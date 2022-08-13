@@ -1,6 +1,5 @@
-import 'mocha';
 import { expect } from 'chai';
-import EVM from '../../src/classes/evm.class';
+import EVM from '../src/classes/evm.class';
 
 describe('evm.class.ts', () => {
     it('should create an instance', () => {

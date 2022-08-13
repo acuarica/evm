@@ -1,12 +1,11 @@
-import 'mocha';
 import { expect } from 'chai';
-import { EVM } from '../../../src';
-import { SELFDESTRUCT } from '../../../src/opcodes';
-import Contract from '../../utils/contract.class';
+import { EVM } from '../../src';
+import { SELFDESTRUCT } from '../../src/opcodes';
+import Contract from '../utils/contract.class';
 
-describe('hello_world.sol', () => {
+describe('helloworld.sol', () => {
     const contract = new Contract();
-    contract.loadFile('hello_world/contract.sol');
+    contract.loadFile('helloworld.sol');
     const evm = new EVM(contract.bytecode());
 
     it('should compile without errors', () => {

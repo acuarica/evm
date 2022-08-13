@@ -1,6 +1,5 @@
-import 'mocha';
 import { expect } from 'chai';
-import Stack from '../../src/classes/stack.class';
+import Stack from '../src/classes/stack.class';
 
 describe('stack.class.ts', () => {
     it('should create an instance', () => {

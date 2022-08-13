@@ -5,7 +5,7 @@ export default class Contract {
     private output: any;
 
     loadFile(filename: string) {
-        const source = fs.readFileSync('./tests/contracts/' + filename, 'utf8');
+        const source = fs.readFileSync('./test/contracts/' + filename, 'utf8');
         const input = {
             language: 'Solidity',
             sources: {

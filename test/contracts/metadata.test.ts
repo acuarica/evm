@@ -2,11 +2,11 @@ import 'mocha';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { expect } from 'chai';
-import Contract from '../../utils/contract.class';
-import EVM from '../../../src/classes/evm.class';
-import { SELFDESTRUCT } from '../../../src/opcodes';
+import Contract from '../utils/contract.class';
+import EVM from '../../src/classes/evm.class';
+import { SELFDESTRUCT } from '../../src/opcodes';
 
-const metadata = fs.readFileSync('./tests/contracts/metadata/contract.sol', 'utf8');
+const metadata = fs.readFileSync('./test/contracts/metadata.sol', 'utf8');
 
 const generateFFMetadataContract = () => {
     while (true) {

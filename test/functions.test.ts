@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import * as functions from '../../data/functions.json';
+import * as functions from '../data/functions.json';
 
 const validTypes = ['bool', 'string', 'address', 'bytes'];
 
