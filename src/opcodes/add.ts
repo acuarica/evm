@@ -36,6 +36,12 @@ export class ADD {
 export default (opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
+    // state.stack.push(
+    //     typeof left === 'bigint' && typeof right === 'bigint' ? left + right
+    //     : typeof left === 'bigint' && left === 0n ? right 
+    //     : typeof right === 'bigint' && right === 0n ? left 
+    //     : new ADD(left, right)
+    // );
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
         state.stack.push(left.add(right));
     } else if (BigNumber.isInstance(left) && left.isZero()) {

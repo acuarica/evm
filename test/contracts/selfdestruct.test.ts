@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import { EVM } from '../../src';
+import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/opcodes';
 import Contract from '../utils/contract.class';
 

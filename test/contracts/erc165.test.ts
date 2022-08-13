@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { EVM } from '../../src';
+import EVM from '../utils/evmtest';
 import Contract from '../utils/contract.class';
 
 describe('erc165.sol', () => {

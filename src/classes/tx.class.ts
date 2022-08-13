@@ -1,5 +1,5 @@
 import * as BigNumber from '../../node_modules/big-integer';
-import * as functionHashes from '../../data/functionHashes.json';
+// import * as functionHashes from '../../data/functionHashes.json';
 
 const parseSingle = (data: any, type: any) => {
     if (type === 'string') {
@@ -66,7 +66,7 @@ export default class Transaction {
         }
     }
 
-    getFunction(): string | false {
+    getFunction(functionHashes: {[s: string]: string}): string | false {
         const functionHash = this.getFunctionHash();
         if (functionHash && functionHash in functionHashes) {
             return (functionHashes as any)[functionHash];
@@ -75,8 +75,8 @@ export default class Transaction {
         }
     }
 
-    getFunctionName(): string | false {
-        const rawFunction = this.getFunction();
+    getFunctionName(functionHashes: {[s: string]: string}): string | false {
+        const rawFunction = this.getFunction(functionHashes);
         if (rawFunction) {
             return rawFunction.split('(')[0];
         } else {
@@ -92,8 +92,8 @@ export default class Transaction {
         }
     }
 
-    getArguments(descriptive: boolean = true): string[] {
-        const functionName = this.getFunction();
+    getArguments(functionHashes: {[s: string]: string}, descriptive: boolean = true): string[] {
+        const functionName = this.getFunction(functionHashes);
         const functionArguments = this.getRawArguments();
         if (functionName && this.input) {
             const rawFunctionArguments = functionName

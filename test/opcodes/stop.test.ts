@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import EVM from '../../src/classes/evm.class';
+import EVM from '../utils/evmtest';
 
 describe('STOP', () => {
     it('should halt', () => {

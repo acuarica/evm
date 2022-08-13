@@ -1,5 +1,5 @@
-import * as functionHashes from '../../data/functionHashes.json';
-import * as eventHashes from '../../data/eventHashes.json';
+// import * as functionHashes from '../../data/functionHashes.json';
+// import * as eventHashes from '../../data/eventHashes.json';
 import opcodeFunctions from '../utils/opcodes';
 import stringifyEvents from '../utils/stringifyEvents';
 import stringifyStructs from '../utils/stringifyStructs';
@@ -44,7 +44,7 @@ export default class EVM {
     gasUsed: number = 0;
     conditions: any = [];
 
-    constructor(code: string | Buffer) {
+    constructor(code: string | Buffer, readonly functionHashes: {[s: string]: string}, readonly eventHashes: {[s: string]: string}) {
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -53,7 +53,7 @@ export default class EVM {
     }
 
     clone(): EVM {
-        const clone = new EVM(this.code);
+        const clone = new EVM(this.code, this.functionHashes, this.eventHashes);
         clone.pc = this.pc;
         clone.opcodes = this.opcodes;
         clone.stack = this.stack.clone();
@@ -103,8 +103,8 @@ export default class EVM {
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH4')
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
-                    .filter(hash => hash in functionHashes)
-                    .map(hash => (functionHashes as any)[hash])
+                    .filter(hash => hash in this.functionHashes)
+                    .map(hash => (this.functionHashes as any)[hash])
             )
         ];
     }
@@ -115,8 +115,8 @@ export default class EVM {
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH32')
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
-                    .filter(hash => hash in eventHashes)
-                    .map(hash => (eventHashes as any)[hash])
+                    .filter(hash => hash in this.eventHashes)
+                    .map(hash => (this.eventHashes as any)[hash])
             )
         ];
     }
@@ -210,7 +210,7 @@ export default class EVM {
         const variables = stringifyVariables(this.variables);
         const functions = Object.keys(this.functions)
             .map((functionName: string) =>
-                stringifyFunctions(functionName, this.functions[functionName])
+                stringifyFunctions(functionName, this.functions[functionName], this.functionHashes)
             )
             .join('');
         const code = stringifyInstructions(instructionTree);

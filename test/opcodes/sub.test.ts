@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 import * as BigNumber from '../../node_modules/big-integer';
-import EVM from '../../src/classes/evm.class';
+import EVM from '../utils/evmtest';
 
 describe('SUB', () => {
     it('should calculate `1 - 1`', () => {

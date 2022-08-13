@@ -1,7 +1,7 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
-import * as functionHashes from '../../data/functionHashes.json';
+// import * as functionHashes from '../../data/functionHashes.json';
 import stringify from '../utils/stringify';
 
 const updateCallDataLoad = (item: any, types: any) => {
@@ -60,7 +60,7 @@ export class TopLevelFunction {
     readonly items: any;
     readonly returns: any;
 
-    constructor(items: any, hash: any, gasUsed: number) {
+    constructor(items: any, hash: any, gasUsed: number, functionHashes: {[s: string]: string}) {
         this.name = 'Function';
         this.hash = hash;
         this.gasUsed = gasUsed;
@@ -248,16 +248,17 @@ export default (opcode: Opcode, state: EVM): void => {
                 state.functions[jumpCondition.hash] = new TopLevelFunction(
                     functionCloneTree,
                     jumpCondition.hash,
-                    functionClone.gasUsed
+                    functionClone.gasUsed,
+                    state.functionHashes,
                 );
                 if (
-                    jumpCondition.hash in functionHashes &&
+                    jumpCondition.hash in state.functionHashes &&
                     functionCloneTree.length === 1 &&
                     functionCloneTree[0].name === 'RETURN' &&
                     functionCloneTree[0].items.every((item: any) => item.name === 'MappingLoad')
                 ) {
                     functionCloneTree[0].items.forEach((item: any) => {
-                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
                         state.mappings[item.location].name = fullFunction.split('(')[0];
                         if (
                             item.structlocation &&
@@ -268,7 +269,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     });
                     delete state.functions[jumpCondition.hash];
                 } else if (
-                    jumpCondition.hash in functionHashes &&
+                    jumpCondition.hash in state.functionHashes &&
                     state.functions[jumpCondition.hash].items.length === 1 &&
                     state.functions[jumpCondition.hash].items[0].name === 'RETURN' &&
                     state.functions[jumpCondition.hash].items[0].items.length === 1 &&
@@ -283,13 +284,13 @@ export default (opcode: Opcode, state: EVM): void => {
                             state.variables
                         )
                     ) {
-                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
                         state.variables[
                             state.functions[jumpCondition.hash].items[0].items[0].location
                         ] = new Variable(fullFunction.split('(')[0], []);
                         delete state.functions[jumpCondition.hash];
                     } else {
-                        const fullFunction = (functionHashes as any)[jumpCondition.hash];
+                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
                         state.variables[
                             state.functions[jumpCondition.hash].items[0].items[0].location
                         ].label = fullFunction.split('(')[0];
@@ -326,7 +327,8 @@ export default (opcode: Opcode, state: EVM): void => {
                     state.functions[''] = new TopLevelFunction(
                         trueCloneTree,
                         '',
-                        trueCloneTree.gasUsed
+                        trueCloneTree.gasUsed,
+                        state.functionHashes,
                     );
                 } else if (
                     trueCloneTree.length > 0 &&

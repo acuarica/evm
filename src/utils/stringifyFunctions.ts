@@ -1,7 +1,7 @@
 import stringifyInstructions from './stringifyInstructions';
-import * as functionHashes from '../../data/functionHashes.json';
+// import * as functionHashes from '../../data/functionHashes.json';
 
-export default (functionName: string, functionInstance: any): string => {
+export default (functionName: string, functionInstance: any, functionHashes: {[s: string]: string}): string => {
     let output = '';
     output += 'function ';
     if (functionName in functionHashes) {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import EVM from '../src/classes/evm.class';
+import EVM from './utils/evmtest';
 
 describe('evm.class.ts', () => {
     it('should create an instance', () => {

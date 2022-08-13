@@ -1,7 +1,7 @@
 import EVM from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import { MLOAD } from './mload';
-import * as eventHashes from '../../data/eventHashes.json';
+// import * as eventHashes from '../../data/eventHashes.json';
 import * as BigNumber from '../../node_modules/big-integer';
 
 export class LOG {
@@ -14,7 +14,7 @@ export class LOG {
     readonly topics: any;
     readonly eventName?: string;
 
-    constructor(topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
+    constructor(eventHashes: {[s: string]: string},topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
         this.name = 'LOG';
         this.wrapped = true;
         this.topics = topics;
@@ -58,8 +58,8 @@ export default (opcode: Opcode, state: EVM): void => {
         if (!(eventTopic in state.events)) {
             state.events[eventTopic] = {};
             state.events[eventTopic].indexedCount = topics.length - 1;
-            if (eventTopic in eventHashes) {
-                state.events[eventTopic].label = (eventHashes as any)[eventTopic];
+            if (eventTopic in state.eventHashes) {
+                state.events[eventTopic].label = (state.eventHashes as any)[eventTopic];
             }
         }
     }
@@ -82,8 +82,8 @@ export default (opcode: Opcode, state: EVM): void => {
             }
             state.events.anonymous.push({ items });
         }
-        state.instructions.push(new LOG(topics, items));
+        state.instructions.push(new LOG(state.eventHashes, topics, items));
     } else {
-        state.instructions.push(new LOG(topics, [], memoryStart, memoryLength));
+        state.instructions.push(new LOG(state.eventHashes, topics, [], memoryStart, memoryLength));
     }
 };

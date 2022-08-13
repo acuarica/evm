@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { expect } from 'chai';
 import Contract from '../utils/contract.class';
-import EVM from '../../src/classes/evm.class';
+import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/opcodes';
 
 const metadata = fs.readFileSync('./test/contracts/metadata.sol', 'utf8');
