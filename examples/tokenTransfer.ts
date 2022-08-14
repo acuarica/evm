@@ -1,5 +1,5 @@
 import { providers } from 'ethers';
-import { Transaction } from '../';
+import { Transaction } from '../src';
 
 import * as functionHashes from '../data/functionHashes.min.json';
 

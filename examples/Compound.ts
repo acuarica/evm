@@ -1,5 +1,5 @@
 import { providers } from 'ethers';
-import { EVM } from '../';
+import { EVM } from '../src';
 
 import * as functionHashes from '../data/functionHashes.min.json';
 import * as eventHashes from '../data/eventHashes.min.json';

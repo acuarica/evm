@@ -10,14 +10,15 @@ export declare class Transaction {
     constructor(transactionObject?: any);
     setInput(input: string): void;
     getFunctionHash(): string | false;
-    getFunction(functionHashes: { [s: string]: string }): string | false;
-    getFunctionName(functionHashes: { [s: string]: string }): string | false;
+    getFunction(functionHashes: {
+        [s: string]: string;
+    }): string | false;
+    getFunctionName(functionHashes: {
+        [s: string]: string;
+    }): string | false;
     getRawArguments(): string[];
-    getArguments(
-        functionHashes: {
-            [s: string]: string;
-        },
-        _descriptive?: boolean
-    ): string[];
+    getArguments(functionHashes: {
+        [s: string]: string;
+    }, _descriptive?: boolean): string[];
     isContractCreation(): boolean;
 }

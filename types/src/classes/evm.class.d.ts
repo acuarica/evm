@@ -38,15 +38,11 @@ export declare class EVM {
     events: Event;
     gasUsed: number;
     conditions: any;
-    constructor(
-        code: string | Buffer,
-        functionHashes: {
-            [s: string]: string;
-        },
-        eventHashes: {
-            [s: string]: string;
-        }
-    );
+    constructor(code: string | Buffer, functionHashes: {
+        [s: string]: string;
+    }, eventHashes: {
+        [s: string]: string;
+    });
     clone(): EVM;
     getBytecode(): string;
     getOpcodes(): Opcode[];
