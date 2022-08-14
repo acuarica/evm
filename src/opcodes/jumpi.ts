@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-// import * as functionHashes from '../../data/functionHashes.json';
 import stringify from '../utils/stringify';
 
 const updateCallDataLoad = (item: any, types: any) => {
@@ -11,7 +10,7 @@ const updateCallDataLoad = (item: any, types: any) => {
                 item[i].name === 'CALLDATALOAD' &&
                 typeof item[i].location === 'bigint'
             ) {
-                const argNumber = item[i].location.subtract(4).divide(32).toString();
+                const argNumber = ((item[i].location - 4n) / 32n).toString();
                 item[i].type = types[argNumber];
             }
             if (typeof item[i] === 'object') {
@@ -298,7 +297,7 @@ export default (opcode: Opcode, state: EVM): void => {
             ((jumpCondition.name === 'LT' &&
                 jumpCondition.left.name === 'CALLDATASIZE' &&
                 typeof jumpCondition.right === 'bigint' &&
-                jumpCondition.right.equals(4)) ||
+                jumpCondition.right === 4n) ||
                 (jumpCondition.name === 'ISZERO' && jumpCondition.item.name === 'CALLDATASIZE'))
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);

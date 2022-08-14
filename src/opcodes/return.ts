@@ -44,7 +44,7 @@ export class RETURN {
         } else if (
             this.items.length === 3 &&
             this.items.every((item: any) => typeof item === 'bigint') &&
-            this.items[0].equals(32)
+            this.items[0] === 32n
         ) {
             return 'return "' + hex2a(this.items[2].toString(16)) + '";';
         } else {

@@ -56,7 +56,7 @@ export default (_opcode: Opcode, state: EVM): void => {
             typeof left === 'bigint' &&
             /^[0]+$/.test(left.toString(16).substring(8)) &&
             right.name === 'CALLDATALOAD' &&
-            right.location.equals(0)
+            right.location === 0n
         ) {
             state.stack.push(
                 new SIG(
@@ -68,7 +68,7 @@ export default (_opcode: Opcode, state: EVM): void => {
             typeof right === 'bigint' &&
             /^[0]+$/.test(right.toString(16).substring(8)) &&
             left.name === 'CALLDATALOAD' &&
-            left.location.equals(0)
+            left.location === 0
         ) {
             state.stack.push(
                 new SIG(
