@@ -92,7 +92,7 @@ export class Transaction {
         }
     }
 
-    getArguments(functionHashes: { [s: string]: string }, descriptive: boolean = true): string[] {
+    getArguments(functionHashes: { [s: string]: string }, _descriptive = true): string[] {
         const functionName = this.getFunction(functionHashes);
         const functionArguments = this.getRawArguments();
         if (functionName && this.input) {

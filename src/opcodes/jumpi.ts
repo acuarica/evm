@@ -6,7 +6,7 @@ import stringify from '../utils/stringify';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
-        if (item.hasOwnProperty(i)) {
+        if (Object.prototype.hasOwnProperty.call(item, i)) {
             if (
                 typeof item[i] === 'object' &&
                 item[i].name === 'CALLDATALOAD' &&
@@ -25,7 +25,7 @@ const updateCallDataLoad = (item: any, types: any) => {
 const findReturns = (item: any) => {
     const returns = [];
     for (const i in item) {
-        if (item.hasOwnProperty(i)) {
+        if (Object.prototype.hasOwnProperty.call(item, i)) {
             if (
                 typeof item[i] === 'object' &&
                 item[i].name === 'RETURN' &&
