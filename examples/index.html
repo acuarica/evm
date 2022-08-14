@@ -37,7 +37,7 @@
         <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
         <script src="../lib/EVM.js"></script>
         <script>
-            const { EVM } = window.EVM;
+            const EVM = window.EVM;
             const web3 = new Web3(
                 new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth')
             );
@@ -48,7 +48,7 @@
                 web3.eth.getCode(location.hash.replace('#', ''), function (err, code) {
                     if (err) alert(err.message);
                     try {
-                        const evm = new EVM(code);
+                        const evm = new EVM(code, {}, {});
                         $('#code').html(evm.decompile());
                         $('.loading').fadeOut(function () {
                             $('.code').fadeIn();

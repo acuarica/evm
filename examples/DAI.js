@@ -1,9 +1,12 @@
-const Web3 = require('web3');
+const { providers } = require('ethers');
 const { EVM } = require('../');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
+const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
+
+const functionHashes = require('../data/functionHashes.min.json');
+const eventHashes = require('../data/eventHashes.min.json');
 
 (async () => {
-    const code = await web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359');
-    const evm = new EVM(code);
+    const code = await provider.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359');
+    const evm = new EVM(code, functionHashes, eventHashes);
     console.log(evm.decompile());
 })();

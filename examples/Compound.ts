@@ -1,8 +1,8 @@
 import { providers } from 'ethers';
 import { EVM } from '../';
 
-import * as functionHashes from '../data/functionHashes.json';
-import * as eventHashes from '../data/eventHashes.json';
+import * as functionHashes from '../data/functionHashes.min.json';
+import * as eventHashes from '../data/eventHashes.min.json';
 
 const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
 

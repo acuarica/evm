@@ -20,16 +20,11 @@ const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth'
         '0xc80682000c727462ac07b64b3de4da43a3635922aa3dd26174fd59f8e8120278',
     ];
 
-    const txs = await Promise.all(
-        txHashes.map(async (tx: string) => {
-            const data = await provider.getTransaction(tx);
-            return data;
-        })
-    );
+    const txs = await Promise.all(txHashes.map(tx => provider.getTransaction(tx)));
 
-    const txData = txs.map((tx: any) => {
+    const txData = txs.map(tx => {
         const transaction = new Transaction();
-        transaction.setInput(tx.input);
+        transaction.setInput(tx.data);
         const functionName = transaction.getFunctionName(functionHashes);
         const functionArguments = transaction.getArguments(functionHashes);
         return functionName + '(' + functionArguments.join(',') + ')';
