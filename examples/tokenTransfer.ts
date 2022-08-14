@@ -14,7 +14,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.c
         '0xdedff4b8ad80cafe7350f54b73fe764a3366415e4cf38364d419df0ea83f010f',
         '0xf153f63dd6b8e08c918c984307d9f68f04fed89118f8610e52cd9adfbd1b6645',
         '0xa54656081baa8e76a74d891782e5e523045bd76cb2fd88ad8dafb865636ae56c',
-        '0xc80682000c727462ac07b64b3de4da43a3635922aa3dd26174fd59f8e8120278'
+        '0xc80682000c727462ac07b64b3de4da43a3635922aa3dd26174fd59f8e8120278',
     ];
 
     const txs = await Promise.all(
