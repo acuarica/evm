@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class MUL {
@@ -31,7 +30,7 @@ export default (_opcode: Opcode, state: EVM): void => {
         (typeof left === 'bigint' && left === 0n) ||
         (typeof right === 'bigint' && right === 0n)
     ) {
-        state.stack.push(BigNumber(0));
+        state.stack.push(0n);
     } else {
         state.stack.push(new MUL(left, right));
     }

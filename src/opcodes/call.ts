@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class CALL {
@@ -47,8 +46,8 @@ export class CALL {
             if (
                 this.gas.name === 'MUL' &&
                 this.gas.left.name === 'ISZERO' &&
-                BigNumber.isInstance(this.gas.right) &&
-                this.gas.right.equals(2300)
+                typeof this.gas.right === 'bigint' &&
+                this.gas.right === 2300n
             ) {
                 if (this.throwOnFail) {
                     return (
