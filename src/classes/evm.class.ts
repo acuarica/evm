@@ -7,7 +7,7 @@ import stringifyMappings from '../utils/stringifyMappings';
 import stringifyVariables from '../utils/stringifyVariables';
 import stringifyFunctions from '../utils/stringifyFunctions';
 import stringifyInstructions from '../utils/stringifyInstructions';
-import Stack from './stack.class';
+import { Stack } from './stack.class';
 import Event from '../interfaces/event.interface';
 import Instruction from '../interfaces/instruction.interface';
 import Mapping from '../interfaces/mapping.interface';

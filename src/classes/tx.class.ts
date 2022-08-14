@@ -15,7 +15,7 @@ const parseSingle = (data: any, type: any) => {
     }
 };
 
-export default class Transaction {
+export class Transaction {
     blockHash?: string;
     blockNumber?: number;
     from?: string;
