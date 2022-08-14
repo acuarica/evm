@@ -1,8 +1,7 @@
 import { providers } from 'ethers';
 import { Transaction } from '../';
 
-import * as functionHashes from '../data/functionHashes.json';
-import * as eventHashes from '../data/eventHashes.json';
+import * as functionHashes from '../data/functionHashes.min.json';
 
 const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
 
