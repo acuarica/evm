@@ -1,15 +1,12 @@
-import * as BigNumber from '../../node_modules/big-integer';
-// import * as functionHashes from '../../data/functionHashes.json';
-
 const parseSingle = (data: any, type: any) => {
     if (type === 'string') {
         return '"' + Buffer.from(data, 'hex').toString('utf8') + '"';
     } else if (type === 'address') {
         return '0x' + data.substring(24);
     } else if (type === 'uint256' || type === 'uint8') {
-        return BigNumber(data, 16).toString();
+        return BigInt('0x' + data).toString();
     } else if (type === 'bool') {
-        return (!BigNumber(data, 16).isZero()).toString();
+        return (BigInt('0x' + data) !== 0n).toString();
     } else {
         return data;
     }
@@ -109,10 +106,8 @@ export class Transaction {
                     const functionArgumentType = rawFunctionArguments[i] || 'unknown';
                     const functionArgument = functionArguments[i];
                     if (functionArgumentType === 'string') {
-                        const location = BigNumber(functionArgument, 16).divide(32).toJSNumber();
-                        const length = BigNumber(functionArguments[location], 16)
-                            .multiply(2)
-                            .toJSNumber();
+                        const location = Number(BigInt('0x' + functionArgument) / 32n);
+                        const length = Number(BigInt('0x' + functionArguments[location]) * 2n);
                         const data = this.input.substring(8).substr((location + 1) * 64, length);
                         result.push(parseSingle(data, functionArgumentType));
                     } else {
