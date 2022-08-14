@@ -9,16 +9,15 @@
         "isolatedModules": true,
         "skipLibCheck": true,
         "declaration": true,
-        "emitDeclarationOnly": true
-        // "strict": true,
-        // "exactOptionalPropertyTypes": true,
-        // "noFallthroughCasesInSwitch": true,
-        // "noImplicitOverride": true,
-        // "noImplicitReturns": true,
-        // "noPropertyAccessFromIndexSignature": true,
-        // "noUncheckedIndexedAccess": true,
-        // "noUnusedLocals": true,
-        // "noUnusedParameters": true,
+        "emitDeclarationOnly": true,
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true
     },
     "exclude": ["node_modules", "types"]
 }
