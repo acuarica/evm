@@ -1,5 +1,3 @@
-// import * as functionHashes from '../../data/functionHashes.json';
-// import * as eventHashes from '../../data/eventHashes.json';
 import opcodeFunctions from '../utils/opcodes';
 import stringifyEvents from '../utils/stringifyEvents';
 import stringifyStructs from '../utils/stringifyStructs';
@@ -35,21 +33,9 @@ interface Variable {
     [key: string]: any;
 }
 
-// interface Storage {
-//     [key: string]: string;
-// }
-
-// interface Memory {
-//     [key: string]: any;
-// }
-
 interface Mapping {
     [key: string]: any;
 }
-
-// interface Jumps {
-//     [key: string]: boolean;
-// }
 
 export class EVM {
     pc = 0;
@@ -133,7 +119,7 @@ export class EVM {
                     .filter(opcode => opcode.name === 'PUSH4')
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in this.functionHashes)
-                    .map(hash => (this.functionHashes as any)[hash])
+                    .map(hash => this.functionHashes[hash])
             ),
         ];
     }
@@ -145,7 +131,7 @@ export class EVM {
                     .filter(opcode => opcode.name === 'PUSH32')
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in this.eventHashes)
-                    .map(hash => (this.eventHashes as any)[hash])
+                    .map(hash => this.eventHashes[hash])
             ),
         ];
     }
