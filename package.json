@@ -56,7 +56,7 @@
         "lint": "eslint .",
         "test": "mocha",
         "build": "webpack --mode production",
-        "hash": "ts-node scripts/build.ts",
+        "hash": "ts-node scripts/hash.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged"
     }
