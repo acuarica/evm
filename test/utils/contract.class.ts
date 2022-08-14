@@ -10,16 +10,16 @@ export default class Contract {
             language: 'Solidity',
             sources: {
                 [filename]: {
-                    content: source
-                }
+                    content: source,
+                },
             },
             settings: {
                 outputSelection: {
                     '*': {
-                        '*': ['*']
-                    }
-                }
-            }
+                        '*': ['*'],
+                    },
+                },
+            },
         };
         this.output = JSON.parse(solc.compile(JSON.stringify(input)));
     }
@@ -29,16 +29,16 @@ export default class Contract {
             language: 'Solidity',
             sources: {
                 [name]: {
-                    content
-                }
+                    content,
+                },
             },
             settings: {
                 outputSelection: {
                     '*': {
-                        '*': ['*']
-                    }
-                }
-            }
+                        '*': ['*'],
+                    },
+                },
+            },
         };
         this.output = JSON.parse(solc.compile(JSON.stringify(input)));
     }
