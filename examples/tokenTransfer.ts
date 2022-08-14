@@ -1,6 +1,10 @@
-const Web3 = require('web3');
+import { providers } from 'ethers';
 import { Transaction } from '../';
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
+
+import * as functionHashes from '../data/functionHashes.json';
+import * as eventHashes from '../data/eventHashes.json';
+
+const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
 
 (async () => {
     const txHashes = [
@@ -19,7 +23,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.c
 
     const txs = await Promise.all(
         txHashes.map(async (tx: string) => {
-            const data = await web3.eth.getTransaction(tx);
+            const data = await provider.getTransaction(tx);
             return data;
         })
     );
@@ -27,8 +31,8 @@ const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.c
     const txData = txs.map((tx: any) => {
         const transaction = new Transaction();
         transaction.setInput(tx.input);
-        const functionName = transaction.getFunctionName();
-        const functionArguments = transaction.getArguments();
+        const functionName = transaction.getFunctionName(functionHashes);
+        const functionArguments = transaction.getArguments(functionHashes);
         return functionName + '(' + functionArguments.join(',') + ')';
     });
 

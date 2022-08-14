@@ -1,12 +1,16 @@
-const Web3 = require('web3');
-import { EVM } from '../src/index';
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
+import { providers } from 'ethers';
+import { EVM } from '../';
+
+import * as functionHashes from '../data/functionHashes.json';
+import * as eventHashes from '../data/eventHashes.json';
+
+const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
 
 (async () => {
     const address = '0x3FDA67f7583380E67ef93072294a7fAc882FD7E7';
-    const code = await web3.eth.getCode(address);
+    const code = await provider.getCode(address);
     console.time();
-    const evm = new EVM(code);
+    const evm = new EVM(code, functionHashes, eventHashes);
     console.log(evm.decompile());
     console.timeEnd();
 })();
