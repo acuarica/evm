@@ -50,7 +50,7 @@ export class DELEGATECALL {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const gas = state.stack.pop();
     const address = state.stack.pop();
     const memoryStart = state.stack.pop();

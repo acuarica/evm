@@ -28,7 +28,7 @@ export class LT {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {

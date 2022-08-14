@@ -16,7 +16,7 @@ export class STOP {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     state.halted = true;
     state.instructions.push(new STOP());
 };

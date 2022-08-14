@@ -84,9 +84,9 @@ export default (opcode: Opcode, state: EVM): void => {
         }
         if (topics.length === 0) {
             if (!('anonymous' in state.events)) {
-                state.events.anonymous = [];
+                state.events['anonymous'] = [];
             }
-            state.events.anonymous.push({ items });
+            state.events['anonymous'].push({ items });
         }
         state.instructions.push(new LOG(state.eventHashes, topics, items));
     } else {

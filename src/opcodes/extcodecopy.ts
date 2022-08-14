@@ -33,7 +33,7 @@ export class EXTCODECOPY {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const address = state.stack.pop();
     const memoryLocation = state.stack.pop();
     const startLocation = state.stack.pop();

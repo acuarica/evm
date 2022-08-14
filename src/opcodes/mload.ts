@@ -20,7 +20,7 @@ export class MLOAD {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const memoryLocation = state.stack.pop();
     if (BigNumber.isInstance(memoryLocation) && memoryLocation.toJSNumber() in state.memory) {
         state.stack.push(state.memory[memoryLocation.toJSNumber()]);

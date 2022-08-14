@@ -40,7 +40,7 @@ export class SHA3 {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
     if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {

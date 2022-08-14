@@ -39,7 +39,7 @@ export class EQ {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     let left = state.stack.pop();
     let right = state.stack.pop();
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {

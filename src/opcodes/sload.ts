@@ -85,7 +85,7 @@ export class SLOAD {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     if (storeLocation.name === 'SHA3') {
         const mappingItems = parseMapping(...storeLocation.items);

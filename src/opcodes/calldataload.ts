@@ -30,7 +30,7 @@ export class CALLDATALOAD {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const startLocation = state.stack.pop();
     state.stack.push(new CALLDATALOAD(startLocation));
 };

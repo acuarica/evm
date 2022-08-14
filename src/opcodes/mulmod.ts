@@ -4,7 +4,7 @@ import { MUL } from './mul';
 import { MOD } from './mod';
 import * as BigNumber from '../../node_modules/big-integer';
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
     const mod = state.stack.pop();

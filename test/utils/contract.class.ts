@@ -1,5 +1,8 @@
 import * as fs from 'fs';
-import * as solc from 'solc';
+// import * as solc from 'solc';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const solc = require('solc');
 
 export default class Contract {
     private output: any;

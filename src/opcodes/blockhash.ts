@@ -19,7 +19,7 @@ export class BLOCKHASH {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const blockNumber = state.stack.pop();
     state.stack.push(new BLOCKHASH(blockNumber));
 };

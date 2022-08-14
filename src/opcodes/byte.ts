@@ -22,7 +22,7 @@ export class BYTE {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const position = state.stack.pop();
     const data = state.stack.pop();
     if (BigNumber.isInstance(data) && BigNumber.isInstance(position)) {

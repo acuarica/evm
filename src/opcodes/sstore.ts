@@ -155,7 +155,7 @@ export class SSTORE {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     const storeData = state.stack.pop();
     if (storeLocation.name === 'SHA3') {

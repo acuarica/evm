@@ -29,7 +29,7 @@ export class CODECOPY {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const memoryLocation = state.stack.pop();
     const startLocation = state.stack.pop();
     const copyLength = state.stack.pop();

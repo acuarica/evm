@@ -19,7 +19,7 @@ export class BALANCE {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const address = state.stack.pop();
     state.stack.push(new BALANCE(address));
 };

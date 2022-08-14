@@ -33,7 +33,7 @@ export class CREATE2 {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const value = state.stack.pop();
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();

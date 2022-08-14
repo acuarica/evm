@@ -221,10 +221,10 @@ export class EVM {
             const opcodes = this.getOpcodes();
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
-                if (!(opcode.name in opcodeFunctions)) {
-                    throw new Error('Unknown OPCODE: ' + opcode.name);
+                if (opcode.name in opcodeFunctions) {
+                    opcodeFunctions[opcode.name as keyof typeof opcodeFunctions](opcode, this);
                 } else {
-                    (opcodeFunctions as any)[opcode.name](opcode, this);
+                    throw new Error('Unknown OPCODE: ' + opcode.name);
                 }
             }
         }

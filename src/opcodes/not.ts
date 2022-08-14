@@ -20,7 +20,7 @@ export class NOT {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const item = state.stack.pop();
     if (BigNumber.isInstance(item)) {
         state.stack.push(item.not());

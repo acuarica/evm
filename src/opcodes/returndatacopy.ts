@@ -29,7 +29,7 @@ export class RETURNDATACOPY {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (_opcode: Opcode, state: EVM): void => {
     const memoryPosition = state.stack.pop();
     const returnDataPosition = state.stack.pop();
     const returnDataSize = state.stack.pop();
