@@ -1,9 +1,13 @@
-const Web3 = require('web3');
+const functionHashes = require("../data/functionHashes.json");
+const eventHashes = require("../data/eventHashes.json");
+
+const ethers = require('ethers');
 const { EVM } = require("../");
-const web3 = new Web3(new Web3.providers.HttpProvider("https://api.mycryptoapi.com/eth"));
+const provider = new ethers.providers.JsonRpcProvider("https://api.mycryptoapi.com/eth");
 
 (async () => {
-    const code = await web3.eth.getCode("0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7");
-    const evm = new EVM(code);
+    console.log('Getting code for `0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7` address...')
+    const code = await provider.getCode("0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7");
+    const evm = new EVM(code, functionHashes, eventHashes);
     console.log(evm.decompile());
 })();

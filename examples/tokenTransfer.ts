@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-import { Transaction } from '../src/index';
+import { Transaction } from '../';
 const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
 
 (async () => {
