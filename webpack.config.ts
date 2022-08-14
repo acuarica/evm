@@ -25,9 +25,9 @@ const config: Configuration = {
                     transpileOnly: true,
                 },
             },
-        ]
+        ],
     },
-    devtool: 'source-map'
+    devtool: 'source-map',
 };
 
 const browser: Configuration = merge(config, {
@@ -35,10 +35,9 @@ const browser: Configuration = merge(config, {
     output: {
         libraryTarget: 'umd',
         umdNamedDefine: true,
-        filename: '[name].js'
+        filename: '[name].js',
     },
     resolve: {
-
         fallback: {
             buffer: require.resolve('buffer/'),
         },
@@ -54,8 +53,8 @@ const node: Configuration = merge(config, {
     target: 'node',
     output: {
         libraryTarget: 'commonjs2',
-        filename: '[name].node.js'
-    }
+        filename: '[name].node.js',
+    },
 });
 
 export default [browser, node];
