@@ -6,6 +6,7 @@
         "outDir": "types",
         "sourceMap": true,
         "resolveJsonModule": true,
+        "isolatedModules": true,
         "skipLibCheck": true,
         "declaration": true,
         "emitDeclarationOnly": true
