@@ -1,4 +1,4 @@
-export default interface Opcode {
+export interface Opcode {
     pc: number;
     opcode: number;
     name: string;

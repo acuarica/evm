@@ -1,5 +1,5 @@
 import { EVM } from '../classes/evm.class';
-import Opcode from '../interfaces/opcode.interface';
+import { Opcode } from '../opcode.interface';
 import { ADD } from './add';
 import { MOD } from './mod';
 import * as BigNumber from '../../node_modules/big-integer';

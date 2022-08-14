@@ -8,11 +8,7 @@ import stringifyVariables from '../utils/stringifyVariables';
 import stringifyFunctions from '../utils/stringifyFunctions';
 import stringifyInstructions from '../utils/stringifyInstructions';
 import { Stack } from './stack.class';
-import Event from '../interfaces/event.interface';
-import Instruction from '../interfaces/instruction.interface';
-import Mapping from '../interfaces/mapping.interface';
-import Opcode from '../interfaces/opcode.interface';
-import Variable from '../interfaces/variable.interface';
+import { Opcode } from '../opcode.interface';
 import {
     STOP,
     RETURN,
@@ -26,8 +22,37 @@ import {
     names,
 } from '../opcodes';
 
+interface Event {
+    [key: string]: any;
+}
+
+interface Instruction {
+    name: string;
+    type?: string;
+    wrapped?: boolean;
+}
+interface Variable {
+    [key: string]: any;
+}
+
+// interface Storage {
+//     [key: string]: string;
+// }
+
+// interface Memory {
+//     [key: string]: any;
+// }
+
+interface Mapping {
+    [key: string]: any;
+}
+
+// interface Jumps {
+//     [key: string]: boolean;
+// }
+
 export class EVM {
-    pc: number = 0;
+    pc = 0;
     stack: Stack = new Stack();
     memory: any = {};
     opcodes: Opcode[] = [];
@@ -36,12 +61,12 @@ export class EVM {
     jumps: any = {};
     code: Buffer;
     mappings: Mapping = {};
-    layer: number = 0;
-    halted: boolean = false;
+    layer = 0;
+    halted = false;
     functions: any = {};
     variables: Variable = {};
     events: Event = {};
-    gasUsed: number = 0;
+    gasUsed = 0;
     conditions: any = [];
 
     constructor(

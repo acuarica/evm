@@ -1,5 +1,5 @@
 import { EVM } from '../classes/evm.class';
-import Opcode from '../interfaces/opcode.interface';
+import { Opcode } from '../opcode.interface';
 import stringify from '../utils/stringify';
 
 export class CODECOPY {

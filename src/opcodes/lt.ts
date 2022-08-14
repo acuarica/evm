@@ -1,5 +1,5 @@
 import { EVM } from '../classes/evm.class';
-import Opcode from '../interfaces/opcode.interface';
+import { Opcode } from '../opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
@@ -11,7 +11,7 @@ export class LT {
     readonly right: any;
     readonly equal: boolean;
 
-    constructor(left: any, right: any, equal: boolean = false) {
+    constructor(left: any, right: any, equal = false) {
         this.name = 'LT';
         this.wrapped = true;
         this.left = left;

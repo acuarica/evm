@@ -9,6 +9,7 @@ import { SELFDESTRUCT } from '../../src/opcodes';
 const metadata = fs.readFileSync('./test/contracts/metadata.sol', 'utf8');
 
 const generateFFMetadataContract = () => {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         const contract = new Contract();
         const randomData = crypto.randomBytes(16).toString('hex');

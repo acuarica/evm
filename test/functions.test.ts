@@ -33,7 +33,7 @@ describe('functions.json', () => {
     it('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', () => {
         expect(
             functions.filter(
-                functionName => !functionName.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ \[\]\(\)]*\)$/)
+                functionName => !functionName.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)
             )
         ).to.deep.equal([]);
     });

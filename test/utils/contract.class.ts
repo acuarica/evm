@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-const solc = require('solc');
+import * as solc from 'solc';
 
 export default class Contract {
     private output: any;

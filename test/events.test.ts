@@ -29,9 +29,7 @@ describe('events.json', () => {
 
     it('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', () => {
         expect(
-            events.filter(
-                eventName => !eventName.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,\[\]\(\)]*\)$/)
-            )
+            events.filter(eventName => !eventName.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/))
         ).to.deep.equal([]);
     });
 

@@ -1,5 +1,5 @@
 import { EVM } from '../classes/evm.class';
-import Opcode from '../interfaces/opcode.interface';
+import { Opcode } from '../opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
 // import * as functionHashes from '../../data/functionHashes.json';
 import stringify from '../utils/stringify';

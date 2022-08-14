@@ -1,5 +1,5 @@
 import { EVM } from '../classes/evm.class';
-import Opcode from '../interfaces/opcode.interface';
+import { Opcode } from '../opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 import { Variable } from './jumpi';
@@ -260,6 +260,7 @@ export default (opcode: Opcode, state: EVM): void => {
             state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
         }
     } else if (
+        // eslint-disable-next-line no-constant-condition
         false &&
         BigNumber.isInstance(storeLocation) &&
         storeLocation.toString() in state.variables &&
