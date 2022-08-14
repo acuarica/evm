@@ -14,7 +14,13 @@ export class LOG {
     readonly topics: any;
     readonly eventName?: string;
 
-    constructor(eventHashes: {[s: string]: string},topics: any, items?: any, memoryStart?: any, memoryLength?: any) {
+    constructor(
+        eventHashes: { [s: string]: string },
+        topics: any,
+        items?: any,
+        memoryStart?: any,
+        memoryLength?: any
+    ) {
         this.name = 'LOG';
         this.wrapped = true;
         this.topics = topics;

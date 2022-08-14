@@ -21,18 +21,9 @@ export class CALLDATALOAD {
             return 'msg.data';
         } else if (
             BigNumber.isInstance(this.location) &&
-            this.location
-                .subtract(4)
-                .mod(32)
-                .isZero()
+            this.location.subtract(4).mod(32).isZero()
         ) {
-            return (
-                '_arg' +
-                this.location
-                    .subtract(4)
-                    .divide(32)
-                    .toString()
-            );
+            return '_arg' + this.location.subtract(4).divide(32).toString();
         } else {
             return 'msg.data[' + stringify(this.location) + ']';
         }

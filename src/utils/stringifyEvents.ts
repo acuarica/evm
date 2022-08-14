@@ -4,10 +4,7 @@ export default (stateEvents: any, events: string[]) => {
 
     events.forEach((event: string) => {
         const eventName = event.split('(')[0];
-        const eventArguments = event
-            .replace(eventName, '')
-            .substring(1)
-            .slice(0, -1);
+        const eventArguments = event.replace(eventName, '').substring(1).slice(0, -1);
         output += 'event ';
         if (eventArguments) {
             output += eventName + '(';

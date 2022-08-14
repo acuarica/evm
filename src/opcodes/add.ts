@@ -1,4 +1,4 @@
-import {EVM} from '../classes/evm.class';
+import { EVM } from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
@@ -38,8 +38,8 @@ export default (opcode: Opcode, state: EVM): void => {
     const right = state.stack.pop();
     // state.stack.push(
     //     typeof left === 'bigint' && typeof right === 'bigint' ? left + right
-    //     : typeof left === 'bigint' && left === 0n ? right 
-    //     : typeof right === 'bigint' && right === 0n ? left 
+    //     : typeof left === 'bigint' && left === 0n ? right
+    //     : typeof right === 'bigint' && right === 0n ? left
     //     : new ADD(left, right)
     // );
     if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {

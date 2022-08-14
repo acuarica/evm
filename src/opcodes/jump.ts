@@ -22,7 +22,7 @@ export class JUMP {
 
     toString() {
         if (!this.valid) {
-            return "revert(\"Bad jump destination\");";
+            return 'revert("Bad jump destination");';
         } else {
             return 'goto(' + stringify(this.location) + ');';
         }

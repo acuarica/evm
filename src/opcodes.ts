@@ -279,7 +279,7 @@ export const codes = {
     0xfa: 'STATICCALL',
     0xfd: 'REVERT',
     0xfe: 'INVALID',
-    0xff: 'SELFDESTRUCT'
+    0xff: 'SELFDESTRUCT',
 };
 
 export const names = {
@@ -422,10 +422,10 @@ export const names = {
     STATICCALL: 0xfa,
     REVERT: 0xfd,
     INVALID: 0xfe,
-    SELFDESTRUCT: 0xff
+    SELFDESTRUCT: 0xff,
 };
 
 export default {
     ...codes,
-    ...names
+    ...names,
 };

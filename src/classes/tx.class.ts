@@ -66,7 +66,7 @@ export class Transaction {
         }
     }
 
-    getFunction(functionHashes: {[s: string]: string}): string | false {
+    getFunction(functionHashes: { [s: string]: string }): string | false {
         const functionHash = this.getFunctionHash();
         if (functionHash && functionHash in functionHashes) {
             return (functionHashes as any)[functionHash];
@@ -75,7 +75,7 @@ export class Transaction {
         }
     }
 
-    getFunctionName(functionHashes: {[s: string]: string}): string | false {
+    getFunctionName(functionHashes: { [s: string]: string }): string | false {
         const rawFunction = this.getFunction(functionHashes);
         if (rawFunction) {
             return rawFunction.split('(')[0];
@@ -92,14 +92,11 @@ export class Transaction {
         }
     }
 
-    getArguments(functionHashes: {[s: string]: string}, descriptive: boolean = true): string[] {
+    getArguments(functionHashes: { [s: string]: string }, descriptive: boolean = true): string[] {
         const functionName = this.getFunction(functionHashes);
         const functionArguments = this.getRawArguments();
         if (functionName && this.input) {
-            const rawFunctionArguments = functionName
-                .split('(')[1]
-                .slice(0, -1)
-                .split(',');
+            const rawFunctionArguments = functionName.split('(')[1].slice(0, -1).split(',');
             if (
                 rawFunctionArguments.length === 1 &&
                 rawFunctionArguments[0] === '' &&
@@ -112,9 +109,7 @@ export class Transaction {
                     const functionArgumentType = rawFunctionArguments[i] || 'unknown';
                     const functionArgument = functionArguments[i];
                     if (functionArgumentType === 'string') {
-                        const location = BigNumber(functionArgument, 16)
-                            .divide(32)
-                            .toJSNumber();
+                        const location = BigNumber(functionArgument, 16).divide(32).toJSNumber();
                         const length = BigNumber(functionArguments[location], 16)
                             .multiply(2)
                             .toJSNumber();

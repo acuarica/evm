@@ -22,7 +22,7 @@ const stringifyMapping = (mapping: any) => {
                             items.shift();
                             return items;
                         }),
-                        values: mapping.values
+                        values: mapping.values,
                     })
                 );
             } else if (mappingChild.length === 1 && !deepMapping) {

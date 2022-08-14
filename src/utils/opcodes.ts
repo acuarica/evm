@@ -209,5 +209,5 @@ export default {
     STATICCALL,
     REVERT,
     INVALID,
-    SELFDESTRUCT
+    SELFDESTRUCT,
 };

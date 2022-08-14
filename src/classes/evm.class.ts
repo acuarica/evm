@@ -23,7 +23,7 @@ import {
     JUMPDEST,
     SELFDESTRUCT,
     codes,
-    names
+    names,
 } from '../opcodes';
 
 export class EVM {
@@ -44,7 +44,11 @@ export class EVM {
     gasUsed: number = 0;
     conditions: any = [];
 
-    constructor(code: string | Buffer, readonly functionHashes: {[s: string]: string}, readonly eventHashes: {[s: string]: string}) {
+    constructor(
+        code: string | Buffer,
+        readonly functionHashes: { [s: string]: string },
+        readonly eventHashes: { [s: string]: string }
+    ) {
         if (code instanceof Buffer) {
             this.code = code;
         } else {
@@ -80,7 +84,7 @@ export class EVM {
                 const currentOp: Opcode = {
                     pc: index,
                     opcode: this.code[index],
-                    name: 'INVALID'
+                    name: 'INVALID',
                 };
                 if (currentOp.opcode in codes) {
                     currentOp.name = (codes as any)[this.code[index]];
@@ -105,7 +109,7 @@ export class EVM {
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in this.functionHashes)
                     .map(hash => (this.functionHashes as any)[hash])
-            )
+            ),
         ];
     }
 
@@ -117,7 +121,7 @@ export class EVM {
                     .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
                     .filter(hash => hash in this.eventHashes)
                     .map(hash => (this.eventHashes as any)[hash])
-            )
+            ),
         ];
     }
 

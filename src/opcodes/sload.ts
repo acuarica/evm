@@ -101,7 +101,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
@@ -134,7 +134,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
@@ -168,7 +168,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);

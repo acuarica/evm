@@ -12,10 +12,7 @@ const updateCallDataLoad = (item: any, types: any) => {
                 item[i].name === 'CALLDATALOAD' &&
                 BigNumber.isInstance(item[i].location)
             ) {
-                const argNumber = item[i].location
-                    .subtract(4)
-                    .divide(32)
-                    .toString();
+                const argNumber = item[i].location.subtract(4).divide(32).toString();
                 item[i].type = types[argNumber];
             }
             if (typeof item[i] === 'object') {
@@ -60,7 +57,7 @@ export class TopLevelFunction {
     readonly items: any;
     readonly returns: any;
 
-    constructor(items: any, hash: any, gasUsed: number, functionHashes: {[s: string]: string}) {
+    constructor(items: any, hash: any, gasUsed: number, functionHashes: { [s: string]: string }) {
         this.name = 'Function';
         this.hash = hash;
         this.gasUsed = gasUsed;
@@ -205,7 +202,7 @@ export class JUMPI {
             return 'if' + stringify(this.condition) + ' goto(' + stringify(this.location) + ');';
         } else {
             console.log(this);
-            return "revert(\"Bad jump destination\");";
+            return 'revert("Bad jump destination");';
         }
     }
 }
@@ -249,7 +246,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     functionCloneTree,
                     jumpCondition.hash,
                     functionClone.gasUsed,
-                    state.functionHashes,
+                    state.functionHashes
                 );
                 if (
                     jumpCondition.hash in state.functionHashes &&
@@ -328,7 +325,7 @@ export default (opcode: Opcode, state: EVM): void => {
                         trueCloneTree,
                         '',
                         trueCloneTree.gasUsed,
-                        state.functionHashes,
+                        state.functionHashes
                     );
                 } else if (
                     trueCloneTree.length > 0 &&
@@ -357,9 +354,9 @@ export default (opcode: Opcode, state: EVM): void => {
                 if (
                     (falseCloneTree.length === 1 &&
                         'name' in falseCloneTree[0] &&
-                        (falseCloneTree[0].name === 'REVERT' &&
-                            falseCloneTree[0].items &&
-                            falseCloneTree[0].items.length === 0)) ||
+                        falseCloneTree[0].name === 'REVERT' &&
+                        falseCloneTree[0].items &&
+                        falseCloneTree[0].items.length === 0) ||
                     falseCloneTree[0].name === 'INVALID'
                 ) {
                     if (

@@ -122,7 +122,7 @@ export class SSTORE {
             !(this.location.toString() in this.variables())
         ) {
             this.variables()[this.location.toString()] = new Variable(false, [
-                () => this.data.type
+                () => this.data.type,
             ]);
         }
     }
@@ -172,7 +172,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
@@ -207,7 +207,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
@@ -242,7 +242,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     name: false,
                     structs: [],
                     keys: [],
-                    values: []
+                    values: [],
                 };
             }
             state.mappings[mappingLocation].keys.push(mappingParts);
