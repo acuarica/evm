@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import { LT } from './lt';
 import { GT } from './gt';
 import stringify from '../utils/stringify';
@@ -28,8 +27,8 @@ export class ISZERO {
 
 export default (_opcode: Opcode, state: EVM): void => {
     const item = state.stack.pop();
-    if (BigNumber.isInstance(item)) {
-        state.stack.push(BigNumber(item.isZero() === true ? 1 : 0));
+    if (typeof item === 'bigint') {
+        state.stack.push(item === 0n ? 1n : 0n);
     } else if (item.name === 'LT') {
         if (item.equal) {
             state.stack.push(new GT(item.left, item.right));

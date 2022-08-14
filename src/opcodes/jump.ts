@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class JUMP {
@@ -31,18 +30,18 @@ export class JUMP {
 
 export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
-    if (!BigNumber.isInstance(jumpLocation)) {
+    if (typeof jumpLocation !== 'bigint') {
         state.halted = true;
         state.instructions.push(new JUMP(jumpLocation, true));
     } else {
         const opcodes = state.getOpcodes();
-        const jumpLocationData = opcodes.find((o: any) => o.pc === jumpLocation.toJSNumber());
+        const jumpLocationData = opcodes.find((o: any) => o.pc === Number(jumpLocation));
         if (!jumpLocationData) {
             state.halted = true;
             state.instructions.push(new JUMP(jumpLocation, true));
         } else {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
-            if (!(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)) {
+            if (!(opcode.pc + ':' + Number(jumpLocation) in state.jumps)) {
                 if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
                     state.halted = true;
                     state.instructions.push(new JUMP(jumpLocation, true));
@@ -51,7 +50,7 @@ export default (opcode: Opcode, state: EVM): void => {
                     jumpIndex >= 0 &&
                     jumpLocationData.name === 'JUMPDEST'
                 ) {
-                    state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
+                    state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
                     state.pc = jumpIndex;
                 } else {
                     state.halted = true;

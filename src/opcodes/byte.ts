@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class BYTE {
@@ -25,8 +24,8 @@ export class BYTE {
 export default (_opcode: Opcode, state: EVM): void => {
     const position = state.stack.pop();
     const data = state.stack.pop();
-    if (BigNumber.isInstance(data) && BigNumber.isInstance(position)) {
-        state.stack.push(data.shiftRight(position).and(1));
+    if (typeof data === 'bigint' && typeof position === 'bigint') {
+        state.stack.push((data >> position) & 1n);
     } else {
         state.stack.push(new BYTE(position, data));
     }

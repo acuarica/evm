@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class NOT {
@@ -22,8 +21,8 @@ export class NOT {
 
 export default (_opcode: Opcode, state: EVM): void => {
     const item = state.stack.pop();
-    if (BigNumber.isInstance(item)) {
-        state.stack.push(item.not());
+    if (typeof item === 'bigint') {
+        state.stack.push(!item);
     } else {
         state.stack.push(new NOT(item));
     }

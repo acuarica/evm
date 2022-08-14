@@ -39,10 +39,10 @@ export class CALL {
 
     toString() {
         if (
-            BigNumber.isInstance(this.memoryLength) &&
-            this.memoryLength.isZero() &&
-            BigNumber.isInstance(this.outputLength) &&
-            this.outputLength.isZero()
+            typeof this.memoryLength === 'bigint' &&
+            this.memoryLength === 0n &&
+            typeof this.outputLength === 'bigint' &&
+            this.outputLength === 0n
         ) {
             if (
                 this.gas.name === 'MUL' &&

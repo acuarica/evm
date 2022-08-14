@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 // import * as functionHashes from '../../data/functionHashes.json';
 import stringify from '../utils/stringify';
 
@@ -10,7 +9,7 @@ const updateCallDataLoad = (item: any, types: any) => {
             if (
                 typeof item[i] === 'object' &&
                 item[i].name === 'CALLDATALOAD' &&
-                BigNumber.isInstance(item[i].location)
+                typeof item[i].location === 'bigint'
             ) {
                 const argNumber = item[i].location.subtract(4).divide(32).toString();
                 item[i].type = types[argNumber];
@@ -114,7 +113,7 @@ export class TopLevelFunction {
             )
         ) {
             returns[0].forEach((item: any) => {
-                if (BigNumber.isInstance(item)) {
+                if (typeof item === 'bigint') {
                     this.returns.push('uint256');
                 } else if (item.type) {
                     this.returns.push(item.type);
@@ -214,27 +213,27 @@ export default (opcode: Opcode, state: EVM): void => {
     console.log(jumpLocation);
     console.log(state.conditions);
     console.log('-');
-    if (!BigNumber.isInstance(jumpLocation)) {
+    if (typeof jumpLocation !== 'bigint') {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
     } else {
-        const jumpLocationData = opcodes.find((o: any) => o.pc === jumpLocation.toJSNumber());
+        const jumpLocationData = opcodes.find((o: any) => o.pc === Number(jumpLocation));
         if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
             //state.halted = true;
             //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             state.instructions.push(new REQUIRE(jumpCondition));
-        } else if (BigNumber.isInstance(jumpCondition)) {
+        } else if (typeof jumpCondition === 'bigint') {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (
                 jumpIndex >= 0 &&
-                !jumpCondition.equals(0) &&
-                !(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)
+                jumpCondition !== 0n &&
+                !(opcode.pc + ':' + Number(jumpLocation) in state.jumps)
             ) {
-                state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
+                state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
                 state.pc = jumpIndex;
             }
         } else if (
-            !(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps) &&
+            !(opcode.pc + ':' + Number(jumpLocation) in state.jumps) &&
             jumpCondition.name === 'SIG'
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
@@ -271,9 +270,8 @@ export default (opcode: Opcode, state: EVM): void => {
                     state.functions[jumpCondition.hash].items[0].name === 'RETURN' &&
                     state.functions[jumpCondition.hash].items[0].items.length === 1 &&
                     state.functions[jumpCondition.hash].items[0].items[0].name === 'SLOAD' &&
-                    BigNumber.isInstance(
-                        state.functions[jumpCondition.hash].items[0].items[0].location
-                    )
+                    typeof state.functions[jumpCondition.hash].items[0].items[0].location ===
+                        'bigint'
                 ) {
                     if (
                         !(
@@ -296,10 +294,10 @@ export default (opcode: Opcode, state: EVM): void => {
                 }
             }
         } else if (
-            !(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps) &&
+            !(opcode.pc + ':' + Number(jumpLocation) in state.jumps) &&
             ((jumpCondition.name === 'LT' &&
                 jumpCondition.left.name === 'CALLDATASIZE' &&
-                BigNumber.isInstance(jumpCondition.right) &&
+                typeof jumpCondition.right === 'bigint' &&
                 jumpCondition.right.equals(4)) ||
                 (jumpCondition.name === 'ISZERO' && jumpCondition.item.name === 'CALLDATASIZE'))
         ) {
@@ -339,9 +337,9 @@ export default (opcode: Opcode, state: EVM): void => {
             } else {
                 state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             }
-        } else if (!(opcode.pc + ':' + jumpLocation.toJSNumber() in state.jumps)) {
+        } else if (!(opcode.pc + ':' + Number(jumpLocation) in state.jumps)) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
-            state.jumps[opcode.pc + ':' + jumpLocation.toJSNumber()] = true;
+            state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
             if (jumpIndex >= 0) {
                 state.halted = true;
                 const trueClone: any = state.clone();
@@ -361,14 +359,14 @@ export default (opcode: Opcode, state: EVM): void => {
                 ) {
                     if (
                         jumpCondition.name === 'CALL' &&
-                        BigNumber.isInstance(jumpCondition.memoryLength) &&
-                        jumpCondition.memoryLength.isZero() &&
-                        BigNumber.isInstance(jumpCondition.outputLength) &&
-                        jumpCondition.outputLength.isZero() &&
+                        typeof jumpCondition.memoryLength === 'bigint' &&
+                        jumpCondition.memoryLength === 0n &&
+                        typeof jumpCondition.outputLength === 'bigint' &&
+                        jumpCondition.outputLength === 0n &&
                         jumpCondition.gas.name === 'MUL' &&
                         jumpCondition.gas.left.name === 'ISZERO' &&
-                        BigNumber.isInstance(jumpCondition.gas.right) &&
-                        jumpCondition.gas.right.equals(2300)
+                        typeof jumpCondition.gas.right === 'bigint' &&
+                        jumpCondition.gas.right === 2300n
                     ) {
                         jumpCondition.throwOnFail = true;
                         state.instructions.push(jumpCondition);

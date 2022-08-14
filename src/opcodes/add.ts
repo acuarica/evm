@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class ADD {
@@ -36,19 +35,13 @@ export class ADD {
 export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    // state.stack.push(
-    //     typeof left === 'bigint' && typeof right === 'bigint' ? left + right
-    //     : typeof left === 'bigint' && left === 0n ? right
-    //     : typeof right === 'bigint' && right === 0n ? left
-    //     : new ADD(left, right)
-    // );
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(left.add(right));
-    } else if (BigNumber.isInstance(left) && left.isZero()) {
-        state.stack.push(right);
-    } else if (BigNumber.isInstance(right) && right.isZero()) {
-        state.stack.push(left);
-    } else {
-        state.stack.push(new ADD(left, right));
-    }
+    state.stack.push(
+        typeof left === 'bigint' && typeof right === 'bigint'
+            ? left + right
+            : typeof left === 'bigint' && left === 0n
+            ? right
+            : typeof right === 'bigint' && right === 0n
+            ? left
+            : new ADD(left, right)
+    );
 };

@@ -7,5 +7,5 @@ export declare class ORIGIN {
     constructor();
     toString(): string;
 }
-declare const _default: (opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, state: EVM) => void;
 export default _default;

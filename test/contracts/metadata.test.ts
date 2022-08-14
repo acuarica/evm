@@ -1,4 +1,3 @@
-import 'mocha';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { expect } from 'chai';

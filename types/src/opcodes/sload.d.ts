@@ -21,5 +21,5 @@ export declare class SLOAD {
     constructor(location: any, variables: any);
     toString(): any;
 }
-declare const _default: (opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, state: EVM) => void;
 export default _default;

@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class MLOAD {
@@ -22,8 +21,8 @@ export class MLOAD {
 
 export default (_opcode: Opcode, state: EVM): void => {
     const memoryLocation = state.stack.pop();
-    if (BigNumber.isInstance(memoryLocation) && memoryLocation.toJSNumber() in state.memory) {
-        state.stack.push(state.memory[memoryLocation.toJSNumber()]);
+    if (typeof memoryLocation === 'bigint' && Number(memoryLocation) in state.memory) {
+        state.stack.push(state.memory[Number(memoryLocation)]);
     } else {
         state.stack.push(new MLOAD(memoryLocation));
     }

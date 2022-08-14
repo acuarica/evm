@@ -1,7 +1,6 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
 import { MLOAD } from './mload';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class SHA3 {
@@ -43,13 +42,9 @@ export class SHA3 {
 export default (_opcode: Opcode, state: EVM): void => {
     const memoryStart = state.stack.pop();
     const memoryLength = state.stack.pop();
-    if (BigNumber.isInstance(memoryStart) && BigNumber.isInstance(memoryLength)) {
+    if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
         const items = [];
-        for (
-            let i = memoryStart.toJSNumber();
-            i < memoryStart.add(memoryLength).toJSNumber();
-            i += 32
-        ) {
+        for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
             if (i in state.memory) {
                 items.push(state.memory[i]);
             } else {

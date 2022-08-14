@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class MSTORE {
@@ -25,8 +24,8 @@ export class MSTORE {
 export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     const storeData = state.stack.pop();
-    if (BigNumber.isInstance(storeLocation)) {
-        state.memory[storeLocation.toJSNumber()] = storeData;
+    if (typeof storeLocation === 'bigint') {
+        state.memory[Number(storeLocation)] = storeData;
     } else {
         state.instructions.push(new MSTORE(storeLocation, storeData));
     }

@@ -25,9 +25,6 @@
         "bytecode",
         "solidity"
     ],
-    "dependencies": {
-        "big-integer": "^1.6.51"
-    },
     "devDependencies": {
         "@types/chai": "^4.3.3",
         "@types/mocha": "^9.1.1",

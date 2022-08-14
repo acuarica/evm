@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class SHL {
@@ -25,8 +24,8 @@ export class SHL {
 export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(left.shiftLeft(right));
+    if (typeof left === 'bigint' && typeof right === 'bigint') {
+        state.stack.push(left << right);
     } else {
         state.stack.push(new SHL(left, right));
     }

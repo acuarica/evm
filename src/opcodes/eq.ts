@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class SIG {
@@ -42,27 +41,19 @@ export class EQ {
 export default (_opcode: Opcode, state: EVM): void => {
     let left = state.stack.pop();
     let right = state.stack.pop();
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(BigNumber(left.equals(right) === true ? 1 : 0));
+    if (typeof left === 'bigint' && typeof right === 'bigint') {
+        state.stack.push(left === right ? 1n : 0n);
     } else {
-        if (
-            BigNumber.isInstance(left) &&
-            right.name === 'DIV' &&
-            BigNumber.isInstance(right.right)
-        ) {
-            left = left.multiply(right.right);
+        if (typeof left === 'bigint' && right.name === 'DIV' && typeof right.right === 'bigint') {
+            left = left * right.right;
             right = right.left;
         }
-        if (
-            BigNumber.isInstance(right) &&
-            left.name === 'DIV' &&
-            BigNumber.isInstance(left.right)
-        ) {
-            right = right.multiply(left.right);
+        if (typeof right === 'bigint' && left.name === 'DIV' && typeof left.right === 'bigint') {
+            right = right * left.right;
             left = left.left;
         }
         if (
-            BigNumber.isInstance(left) &&
+            typeof left === 'bigint' &&
             /^[0]+$/.test(left.toString(16).substring(8)) &&
             right.name === 'CALLDATALOAD' &&
             right.location.equals(0)
@@ -74,7 +65,7 @@ export default (_opcode: Opcode, state: EVM): void => {
                 )
             );
         } else if (
-            BigNumber.isInstance(right) &&
+            typeof right === 'bigint' &&
             /^[0]+$/.test(right.toString(16).substring(8)) &&
             left.name === 'CALLDATALOAD' &&
             left.location.equals(0)

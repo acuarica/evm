@@ -13,5 +13,5 @@ export declare class DELEGATECALL {
     constructor(gas: any, address: any, memoryStart: any, memoryLength: any, outputStart: any, outputLength: any);
     toString(): string;
 }
-declare const _default: (opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, state: EVM) => void;
 export default _default;

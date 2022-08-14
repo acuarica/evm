@@ -2,16 +2,15 @@ import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
 import { MUL } from './mul';
 import { MOD } from './mod';
-import * as BigNumber from '../../node_modules/big-integer';
 
 export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
     const mod = state.stack.pop();
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right) && BigNumber.isInstance(mod)) {
-        state.stack.push(left.multiply(right).mod(mod));
-    } else if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(new MOD(left.multiply(right), mod));
+    if (typeof left === 'bigint' && typeof right === 'bigint' && typeof mod === 'bigint') {
+        state.stack.push((left * right) % mod);
+    } else if (typeof left === 'bigint' && typeof right === 'bigint') {
+        state.stack.push(new MOD(left * right, mod));
     } else {
         state.stack.push(new MOD(new MUL(left, right), mod));
     }

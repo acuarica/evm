@@ -1,6 +1,4 @@
-import 'mocha';
 import { expect } from 'chai';
-import * as BigNumber from '../../node_modules/big-integer';
 import EVM from '../utils/evmtest';
 
 describe('PUSH', () => {
@@ -8,6 +6,6 @@ describe('PUSH', () => {
         const evm = new EVM('0x6001');
         expect(evm.stack.elements).to.deep.equal([]);
         evm.parse();
-        expect(evm.stack.elements).to.deep.equal([BigNumber(1)]);
+        expect(evm.stack.elements).to.deep.equal([1n]);
     });
 });

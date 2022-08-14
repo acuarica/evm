@@ -1,6 +1,5 @@
 import { EVM } from '../classes/evm.class';
 import { Opcode } from '../opcode.interface';
-import * as BigNumber from '../../node_modules/big-integer';
 import stringify from '../utils/stringify';
 
 export class GT {
@@ -31,8 +30,8 @@ export class GT {
 export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(BigNumber(left.greater(right) === true ? 1 : 0));
+    if (typeof left === 'bigint' && typeof right === 'bigint') {
+        state.stack.push(left > right ? 1n : 0n);
     } else {
         state.stack.push(new GT(left, right));
     }

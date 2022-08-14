@@ -25,11 +25,11 @@ export class MUL {
 export default (_opcode: Opcode, state: EVM): void => {
     const left = state.stack.pop();
     const right = state.stack.pop();
-    if (BigNumber.isInstance(left) && BigNumber.isInstance(right)) {
-        state.stack.push(left.multiply(right));
+    if (typeof left === 'bigint' && typeof right === 'bigint') {
+        state.stack.push(left * right);
     } else if (
-        (BigNumber.isInstance(left) && left.isZero()) ||
-        (BigNumber.isInstance(right) && right.isZero())
+        (typeof left === 'bigint' && left === 0n) ||
+        (typeof right === 'bigint' && right === 0n)
     ) {
         state.stack.push(BigNumber(0));
     } else {
