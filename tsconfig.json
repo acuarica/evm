@@ -3,14 +3,12 @@
         "module": "commonjs",
         "target": "es2020",
         "lib": ["es2020"],
-        "outDir": "out",
+        "outDir": "types",
         "sourceMap": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "declaration": true,
-        "declarationDir": "./typings",
         "emitDeclarationOnly": true
-
         // "strict": true,
         // "exactOptionalPropertyTypes": true,
         // "noFallthroughCasesInSwitch": true,
@@ -21,5 +19,5 @@
         // "noUnusedLocals": true,
         // "noUnusedParameters": true,
     },
-    "exclude": ["node_modules", "examples"]
+    "exclude": ["node_modules", "types"]
 }

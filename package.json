@@ -52,7 +52,7 @@
     },
     "scripts": {
         "prepare": "husky install",
-        "compile": "tsc --noEmit --project tsconfig.json",
+        "compile": "tsc",
         "lint": "eslint .",
         "test": "mocha",
         "build": "webpack --mode production",
