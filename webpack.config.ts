@@ -1,61 +1,57 @@
 import * as path from 'path';
-import { Configuration } from 'webpack';
-import * as nodeExternals from 'webpack-node-externals';
-import * as merge from 'webpack-merge';
+import { Configuration, ProvidePlugin } from 'webpack';
+import { merge } from 'webpack-merge';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
-const sourcePath = path.resolve(__dirname, 'src');
 
 const config: Configuration = {
     mode: isDevelopment ? 'development' : 'production',
     entry: {
-        EVM: path.resolve(sourcePath, 'index.ts')
+        EVM: './src/index.ts',
     },
     output: {
         path: path.resolve(__dirname, 'lib'),
-        library: 'EVM'
     },
     resolve: {
-        extensions: ['.ts', '.js']
+        extensions: ['.ts', '.js'],
     },
     module: {
         rules: [
             {
                 test: /\.ts$/,
-                use: [
-                    {
-                        loader: 'awesome-typescript-loader',
-                        options: {
-                            useCache: true,
-                            useBabel: true,
-                            babelCore: '@babel/core'
-                        }
-                    }
-                ],
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                loader: 'ts-loader',
+                options: {
+                    transpileOnly: true,
+                },
             },
-            {
-                test: /\.js$/,
-                use: ['file-loader'],
-                include: /node_modules\/ethereumjs-vm\/dist\/opcodes\.js/
-            }
         ]
     },
     devtool: 'source-map'
 };
 
-const browser: Configuration = merge.smart(config, {
+const browser: Configuration = merge(config, {
     target: 'web',
     output: {
         libraryTarget: 'umd',
         umdNamedDefine: true,
         filename: '[name].js'
-    }
+    },
+    resolve: {
+
+        fallback: {
+            buffer: require.resolve('buffer/'),
+        },
+    },
+    plugins: [
+        new ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+    ],
 });
 
-const node: Configuration = merge.smart(config, {
+const node: Configuration = merge(config, {
     target: 'node',
-    externals: [nodeExternals()],
     output: {
         libraryTarget: 'commonjs2',
         filename: '[name].node.js'

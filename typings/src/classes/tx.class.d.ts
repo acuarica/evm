@@ -1,4 +1,4 @@
-export default class Transaction {
+export declare class Transaction {
     blockHash?: string;
     blockNumber?: number;
     from?: string;

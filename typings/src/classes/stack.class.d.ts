@@ -1,4 +1,4 @@
-export default class Stack {
+export declare class Stack {
     elements: any[];
     constructor();
     push(item: any): void;

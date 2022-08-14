@@ -1,11 +1,11 @@
 /// <reference types="node" />
-import Stack from './stack.class';
+import { Stack } from './stack.class';
 import Event from '../interfaces/event.interface';
 import Instruction from '../interfaces/instruction.interface';
 import Mapping from '../interfaces/mapping.interface';
 import Opcode from '../interfaces/opcode.interface';
 import Variable from '../interfaces/variable.interface';
-export default class EVM {
+export declare class EVM {
     readonly functionHashes: {
         [s: string]: string;
     };
