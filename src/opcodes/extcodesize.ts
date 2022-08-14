@@ -1,4 +1,4 @@
-import EVM from '../classes/evm.class';
+import { EVM } from '../classes/evm.class';
 import Opcode from '../interfaces/opcode.interface';
 import stringify from '../utils/stringify';
 

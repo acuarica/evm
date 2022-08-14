@@ -26,7 +26,7 @@ import {
     names
 } from '../opcodes';
 
-export default class EVM {
+export class EVM {
     pc: number = 0;
     stack: Stack = new Stack();
     memory: any = {};

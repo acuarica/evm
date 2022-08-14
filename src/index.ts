@@ -3,7 +3,7 @@
 // import * as _functionHashes from '../data/functionHashes.json';
 // import * as _eventHashes from '../data/eventHashes.json';
 import Transaction from './classes/tx.class';
-import EVM from './classes/evm.class';
+import { EVM } from './classes/evm.class';
 
 // export const functions: any = _functions as any;
 // export const events: any = _events as any;
