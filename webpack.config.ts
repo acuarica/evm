@@ -2,10 +2,7 @@ import * as path from 'path';
 import { Configuration, ProvidePlugin } from 'webpack';
 import { merge } from 'webpack-merge';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
-
 const config: Configuration = {
-    mode: isDevelopment ? 'development' : 'production',
     entry: {
         EVM: './src/index.ts',
     },
