@@ -1,90 +1,60 @@
 {
-  "name": "evm",
-  "version": "0.3.0",
-  "description": "An ethereum virtual machine (EVM) bytecode decompiler",
-  "main": "lib/EVM.node.js",
-  "module": "lib/EVM.js",
-  "typings": "typings/src/index.d.ts",
-  "scripts": {
-    "tscheck": "tsc --noEmit --project tsconfig.json",
-    "tslint": "tslint --project .",
-    "test": "mocha -r ts-node/register ./tests/index.ts",
-    "prepublishOnly": "npm run clean && npm run build:prod",
-    "clean": "rimraf ./lib",
-    "build": "npm run build:hashes && webpack",
-    "build:prod": "cross-env NODE_ENV=production npm run build",
-    "build:hashes": "ts-node ./scripts/build.ts",
-    "prettier:diff": "prettier --write --config ./.prettierrc --list-different 'src/**/*.ts'"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MrLuit/evm.git"
-  },
-  "author": "Luit Hollander <luit@hollander.email> (https://luit.me)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MrLuit/evm/issues"
-  },
-  "homepage": "https://github.com/MrLuit/evm#readme",
-  "keywords": [
-    "ethereum",
-    "evm",
-    "utils",
-    "decompiler",
-    "typescript",
-    "bytecode",
-    "solidity"
-  ],
-  "dependencies": {},
-  "devDependencies": {
-    "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.2.3",
-    "@types/chai": "4.1.7",
-    "@types/ethereumjs-abi": "0.6.1",
-    "@types/mocha": "5.2.5",
-    "@types/node": "10.12.18",
-    "@types/webpack": "4.4.22",
-    "@types/webpack-merge": "4.1.3",
-    "@types/webpack-node-externals": "1.6.3",
-    "awesome-typescript-loader": "5.2.1",
-    "big-integer": "1.6.40",
-    "chai": "4.2.0",
-    "cross-env": "5.2.0",
-    "file-loader": "3.0.1",
-    "husky": "1.3.1",
-    "lint-staged": "8.1.0",
-    "mocha": "5.2.0",
-    "prettier": "1.15.3",
-    "rimraf": "2.6.2",
-    "solc": "0.5.5",
-    "ts-node": "7.0.1",
-    "tslint": "5.12.0",
-    "tslint-config-prettier": "1.17.0",
-    "tslint-microsoft-contrib": "6.0.0",
-    "tslint-no-unused-expression-chai": "0.1.4",
-    "typescript": "3.2.2",
-    "web3": "1.0.0-beta.37",
-    "webpack": "4.28.3",
-    "webpack-cli": "3.1.2",
-    "webpack-merge": "4.1.5",
-    "webpack-node-externals": "1.7.2"
-  },
-  "lint-staged": {
-    "*.ts": [
-      "prettier --write --config ./.prettierrc --config-precedence file-override",
-      "tslint --project .",
-      "git add"
+    "name": "evm",
+    "version": "0.3.1",
+    "description": "An ethereum virtual machine (EVM) bytecode decompiler",
+    "private": true,
+    "main": "lib/EVM.node.js",
+    "module": "lib/EVM.js",
+    "typings": "typings/src/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MrLuit/evm.git"
+    },
+    "author": "Luit Hollander <luit@hollander.email> (https://luit.me)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/acuarica/evm/issues"
+    },
+    "homepage": "https://github.com/acuarica/evm#readme",
+    "keywords": [
+        "ethereum",
+        "evm",
+        "utils",
+        "decompiler",
+        "typescript",
+        "bytecode",
+        "solidity"
     ],
-    "*.json": [
-      "npm run build:hashes",
-      "git add"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "post-commit": "git update-index --again",
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run tslint && npm run tscheck && npm run test"
+    "dependencies": {
+        "big-integer": "^1.6.51"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.3",
+        "@types/mocha": "^9.1.1",
+        "@types/node": "^18.7.2",
+        "buffer": "^6.0.3",
+        "chai": "^4.3.6",
+        "ethers": "^5.6.9",
+        "husky": "^8.0.1",
+        "mocha": "^10.0.0",
+        "prettier": "^2.7.1",
+        "pretty-quick": "^3.1.3",
+        "solc": "0.5.5",
+        "ts-loader": "^9.3.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.7.4",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "webpack-merge": "^5.8.0"
+    },
+    "scripts": {
+        "prepare": "husky install",
+        "compile": "tsc --noEmit --project tsconfig.json",
+        "lint": "eslint .",
+        "test": "mocha",
+        "build": "webpack --mode production",
+        "build:hashes": "ts-node ./scripts/build.ts",
+        "prettier": "prettier --write .",
+        "prettier:staged": "pretty-quick --staged"
     }
-  }
 }
