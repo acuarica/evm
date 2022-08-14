@@ -5,7 +5,7 @@
     "private": true,
     "main": "lib/EVM.node.js",
     "module": "lib/EVM.js",
-    "typings": "typings/src/index.d.ts",
+    "types": "types/src/index.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/acuarica/evm.git"
