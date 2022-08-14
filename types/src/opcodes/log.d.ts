@@ -9,15 +9,9 @@ export declare class LOG {
     readonly items?: any;
     readonly topics: any;
     readonly eventName?: string;
-    constructor(
-        eventHashes: {
-            [s: string]: string;
-        },
-        topics: any,
-        items?: any,
-        memoryStart?: any,
-        memoryLength?: any
-    );
+    constructor(eventHashes: {
+        [s: string]: string;
+    }, topics: any, items?: any, memoryStart?: any, memoryLength?: any);
     toString(): string;
 }
 declare const _default: (opcode: Opcode, state: EVM) => void;

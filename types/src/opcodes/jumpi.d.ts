@@ -11,14 +11,9 @@ export declare class TopLevelFunction {
     readonly constant: boolean;
     readonly items: any;
     readonly returns: any;
-    constructor(
-        items: any,
-        hash: any,
-        gasUsed: number,
-        functionHashes: {
-            [s: string]: string;
-        }
-    );
+    constructor(items: any, hash: any, gasUsed: number, functionHashes: {
+        [s: string]: string;
+    });
 }
 export declare class Variable {
     readonly name: string;
