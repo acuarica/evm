@@ -19,6 +19,7 @@ import {
     codes,
     names,
 } from '../opcodes';
+import { fromHex, toHex } from '../utils/hex';
 
 interface Event {
     [key: string]: any;
@@ -45,7 +46,7 @@ export class EVM {
     instructions: Instruction[] = [];
     storage: any = {};
     jumps: any = {};
-    code: Buffer;
+    code: Uint8Array;
     mappings: Mapping = {};
     layer = 0;
     halted = false;
@@ -56,14 +57,14 @@ export class EVM {
     conditions: any = [];
 
     constructor(
-        code: string | Buffer,
+        code: string | Uint8Array,
         readonly functionHashes: { [s: string]: string },
         readonly eventHashes: { [s: string]: string }
     ) {
-        if (code instanceof Buffer) {
+        if (code instanceof Uint8Array) {
             this.code = code;
         } else {
-            this.code = Buffer.from(code.replace('0x', ''), 'hex');
+            this.code = fromHex(code.replace('0x', ''));
         }
     }
 
@@ -86,7 +87,7 @@ export class EVM {
     }
 
     getBytecode(): string {
-        return '0x' + this.code.toString('hex');
+        return '0x' + toHex(this.code);
     }
 
     getOpcodes(): Opcode[] {
@@ -103,7 +104,7 @@ export class EVM {
                 this.opcodes.push(currentOp);
                 if (currentOp.name.startsWith('PUSH')) {
                     const pushDataLength = this.code[index] - 0x5f;
-                    const pushData = this.code.slice(index + 1, index + pushDataLength + 1);
+                    const pushData = this.code.subarray(index + 1, index + pushDataLength + 1);
                     currentOp.pushData = pushData;
                     index += pushDataLength;
                 }
@@ -117,7 +118,7 @@ export class EVM {
             ...new Set(
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH4')
-                    .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
+                    .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.functionHashes)
                     .map(hash => this.functionHashes[hash])
             ),
@@ -129,7 +130,7 @@ export class EVM {
             ...new Set(
                 this.getOpcodes()
                     .filter(opcode => opcode.name === 'PUSH32')
-                    .map(opcode => (opcode.pushData ? opcode.pushData.toString('hex') : ''))
+                    .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.eventHashes)
                     .map(hash => this.eventHashes[hash])
             ),

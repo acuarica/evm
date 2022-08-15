@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Configuration, ProvidePlugin } from 'webpack';
+import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 
 const config: Configuration = {
@@ -34,16 +34,16 @@ const browser: Configuration = merge(config, {
         umdNamedDefine: true,
         filename: '[name].js',
     },
-    resolve: {
-        fallback: {
-            buffer: require.resolve('buffer/'),
-        },
-    },
-    plugins: [
-        new ProvidePlugin({
-            Buffer: ['buffer', 'Buffer'],
-        }),
-    ],
+    // resolve: {
+    //     fallback: {
+    //         buffer: require.resolve('buffer/'),
+    //     },
+    // },
+    // plugins: [
+    //     new ProvidePlugin({
+    //         Buffer: ['buffer', 'Buffer'],
+    //     }),
+    // ],
 });
 
 const node: Configuration = merge(config, {
