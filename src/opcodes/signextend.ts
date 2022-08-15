@@ -1,5 +1,5 @@
-import { EVM } from '../classes/evm.class';
-import { Opcode } from '../opcode.interface';
+import { EVM } from '../evm';
+import { Opcode } from '../opcode';
 import { SHL } from './shl';
 import { SAR } from './sar';
 import { SUB } from './sub';

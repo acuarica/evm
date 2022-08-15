@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { expect } from 'chai';
 import Contract from '../utils/contract.class';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/opcodes';
+import { SELFDESTRUCT } from '../../src/codes';
 
 const metadata = fs.readFileSync('./test/contracts/metadata.sol', 'utf8');
 

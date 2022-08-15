@@ -1,5 +1,5 @@
-import { EVM } from '../classes/evm.class';
-import { Opcode } from '../opcode.interface';
+import { EVM } from '../evm';
+import { Opcode } from '../opcode';
 
 export default (_opcode: Opcode, state: EVM): void => {
     state.stack.pop();

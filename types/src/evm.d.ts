@@ -1,5 +1,5 @@
-import { Stack } from './stack.class';
-import { Opcode } from '../opcode.interface';
+import { Stack } from './stack';
+import { Opcode } from './opcode';
 interface Event {
     [key: string]: any;
 }

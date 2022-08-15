@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/opcodes';
+import { SELFDESTRUCT } from '../../src/codes';
 import Contract from '../utils/contract.class';
 
 describe('selfdestruct.sol', () => {

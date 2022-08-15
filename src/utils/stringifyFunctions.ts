@@ -1,5 +1,4 @@
 import stringifyInstructions from './stringifyInstructions';
-// import * as functionHashes from '../../data/functionHashes.json';
 
 export default (
     functionName: string,

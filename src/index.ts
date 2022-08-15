@@ -1,3 +1,4 @@
-export { Transaction } from './classes/tx.class';
-export { EVM } from './classes/evm.class';
+export { Stack } from './stack';
+export { Transaction } from './tx';
+export { EVM } from './evm';
 export * from './opcodes';

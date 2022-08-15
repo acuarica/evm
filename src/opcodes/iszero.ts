@@ -1,5 +1,5 @@
-import { EVM } from '../classes/evm.class';
-import { Opcode } from '../opcode.interface';
+import { EVM } from '../evm';
+import { Opcode } from '../opcode';
 import { LT } from './lt';
 import { GT } from './gt';
 import stringify from '../utils/stringify';

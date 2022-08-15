@@ -1,5 +1,5 @@
-import { EVM } from '../classes/evm.class';
-import { Opcode } from '../opcode.interface';
+import { EVM } from '../evm';
+import { Opcode } from '../opcode';
 export declare class EXP {
     readonly name: string;
     readonly type?: string;

@@ -1,12 +1,12 @@
-import opcodeFunctions from '../utils/opcodes';
-import stringifyEvents from '../utils/stringifyEvents';
-import stringifyStructs from '../utils/stringifyStructs';
-import stringifyMappings from '../utils/stringifyMappings';
-import stringifyVariables from '../utils/stringifyVariables';
-import stringifyFunctions from '../utils/stringifyFunctions';
-import stringifyInstructions from '../utils/stringifyInstructions';
-import { Stack } from './stack.class';
-import { Opcode } from '../opcode.interface';
+import opcodeFunctions from './opcodes';
+import stringifyEvents from './utils/stringifyEvents';
+import stringifyStructs from './utils/stringifyStructs';
+import stringifyMappings from './utils/stringifyMappings';
+import stringifyVariables from './utils/stringifyVariables';
+import stringifyFunctions from './utils/stringifyFunctions';
+import stringifyInstructions from './utils/stringifyInstructions';
+import { Stack } from './stack';
+import { Opcode } from './opcode';
 import {
     STOP,
     RETURN,
@@ -18,8 +18,8 @@ import {
     SELFDESTRUCT,
     codes,
     names,
-} from '../opcodes';
-import { fromHex, toHex } from '../utils/hex';
+} from './codes';
+import { fromHex, toHex } from './hex';
 
 interface Event {
     [key: string]: any;
@@ -99,7 +99,7 @@ export class EVM {
                     name: 'INVALID',
                 };
                 if (currentOp.opcode in codes) {
-                    currentOp.name = (codes as any)[this.code[index]];
+                    currentOp.name = codes[currentOp.opcode as keyof typeof codes];
                 }
                 this.opcodes.push(currentOp);
                 if (currentOp.name.startsWith('PUSH')) {
