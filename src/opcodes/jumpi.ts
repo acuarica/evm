@@ -199,7 +199,6 @@ export class JUMPI {
         } else if (this.valid) {
             return 'if' + stringify(this.condition) + ' goto(' + stringify(this.location) + ');';
         } else {
-            console.log(this);
             return 'revert("Bad jump destination");';
         }
     }
@@ -209,9 +208,6 @@ export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
     const jumpCondition = state.stack.pop();
     const opcodes = state.getOpcodes();
-    console.log(jumpLocation);
-    console.log(state.conditions);
-    console.log('-');
     if (typeof jumpLocation !== 'bigint') {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
