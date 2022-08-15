@@ -34,16 +34,6 @@ const browser: Configuration = merge(config, {
         umdNamedDefine: true,
         filename: '[name].js',
     },
-    // resolve: {
-    //     fallback: {
-    //         buffer: require.resolve('buffer/'),
-    //     },
-    // },
-    // plugins: [
-    //     new ProvidePlugin({
-    //         Buffer: ['buffer', 'Buffer'],
-    //     }),
-    // ],
 });
 
 const node: Configuration = merge(config, {
