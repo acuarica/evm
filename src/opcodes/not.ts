@@ -9,7 +9,7 @@ export class NOT {
     readonly item: any;
 
     constructor(item: any) {
-        this.name = 'AND';
+        this.name = 'NOT';
         this.wrapped = true;
         this.item = item;
     }
@@ -22,7 +22,7 @@ export class NOT {
 export default (_opcode: Opcode, state: EVM): void => {
     const item = state.stack.pop();
     if (typeof item === 'bigint') {
-        state.stack.push(!item);
+        state.stack.push(~item);
     } else {
         state.stack.push(new NOT(item));
     }
