@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Stack } from './stack.class';
 import { Opcode } from '../opcode.interface';
 interface Event {
@@ -29,7 +28,7 @@ export declare class EVM {
     instructions: Instruction[];
     storage: any;
     jumps: any;
-    code: Buffer;
+    code: Uint8Array;
     mappings: Mapping;
     layer: number;
     halted: boolean;
@@ -38,7 +37,7 @@ export declare class EVM {
     events: Event;
     gasUsed: number;
     conditions: any;
-    constructor(code: string | Buffer, functionHashes: {
+    constructor(code: string | Uint8Array, functionHashes: {
         [s: string]: string;
     }, eventHashes: {
         [s: string]: string;
