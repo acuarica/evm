@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { Stack } from '../src';
+import { Stack } from '../src/stack';
 
-describe('stack.class.ts', () => {
+describe('stack', () => {
     it('should create an instance', () => {
         const stack = new Stack<never>();
         expect(stack).to.be.an.instanceof(Stack);

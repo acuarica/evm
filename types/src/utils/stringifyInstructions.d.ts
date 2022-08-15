@@ -1,2 +1,7 @@
-export declare const stringifyInstructions: (instructionTree: any, indentation?: number) => string;
-export default stringifyInstructions;
+/**
+ *
+ * @param instructionTree
+ * @param indentation
+ * @returns
+ */
+export declare function stringifyInstructions(instructionTree: any, indentation?: number): string;

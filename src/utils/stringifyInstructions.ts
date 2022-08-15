@@ -1,38 +1,42 @@
-export const stringifyInstructions = (instructionTree: any, indentation = 0): string => {
-    let instructionLines = '';
+/**
+ *
+ * @param instructionTree
+ * @param indentation
+ * @returns
+ */
+export function stringifyInstructions(instructionTree: any, indentation = 0): string {
+    let lines = '';
     instructionTree.forEach((instruction: any) => {
         if (instruction.name === 'JUMPI' && instruction.false) {
             const condition = instruction.toString();
             const falseInstructions = instruction.false.filter((i: any) => i.debugLevel > 0);
             if (falseInstructions.length === 1 && falseInstructions[0].name === 'JUMPI') {
-                instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
-                instructionLines += stringifyInstructions(instruction.true, indentation + 4);
-                instructionLines += ' '.repeat(indentation) + '} else ';
+                lines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
+                lines += stringifyInstructions(instruction.true, indentation + 4);
+                lines += ' '.repeat(indentation) + '} else ';
                 const elseOrElseIf = stringifyInstructions(instruction.false, indentation);
                 if (elseOrElseIf.trim().startsWith('if')) {
-                    instructionLines += elseOrElseIf.trim() + '\n';
+                    lines += elseOrElseIf.trim() + '\n';
                 } else {
-                    instructionLines +=
+                    lines +=
                         '{\n' +
                         elseOrElseIf
                             .split('\n')
                             .filter(l => l)
                             .map(l => ' '.repeat(4) + l)
                             .join('\n');
-                    instructionLines += '\n' + ' '.repeat(indentation) + '}\n';
+                    lines += '\n' + ' '.repeat(indentation) + '}\n';
                 }
             } else {
-                instructionLines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
-                instructionLines += stringifyInstructions(instruction.true, indentation + 4);
-                instructionLines += ' '.repeat(indentation) + '} else {\n';
-                instructionLines += stringifyInstructions(instruction.false, indentation + 4);
-                instructionLines += ' '.repeat(indentation) + '}\n';
+                lines += ' '.repeat(indentation) + 'if' + condition + ' {\n';
+                lines += stringifyInstructions(instruction.true, indentation + 4);
+                lines += ' '.repeat(indentation) + '} else {\n';
+                lines += stringifyInstructions(instruction.false, indentation + 4);
+                lines += ' '.repeat(indentation) + '}\n';
             }
         } else {
-            instructionLines += ' '.repeat(indentation) + instruction.toString() + '\n';
+            lines += ' '.repeat(indentation) + instruction.toString() + '\n';
         }
     });
-    return instructionLines;
-};
-
-export default stringifyInstructions;
+    return lines;
+}

@@ -4,7 +4,7 @@ import stringifyStructs from './utils/stringifyStructs';
 import stringifyMappings from './utils/stringifyMappings';
 import stringifyVariables from './utils/stringifyVariables';
 import stringifyFunctions from './utils/stringifyFunctions';
-import stringifyInstructions from './utils/stringifyInstructions';
+import { stringifyInstructions } from './utils/stringifyInstructions';
 import { Stack } from './stack';
 import { Opcode } from './opcode';
 import {

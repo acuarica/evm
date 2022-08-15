@@ -1,4 +1,4 @@
-import stringifyInstructions from './stringifyInstructions';
+import { stringifyInstructions } from './stringifyInstructions';
 
 export default (
     functionName: string,
