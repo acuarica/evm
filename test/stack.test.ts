@@ -3,12 +3,12 @@ import { Stack } from '../src';
 
 describe('stack.class.ts', () => {
     it('should create an instance', () => {
-        const stack = new Stack();
+        const stack = new Stack<never>();
         expect(stack).to.be.an.instanceof(Stack);
     });
 
     it('should push successfully', () => {
-        const stack = new Stack();
+        const stack = new Stack<string>();
         stack.push('1');
         expect(stack.elements).to.deep.equal(['1']);
         stack.push('0');
@@ -16,7 +16,7 @@ describe('stack.class.ts', () => {
     });
 
     it('should pop successfully', () => {
-        const stack = new Stack();
+        const stack = new Stack<number>();
         stack.push(1);
         stack.push(2);
         expect(stack.elements).to.deep.equal([2, 1]);
@@ -28,31 +28,31 @@ describe('stack.class.ts', () => {
     });
 
     it('should duplicate successfully', () => {
-        const stack = new Stack();
+        const stack = new Stack<string>();
         stack.push('x');
         stack.push('y');
         stack.push('z');
         expect(stack.elements).to.deep.equal(['z', 'y', 'x']);
-        stack.duplicate(0);
+        stack.dup(0);
         expect(stack.elements).to.deep.equal(['z', 'z', 'y', 'x']);
-        stack.duplicate(3);
+        stack.dup(3);
         expect(stack.elements).to.deep.equal(['x', 'z', 'z', 'y', 'x']);
-        expect(() => stack.duplicate(-1)).to.throw(
+        expect(() => stack.dup(-1)).to.throw(
             Error,
             'Unsupported position for duplication operation'
         );
-        expect(() => stack.duplicate(16)).to.throw(
+        expect(() => stack.dup(16)).to.throw(
             Error,
             'Unsupported position for duplication operation'
         );
-        expect(() => stack.duplicate(5)).to.throw(
+        expect(() => stack.dup(5)).to.throw(
             Error,
             "Invalid duplication operation, provided position wasn't found in stack"
         );
     });
 
     it('should swap successfully', () => {
-        const stack = new Stack();
+        const stack = new Stack<string>();
         stack.push('a');
         stack.push('b');
         stack.push('c');
@@ -70,7 +70,7 @@ describe('stack.class.ts', () => {
     });
 
     it('should clone successfully', () => {
-        const stack1 = new Stack();
+        const stack1 = new Stack<number>();
         stack1.push(3);
         expect(stack1.elements).to.deep.equal([3]);
         const stack2 = stack1.clone();
@@ -81,7 +81,7 @@ describe('stack.class.ts', () => {
     });
 
     it('should reset successfully', () => {
-        const stack = new Stack();
+        const stack = new Stack<number>();
         stack.push(100);
         expect(stack.elements).to.deep.equal([100]);
         stack.reset();

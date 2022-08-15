@@ -22,7 +22,7 @@ export declare class EVM {
         [s: string]: string;
     };
     pc: number;
-    stack: Stack;
+    stack: Stack<any>;
     memory: any;
     opcodes: Opcode[];
     instructions: Instruction[];

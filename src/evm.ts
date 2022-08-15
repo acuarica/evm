@@ -40,7 +40,7 @@ interface Mapping {
 
 export class EVM {
     pc = 0;
-    stack: Stack = new Stack();
+    stack: Stack<any> = new Stack<any>();
     memory: any = {};
     opcodes: Opcode[] = [];
     instructions: Instruction[] = [];

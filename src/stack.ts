@@ -1,11 +1,11 @@
-export class Stack {
-    elements: any[];
+export class Stack<T> {
+    elements: T[];
 
     constructor() {
         this.elements = [];
     }
 
-    push(item: any): void {
+    push(item: T): void {
         if (this.elements.length >= 1024) {
             throw new Error('Stack too deep');
         } else {
@@ -13,15 +13,15 @@ export class Stack {
         }
     }
 
-    pop(): any {
+    pop(): T | never {
         if (this.elements.length === 0) {
             throw new Error('POP with empty stack');
         } else {
-            return this.elements.shift();
+            return this.elements.shift()!;
         }
     }
 
-    duplicate(position: number): void {
+    dup(position: number): void | never {
         if (position < 0 || position > 15) {
             throw new Error('Unsupported position for duplication operation');
         } else if (!(position in this.elements)) {
@@ -46,8 +46,8 @@ export class Stack {
         }
     }
 
-    clone(): Stack {
-        const stack = new Stack();
+    clone(): Stack<T> {
+        const stack = new Stack<T>();
         stack.elements = [...this.elements];
         return stack;
     }
