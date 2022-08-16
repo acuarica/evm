@@ -1,12 +1,27 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import Contract from '../utils/contract.class';
+import Contract from './utils/solc';
 
-describe('selfdestruct.sol', () => {
-    const contract = new Contract();
-    contract.loadFile('selfdestruct.sol');
-    const evm = new EVM(contract.bytecode());
+const CONTRACT = `
+pragma solidity 0.5.5;
+
+contract Contract {
+    function () external {
+        selfdestruct(msg.sender);
+    }
+}
+`;
+
+describe('contracts::selfdestruct', () => {
+    let contract: Contract;
+    let evm: EVM;
+
+    before(() => {
+        contract = new Contract();
+        contract.load('selfdestruct', CONTRACT);
+        evm = new EVM(contract.bytecode());
+    });
 
     it('should compile without errors', () => {
         expect(contract.valid(), contract.errors().join('\n')).to.be.true;

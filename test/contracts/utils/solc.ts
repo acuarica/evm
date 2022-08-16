@@ -27,7 +27,7 @@ export default class Contract {
         this.output = JSON.parse(solc.compile(JSON.stringify(input)));
     }
 
-    load(name: string, content: string) {
+    load(name: string, content: string): void {
         const input = {
             language: 'Solidity',
             sources: {
@@ -46,7 +46,7 @@ export default class Contract {
         this.output = JSON.parse(solc.compile(JSON.stringify(input)));
     }
 
-    valid() {
+    valid(): boolean {
         return (
             'contracts' in this.output &&
             (!('errors' in this.output) || this.output.errors.length === 0)
@@ -57,7 +57,7 @@ export default class Contract {
         return (this.output.errors || []).map((error: any) => error.formattedMessage);
     }
 
-    bytecode() {
+    bytecode(): string {
         if (this.valid()) {
             const { contracts } = this.output;
             const filename = Object.keys(contracts)[0];
