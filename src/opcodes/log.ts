@@ -1,7 +1,6 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 import { MLOAD } from './mload';
-// import * as eventHashes from '../../data/eventHashes.json';
 
 export class LOG {
     readonly name: string;
@@ -50,41 +49,44 @@ export class LOG {
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
-    const topicsCount = parseInt(opcode.name.replace('LOG', ''), 10);
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    const topics = [];
-    for (let i = 0; i < topicsCount; i++) {
-        topics.push(state.stack.pop());
-    }
-    if (topics.length > 0) {
-        const eventTopic = topics[0].toString(16);
-        if (!(eventTopic in state.events)) {
-            state.events[eventTopic] = {};
-            state.events[eventTopic].indexedCount = topics.length - 1;
-            if (eventTopic in state.eventHashes) {
-                state.events[eventTopic].label = (state.eventHashes as any)[eventTopic];
+export default (topicsCount: number) => {
+    return (_opcode: Opcode, state: EVM): void => {
+        const memoryStart = state.stack.pop();
+        const memoryLength = state.stack.pop();
+        const topics = [];
+        for (let i = 0; i < topicsCount; i++) {
+            topics.push(state.stack.pop());
+        }
+        if (topics.length > 0) {
+            const eventTopic = topics[0].toString(16);
+            if (!(eventTopic in state.events)) {
+                state.events[eventTopic] = {};
+                state.events[eventTopic].indexedCount = topics.length - 1;
+                if (eventTopic in state.eventHashes) {
+                    state.events[eventTopic].label = (state.eventHashes as any)[eventTopic];
+                }
             }
         }
-    }
-    if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
-        const items = [];
-        for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-            if (i in state.memory) {
-                items.push(state.memory[i]);
-            } else {
-                items.push(new MLOAD(i));
+        if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
+            const items = [];
+            for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+                if (i in state.memory) {
+                    items.push(state.memory[i]);
+                } else {
+                    items.push(new MLOAD(i));
+                }
             }
-        }
-        if (topics.length === 0) {
-            if (!('anonymous' in state.events)) {
-                state.events['anonymous'] = [];
+            if (topics.length === 0) {
+                if (!('anonymous' in state.events)) {
+                    state.events['anonymous'] = [];
+                }
+                state.events['anonymous'].push({ items });
             }
-            state.events['anonymous'].push({ items });
+            state.instructions.push(new LOG(state.eventHashes, topics, items));
+        } else {
+            state.instructions.push(
+                new LOG(state.eventHashes, topics, [], memoryStart, memoryLength)
+            );
         }
-        state.instructions.push(new LOG(state.eventHashes, topics, items));
-    } else {
-        state.instructions.push(new LOG(state.eventHashes, topics, [], memoryStart, memoryLength));
-    }
+    };
 };
