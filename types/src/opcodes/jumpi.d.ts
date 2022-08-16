@@ -22,19 +22,19 @@ export declare class Variable {
     constructor(label: string | false, types: any);
 }
 export declare class REQUIRE {
-    readonly name: string;
+    readonly condition: any;
+    readonly name = "REQUIRE";
     readonly type?: string;
     readonly wrapped: boolean;
-    readonly condition: any;
     constructor(condition: any);
     toString(): string;
 }
 export declare class JUMPI {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
     readonly condition: any;
     readonly location: any;
+    readonly name = "JUMPI";
+    readonly type?: string;
+    readonly wrapped = true;
     readonly valid: boolean;
     readonly true?: any;
     readonly false?: any;

@@ -1,13 +1,25 @@
+import opcodeFunctions from './opcodes';
 import { Stack } from './stack';
 import { Opcode } from './opcode';
+import { GT } from './opcodes/gt';
+import { LT } from './opcodes/lt';
+import { SHA3 } from './opcodes/sha3';
+import { ADD } from './opcodes/add';
+import { SIG } from './opcodes/eq';
+import { ISZERO } from './opcodes/iszero';
+import { CALL } from './opcodes/call';
 interface Event {
     [key: string]: any;
 }
-interface Instruction {
-    name: string;
+declare type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL;
+declare type Name = INST['name'];
+declare type A = Exclude<keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'SIG' | 'MappingLoad' | 'LOG', Name>;
+interface Instruction2 {
+    name: A;
     type?: string;
     wrapped?: boolean;
 }
+declare type Instruction = Instruction2 | INST;
 interface Variable {
     [key: string]: any;
 }

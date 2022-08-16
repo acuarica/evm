@@ -1,25 +1,25 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class MappingStore {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
+    readonly mappings: any;
     readonly location: any;
-    readonly count: any;
     readonly items: any;
     readonly data: any;
+    readonly count: any;
     readonly structlocation?: any;
-    readonly mappings: any;
+    readonly name = "MappingStore";
+    readonly type?: string;
+    readonly wrapped = false;
     constructor(mappings: any, location: any, items: any, data: any, count: any, structlocation?: any);
     toString(): string;
 }
 export declare class SSTORE {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
     readonly location: any;
     readonly data: any;
     readonly variables: any;
+    readonly name = "SSTORE";
+    readonly type?: string;
+    readonly wrapped = true;
     constructor(location: any, data: any, variables: any);
     toString(): string;
 }

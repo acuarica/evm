@@ -1,13 +1,13 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class SHR {
-    readonly name: string;
+    readonly value: any;
+    readonly shift: any;
+    readonly name = "SHR";
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly left: any;
-    readonly right: any;
-    constructor(left: any, right: any);
+    readonly wrapped = true;
+    constructor(value: any, shift: any);
     toString(): string;
 }
-declare const _default: (_opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, { stack }: EVM) => void;
 export default _default;

@@ -1,9 +1,9 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class REVERT {
-    readonly name: string;
+    readonly name = "REVERT";
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = true;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;

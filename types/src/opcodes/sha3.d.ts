@@ -1,9 +1,9 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class SHA3 {
-    readonly name: string;
+    readonly name = "SHA3";
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = false;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;

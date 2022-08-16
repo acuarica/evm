@@ -1,12 +1,12 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class ISZERO {
-    readonly name: string;
+    readonly value: any;
+    readonly name = "ISZERO";
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly item: any;
-    constructor(item: any);
+    readonly wrapped = true;
+    constructor(value: any);
     toString(): string;
 }
-declare const _default: (_opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, { stack }: EVM) => void;
 export default _default;

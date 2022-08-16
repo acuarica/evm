@@ -1,10 +1,10 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class INVALID {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
     readonly opcode: any;
+    readonly name = "INVALID";
+    readonly type?: string;
+    readonly wrapped = true;
     constructor(opcode: any);
     toString(): string;
 }

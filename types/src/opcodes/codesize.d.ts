@@ -1,10 +1,9 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class CODESIZE {
-    readonly name: string;
+    readonly name = "CODESIZE";
     readonly type?: string;
-    readonly wrapped: boolean;
-    constructor();
+    readonly wrapped = false;
     toString(): string;
 }
 declare const _default: (_opcode: Opcode, state: EVM) => void;

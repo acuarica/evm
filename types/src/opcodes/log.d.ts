@@ -1,18 +1,18 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class LOG {
-    readonly name: string;
+    readonly topics: any;
+    readonly name = "LOG";
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = true;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items?: any;
-    readonly topics: any;
     readonly eventName?: string;
     constructor(eventHashes: {
         [s: string]: string;
     }, topics: any, items?: any, memoryStart?: any, memoryLength?: any);
     toString(): string;
 }
-declare const _default: (opcode: Opcode, state: EVM) => void;
+declare const _default: (topicsCount: number) => (_opcode: Opcode, state: EVM) => void;
 export default _default;

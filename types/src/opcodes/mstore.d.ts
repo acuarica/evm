@@ -1,11 +1,11 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 export declare class MSTORE {
-    readonly name: string;
-    readonly type?: string;
-    readonly wrapped: boolean;
     readonly location: any;
     readonly data: any;
+    readonly name = "MSTORE";
+    readonly type?: string;
+    readonly wrapped = true;
     constructor(location: any, data: any);
     toString(): string;
 }
