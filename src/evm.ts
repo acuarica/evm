@@ -93,11 +93,18 @@ export class EVM {
     getOpcodes(): Opcode[] {
         if (this.opcodes.length === 0) {
             for (let index = 0; index < this.code.length; index++) {
-                const currentOp: Opcode = {
+                const currentOp = {
                     pc: index,
                     opcode: this.code[index],
                     name: 'INVALID',
-                };
+                    toString: function () {
+                        const pc = this.pc.toString(16).padStart(4, '0').toUpperCase();
+                        const opcode = this.opcode.toString(16).padStart(2, '0').toUpperCase();
+                        const pushData = this.pushData ? ' 0x' + toHex(this.pushData) : '';
+
+                        return `${pc}    ${opcode}    ${this.name}${pushData}`;
+                    },
+                } as Opcode;
                 if (currentOp.opcode in codes) {
                     currentOp.name = codes[currentOp.opcode as keyof typeof codes];
                 }
