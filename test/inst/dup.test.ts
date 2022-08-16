@@ -21,9 +21,7 @@ describe('DUP', () => {
         it(`should throw when #${size + 1} element is not present on the stack`, () => {
             const evm = new EVM('0x' + (0x80 + size).toString(16));
 
-            const ignored = [];
             for (let i = 0; i < size; i++) {
-                ignored.push(1n);
                 evm.stack.push(1n);
             }
 
