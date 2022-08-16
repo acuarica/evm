@@ -1,5 +1,3 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class XOR {
@@ -13,11 +11,3 @@ export class XOR {
         return stringify(this.left) + ' ^ ' + stringify(this.right);
     }
 }
-
-export default (_opcode: Opcode, { stack }: EVM): void => {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(
-        typeof left === 'bigint' && typeof right === 'bigint' ? left ^ right : new XOR(left, right)
-    );
-};

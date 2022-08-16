@@ -3,33 +3,18 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class STATICCALL {
-    readonly name: string;
+    readonly name = 'STATICCALL';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly gas: any;
-    readonly address: any;
-    readonly memoryStart: any;
-    readonly memoryLength: any;
-    readonly outputStart: any;
-    readonly outputLength: any;
+    readonly wrapped = true;
 
     constructor(
-        gas: any,
-        address: any,
-        memoryStart: any,
-        memoryLength: any,
-        outputStart: any,
-        outputLength: any
-    ) {
-        this.name = 'STATICCALL';
-        this.wrapped = true;
-        this.gas = gas;
-        this.address = address;
-        this.memoryStart = memoryStart;
-        this.memoryLength = memoryLength;
-        this.outputStart = outputStart;
-        this.outputLength = outputLength;
-    }
+        readonly gas: any,
+        readonly address: any,
+        readonly memoryStart: any,
+        readonly memoryLength: any,
+        readonly outputStart: any,
+        readonly outputLength: any
+    ) {}
 
     toString() {
         return (
@@ -50,14 +35,12 @@ export class STATICCALL {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const gas = state.stack.pop();
-    const address = state.stack.pop();
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    const outputStart = state.stack.pop();
-    const outputLength = state.stack.pop();
-    state.stack.push(
-        new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
-    );
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const gas = stack.pop();
+    const address = stack.pop();
+    const memoryStart = stack.pop();
+    const memoryLength = stack.pop();
+    const outputStart = stack.pop();
+    const outputLength = stack.pop();
+    stack.push(new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength));
 };

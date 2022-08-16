@@ -139,16 +139,11 @@ export class Variable {
 }
 
 export class REQUIRE {
-    readonly name: string;
+    readonly name = 'REQUIRE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly condition: any;
+    readonly wrapped: boolean = true;
 
-    constructor(condition: any) {
-        this.name = 'REQUIRE';
-        this.wrapped = true;
-        this.condition = condition;
-    }
+    constructor(readonly condition: any) {}
 
     toString() {
         return 'require(' + stringify(this.condition) + ');';
@@ -156,21 +151,21 @@ export class REQUIRE {
 }
 
 export class JUMPI {
-    readonly name: string;
+    readonly name = 'JUMPI';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly condition: any;
-    readonly location: any;
+    readonly wrapped = true;
     readonly valid: boolean;
     readonly true?: any;
     readonly false?: any;
     readonly payable?: boolean;
 
-    constructor(condition: any, location: any, ifTrue?: any, ifFalse?: any, skipped?: boolean) {
-        this.name = 'JUMPI';
-        this.wrapped = true;
-        this.condition = condition;
-        this.location = location;
+    constructor(
+        readonly condition: any,
+        readonly location: any,
+        ifTrue?: any,
+        ifFalse?: any,
+        skipped?: boolean
+    ) {
         if (skipped) {
             this.valid = true;
         } else if (ifTrue && ifFalse) {
@@ -294,7 +289,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 jumpCondition.left.name === 'CALLDATASIZE' &&
                 typeof jumpCondition.right === 'bigint' &&
                 jumpCondition.right === 4n) ||
-                (jumpCondition.name === 'ISZERO' && jumpCondition.item.name === 'CALLDATASIZE'))
+                (jumpCondition.name === 'ISZERO' && jumpCondition.value.name === 'CALLDATASIZE'))
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (jumpIndex >= 0) {

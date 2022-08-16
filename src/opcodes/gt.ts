@@ -6,9 +6,8 @@ export class GT {
     readonly name = 'GT';
     readonly type?: string;
     readonly wrapped = true;
-    // readonly equal: boolean;
 
-    constructor(readonly left: any, readonly right: any, readonly equal = false) {}
+    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
 
     toString() {
         return stringify(this.left) + (this.equal ? ' >= ' : ' > ') + stringify(this.right);

@@ -2,16 +2,11 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class INVALID {
-    readonly name: string;
+    readonly name = 'INVALID';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly opcode: any;
+    readonly wrapped = true;
 
-    constructor(opcode: any) {
-        this.name = 'INVALID';
-        this.wrapped = true;
-        this.opcode = opcode;
-    }
+    constructor(readonly opcode: any) {}
 
     toString() {
         return 'revert("Invalid instruction (0x' + this.opcode.toString(16) + ')");';

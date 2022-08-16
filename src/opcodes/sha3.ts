@@ -4,16 +4,14 @@ import { MLOAD } from './mload';
 import stringify from '../utils/stringify';
 
 export class SHA3 {
-    readonly name: string;
+    readonly name = 'SHA3';
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = false;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
-        this.name = 'SHA3';
-        this.wrapped = false;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

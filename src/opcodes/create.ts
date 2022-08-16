@@ -3,20 +3,12 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class CREATE {
-    readonly name: string;
+    readonly name = 'CREATE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly memoryStart: any;
-    readonly memoryLength: any;
-    readonly value: any;
+    readonly wrapped = true;
 
-    constructor(memoryStart: any, memoryLength: any, value: any) {
-        this.name = 'CREATE';
-        this.name = 'address';
-        this.wrapped = true;
-        this.memoryStart = memoryStart;
-        this.memoryLength = memoryLength;
-        this.value = value;
+    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {
+        // this.name = 'address';
     }
 
     toString() {

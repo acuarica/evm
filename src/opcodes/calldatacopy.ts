@@ -28,9 +28,14 @@ export class CALLDATACOPY {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const memoryLocation = state.stack.pop();
-    const startLocation = state.stack.pop();
-    const copyLength = state.stack.pop();
-    state.memory[memoryLocation] = new CALLDATACOPY(startLocation, copyLength);
+export default (_opcode: Opcode, { stack, memory }: EVM): void => {
+    const memoryLocation = stack.pop();
+    const startLocation = stack.pop();
+    const copyLength = stack.pop();
+
+    if (typeof memoryLocation !== 'number') {
+        throw new Error('expected number in returndatacopy');
+    }
+
+    memory[memoryLocation] = new CALLDATACOPY(startLocation, copyLength);
 };

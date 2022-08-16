@@ -3,25 +3,21 @@ import { Opcode } from '../opcode';
 import { MLOAD } from './mload';
 
 export class LOG {
-    readonly name: string;
+    readonly name = 'LOG';
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = true;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items?: any;
-    readonly topics: any;
     readonly eventName?: string;
 
     constructor(
         eventHashes: { [s: string]: string },
-        topics: any,
+        readonly topics: any,
         items?: any,
         memoryStart?: any,
         memoryLength?: any
     ) {
-        this.name = 'LOG';
-        this.wrapped = true;
-        this.topics = topics;
         if (
             this.topics.length > 0 &&
             typeof this.topics[0] === 'bigint' &&

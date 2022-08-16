@@ -3,16 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class MLOAD {
-    readonly name: string;
+    readonly name = 'MLOAD';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
+    readonly wrapped = true;
 
-    constructor(location: any) {
-        this.name = 'MLOAD';
-        this.wrapped = true;
-        this.location = location;
-    }
+    constructor(readonly location: any) {}
 
     toString() {
         return 'memory[' + stringify(this.location) + ']';

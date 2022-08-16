@@ -3,36 +3,19 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class CALLCODE {
-    readonly name: string;
+    readonly name = 'CALLCODE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly gas: any;
-    readonly address: any;
-    readonly value: any;
-    readonly memoryStart: any;
-    readonly memoryLength: any;
-    readonly outputStart: any;
-    readonly outputLength: any;
+    readonly wrapped = true;
 
     constructor(
-        gas: any,
-        address: any,
-        value: any,
-        memoryStart: any,
-        memoryLength: any,
-        outputStart: any,
-        outputLength: any
-    ) {
-        this.name = 'CALLCODE';
-        this.wrapped = true;
-        this.gas = gas;
-        this.address = address;
-        this.value = value;
-        this.memoryStart = memoryStart;
-        this.memoryLength = memoryLength;
-        this.outputStart = outputStart;
-        this.outputLength = outputLength;
-    }
+        readonly gas: any,
+        readonly address: any,
+        readonly value: any,
+        readonly memoryStart: any,
+        readonly memoryLength: any,
+        readonly outputStart: any,
+        readonly outputLength: any
+    ) {}
 
     toString() {
         return (
@@ -55,15 +38,16 @@ export class CALLCODE {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const gas = state.stack.pop();
-    const address = state.stack.pop();
-    const value = state.stack.pop();
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    const outputStart = state.stack.pop();
-    const outputLength = state.stack.pop();
-    state.stack.push(
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const gas = stack.pop();
+    const address = stack.pop();
+    const value = stack.pop();
+    const memoryStart = stack.pop();
+    const memoryLength = stack.pop();
+    const outputStart = stack.pop();
+    const outputLength = stack.pop();
+
+    stack.push(
         new CALLCODE(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
     );
 };

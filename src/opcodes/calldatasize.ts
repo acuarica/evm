@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class CALLDATASIZE {
-    readonly name: string;
+    readonly name = 'CALLDATASIZE';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'CALLDATASIZE';
-        this.wrapped = false;
-    }
+    readonly wrapped = false;
 
     toString() {
         return 'msg.data.length';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new CALLDATASIZE());
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    stack.push(new CALLDATASIZE());
 };

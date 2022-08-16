@@ -3,16 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class SELFDESTRUCT {
-    readonly name: string;
+    readonly name = 'SELFDESTRUCT';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly address: any;
+    readonly wrapped = true;
 
-    constructor(address: any) {
-        this.name = 'SELFDESTRUCT';
-        this.wrapped = true;
-        this.address = address;
-    }
+    constructor(readonly address: any) {}
 
     toString() {
         return 'selfdestruct(' + stringify(this.address) + ');';

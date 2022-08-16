@@ -3,20 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class EXTCODECOPY {
-    readonly name: string;
+    readonly name = 'EXTCODECOPY';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly address: any;
-    readonly startLocation: any;
-    readonly copyLength: any;
+    readonly wrapped = true;
 
-    constructor(address: any, startLocation: any, copyLength: any) {
-        this.name = 'EXTCODECOPY';
-        this.wrapped = true;
-        this.address = address;
-        this.startLocation = startLocation;
-        this.copyLength = copyLength;
-    }
+    constructor(readonly address: any, readonly startLocation: any, readonly copyLength: any) {}
 
     toString() {
         return (
@@ -33,10 +24,15 @@ export class EXTCODECOPY {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const address = state.stack.pop();
-    const memoryLocation = state.stack.pop();
-    const startLocation = state.stack.pop();
-    const copyLength = state.stack.pop();
-    state.memory[memoryLocation] = new EXTCODECOPY(address, startLocation, copyLength);
+export default (_opcode: Opcode, { stack, memory }: EVM): void => {
+    const address = stack.pop();
+    const memoryLocation = stack.pop();
+    const startLocation = stack.pop();
+    const copyLength = stack.pop();
+
+    if (typeof memoryLocation !== 'number') {
+        throw new Error('expected number extcodecopy');
+    }
+
+    memory[memoryLocation] = new EXTCODECOPY(address, startLocation, copyLength);
 };

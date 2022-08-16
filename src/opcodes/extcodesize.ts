@@ -3,23 +3,18 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class EXTCODESIZE {
-    readonly name: string;
+    readonly name = 'EXTCODESIZE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly address: any;
+    readonly wrapped = true;
 
-    constructor(address: any) {
-        this.name = 'EXTCODESIZE';
-        this.wrapped = true;
-        this.address = address;
-    }
+    constructor(readonly address: any) {}
 
     toString() {
         return 'address(' + stringify(this.address) + ').code.length';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const address = state.stack.pop();
-    state.stack.push(new EXTCODESIZE(address));
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const address = stack.pop();
+    stack.push(new EXTCODESIZE(address));
 };

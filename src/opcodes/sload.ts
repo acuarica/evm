@@ -15,24 +15,17 @@ const parseMapping = (...items: any[]) => {
 };
 
 export class MappingLoad {
-    readonly name: string;
+    readonly name = 'MappingLoad';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
-    readonly count: any;
-    readonly items: any;
-    readonly structlocation?: any;
-    readonly mappings: any;
+    readonly wrapped = false;
 
-    constructor(mappings: any, location: any, items: any, count: any, structlocation?: any) {
-        this.name = 'MappingLoad';
-        this.wrapped = false;
-        this.location = location;
-        this.count = count;
-        this.items = items;
-        this.structlocation = structlocation;
-        this.mappings = mappings;
-    }
+    constructor(
+        readonly mappings: any,
+        readonly location: any,
+        readonly items: any,
+        readonly count: any,
+        readonly structlocation?: any
+    ) {}
 
     toString() {
         let mappingName = 'mapping' + (this.count + 1);
@@ -56,18 +49,11 @@ export class MappingLoad {
 }
 
 export class SLOAD {
-    readonly name: string;
+    readonly name = 'SLOAD';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
-    readonly variables: any;
+    readonly wrapped = false;
 
-    constructor(location: any, variables: any) {
-        this.name = 'SLOAD';
-        this.wrapped = false;
-        this.location = location;
-        this.variables = variables;
-    }
+    constructor(readonly location: any, readonly variables: any) {}
 
     toString() {
         if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
@@ -86,7 +72,7 @@ export class SLOAD {
 
 export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
-    if (storeLocation.name === 'SHA3') {
+    if (typeof storeLocation !== 'bigint' && storeLocation.name === 'SHA3') {
         const mappingItems = parseMapping(...storeLocation.items);
         const mappingLocation = mappingItems.find(
             (mappingItem: any) => typeof mappingItem === 'bigint'
@@ -116,6 +102,7 @@ export default (_opcode: Opcode, state: EVM): void => {
             state.stack.push(new SLOAD(storeLocation, () => state.variables));
         }
     } else if (
+        typeof storeLocation !== 'bigint' &&
         storeLocation.name === 'ADD' &&
         storeLocation.left.name === 'SHA3' &&
         typeof storeLocation.right === 'bigint'
@@ -150,6 +137,7 @@ export default (_opcode: Opcode, state: EVM): void => {
             state.stack.push(new SLOAD(storeLocation, () => state.variables));
         }
     } else if (
+        typeof storeLocation !== 'bigint' &&
         storeLocation.name === 'ADD' &&
         typeof storeLocation.left === 'bigint' &&
         storeLocation.right.name === 'SHA3'

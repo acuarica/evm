@@ -3,18 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class RETURNDATACOPY {
-    readonly name: string;
+    readonly name = 'RETURNDATACOPY';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly returnDataPosition: any;
-    readonly returnDataSize: any;
+    readonly wrapped = true;
 
-    constructor(returnDataPosition: any, returnDataSize: any) {
-        this.name = 'RETURNDATACOPY';
-        this.wrapped = true;
-        this.returnDataPosition = returnDataPosition;
-        this.returnDataSize = returnDataSize;
-    }
+    constructor(readonly returnDataPosition: any, readonly returnDataSize: any) {}
 
     toString() {
         return (
@@ -33,5 +26,10 @@ export default (_opcode: Opcode, state: EVM): void => {
     const memoryPosition = state.stack.pop();
     const returnDataPosition = state.stack.pop();
     const returnDataSize = state.stack.pop();
+
+    if (typeof memoryPosition !== 'number') {
+        throw new Error('expected number in returndatacopy');
+    }
+
     state.memory[memoryPosition] = new RETURNDATACOPY(returnDataPosition, returnDataSize);
 };

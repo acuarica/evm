@@ -16,33 +16,18 @@ const parseMapping = (...items: any[]) => {
 };
 
 export class MappingStore {
-    readonly name: string;
+    readonly name = 'MappingStore';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
-    readonly count: any;
-    readonly items: any;
-    readonly data: any;
-    readonly structlocation?: any;
-    readonly mappings: any;
+    readonly wrapped = false;
 
     constructor(
-        mappings: any,
-        location: any,
-        items: any,
-        data: any,
-        count: any,
-        structlocation?: any
-    ) {
-        this.name = 'MappingStore';
-        this.wrapped = false;
-        this.location = location;
-        this.items = items;
-        this.data = data;
-        this.count = count;
-        this.structlocation = structlocation;
-        this.mappings = mappings;
-    }
+        readonly mappings: any,
+        readonly location: any,
+        readonly items: any,
+        readonly data: any,
+        readonly count: any,
+        readonly structlocation?: any
+    ) {}
 
     toString() {
         let mappingName = 'mapping' + (this.count + 1);
@@ -98,19 +83,11 @@ export class MappingStore {
 }
 
 export class SSTORE {
-    readonly name: string;
+    readonly name = 'SSTORE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
-    readonly data: any;
-    readonly variables: any;
+    readonly wrapped = true;
 
-    constructor(location: any, data: any, variables: any) {
-        this.name = 'SSTORE';
-        this.wrapped = true;
-        this.location = location;
-        this.data = data;
-        this.variables = variables;
+    constructor(readonly location: any, readonly data: any, readonly variables: any) {
         if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
             this.variables()[this.location.toString()].types.push(() => this.data.type);
         } else if (
@@ -154,7 +131,9 @@ export class SSTORE {
 export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     const storeData = state.stack.pop();
-    if (storeLocation.name === 'SHA3') {
+    if (typeof storeLocation === 'bigint') {
+        throw new Error('bigint not expected in sstore');
+    } else if (storeLocation.name === 'SHA3') {
         const mappingItems = parseMapping(...storeLocation.items);
         const mappingLocation = mappingItems.find(
             (mappingItem: any) => typeof mappingItem === 'bigint'
@@ -258,13 +237,13 @@ export default (_opcode: Opcode, state: EVM): void => {
     } else if (
         // eslint-disable-next-line no-constant-condition
         false &&
-        typeof storeLocation === 'bigint' &&
-        storeLocation.toString() in state.variables &&
-        storeData.type &&
-        !state.variables[storeLocation.toString()].types.includes(storeData.type)
+        // typeof storeLocation === 'bigint' &&
+        storeLocation.toString() in state.variables //&&
+        // storeData.type &&
+        // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
     ) {
         state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
-        state.variables[storeLocation.toString()].types.push(storeData.type);
+        // state.variables[storeLocation.toString()].types.push(storeData.type);
     } else {
         state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
     }

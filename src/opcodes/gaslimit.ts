@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class GASLIMIT {
-    readonly name: string;
+    readonly name = 'GASLIMIT';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'GASLIMIT';
-        this.wrapped = false;
-    }
+    readonly wrapped = false;
 
     toString() {
         return 'block.gaslimit';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new GASLIMIT());
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    stack.push(new GASLIMIT());
 };

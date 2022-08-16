@@ -2,14 +2,9 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class STOP {
-    readonly name: string;
+    readonly name = 'STOP';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'STOP';
-        this.wrapped = false;
-    }
+    readonly wrapped = false;
 
     toString() {
         return 'return;';

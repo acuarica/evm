@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class NUMBER {
-    readonly name: string;
+    readonly name = 'NUMBER';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'NUMBER';
-        this.wrapped = false;
-    }
+    readonly wrapped = true;
 
     toString() {
         return 'block.number';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new NUMBER());
+export default (_opcode: Opcode, { stack }: EVM) => {
+    stack.push(new NUMBER());
 };

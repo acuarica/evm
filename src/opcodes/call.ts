@@ -3,38 +3,20 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class CALL {
-    readonly name: string;
+    readonly name = 'CALL';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly gas: any;
-    readonly address: any;
-    readonly value: any;
-    readonly memoryStart: any;
-    readonly memoryLength: any;
-    readonly outputStart: any;
-    readonly outputLength: any;
-    readonly throwOnFail: boolean;
+    readonly wrapped = false;
+    throwOnFail = false;
 
     constructor(
-        gas: any,
-        address: any,
-        value: any,
-        memoryStart: any,
-        memoryLength: any,
-        outputStart: any,
-        outputLength: any
-    ) {
-        this.name = 'CALL';
-        this.wrapped = false;
-        this.gas = gas;
-        this.address = address;
-        this.value = value;
-        this.memoryStart = memoryStart;
-        this.memoryLength = memoryLength;
-        this.outputStart = outputStart;
-        this.outputLength = outputLength;
-        this.throwOnFail = false;
-    }
+        readonly gas: any,
+        readonly address: any,
+        readonly value: any,
+        readonly memoryStart: any,
+        readonly memoryLength: any,
+        readonly outputStart: any,
+        readonly outputLength: any
+    ) {}
 
     toString() {
         if (
@@ -99,16 +81,19 @@ export class CALL {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const gas = state.stack.pop();
-    const address = state.stack.pop();
-    const value = state.stack.pop();
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    const outputStart = state.stack.pop();
-    const outputLength = state.stack.pop();
-    state.stack.push(
-        new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
-    );
-    state.memory[outputStart] = 'output';
+export default (_opcode: Opcode, { stack, memory }: EVM): void => {
+    const gas = stack.pop();
+    const address = stack.pop();
+    const value = stack.pop();
+    const memoryStart = stack.pop();
+    const memoryLength = stack.pop();
+    const outputStart = stack.pop();
+    const outputLength = stack.pop();
+    stack.push(new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength));
+
+    if (typeof outputStart !== 'number') {
+        console.log('WARN:CALL outstart should be number');
+    }
+
+    memory[outputStart as any as number] = 'output';
 };

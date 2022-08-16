@@ -3,18 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class MSTORE {
-    readonly name: string;
+    readonly name = 'MSTORE';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
-    readonly data: any;
+    readonly wrapped = true;
 
-    constructor(location: any, data: any) {
-        this.name = 'MSTORE';
-        this.wrapped = true;
-        this.location = location;
-        this.data = data;
-    }
+    constructor(readonly location: any, readonly data: any) {}
 
     toString() {
         return 'memory[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';

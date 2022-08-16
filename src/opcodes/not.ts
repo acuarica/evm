@@ -3,27 +3,18 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class NOT {
-    readonly name: string;
+    readonly name = 'NOT';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly item: any;
+    readonly wrapped = true;
 
-    constructor(item: any) {
-        this.name = 'NOT';
-        this.wrapped = true;
-        this.item = item;
-    }
+    constructor(readonly item: any) {}
 
     toString() {
         return '~' + stringify(this.item);
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const item = state.stack.pop();
-    if (typeof item === 'bigint') {
-        state.stack.push(~item);
-    } else {
-        state.stack.push(new NOT(item));
-    }
+export default (_opcode: Opcode, { stack }: EVM) => {
+    const item = stack.pop();
+    stack.push(typeof item === 'bigint' ? ~item : new NOT(item));
 };

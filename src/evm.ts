@@ -20,16 +20,34 @@ import {
     names,
 } from './codes';
 import { fromHex, toHex } from './hex';
+import { GT } from './opcodes/gt';
+import { LT } from './opcodes/lt';
+import { SHA3 } from './opcodes/sha3';
+import { ADD } from './opcodes/add';
+import { SIG } from './opcodes/eq';
+import { ISZERO } from './opcodes/iszero';
+import { CALL } from './opcodes/call';
 
 interface Event {
     [key: string]: any;
 }
 
-interface Instruction {
-    name: string;
+type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL;
+type Name = INST['name'];
+type A = Exclude<
+    keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'SIG' | 'MappingLoad' | 'LOG',
+    Name
+>;
+
+interface Instruction2 {
+    // name: string;
+    name: A;
     type?: string;
     wrapped?: boolean;
 }
+
+type Instruction = Instruction2 | INST;
+
 interface Variable {
     [key: string]: any;
 }
@@ -40,6 +58,7 @@ interface Mapping {
 
 export class EVM {
     pc = 0;
+    // stack = new Stack<bigint | Instruction>();
     stack = new Stack<any>();
     memory: any = {};
     opcodes: Opcode[] = [];

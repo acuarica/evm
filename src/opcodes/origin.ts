@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class ORIGIN {
-    readonly name: string;
+    readonly name = 'ORIGIN';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'ORIGIN';
-        this.wrapped = false;
-    }
+    readonly wrapped = false;
 
     toString() {
         return 'tx.origin';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new ORIGIN());
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    stack.push(new ORIGIN());
 };

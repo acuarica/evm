@@ -3,17 +3,12 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class CALLDATALOAD {
-    readonly name: string;
+    readonly name = 'CALLDATALOAD';
     readonly type?: string;
     readonly returntype?: string;
-    readonly wrapped: boolean;
-    readonly location: any;
+    readonly wrapped = false;
 
-    constructor(location: any) {
-        this.name = 'CALLDATALOAD';
-        this.wrapped = false;
-        this.location = location;
-    }
+    constructor(readonly location: any) {}
 
     toString() {
         if (typeof this.location === 'bigint' && this.location === 0n) {
@@ -27,6 +22,6 @@ export class CALLDATALOAD {
 }
 
 export default (_opcode: Opcode, { stack }: EVM): void => {
-    const startLocation = stack.pop();
-    stack.push(new CALLDATALOAD(startLocation));
+    const location = stack.pop();
+    stack.push(new CALLDATALOAD(location));
 };

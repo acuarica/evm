@@ -3,36 +3,25 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class LT {
-    readonly name: string;
+    readonly name = 'LT';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly left: any;
-    readonly right: any;
-    readonly equal: boolean;
+    readonly wrapped = true;
 
-    constructor(left: any, right: any, equal = false) {
-        this.name = 'LT';
-        this.wrapped = true;
-        this.left = left;
-        this.right = right;
-        this.equal = equal;
-    }
+    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
 
     toString() {
-        if (this.equal) {
-            return stringify(this.left) + ' <= ' + stringify(this.right);
-        } else {
-            return stringify(this.left) + ' < ' + stringify(this.right);
-        }
+        return stringify(this.left) + (this.equal ? ' <= ' : ' < ') + stringify(this.right);
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const left = state.stack.pop();
-    const right = state.stack.pop();
-    if (typeof left === 'bigint' && typeof right === 'bigint') {
-        state.stack.push(left < right ? 1n : 0n);
-    } else {
-        state.stack.push(new LT(left, right));
-    }
+export default (_opcode: Opcode, { stack }: EVM) => {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(
+        typeof left === 'bigint' && typeof right === 'bigint'
+            ? left < right
+                ? 1n
+                : 0n
+            : new LT(left, right)
+    );
 };

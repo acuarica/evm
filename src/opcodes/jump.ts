@@ -3,28 +3,19 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class JUMP {
-    readonly name: string;
+    readonly name = 'JUMP';
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped: boolean = false;
     readonly valid: boolean;
-    readonly location: any;
 
-    constructor(location: any, bad?: boolean) {
-        this.name = 'JUMP';
-        this.wrapped = false;
-        this.location = location;
-        this.valid = true;
-        if (bad) {
-            this.valid = false;
-        }
+    constructor(readonly location: any, bad?: boolean) {
+        this.valid = !bad;
     }
 
     toString() {
-        if (!this.valid) {
-            return 'revert("Bad jump destination");';
-        } else {
-            return 'goto(' + stringify(this.location) + ');';
-        }
+        return this.valid
+            ? 'goto(' + stringify(this.location) + ');'
+            : 'revert("Bad jump destination");';
     }
 }
 
@@ -35,7 +26,7 @@ export default (opcode: Opcode, state: EVM): void => {
         state.instructions.push(new JUMP(jumpLocation, true));
     } else {
         const opcodes = state.getOpcodes();
-        const jumpLocationData = opcodes.find((o: any) => o.pc === Number(jumpLocation));
+        const jumpLocationData = opcodes.find(op => op.pc === Number(jumpLocation));
         if (!jumpLocationData) {
             state.halted = true;
             state.instructions.push(new JUMP(jumpLocation, true));

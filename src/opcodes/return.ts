@@ -5,16 +5,14 @@ import { hex2a } from '../hex';
 import stringify from '../utils/stringify';
 
 export class RETURN {
-    readonly name: string;
+    readonly name = 'RETURN';
     readonly type?: string;
-    readonly wrapped: boolean;
+    readonly wrapped = true;
     readonly memoryStart?: any;
     readonly memoryLength?: any;
     readonly items: any;
 
     constructor(items: any, memoryStart?: any, memoryLength?: any) {
-        this.name = 'RETURN';
-        this.wrapped = true;
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

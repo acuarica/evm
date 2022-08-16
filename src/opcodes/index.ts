@@ -1,3 +1,7 @@
+import { EVM } from '../evm';
+import { Opcode } from '../opcode';
+import { toHex } from '../hex';
+
 import STOP from './stop';
 import ADD from './add';
 import MUL from './mul';
@@ -14,7 +18,6 @@ import EQ from './eq';
 import ISZERO from './iszero';
 import AND from './and';
 import OR from './or';
-import XOR from './xor';
 import NOT from './not';
 import BYTE from './byte';
 import SHL from './shl';
@@ -54,9 +57,6 @@ import PC from './pc';
 import MSIZE from './msize';
 import GAS from './gas';
 import JUMPDEST from './jumpdest';
-import PUSH from './push';
-import DUP from './dup';
-import SWAP from './swap';
 import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
@@ -68,6 +68,7 @@ import STATICCALL from './staticcall';
 import REVERT from './revert';
 import INVALID from './invalid';
 import SELFDESTRUCT from './selfdestruct';
+import { XOR } from './xor';
 
 export default {
     STOP,
@@ -90,7 +91,15 @@ export default {
     ISZERO,
     AND,
     OR,
-    XOR,
+    XOR: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(
+            typeof left === 'bigint' && typeof right === 'bigint'
+                ? left ^ right
+                : new XOR(left, right)
+        );
+    },
     NOT,
     BYTE,
     SHL,
@@ -211,3 +220,19 @@ export default {
     INVALID,
     SELFDESTRUCT,
 };
+
+function PUSH(opcode: Opcode, { stack }: EVM) {
+    stack.push(BigInt('0x' + toHex(opcode.pushData!)));
+}
+
+function DUP(position: number) {
+    return (_opcode: Opcode, { stack }: EVM): void => {
+        stack.dup(position);
+    };
+}
+
+function SWAP(position: number) {
+    return (_opcode: Opcode, { stack }: EVM): void => {
+        stack.swap(position);
+    };
+}
