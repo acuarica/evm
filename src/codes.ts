@@ -424,8 +424,3 @@ export const names = {
     INVALID: 0xfe,
     SELFDESTRUCT: 0xff,
 };
-
-export default {
-    ...codes,
-    ...names,
-};
