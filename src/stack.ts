@@ -33,7 +33,7 @@ export class Stack<T> {
         }
     }
 
-    swap(secondPosition: number): void {
+    swap(secondPosition: number): void | never {
         if (secondPosition < 1 || secondPosition > 16) {
             throw new Error('Unsupported position for swap operation');
         } else if (!(secondPosition in this.elements)) {
