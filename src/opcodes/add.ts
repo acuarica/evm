@@ -3,17 +3,10 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class ADD {
-    readonly name: string;
-    readonly wrapped: boolean;
-    readonly left: any;
-    readonly right: any;
+    readonly name = 'ADD';
+    readonly wrapped = true;
 
-    constructor(left: any, right: any) {
-        this.name = 'ADD';
-        this.wrapped = true;
-        this.left = left;
-        this.right = right;
-    }
+    constructor(readonly left: any, readonly right: any) {}
 
     toString() {
         return stringify(this.left) + ' + ' + stringify(this.right);
@@ -32,10 +25,10 @@ export class ADD {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const left = state.stack.pop();
-    const right = state.stack.pop();
-    state.stack.push(
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(
         typeof left === 'bigint' && typeof right === 'bigint'
             ? left + right
             : typeof left === 'bigint' && left === 0n

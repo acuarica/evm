@@ -3,20 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class CREATE2 {
-    readonly name: string;
+    readonly name = 'CREATE2';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly memoryStart: any;
-    readonly memoryLength: any;
-    readonly value: any;
+    readonly wrapped = true;
 
-    constructor(memoryStart: any, memoryLength: any, value: any) {
-        this.name = 'CREATE2';
-        this.wrapped = true;
-        this.memoryStart = memoryStart;
-        this.memoryLength = memoryLength;
-        this.value = value;
-    }
+    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {}
 
     toString() {
         return (
@@ -33,9 +24,9 @@ export class CREATE2 {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const value = state.stack.pop();
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    state.stack.push(new CREATE2(memoryStart, memoryLength, value));
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const value = stack.pop();
+    const memoryStart = stack.pop();
+    const memoryLength = stack.pop();
+    stack.push(new CREATE2(memoryStart, memoryLength, value));
 };

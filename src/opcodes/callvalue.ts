@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class CALLVALUE {
-    readonly name: string;
+    readonly name = 'CALLVALUE';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'CALLVALUE';
-        this.wrapped = false;
-    }
+    readonly wrapped: boolean = false;
 
     toString() {
         return 'msg.value';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new CALLVALUE());
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    stack.push(new CALLVALUE());
 };

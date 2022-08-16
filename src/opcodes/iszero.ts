@@ -5,45 +5,32 @@ import { GT } from './gt';
 import stringify from '../utils/stringify';
 
 export class ISZERO {
-    readonly name: string;
+    readonly name = 'ISZERO';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly item: any;
+    readonly wrapped = true;
 
-    constructor(item: any) {
-        this.name = 'ISZERO';
-        this.wrapped = true;
-        this.item = item;
-    }
+    constructor(readonly value: any) {}
 
     toString() {
-        if (this.item.name === 'EQ') {
-            return stringify(this.item.left) + ' != ' + stringify(this.item.right);
-        } else {
-            return stringify(this.item) + ' == 0';
-        }
+        return this.value.name === 'EQ'
+            ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
+            : stringify(this.value) + ' == 0';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const item = state.stack.pop();
-    if (typeof item === 'bigint') {
-        state.stack.push(item === 0n ? 1n : 0n);
-    } else if (item.name === 'LT') {
-        if (item.equal) {
-            state.stack.push(new GT(item.left, item.right));
-        } else {
-            state.stack.push(new GT(item.left, item.right, true));
-        }
-    } else if (item.name === 'GT') {
-        if (item.equal) {
-            state.stack.push(new LT(item.left, item.right));
-        } else {
-            state.stack.push(new LT(item.left, item.right, true));
-        }
-    } else if (item instanceof ISZERO) {
-        state.stack.push(item.item);
-    } else {
-        state.stack.push(new ISZERO(item));
-    }
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const value = stack.pop();
+    stack.push(
+        typeof value === 'bigint'
+            ? value === 0n
+                ? 1n
+                : 0n
+            : value.name === 'LT'
+            ? new GT(value.left, value.right, !value.equal)
+            : value.name === 'GT'
+            ? new LT(value.left, value.right, !value.equal)
+            : value instanceof ISZERO
+            ? value.value
+            : new ISZERO(value)
+    );
 };

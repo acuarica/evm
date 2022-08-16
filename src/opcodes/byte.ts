@@ -21,12 +21,12 @@ export class BYTE {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const position = state.stack.pop();
-    const data = state.stack.pop();
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    const position = stack.pop();
+    const data = stack.pop();
     if (typeof data === 'bigint' && typeof position === 'bigint') {
-        state.stack.push((data >> position) & 1n);
+        stack.push((data >> position) & 1n);
     } else {
-        state.stack.push(new BYTE(position, data));
+        stack.push(new BYTE(position, data));
     }
 };

@@ -2,20 +2,15 @@ import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 
 export class COINBASE {
-    readonly name: string;
+    readonly name = 'COINBASE';
     readonly type?: string;
-    readonly wrapped: boolean;
-
-    constructor() {
-        this.name = 'COINBASE';
-        this.wrapped = false;
-    }
+    readonly wrapped = false;
 
     toString() {
         return 'block.coinbase';
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    state.stack.push(new COINBASE());
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    stack.push(new COINBASE());
 };
