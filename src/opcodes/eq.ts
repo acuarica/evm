@@ -3,16 +3,11 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class SIG {
-    readonly name: string;
+    readonly name = 'SIG';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly hash: string;
+    readonly wrapped = false;
 
-    constructor(hash: string) {
-        this.name = 'SIG';
-        this.wrapped = false;
-        this.hash = hash;
-    }
+    constructor(readonly hash: string) {}
 
     toString() {
         return 'msg.sig == ' + this.hash;
@@ -20,29 +15,34 @@ export class SIG {
 }
 
 export class EQ {
-    readonly name: string;
+    readonly name = 'EQ';
     readonly type?: string;
-    readonly wrapped: boolean;
-    readonly left: any;
-    readonly right: any;
+    readonly wrapped = true;
 
-    constructor(left: any, right: any) {
-        this.name = 'EQ';
-        this.wrapped = true;
-        this.left = left;
-        this.right = right;
-    }
+    constructor(readonly left: any, readonly right: any) {}
 
     toString() {
         return stringify(this.left) + ' == ' + stringify(this.right);
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    let left = state.stack.pop();
-    let right = state.stack.pop();
+function isSHRCallData(inst: any) {
+    return (
+        inst.name === 'SHR' &&
+        typeof inst.shift === 'bigint' &&
+        inst.shift === 0xe0n &&
+        typeof inst.value !== 'bigint' &&
+        inst.value.name === 'CALLDATALOAD' &&
+        inst.value.location === 0n
+    );
+}
+
+export default (_opcode: Opcode, { stack }: EVM): void => {
+    let left = stack.pop();
+    let right = stack.pop();
+
     if (typeof left === 'bigint' && typeof right === 'bigint') {
-        state.stack.push(left === right ? 1n : 0n);
+        stack.push(left === right ? 1n : 0n);
     } else {
         if (typeof left === 'bigint' && right.name === 'DIV' && typeof right.right === 'bigint') {
             left = left * right.right;
@@ -58,7 +58,7 @@ export default (_opcode: Opcode, state: EVM): void => {
             right.name === 'CALLDATALOAD' &&
             right.location === 0n
         ) {
-            state.stack.push(
+            stack.push(
                 new SIG(
                     '0'.repeat(64 - left.toString(16).length) +
                         left.toString(16).substring(0, 8 - (64 - left.toString(16).length))
@@ -70,14 +70,16 @@ export default (_opcode: Opcode, state: EVM): void => {
             left.name === 'CALLDATALOAD' &&
             left.location === 0
         ) {
-            state.stack.push(
+            stack.push(
                 new SIG(
                     '0'.repeat(64 - right.toString(16).length) +
                         right.toString(16).substring(0, 8 - (64 - right.toString(16).length))
                 )
             );
+        } else if (typeof left === 'bigint' && isSHRCallData(right)) {
+            stack.push(new SIG(left.toString(16)));
         } else {
-            state.stack.push(new EQ(left, right));
+            stack.push(new EQ(left, right));
         }
     }
 };

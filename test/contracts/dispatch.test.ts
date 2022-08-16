@@ -21,25 +21,54 @@ contract Contract {
 `;
 
 describe('contracts::dispatch', () => {
-    let contract: Contract;
-    let evm: EVM;
+    describe('single method', () => {
+        const CONTRACT = `
+        pragma solidity 0.5.5;
+        contract Contract {
+            function get() external pure returns (uint8) {
+                return 5;
+            }
+        }`;
 
-    before(() => {
-        contract = new Contract();
-        contract.load('Contract', CONTRACT);
-        evm = new EVM(contract.bytecode());
+        let contract: Contract;
+        let evm: EVM;
+
+        before(() => {
+            contract = new Contract();
+            contract.load('Contract', CONTRACT);
+            evm = new EVM(contract.bytecode());
+        });
+
+        it('should compile without errors', () => {
+            expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        });
+
+        it('should decompile functions', () => {
+            expect(evm.decompile()).to.match(/function get\(\) public view payable/);
+        });
     });
 
-    it('should compile without errors', () => {
-        expect(contract.valid(), contract.errors().join('\n')).to.be.true;
-    });
+    describe('simple', () => {
+        let contract: Contract;
+        let evm: EVM;
 
-    it('should not detect selfdestruct', () => {
-        expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
-        expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
-    });
+        before(() => {
+            contract = new Contract();
+            contract.load('Contract', CONTRACT);
+            evm = new EVM(contract.bytecode());
+        });
 
-    it('should retrieve function signatures', () => {
-        expect(new Set(evm.getFunctions())).to.be.deep.equal(new Set(['symbol()', 'get()']));
+        it('should compile without errors', () => {
+            expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        });
+
+        it('should not detect selfdestruct', () => {
+            expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
+        });
+
+        it('should retrieve function signatures', () => {
+            expect(new Set(evm.getFunctions())).to.be.deep.equal(new Set(['symbol()', 'get()']));
+        });
     });
 });
