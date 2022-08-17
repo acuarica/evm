@@ -1,9 +1,11 @@
-import { EVM, Operand } from '../evm';
+import { EVM, Instruction, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 import { CALLDATASIZE } from './calldatasize';
 import { CALLVALUE } from './callvalue';
 import { IsZero } from './iszero';
+import { Return } from './return';
+import { SLOAD } from './sload';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
@@ -47,22 +49,18 @@ const findReturns = (item: any) => {
 };
 
 export class TopLevelFunction {
-    readonly name: string;
-    readonly type?: string;
     readonly label: string;
-    readonly hash: any;
-    readonly gasUsed: number;
     readonly payable: boolean;
     readonly visibility: string;
     readonly constant: boolean;
-    readonly items: any;
     readonly returns: any;
 
-    constructor(items: any, hash: any, gasUsed: number, functionHashes: { [s: string]: string }) {
-        this.name = 'Function';
-        this.hash = hash;
-        this.gasUsed = gasUsed;
-        this.items = items;
+    constructor(
+        readonly items: Instruction[],
+        readonly hash: string,
+        readonly gasUsed: number,
+        functionHashes: { [s: string]: string }
+    ) {
         this.payable = true;
         this.visibility = 'public';
         this.constant = false;
@@ -99,7 +97,7 @@ export class TopLevelFunction {
             }
         }
         const returns: any = [];
-        this.items.forEach((item: any) => {
+        this.items.forEach(item => {
             const deepReturns = findReturns(item);
             if (deepReturns.length > 0) {
                 returns.push(...deepReturns);
@@ -155,7 +153,6 @@ export class Require {
 
 export class JUMPI {
     readonly name = 'JUMPI';
-    readonly type?: string;
     readonly wrapped = true;
     readonly valid: boolean;
     readonly true?: any;
@@ -259,29 +256,27 @@ export default (opcode: Opcode, state: EVM): void => {
                     delete state.functions[jumpCondition.hash];
                 } else if (
                     jumpCondition.hash in state.functionHashes &&
-                    state.functions[jumpCondition.hash].items.length === 1 &&
-                    state.functions[jumpCondition.hash].items[0].name === 'RETURN' &&
-                    state.functions[jumpCondition.hash].items[0].items.length === 1 &&
-                    state.functions[jumpCondition.hash].items[0].items[0].name === 'SLOAD' &&
-                    typeof state.functions[jumpCondition.hash].items[0].items[0].location ===
-                        'bigint'
+                    (items =>
+                        items.length === 1 &&
+                        items[0].name === 'RETURN' &&
+                        items[0].items.length === 1 &&
+                        items[0].items[0] instanceof SLOAD &&
+                        typeof items[0].items[0].location === 'bigint')(
+                        state.functions[jumpCondition.hash].items
+                    )
                 ) {
-                    if (
-                        !(
-                            state.functions[jumpCondition.hash].items[0].items[0].location in
-                            state.variables
-                        )
-                    ) {
+                    const item = (state.functions[jumpCondition.hash].items[0] as Return)
+                        .items[0] as SLOAD;
+                    if (!(item.location in state.variables)) {
                         const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
-                        state.variables[
-                            state.functions[jumpCondition.hash].items[0].items[0].location
-                        ] = new Variable(fullFunction.split('(')[0], []);
+                        state.variables[item.location] = new Variable(
+                            fullFunction.split('(')[0],
+                            []
+                        );
                         delete state.functions[jumpCondition.hash];
                     } else {
                         const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
-                        state.variables[
-                            state.functions[jumpCondition.hash].items[0].items[0].location
-                        ].label = fullFunction.split('(')[0];
+                        state.variables[item.location].label = fullFunction.split('(')[0];
                         delete state.functions[jumpCondition.hash];
                     }
                 }

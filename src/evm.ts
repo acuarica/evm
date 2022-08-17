@@ -31,6 +31,7 @@ import { CALLDATALOAD } from './opcodes/calldataload';
 import { CALLDATACOPY } from './opcodes/calldatacopy';
 import { Return } from './opcodes/return';
 import { Revert } from './opcodes/revert';
+import { TopLevelFunction } from './opcodes/jumpi';
 
 interface Event {
     [key: string]: any;
@@ -82,17 +83,16 @@ export class EVM {
     memory: { [location: number]: Operand } = {};
     opcodes: Opcode[] = [];
     instructions: Instruction[] = [];
-    storage: any = {};
     jumps: any = {};
     code: Uint8Array;
     mappings: Mapping = {};
     layer = 0;
     halted = false;
-    functions: any = {};
+    functions: { [hash: string]: TopLevelFunction } = {};
     variables: Variable = {};
     events: Event = {};
     gasUsed = 0;
-    conditions: any = [];
+    conditions: Instruction[] = [];
 
     constructor(
         code: string | Uint8Array,
@@ -112,7 +112,6 @@ export class EVM {
         clone.opcodes = this.opcodes;
         clone.stack = this.stack.clone();
         clone.memory = { ...this.memory };
-        clone.storage = this.storage;
         clone.jumps = { ...this.jumps };
         clone.mappings = this.mappings;
         clone.layer = this.layer + 1;
@@ -239,7 +238,6 @@ export class EVM {
         this.instructions = [];
         this.stack.reset();
         this.memory = {};
-        this.storage = {};
         this.jumps = {};
         this.mappings = {};
         this.functions = {};

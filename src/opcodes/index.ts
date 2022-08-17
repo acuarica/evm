@@ -1,4 +1,4 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
@@ -390,6 +390,6 @@ function mstore(_opcode: Opcode, { stack, memory, instructions }: EVM) {
     }
 }
 
-function isBigInt(value: any): value is bigint {
+function isBigInt(value: Operand): value is bigint {
     return typeof value === 'bigint';
 }

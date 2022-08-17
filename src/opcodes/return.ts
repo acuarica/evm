@@ -1,3 +1,4 @@
+import { Operand } from '../evm';
 import { hex2a } from '../hex';
 import stringify from '../utils/stringify';
 
@@ -5,20 +6,17 @@ export class Return {
     readonly name = 'RETURN';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
-    readonly items: any;
+    readonly memoryStart?: Operand;
+    readonly memoryLength?: Operand;
 
-    constructor(items: any, memoryStart?: any, memoryLength?: any) {
+    constructor(readonly items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
-        } else {
-            this.items = items;
         }
     }
 
-    toString() {
+    toString(): string {
         if (this.memoryStart && this.memoryLength) {
             return (
                 'return memory[' +
@@ -33,7 +31,7 @@ export class Return {
             return 'return;';
         } else if (
             this.items.length === 1 &&
-            (typeof this.items[0] === 'bigint' || this.items[0].static)
+            (typeof this.items[0] === 'bigint' || (this.items[0] as any).static)
         ) {
             return 'return ' + this.items[0] + ';';
         } else if (

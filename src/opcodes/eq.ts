@@ -1,29 +1,23 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class SIG {
     readonly name = 'SIG';
-    readonly type?: string;
     readonly wrapped = false;
 
     constructor(readonly hash: string) {}
 
-    toString() {
-        return 'msg.sig == ' + this.hash;
-    }
+    toString = () => `msg.sig == ${this.hash}`;
 }
 
 export class EQ {
     readonly name = 'EQ';
-    readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: any, readonly right: any) {}
+    constructor(readonly left: Operand, readonly right: Operand) {}
 
-    toString() {
-        return stringify(this.left) + ' == ' + stringify(this.right);
-    }
+    toString = () => `${stringify(this.left)} == ${stringify(this.right)}`;
 }
 
 function isSHRCallData(inst: any) {
