@@ -27,26 +27,25 @@ import { ADD } from './opcodes/add';
 import { SIG } from './opcodes/eq';
 import { ISZERO } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
+import { DIV } from './opcodes/div';
+import { CALLDATALOAD } from './opcodes/calldataload';
 
 interface Event {
     [key: string]: any;
 }
 
-type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL;
-type Name = INST['name'];
-type A = Exclude<
-    keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'SIG' | 'MappingLoad' | 'LOG',
-    Name
->;
+type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL | DIV | CALLDATALOAD;
 
-interface Instruction2 {
-    // name: string;
-    name: A;
-    type?: string;
-    wrapped?: boolean;
-}
-
-type Instruction = Instruction2 | INST;
+type Instruction =
+    | {
+          name: Exclude<
+              keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'MappingLoad' | 'LOG',
+              INST['name']
+          >;
+          type?: string;
+          wrapped?: boolean;
+      }
+    | INST;
 
 interface Variable {
     [key: string]: any;
@@ -58,8 +57,7 @@ interface Mapping {
 
 export class EVM {
     pc = 0;
-    // stack = new Stack<bigint | Instruction>();
-    stack = new Stack<any>();
+    stack = new Stack<bigint | Instruction>();
     memory: any = {};
     opcodes: Opcode[] = [];
     instructions: Instruction[] = [];
