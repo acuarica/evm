@@ -3,7 +3,7 @@ import { Opcode } from '../opcode';
 export declare class NUMBER {
     readonly name = "NUMBER";
     readonly type?: string;
-    readonly wrapped = true;
+    readonly wrapped = false;
     toString(): string;
 }
 declare const _default: (_opcode: Opcode, { stack }: EVM) => void;

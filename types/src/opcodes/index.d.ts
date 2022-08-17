@@ -42,7 +42,7 @@ declare const _default: {
     EXTCODESIZE: (_opcode: Opcode, { stack }: EVM) => void;
     EXTCODECOPY: (_opcode: Opcode, { stack, memory }: EVM) => void;
     RETURNDATASIZE: (_opcode: Opcode, { stack }: EVM) => void;
-    RETURNDATACOPY: (_opcode: Opcode, state: EVM) => void;
+    RETURNDATACOPY: (_opcode: Opcode, { stack, memory }: EVM) => void;
     EXTCODEHASH: (_opcode: Opcode, { stack }: EVM) => void;
     BLOCKHASH: (_opcode: Opcode, { stack }: EVM) => void;
     COINBASE: (_opcode: Opcode, { stack }: EVM) => void;
@@ -58,7 +58,7 @@ declare const _default: {
     SSTORE: (_opcode: Opcode, state: EVM) => void;
     JUMP: (opcode: Opcode, state: EVM) => void;
     JUMPI: (opcode: Opcode, state: EVM) => void;
-    PC: (opcode: Opcode, state: EVM) => void;
+    PC: (opcode: Opcode, { stack }: EVM) => void;
     MSIZE: (_opcode: Opcode, { stack }: EVM) => void;
     GAS: (_opcode: Opcode, { stack }: EVM) => void;
     JUMPDEST: (_opcode: Opcode, _state: EVM) => void;

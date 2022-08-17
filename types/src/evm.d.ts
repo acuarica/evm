@@ -8,18 +8,17 @@ import { ADD } from './opcodes/add';
 import { SIG } from './opcodes/eq';
 import { ISZERO } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
+import { DIV } from './opcodes/div';
+import { CALLDATALOAD } from './opcodes/calldataload';
 interface Event {
     [key: string]: any;
 }
-declare type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL;
-declare type Name = INST['name'];
-declare type A = Exclude<keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'SIG' | 'MappingLoad' | 'LOG', Name>;
-interface Instruction2 {
-    name: A;
+declare type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL | DIV | CALLDATALOAD;
+declare type Instruction = {
+    name: Exclude<keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'MappingLoad' | 'LOG', INST['name']>;
     type?: string;
     wrapped?: boolean;
-}
-declare type Instruction = Instruction2 | INST;
+} | INST;
 interface Variable {
     [key: string]: any;
 }
@@ -34,7 +33,7 @@ export declare class EVM {
         [s: string]: string;
     };
     pc: number;
-    stack: Stack<any>;
+    stack: Stack<bigint | Instruction>;
     memory: any;
     opcodes: Opcode[];
     instructions: Instruction[];

@@ -9,5 +9,5 @@ export declare class RETURNDATACOPY {
     constructor(returnDataPosition: any, returnDataSize: any);
     toString(): string;
 }
-declare const _default: (_opcode: Opcode, state: EVM) => void;
+declare const _default: (_opcode: Opcode, { stack, memory }: EVM) => void;
 export default _default;
