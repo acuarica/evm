@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { writeFileSync } from 'fs';
 import { utils } from 'ethers';
 
 import * as functions from '../data/functions.json';
@@ -15,9 +15,9 @@ const reduce = (entries: string[], replacer: (value: string) => string) =>
 const functionHashes = reduce(functions, s => s.substring(2, 10));
 const eventHashes = reduce(events, s => s.substring(2));
 
-fs.writeFileSync('./data/functionHashes.json', JSON.stringify(functionHashes, null, 4));
-fs.writeFileSync('./data/functionHashes.min.json', JSON.stringify(functionHashes));
-fs.writeFileSync('./data/eventHashes.json', JSON.stringify(eventHashes, null, 4));
-fs.writeFileSync('./data/eventHashes.min.json', JSON.stringify(eventHashes));
+writeFileSync('./data/functionHashes.json', JSON.stringify(functionHashes, null, 4));
+writeFileSync('./data/functionHashes.min.json', JSON.stringify(functionHashes));
+writeFileSync('./data/eventHashes.json', JSON.stringify(eventHashes, null, 4));
+writeFileSync('./data/eventHashes.min.json', JSON.stringify(eventHashes));
 
 console.log('Updated hashes successfully');
