@@ -44,17 +44,28 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
     if (typeof left === 'bigint' && typeof right === 'bigint') {
         stack.push(left === right ? 1n : 0n);
     } else {
-        if (typeof left === 'bigint' && right.name === 'DIV' && typeof right.right === 'bigint') {
+        if (
+            typeof left === 'bigint' &&
+            typeof right !== 'bigint' &&
+            right.name === 'DIV' &&
+            typeof right.right === 'bigint'
+        ) {
             left = left * right.right;
             right = right.left;
         }
-        if (typeof right === 'bigint' && left.name === 'DIV' && typeof left.right === 'bigint') {
+        if (
+            typeof right === 'bigint' &&
+            typeof left !== 'bigint' &&
+            left.name === 'DIV' &&
+            typeof left.right === 'bigint'
+        ) {
             right = right * left.right;
             left = left.left;
         }
         if (
             typeof left === 'bigint' &&
             /^[0]+$/.test(left.toString(16).substring(8)) &&
+            typeof right !== 'bigint' &&
             right.name === 'CALLDATALOAD' &&
             right.location === 0n
         ) {
@@ -67,6 +78,7 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
         } else if (
             typeof right === 'bigint' &&
             /^[0]+$/.test(right.toString(16).substring(8)) &&
+            typeof left !== 'bigint' &&
             left.name === 'CALLDATALOAD' &&
             left.location === 0
         ) {
