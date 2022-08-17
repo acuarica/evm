@@ -4,7 +4,7 @@ import { Opcode } from '../opcode';
 export class NUMBER {
     readonly name = 'NUMBER';
     readonly type?: string;
-    readonly wrapped = true;
+    readonly wrapped = false;
 
     toString() {
         return 'block.number';
