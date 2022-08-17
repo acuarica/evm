@@ -53,10 +53,8 @@ import SLOAD from './sload';
 import SSTORE from './sstore';
 import JUMP from './jump';
 import JUMPI from './jumpi';
-import PC from './pc';
 import MSIZE from './msize';
 import GAS from './gas';
-import JUMPDEST from './jumpdest';
 import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
@@ -136,10 +134,14 @@ export default {
     SSTORE,
     JUMP,
     JUMPI,
-    PC,
+    PC: (opcode: Opcode, { stack }: EVM) => {
+        stack.push(BigInt(opcode.pc));
+    },
     MSIZE,
     GAS,
-    JUMPDEST,
+    JUMPDEST: (_opcode: Opcode, _state: EVM) => {
+        /* Empty */
+    },
     PUSH1: PUSH,
     PUSH2: PUSH,
     PUSH3: PUSH,
