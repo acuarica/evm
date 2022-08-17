@@ -1,6 +1,9 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
+import { CALLDATASIZE } from './calldatasize';
+import { CALLVALUE } from './callvalue';
+import { IsZero } from './iszero';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
@@ -71,9 +74,9 @@ export class TopLevelFunction {
         }
         if (
             this.items.length > 0 &&
-            this.items[0] instanceof REQUIRE &&
-            this.items[0].condition.name === 'ISZERO' &&
-            this.items[0].condition.item.name === 'CALLVALUE'
+            this.items[0] instanceof Require &&
+            this.items[0].condition instanceof IsZero &&
+            this.items[0].condition.value instanceof CALLVALUE
         ) {
             this.payable = false;
             this.items.shift();
@@ -138,12 +141,12 @@ export class Variable {
     }
 }
 
-export class REQUIRE {
+export class Require {
     readonly name = 'REQUIRE';
     readonly type?: string;
     readonly wrapped: boolean = true;
 
-    constructor(readonly condition: any) {}
+    constructor(readonly condition: Operand) {}
 
     toString() {
         return 'require(' + stringify(this.condition) + ');';
@@ -174,9 +177,9 @@ export class JUMPI {
             this.false = ifFalse;
             if (
                 this.true.length >= 1 &&
-                this.true[0] instanceof REQUIRE &&
-                this.true[0].condition.name === 'ISZERO' &&
-                this.true[0].condition.item.name === 'CALLVALUE'
+                this.true[0] instanceof Require &&
+                this.true[0].condition instanceof IsZero &&
+                this.true[0].condition.value instanceof CALLVALUE
             ) {
                 this.payable = false;
                 this.true.shift();
@@ -211,7 +214,7 @@ export default (opcode: Opcode, state: EVM): void => {
         if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
             //state.halted = true;
             //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
-            state.instructions.push(new REQUIRE(jumpCondition));
+            state.instructions.push(new Require(jumpCondition));
         } else if (typeof jumpCondition === 'bigint') {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (
@@ -228,7 +231,7 @@ export default (opcode: Opcode, state: EVM): void => {
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (jumpIndex >= 0) {
-                const functionClone: any = state.clone();
+                const functionClone = state.clone();
                 functionClone.pc = jumpIndex;
                 const functionCloneTree = functionClone.parse();
                 state.functions[jumpCondition.hash] = new TopLevelFunction(
@@ -289,30 +292,30 @@ export default (opcode: Opcode, state: EVM): void => {
                 jumpCondition.left.name === 'CALLDATASIZE' &&
                 typeof jumpCondition.right === 'bigint' &&
                 jumpCondition.right === 4n) ||
-                (jumpCondition.name === 'ISZERO' && jumpCondition.value.name === 'CALLDATASIZE'))
+                (jumpCondition.name === 'ISZERO' && jumpCondition.value instanceof CALLDATASIZE))
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (jumpIndex >= 0) {
                 state.halted = true;
-                const trueClone: any = state.clone();
+                const trueClone = state.clone();
                 trueClone.pc = jumpIndex;
                 trueClone.conditions.push(jumpCondition);
                 const trueCloneTree = trueClone.parse();
                 const falseClone = state.clone();
                 falseClone.pc = state.pc + 1;
-                const falseCloneTree: any = falseClone.parse();
+                const falseCloneTree = falseClone.parse();
                 if (
                     trueCloneTree.length > 0 &&
                     trueCloneTree.length === falseCloneTree.length &&
                     trueCloneTree[0].name !== 'REVERT' &&
                     trueCloneTree[0].name !== 'INVALID' &&
-                    trueCloneTree.map((item: any) => stringify(item)).join('') ===
-                        falseCloneTree.map((item: any) => stringify(item)).join('')
+                    trueCloneTree.map(item => stringify(item)).join('') ===
+                        falseCloneTree.map(item => stringify(item)).join('')
                 ) {
                     state.functions[''] = new TopLevelFunction(
                         trueCloneTree,
                         '',
-                        trueCloneTree.gasUsed,
+                        trueClone.gasUsed,
                         state.functionHashes
                     );
                 } else if (
@@ -332,13 +335,13 @@ export default (opcode: Opcode, state: EVM): void => {
             state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
             if (jumpIndex >= 0) {
                 state.halted = true;
-                const trueClone: any = state.clone();
+                const trueClone = state.clone();
                 trueClone.pc = jumpIndex;
                 trueClone.conditions.push(jumpCondition);
                 const trueCloneTree = trueClone.parse();
                 const falseClone = state.clone();
                 falseClone.pc = state.pc + 1;
-                const falseCloneTree: any = falseClone.parse();
+                const falseCloneTree = falseClone.parse();
                 if (
                     (falseCloneTree.length === 1 &&
                         'name' in falseCloneTree[0] &&
@@ -362,7 +365,7 @@ export default (opcode: Opcode, state: EVM): void => {
                         state.instructions.push(jumpCondition);
                         state.instructions.push(...trueCloneTree);
                     } else {
-                        state.instructions.push(new REQUIRE(jumpCondition));
+                        state.instructions.push(new Require(jumpCondition));
                         state.instructions.push(...trueCloneTree);
                     }
                 } else {

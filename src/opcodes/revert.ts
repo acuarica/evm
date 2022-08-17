@@ -1,9 +1,6 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
-import { MLOAD } from './mload';
 import stringify from '../utils/stringify';
 
-export class REVERT {
+export class Revert {
     readonly name = 'REVERT';
     readonly type?: string;
     readonly wrapped = true;
@@ -36,22 +33,3 @@ export class REVERT {
         }
     }
 }
-
-export default (_opcode: Opcode, state: EVM): void => {
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    state.halted = true;
-    if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
-        const items = [];
-        for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-            if (i in state.memory) {
-                items.push(state.memory[i]);
-            } else {
-                items.push(new MLOAD(i));
-            }
-        }
-        state.instructions.push(new REVERT(items));
-    } else {
-        state.instructions.push(new REVERT([], memoryStart, memoryLength));
-    }
-};

@@ -3,13 +3,11 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import STOP from './stop';
-import ADD from './add';
-import MUL from './mul';
+import { Add } from './add';
+import { Mul } from './mul';
 import SUB from './sub';
 import DIV from './div';
-import MOD from './mod';
-import ADDMOD from './addmod';
-import MULMOD from './mulmod';
+import { Mod } from './mod';
 import EXP from './exp';
 import SIGNEXTEND from './signextend';
 import LT from './lt';
@@ -25,7 +23,7 @@ import SHR from './shr';
 import SAR from './sar';
 import SHA3 from './sha3';
 import { ADDRESS } from './address';
-import BALANCE from './balance';
+import { BALANCE } from './balance';
 import ORIGIN from './origin';
 import CALLER from './caller';
 import CALLVALUE from './callvalue';
@@ -40,7 +38,7 @@ import EXTCODECOPY from './extcodecopy';
 import RETURNDATASIZE from './returndatasize';
 import RETURNDATACOPY from './returndatacopy';
 import EXTCODEHASH from './extcodehash';
-import BLOCKHASH from './blockhash';
+import { BLOCKHASH } from './blockhash';
 import COINBASE from './coinbase';
 import TIMESTAMP from './timestamp';
 import { NUMBER } from './number';
@@ -58,26 +56,70 @@ import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
 import CALLCODE from './callcode';
-import RETURN from './return';
+import { Return } from './return';
 import DELEGATECALL from './delegatecall';
 import CREATE2 from './create2';
 import STATICCALL from './staticcall';
-import REVERT from './revert';
+import { Revert } from './revert';
 import INVALID from './invalid';
 import SELFDESTRUCT from './selfdestruct';
 import { XOR } from './xor';
 
 export default {
     STOP,
-    ADD,
-    MUL,
+    ADD: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(
+            isBigInt(left) && isBigInt(right)
+                ? left + right
+                : isBigInt(left) && left === 0n
+                ? right
+                : isBigInt(right) && right === 0n
+                ? left
+                : new Add(left, right)
+        );
+    },
+    MUL: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(
+            isBigInt(left) && isBigInt(right)
+                ? left * right
+                : (isBigInt(left) && left === 0n) || (isBigInt(right) && right === 0n)
+                ? 0n
+                : new Mul(left, right)
+        );
+    },
     SUB,
     DIV,
     SDIV: DIV,
-    MOD,
-    SMOD: MOD,
-    ADDMOD,
-    MULMOD,
+    MOD: mod,
+    SMOD: mod,
+    ADDMOD: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        const mod = stack.pop();
+        stack.push(
+            typeof left === 'bigint' && typeof right === 'bigint' && typeof mod === 'bigint'
+                ? (left + right) % mod
+                : typeof left === 'bigint' && typeof right === 'bigint'
+                ? new Mod(left + right, mod)
+                : new Mod(new Add(left, right), mod)
+        );
+    },
+    MULMOD: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        const mod = stack.pop();
+        stack.push(
+            isBigInt(left) && isBigInt(right) && isBigInt(mod)
+                ? (left * right) % mod
+                : isBigInt(left) && isBigInt(right)
+                ? new Mod(left * right, mod)
+                : new Mod(new Mul(left, right), mod)
+        );
+    },
     EXP,
     SIGNEXTEND,
     LT,
@@ -106,7 +148,10 @@ export default {
     ADDRESS: (_opcode: Opcode, { stack }: EVM) => {
         stack.push(new ADDRESS());
     },
-    BALANCE,
+    BALANCE: (_opcode: Opcode, { stack }: EVM) => {
+        const address = stack.pop();
+        stack.push(new BALANCE(address));
+    },
     ORIGIN,
     CALLER,
     CALLVALUE,
@@ -122,9 +167,9 @@ export default {
         const startLocation = stack.pop();
         const copyLength = stack.pop();
         if (typeof memoryLocation !== 'number') {
-            throw new Error('expected number in returndatacopy');
+            // throw new Error('expected number in returndatacopy');
         }
-        memory[memoryLocation] = new CALLDATACOPY(startLocation, copyLength);
+        memory[memoryLocation as any] = new CALLDATACOPY(startLocation, copyLength);
     },
     CODESIZE,
     CODECOPY,
@@ -134,7 +179,10 @@ export default {
     RETURNDATASIZE,
     RETURNDATACOPY,
     EXTCODEHASH,
-    BLOCKHASH,
+    BLOCKHASH: (_opcode: Opcode, { stack }: EVM) => {
+        const blockNumber = stack.pop();
+        stack.push(new BLOCKHASH(blockNumber));
+    },
     COINBASE,
     TIMESTAMP,
     NUMBER: (_opcode: Opcode, { stack }: EVM) => {
@@ -241,14 +289,48 @@ export default {
     CREATE,
     CALL,
     CALLCODE,
-    RETURN,
+    RETURN: (_opcode: Opcode, state: EVM) => {
+        const memoryStart = state.stack.pop();
+        const memoryLength = state.stack.pop();
+        state.halted = true;
+        if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
+            const items = [];
+            for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+                items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
+            }
+            state.instructions.push(new Return(items));
+        } else {
+            state.instructions.push(new Return([], memoryStart, memoryLength));
+        }
+    },
     DELEGATECALL,
     CREATE2,
     STATICCALL,
-    REVERT,
+    REVERT: (_opcode: Opcode, state: EVM) => {
+        const memoryStart = state.stack.pop();
+        const memoryLength = state.stack.pop();
+        state.halted = true;
+        if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
+            const items = [];
+            for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+                items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
+            }
+            state.instructions.push(new Revert(items));
+        } else {
+            state.instructions.push(new Revert([], memoryStart, memoryLength));
+        }
+    },
     INVALID,
     SELFDESTRUCT,
 };
+
+function mod(_opcode: Opcode, { stack }: EVM) {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(
+        typeof left === 'bigint' && typeof right === 'bigint' ? left % right : new Mod(left, right)
+    );
+}
 
 function push(opcode: Opcode, { stack }: EVM) {
     stack.push(BigInt('0x' + toHex(opcode.pushData!)));
@@ -269,9 +351,13 @@ function swap(position: number) {
 function mstore(_opcode: Opcode, { stack, memory, instructions }: EVM) {
     const storeLocation = stack.pop();
     const storeData = stack.pop();
-    if (typeof storeLocation === 'bigint') {
+    if (isBigInt(storeLocation)) {
         memory[Number(storeLocation)] = storeData;
     } else {
         instructions.push(new MSTORE(storeLocation, storeData));
     }
+}
+
+function isBigInt(value: any): value is bigint {
+    return typeof value === 'bigint';
 }

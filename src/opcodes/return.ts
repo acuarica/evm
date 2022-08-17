@@ -1,10 +1,7 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
-import { MLOAD } from './mload';
 import { hex2a } from '../hex';
 import stringify from '../utils/stringify';
 
-export class RETURN {
+export class Return {
     readonly name = 'RETURN';
     readonly type?: string;
     readonly wrapped = true;
@@ -50,22 +47,3 @@ export class RETURN {
         }
     }
 }
-
-export default (_opcode: Opcode, state: EVM): void => {
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
-    state.halted = true;
-    if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
-        const items = [];
-        for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-            if (i in state.memory) {
-                items.push(state.memory[i]);
-            } else {
-                items.push(new MLOAD(i));
-            }
-        }
-        state.instructions.push(new RETURN(items));
-    } else {
-        state.instructions.push(new RETURN([], memoryStart, memoryLength));
-    }
-};

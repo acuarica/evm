@@ -23,21 +23,35 @@ import { fromHex, toHex } from './hex';
 import { GT } from './opcodes/gt';
 import { LT } from './opcodes/lt';
 import { SHA3 } from './opcodes/sha3';
-import { ADD } from './opcodes/add';
+import { Add } from './opcodes/add';
 import { SIG } from './opcodes/eq';
-import { ISZERO } from './opcodes/iszero';
+import { IsZero } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
 import { DIV } from './opcodes/div';
 import { CALLDATALOAD } from './opcodes/calldataload';
 import { CALLDATACOPY } from './opcodes/calldatacopy';
+import { Return } from './opcodes/return';
+import { Revert } from './opcodes/revert';
 
 interface Event {
     [key: string]: any;
 }
 
-type INST = GT | LT | SHA3 | ADD | SIG | ISZERO | CALL | DIV | CALLDATALOAD | CALLDATACOPY;
+type INST =
+    | GT
+    | LT
+    | SHA3
+    | Add
+    | SIG
+    | IsZero
+    | CALL
+    | DIV
+    | CALLDATALOAD
+    | CALLDATACOPY
+    | Return
+    | Revert;
 
-type Instruction =
+export type Instruction =
     | {
           name: Exclude<
               | keyof typeof opcodeFunctions
@@ -49,11 +63,11 @@ type Instruction =
               INST['name']
           >;
           type?: string;
-          wrapped?: boolean;
+          wrapped: boolean;
       }
     | INST;
 
-type Operand = bigint | Instruction;
+export type Operand = bigint | Instruction;
 
 interface Variable {
     [key: string]: any;

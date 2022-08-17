@@ -1,18 +1,19 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import { LT } from './lt';
 import { GT } from './gt';
 import stringify from '../utils/stringify';
+import { EQ } from './eq';
 
-export class ISZERO {
+export class IsZero {
     readonly name = 'ISZERO';
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly value: any) {}
+    constructor(readonly value: Operand) {}
 
     toString() {
-        return this.value.name === 'EQ'
+        return this.value instanceof EQ
             ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
             : stringify(this.value) + ' == 0';
     }
@@ -29,8 +30,8 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
             ? new GT(value.left, value.right, !value.equal)
             : value.name === 'GT'
             ? new LT(value.left, value.right, !value.equal)
-            : value instanceof ISZERO
+            : value instanceof IsZero
             ? value.value
-            : new ISZERO(value)
+            : new IsZero(value)
     );
 };

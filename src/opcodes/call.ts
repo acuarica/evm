@@ -83,6 +83,7 @@ export class CALL {
 
 export class ReturnData {
     readonly name = 'ReturnData';
+    readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {}
 
@@ -101,9 +102,9 @@ export default (_opcode: Opcode, { stack, memory }: EVM): void => {
     const outputLength = stack.pop();
     stack.push(new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength));
 
-    if (typeof outputStart !== 'number') {
-        console.log('WARN:CALL outstart should be number');
-    }
+    // if (typeof outputStart !== 'number') {
+    //     console.log('WARN:CALL outstart should be number');
+    // }
 
     memory[outputStart as any as number] = new ReturnData(outputStart, outputLength);
 };

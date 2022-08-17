@@ -1,8 +1,6 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
-export class ADD {
+export class Add {
     readonly name = 'ADD';
     readonly wrapped = true;
 
@@ -24,17 +22,3 @@ export class ADD {
         }
     }
 }
-
-export default (_opcode: Opcode, { stack }: EVM): void => {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(
-        typeof left === 'bigint' && typeof right === 'bigint'
-            ? left + right
-            : typeof left === 'bigint' && left === 0n
-            ? right
-            : typeof right === 'bigint' && right === 0n
-            ? left
-            : new ADD(left, right)
-    );
-};

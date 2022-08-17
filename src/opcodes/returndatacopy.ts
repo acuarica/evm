@@ -28,8 +28,8 @@ export default (_opcode: Opcode, { stack, memory }: EVM): void => {
     const returnDataSize = stack.pop();
 
     if (typeof memoryPosition !== 'number') {
-        throw new Error('expected number in returndatacopy');
+        // throw new Error('expected number in returndatacopy');
     }
 
-    memory[memoryPosition] = new RETURNDATACOPY(returnDataPosition, returnDataSize);
+    memory[memoryPosition as any] = new RETURNDATACOPY(returnDataPosition, returnDataSize);
 };

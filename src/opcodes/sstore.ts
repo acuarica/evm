@@ -132,7 +132,8 @@ export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     const storeData = state.stack.pop();
     if (typeof storeLocation === 'bigint') {
-        throw new Error('bigint not expected in sstore');
+        // throw new Error('bigint not expected in sstore');
+        state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
     } else if (storeLocation.name === 'SHA3') {
         const mappingItems = parseMapping(...storeLocation.items);
         const mappingLocation = mappingItems.find(

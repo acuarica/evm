@@ -28,8 +28,8 @@ export default (_opcode: Opcode, { stack, memory }: EVM): void => {
     const copyLength = stack.pop();
 
     if (typeof memoryLocation !== 'number') {
-        throw new Error('expected number for memory location on codecopy');
+        // throw new Error('expected number for memory location on codecopy');
     }
 
-    memory[memoryLocation] = new CODECOPY(startLocation, copyLength);
+    memory[memoryLocation as any] = new CODECOPY(startLocation, copyLength);
 };
