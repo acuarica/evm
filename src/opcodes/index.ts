@@ -3,24 +3,18 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import STOP from './stop';
-import { Add } from './add';
-import { Mul } from './mul';
-import SUB from './sub';
-import DIV from './div';
+import { Add, Mul, Sub, Div } from '../inst/math';
+import { Shl, Shr, Sar } from '../inst/logic';
 import { Mod } from './mod';
 import EXP from './exp';
-import SIGNEXTEND from './signextend';
 import LT from './lt';
 import GT from './gt';
 import EQ from './eq';
 import ISZERO from './iszero';
 import AND from './and';
 import OR from './or';
-import NOT from './not';
+import { Not } from './not';
 import BYTE from './byte';
-import SHL from './shl';
-import SHR from './shr';
-import SAR from './sar';
 import SHA3 from './sha3';
 import { ADDRESS } from './address';
 import { BALANCE } from './balance';
@@ -66,6 +60,7 @@ import SELFDESTRUCT from './selfdestruct';
 import { XOR } from './xor';
 
 export default {
+    // Stop and Arithmetic Operations (since Frontier)
     STOP,
     ADD: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
@@ -91,9 +86,13 @@ export default {
                 : new Mul(left, right)
         );
     },
-    SUB,
-    DIV,
-    SDIV: DIV,
+    SUB: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(isBigInt(left) && isBigInt(right) ? left - right : new Sub(left, right));
+    },
+    DIV: div,
+    SDIV: div,
     MOD: mod,
     SMOD: mod,
     ADDMOD: (_opcode: Opcode, { stack }: EVM) => {
@@ -101,9 +100,9 @@ export default {
         const right = stack.pop();
         const mod = stack.pop();
         stack.push(
-            typeof left === 'bigint' && typeof right === 'bigint' && typeof mod === 'bigint'
+            isBigInt(left) && isBigInt(right) && isBigInt(mod)
                 ? (left + right) % mod
-                : typeof left === 'bigint' && typeof right === 'bigint'
+                : isBigInt(left) && isBigInt(right)
                 ? new Mod(left + right, mod)
                 : new Mod(new Add(left, right), mod)
         );
@@ -121,7 +120,19 @@ export default {
         );
     },
     EXP,
-    SIGNEXTEND,
+    SIGNEXTEND: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(
+            isBigInt(left) && isBigInt(right)
+                ? (right << (32n - left)) >> (32n - left)
+                : isBigInt(left)
+                ? new Sar(new Shl(right, 32n - left), 32n - left)
+                : new Sar(new Shl(right, new Sub(32n, left)), new Sub(32n, left))
+        );
+    },
+
+    // Comparison & Bitwise Logic Operations (since Constantinople)
     LT,
     GT,
     SLT: LT,
@@ -133,17 +144,28 @@ export default {
     XOR: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
         const right = stack.pop();
-        stack.push(
-            typeof left === 'bigint' && typeof right === 'bigint'
-                ? left ^ right
-                : new XOR(left, right)
-        );
+        stack.push(isBigInt(left) && isBigInt(right) ? left ^ right : new XOR(left, right));
     },
-    NOT,
+    NOT: (_opcode: Opcode, { stack }: EVM) => {
+        const value = stack.pop();
+        stack.push(isBigInt(value) ? ~value : new Not(value));
+    },
     BYTE,
-    SHL,
-    SHR,
-    SAR,
+    SHL: (_opcode: Opcode, { stack }: EVM) => {
+        const shift = stack.pop();
+        const value = stack.pop();
+        stack.push(isBigInt(value) && isBigInt(shift) ? value << shift : new Shl(value, shift));
+    },
+    SHR: (_opcode: Opcode, { stack }: EVM) => {
+        const shift = stack.pop();
+        const value = stack.pop();
+        stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Shr(value, shift));
+    },
+    SAR: (_opcode: Opcode, { stack }: EVM) => {
+        const shift = stack.pop();
+        const value = stack.pop();
+        stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Sar(value, shift));
+    },
     SHA3,
     ADDRESS: (_opcode: Opcode, { stack }: EVM) => {
         stack.push(new ADDRESS());
@@ -198,7 +220,7 @@ export default {
     MLOAD: (_opcode: Opcode, { stack, memory }: EVM) => {
         const memoryLocation = stack.pop();
         stack.push(
-            typeof memoryLocation === 'bigint' && Number(memoryLocation) in memory
+            isBigInt(memoryLocation) && Number(memoryLocation) in memory
                 ? memory[Number(memoryLocation)]
                 : new MLOAD(memoryLocation)
         );
@@ -310,7 +332,7 @@ export default {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();
         state.halted = true;
-        if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
+        if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
             const items = [];
             for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
                 items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
@@ -324,12 +346,22 @@ export default {
     SELFDESTRUCT,
 };
 
-function mod(_opcode: Opcode, { stack }: EVM) {
+function div(_opcode: Opcode, { stack }: EVM) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(
-        typeof left === 'bigint' && typeof right === 'bigint' ? left % right : new Mod(left, right)
+        isBigInt(left) && isBigInt(right)
+            ? left / right
+            : isBigInt(right) && right === 1n
+            ? left
+            : new Div(left, right)
     );
+}
+
+function mod(_opcode: Opcode, { stack }: EVM) {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(isBigInt(left) && isBigInt(right) ? left % right : new Mod(left, right));
 }
 
 function push(opcode: Opcode, { stack }: EVM) {

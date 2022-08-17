@@ -1,20 +1,11 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
+import { Operand } from '../evm';
 import stringify from '../utils/stringify';
 
-export class NOT {
+export class Not {
     readonly name = 'NOT';
-    readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly item: any) {}
+    constructor(readonly value: Operand) {}
 
-    toString() {
-        return '~' + stringify(this.item);
-    }
+    toString = () => `~${stringify(this.value)}`;
 }
-
-export default (_opcode: Opcode, { stack }: EVM) => {
-    const item = stack.pop();
-    stack.push(typeof item === 'bigint' ? ~item : new NOT(item));
-};

@@ -23,11 +23,10 @@ import { fromHex, toHex } from './hex';
 import { GT } from './opcodes/gt';
 import { LT } from './opcodes/lt';
 import { SHA3 } from './opcodes/sha3';
-import { Add } from './opcodes/add';
+import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';
 import { IsZero } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
-import { DIV } from './opcodes/div';
 import { CALLDATALOAD } from './opcodes/calldataload';
 import { CALLDATACOPY } from './opcodes/calldatacopy';
 import { Return } from './opcodes/return';
@@ -45,7 +44,7 @@ type INST =
     | SIG
     | IsZero
     | CALL
-    | DIV
+    | Div
     | CALLDATALOAD
     | CALLDATACOPY
     | Return
