@@ -37,20 +37,16 @@ export class SHA3 {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const memoryStart = state.stack.pop();
-    const memoryLength = state.stack.pop();
+export default (_opcode: Opcode, { stack, memory }: EVM): void => {
+    const memoryStart = stack.pop();
+    const memoryLength = stack.pop();
     if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
         const items = [];
         for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-            if (i in state.memory) {
-                items.push(state.memory[i]);
-            } else {
-                items.push(new MLOAD(i));
-            }
+            items.push(i in memory ? memory[i] : new MLOAD(i));
         }
-        state.stack.push(new SHA3(items));
+        stack.push(new SHA3(items));
     } else {
-        state.stack.push(new SHA3([], memoryStart, memoryLength));
+        stack.push(new SHA3([], memoryStart, memoryLength));
     }
 };

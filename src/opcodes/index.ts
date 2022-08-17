@@ -24,7 +24,7 @@ import SHL from './shl';
 import SHR from './shr';
 import SAR from './sar';
 import SHA3 from './sha3';
-import ADDRESS from './address';
+import { ADDRESS } from './address';
 import BALANCE from './balance';
 import ORIGIN from './origin';
 import CALLER from './caller';
@@ -43,10 +43,9 @@ import EXTCODEHASH from './extcodehash';
 import BLOCKHASH from './blockhash';
 import COINBASE from './coinbase';
 import TIMESTAMP from './timestamp';
-import NUMBER from './number';
-import DIFFICULTY from './difficulty';
+import { NUMBER } from './number';
+import { DIFFICULTY } from './difficulty';
 import GASLIMIT from './gaslimit';
-import POP from './pop';
 import MLOAD from './mload';
 import MSTORE from './mstore';
 import SLOAD from './sload';
@@ -104,7 +103,9 @@ export default {
     SHR,
     SAR,
     SHA3,
-    ADDRESS,
+    ADDRESS: (_opcode: Opcode, { stack }: EVM) => {
+        stack.push(new ADDRESS());
+    },
     BALANCE,
     ORIGIN,
     CALLER,
@@ -123,10 +124,16 @@ export default {
     BLOCKHASH,
     COINBASE,
     TIMESTAMP,
-    NUMBER,
-    DIFFICULTY,
+    NUMBER: (_opcode: Opcode, { stack }: EVM) => {
+        stack.push(new NUMBER());
+    },
+    DIFFICULTY: (_opcode: Opcode, { stack }: EVM) => {
+        stack.push(new DIFFICULTY());
+    },
     GASLIMIT,
-    POP,
+    POP: (_opcode: Opcode, { stack }: EVM) => {
+        stack.pop();
+    },
     MLOAD,
     MSTORE,
     MSTORE8: MSTORE,
