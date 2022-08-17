@@ -1,3 +1,4 @@
+import { Operand } from '../evm';
 import stringify from '../utils/stringify';
 
 export class Shl {
@@ -5,7 +6,7 @@ export class Shl {
     readonly type?: string;
     readonly wrapped: boolean = true;
 
-    constructor(readonly value: any, readonly shift: any) {}
+    constructor(readonly value: Operand, readonly shift: Operand) {}
 
     toString = () => stringify(this.value) + ' << ' + stringify(this.shift);
 }
@@ -14,7 +15,7 @@ export class Shr {
     readonly name = 'SHR';
     readonly wrapped = true;
 
-    constructor(readonly value: any, readonly shift: any) {}
+    constructor(readonly value: Operand, readonly shift: Operand) {}
 
     toString = () => `${stringify(this.value)} >>> ${stringify(this.shift)}`;
 }
@@ -23,7 +24,7 @@ export class Sar {
     readonly name = 'SAR';
     readonly wrapped = true;
 
-    constructor(readonly value: any, readonly shift: any) {}
+    constructor(readonly value: Operand, readonly shift: Operand) {}
 
     toString = () => `${stringify(this.value)} >> ${stringify(this.shift)}`;
 }

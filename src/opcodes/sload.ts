@@ -1,6 +1,7 @@
 import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
+import { SHA3 } from './sha3';
 
 const parseMapping = (...items: any[]) => {
     const mappings: any = [];
@@ -104,7 +105,7 @@ export default (_opcode: Opcode, state: EVM): void => {
     } else if (
         typeof storeLocation !== 'bigint' &&
         storeLocation.name === 'ADD' &&
-        storeLocation.left.name === 'SHA3' &&
+        storeLocation.left instanceof SHA3 &&
         typeof storeLocation.right === 'bigint'
     ) {
         const mappingItems = parseMapping(...storeLocation.left.items);
@@ -140,7 +141,7 @@ export default (_opcode: Opcode, state: EVM): void => {
         typeof storeLocation !== 'bigint' &&
         storeLocation.name === 'ADD' &&
         typeof storeLocation.left === 'bigint' &&
-        storeLocation.right.name === 'SHA3'
+        storeLocation.right instanceof SHA3
     ) {
         const mappingItems = parseMapping(...storeLocation.right.items);
         const mappingLocation = mappingItems.find(
