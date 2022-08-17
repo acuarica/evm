@@ -20,10 +20,10 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
     if (typeof left === 'bigint' && typeof right === 'bigint') {
         stack.push(left & right);
     } else if (typeof left === 'bigint' && /^[f]+$/.test(left.toString(16))) {
-        right.size = left.toString(16).length;
+        (right as any).size = left.toString(16).length;
         stack.push(right);
     } else if (typeof right === 'bigint' && /^[f]+$/.test(right.toString(16))) {
-        left.size = right.toString(16).length;
+        (left as any).size = right.toString(16).length;
         stack.push(left);
         /*} else if (
         typeof left === 'bigint' &&
