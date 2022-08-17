@@ -22,14 +22,14 @@ export class RETURNDATACOPY {
     }
 }
 
-export default (_opcode: Opcode, state: EVM): void => {
-    const memoryPosition = state.stack.pop();
-    const returnDataPosition = state.stack.pop();
-    const returnDataSize = state.stack.pop();
+export default (_opcode: Opcode, { stack, memory }: EVM): void => {
+    const memoryPosition = stack.pop();
+    const returnDataPosition = stack.pop();
+    const returnDataSize = stack.pop();
 
     if (typeof memoryPosition !== 'number') {
         throw new Error('expected number in returndatacopy');
     }
 
-    state.memory[memoryPosition] = new RETURNDATACOPY(returnDataPosition, returnDataSize);
+    memory[memoryPosition] = new RETURNDATACOPY(returnDataPosition, returnDataSize);
 };
