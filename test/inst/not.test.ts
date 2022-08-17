@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { NUMBER } from '../../src/opcodes/number';
 import EVM from '../utils/evmtest';
 
 describe('NOT', () => {
@@ -10,11 +11,12 @@ describe('NOT', () => {
         expect(evm.stack.elements).to.deep.equal([~1n]);
     });
 
-    it('should stringify `~x`', () => {
+    it('should stringify `~block.number`', () => {
         const evm = new EVM('0x19');
-        evm.stack.push('x');
-        expect(evm.stack.elements).to.deep.equal(['x']);
+        evm.stack.push(new NUMBER());
+        expect(evm.stack.elements).to.deep.equal([new NUMBER()]);
         evm.parse();
-        expect(evm.stack.elements[0].toString()).to.equal('~x');
+        expect(evm.stack.elements).has.length(1);
+        expect(evm.stack.elements[0].toString()).to.equal('~block.number');
     });
 });
