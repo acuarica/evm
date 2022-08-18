@@ -59,7 +59,7 @@ export default (topicsCount: number) => {
                 state.events[eventTopic] = {};
                 state.events[eventTopic].indexedCount = topics.length - 1;
                 if (eventTopic in state.eventHashes) {
-                    state.events[eventTopic].label = (state.eventHashes as any)[eventTopic];
+                    state.events[eventTopic].label = state.eventHashes[eventTopic];
                 }
             }
         }
