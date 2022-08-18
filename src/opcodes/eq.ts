@@ -83,7 +83,9 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
                 )
             );
         } else if (typeof left === 'bigint' && isSHRCallData(right)) {
-            stack.push(new SIG(left.toString(16)));
+            stack.push(new SIG(left.toString(16).padStart(8, '0')));
+        } else if (typeof right === 'bigint' && isSHRCallData(left)) {
+            stack.push(new SIG(right.toString(16).padStart(8, '0')));
         } else {
             stack.push(new EQ(left, right));
         }

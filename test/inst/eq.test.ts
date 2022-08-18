@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { BlockNumber } from '../../src/inst/block';
 import { CallDataLoad } from '../../src/inst/info';
+import { Shr } from '../../src/inst/logic';
 import { Div } from '../../src/inst/math';
 import EVM from '../utils/evmtest';
 
@@ -47,6 +48,26 @@ describe('EQ', () => {
         const evm = new EVM('0x14');
         evm.stack.push(0x06fdde03n);
         evm.stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
+        evm.parse();
+
+        expect(evm.stack.elements).has.length(1);
+        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
+    });
+
+    it('should stringify signature `msg.sig` from RHS SHR', () => {
+        const evm = new EVM('0x14');
+        evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
+        evm.stack.push(0x06fdde03n);
+        evm.parse();
+
+        expect(evm.stack.elements).has.length(1);
+        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
+    });
+
+    it('should stringify signature `msg.sig` from LHS SHR', () => {
+        const evm = new EVM('0x14');
+        evm.stack.push(0x06fdde03n);
+        evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
         evm.parse();
 
         expect(evm.stack.elements).has.length(1);
