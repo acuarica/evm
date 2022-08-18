@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { NUMBER } from '../../src/opcodes/number';
+import { BlockNumber } from '../../src/inst/block';
 import EVM from '../utils/evmtest';
 
 describe('NOT', () => {
@@ -13,8 +13,8 @@ describe('NOT', () => {
 
     it('should stringify `~block.number`', () => {
         const evm = new EVM('0x19');
-        evm.stack.push(new NUMBER());
-        expect(evm.stack.elements).to.deep.equal([new NUMBER()]);
+        evm.stack.push(new BlockNumber());
+        expect(evm.stack.elements).to.deep.equal([new BlockNumber()]);
         evm.parse();
         expect(evm.stack.elements).has.length(1);
         expect(evm.stack.elements[0].toString()).to.equal('~block.number');
