@@ -57,6 +57,18 @@ export class CALLDATASIZE {
     }
 }
 
+export class CALLDATACOPY {
+    readonly name = 'CALLDATACOPY';
+    readonly type?: string;
+    readonly wrapped: boolean = true;
+
+    constructor(readonly startLocation: any, readonly copyLength: any) {}
+
+    toString() {
+        return `msg.data[${this.startLocation}:(${this.startLocation}+${this.copyLength})];`;
+    }
+}
+
 export class CallValue {
     readonly name = 'CALLDATASIZE';
     readonly type?: string;

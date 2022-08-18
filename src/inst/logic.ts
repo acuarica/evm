@@ -1,5 +1,20 @@
 import { Operand } from '../evm';
+import { EQ } from '../opcodes/eq';
 import stringify from '../utils/stringify';
+
+export class IsZero {
+    readonly name = 'ISZERO';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly value: Operand) {}
+
+    toString() {
+        return this.value instanceof EQ
+            ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
+            : stringify(this.value) + ' == 0';
+    }
+}
 
 export class GT {
     readonly name = 'GT';

@@ -20,16 +20,13 @@ import {
     names,
 } from './codes';
 import { fromHex, toHex } from './hex';
-import { LT, GT } from './inst/logic';
+import { IsZero, LT, GT } from './inst/logic';
 import { SHA3 } from './opcodes/sha3';
 import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';
-import { IsZero } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
-import { CallDataLoad } from './inst/info';
-import { CALLDATACOPY } from './opcodes/calldatacopy';
-import { Return } from './opcodes/return';
-import { Revert } from './opcodes/revert';
+import { CALLDATACOPY, CallDataLoad } from './inst/info';
+import { Return, Revert } from './inst/system';
 import { TopLevelFunction, Variable } from './opcodes/jumpi';
 
 interface Event {

@@ -3,8 +3,8 @@ import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 import { CALLDATASIZE } from '../inst/info';
 import { CallValue } from '../inst/info';
-import { IsZero } from './iszero';
-import { Return } from './return';
+import { IsZero } from '../inst/logic';
+import { Return } from '../inst/system';
 import { SLOAD } from './sload';
 
 const updateCallDataLoad = (item: any, types: any) => {

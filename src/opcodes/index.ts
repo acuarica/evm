@@ -3,21 +3,25 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
-import { LT, GT, Xor, Not, Byte, Shl, Shr, Sar } from '../inst/logic';
-import { Address, Balance, CallDataLoad, CALLDATASIZE, CallValue } from '../inst/info';
+import { LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
+import {
+    Address,
+    Balance,
+    CallDataLoad,
+    CALLDATASIZE,
+    CALLDATACOPY,
+    CallValue,
+} from '../inst/info';
 import { BlockHash } from '../inst/block';
-import { Invalid, SelfDestruct } from '../inst/system';
+import { Return, Revert, Invalid, SelfDestruct } from '../inst/system';
 
 import EQ from './eq';
-import ISZERO from './iszero';
 import AND from './and';
 import OR from './or';
 import SHA3 from './sha3';
-import { CALLDATACOPY } from './calldatacopy';
 import CODECOPY from './codecopy';
 import EXTCODESIZE from './extcodesize';
 import EXTCODECOPY from './extcodecopy';
-import RETURNDATASIZE from './returndatasize';
 import RETURNDATACOPY from './returndatacopy';
 import EXTCODEHASH from './extcodehash';
 import { MLOAD } from './mload';
@@ -30,11 +34,9 @@ import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
 import CALLCODE from './callcode';
-import { Return } from './return';
 import DELEGATECALL from './delegatecall';
 import CREATE2 from './create2';
 import STATICCALL from './staticcall';
-import { Revert } from './revert';
 
 export default {
     // Stop and Arithmetic Operations (since Frontier)
@@ -122,7 +124,22 @@ export default {
     SLT: lt,
     SGT: gt,
     EQ,
-    ISZERO,
+    ISZERO: (_opcode: Opcode, { stack }: EVM) => {
+        const value = stack.pop();
+        stack.push(
+            isBigInt(value)
+                ? value === 0n
+                    ? 1n
+                    : 0n
+                : value.name === 'LT'
+                ? new GT(value.left, value.right, !value.equal)
+                : value.name === 'GT'
+                ? new LT(value.left, value.right, !value.equal)
+                : value instanceof IsZero
+                ? value.value
+                : new IsZero(value)
+        );
+    },
     AND,
     OR,
     XOR: (_opcode: Opcode, { stack }: EVM) => {
@@ -194,7 +211,7 @@ export default {
     GASPRICE: symbol('tx.gasprice'),
     EXTCODESIZE,
     EXTCODECOPY,
-    RETURNDATASIZE,
+    RETURNDATASIZE: symbol('output.length'),
     RETURNDATACOPY,
     EXTCODEHASH,
 
