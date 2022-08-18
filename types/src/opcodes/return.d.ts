@@ -1,14 +1,11 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
-export declare class RETURN {
+import { Operand } from '../evm';
+export declare class Return {
+    readonly items: Operand[];
     readonly name = "RETURN";
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
-    readonly items: any;
-    constructor(items: any, memoryStart?: any, memoryLength?: any);
+    readonly memoryStart?: Operand;
+    readonly memoryLength?: Operand;
+    constructor(items: Operand[], memoryStart?: Operand, memoryLength?: Operand);
     toString(): string;
 }
-declare const _default: (_opcode: Opcode, state: EVM) => void;
-export default _default;

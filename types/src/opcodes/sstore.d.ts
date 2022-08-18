@@ -1,4 +1,4 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 export declare class MappingStore {
     readonly mappings: any;
@@ -14,13 +14,13 @@ export declare class MappingStore {
     toString(): string;
 }
 export declare class SSTORE {
-    readonly location: any;
+    readonly location: Operand;
     readonly data: any;
     readonly variables: any;
     readonly name = "SSTORE";
     readonly type?: string;
     readonly wrapped = true;
-    constructor(location: any, data: any, variables: any);
+    constructor(location: Operand, data: any, variables: any);
     toString(): string;
 }
 declare const _default: (_opcode: Opcode, state: EVM) => void;

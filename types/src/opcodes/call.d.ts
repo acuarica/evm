@@ -15,5 +15,13 @@ export declare class CALL {
     constructor(gas: any, address: any, value: any, memoryStart: any, memoryLength: any, outputStart: any, outputLength: any);
     toString(): string;
 }
+export declare class ReturnData {
+    readonly retOffset: any;
+    readonly retSize: any;
+    readonly name = "ReturnData";
+    readonly wrapped = false;
+    constructor(retOffset: any, retSize: any);
+    toString(): string;
+}
 declare const _default: (_opcode: Opcode, { stack, memory }: EVM) => void;
 export default _default;

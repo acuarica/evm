@@ -1,2 +1,4 @@
-declare const _default: (item: any) => any;
+declare const _default: (value: bigint | {
+    wrapped: boolean;
+}) => string;
 export default _default;

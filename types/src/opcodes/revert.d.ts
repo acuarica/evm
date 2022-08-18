@@ -1,6 +1,4 @@
-import { EVM } from '../evm';
-import { Opcode } from '../opcode';
-export declare class REVERT {
+export declare class Revert {
     readonly name = "REVERT";
     readonly type?: string;
     readonly wrapped = true;
@@ -10,5 +8,3 @@ export declare class REVERT {
     constructor(items: any, memoryStart?: any, memoryLength?: any);
     toString(): string;
 }
-declare const _default: (_opcode: Opcode, state: EVM) => void;
-export default _default;
