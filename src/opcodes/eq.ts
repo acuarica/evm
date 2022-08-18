@@ -74,7 +74,7 @@ export default (_opcode: Opcode, { stack }: EVM): void => {
             /^[0]+$/.test(right.toString(16).substring(8)) &&
             typeof left !== 'bigint' &&
             left.name === 'CALLDATALOAD' &&
-            left.location === 0
+            left.location === 0n
         ) {
             stack.push(
                 new SIG(

@@ -34,7 +34,7 @@ export class CallDataLoad {
     readonly returntype?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: any) {}
+    constructor(readonly location: Operand) {}
 
     toString() {
         if (typeof this.location === 'bigint' && this.location === 0n) {
@@ -52,9 +52,7 @@ export class CALLDATASIZE {
     readonly type?: string;
     readonly wrapped = false;
 
-    toString() {
-        return 'msg.data.length';
-    }
+    toString = () => 'msg.data.length';
 }
 
 export class CALLDATACOPY {
@@ -64,9 +62,7 @@ export class CALLDATACOPY {
 
     constructor(readonly startLocation: any, readonly copyLength: any) {}
 
-    toString() {
-        return `msg.data[${this.startLocation}:(${this.startLocation}+${this.copyLength})];`;
-    }
+    toString = () => `msg.data[${this.startLocation}:(${this.startLocation}+${this.copyLength})];`;
 }
 
 export class CallValue {
@@ -74,7 +70,5 @@ export class CallValue {
     readonly type?: string;
     readonly wrapped = false;
 
-    toString() {
-        return 'msg.value';
-    }
+    toString = () => 'msg.value';
 }
