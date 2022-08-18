@@ -1,4 +1,7 @@
 import { EVM, Operand } from '../evm';
+import { CallDataLoad } from '../inst/info';
+import { Shr } from '../inst/logic';
+import { Div } from '../inst/math';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 
@@ -20,74 +23,54 @@ export class EQ {
     toString = () => `${stringify(this.left)} == ${stringify(this.right)}`;
 }
 
-function isSHRCallData(inst: any) {
-    return (
-        inst.name === 'SHR' &&
-        typeof inst.shift === 'bigint' &&
-        inst.shift === 0xe0n &&
-        typeof inst.value !== 'bigint' &&
-        inst.value.name === 'CALLDATALOAD' &&
-        inst.value.location === 0n
-    );
+function fromSHRsig(left: Operand, right: Operand, cc: () => SIG | EQ): SIG | EQ {
+    if (
+        typeof left === 'bigint' &&
+        right instanceof Shr &&
+        typeof right.shift === 'bigint' &&
+        right.shift === 0xe0n &&
+        right.value instanceof CallDataLoad &&
+        right.value.location === 0n
+    ) {
+        return new SIG(left.toString(16).padStart(8, '0'));
+    }
+    return cc();
 }
 
-export default (_opcode: Opcode, { stack }: EVM): void => {
-    let left = stack.pop();
-    let right = stack.pop();
+function fromDIVEXPsig(left: Operand, right: Operand, cc: () => SIG | EQ): SIG | EQ {
+    if (typeof left === 'bigint' && right instanceof Div && typeof right.right === 'bigint') {
+        left = left * right.right;
+        right = right.left;
 
-    if (typeof left === 'bigint' && typeof right === 'bigint') {
-        stack.push(left === right ? 1n : 0n);
-    } else {
-        if (
-            typeof left === 'bigint' &&
-            typeof right !== 'bigint' &&
-            right.name === 'DIV' &&
-            typeof right.right === 'bigint'
-        ) {
-            left = left * right.right;
-            right = right.left;
-        }
-        if (
-            typeof right === 'bigint' &&
-            typeof left !== 'bigint' &&
-            left.name === 'DIV' &&
-            typeof left.right === 'bigint'
-        ) {
-            right = right * left.right;
-            left = left.left;
-        }
-        if (
-            typeof left === 'bigint' &&
-            /^[0]+$/.test(left.toString(16).substring(8)) &&
-            typeof right !== 'bigint' &&
-            right.name === 'CALLDATALOAD' &&
-            right.location === 0n
-        ) {
-            stack.push(
-                new SIG(
-                    '0'.repeat(64 - left.toString(16).length) +
-                        left.toString(16).substring(0, 8 - (64 - left.toString(16).length))
-                )
+        // /^[0]+$/.test(left.toString(16).substring(8)) &&
+        if (left % (1n << 0xe0n) === 0n && right instanceof CallDataLoad && right.location === 0n) {
+            return new SIG(
+                left
+                    .toString(16)
+                    .substring(0, 8 - (64 - left.toString(16).length))
+                    .padStart(8, '0')
             );
-        } else if (
-            typeof right === 'bigint' &&
-            /^[0]+$/.test(right.toString(16).substring(8)) &&
-            typeof left !== 'bigint' &&
-            left.name === 'CALLDATALOAD' &&
-            left.location === 0n
-        ) {
-            stack.push(
-                new SIG(
-                    '0'.repeat(64 - right.toString(16).length) +
-                        right.toString(16).substring(0, 8 - (64 - right.toString(16).length))
-                )
-            );
-        } else if (typeof left === 'bigint' && isSHRCallData(right)) {
-            stack.push(new SIG(left.toString(16).padStart(8, '0')));
-        } else if (typeof right === 'bigint' && isSHRCallData(left)) {
-            stack.push(new SIG(right.toString(16).padStart(8, '0')));
-        } else {
-            stack.push(new EQ(left, right));
         }
     }
+
+    return cc();
+}
+
+export default (_opcode: Opcode, { stack }: EVM) => {
+    const left = stack.pop();
+    const right = stack.pop();
+
+    stack.push(
+        typeof left === 'bigint' && typeof right === 'bigint'
+            ? left === right
+                ? 1n
+                : 0n
+            : fromDIVEXPsig(left, right, () =>
+                  fromDIVEXPsig(right, left, () =>
+                      fromSHRsig(left, right, () =>
+                          fromSHRsig(right, left, () => new EQ(left, right))
+                      )
+                  )
+              )
+    );
 };

@@ -34,43 +34,47 @@ describe('EQ', () => {
         expect(evm.stack.elements[0].toString()).to.equal('block.number == 1');
     });
 
-    it('should stringify signature `msg.sig` from RHS DIV&EXP', () => {
-        const evm = new EVM('0x14');
-        evm.stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
-        evm.stack.push(0x06fdde03n);
-        evm.parse();
+    ['06fdde03', '12345678', '00000001'].forEach(hash => {
+        describe(`EQ detect msg.sig for hash ${hash}`, () => {
+            it('should stringify signature `msg.sig` from RHS DIV&EXP', () => {
+                const evm = new EVM('0x14');
+                evm.stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
+                evm.stack.push(BigInt('0x' + hash));
+                evm.parse();
 
-        expect(evm.stack.elements).has.length(1);
-        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
-    });
+                expect(evm.stack.elements).has.length(1);
+                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+            });
 
-    it('should stringify signature `msg.sig` from LHS DIV&EXP', () => {
-        const evm = new EVM('0x14');
-        evm.stack.push(0x06fdde03n);
-        evm.stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
-        evm.parse();
+            it('should stringify signature `msg.sig` from LHS DIV&EXP', () => {
+                const evm = new EVM('0x14');
+                evm.stack.push(BigInt('0x' + hash));
+                evm.stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
+                evm.parse();
 
-        expect(evm.stack.elements).has.length(1);
-        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
-    });
+                expect(evm.stack.elements).has.length(1);
+                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+            });
 
-    it('should stringify signature `msg.sig` from RHS SHR', () => {
-        const evm = new EVM('0x14');
-        evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
-        evm.stack.push(0x06fdde03n);
-        evm.parse();
+            it('should stringify signature `msg.sig` from RHS SHR', () => {
+                const evm = new EVM('0x14');
+                evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
+                evm.stack.push(BigInt('0x' + hash));
+                evm.parse();
 
-        expect(evm.stack.elements).has.length(1);
-        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
-    });
+                expect(evm.stack.elements).has.length(1);
+                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+            });
 
-    it('should stringify signature `msg.sig` from LHS SHR', () => {
-        const evm = new EVM('0x14');
-        evm.stack.push(0x06fdde03n);
-        evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
-        evm.parse();
+            it('should stringify signature `msg.sig` from LHS SHR', () => {
+                const evm = new EVM('0x14');
+                evm.stack.push(BigInt('0x' + hash));
+                evm.stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
+                evm.parse();
 
-        expect(evm.stack.elements).has.length(1);
-        expect(evm.stack.elements[0].toString()).to.equal('msg.sig == 06fdde03');
+                expect(evm.stack.elements).has.length(1);
+                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+            });
+        });
     });
 });
