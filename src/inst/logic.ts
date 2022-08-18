@@ -1,6 +1,30 @@
 import { Operand } from '../evm';
 import stringify from '../utils/stringify';
 
+export class GT {
+    readonly name = 'GT';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
+
+    toString() {
+        return stringify(this.left) + (this.equal ? ' >= ' : ' > ') + stringify(this.right);
+    }
+}
+
+export class LT {
+    readonly name = 'LT';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
+
+    toString() {
+        return stringify(this.left) + (this.equal ? ' <= ' : ' < ') + stringify(this.right);
+    }
+}
+
 /**
  * https://www.evm.codes/#18
  */

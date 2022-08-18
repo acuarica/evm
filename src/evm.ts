@@ -20,8 +20,7 @@ import {
     names,
 } from './codes';
 import { fromHex, toHex } from './hex';
-import { GT } from './opcodes/gt';
-import { LT } from './opcodes/lt';
+import { LT, GT } from './inst/logic';
 import { SHA3 } from './opcodes/sha3';
 import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';

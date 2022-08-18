@@ -1,7 +1,6 @@
 import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
-import { LT } from './lt';
-import { GT } from './gt';
+import { LT, GT } from '../inst/logic';
 import stringify from '../utils/stringify';
 import { EQ } from './eq';
 

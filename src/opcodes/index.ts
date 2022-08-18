@@ -3,20 +3,17 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
-import { Xor, Not, Byte, Shl, Shr, Sar } from '../inst/logic';
+import { LT, GT, Xor, Not, Byte, Shl, Shr, Sar } from '../inst/logic';
 import { Address, Balance, CallDataLoad, CALLDATASIZE, CallValue } from '../inst/info';
 import { BlockHash } from '../inst/block';
 import { Invalid, SelfDestruct } from '../inst/system';
 
-import LT from './lt';
-import GT from './gt';
 import EQ from './eq';
 import ISZERO from './iszero';
 import AND from './and';
 import OR from './or';
 import SHA3 from './sha3';
 import { CALLDATACOPY } from './calldatacopy';
-import CODESIZE from './codesize';
 import CODECOPY from './codecopy';
 import EXTCODESIZE from './extcodesize';
 import EXTCODECOPY from './extcodecopy';
@@ -29,7 +26,6 @@ import SLOAD from './sload';
 import SSTORE from './sstore';
 import JUMP from './jump';
 import JUMPI from './jumpi';
-import MSIZE from './msize';
 import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
@@ -121,10 +117,10 @@ export default {
     },
 
     // Comparison & Bitwise Logic Operations (since Constantinople)
-    LT,
-    GT,
-    SLT: LT,
-    SGT: GT,
+    LT: lt,
+    GT: gt,
+    SLT: lt,
+    SGT: gt,
     EQ,
     ISZERO,
     AND,
@@ -193,7 +189,7 @@ export default {
         }
         memory[memoryLocation as any] = new CALLDATACOPY(startLocation, copyLength);
     },
-    CODESIZE,
+    CODESIZE: symbol('this.code.length'),
     CODECOPY,
     GASPRICE: symbol('tx.gasprice'),
     EXTCODESIZE,
@@ -233,7 +229,7 @@ export default {
     PC: (opcode: Opcode, { stack }: EVM) => {
         stack.push(BigInt(opcode.pc));
     },
-    MSIZE,
+    MSIZE: symbol('memory.length'),
     GAS: symbol('gasleft()'),
     JUMPDEST: (_opcode: Opcode, _state: EVM) => {
         /* Empty */
@@ -381,6 +377,18 @@ function mod(_opcode: Opcode, { stack }: EVM) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? left % right : new Mod(left, right));
+}
+
+function lt(_opcode: Opcode, { stack }: EVM) {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(isBigInt(left) && isBigInt(right) ? (left < right ? 1n : 0n) : new LT(left, right));
+}
+
+function gt(_opcode: Opcode, { stack }: EVM) {
+    const left = stack.pop();
+    const right = stack.pop();
+    stack.push(isBigInt(left) && isBigInt(right) ? (left > right ? 1n : 0n) : new GT(left, right));
 }
 
 function push(opcode: Opcode, { stack }: EVM) {
