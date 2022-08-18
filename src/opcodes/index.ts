@@ -2,42 +2,27 @@ import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
-import STOP from './stop';
-import { Add, Mul, Sub, Div } from '../inst/math';
-import { Shl, Shr, Sar } from '../inst/logic';
-import { Mod } from './mod';
-import EXP from './exp';
+import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
+import { Xor, Not, Byte, Shl, Shr, Sar } from '../inst/logic';
+import { Address, Balance, CallDataLoad, CALLDATASIZE, CallValue } from '../inst/info';
+import { BlockHash } from '../inst/block';
+import { Invalid, SelfDestruct } from '../inst/system';
+
 import LT from './lt';
 import GT from './gt';
 import EQ from './eq';
 import ISZERO from './iszero';
 import AND from './and';
 import OR from './or';
-import { Not } from './not';
-import BYTE from './byte';
 import SHA3 from './sha3';
-import { ADDRESS } from './address';
-import { BALANCE } from './balance';
-import ORIGIN from './origin';
-import CALLER from './caller';
-import CALLVALUE from './callvalue';
-import { CALLDATALOAD } from './calldataload';
-import { CALLDATASIZE } from './calldatasize';
 import { CALLDATACOPY } from './calldatacopy';
 import CODESIZE from './codesize';
 import CODECOPY from './codecopy';
-import GASPRICE from './gasprice';
 import EXTCODESIZE from './extcodesize';
 import EXTCODECOPY from './extcodecopy';
 import RETURNDATASIZE from './returndatasize';
 import RETURNDATACOPY from './returndatacopy';
 import EXTCODEHASH from './extcodehash';
-import { BLOCKHASH } from './blockhash';
-import COINBASE from './coinbase';
-import TIMESTAMP from './timestamp';
-import { NUMBER } from './number';
-import { DIFFICULTY } from './difficulty';
-import GASLIMIT from './gaslimit';
 import { MLOAD } from './mload';
 import { MSTORE } from './mstore';
 import SLOAD from './sload';
@@ -45,7 +30,6 @@ import SSTORE from './sstore';
 import JUMP from './jump';
 import JUMPI from './jumpi';
 import MSIZE from './msize';
-import GAS from './gas';
 import LOG from './log';
 import CREATE from './create';
 import CALL from './call';
@@ -55,13 +39,13 @@ import DELEGATECALL from './delegatecall';
 import CREATE2 from './create2';
 import STATICCALL from './staticcall';
 import { Revert } from './revert';
-import INVALID from './invalid';
-import SELFDESTRUCT from './selfdestruct';
-import { XOR } from './xor';
 
 export default {
     // Stop and Arithmetic Operations (since Frontier)
-    STOP,
+    STOP: (_opcode: Opcode, state: EVM) => {
+        state.halted = true;
+        state.instructions.push(new Stop());
+    },
     ADD: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
         const right = stack.pop();
@@ -119,7 +103,11 @@ export default {
                 : new Mod(new Mul(left, right), mod)
         );
     },
-    EXP,
+    EXP: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(isBigInt(left) && isBigInt(right) ? left ** right : new Exp(left, right));
+    },
     SIGNEXTEND: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
         const right = stack.pop();
@@ -144,13 +132,21 @@ export default {
     XOR: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
         const right = stack.pop();
-        stack.push(isBigInt(left) && isBigInt(right) ? left ^ right : new XOR(left, right));
+        stack.push(isBigInt(left) && isBigInt(right) ? left ^ right : new Xor(left, right));
     },
     NOT: (_opcode: Opcode, { stack }: EVM) => {
         const value = stack.pop();
         stack.push(isBigInt(value) ? ~value : new Not(value));
     },
-    BYTE,
+    BYTE: (_opcode: Opcode, { stack }: EVM) => {
+        const position = stack.pop();
+        const data = stack.pop();
+        stack.push(
+            isBigInt(data) && isBigInt(position)
+                ? (data >> position) & 1n
+                : new Byte(position, data)
+        );
+    },
     SHL: (_opcode: Opcode, { stack }: EVM) => {
         const shift = stack.pop();
         const value = stack.pop();
@@ -167,19 +163,23 @@ export default {
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Sar(value, shift));
     },
     SHA3,
+
+    // Environmental Information (since Frontier)
     ADDRESS: (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(new ADDRESS());
+        stack.push(new Address());
     },
     BALANCE: (_opcode: Opcode, { stack }: EVM) => {
         const address = stack.pop();
-        stack.push(new BALANCE(address));
+        stack.push(new Balance(address));
     },
-    ORIGIN,
-    CALLER,
-    CALLVALUE,
+    ORIGIN: symbol('tx.origin'),
+    CALLER: symbol('msg.sender'),
+    CALLVALUE: (_opcode: Opcode, { stack }: EVM) => {
+        stack.push(new CallValue());
+    },
     CALLDATALOAD: (_opcode: Opcode, { stack }: EVM) => {
         const location = stack.pop();
-        stack.push(new CALLDATALOAD(location));
+        stack.push(new CallDataLoad(location));
     },
     CALLDATASIZE: (_opcode: Opcode, { stack }: EVM) => {
         stack.push(new CALLDATASIZE());
@@ -195,25 +195,24 @@ export default {
     },
     CODESIZE,
     CODECOPY,
-    GASPRICE,
+    GASPRICE: symbol('tx.gasprice'),
     EXTCODESIZE,
     EXTCODECOPY,
     RETURNDATASIZE,
     RETURNDATACOPY,
     EXTCODEHASH,
+
+    // Block Information
     BLOCKHASH: (_opcode: Opcode, { stack }: EVM) => {
         const blockNumber = stack.pop();
-        stack.push(new BLOCKHASH(blockNumber));
+        stack.push(new BlockHash(blockNumber));
     },
-    COINBASE,
-    TIMESTAMP,
-    NUMBER: (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(new NUMBER());
-    },
-    DIFFICULTY: (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(new DIFFICULTY());
-    },
-    GASLIMIT,
+    COINBASE: symbol('block.coinbase'),
+    TIMESTAMP: symbol('block.timestamp'),
+    NUMBER: symbol('block.number'),
+    DIFFICULTY: symbol('block.difficulty'),
+    GASLIMIT: symbol('block.gaslimit'),
+
     POP: (_opcode: Opcode, { stack }: EVM) => {
         stack.pop();
     },
@@ -235,7 +234,7 @@ export default {
         stack.push(BigInt(opcode.pc));
     },
     MSIZE,
-    GAS,
+    GAS: symbol('gasleft()'),
     JUMPDEST: (_opcode: Opcode, _state: EVM) => {
         /* Empty */
     },
@@ -342,9 +341,29 @@ export default {
             state.instructions.push(new Revert([], memoryStart, memoryLength));
         }
     },
-    INVALID,
-    SELFDESTRUCT,
+    INVALID: (opcode: Opcode, state: EVM) => {
+        state.halted = true;
+        state.instructions.push(new Invalid(opcode.opcode));
+    },
+    SELFDESTRUCT: (_opcode: Opcode, state: EVM) => {
+        const address = state.stack.pop();
+        state.halted = true;
+        state.instructions.push(new SelfDestruct(address));
+    },
 };
+
+class Symbol {
+    readonly name = 'SYMBOL';
+    readonly wrapped = false;
+    constructor(readonly symbol: string) {}
+    toString = () => this.symbol;
+}
+
+function symbol(value: string) {
+    return (_opcode: Opcode, { stack }: EVM) => {
+        stack.push(new Symbol(value));
+    };
+}
 
 function div(_opcode: Opcode, { stack }: EVM) {
     const left = stack.pop();

@@ -1,4 +1,4 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 import { Variable } from './jumpi';
@@ -88,7 +88,7 @@ export class SSTORE {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly location: any, readonly data: any, readonly variables: any) {
+    constructor(readonly location: Operand, readonly data: any, readonly variables: any) {
         if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
             this.variables()[this.location.toString()].types.push(() => this.data.type);
         } else if (

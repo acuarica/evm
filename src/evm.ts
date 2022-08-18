@@ -27,11 +27,11 @@ import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';
 import { IsZero } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
-import { CALLDATALOAD } from './opcodes/calldataload';
+import { CallDataLoad } from './inst/info';
 import { CALLDATACOPY } from './opcodes/calldatacopy';
 import { Return } from './opcodes/return';
 import { Revert } from './opcodes/revert';
-import { TopLevelFunction } from './opcodes/jumpi';
+import { TopLevelFunction, Variable } from './opcodes/jumpi';
 
 interface Event {
     [key: string]: any;
@@ -46,7 +46,7 @@ type INST =
     | IsZero
     | CALL
     | Div
-    | CALLDATALOAD
+    | CallDataLoad
     | CALLDATACOPY
     | Return
     | Revert;
@@ -59,7 +59,8 @@ export type Instruction =
               | 'REQUIRE'
               | 'MappingLoad'
               | 'LOG'
-              | 'ReturnData',
+              | 'ReturnData'
+              | 'SYMBOL',
               INST['name']
           >;
           type?: string;
@@ -68,10 +69,6 @@ export type Instruction =
     | INST;
 
 export type Operand = bigint | Instruction;
-
-interface Variable {
-    [key: string]: any;
-}
 
 interface Mapping {
     [key: string]: any;
@@ -89,7 +86,7 @@ export class EVM {
     layer = 0;
     halted = false;
     functions: { [hash: string]: TopLevelFunction } = {};
-    variables: Variable = {};
+    variables: { [key: string]: Variable } = {};
     events: Event = {};
     gasUsed = 0;
     conditions: Instruction[] = [];

@@ -1,8 +1,8 @@
 import { EVM, Instruction, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
-import { CALLDATASIZE } from './calldatasize';
-import { CALLVALUE } from './callvalue';
+import { CALLDATASIZE } from '../inst/info';
+import { CallValue } from '../inst/info';
 import { IsZero } from './iszero';
 import { Return } from './return';
 import { SLOAD } from './sload';
@@ -74,7 +74,7 @@ export class TopLevelFunction {
             this.items.length > 0 &&
             this.items[0] instanceof Require &&
             this.items[0].condition instanceof IsZero &&
-            this.items[0].condition.value instanceof CALLVALUE
+            this.items[0].condition.value instanceof CallValue
         ) {
             this.payable = false;
             this.items.shift();
@@ -128,15 +128,7 @@ export class TopLevelFunction {
 }
 
 export class Variable {
-    readonly name: string;
-    readonly label: string | false;
-    readonly types: any;
-
-    constructor(label: string | false, types: any) {
-        this.name = 'Variable';
-        this.label = label;
-        this.types = types;
-    }
+    constructor(public label: string | false, readonly types: any) {}
 }
 
 export class Require {
@@ -176,7 +168,7 @@ export class JUMPI {
                 this.true.length >= 1 &&
                 this.true[0] instanceof Require &&
                 this.true[0].condition instanceof IsZero &&
-                this.true[0].condition.value instanceof CALLVALUE
+                this.true[0].condition.value instanceof CallValue
             ) {
                 this.payable = false;
                 this.true.shift();
