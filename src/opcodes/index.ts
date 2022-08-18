@@ -38,6 +38,13 @@ import DELEGATECALL from './delegatecall';
 import CREATE2 from './create2';
 import STATICCALL from './staticcall';
 
+class Symbol {
+    readonly name = 'SYMBOL';
+    readonly wrapped = false;
+    constructor(readonly symbol: string) {}
+    toString = () => this.symbol;
+}
+
 export default {
     // Stop and Arithmetic Operations (since Frontier)
     STOP: (_opcode: Opcode, state: EVM) => {
@@ -365,16 +372,10 @@ export default {
     },
 };
 
-class Symbol {
-    readonly name = 'SYMBOL';
-    readonly wrapped = false;
-    constructor(readonly symbol: string) {}
-    toString = () => this.symbol;
-}
-
 function symbol(value: string) {
+    const sym = new Symbol(value);
     return (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(new Symbol(value));
+        stack.push(sym);
     };
 }
 
