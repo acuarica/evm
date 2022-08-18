@@ -1,9 +1,8 @@
 import { expect } from 'chai';
-import { BlockNumber } from '../../src/inst/block';
 import { CallDataLoad } from '../../src/inst/info';
 import { Shr } from '../../src/inst/logic';
 import { Div } from '../../src/inst/math';
-import EVM from '../utils/evmtest';
+import EVM, { Sym } from '../utils/evmtest';
 
 describe('EQ', () => {
     it('should calculate `1 == 1`', () => {
@@ -19,19 +18,19 @@ describe('EQ', () => {
         const evm = new EVM('0x14');
         evm.stack.push(1n);
         evm.stack.push(2n);
-        expect(evm.stack.elements).to.deep.equal([2n, 1n]);
+        expect(evm.stack.elements).to.be.deep.equal([2n, 1n]);
         evm.parse();
-        expect(evm.stack.elements).to.deep.equal([0n]);
+        expect(evm.stack.elements).to.be.deep.equal([0n]);
     });
 
-    it('should stringify `block.number == 1`', () => {
+    it('should stringify `x == 1`', () => {
         const evm = new EVM('0x14');
         evm.stack.push(1n);
-        evm.stack.push(new BlockNumber());
-        expect(evm.stack.elements).to.deep.equal([new BlockNumber(), 1n]);
+        evm.stack.push(new Sym());
+        expect(evm.stack.elements).to.be.deep.equal([new Sym(), 1n]);
         evm.parse();
         expect(evm.stack.elements).has.length(1);
-        expect(evm.stack.elements[0].toString()).to.equal('block.number == 1');
+        expect(evm.stack.elements[0].toString()).to.be.equal('x == 1');
     });
 
     ['06fdde03', '12345678', '00000001'].forEach(hash => {
@@ -53,7 +52,7 @@ describe('EQ', () => {
                 evm.parse();
 
                 expect(evm.stack.elements).has.length(1);
-                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+                expect(evm.stack.elements[0].toString()).to.be.equal(`msg.sig == ${hash}`);
             });
 
             it('should stringify signature `msg.sig` from RHS SHR', () => {
@@ -63,7 +62,7 @@ describe('EQ', () => {
                 evm.parse();
 
                 expect(evm.stack.elements).has.length(1);
-                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+                expect(evm.stack.elements[0].toString()).to.be.equal(`msg.sig == ${hash}`);
             });
 
             it('should stringify signature `msg.sig` from LHS SHR', () => {
@@ -73,7 +72,7 @@ describe('EQ', () => {
                 evm.parse();
 
                 expect(evm.stack.elements).has.length(1);
-                expect(evm.stack.elements[0].toString()).to.equal(`msg.sig == ${hash}`);
+                expect(evm.stack.elements[0].toString()).to.be.equal(`msg.sig == ${hash}`);
             });
         });
     });

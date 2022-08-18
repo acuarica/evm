@@ -9,13 +9,3 @@ export class BlockHash {
 
     toString = () => `block.blockhash(${stringify(this.blockNumber)})`;
 }
-
-export class BlockNumber {
-    readonly name = 'NUMBER';
-    readonly type?: string;
-    readonly wrapped = false;
-
-    toString() {
-        return 'block.number';
-    }
-}
