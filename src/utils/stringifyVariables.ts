@@ -1,10 +1,12 @@
-export default (variables: any) => {
+import { Variable } from '../opcodes/jumpi';
+
+export default (variables: { [key: string]: Variable }) => {
     let output = '';
 
-    Object.keys(variables).forEach((key: string, index: number) => {
+    Object.keys(variables).forEach((key, index) => {
         const variable = variables[key];
         const types = variable.types
-            .map((type: any) => {
+            .map(type => {
                 if (typeof type === 'function') {
                     return type();
                 } else {

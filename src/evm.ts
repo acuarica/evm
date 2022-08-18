@@ -18,6 +18,7 @@ import {
     SELFDESTRUCT,
     codes,
     names,
+    PUSH4,
 } from './codes';
 import { fromHex, toHex } from './hex';
 import { IsZero, LT, GT } from './inst/logic';
@@ -123,10 +124,11 @@ export class EVM {
     getOpcodes(): Opcode[] {
         if (this.opcodes.length === 0) {
             for (let index = 0; index < this.code.length; index++) {
+                const opcode = this.code[index];
                 const currentOp = {
                     pc: index,
-                    opcode: this.code[index],
-                    name: 'INVALID',
+                    opcode,
+                    name: codes[opcode as keyof typeof codes] ?? 'INVALID',
                     toString: function () {
                         const pc = this.pc.toString(16).padStart(4, '0').toUpperCase();
                         const opcode = this.opcode.toString(16).padStart(2, '0').toUpperCase();
@@ -135,15 +137,12 @@ export class EVM {
                         return `${pc}    ${opcode}    ${this.name}${pushData}`;
                     },
                 } as Opcode;
-                if (currentOp.opcode in codes) {
-                    currentOp.name = codes[currentOp.opcode as keyof typeof codes];
-                }
                 this.opcodes.push(currentOp);
-                if (currentOp.name.startsWith('PUSH')) {
-                    const pushDataLength = this.code[index] - 0x5f;
-                    const pushData = this.code.subarray(index + 1, index + pushDataLength + 1);
-                    currentOp.pushData = pushData;
-                    index += pushDataLength;
+                if (opcode >= PUSH1 && opcode <= PUSH32) {
+                    const size = opcode - 0x5f;
+                    const data = this.code.subarray(index + 1, index + size + 1);
+                    currentOp.pushData = data;
+                    index += size;
                 }
             }
         }
@@ -154,7 +153,7 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.name === 'PUSH4')
+                    .filter(opcode => opcode.opcode === PUSH4)
                     .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.functionHashes)
                     .map(hash => this.functionHashes[hash])
@@ -166,7 +165,7 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.name === 'PUSH32')
+                    .filter(opcode => opcode.opcode === PUSH32)
                     .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.eventHashes)
                     .map(hash => this.eventHashes[hash])
@@ -198,7 +197,7 @@ export class EVM {
 
     getJumpDestinations(): number[] {
         return this.getOpcodes()
-            .filter(opcode => opcode.name === 'JUMPDEST')
+            .filter(opcode => opcode.opcode === JUMPDEST)
             .map(opcode => opcode.pc);
     }
 
@@ -244,11 +243,7 @@ export class EVM {
             const opcodes = this.getOpcodes();
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
-                if (opcode.name in opcodeFunctions) {
-                    opcodeFunctions[opcode.name as keyof typeof opcodeFunctions](opcode, this);
-                } else {
-                    throw new Error('Unknown OPCODE: ' + opcode.name);
-                }
+                opcodeFunctions[opcode.name as keyof typeof opcodeFunctions](opcode, this);
             }
         }
         return this.instructions;

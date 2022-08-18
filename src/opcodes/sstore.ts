@@ -95,7 +95,7 @@ export class SSTORE {
             typeof this.location === 'bigint' &&
             !(this.location.toString() in this.variables())
         ) {
-            this.variables()[this.location.toString()] = new Variable(false, [
+            this.variables()[this.location.toString()] = new Variable(undefined, [
                 () => this.data.type,
             ]);
         }

@@ -6,6 +6,7 @@ import { CallValue } from '../inst/info';
 import { IsZero } from '../inst/logic';
 import { Return } from '../inst/system';
 import { SLOAD } from './sload';
+import { JUMPDEST } from '../codes';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
@@ -66,7 +67,7 @@ export class TopLevelFunction {
         this.constant = false;
         this.returns = [];
         if (this.hash in functionHashes) {
-            this.label = (functionHashes as any)[this.hash];
+            this.label = functionHashes[this.hash];
         } else {
             this.label = this.hash + '()';
         }
@@ -128,7 +129,7 @@ export class TopLevelFunction {
 }
 
 export class Variable {
-    constructor(public label: string | false, readonly types: any) {}
+    constructor(public label: string | undefined, readonly types: any[]) {}
 }
 
 export class Require {
@@ -199,8 +200,8 @@ export default (opcode: Opcode, state: EVM): void => {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
     } else {
-        const jumpLocationData = opcodes.find((o: any) => o.pc === Number(jumpLocation));
-        if (!jumpLocationData || jumpLocationData.name !== 'JUMPDEST') {
+        const jumpLocationData = opcodes.find(o => o.pc === Number(jumpLocation));
+        if (!jumpLocationData || jumpLocationData.opcode !== JUMPDEST) {
             //state.halted = true;
             //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             state.instructions.push(new Require(jumpCondition));

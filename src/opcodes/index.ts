@@ -3,7 +3,7 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
-import { LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
+import { OR, LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
 import {
     Address,
     Balance,
@@ -17,7 +17,6 @@ import { Return, Revert, Invalid, SelfDestruct } from '../inst/system';
 
 import EQ from './eq';
 import AND from './and';
-import OR from './or';
 import SHA3 from './sha3';
 import CODECOPY from './codecopy';
 import EXTCODESIZE from './extcodesize';
@@ -148,7 +147,11 @@ export default {
         );
     },
     AND,
-    OR,
+    OR: (_opcode: Opcode, { stack }: EVM) => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(isBigInt(left) && isBigInt(right) ? left | right : new OR(left, right));
+    },
     XOR: (_opcode: Opcode, { stack }: EVM) => {
         const left = stack.pop();
         const right = stack.pop();

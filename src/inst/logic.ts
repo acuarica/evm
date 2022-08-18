@@ -2,6 +2,16 @@ import { Operand } from '../evm';
 import { EQ } from '../opcodes/eq';
 import stringify from '../utils/stringify';
 
+export class OR {
+    readonly name = 'OR';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly left: any, readonly right: any) {}
+
+    toString = () => stringify(this.left) + ' || ' + stringify(this.right);
+}
+
 export class IsZero {
     readonly name = 'ISZERO';
     readonly type?: string;
