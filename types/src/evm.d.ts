@@ -1,16 +1,13 @@
 import opcodeFunctions from './opcodes';
 import { Stack } from './stack';
 import { Opcode } from './opcode';
-import { LT, GT } from './inst/logic';
+import { IsZero, LT, GT } from './inst/logic';
 import { SHA3 } from './opcodes/sha3';
 import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';
-import { IsZero } from './opcodes/iszero';
 import { CALL } from './opcodes/call';
-import { CallDataLoad } from './inst/info';
-import { CALLDATACOPY } from './opcodes/calldatacopy';
-import { Return } from './opcodes/return';
-import { Revert } from './opcodes/revert';
+import { CALLDATACOPY, CallDataLoad } from './inst/info';
+import { Return, Revert } from './inst/system';
 import { TopLevelFunction, Variable } from './opcodes/jumpi';
 interface Event {
     [key: string]: any;
@@ -18,8 +15,9 @@ interface Event {
 declare type INST = GT | LT | SHA3 | Add | SIG | IsZero | CALL | Div | CallDataLoad | CALLDATACOPY | Return | Revert;
 export declare type Instruction = {
     name: Exclude<keyof typeof opcodeFunctions | 'MappingStore' | 'REQUIRE' | 'MappingLoad' | 'LOG' | 'ReturnData' | 'SYMBOL', INST['name']>;
-    type?: string;
+    type?: string | undefined;
     wrapped: boolean;
+    toString: () => string;
 } | INST;
 export declare type Operand = bigint | Instruction;
 interface Mapping {

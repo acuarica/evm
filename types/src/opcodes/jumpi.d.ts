@@ -14,9 +14,9 @@ export declare class TopLevelFunction {
     });
 }
 export declare class Variable {
-    label: string | false;
-    readonly types: any;
-    constructor(label: string | false, types: any);
+    label: string | undefined;
+    readonly types: any[];
+    constructor(label: string | undefined, types: any[]);
 }
 export declare class Require {
     readonly condition: Operand;

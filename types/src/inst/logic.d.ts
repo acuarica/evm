@@ -1,4 +1,21 @@
 import { Operand } from '../evm';
+export declare class OR {
+    readonly left: any;
+    readonly right: any;
+    readonly name = "OR";
+    readonly type?: string;
+    readonly wrapped = true;
+    constructor(left: any, right: any);
+    toString: () => string;
+}
+export declare class IsZero {
+    readonly value: Operand;
+    readonly name = "ISZERO";
+    readonly type?: string;
+    readonly wrapped = true;
+    constructor(value: Operand);
+    toString(): string;
+}
 export declare class GT {
     readonly left: any;
     readonly right: any;
