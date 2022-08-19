@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { utils } from 'ethers';
 import { readFileSync } from 'fs';
 import EVM from './utils/evmtest';
 
@@ -7,6 +8,11 @@ describe('smoke', () => {
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
             count: 13245,
+            lines: [],
+        },
+        {
+            name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
+            count: 8108,
             lines: [],
         },
         {
@@ -55,26 +61,52 @@ describe('smoke', () => {
         {
             name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             count: 1577,
-            lines: [],
+            lines: [
+                /^mapping \(address => unknown\) public balanceOf;$/m,
+                /^mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
+                /^unknown public decimals;$/m,
+                /^function name\(\)/m,
+                /^function approve\(address _arg0, uint256 _arg1\)/m,
+                /^function totalSupply\(\)/m,
+                /^function transferFrom\(address _arg0, address _arg1, uint256 _arg2\)/m,
+                /^function withdraw\(uint256 _arg0\)/m,
+                /^function symbol\(\)/m,
+                /^function transfer\(address _arg0, uint256 _arg1\)/m,
+                /^function deposit\(\)/m,
+            ],
         },
-    ].forEach(contract => {
-        describe(`for ${contract.name}`, () => {
+    ].forEach(({ name, count, lines }) => {
+        describe(`for ${name}`, () => {
             let evm: EVM;
 
             before(() => {
-                const bytecode = readFileSync(`./test/smoke/${contract.name}.bytecode`, 'utf8');
+                const bytecode = readFileSync(`./test/smoke/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
             });
 
             it(`should decode bytecode correctly`, () => {
                 const opcodes = evm.getOpcodes();
-                expect(opcodes).to.be.of.length(contract.count);
+                expect(opcodes).to.be.of.length(count);
+            });
+
+            it(`should find proper functions (not variables) correctly`, () => {
+                const functions = lines
+                    .map(l =>
+                        l.source
+                            .replace(/\\/g, '')
+                            .replace('^', '')
+                            .replace('$', '')
+                            .replace('{', '')
+                    )
+                    .filter(l => l.startsWith('function'))
+                    .map(l => utils.Fragment.from(l).format());
+                expect(evm.getFunctions()).to.include.members(functions);
             });
 
             it(`should decompile contract correctly`, () => {
                 const text = evm.decompile();
 
-                for (const line of contract.lines) {
+                for (const line of lines) {
                     expect(text).to.match(line);
                 }
             });
