@@ -3,23 +3,6 @@ import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
 import Contract from './utils/solc';
 
-const CONTRACT = `
-pragma solidity 0.5.5;
-
-contract Contract {
-
-    uint256 data = 0;
-
-    function symbol() public {
-        data = 1;
-    }
-
-    function get() public pure returns (uint256) {
-        return 5;
-    }
-}
-`;
-
 describe('contracts::dispatch', () => {
     describe('single method', () => {
         const CONTRACT = `
@@ -49,6 +32,14 @@ describe('contracts::dispatch', () => {
     });
 
     describe('simple', () => {
+        const CONTRACT = `pragma solidity 0.5.5;
+        contract Contract {
+            uint256 data = 0;
+            function symbol() public { data = 1; }
+            function get() public pure returns (uint256) { return 5; }
+            function thisAddress() public view returns (address) { return address(this); }
+        }`;
+
         let contract: Contract;
         let evm: EVM;
 
@@ -67,8 +58,8 @@ describe('contracts::dispatch', () => {
             expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
         });
 
-        it('should retrieve function signatures', () => {
-            expect(new Set(evm.getFunctions())).to.be.deep.equal(new Set(['symbol()', 'get()']));
+        it('should function signatures', () => {
+            expect(evm.decompile()).to.match(/return\(this\);$/m);
         });
     });
 });
