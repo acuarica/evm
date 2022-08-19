@@ -60,8 +60,9 @@ export type Instruction =
               | 'SYMBOL',
               INST['name']
           >;
-          type?: string;
+          type?: string | undefined;
           wrapped: boolean;
+          toString: () => string;
       }
     | INST;
 

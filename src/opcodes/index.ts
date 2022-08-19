@@ -4,25 +4,15 @@ import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
 import { OR, LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
-import {
-    Address,
-    Balance,
-    CallDataLoad,
-    CALLDATASIZE,
-    CALLDATACOPY,
-    CallValue,
-} from '../inst/info';
-import { BlockHash } from '../inst/block';
+import { CallDataLoad, CALLDATASIZE, CALLDATACOPY, CallValue } from '../inst/info';
 import { Return, Revert, Invalid, SelfDestruct } from '../inst/system';
 
 import EQ from './eq';
 import AND from './and';
 import SHA3 from './sha3';
 import CODECOPY from './codecopy';
-import EXTCODESIZE from './extcodesize';
 import EXTCODECOPY from './extcodecopy';
 import RETURNDATACOPY from './returndatacopy';
-import EXTCODEHASH from './extcodehash';
 import { MLOAD } from './mload';
 import { MSTORE } from './mstore';
 import SLOAD from './sload';
@@ -36,13 +26,7 @@ import CALLCODE from './callcode';
 import DELEGATECALL from './delegatecall';
 import CREATE2 from './create2';
 import STATICCALL from './staticcall';
-
-class Symbol {
-    readonly name = 'SYMBOL';
-    readonly wrapped = false;
-    constructor(readonly symbol: string) {}
-    toString = () => this.symbol;
-}
+import stringify from '../utils/stringify';
 
 export default {
     // Stop and Arithmetic Operations (since Frontier)
@@ -188,15 +172,10 @@ export default {
     SHA3,
 
     // Environmental Information (since Frontier)
-    ADDRESS: (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(new Address());
-    },
-    BALANCE: (_opcode: Opcode, { stack }: EVM) => {
-        const address = stack.pop();
-        stack.push(new Balance(address));
-    },
-    ORIGIN: symbol('tx.origin'),
-    CALLER: symbol('msg.sender'),
+    ADDRESS: symbol0('this', 'address'),
+    BALANCE: symbol1(address => `${address}.balance`),
+    ORIGIN: symbol0('tx.origin'),
+    CALLER: symbol0('msg.sender'),
     CALLVALUE: (_opcode: Opcode, { stack }: EVM) => {
         stack.push(new CallValue());
     },
@@ -216,25 +195,22 @@ export default {
         }
         memory[memoryLocation as any] = new CALLDATACOPY(startLocation, copyLength);
     },
-    CODESIZE: symbol('this.code.length'),
+    CODESIZE: symbol0('this.code.length'),
     CODECOPY,
-    GASPRICE: symbol('tx.gasprice'),
-    EXTCODESIZE,
+    GASPRICE: symbol0('tx.gasprice'),
+    EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
     EXTCODECOPY,
-    RETURNDATASIZE: symbol('output.length'),
+    RETURNDATASIZE: symbol0('output.length'),
     RETURNDATACOPY,
-    EXTCODEHASH,
+    EXTCODEHASH: symbol1(address => `keccak256(address(${address}).code)`),
 
     // Block Information
-    BLOCKHASH: (_opcode: Opcode, { stack }: EVM) => {
-        const blockNumber = stack.pop();
-        stack.push(new BlockHash(blockNumber));
-    },
-    COINBASE: symbol('block.coinbase'),
-    TIMESTAMP: symbol('block.timestamp'),
-    NUMBER: symbol('block.number'),
-    DIFFICULTY: symbol('block.difficulty'),
-    GASLIMIT: symbol('block.gaslimit'),
+    BLOCKHASH: symbol1(blockNumber => `blockhash(${blockNumber})`),
+    COINBASE: symbol0('block.coinbase'),
+    TIMESTAMP: symbol0('block.timestamp'),
+    NUMBER: symbol0('block.number'),
+    DIFFICULTY: symbol0('block.difficulty'),
+    GASLIMIT: symbol0('block.gaslimit'),
 
     POP: (_opcode: Opcode, { stack }: EVM) => {
         stack.pop();
@@ -256,8 +232,8 @@ export default {
     PC: (opcode: Opcode, { stack }: EVM) => {
         stack.push(BigInt(opcode.pc));
     },
-    MSIZE: symbol('memory.length'),
-    GAS: symbol('gasleft()'),
+    MSIZE: symbol0('memory.length'),
+    GAS: symbol0('gasleft()'),
     JUMPDEST: (_opcode: Opcode, _state: EVM) => {
         /* Empty */
     },
@@ -375,10 +351,25 @@ export default {
     },
 };
 
-function symbol(value: string) {
-    const sym = new Symbol(value);
+function symbol0(value: string, type?: string) {
     return (_opcode: Opcode, { stack }: EVM) => {
-        stack.push(sym);
+        stack.push({
+            name: 'SYMBOL',
+            type,
+            wrapped: false,
+            toString: () => value,
+        });
+    };
+}
+
+function symbol1(fn: (value: string) => string) {
+    return (_opcode: Opcode, { stack }: EVM) => {
+        const value = stack.pop();
+        stack.push({
+            name: 'SYMBOL',
+            wrapped: false,
+            toString: () => fn(stringify(value)),
+        });
     };
 }
 
