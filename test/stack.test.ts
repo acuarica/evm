@@ -47,7 +47,7 @@ describe('stack', () => {
         );
         expect(() => stack.dup(5)).to.throw(
             Error,
-            "Invalid duplication operation, provided position wasn't found in stack"
+            'Invalid duplication operation, position was not found'
         );
     });
 
@@ -65,7 +65,7 @@ describe('stack', () => {
         expect(() => stack.swap(17)).to.throw(Error, 'Unsupported position for swap operation');
         expect(() => stack.swap(3)).to.throw(
             Error,
-            "Invalid swap operation, provided position wasn't found in stack"
+            'Invalid swap operation, position was not found'
         );
     });
 
