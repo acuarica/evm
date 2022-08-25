@@ -21,7 +21,7 @@ import { readFileSync } from 'fs';
 // }
 // `;
 
-describe.only('contracts::helloworld', () => {
+describe('contracts::helloworld', () => {
     let evm: EVM;
 
     before(() => {
@@ -31,7 +31,7 @@ describe.only('contracts::helloworld', () => {
     });
 
     it('should not detect selfdestruct', () => {
-        console.log(evm.decompile());
+        // console.log(evm.decompile());
         expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
     }).timeout(10000);
