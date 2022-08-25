@@ -2,7 +2,7 @@ export default (stateEvents: any, events: string[]) => {
     const stateEventValues = Object.keys(stateEvents).map((key: string) => stateEvents[key]);
     let output = '';
 
-    events.forEach((event: string) => {
+    events.forEach(event => {
         const eventName = event.split('(')[0];
         const eventArguments = event.replace(eventName, '').substring(1).slice(0, -1);
         output += 'event ';
@@ -10,7 +10,7 @@ export default (stateEvents: any, events: string[]) => {
             output += eventName + '(';
             output += eventArguments
                 .split(',')
-                .map((a: string, i: number) => {
+                .map((a, i) => {
                     const stateEvent = stateEventValues.find((e: any) => e.label === event);
                     if (stateEvent && i < stateEvent.indexedCount) {
                         return a + ' indexed _arg' + i;

@@ -1,14 +1,15 @@
+import { TopLevelFunction } from '../opcodes/jumpi';
 import { stringifyInstructions } from './stringifyInstructions';
 
 export default (
     functionName: string,
-    functionInstance: any,
+    functionInstance: TopLevelFunction,
     functionHashes: { [s: string]: string }
 ): string => {
     let output = '';
     output += 'function ';
     if (functionName in functionHashes) {
-        const fullFunction = (functionHashes as any)[functionName];
+        const fullFunction = functionHashes[functionName];
         const fullFunctionName = fullFunction.split('(')[0];
         const fullFunctionArguments = fullFunction
             .replace(fullFunctionName, '')
