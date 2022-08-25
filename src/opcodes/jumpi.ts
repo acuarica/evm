@@ -5,7 +5,7 @@ import { CALLDATASIZE } from '../inst/info';
 import { CallValue } from '../inst/info';
 import { IsZero } from '../inst/logic';
 import { Return } from '../inst/system';
-import { SLOAD } from './sload';
+import { MappingLoad, SLOAD } from './sload';
 import { JUMPDEST } from '../codes';
 
 const updateCallDataLoad = (item: any, types: any) => {
@@ -84,8 +84,8 @@ export class TopLevelFunction {
             this.constant = true;
         }
         if (this.hash in functionHashes) {
-            const functionName = (functionHashes as any)[this.hash].split('(')[0];
-            const argumentTypes = (functionHashes as any)[this.hash]
+            const functionName = functionHashes[this.hash].split('(')[0];
+            const argumentTypes = functionHashes[this.hash]
                 .replace(functionName, '')
                 .substr(1)
                 .slice(0, -1)
@@ -94,7 +94,7 @@ export class TopLevelFunction {
                 argumentTypes.length > 1 ||
                 (argumentTypes.length === 1 && argumentTypes[0] !== '')
             ) {
-                this.items.forEach((item: any) => updateCallDataLoad(item, argumentTypes));
+                this.items.forEach(item => updateCallDataLoad(item, argumentTypes));
             }
         }
         const returns: any = [];
@@ -196,6 +196,11 @@ export default (opcode: Opcode, state: EVM): void => {
     const jumpLocation = state.stack.pop();
     const jumpCondition = state.stack.pop();
     const opcodes = state.getOpcodes();
+
+    // const ss = state.stack.elements.slice(0, 2).map(e => e.toString()).join(' | ');
+    // const jj = Object.keys(state.jumps).filter(j => j.startsWith(opcode.pc + ':')).join(',');
+    // console.log('layer', state.layer, opcode.name, opcode.pc, 'to', jumpLocation, 'if', jumpCondition.toString(), 'jumps', jj, 'with', ss);
+
     if (typeof jumpLocation !== 'bigint') {
         state.halted = true;
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
@@ -220,10 +225,14 @@ export default (opcode: Opcode, state: EVM): void => {
             jumpCondition.name === 'SIG'
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
+
+            state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
+
             if (jumpIndex >= 0) {
                 const functionClone = state.clone();
                 functionClone.pc = jumpIndex;
                 const functionCloneTree = functionClone.parse();
+                // state.jumps.
                 state.functions[jumpCondition.hash] = new TopLevelFunction(
                     functionCloneTree,
                     jumpCondition.hash,
@@ -234,10 +243,10 @@ export default (opcode: Opcode, state: EVM): void => {
                     jumpCondition.hash in state.functionHashes &&
                     functionCloneTree.length === 1 &&
                     functionCloneTree[0].name === 'RETURN' &&
-                    functionCloneTree[0].items.every((item: any) => item.name === 'MappingLoad')
+                    functionCloneTree[0].items.every(item => item instanceof MappingLoad)
                 ) {
-                    functionCloneTree[0].items.forEach((item: any) => {
-                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
+                    (functionCloneTree[0].items as MappingLoad[]).forEach(item => {
+                        const fullFunction = state.functionHashes[jumpCondition.hash];
                         state.mappings[item.location].name = fullFunction.split('(')[0];
                         if (
                             item.structlocation &&
@@ -261,14 +270,14 @@ export default (opcode: Opcode, state: EVM): void => {
                     const item = (state.functions[jumpCondition.hash].items[0] as Return)
                         .items[0] as SLOAD;
                     if (!(item.location in state.variables)) {
-                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
+                        const fullFunction = state.functionHashes[jumpCondition.hash];
                         state.variables[item.location] = new Variable(
                             fullFunction.split('(')[0],
                             []
                         );
                         delete state.functions[jumpCondition.hash];
                     } else {
-                        const fullFunction = (state.functionHashes as any)[jumpCondition.hash];
+                        const fullFunction = state.functionHashes[jumpCondition.hash];
                         state.variables[item.location].label = fullFunction.split('(')[0];
                         delete state.functions[jumpCondition.hash];
                     }
@@ -283,6 +292,9 @@ export default (opcode: Opcode, state: EVM): void => {
                 (jumpCondition.name === 'ISZERO' && jumpCondition.value instanceof CALLDATASIZE))
         ) {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
+
+            // state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
+
             if (jumpIndex >= 0) {
                 state.halted = true;
                 const trueClone = state.clone();
@@ -330,6 +342,7 @@ export default (opcode: Opcode, state: EVM): void => {
                 const falseClone = state.clone();
                 falseClone.pc = state.pc + 1;
                 const falseCloneTree = falseClone.parse();
+                // state.jumps = { ...state.jumps, ...trueClone.jumps, ...falseClone.jumps };
                 if (
                     (falseCloneTree.length === 1 &&
                         'name' in falseCloneTree[0] &&
