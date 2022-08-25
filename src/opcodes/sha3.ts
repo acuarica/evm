@@ -1,4 +1,4 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import { MLOAD } from './mload';
 import stringify from '../utils/stringify';
@@ -7,11 +7,11 @@ export class SHA3 {
     readonly name = 'SHA3';
     readonly type?: string;
     readonly wrapped = false;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
-    readonly items: any;
+    readonly memoryStart?: Operand;
+    readonly memoryLength?: Operand;
+    readonly items?: Operand[];
 
-    constructor(items: any, memoryStart?: any, memoryLength?: any) {
+    constructor(items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -22,17 +22,11 @@ export class SHA3 {
 
     toString() {
         if (this.items) {
-            return 'keccak256(' + this.items.map((item: any) => stringify(item)).join(', ') + ')';
+            return `keccak256(${this.items.map(item => stringify(item)).join(', ')})`;
         } else {
-            return (
-                'keccak256(memory[' +
-                stringify(this.memoryStart) +
-                ':(' +
-                stringify(this.memoryStart) +
-                '+' +
-                stringify(this.memoryLength) +
-                ')])'
-            );
+            return `keccak256(memory[${stringify(this.memoryStart!)}:(${stringify(
+                this.memoryStart!
+            )}+${stringify(this.memoryLength!)})])`;
         }
     }
 }
