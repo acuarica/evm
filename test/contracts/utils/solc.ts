@@ -2,10 +2,10 @@ export const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
 
 export type Version = typeof VERSIONS[number];
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const solcs = Object.fromEntries(
     VERSIONS.map(version => [
         version,
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         require(`solc-${version}`) as { compile: (input: string) => string },
     ])
 );
@@ -45,8 +45,6 @@ export function compile(contractName: string, content: string, version: Version 
         errors: [{ formattedMessage: string }];
     };
 
-    console.log(output);
-
     if (!valid(output)) {
         const errors = (output.errors || []).map(error => error.formattedMessage);
         throw new Error(errors.join('\n'));
@@ -54,8 +52,6 @@ export function compile(contractName: string, content: string, version: Version 
 
     const { contracts } = output;
     const contract = contracts[source];
-    // console.log(contract[contractName]);
-    // const name1 = Object.keys(contract)[0];
 
     if (!(contractName in contract)) {
         throw new Error(
@@ -66,7 +62,6 @@ export function compile(contractName: string, content: string, version: Version 
     }
 
     const bytecode = contract[contractName].evm.deployedBytecode.object;
-
     return bytecode;
 
     function valid(output: any): boolean {
