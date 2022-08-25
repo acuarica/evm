@@ -58,7 +58,7 @@ describe('contracts::internal', () => {
             evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
-        it('should decompile functions', () => {
+        it.skip('should decompile functions', () => {
             console.log(evm.decompile());
             expect(evm.decompile()).to.match(/function get\(\) public view payable/);
         });
