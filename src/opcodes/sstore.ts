@@ -4,15 +4,15 @@ import stringify from '../utils/stringify';
 import { Variable } from './jumpi';
 import { SHA3 } from './sha3';
 
-const parseMapping = (...items: any[]) => {
-    const mappings: any = [];
-    items.forEach((item2: any) => {
-        if (item2.name === 'SHA3' && item2.items) {
-            mappings.push(...parseMapping(...item2.items));
+const parseMapping = (...items: Operand[]): Operand[] => {
+    const mappings = [];
+    for (const item of items) {
+        if (item instanceof SHA3 && item.items) {
+            mappings.push(...parseMapping(...item.items));
         } else {
-            mappings.push(item2);
+            mappings.push(item);
         }
-    });
+    }
     return mappings;
 };
 
@@ -136,24 +136,23 @@ export default (_opcode: Opcode, state: EVM): void => {
         // throw new Error('bigint not expected in sstore');
         state.instructions.push(new SSTORE(storeLocation, storeData, () => state.variables));
     } else if (storeLocation.name === 'SHA3') {
-        const mappingItems = parseMapping(...storeLocation.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
+        const mappingItems = parseMapping(...storeLocation.items!);
+        const mappingLocation = <bigint | undefined>(
+            mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
         );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
-            state.mappings[mappingLocation].values.push(storeData);
+            state.mappings[loc].keys.push(mappingParts);
+            state.mappings[loc].values.push(storeData);
             state.instructions.push(
                 new MappingStore(
                     () => state.mappings,
@@ -171,23 +170,22 @@ export default (_opcode: Opcode, state: EVM): void => {
         storeLocation.left instanceof SHA3 &&
         typeof storeLocation.right === 'bigint'
     ) {
-        const mappingItems = parseMapping(...storeLocation.left.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
+        const mappingItems = parseMapping(...storeLocation.left.items!);
+        const mappingLocation = <bigint | undefined>(
+            mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
         );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
+            state.mappings[loc].keys.push(mappingParts);
             state.instructions.push(
                 new MappingStore(
                     () => state.mappings,
@@ -206,23 +204,22 @@ export default (_opcode: Opcode, state: EVM): void => {
         typeof storeLocation.left === 'bigint' &&
         storeLocation.right instanceof SHA3
     ) {
-        const mappingItems = parseMapping(...storeLocation.right.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
+        const mappingItems = parseMapping(...storeLocation.right.items!);
+        const mappingLocation = <bigint | undefined>(
+            mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
         );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
+            state.mappings[loc].keys.push(mappingParts);
             state.instructions.push(
                 new MappingStore(
                     () => state.mappings,

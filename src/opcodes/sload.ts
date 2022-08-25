@@ -1,17 +1,17 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
 import { SHA3 } from './sha3';
 
-const parseMapping = (...items: any[]) => {
-    const mappings: any = [];
-    items.forEach((item2: any) => {
-        if (item2.name === 'SHA3' && item2.items) {
-            mappings.push(...parseMapping(...item2.items));
+const parseMapping = (...items: Operand[]): Operand[] => {
+    const mappings = [];
+    for (const item of items) {
+        if (item instanceof SHA3 && item.items) {
+            mappings.push(...parseMapping(...item.items));
         } else {
-            mappings.push(item2);
+            mappings.push(item);
         }
-    });
+    }
     return mappings;
 };
 
@@ -21,30 +21,29 @@ export class MappingLoad {
     readonly wrapped = false;
 
     constructor(
-        readonly mappings: any,
-        readonly location: any,
-        readonly items: any,
-        readonly count: any,
-        readonly structlocation?: any
+        readonly mappings: () => { [location: number]: EVM['mappings'][keyof EVM['mappings']] },
+        readonly location: number,
+        readonly items: Operand[],
+        readonly count: number,
+        readonly structlocation?: bigint
     ) {}
 
     toString() {
         let mappingName = 'mapping' + (this.count + 1);
-        if (this.location in this.mappings() && this.mappings()[this.location].name) {
-            mappingName = this.mappings()[this.location].name;
+        const maybeName = this.mappings()[this.location].name;
+        if (this.location in this.mappings() && maybeName) {
+            mappingName = maybeName;
         }
         if (this.structlocation) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
+                this.items.map(item => '[' + stringify(item) + ']').join('') +
                 '[' +
                 this.structlocation.toString() +
                 ']'
             );
         } else {
-            return (
-                mappingName + this.items.map((item: any) => '[' + stringify(item) + ']').join('')
-            );
+            return mappingName + this.items.map(item => '[' + stringify(item) + ']').join('');
         }
     }
 }
@@ -74,27 +73,26 @@ export class SLOAD {
 export default (_opcode: Opcode, state: EVM): void => {
     const storeLocation = state.stack.pop();
     if (typeof storeLocation !== 'bigint' && storeLocation.name === 'SHA3') {
-        const mappingItems = parseMapping(...storeLocation.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
+        const mappingItems = parseMapping(...storeLocation.items!);
+        const mappingLocation = <bigint | undefined>(
+            mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
         );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
+            state.mappings[loc].keys.push(mappingParts);
             state.stack.push(
                 new MappingLoad(
                     () => state.mappings,
-                    mappingLocation,
+                    loc,
                     mappingParts,
                     Object.keys(state.mappings).indexOf(mappingLocation.toString())
                 )
@@ -108,27 +106,26 @@ export default (_opcode: Opcode, state: EVM): void => {
         storeLocation.left instanceof SHA3 &&
         typeof storeLocation.right === 'bigint'
     ) {
-        const mappingItems = parseMapping(...storeLocation.left.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
+        const mappingItems = parseMapping(...storeLocation.left.items!);
+        const mappingLocation = <bigint | undefined>(
+            mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
         );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
+            state.mappings[loc].keys.push(mappingParts);
             state.stack.push(
                 new MappingLoad(
                     () => state.mappings,
-                    mappingLocation,
+                    loc,
                     mappingParts,
                     Object.keys(state.mappings).indexOf(mappingLocation.toString()),
                     storeLocation.right
@@ -143,27 +140,24 @@ export default (_opcode: Opcode, state: EVM): void => {
         typeof storeLocation.left === 'bigint' &&
         storeLocation.right instanceof SHA3
     ) {
-        const mappingItems = parseMapping(...storeLocation.right.items);
-        const mappingLocation = mappingItems.find(
-            (mappingItem: any) => typeof mappingItem === 'bigint'
-        );
-        const mappingParts = mappingItems.filter(
-            (mappingItem: any) => typeof mappingItem !== 'bigint'
-        );
+        const mappingItems = parseMapping(...storeLocation.right.items!);
+        const mappingLocation = mappingItems.find(mappingItem => typeof mappingItem === 'bigint');
+        const mappingParts = mappingItems.filter(mappingItem => typeof mappingItem !== 'bigint');
         if (mappingLocation && mappingParts.length > 0) {
-            if (!(mappingLocation in state.mappings)) {
-                state.mappings[mappingLocation] = {
-                    name: false,
+            const loc = Number(mappingLocation);
+            if (!(loc in state.mappings)) {
+                state.mappings[loc] = {
+                    name: undefined,
                     structs: [],
                     keys: [],
                     values: [],
                 };
             }
-            state.mappings[mappingLocation].keys.push(mappingParts);
+            state.mappings[loc].keys.push(mappingParts);
             state.stack.push(
                 new MappingLoad(
                     () => state.mappings,
-                    mappingLocation,
+                    loc,
                     mappingParts,
                     Object.keys(state.mappings).indexOf(mappingLocation.toString()),
                     storeLocation.left
