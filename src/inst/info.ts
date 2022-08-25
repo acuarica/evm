@@ -1,9 +1,6 @@
 import { Operand } from '../evm';
 import stringify from '../utils/stringify';
 
-/**
- * https://www.evm.codes/#35
- */
 export class CallDataLoad {
     readonly name = 'CALLDATALOAD';
     readonly type?: string;
@@ -29,16 +26,6 @@ export class CALLDATASIZE {
     readonly wrapped = false;
 
     toString = () => 'msg.data.length';
-}
-
-export class CALLDATACOPY {
-    readonly name = 'CALLDATACOPY';
-    readonly type?: string;
-    readonly wrapped: boolean = true;
-
-    constructor(readonly startLocation: any, readonly copyLength: any) {}
-
-    toString = () => `msg.data[${this.startLocation}:(${this.startLocation}+${this.copyLength})];`;
 }
 
 export class CallValue {

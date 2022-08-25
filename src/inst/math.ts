@@ -17,6 +17,18 @@ export class Add {
 
     constructor(readonly left: Operand, readonly right: Operand) {}
 
+    // get type() {
+    //     if (this.left.type === this.right.type) {
+    //         return this.left.type;
+    //     } else if (!this.left.type && this.right.type) {
+    //         return this.right.type;
+    //     } else if (!this.right.type && this.left.type) {
+    //         return this.left.type;
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
     toString = () => `${stringify(this.left)} + ${stringify(this.right)}`;
 }
 

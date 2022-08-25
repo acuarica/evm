@@ -50,11 +50,11 @@ export class Revert {
     readonly name = 'REVERT';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
-    readonly items: any;
+    readonly memoryStart?: Operand;
+    readonly memoryLength?: Operand;
+    readonly items?: Operand[];
 
-    constructor(items: any, memoryStart?: any, memoryLength?: any) {
+    constructor(items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -65,17 +65,11 @@ export class Revert {
 
     toString() {
         if (this.items) {
-            return 'revert(' + this.items.map((item: any) => stringify(item)).join(', ') + ');';
+            return 'revert(' + this.items.map(item => stringify(item)).join(', ') + ');';
         } else {
-            return (
-                'revert(memory[' +
-                stringify(this.memoryStart) +
-                ':(' +
-                stringify(this.memoryStart) +
-                '+' +
-                stringify(this.memoryLength) +
-                ')]);'
-            );
+            return `revert(memory[${stringify(this.memoryStart!)}:(${stringify(
+                this.memoryStart!
+            )}+${stringify(this.memoryLength!)})]);`;
         }
     }
 }
