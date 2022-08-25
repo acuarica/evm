@@ -4,15 +4,12 @@ import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
 import { OR, LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
-import { CallDataLoad, CALLDATASIZE, CALLDATACOPY, CallValue } from '../inst/info';
+import { CallDataLoad, CALLDATASIZE, CallValue } from '../inst/info';
 import { Return, Revert, Invalid, SelfDestruct } from '../inst/system';
 
 import EQ from './eq';
 import AND from './and';
 import SHA3 from './sha3';
-import CODECOPY from './codecopy';
-import EXTCODECOPY from './extcodecopy';
-import RETURNDATACOPY from './returndatacopy';
 import { MLOAD } from './mload';
 import { MSTORE } from './mstore';
 import SLOAD from './sload';
@@ -186,22 +183,19 @@ export default {
     CALLDATASIZE: (_opcode: Opcode, { stack }: EVM) => {
         stack.push(new CALLDATASIZE());
     },
-    CALLDATACOPY: (_opcode: Opcode, { stack, memory }: EVM) => {
-        const memoryLocation = stack.pop();
-        const startLocation = stack.pop();
-        const copyLength = stack.pop();
-        if (typeof memoryLocation !== 'number') {
-            // throw new Error('expected number in returndatacopy');
-        }
-        memory[memoryLocation as any] = new CALLDATACOPY(startLocation, copyLength);
-    },
+    CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
     CODESIZE: symbol0('this.code.length'),
-    CODECOPY,
+    CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
     GASPRICE: symbol0('tx.gasprice'),
     EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
-    EXTCODECOPY,
+    EXTCODECOPY: (_opcode: Opcode, { stack }: EVM) => {
+        const address = stack.pop();
+        datacopy(
+            (offset, size) => `address(${stringify(address)}).code[${offset}:(${offset}+${size})]`
+        );
+    },
     RETURNDATASIZE: symbol0('output.length'),
-    RETURNDATACOPY,
+    RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
     EXTCODEHASH: symbol1(address => `keccak256(address(${address}).code)`),
 
     // Block Information
@@ -378,7 +372,9 @@ function div(_opcode: Opcode, { stack }: EVM) {
     const right = stack.pop();
     stack.push(
         isBigInt(left) && isBigInt(right)
-            ? left / right
+            ? right === 0n
+                ? new Div(left, right)
+                : left / right
             : isBigInt(right) && right === 1n
             ? left
             : new Div(left, right)
@@ -401,6 +397,22 @@ function gt(_opcode: Opcode, { stack }: EVM) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? (left > right ? 1n : 0n) : new GT(left, right));
+}
+
+export function datacopy(fn: (offset: string, size: string) => string) {
+    return (_opcode: Opcode, { stack, memory }: EVM) => {
+        const dest = stack.pop();
+        const offset = stack.pop();
+        const size = stack.pop();
+        if (typeof dest !== 'number') {
+            // throw new Error('expected number in returndatacopy');
+        }
+        memory[dest as any] = {
+            name: 'SYMBOL',
+            wrapped: false,
+            toString: () => fn(stringify(offset), stringify(size)),
+        };
+    };
 }
 
 function push(opcode: Opcode, { stack }: EVM) {
