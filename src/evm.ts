@@ -26,27 +26,12 @@ import { SHA3 } from './opcodes/sha3';
 import { Add, Div } from './inst/math';
 import { SIG } from './opcodes/eq';
 import { CALL } from './opcodes/call';
-import { CALLDATACOPY, CallDataLoad } from './inst/info';
+import { CallDataLoad } from './inst/info';
 import { Return, Revert } from './inst/system';
 import { TopLevelFunction, Variable } from './opcodes/jumpi';
+import { stripMetadataHash } from './metadata';
 
-interface Event {
-    [key: string]: any;
-}
-
-type INST =
-    | GT
-    | LT
-    | SHA3
-    | Add
-    | SIG
-    | IsZero
-    | CALL
-    | Div
-    | CallDataLoad
-    | CALLDATACOPY
-    | Return
-    | Revert;
+type INST = GT | LT | SHA3 | Add | SIG | IsZero | CALL | Div | CallDataLoad | Return | Revert;
 
 export type Instruction =
     | {
@@ -68,24 +53,27 @@ export type Instruction =
 
 export type Operand = bigint | Instruction;
 
-interface Mapping {
-    [key: string]: any;
-}
-
 export class EVM {
     pc = 0;
     stack = new Stack<bigint | Instruction>();
     memory: { [location: number]: Operand } = {};
     opcodes: Opcode[] = [];
     instructions: Instruction[] = [];
-    jumps: any = {};
+    jumps: { [label: string]: true } = {};
     code: Uint8Array;
-    mappings: Mapping = {};
+    mappings: {
+        [key: string]: {
+            name: string | undefined;
+            structs: bigint[];
+            keys: Operand[][];
+            values: Operand[];
+        };
+    } = {};
     layer = 0;
     halted = false;
     functions: { [hash: string]: TopLevelFunction } = {};
     variables: { [key: string]: Variable } = {};
-    events: Event = {};
+    events: { [key: string]: any } = {};
     gasUsed = 0;
     conditions: Instruction[] = [];
 
@@ -108,6 +96,7 @@ export class EVM {
         clone.stack = this.stack.clone();
         clone.memory = { ...this.memory };
         clone.jumps = { ...this.jumps };
+        // clone.jumps = this.jumps;
         clone.mappings = this.mappings;
         clone.layer = this.layer + 1;
         clone.functions = this.functions;
@@ -202,41 +191,22 @@ export class EVM {
             .map(opcode => opcode.pc);
     }
 
-    getSwarmHash(): string | false {
-        const regex = /a165627a7a72305820([a-f0-9]{64})0029$/;
-        const bytecode = this.getBytecode();
-        const match = bytecode.match(regex);
-        if (match && match[1]) {
-            return 'bzzr://' + match[1];
-        } else {
-            return false;
-        }
+    getMetadataHash(): string | undefined {
+        const x = stripMetadataHash(this.getBytecode());
+        return x ? x[1] : undefined;
     }
 
     getABI(): any {
-        const abi: any = [];
+        const abi = [];
         if (this.instructions.length === 0) {
             this.parse();
         }
-        Object.keys(this.functions).forEach((key: string) => {
+        Object.keys(this.functions).forEach(key => {
             const item: any = abi.push({ type: 'function' });
             item.name = this.functions[key].label.split('(')[0];
             item.payable = this.functions[key].payable;
             item.constant = this.functions[key].constant;
         });
-    }
-
-    reset(): void {
-        this.pc = 0;
-        this.instructions = [];
-        this.stack.reset();
-        this.memory = {};
-        this.jumps = {};
-        this.mappings = {};
-        this.functions = {};
-        this.variables = {};
-        this.events = {};
-        this.gasUsed = 0;
     }
 
     parse(): Instruction[] {
@@ -257,7 +227,7 @@ export class EVM {
         const mappings = stringifyMappings(this.mappings);
         const variables = stringifyVariables(this.variables);
         const functions = Object.keys(this.functions)
-            .map((functionName: string) =>
+            .map(functionName =>
                 stringifyFunctions(functionName, this.functions[functionName], this.functionHashes)
             )
             .join('');
