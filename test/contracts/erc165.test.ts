@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import Contract from './utils/solc';
+import { compile } from './utils/solc';
 
 const CONTRACT = `
 pragma solidity 0.5.5;
@@ -12,17 +12,10 @@ contract Contract {
 }`;
 
 describe('contracts::erc165', () => {
-    let contract: Contract;
     let evm: EVM;
 
     before(() => {
-        contract = new Contract();
-        contract.load('erc165', CONTRACT);
-        evm = new EVM(contract.bytecode());
-    });
-
-    it('should compile without errors', () => {
-        expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        evm = new EVM(compile('erc165', CONTRACT));
     });
 
     it('should detect ERC165', () => {

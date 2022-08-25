@@ -1,38 +1,33 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import Contract from './utils/solc';
+import { compile } from './utils/solc';
 
 describe('contracts::dispatch', () => {
     describe('single method', () => {
-        const CONTRACT = `
-        pragma solidity 0.5.5;
+        const CONTRACT = `// SPDX-License-Identifier: MIT
+        pragma solidity 0.8.16;
         contract Contract {
             function get() external pure returns (uint8) {
                 return 5;
             }
         }`;
 
-        let contract: Contract;
         let evm: EVM;
 
         before(() => {
-            contract = new Contract();
-            contract.load('Contract', CONTRACT);
-            evm = new EVM(contract.bytecode());
-        });
-
-        it('should compile without errors', () => {
-            expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should decompile functions', () => {
+            console.log(evm.decompile());
             expect(evm.decompile()).to.match(/function get\(\) public view payable/);
         });
     });
 
     describe('simple', () => {
-        const CONTRACT = `pragma solidity 0.5.5;
+        const CONTRACT = `// SPDX-License-Identifier: MIT
+        pragma solidity 0.8.16;
         contract Contract {
             uint256 data = 0;
             function symbol() public { data = 1; }
@@ -40,17 +35,10 @@ describe('contracts::dispatch', () => {
             function thisAddress() public view returns (address) { return address(this); }
         }`;
 
-        let contract: Contract;
         let evm: EVM;
 
         before(() => {
-            contract = new Contract();
-            contract.load('Contract', CONTRACT);
-            evm = new EVM(contract.bytecode());
-        });
-
-        it('should compile without errors', () => {
-            expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should not detect selfdestruct', () => {

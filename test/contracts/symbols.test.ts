@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import Contract from './utils/solc';
+import { compile } from './utils/solc';
 
 describe('contracts::symbols', () => {
     const CONTRACT = `pragma solidity 0.5.5;
@@ -12,17 +12,10 @@ describe('contracts::symbols', () => {
             function setThis() public { _addr = address(this); }
         }`;
 
-    let contract: Contract;
     let evm: EVM;
 
     before(() => {
-        contract = new Contract();
-        contract.load('Contract', CONTRACT);
-        evm = new EVM(contract.bytecode());
-    });
-
-    it('should compile without errors', () => {
-        expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        evm = new EVM(compile('Contract', CONTRACT));
     });
 
     it('should find `BLOCKHASH` symbol', () => {

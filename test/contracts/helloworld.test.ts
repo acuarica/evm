@@ -1,36 +1,38 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import Contract from './utils/solc';
+import { compile } from './utils/solc';
+import { readFileSync } from 'fs';
+// import { readFileSync } from 'fs';
 
-const CONTRACT = `
-pragma solidity 0.5.5;
+// const CONTRACT = `
+// pragma solidity 0.5.5;
 
-contract Contract {
-    event HelloWorld(string);
+// contract A {
+//     uint256 hola;
+// }
 
-    function () external {
-        emit HelloWorld("Hello, world!");
-    }
-}
-`;
+// contract Contract {
+//     event HelloWorld(string);
 
-describe('contracts::helloworld', () => {
-    let contract: Contract;
+//     function () external {
+//         emit HelloWorld("Hello, world!");
+//     }
+// }
+// `;
+
+describe.only('contracts::helloworld', () => {
     let evm: EVM;
 
     before(() => {
-        contract = new Contract();
-        contract.load('helloworld', CONTRACT);
-        evm = new EVM(contract.bytecode());
-    });
-
-    it('should compile without errors', () => {
-        expect(contract.valid(), contract.errors().join('\n')).to.be.true;
+        const source = readFileSync('./test/contracts/Cryptomeria.sol', 'utf8');
+        // evm = new EVM(compile('Contract', CONTRACT));
+        evm = new EVM(compile('Cryptomeria', source, '0.8.16'));
     });
 
     it('should not detect selfdestruct', () => {
+        console.log(evm.decompile());
         expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
-    });
+    }).timeout(10000);
 });
