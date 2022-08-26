@@ -44,7 +44,9 @@ describe('data', () => {
                                 paramType.charAt(0).toUpperCase() === paramType.charAt(0)
                         )
                     ),
-                    `${functionSig}:${inspect(func.inputs)} does not seem to be a valid signature`
+                    `${functionSig}:${inspect(
+                        func.inputs
+                    )} does not seem to be a valid function signature`
                 ).to.be.true;
             }
         });
@@ -75,8 +77,12 @@ describe('data', () => {
                 expect(eventSig, `${eventSig} may contain uint|int|byte`).to.be.equal(
                     event.format()
                 );
-                expect(event.inputs.every(isValidType(_paramType => false)), inspect(event.inputs))
-                    .to.be.true;
+                expect(
+                    event.inputs.every(isValidType(_paramType => false)),
+                    `${eventSig}:${inspect(
+                        event.inputs
+                    )} does not seem to be a valid event signature`
+                ).to.be.true;
             }
         });
     });
