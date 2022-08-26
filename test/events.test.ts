@@ -1,24 +1,9 @@
 import { expect } from 'chai';
+import { EventFragment, ParamType } from 'ethers/lib/utils';
+import { inspect } from 'util';
 import * as events from '../data/events.json';
 
 describe('events.json', () => {
-    let validTypes: string[];
-
-    before(() => {
-        validTypes = ['bool', 'string', 'address', 'bytes'];
-
-        for (let i = 1; i <= 32; i++) {
-            validTypes.push('bytes' + i);
-        }
-
-        for (let i = 8; i <= 256; i += 8) {
-            validTypes.push('uint' + i);
-            validTypes.push('int' + i);
-        }
-
-        validTypes.forEach(type => validTypes.push(type + '[]'));
-    });
-
     it('should not contain duplicates', () => {
         expect(events).to.deep.equal([...new Set(events)]);
     });
@@ -38,34 +23,29 @@ describe('events.json', () => {
     });
 
     it('entries should contain valid arguments', () => {
-        events.forEach(eventName => {
-            const eventArgumentsRaw = /^[a-zA-Z0-9]+\(([a-zA-Z0-9,]*)\)$/.exec(eventName);
-            if (eventArgumentsRaw) {
-                const eventArguments = eventArgumentsRaw[1].split(',');
-                if (eventArguments.length === 1 && eventArguments[0] === '') {
-                    eventArguments.pop();
-                }
-                expect(
-                    eventArguments,
-                    eventName + ' contains `uint` (should be `uint256`)'
-                ).to.not.include('uint');
-                expect(
-                    eventArguments,
-                    eventName + ' contains `int` (should be `int256`)'
-                ).to.not.include('int');
-                expect(
-                    eventArguments,
-                    eventName + ' contains `byte` (should be `bytes1`)'
-                ).to.not.include('byte');
-                expect(
-                    eventArguments.filter(
-                        eventArgument => validTypes.indexOf(eventArgument) === -1
-                    ),
-                    eventName
-                ).to.deep.equal([]);
-            }
-        });
-    })
-        .timeout(10000)
-        .slow(5000);
+        for (const eventSig of events) {
+            const event = EventFragment.from(eventSig);
+            expect(eventSig, `${eventSig} may contain uint|int|byte`).to.be.equal(event.format());
+            expect(event.inputs.every(isValidType), inspect(event.inputs)).to.be.true;
+        }
+    });
 });
+
+const validTypes = [
+    'bool',
+    'string',
+    'address',
+    'bytes',
+    'function',
+    ...[...Array(32).keys()]
+        .map(i => i + 1)
+        .reduce((a, i) => [...a, `bytes${i}`, `uint${i * 8}`, `int${i * 8}`], [] as string[]),
+];
+
+function isValidType(param: ParamType): boolean {
+    return (
+        validTypes.includes(param.type) ||
+        (param.type === 'tuple' && param.components.every(isValidType)) ||
+        (param.baseType === 'array' && isValidType(param.arrayChildren))
+    );
+}
