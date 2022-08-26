@@ -29,9 +29,10 @@ module.exports = {
      * spec  One or more files, directories, or globs to test
      *                                                    [array] [default: ["test"]]
      * ```
+     *
+     * Additionally to `test`, we also include `check` tests.
+     * These tests do not test some functionality in our codebase.
+     * Instead, they check some external conditions.
      */
-    spec: [
-        // These are the same test files covered by the VS Code Host test runner.
-        'test/**/*.test.ts',
-    ],
+    spec: ['test/**/*.{test,check}.ts'],
 };
