@@ -49,7 +49,7 @@ describe('data', () => {
                     )} does not seem to be a valid function signature`
                 ).to.be.true;
             }
-        }).timeout(4000);
+        }).timeout(10000);
     });
 
     describe('events.json', () => {
