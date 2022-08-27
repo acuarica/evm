@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/codes';
 import { solc } from './utils/solc';
 import { readFileSync } from 'fs';
+import { OPCODES } from '../../src/opcode';
 // import { readFileSync } from 'fs';
 
 // const CONTRACT = `
@@ -35,7 +35,7 @@ describe('contracts::helloworld', () => {
 
     it('should not detect selfdestruct', () => {
         // console.log(evm.decompile());
-        expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+        expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
     }).timeout(10000);
 });

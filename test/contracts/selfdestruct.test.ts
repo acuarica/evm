@@ -1,6 +1,6 @@
 import { expect } from 'chai';
+import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/codes';
 import { solc } from './utils/solc';
 
 const CONTRACT = `
@@ -19,7 +19,7 @@ describe('contracts::selfdestruct', () => {
     });
 
     it('should detect selfdestruct', () => {
-        expect(evm.containsOpcode(SELFDESTRUCT)).to.be.true;
+        expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
     });
 });

@@ -1,12 +1,11 @@
 import { EVM, Instruction, Operand } from '../evm';
-import { Opcode } from '../opcode';
+import { Opcode, OPCODES } from '../opcode';
 import stringify from '../utils/stringify';
 import { CALLDATASIZE } from '../inst/info';
 import { CallValue } from '../inst/info';
 import { IsZero } from '../inst/logic';
 import { Return } from '../inst/system';
 import { MappingLoad, SLOAD } from './sload';
-import { JUMPDEST } from '../codes';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
@@ -206,7 +205,7 @@ export default (opcode: Opcode, state: EVM): void => {
         state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
     } else {
         const jumpLocationData = opcodes.find(o => o.pc === Number(jumpLocation));
-        if (!jumpLocationData || jumpLocationData.opcode !== JUMPDEST) {
+        if (!jumpLocationData || jumpLocationData.opcode !== OPCODES.JUMPDEST) {
             //state.halted = true;
             //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
             state.instructions.push(new Require(jumpCondition));

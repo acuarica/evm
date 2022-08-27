@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/codes';
 import { solc } from './utils/solc';
+import { OPCODES } from '../../src/opcode';
 
 describe('contracts::dispatch', () => {
     describe('single method', () => {
@@ -19,6 +19,7 @@ describe('contracts::dispatch', () => {
         });
 
         it('should decompile functions', () => {
+            console.log(evm.getBytecode());
             console.log(evm.decompile());
             expect(evm.decompile()).to.match(/function get\(\) public view payable/);
         });
@@ -40,7 +41,7 @@ describe('contracts::dispatch', () => {
         });
 
         it('should not detect selfdestruct', () => {
-            expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+            expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
             expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
         });
 

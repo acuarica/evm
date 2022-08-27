@@ -1,6 +1,5 @@
-import { JUMPDEST } from '../codes';
 import { EVM } from '../evm';
-import { Opcode } from '../opcode';
+import { Opcode, OPCODES } from '../opcode';
 import stringify from '../utils/stringify';
 
 export class JUMP {
@@ -34,13 +33,13 @@ export default (opcode: Opcode, state: EVM): void => {
         } else {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (!(opcode.pc + ':' + Number(jumpLocation) in state.jumps)) {
-                if (!jumpLocationData || jumpLocationData.opcode !== JUMPDEST) {
+                if (!jumpLocationData || jumpLocationData.opcode !== OPCODES.JUMPDEST) {
                     state.halted = true;
                     state.instructions.push(new JUMP(jumpLocation, true));
                 } else if (
                     jumpLocationData &&
                     jumpIndex >= 0 &&
-                    jumpLocationData.opcode === JUMPDEST
+                    jumpLocationData.opcode === OPCODES.JUMPDEST
                 ) {
                     state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
                     state.pc = jumpIndex;

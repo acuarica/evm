@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/codes';
 import { solc, VERSIONS } from './utils/solc';
+import { OPCODES } from '../../src/opcode';
 
 const HASHES = {
     '0.5.5': 'bzzr://096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
@@ -24,7 +24,7 @@ describe('contracts::empty', () => {
             });
 
             it('should not detect selfdestruct', () => {
-                expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+                expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
                 expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
             });
 

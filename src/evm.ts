@@ -6,20 +6,7 @@ import stringifyVariables from './utils/stringifyVariables';
 import stringifyFunctions from './utils/stringifyFunctions';
 import { stringifyInstructions } from './utils/stringifyInstructions';
 import { Stack } from './stack';
-import { Opcode } from './opcode';
-import {
-    STOP,
-    RETURN,
-    REVERT,
-    INVALID,
-    PUSH1,
-    PUSH32,
-    JUMPDEST,
-    SELFDESTRUCT,
-    codes,
-    names,
-    PUSH4,
-} from './codes';
+import { decode, Opcode, OPCODES } from './opcode';
 import { fromHex, toHex } from './hex';
 import { IsZero, LT, GT } from './inst/logic';
 import { SHA3 } from './opcodes/sha3';
@@ -113,28 +100,7 @@ export class EVM {
 
     getOpcodes(): Opcode[] {
         if (this.opcodes.length === 0) {
-            for (let index = 0; index < this.code.length; index++) {
-                const opcode = this.code[index];
-                const currentOp = {
-                    pc: index,
-                    opcode,
-                    name: codes[opcode as keyof typeof codes] ?? 'INVALID',
-                    toString: function () {
-                        const pc = this.pc.toString(16).padStart(4, '0').toUpperCase();
-                        const opcode = this.opcode.toString(16).padStart(2, '0').toUpperCase();
-                        const pushData = this.pushData ? ' 0x' + toHex(this.pushData) : '';
-
-                        return `${pc}    ${opcode}    ${this.name}${pushData}`;
-                    },
-                } as Opcode;
-                this.opcodes.push(currentOp);
-                if (opcode >= PUSH1 && opcode <= PUSH32) {
-                    const size = opcode - 0x5f;
-                    const data = this.code.subarray(index + 1, index + size + 1);
-                    currentOp.pushData = data;
-                    index += size;
-                }
-            }
+            this.opcodes = decode(this.code);
         }
         return this.opcodes;
     }
@@ -143,7 +109,7 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.opcode === PUSH4)
+                    .filter(opcode => opcode.opcode === OPCODES.PUSH4)
                     .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.functionHashes)
                     .map(hash => this.functionHashes[hash])
@@ -155,7 +121,7 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.opcode === PUSH32)
+                    .filter(opcode => opcode.opcode === OPCODES.PUSH32)
                     .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
                     .filter(hash => hash in this.eventHashes)
                     .map(hash => this.eventHashes[hash])
@@ -164,9 +130,16 @@ export class EVM {
     }
 
     containsOpcode(opcode: number | string): boolean {
+        const HALTS = [
+            OPCODES.STOP,
+            OPCODES.RETURN,
+            OPCODES.REVERT,
+            OPCODES.INVALID,
+            OPCODES.SELFDESTRUCT,
+        ] as number[];
         let halted = false;
-        if (typeof opcode === 'string' && opcode in names) {
-            opcode = (names as any)[opcode];
+        if (typeof opcode === 'string' && opcode in OPCODES) {
+            opcode = OPCODES[opcode as keyof typeof OPCODES];
         } else if (typeof opcode === 'string') {
             throw new Error('Invalid opcode provided');
         }
@@ -174,12 +147,12 @@ export class EVM {
             const currentOpcode = this.code[index];
             if (currentOpcode === opcode && !halted) {
                 return true;
-            } else if (currentOpcode === JUMPDEST) {
+            } else if (currentOpcode === OPCODES.JUMPDEST) {
                 halted = false;
-            } else if ([STOP, RETURN, REVERT, INVALID, SELFDESTRUCT].includes(currentOpcode)) {
+            } else if (HALTS.includes(currentOpcode)) {
                 halted = true;
-            } else if (currentOpcode >= PUSH1 && currentOpcode <= PUSH32) {
-                index += currentOpcode - PUSH1 + 0x01;
+            } else if (currentOpcode >= OPCODES.PUSH1 && currentOpcode <= OPCODES.PUSH32) {
+                index += currentOpcode - OPCODES.PUSH1 + 0x01;
             }
         }
         return false;
@@ -187,7 +160,7 @@ export class EVM {
 
     getJumpDestinations(): number[] {
         return this.getOpcodes()
-            .filter(opcode => opcode.opcode === JUMPDEST)
+            .filter(opcode => opcode.opcode === OPCODES.JUMPDEST)
             .map(opcode => opcode.pc);
     }
 
@@ -213,7 +186,7 @@ export class EVM {
             const opcodes = this.getOpcodes();
             for (this.pc; this.pc < opcodes.length && !this.halted; this.pc++) {
                 const opcode = opcodes[this.pc];
-                opcodeFunctions[opcode.name as keyof typeof opcodeFunctions](opcode, this);
+                opcodeFunctions[opcode.mnemonic](opcode, this);
             }
         }
         return this.instructions;
