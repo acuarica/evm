@@ -22,18 +22,23 @@ const METADATA_SOLC_0_8_16 = new RegExp(
     `a264${IPFS}5822([a-f0-9]{68})64${SOLC}43([a-f0-9]{6})0033$`
 );
 
-const protocols: [RegExp, string][] = [
+const protocols: [RegExp, 'bzzr' | 'ipfs'][] = [
     [METADATA_SOLC_0_5_5, 'bzzr'],
     [METADATA_SOLC_0_5_17, 'bzzr'],
     [METADATA_SOLC_0_8_16, 'ipfs'],
 ];
 
 /**
+ * Represents the metadata hash protocols embedded in bytecode by `solc`.
+ */
+export type MetadataHash = `bzzr://${string}` | `ipfs://${string}`;
+
+/**
  *
  * @param code
  * @returns
  */
-export function stripMetadataHash(code: string): [string, string] | undefined {
+export function stripMetadataHash(code: string): [string, MetadataHash | null] {
     for (const [re, protocol] of protocols) {
         const match = code.match(re);
         if (match && match[1]) {
@@ -41,5 +46,5 @@ export function stripMetadataHash(code: string): [string, string] | undefined {
         }
     }
 
-    return undefined;
+    return [code, null];
 }

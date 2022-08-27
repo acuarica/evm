@@ -29,7 +29,7 @@ import { CALL } from './opcodes/call';
 import { CallDataLoad } from './inst/info';
 import { Return, Revert } from './inst/system';
 import { TopLevelFunction, Variable } from './opcodes/jumpi';
-import { stripMetadataHash } from './metadata';
+import { MetadataHash, stripMetadataHash } from './metadata';
 
 type INST = GT | LT | SHA3 | Add | SIG | IsZero | CALL | Div | CallDataLoad | Return | Revert;
 
@@ -191,9 +191,8 @@ export class EVM {
             .map(opcode => opcode.pc);
     }
 
-    getMetadataHash(): string | undefined {
-        const x = stripMetadataHash(this.getBytecode());
-        return x ? x[1] : undefined;
+    getMetadataHash(): MetadataHash | null {
+        return stripMetadataHash(this.getBytecode())[1];
     }
 
     getABI(): any {
