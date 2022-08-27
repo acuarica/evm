@@ -1,12 +1,10 @@
 import * as crypto from 'crypto';
 import { expect } from 'chai';
-import { compile } from './utils/solc';
+import { solc } from './utils/solc';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
 
 const CONTRACT = `
-pragma solidity 0.5.5;
-
 contract C {
     bytes32 constant data = "[randomData]";
 }
@@ -16,7 +14,7 @@ function generateFFMetadataContract() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         const randomData = crypto.randomBytes(16).toString('hex');
-        const evm = new EVM(compile('C', CONTRACT.replace('[randomData]', randomData)));
+        const evm = new EVM(solc('C', CONTRACT.replace('[randomData]', randomData)));
         const swarmHash = evm.getMetadataHash();
 
         if (swarmHash && typeof swarmHash === 'string' && swarmHash.includes('ff')) {

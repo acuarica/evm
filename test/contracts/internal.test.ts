@@ -1,12 +1,10 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile } from './utils/solc';
+import { solc } from './utils/solc';
 
 describe('contracts::internal', () => {
     describe('internal', () => {
-        const CONTRACT = `// SPDX-License-Identifier: MIT
-        pragma solidity 0.8.16;
-
+        const CONTRACT = `
         abstract contract Context {
             function _msgSender() internal view virtual returns (address) {
                 return msg.sender;
@@ -55,7 +53,7 @@ describe('contracts::internal', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
         });
 
         it.skip('should decompile functions', () => {

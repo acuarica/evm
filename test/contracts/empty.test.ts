@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import { compile, VERSIONS } from './utils/solc';
+import { solc, VERSIONS } from './utils/solc';
 
 const HASHES = {
-    '0.5.5': 'bzzr://21979a02bd63f5db5ee0ced275b81e8407ae1252d879b2143fe47da327f26dbd',
-    '0.5.17': 'bzzr://e7a2b3aa2410f08d6ab702e1d605cd779c106134ed242b57d0dbe67390d4a766',
-    '0.8.16': 'ipfs://1220b9c8a18d8f2f694ef2a30219acc4e9ddf79dd3eef10c395d968869a3480fd6cd',
+    '0.5.5': 'bzzr://096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
+    '0.5.17': 'bzzr://b3196c0c582734d74810ef2241e728f6b83b6aa79d5f53732f29849c4bb4a25a',
+    '0.8.16': 'ipfs://122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
 };
 
 const DECOMPILE = `revert();
@@ -15,14 +15,12 @@ const DECOMPILE = `revert();
 describe('contracts::empty', () => {
     VERSIONS.forEach(version => {
         describe(`using solc-v${version}`, () => {
-            const CONTRACT = `// SPDX-License-Identifier: MIT
-            pragma solidity ${version};
-            contract Empty { }`;
+            const CONTRACT = `contract Empty { }`;
 
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(compile('Empty', CONTRACT, version));
+                evm = new EVM(solc('Empty', CONTRACT, version));
             });
 
             it('should not detect selfdestruct', () => {

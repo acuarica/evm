@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import { compile } from './utils/solc';
+import { solc } from './utils/solc';
 import { readFileSync } from 'fs';
 // import { readFileSync } from 'fs';
 
@@ -27,7 +27,10 @@ describe('contracts::helloworld', () => {
     before(() => {
         const source = readFileSync('./test/contracts/Cryptomeria.sol', 'utf8');
         // evm = new EVM(compile('Contract', CONTRACT));
-        evm = new EVM(compile('Cryptomeria', source, '0.8.16'));
+        evm = new EVM(solc('Cryptomeria', source, '0.8.16'));
+
+        // console.log(evm.getBytecode());
+        // evm.getOpcodes().forEach(op => console.log(op.toString()));
     });
 
     it('should not detect selfdestruct', () => {

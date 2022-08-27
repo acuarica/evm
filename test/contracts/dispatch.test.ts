@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { SELFDESTRUCT } from '../../src/codes';
-import { compile } from './utils/solc';
+import { solc } from './utils/solc';
 
 describe('contracts::dispatch', () => {
     describe('single method', () => {
-        const CONTRACT = `// SPDX-License-Identifier: MIT
-        pragma solidity 0.8.16;
+        const CONTRACT = `
         contract Contract {
             function get() external pure returns (uint8) {
                 return 5;
@@ -16,7 +15,7 @@ describe('contracts::dispatch', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should decompile functions', () => {
@@ -26,8 +25,7 @@ describe('contracts::dispatch', () => {
     });
 
     describe('simple', () => {
-        const CONTRACT = `// SPDX-License-Identifier: MIT
-        pragma solidity 0.8.16;
+        const CONTRACT = `
         contract Contract {
             uint256 data = 0;
             function symbol() public { data = 1; }
@@ -38,7 +36,7 @@ describe('contracts::dispatch', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should not detect selfdestruct', () => {

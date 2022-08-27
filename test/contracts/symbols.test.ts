@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile } from './utils/solc';
+import { solc } from './utils/solc';
 
 describe('contracts::symbols', () => {
-    const CONTRACT = `pragma solidity 0.5.5;
-        contract Contract {
+    const CONTRACT = `
+        contract C {
             address _addr;
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
             function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
@@ -15,7 +15,7 @@ describe('contracts::symbols', () => {
     let evm: EVM;
 
     before(() => {
-        evm = new EVM(compile('Contract', CONTRACT));
+        evm = new EVM(solc('C', CONTRACT));
     });
 
     it('should find `BLOCKHASH` symbol', () => {

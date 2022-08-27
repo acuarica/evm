@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT                                                                               
-                                                    
-pragma solidity 0.8.16;
 
 contract ERC20 {
     function transfer(address recipient, uint256 amount) public virtual {

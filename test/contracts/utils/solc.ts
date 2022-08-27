@@ -10,15 +10,30 @@ const solcs = Object.fromEntries(
     ])
 );
 
-export function compile(contractName: string, content: string, version: Version = '0.5.5'): string {
+/**
+ *
+ * https://docs.soliditylang.org/en/v0.8.16/using-the-compiler.html#compiler-input-and-output-json-description
+ *
+ * @param contractName
+ * @param content
+ * @param version
+ * @returns
+ */
+export function solc(
+    contractName: string,
+    content: string,
+    version: Version = '0.5.5',
+    license: 'MIT' = 'MIT'
+): string {
     const source = 'SOURCE' as const;
-    const solc = solcs[version];
 
     const input = {
         language: 'Solidity',
         sources: {
             [source]: {
-                content,
+                content:
+                    `// SPDX-License-Identifier: ${license}\npragma solidity ${version};\n` +
+                    content,
             },
         },
         settings: {
@@ -35,7 +50,7 @@ export function compile(contractName: string, content: string, version: Version 
         opcodes: string;
         sourceMap: string;
     };
-    const output = JSON.parse(solc.compile(JSON.stringify(input))) as {
+    const output = JSON.parse(solcs[version].compile(JSON.stringify(input))) as {
         contracts: {
             [source]: {
                 [contractName: string]: { evm: { bytecode: Bytecode; deployedBytecode: Bytecode } };
