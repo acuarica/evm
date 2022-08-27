@@ -79,12 +79,4 @@ describe('stack', () => {
         expect(stack1.elements).to.deep.equal([]);
         expect(stack2.elements).to.deep.equal([3]);
     });
-
-    it('should reset successfully', () => {
-        const stack = new Stack<number>();
-        stack.push(100);
-        expect(stack.elements).to.deep.equal([100]);
-        stack.reset();
-        expect(stack.elements).to.deep.equal([]);
-    });
 });

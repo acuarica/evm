@@ -48,8 +48,4 @@ export class Stack<T> {
         stack.elements = [...this.elements];
         return stack;
     }
-
-    reset(): void {
-        this.elements = [];
-    }
 }
