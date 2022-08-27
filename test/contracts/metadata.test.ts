@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { expect } from 'chai';
 import { solc } from './utils/solc';
 import EVM from '../utils/evmtest';
-import { SELFDESTRUCT } from '../../src/codes';
+import { OPCODES } from '../../src/opcode';
 
 const CONTRACT = `
 contract C {
@@ -35,7 +35,7 @@ describe('contracts::metadata', () => {
     });
 
     it('should not detect selfdestruct', () => {
-        expect(evm.containsOpcode(SELFDESTRUCT)).to.be.false;
+        expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
     });
 });
