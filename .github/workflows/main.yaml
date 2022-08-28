@@ -7,6 +7,9 @@ on:
     paths-ignore:
       - '**.md'
 
+env:
+  FORCE_COLOR: 3
+
 jobs:
   build:
     runs-on: ubuntu-latest
