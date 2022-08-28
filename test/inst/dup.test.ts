@@ -15,7 +15,7 @@ describe('DUP', () => {
 
             evm.parse();
 
-            expect(evm.stack.elements).to.deep.equal([2n, ...ignored, 2n]);
+            expect(evm.stack.values).to.deep.equal([2n, ...ignored, 2n]);
         });
 
         it(`should throw when #${size + 1} element is not present on the stack`, () => {
