@@ -182,12 +182,4 @@ describe('smoke', () => {
             if (i >= 20) break;
         }
     });
-
-    it.skip(`should bytecode from open source`, () => {
-        // 'mapping \(address => unknown\) public balanceOf;$/m,
-        // const a = 'mapping (address => mapping (address => uint256)) public allowance';
-        // const a= 'uint256 public decimals';
-        //     const f = utils.Fragment. from(a).format();
-        //     console.log(f);
-    });
 });
