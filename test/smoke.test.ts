@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { readFileSync } from 'fs';
+import { inspect } from 'util';
 import EVM from './utils/evmtest';
 
 describe('smoke', () => {
@@ -41,6 +42,7 @@ describe('smoke', () => {
                 /^function approve\(address _arg0, uint256 _arg1\) public payable {$/m,
                 /^function transferFrom\(address _arg0, address _arg1, uint256 _arg2\) public payable returns \(uint256\) {$/m,
                 /^function mintToken\(address _arg0, uint256 _arg1\) public payable {$/m,
+                /^function name\(\)/m,
                 /^function symbol\(\) public payable {$/m,
                 /^function transfer\(address _arg0, uint256 _arg1\) public payable {$/m,
                 /^function freezeAccount\(address _arg0, bool _arg1\) public payable {$/m,
@@ -48,6 +50,12 @@ describe('smoke', () => {
             ],
         },
         {
+            /**
+             * Bytecode of USDC _proxy_ contract.
+             * Fetched with this RPC provider https://api.avax-test.network/ext/bc/C/rpc.
+             *
+             * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
+             */
             name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
             count: 750,
             lines: [
@@ -89,18 +97,49 @@ describe('smoke', () => {
                 expect(opcodes).to.be.of.length(count);
             });
 
-            it(`should find proper functions (not variables) correctly`, () => {
-                const functions = lines
-                    .map(l =>
-                        l.source
-                            .replace(/\\/g, '')
-                            .replace('^', '')
-                            .replace('$', '')
-                            .replace('{', '')
-                    )
-                    .filter(l => l.startsWith('function'))
-                    .map(l => utils.Fragment.from(l).format());
+            it(`should detect functions correctly`, () => {
+                const defs = lines.map(line =>
+                    line.source
+                        .replace(/\\/g, '')
+                        .replace('^', '')
+                        .replace('$', '')
+                        .replace('{', '')
+                        .replace(';', '')
+                );
+
+                const functions = defs
+                    .filter(line => line.startsWith('function '))
+                    .map(line => utils.Fragment.from(line).format());
                 expect(evm.getFunctions()).to.include.members(functions);
+
+                const variables = defs
+                    .filter(line => line.includes(' public ') && !line.includes('('))
+                    .map(line => line.split(' ').pop() + '()');
+                expect(evm.getFunctions()).to.include.members(variables);
+
+                const mappings = defs
+                    .filter(line => line.startsWith('mapping ') && line.includes(' public '))
+                    .map(line => {
+                        const parts = line
+                            .replace(/mapping /g, '')
+                            .replace(/\(/g, '')
+                            .replace(/\)/g, '')
+                            .replace(/ => /g, ' ')
+                            .replace(' public ', ' ')
+                            .split(' ');
+                        const name = parts.pop();
+                        parts.pop();
+                        return `${name!}(${parts.join(',')})`;
+                    });
+                expect(evm.getFunctions()).to.include.members(mappings);
+
+                if (lines.length > 0) {
+                    const expected = [...functions, ...variables, ...mappings];
+                    expect(
+                        new Set(evm.getFunctions()),
+                        `actual ${inspect(evm.getFunctions())} != expected ${inspect(expected)}`
+                    ).to.be.deep.equal(new Set(expected));
+                }
             });
 
             it(`should decompile contract correctly`, () => {
