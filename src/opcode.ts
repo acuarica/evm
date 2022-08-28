@@ -1,7 +1,45 @@
 import { toHex } from './hex';
 
 /**
- *
+ * Set of `PUSHn` opcodes.
+ */
+export const PUSHES = {
+    PUSH1: 0x60,
+    PUSH2: 0x61,
+    PUSH3: 0x62,
+    PUSH4: 0x63,
+    PUSH5: 0x64,
+    PUSH6: 0x65,
+    PUSH7: 0x66,
+    PUSH8: 0x67,
+    PUSH9: 0x68,
+    PUSH10: 0x69,
+    PUSH11: 0x6a,
+    PUSH12: 0x6b,
+    PUSH13: 0x6c,
+    PUSH14: 0x6d,
+    PUSH15: 0x6e,
+    PUSH16: 0x6f,
+    PUSH17: 0x70,
+    PUSH18: 0x71,
+    PUSH19: 0x72,
+    PUSH20: 0x73,
+    PUSH21: 0x74,
+    PUSH22: 0x75,
+    PUSH23: 0x76,
+    PUSH24: 0x77,
+    PUSH25: 0x78,
+    PUSH26: 0x79,
+    PUSH27: 0x7a,
+    PUSH28: 0x7b,
+    PUSH29: 0x7c,
+    PUSH30: 0x7d,
+    PUSH31: 0x7e,
+    PUSH32: 0x7f,
+};
+
+/**
+ * Set of opcodes defined by the EVM.
  */
 export const OPCODES = {
     STOP: 0x00,
@@ -65,38 +103,7 @@ export const OPCODES = {
     MSIZE: 0x59,
     GAS: 0x5a,
     JUMPDEST: 0x5b,
-    PUSH1: 0x60,
-    PUSH2: 0x61,
-    PUSH3: 0x62,
-    PUSH4: 0x63,
-    PUSH5: 0x64,
-    PUSH6: 0x65,
-    PUSH7: 0x66,
-    PUSH8: 0x67,
-    PUSH9: 0x68,
-    PUSH10: 0x69,
-    PUSH11: 0x6a,
-    PUSH12: 0x6b,
-    PUSH13: 0x6c,
-    PUSH14: 0x6d,
-    PUSH15: 0x6e,
-    PUSH16: 0x6f,
-    PUSH17: 0x70,
-    PUSH18: 0x71,
-    PUSH19: 0x72,
-    PUSH20: 0x73,
-    PUSH21: 0x74,
-    PUSH22: 0x75,
-    PUSH23: 0x76,
-    PUSH24: 0x77,
-    PUSH25: 0x78,
-    PUSH26: 0x79,
-    PUSH27: 0x7a,
-    PUSH28: 0x7b,
-    PUSH29: 0x7c,
-    PUSH30: 0x7d,
-    PUSH31: 0x7e,
-    PUSH32: 0x7f,
+    ...PUSHES,
     DUP1: 0x80,
     DUP2: 0x81,
     DUP3: 0x82,
@@ -154,9 +161,47 @@ const MNEMONICS = Object.fromEntries(
 );
 
 /**
+ * Represents all unary opcodes defined by the EVM.
+ * Essentially, all but `PUSHn` opcodes are unary opcodes.
+ */
+export interface Unary {
+    /**
+     * Represents a valid opcode.
+     *
+     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+     *
+     * If the `opcode` given is not a valid opcode,
+     * you can provide `INVALID` as `mnemonic`.
+     */
+    mnemonic: Exclude<keyof typeof OPCODES, keyof typeof PUSHES>;
+
+    /**
+     * A `Unary` opcode does not include any `pushData`.
+     */
+    pushData: null;
+}
+
+/**
+ * Represents a `PUSHn` mnemonic augmented with its `pushData`.
+ */
+export interface Push {
+    /**
+     * A `PUSHn` opcode only permits a `PUSHn` opcode.
+     */
+    mnemonic: keyof typeof PUSHES;
+
+    /**
+     * If this `Opcode` is a `PUSHn` instruction,
+     * then `pushData` contains the data attached to this instruction.
+     * Otherwise, `null`.
+     */
+    pushData: Uint8Array;
+}
+
+/**
  *
  */
-export interface Opcode {
+export type Opcode = {
     /**
      * The offset in the bytecode where this `Opcode` was found.
      */
@@ -167,24 +212,7 @@ export interface Opcode {
      * The `opcode` may not be a valid opcode.
      */
     readonly opcode: number;
-
-    /**
-     * Represents a valid opcode.
-     *
-     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
-     *
-     * If the `opcode` given is not a valid opcode,
-     * you can provide `INVALID` as `mnemonic`.
-     */
-    readonly mnemonic: keyof typeof OPCODES;
-
-    /**
-     * If this `Opcode` is a `PUSHn` instruction,
-     * then `pushData` contains the data attached to this instruction.
-     * Otherwise, `null`.
-     */
-    readonly pushData: Uint8Array | null;
-}
+} & (Unary | Push);
 
 /**
  *
@@ -196,23 +224,39 @@ export function decode(code: Uint8Array): Opcode[] {
 
     for (let i = 0; i < code.length; i++) {
         const opcode = code[i];
+        const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
         opcodes.push({
             pc: i,
             opcode,
-            mnemonic: MNEMONICS[opcode] ?? 'INVALID',
-            pushData:
-                opcode >= OPCODES.PUSH1 && opcode <= OPCODES.PUSH32
-                    ? (() => {
+            ...(isPush(mnemonic)
+                ? {
+                      mnemonic,
+                      pushData: (() => {
                           const pushSize = opcode - OPCODES.PUSH1 + 0x01;
                           const data = code.subarray(i + 1, i + pushSize + 1);
                           i += pushSize;
                           return data;
-                      })()
-                    : null,
+                      })(),
+                  }
+                : {
+                      mnemonic,
+                      pushData: null,
+                  }),
         });
     }
 
     return opcodes;
+
+    /**
+     * Asserts whether `mnemonic` is a `PUSHn` opcode.
+     *
+     * @param mnemonic the `mnemonic` to check.
+     * @returns `true` when `mnemonic` is a `PUSHn` opcode.
+     * `false` otherwise.
+     */
+    function isPush(mnemonic: keyof typeof OPCODES): mnemonic is keyof typeof PUSHES {
+        return mnemonic in PUSHES;
+    }
 }
 
 export function formatOpcode(this: Opcode) {

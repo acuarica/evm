@@ -109,8 +109,11 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.opcode === OPCODES.PUSH4)
-                    .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
+                    .filter(
+                        (opcode): opcode is Opcode & { mnemonic: 'PUSH4' } =>
+                            opcode.opcode === OPCODES.PUSH4
+                    )
+                    .map(opcode => toHex(opcode.pushData))
                     .filter(hash => hash in this.functionHashes)
                     .map(hash => this.functionHashes[hash])
             ),
@@ -121,8 +124,11 @@ export class EVM {
         return [
             ...new Set(
                 this.getOpcodes()
-                    .filter(opcode => opcode.opcode === OPCODES.PUSH32)
-                    .map(opcode => (opcode.pushData ? toHex(opcode.pushData) : ''))
+                    .filter(
+                        (opcode): opcode is Opcode & { mnemonic: 'PUSH32' } =>
+                            opcode.opcode === OPCODES.PUSH32
+                    )
+                    .map(opcode => toHex(opcode.pushData))
                     .filter(hash => hash in this.eventHashes)
                     .map(hash => this.eventHashes[hash])
             ),
