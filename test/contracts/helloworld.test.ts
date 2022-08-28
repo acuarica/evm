@@ -3,7 +3,6 @@ import EVM from '../utils/evmtest';
 import { compile } from './utils/solc';
 import { readFileSync } from 'fs';
 import { OPCODES } from '../../src/opcode';
-// import { readFileSync } from 'fs';
 
 // const CONTRACT = `
 // pragma solidity 0.5.5;
@@ -21,7 +20,7 @@ import { OPCODES } from '../../src/opcode';
 // }
 // `;
 
-describe('contracts::helloworld', () => {
+describe.skip('contracts::helloworld', () => {
     let evm: EVM;
 
     before(() => {
@@ -34,8 +33,8 @@ describe('contracts::helloworld', () => {
     });
 
     it('should not detect selfdestruct', () => {
-        // console.log(evm.decompile());
+        console.log(evm.decompile());
         expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
-    }).timeout(10000);
+    }).timeout(2000);
 });
