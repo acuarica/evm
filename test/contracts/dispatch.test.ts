@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { solc } from './utils/solc';
+import { compile } from './utils/solc';
 import { OPCODES } from '../../src/opcode';
 
 describe('contracts::dispatch', () => {
@@ -15,12 +15,10 @@ describe('contracts::dispatch', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should decompile functions', () => {
-            console.log(evm.getBytecode());
-            console.log(evm.decompile());
             expect(evm.decompile()).to.match(/function get\(\) public view payable/);
         });
     });
@@ -37,7 +35,7 @@ describe('contracts::dispatch', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
         it('should not detect selfdestruct', () => {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { solc, VERSIONS } from './utils/solc';
+import { compile, solcs, VERSIONS } from './utils/solc';
 import { OPCODES } from '../../src/opcode';
 
 const HASHES = {
@@ -14,13 +14,13 @@ const DECOMPILE = `revert();
 
 describe('contracts::empty', () => {
     VERSIONS.forEach(version => {
-        describe(`using solc-v${version}`, () => {
+        describe(`using solc-v${solcs[version].version()}`, () => {
             const CONTRACT = `contract Empty { }`;
 
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(solc('Empty', CONTRACT, version));
+                evm = new EVM(compile('Empty', CONTRACT, version));
             });
 
             it('should not detect selfdestruct', () => {
@@ -41,8 +41,6 @@ describe('contracts::empty', () => {
             });
 
             it('should decompile bytecode', () => {
-                // console.log(evm.getOpcodes().forEach(op => console.log(op.toString())));
-                // console.log(evm.decompile());
                 expect(evm.decompile()).to.be.equal(DECOMPILE);
             });
         });

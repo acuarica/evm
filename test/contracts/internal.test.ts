@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { solc } from './utils/solc';
+import { compile } from './utils/solc';
 
 describe('contracts::internal', () => {
     describe('internal', () => {
@@ -53,7 +53,7 @@ describe('contracts::internal', () => {
         let evm: EVM;
 
         before(() => {
-            evm = new EVM(solc('Contract', CONTRACT, '0.8.16'));
+            evm = new EVM(compile('Contract', CONTRACT, '0.8.16'));
         });
 
         it.skip('should decompile functions', () => {

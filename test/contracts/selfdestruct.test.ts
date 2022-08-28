@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
-import { solc } from './utils/solc';
+import { compile } from './utils/solc';
 
 const CONTRACT = `
 contract C {
@@ -15,7 +15,7 @@ describe('contracts::selfdestruct', () => {
     let evm: EVM;
 
     before(() => {
-        evm = new EVM(solc('C', CONTRACT));
+        evm = new EVM(compile('C', CONTRACT));
     });
 
     it('should detect selfdestruct', () => {

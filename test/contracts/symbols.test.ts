@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { solc } from './utils/solc';
+import { compile } from './utils/solc';
 
 describe('contracts::symbols', () => {
     const CONTRACT = `
@@ -15,7 +15,7 @@ describe('contracts::symbols', () => {
     let evm: EVM;
 
     before(() => {
-        evm = new EVM(solc('C', CONTRACT));
+        evm = new EVM(compile('C', CONTRACT));
     });
 
     it('should find `BLOCKHASH` symbol', () => {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { solc } from './utils/solc';
+import { compile } from './utils/solc';
 import { readFileSync } from 'fs';
 import { OPCODES } from '../../src/opcode';
 // import { readFileSync } from 'fs';
@@ -27,7 +27,7 @@ describe('contracts::helloworld', () => {
     before(() => {
         const source = readFileSync('./test/contracts/Cryptomeria.sol', 'utf8');
         // evm = new EVM(compile('Contract', CONTRACT));
-        evm = new EVM(solc('Cryptomeria', source, '0.8.16'));
+        evm = new EVM(compile('Cryptomeria', source, '0.8.16'));
 
         // console.log(evm.getBytecode());
         // evm.getOpcodes().forEach(op => console.log(op.toString()));
