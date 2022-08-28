@@ -26,17 +26,17 @@ contract('internal', version => {
 
     it('should decompile bytecode from `internal` method with different arguments', () => {
         const CONTRACT = `contract C {
-                    mapping(address => uint256) private _values;
-                    function _getValue(address from) internal view returns (uint256) {
-                        return _values[from];
-                    }
-                    function getForSender() external view returns (uint256) {
-                        return _getValue(msg.sender);
-                    }
-                    function getForArg(address from) external view returns (uint256) {
-                        return _getValue(from);
-                    }
-                }`;
+            mapping(address => uint256) private _values;
+            function _getValue(address from) internal view returns (uint256) {
+                return _values[from];
+            }
+            function getForSender() external view returns (uint256) {
+                return _getValue(msg.sender);
+            }
+            function getForArg(address from) external view returns (uint256) {
+                return _getValue(from);
+            }
+        }`;
         const evm = new EVM(compile('C', CONTRACT, version));
 
         const text = evm.decompile();
@@ -46,21 +46,21 @@ contract('internal', version => {
 
     it.skip('should decompile bytecode from `internal` method without inlining function', () => {
         const CONTRACT = `contract C {
-                    mapping(uint256 => uint256) private _values;
-                    function _getValue(uint256 n) internal view returns (uint256) {
-                        uint256 result = 0;
-                        for (uint256 i = 0; i < n; i++) {
-                            result += _values[i];
-                        }
-                        return result;
-                    }
-                    function getFor5() external view returns (uint256) {
-                        return _getValue(5);
-                    }
-                    function getForArg(uint256 n) external view returns (uint256) {
-                        return _getValue(n);
-                    }
-                }`;
+            mapping(uint256 => uint256) private _values;
+            function _getValue(uint256 n) internal view returns (uint256) {
+                uint256 result = 0;
+                for (uint256 i = 0; i < n; i++) {
+                    result += _values[i];
+                }
+                return result;
+            }
+            function getFor5() external view returns (uint256) {
+                return _getValue(5);
+            }
+            function getForArg(uint256 n) external view returns (uint256) {
+                return _getValue(n);
+            }
+        }`;
         const evm = new EVM(compile('C', CONTRACT, version));
 
         const text = evm.decompile();
