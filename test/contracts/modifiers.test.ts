@@ -3,9 +3,7 @@ import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
 contract('modifiers', version => {
-    let evm: EVM;
-
-    before(() => {
+    it('should decompile bytecode', () => {
         const CONTRACT = `contract C {
             uint256 private _value;
             address private _owner;
@@ -27,10 +25,8 @@ contract('modifiers', version => {
                 _value = value + 3;
             }
         }`;
-        evm = new EVM(compile('C', CONTRACT, version));
-    });
+        const evm = new EVM(compile('C', CONTRACT, version));
 
-    it('should decompile bytecode', () => {
         const text = evm.decompile();
         expect(text, text).to.not.match(/return msg.sender;/);
         expect(text, text).to.match(/if\(storage\[1\] == msg.sender\) \{$/m);
