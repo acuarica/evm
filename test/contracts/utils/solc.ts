@@ -87,3 +87,13 @@ export function compile(
         return 'contracts' in output && (!('errors' in output) || output.errors.length === 0);
     }
 }
+
+export function contract(title: string, fn: (version: Version) => void) {
+    describe(`contracts::${title}`, () => {
+        (process.env['SOLC'] ? [process.env['SOLC'] as Version] : VERSIONS).forEach(version => {
+            describe(`using solc-v${solcs[version].version()}`, () => {
+                fn(version);
+            });
+        });
+    });
+}
