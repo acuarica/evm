@@ -39,8 +39,7 @@ describe('contracts::empty', () => {
             });
 
             it('should decompile bytecode', () => {
-                const DECOMPILE = 'revert();\n';
-                expect(evm.decompile()).to.be.equal(DECOMPILE);
+                expect(evm.decompile()).to.be.equal('revert();\n');
             });
         });
     });
