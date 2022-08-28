@@ -44,7 +44,7 @@ describe('contracts::dispatch', () => {
         });
 
         it('should function signatures', () => {
-            expect(evm.decompile()).to.match(/return\(this\);$/m);
+            expect(evm.decompile()).to.match(/return this;$/m);
         });
     });
 });

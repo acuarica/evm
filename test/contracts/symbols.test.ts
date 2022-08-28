@@ -19,14 +19,14 @@ describe('contracts::symbols', () => {
     });
 
     it('should find `BLOCKHASH` symbol', () => {
-        expect(evm.decompile()).to.match(/return\(blockhash\(7\)\);$/m);
+        expect(evm.decompile()).to.match(/return blockhash\(7\);$/m);
     });
 
     it('should find `BALANCE` symbol', () => {
-        expect(evm.decompile()).to.match(/return\(_arg0.balance\);$/m);
+        expect(evm.decompile()).to.match(/return _arg0.balance;$/m);
     });
 
     it('should find `ADDRESS` symbol', () => {
-        expect(evm.decompile()).to.match(/return\(this\);$/m);
+        expect(evm.decompile()).to.match(/return this;$/m);
     });
 });

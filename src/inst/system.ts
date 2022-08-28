@@ -41,7 +41,9 @@ export class Return {
         ) {
             return 'return "' + hex2a(this.items[2].toString(16)) + '";';
         } else {
-            return 'return(' + this.items.map((item: any) => stringify(item)).join(', ') + ');';
+            return this.items.length === 1
+                ? `return ${stringify(this.items[0])};`
+                : `return (${this.items.map(item => stringify(item)).join(', ')});`;
         }
     }
 }
