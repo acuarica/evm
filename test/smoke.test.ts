@@ -80,7 +80,7 @@ describe('smoke', () => {
             let evm: EVM;
 
             before(() => {
-                const bytecode = readFileSync(`./test/smoke/${name}.bytecode`, 'utf8');
+                const bytecode = readFileSync(`./test/data/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
             });
 
