@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { stripMetadataHash } from '../../src/metadata';
 import EVM from '../utils/evmtest';
-import { compile, contract, Version } from './utils/solc';
+import { compile, contract } from './utils/solc';
 
-contract('variables', (version: Version) => {
+contract('variables', version => {
     it('should decompile with a private variable and no usages', () => {
         const CONTRACT = `contract C {
             uint256 private value;
