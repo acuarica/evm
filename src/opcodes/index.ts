@@ -3,26 +3,29 @@ import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 
 import { Stop, Add, Mul, Sub, Div, Mod, Exp } from '../inst/math';
-import { OR, LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero } from '../inst/logic';
+import { OR, LT, GT, Xor, Not, Byte, Shl, Shr, Sar, IsZero, SHA3 } from '../inst/logic';
 import { CallDataLoad, CALLDATASIZE, CallValue } from '../inst/info';
-import { Return, Revert, Invalid, SelfDestruct } from '../inst/system';
+import {
+    Return,
+    Revert,
+    Invalid,
+    SelfDestruct,
+    STATICCALL,
+    CREATE,
+    CREATE2,
+    CALLCODE,
+    DELEGATECALL,
+} from '../inst/system';
+import { MLOAD, MSTORE } from '../inst/memory';
 
 import EQ from './eq';
 import AND from './and';
-import SHA3 from './sha3';
-import { MLOAD } from './mload';
-import { MSTORE } from './mstore';
 import SLOAD from './sload';
 import SSTORE from './sstore';
 import JUMP from './jump';
 import JUMPI from './jumpi';
 import LOG from './log';
-import CREATE from './create';
 import CALL from './call';
-import CALLCODE from './callcode';
-import DELEGATECALL from './delegatecall';
-import CREATE2 from './create2';
-import STATICCALL from './staticcall';
 import stringify from '../utils/stringify';
 
 export default {
@@ -166,7 +169,21 @@ export default {
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Sar(value, shift));
     },
-    SHA3,
+
+    // Group SHA3
+    SHA3: (_opcode: Opcode, { stack, memory }: EVM) => {
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
+            const items = [];
+            for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+                items.push(i in memory ? memory[i] : new MLOAD(i));
+            }
+            stack.push(new SHA3(items));
+        } else {
+            stack.push(new SHA3([], memoryStart, memoryLength));
+        }
+    },
 
     // Environmental Information (since Frontier)
     ADDRESS: symbol0('this', 'address'),
@@ -300,9 +317,26 @@ export default {
     LOG2: LOG(2),
     LOG3: LOG(3),
     LOG4: LOG(4),
-    CREATE,
+    CREATE: (_opcode: Opcode, { stack }: EVM) => {
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        stack.push(new CREATE(memoryStart, memoryLength, value));
+    },
     CALL,
-    CALLCODE,
+    CALLCODE: (_opcode: Opcode, { stack }: EVM) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+
+        stack.push(
+            new CALLCODE(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
     RETURN: (_opcode: Opcode, state: EVM) => {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();
@@ -317,9 +351,34 @@ export default {
             state.instructions.push(new Return([], memoryStart, memoryLength));
         }
     },
-    DELEGATECALL,
-    CREATE2,
-    STATICCALL,
+    DELEGATECALL: (_opcode: Opcode, { stack }: EVM) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+        stack.push(
+            new DELEGATECALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
+    CREATE2: (_opcode: Opcode, { stack }: EVM) => {
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        stack.push(new CREATE2(memoryStart, memoryLength, value));
+    },
+    STATICCALL: (_opcode: Opcode, { stack }: EVM) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+        stack.push(
+            new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
     REVERT: (_opcode: Opcode, state: EVM) => {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();

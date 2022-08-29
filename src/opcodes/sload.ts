@@ -1,7 +1,7 @@
 import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import stringify from '../utils/stringify';
-import { SHA3 } from './sha3';
+import { SHA3 } from '../inst/logic';
 
 const parseMapping = (...items: Operand[]): Operand[] => {
     const mappings = [];

@@ -2,6 +2,154 @@ import { Operand } from '../evm';
 import { hex2a } from '../hex';
 import stringify from '../utils/stringify';
 
+export class CREATE {
+    readonly name = 'CREATE';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {
+        // this.name = 'address';
+    }
+
+    toString() {
+        return (
+            '(new Contract(memory[' +
+            stringify(this.memoryStart) +
+            ':(' +
+            stringify(this.memoryStart) +
+            '+' +
+            stringify(this.memoryLength) +
+            ')]).value(' +
+            stringify(this.value) +
+            ')).address'
+        );
+    }
+}
+
+export class CALLCODE {
+    readonly name = 'CALLCODE';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(
+        readonly gas: Operand,
+        readonly address: Operand,
+        readonly value: Operand,
+        readonly memoryStart: Operand,
+        readonly memoryLength: Operand,
+        readonly outputStart: Operand,
+        readonly outputLength: Operand
+    ) {}
+
+    toString() {
+        return (
+            'callcode(' +
+            stringify(this.gas) +
+            ',' +
+            stringify(this.address) +
+            ',' +
+            stringify(this.value) +
+            ',' +
+            stringify(this.memoryStart) +
+            ',' +
+            stringify(this.memoryLength) +
+            ',' +
+            stringify(this.outputStart) +
+            ',' +
+            stringify(this.outputLength) +
+            ')'
+        );
+    }
+}
+
+export class CREATE2 {
+    readonly name = 'CREATE2';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {}
+
+    toString() {
+        return (
+            '(new Contract(memory[' +
+            stringify(this.memoryStart) +
+            ':(' +
+            stringify(this.memoryStart) +
+            '+' +
+            stringify(this.memoryLength) +
+            ')]).value(' +
+            stringify(this.value) +
+            ')).address'
+        );
+    }
+}
+
+export class STATICCALL {
+    readonly name = 'STATICCALL';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(
+        readonly gas: Operand,
+        readonly address: Operand,
+        readonly memoryStart: Operand,
+        readonly memoryLength: Operand,
+        readonly outputStart: Operand,
+        readonly outputLength: Operand
+    ) {}
+
+    toString() {
+        return (
+            'staticcall(' +
+            stringify(this.gas) +
+            ',' +
+            stringify(this.address) +
+            ',' +
+            stringify(this.memoryStart) +
+            ',' +
+            stringify(this.memoryLength) +
+            ',' +
+            stringify(this.outputStart) +
+            ',' +
+            stringify(this.outputLength) +
+            ')'
+        );
+    }
+}
+
+export class DELEGATECALL {
+    readonly name = 'DELEGATECALL';
+    readonly type?: string;
+    readonly wrapped = true;
+
+    constructor(
+        readonly gas: Operand,
+        readonly address: Operand,
+        readonly memoryStart: Operand,
+        readonly memoryLength: Operand,
+        readonly outputStart: Operand,
+        readonly outputLength: Operand
+    ) {}
+
+    toString() {
+        return (
+            'delegatecall(' +
+            stringify(this.gas) +
+            ',' +
+            stringify(this.address) +
+            ',' +
+            stringify(this.memoryStart) +
+            ',' +
+            stringify(this.memoryLength) +
+            ',' +
+            stringify(this.outputStart) +
+            ',' +
+            stringify(this.outputLength) +
+            ')'
+        );
+    }
+}
+
 export class Return {
     readonly name = 'RETURN';
     readonly type?: string;

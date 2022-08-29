@@ -1,6 +1,6 @@
 import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
-import { MLOAD } from './mload';
+import { MLOAD } from '../inst/memory';
 
 export class LOG {
     readonly name = 'LOG';
