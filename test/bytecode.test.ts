@@ -86,10 +86,12 @@ describe('bytecode', () => {
     ].forEach(({ name, count, lines }) => {
         describe(`for ${name}`, () => {
             let evm: EVM;
+            let text: string;
 
             before(() => {
                 const bytecode = readFileSync(`./test/data/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
+                text = evm.decompile();
             });
 
             it(`should decode bytecode correctly`, () => {
@@ -142,12 +144,10 @@ describe('bytecode', () => {
                 }
             });
 
-            it(`should decompile contract correctly`, () => {
-                const text = evm.decompile();
-
-                for (const line of lines) {
+            lines.forEach(line => {
+                it(`should match decompiled bytecode to '${line.source}'`, () => {
                     expect(text, text).to.match(line);
-                }
+                });
             });
         });
     });
