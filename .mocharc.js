@@ -30,9 +30,13 @@ module.exports = {
      *                                                    [array] [default: ["test"]]
      * ```
      *
+     * `test` tests perform the actual testing of the package's modules.
+     *
      * Additionally to `test`, we also include `check` tests.
-     * These tests do not test some functionality in our codebase.
-     * Instead, they check some external conditions.
+     * `check` tests should not test any functionality in the package's modules.
+     * Instead, they _check_ the behavior or data of some external dependency.
+     * This provides a checkpoint to understand external APIs and data.
+     * This is in turn facilitates `test` creation.
      */
     spec: ['test/**/*.{test,check}.ts'],
 };
