@@ -1,17 +1,6 @@
-export const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
+const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
 
-export type Version = typeof VERSIONS[number];
-
-export const solcs = Object.fromEntries(
-    VERSIONS.map(version => [
-        version,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require(`solc-${version}`) as {
-            version: () => string;
-            compile: (input: string) => string;
-        },
-    ])
-);
+type Version = typeof VERSIONS[number];
 
 type Bytecode = {
     object: string;
@@ -62,7 +51,13 @@ export function compile(
         },
     };
 
-    const output = JSON.parse(solcs[version].compile(JSON.stringify(input))) as SolcOutput;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const solc = require(`solc-${version}`) as {
+        // Not used
+        version: () => string;
+        compile: (input: string) => string;
+    };
+    const output = JSON.parse(solc.compile(JSON.stringify(input))) as SolcOutput;
 
     if (!valid(output)) {
         const errors = (output.errors || []).map(error => error.formattedMessage);
@@ -91,7 +86,7 @@ export function compile(
 export function contract(title: string, fn: (version: Version) => void) {
     describe(`contracts::${title}`, () => {
         (process.env['SOLC'] ? [process.env['SOLC'] as Version] : VERSIONS).forEach(version => {
-            describe(`using solc-v${solcs[version].version()}`, () => {
+            describe(`using solc-v${version}`, () => {
                 fn(version);
             });
         });
