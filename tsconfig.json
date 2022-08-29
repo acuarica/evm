@@ -19,5 +19,11 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
+
+    // Use SWC to speed up `mocha` tests.
+    // See https://typestrong.org/ts-node/docs/swc.
+    "ts-node": {
+        "swc": true
+    },
     "exclude": ["node_modules", "types"]
 }

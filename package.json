@@ -26,6 +26,7 @@
         "solidity"
     ],
     "devDependencies": {
+        "@swc/core": "^1.2.244",
         "@types/chai": "^4.3.3",
         "@types/mocha": "^9.1.1",
         "@types/node": "^18.7.2",
