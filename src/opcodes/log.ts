@@ -1,4 +1,4 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode } from '../opcode';
 import { MLOAD } from './mload';
 
@@ -13,24 +13,24 @@ export class LOG {
 
     constructor(
         eventHashes: { [s: string]: string },
-        readonly topics: any,
-        items?: any,
-        memoryStart?: any,
-        memoryLength?: any
+        readonly topics: Operand[],
+        args?: Operand[],
+        memoryStart?: Operand,
+        memoryLength?: Operand
     ) {
         if (
             this.topics.length > 0 &&
             typeof this.topics[0] === 'bigint' &&
             this.topics[0].toString(16) in eventHashes
         ) {
-            this.eventName = (eventHashes as any)[this.topics[0].toString(16)].split('(')[0];
+            this.eventName = eventHashes[this.topics[0].toString(16)].split('(')[0];
             this.topics.shift();
         }
         if (this.memoryStart && this.memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
         } else {
-            this.items = items;
+            this.items = args;
         }
     }
 
@@ -56,29 +56,26 @@ export default (topicsCount: number) => {
         if (topics.length > 0) {
             const eventTopic = topics[0].toString(16);
             if (!(eventTopic in state.events)) {
-                state.events[eventTopic] = {};
-                state.events[eventTopic].indexedCount = topics.length - 1;
+                state.events[eventTopic] = {
+                    indexedCount: topics.length - 1,
+                };
                 if (eventTopic in state.eventHashes) {
                     state.events[eventTopic].label = state.eventHashes[eventTopic];
                 }
             }
         }
         if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
-            const items = [];
+            const args = [];
             for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-                if (i in state.memory) {
-                    items.push(state.memory[i]);
-                } else {
-                    items.push(new MLOAD(i));
-                }
+                args.push(i in state.memory ? state.memory[i] : new MLOAD(i));
             }
-            if (topics.length === 0) {
-                if (!('anonymous' in state.events)) {
-                    state.events['anonymous'] = [];
-                }
-                state.events['anonymous'].push({ items });
-            }
-            state.instructions.push(new LOG(state.eventHashes, topics, items));
+            // if (topics.length === 0) {
+            // if (!('anonymous' in state.events)) {
+            // state.events['anonymous'] = [];
+            // }
+            // state.events['anonymous'].push({ items });
+            // }
+            state.instructions.push(new LOG(state.eventHashes, topics, args));
         } else {
             state.instructions.push(
                 new LOG(state.eventHashes, topics, [], memoryStart, memoryLength)

@@ -60,7 +60,7 @@ export class EVM {
     halted = false;
     functions: { [hash: string]: TopLevelFunction } = {};
     variables: { [key: string]: Variable } = {};
-    events: { [key: string]: any } = {};
+    events: { [key: string]: { label?: string; indexedCount: number } } = {};
     gasUsed = 0;
     conditions: Instruction[] = [];
 

@@ -1,5 +1,7 @@
-export default (stateEvents: any, events: string[]) => {
-    const stateEventValues = Object.keys(stateEvents).map((key: string) => stateEvents[key]);
+import { type EVM } from '../evm';
+
+export default (stateEvents: EVM['events'], events: string[]) => {
+    const stateEventValues = Object.keys(stateEvents).map(key => stateEvents[key]);
     let output = '';
 
     events.forEach(event => {
@@ -11,7 +13,7 @@ export default (stateEvents: any, events: string[]) => {
             output += eventArguments
                 .split(',')
                 .map((a, i) => {
-                    const stateEvent = stateEventValues.find((e: any) => e.label === event);
+                    const stateEvent = stateEventValues.find(e => e.label === event);
                     if (stateEvent && i < stateEvent.indexedCount) {
                         return a + ' indexed _arg' + i;
                     } else {
