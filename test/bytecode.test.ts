@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { inspect } from 'util';
 import EVM from './utils/evmtest';
 
-describe('smoke', () => {
+describe('bytecode', () => {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
@@ -146,40 +146,9 @@ describe('smoke', () => {
                 const text = evm.decompile();
 
                 for (const line of lines) {
-                    expect(text).to.match(line);
+                    expect(text, text).to.match(line);
                 }
             });
         });
-    });
-
-    it.skip(`should correctly decode bytecode from open source`, () => {
-        const BASE_PATH = './data/smoke/';
-        const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
-        const lines = csv.toString().split('\n');
-        const addresses = lines
-            .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
-            .filter(
-                ([, address]) => address === '0xaf82a008d4922c7e3a4d7626663b17dbca9c2622'
-                // && address !== '0x6b45B00D3d373C3DCE06c1D694e8b224924e2232'
-            );
-
-        // console.log(addresses);
-        let i = 0;
-        for (const [, address, name] of addresses) {
-            const path = `${BASE_PATH}${name}-${address}.bytecode`;
-            console.log(path);
-            const bytecode = readFileSync(path, 'utf8');
-            const evm = new EVM(bytecode);
-            try {
-                evm.getOpcodes();
-                evm.decompile();
-                console.log(evm.jumps);
-            } catch (err) {
-                console.log('Error in', path, 'at offset', evm.pc);
-                throw err;
-            }
-            i++;
-            if (i >= 20) break;
-        }
     });
 });
