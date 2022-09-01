@@ -275,10 +275,10 @@ export function decode(code: Uint8Array): Opcode[] {
 }
 
 export function formatOpcode(op: Opcode) {
-    const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
+    const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
     // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();
     const pushData = op.pushData ? ' 0x' + toHex(op.pushData) : '';
 
     // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
-    return `${pc}    ${op.mnemonic}${pushData}`;
+    return `${offset}    ${op.mnemonic}${pushData}`;
 }
