@@ -18,5 +18,13 @@ module.exports = {
         '@typescript-eslint/restrict-template-expressions': ['error', { allowAny: true }],
         '@typescript-eslint/no-explicit-any': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
+
+        /**
+         * Permits to use arrow functions as no-op.
+         *
+         * https://typescript-eslint.io/rules/no-empty-function/
+         * https://eslint.org/docs/latest/rules/no-empty-function#allow-arrowfunctions
+         */
+        '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
     },
 };
