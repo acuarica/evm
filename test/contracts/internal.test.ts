@@ -40,6 +40,7 @@ contract('internal', version => {
         const evm = new EVM(compile('C', CONTRACT, version));
 
         const text = evm.decompile();
+
         expect(text, text).to.match(/return storage\[keccak256\(msg.sender, 0\)\];$/m);
         expect(text, text).to.match(/return storage\[keccak256\(_arg0, 0\)\];$/m);
     });

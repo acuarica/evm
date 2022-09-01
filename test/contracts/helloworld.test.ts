@@ -4,28 +4,12 @@ import { compile } from './utils/solc';
 import { readFileSync } from 'fs';
 import { OPCODES } from '../../src/opcode';
 
-// const CONTRACT = `
-// pragma solidity 0.5.5;
-
-// contract A {
-//     uint256 hola;
-// }
-
-// contract Contract {
-//     event HelloWorld(string);
-
-//     function () external {
-//         emit HelloWorld("Hello, world!");
-//     }
-// }
-// `;
-
-describe.skip('contracts::helloworld', () => {
+describe('contracts::helloworld', () => {
     let evm: EVM;
 
     before(() => {
-        const source = readFileSync('./test/contracts/Cryptomeria.sol', 'utf8');
-        // evm = new EVM(compile('Contract', CONTRACT));
+        // const source = readFileSync('./test/contracts/Cryptomeria.sol', 'utf8');
+        const source = readFileSync('./test/contracts/Snapshots.sol', 'utf8');
         evm = new EVM(compile('Cryptomeria', source, '0.8.16'));
 
         // console.log(evm.getBytecode());
@@ -34,6 +18,7 @@ describe.skip('contracts::helloworld', () => {
 
     it('should not detect selfdestruct', () => {
         console.log(evm.decompile());
+        // console.log(evm.decompile());
         expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.false;
     }).timeout(2000);

@@ -40,6 +40,12 @@ export const PUSHES = {
 
 /**
  * Set of opcodes defined by the EVM.
+ *
+ * They are constructed from two kinds of opcodes.
+ * `Unary` opcodes which takes no-arguments and,
+ * `PUSHn` opcodes which takes an `n` byte argument from the bytecode.
+ *
+ * From these two different categories is easier to distinguish between the two.
  */
 export const OPCODES = {
     STOP: 0x00,
@@ -203,7 +209,15 @@ export interface Push {
  */
 export type Opcode = {
     /**
-     * The offset in the bytecode where this `Opcode` was found.
+     * This is the offset in the bytecode where this `Opcode` was found.
+     * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
+     * expects a stack operand referencing this `offset` in the bytecode.
+     */
+    readonly offset: number;
+
+    /**
+     * The Program Counter of this `Opcode`.
+     * The index in the `Opcode[]` where this `Opcode` is inserted.
      */
     readonly pc: number;
 
@@ -226,7 +240,8 @@ export function decode(code: Uint8Array): Opcode[] {
         const opcode = code[i];
         const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
         opcodes.push({
-            pc: i,
+            offset: i,
+            pc: opcodes.length,
             opcode,
             ...(isPush(mnemonic)
                 ? {
@@ -259,10 +274,11 @@ export function decode(code: Uint8Array): Opcode[] {
     }
 }
 
-export function formatOpcode(this: Opcode) {
-    const pc = this.pc.toString(16).padStart(4, '0').toUpperCase();
-    const opcode = this.opcode.toString(16).padStart(2, '0').toUpperCase();
-    const pushData = this.pushData ? ' 0x' + toHex(this.pushData) : '';
+export function formatOpcode(op: Opcode) {
+    const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
+    // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();
+    const pushData = op.pushData ? ' 0x' + toHex(op.pushData) : '';
 
-    return `${pc}    ${opcode}    ${this.mnemonic}${pushData}`;
+    // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
+    return `${pc}    ${op.mnemonic}${pushData}`;
 }

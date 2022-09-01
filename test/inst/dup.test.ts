@@ -1,31 +1,38 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
+import { DUPS, Stack } from '../../src';
+import { Operand } from '../../src/state';
+
+type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 describe('DUP', () => {
-    [...Array(16).keys()].forEach(function (size) {
-        it(`should dup #${size + 1} element on the stack`, () => {
-            const evm = new EVM('0x' + (0x80 + size).toString(16));
-            evm.stack.push(2n);
+    [...Array(16).keys()]
+        .map(i => i + 1)
+        .forEach(function (size) {
+            it(`should dup #${size - 1} element on the stack`, () => {
+                const stack = new Stack<bigint>();
+                stack.push(2n);
 
-            const ignored = [];
-            for (let i = 0; i < size; i++) {
-                ignored.push(1n);
-                evm.stack.push(1n);
-            }
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(1n);
+                    stack.push(1n);
+                }
 
-            evm.parse();
+                DUPS()[`DUP${size as Size}`](stack);
 
-            expect(evm.stack.values).to.deep.equal([2n, ...ignored, 2n]);
+                expect(stack.values).to.deep.equal([2n, ...ignored, 2n]);
+            });
+
+            it(`should throw when #${size} element is not present on the stack`, () => {
+                const stack = new Stack<Operand>();
+
+                for (let i = 1; i < size; i++) {
+                    stack.push(1n);
+                }
+
+                expect(() => DUPS()[`DUP${size as Size}`](stack)).to.throw(
+                    'Invalid duplication operation'
+                );
+            });
         });
-
-        it(`should throw when #${size + 1} element is not present on the stack`, () => {
-            const evm = new EVM('0x' + (0x80 + size).toString(16));
-
-            for (let i = 0; i < size; i++) {
-                evm.stack.push(1n);
-            }
-
-            expect(() => evm.parse()).to.throw('Invalid duplication operation');
-        });
-    });
 });

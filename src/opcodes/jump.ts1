@@ -1,55 +1,54 @@
-import { EVM } from '../evm';
+import { EVM, Operand } from '../evm';
 import { Opcode, OPCODES } from '../opcode';
+import { State } from '../state';
 import stringify from '../utils/stringify';
 
 export class JUMP {
     readonly name = 'JUMP';
     readonly type?: string;
     readonly wrapped: boolean = false;
-    readonly valid: boolean;
 
-    constructor(readonly location: any, bad?: boolean) {
-        this.valid = !bad;
-    }
+    constructor(readonly location: Operand, readonly bad?: boolean) { }
 
     toString() {
-        return this.valid
-            ? 'goto(' + stringify(this.location) + ');'
-            : 'revert("Bad jump destination");';
+        return this.bad
+            ? 'revert("Bad jump destination");'
+            : 'goto(' + stringify(this.location) + ');';
     }
 }
 
-export default (opcode: Opcode, state: EVM): void => {
+export default (opcode: Opcode, state: EVM & State): void => {
     const jumpLocation = state.stack.pop();
     if (typeof jumpLocation !== 'bigint') {
         state.halted = true;
-        state.instructions.push(new JUMP(jumpLocation, true));
+        state.stmts.push(new JUMP(jumpLocation, true));
     } else {
         const opcodes = state.getOpcodes();
         const jumpLocationData = opcodes.find(op => op.pc === Number(jumpLocation));
         if (!jumpLocationData) {
             state.halted = true;
-            state.instructions.push(new JUMP(jumpLocation, true));
+            state.stmts.push(new JUMP(jumpLocation, true));
         } else {
             const jumpIndex = opcodes.indexOf(jumpLocationData);
             if (!(opcode.pc + ':' + Number(jumpLocation) in state.jumps)) {
                 if (!jumpLocationData || jumpLocationData.opcode !== OPCODES.JUMPDEST) {
                     state.halted = true;
-                    state.instructions.push(new JUMP(jumpLocation, true));
+                    state.stmts.push(new JUMP(jumpLocation, true));
                 } else if (
                     jumpLocationData &&
                     jumpIndex >= 0 &&
                     jumpLocationData.opcode === OPCODES.JUMPDEST
                 ) {
-                    state.jumps[opcode.pc + ':' + Number(jumpLocation)] = true;
+                    state.jumps[opcode.pc + ':' + Number(jumpLocation)] = [...state.stmts];
                     state.pc = jumpIndex;
                 } else {
                     state.halted = true;
-                    state.instructions.push(new JUMP(jumpLocation, true));
+                    state.stmts.push(new JUMP(jumpLocation, true));
                 }
             } else {
                 state.halted = true;
-                state.instructions.push(new JUMP(jumpLocation));
+                // state.instructions.push(new JUMP(jumpLocation));
+                state.stmts.push(...state.jumps[opcode.pc + ':' + Number(jumpLocation)]);
             }
         }
     }

@@ -1,26 +1,38 @@
+import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import EVM from './utils/evmtest';
 
 describe('etherscan', () => {
-    it.skip(`should correctly decode bytecode from open source`, () => {
-        const BASE_PATH = './data/smoke/';
-        const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
-        const lines = csv.toString().split('\n');
-        const addresses = lines
-            .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
-            .filter(([, address]) => address !== '0xba31ab04a7fe99641e1e7884c21ecbe2692a3cdc');
-        for (const [, address, name] of addresses) {
+    const BASE_PATH = './data/smoke/';
+    const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
+    csv.toString()
+        .split('\n')
+        .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
+        .forEach(([, address, name]) => {
             const path = `${BASE_PATH}${name}-${address}.bytecode`;
-            console.log(path);
-            const bytecode = readFileSync(path, 'utf8');
-            const evm = new EVM(bytecode);
-            try {
-                evm.getOpcodes();
-                evm.decompile();
-            } catch (err) {
-                console.log('Error in', path, 'at offset', evm.pc);
-                throw err;
-            }
-        }
-    });
+
+            it(`should decode & decompile ${path}`, () => {
+                const bytecode = readFileSync(path, 'utf8');
+                const evm = new EVM(bytecode);
+                if (
+                    [
+                        'Vyper_contract-0x5c22c615eefbaa896c6e34db8d1e9835ae215832',
+                        'Vyper_contract-0xA9b2F5ce3aAE7374a62313473a74C98baa7fa70E',
+                    ].includes(name + '-' + address)
+                ) {
+                    expect(() => evm.getBlocks()).to.throw(
+                        '`Stack.Error: POP with empty stack` at [1158] MSTORE =| '
+                    );
+                } else if (
+                    'FairXYZWallets-0x033870acf44FaB6342EF1a114A6826D2F8D15B03' ===
+                    name + '-' + address
+                ) {
+                    expect(() => evm.getBlocks()).to.throw(
+                        'TypeError: storeLocation.items is not iterable'
+                    );
+                } else {
+                    evm.getBlocks();
+                }
+            });
+        });
 });

@@ -1,8 +1,9 @@
-import { EVM, Operand } from '../evm';
+import { EVM } from '../evm';
 import { Opcode } from '../opcode';
-import { MLOAD } from '../inst/memory';
+import { MLOAD } from './memory';
+import { Operand, State } from '../state';
 
-export class LOG {
+export class Log {
     readonly name = 'LOG';
     readonly type?: string;
     readonly wrapped = true;
@@ -45,8 +46,18 @@ export class LOG {
     }
 }
 
-export default (topicsCount: number) => {
-    return (_opcode: Opcode, state: EVM): void => {
+export const LOGS = (evm: EVM) => {
+    return {
+        LOG0: log(0, evm),
+        LOG1: log(1, evm),
+        LOG2: log(2, evm),
+        LOG3: log(3, evm),
+        LOG4: log(4, evm),
+    };
+};
+
+function log(topicsCount: number, evm: EVM) {
+    return (_opcode: Opcode, state: State): void => {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();
         const topics = [];
@@ -55,31 +66,33 @@ export default (topicsCount: number) => {
         }
         if (topics.length > 0) {
             const eventTopic = topics[0].toString(16);
-            if (!(eventTopic in state.events)) {
-                state.events[eventTopic] = {
+            if (!(eventTopic in evm.events)) {
+                evm.events[eventTopic] = {
                     indexedCount: topics.length - 1,
                 };
-                if (eventTopic in state.eventHashes) {
-                    state.events[eventTopic].label = state.eventHashes[eventTopic];
+                if (eventTopic in evm.eventHashes) {
+                    evm.events[eventTopic].label = evm.eventHashes[eventTopic];
                 }
             }
         }
+
         if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
             const args = [];
             for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
                 args.push(i in state.memory ? state.memory[i] : new MLOAD(i));
             }
+
+            // aparently not used
             // if (topics.length === 0) {
             // if (!('anonymous' in state.events)) {
             // state.events['anonymous'] = [];
             // }
             // state.events['anonymous'].push({ items });
             // }
-            state.instructions.push(new LOG(state.eventHashes, topics, args));
+
+            state.stmts.push(new Log(evm.eventHashes, topics, args));
         } else {
-            state.instructions.push(
-                new LOG(state.eventHashes, topics, [], memoryStart, memoryLength)
-            );
+            state.stmts.push(new Log(evm.eventHashes, topics, [], memoryStart, memoryLength));
         }
     };
-};
+}

@@ -3,7 +3,7 @@ export class Stack<T> {
 
     push(item: T): void | never {
         if (this.values.length >= 1024) {
-            throw new Error('Stack too deep');
+            throw new Stack.Error('Stack too deep');
         }
 
         this.values.unshift(item);
@@ -11,7 +11,7 @@ export class Stack<T> {
 
     pop(): T | never {
         if (this.values.length === 0) {
-            throw new Error('POP with empty stack');
+            throw new Stack.Error('POP with empty stack');
         }
 
         // The non-null assertion operator `!` is needed here because the
@@ -22,9 +22,9 @@ export class Stack<T> {
 
     dup(position: number): void | never {
         if (position < 0 || position > 15) {
-            throw new Error('Unsupported position for duplication operation');
+            throw new Stack.Error('Unsupported position for duplication operation');
         } else if (!(position in this.values)) {
-            throw new Error('Invalid duplication operation, position was not found');
+            throw new Stack.Error('Invalid duplication operation, position was not found');
         }
 
         this.push(this.values[position]);
@@ -32,9 +32,9 @@ export class Stack<T> {
 
     swap(secondPosition: number): void | never {
         if (secondPosition < 1 || secondPosition > 16) {
-            throw new Error('Unsupported position for swap operation');
+            throw new Stack.Error('Unsupported position for swap operation');
         } else if (!(secondPosition in this.values)) {
-            throw new Error('Invalid swap operation, position was not found');
+            throw new Stack.Error('Invalid swap operation, position was not found');
         }
 
         const firstValue = this.values[0];
@@ -48,4 +48,11 @@ export class Stack<T> {
         stack.values.push(...this.values);
         return stack;
     }
+
+    static Error = class extends Error {
+        constructor(message: string) {
+            super(message);
+        }
+        override name = 'Stack.Error';
+    };
 }

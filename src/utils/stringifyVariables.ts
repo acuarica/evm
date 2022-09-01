@@ -1,4 +1,4 @@
-import { Variable } from '../opcodes/jumpi';
+import { Variable } from '../inst/jumps';
 
 export default (variables: { [key: string]: Variable }) => {
     let output = '';

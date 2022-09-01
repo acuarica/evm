@@ -1,6 +1,20 @@
-import { Operand } from '../evm';
 import { hex2a } from '../hex';
+import { Opcode } from '../opcode';
+// import { isBigInt } from './core';
+import { Operand, State } from '../state';
 import stringify from '../utils/stringify';
+// import { MLOAD } from './memory';
+import { memArgs } from './$lib';
+
+/**
+ * https://www.evm.codes/#00
+ */
+export class Stop {
+    readonly name = 'STOP';
+    readonly wrapped = false;
+
+    toString = () => 'return;';
+}
 
 export class CREATE {
     readonly name = 'CREATE';
@@ -26,6 +40,95 @@ export class CREATE {
     }
 }
 
+export class CALL {
+    readonly name = 'CALL';
+    readonly type?: string;
+    readonly wrapped = false;
+    throwOnFail = false;
+
+    constructor(
+        readonly gas: any,
+        readonly address: any,
+        readonly value: any,
+        readonly memoryStart: any,
+        readonly memoryLength: any,
+        readonly outputStart: any,
+        readonly outputLength: any
+    ) {}
+
+    toString() {
+        if (
+            typeof this.memoryLength === 'bigint' &&
+            this.memoryLength === 0n &&
+            typeof this.outputLength === 'bigint' &&
+            this.outputLength === 0n
+        ) {
+            if (
+                this.gas.name === 'MUL' &&
+                this.gas.left.name === 'ISZERO' &&
+                typeof this.gas.right === 'bigint' &&
+                this.gas.right === 2300n
+            ) {
+                if (this.throwOnFail) {
+                    return (
+                        'address(' +
+                        stringify(this.address) +
+                        ').transfer(' +
+                        stringify(this.value) +
+                        ')'
+                    );
+                } else {
+                    return (
+                        'address(' +
+                        stringify(this.address) +
+                        ').send(' +
+                        stringify(this.value) +
+                        ')'
+                    );
+                }
+            } else {
+                return (
+                    'address(' +
+                    stringify(this.address) +
+                    ').call.gas(' +
+                    stringify(this.gas) +
+                    ').value(' +
+                    stringify(this.value) +
+                    ')'
+                );
+            }
+        } else {
+            return (
+                'call(' +
+                stringify(this.gas) +
+                ',' +
+                stringify(this.address) +
+                ',' +
+                stringify(this.value) +
+                ',' +
+                stringify(this.memoryStart) +
+                ',' +
+                stringify(this.memoryLength) +
+                ',' +
+                stringify(this.outputStart) +
+                ',' +
+                stringify(this.outputLength) +
+                ')'
+            );
+        }
+    }
+}
+
+export class ReturnData {
+    readonly name = 'ReturnData';
+    readonly wrapped = false;
+
+    constructor(readonly retOffset: any, readonly retSize: any) {}
+
+    toString() {
+        return `output:ReturnData:${this.retOffset}:${this.retSize}`;
+    }
+}
 export class CALLCODE {
     readonly name = 'CALLCODE';
     readonly type?: string;
@@ -243,3 +346,116 @@ export class SelfDestruct {
 
     toString = () => `selfdestruct(${stringify(this.address)});`;
 }
+
+export const SYSTEM = {
+    STOP: (_opcode: Opcode, state: State) => {
+        state.halted = true;
+        state.stmts.push(new Stop());
+    },
+
+    CREATE: (_opcode: Opcode, { stack }: State) => {
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        stack.push(new CREATE(memoryStart, memoryLength, value));
+    },
+    CALL: (_opcode: Opcode, { stack, memory }: State) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+        stack.push(
+            new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
+        );
+
+        // if (typeof outputStart !== 'number') {
+        //     console.log('WARN:CALL outstart should be number');
+        // }
+
+        memory[outputStart as any as number] = new ReturnData(outputStart, outputLength);
+    },
+    CALLCODE: (_opcode: Opcode, { stack }: State) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+
+        stack.push(
+            new CALLCODE(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
+    RETURN: (_opcode: Opcode, state: State) => {
+        // const memoryStart = state.stack.pop();
+        // const memoryLength = state.stack.pop();
+        state.halted = true;
+        memArgs(state, Return, state.stmts.push.bind(state.stmts));
+        // if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
+        //     const items = [];
+        //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+        //         items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
+        //     }
+        //     state.stmts.push(new Return(items));
+        // } else {
+        //     state.stmts.push(new Return([], memoryStart, memoryLength));
+        // }
+    },
+    DELEGATECALL: (_opcode: Opcode, { stack }: State) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+        stack.push(
+            new DELEGATECALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
+    CREATE2: (_opcode: Opcode, { stack }: State) => {
+        const value = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        stack.push(new CREATE2(memoryStart, memoryLength, value));
+    },
+    STATICCALL: (_opcode: Opcode, { stack }: State) => {
+        const gas = stack.pop();
+        const address = stack.pop();
+        const memoryStart = stack.pop();
+        const memoryLength = stack.pop();
+        const outputStart = stack.pop();
+        const outputLength = stack.pop();
+        stack.push(
+            new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+        );
+    },
+    REVERT: (_opcode: Opcode, state: State) => {
+        // const memoryStart = state.stack.pop();
+        // const memoryLength = state.stack.pop();
+        state.halted = true;
+        memArgs(state, Revert, state.stmts.push.bind(state.stmts));
+        // if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
+        //     const items = [];
+        //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+        //         items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
+        //     }
+        //     state.stmts.push(new Revert(items));
+        // } else {
+        //     state.stmts.push(new Revert([], memoryStart, memoryLength));
+        // }
+    },
+    INVALID: (opcode: Opcode, state: State) => {
+        state.halted = true;
+        state.stmts.push(new Invalid(opcode.opcode));
+    },
+
+    SELFDESTRUCT: (_opcode: Opcode, state: State) => {
+        const address = state.stack.pop();
+        state.halted = true;
+        state.stmts.push(new SelfDestruct(address));
+    },
+};

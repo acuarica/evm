@@ -11,6 +11,6 @@ describe('evm', () => {
         const evm = new EVM('0x0c0d0e0ffc');
         expect(evm).to.be.an.instanceof(EVM);
 
-        expect(evm.getOpcodes().map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('INVALID'));
+        expect(evm.opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('INVALID'));
     });
 });

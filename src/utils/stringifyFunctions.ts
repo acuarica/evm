@@ -1,4 +1,4 @@
-import { TopLevelFunction } from '../opcodes/jumpi';
+import { TopLevelFunction } from '../inst/jumps';
 import { stringifyInstructions } from './stringifyInstructions';
 
 export default (

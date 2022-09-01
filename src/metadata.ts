@@ -34,17 +34,21 @@ const protocols: [RegExp, 'bzzr' | 'ipfs'][] = [
 export type MetadataHash = `bzzr://${string}` | `ipfs://${string}`;
 
 /**
+ * Splits the `bytecode` into executable code and embedded metadata hash as
+ * placed by the Solidity compiler.
  *
- * @param code
- * @returns
+ * @param bytecode the contract `bytecode` to test for metadata hash from.
+ * @returns An tuple where the first component is the executable code and
+ * second one is the metadata hash when the metadata is present.
+ * Otherwise, the original `bytecode` and `null` respectively.
  */
-export function stripMetadataHash(code: string): [string, MetadataHash | null] {
+export function stripMetadataHash(bytecode: string): [string, MetadataHash | null] {
     for (const [re, protocol] of protocols) {
-        const match = code.match(re);
+        const match = bytecode.match(re);
         if (match && match[1]) {
-            return [code.substring(0, match.index), `${protocol}://${match[1]}`];
+            return [bytecode.substring(0, match.index), `${protocol}://${match[1]}`];
         }
     }
 
-    return [code, null];
+    return [bytecode, null];
 }

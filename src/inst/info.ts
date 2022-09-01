@@ -1,4 +1,6 @@
-import { Operand } from '../evm';
+import { Operand } from '../state';
+import { Opcode } from '../opcode';
+import { State } from '../state';
 import stringify from '../utils/stringify';
 
 export class CallDataLoad {
@@ -35,3 +37,17 @@ export class CallValue {
 
     toString = () => 'msg.value';
 }
+
+export const INFO = {
+    // Environmental Information (since Frontier)
+    CALLVALUE: (_opcode: Opcode, { stack }: State) => {
+        stack.push(new CallValue());
+    },
+    CALLDATALOAD: (_opcode: Opcode, { stack }: State) => {
+        const location = stack.pop();
+        stack.push(new CallDataLoad(location));
+    },
+    CALLDATASIZE: (_opcode: Opcode, { stack }: State) => {
+        stack.push(new CALLDATASIZE());
+    },
+};

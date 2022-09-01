@@ -5,11 +5,9 @@ import { compile } from './utils/solc';
 describe('contracts::symbols', () => {
     const CONTRACT = `
         contract C {
-            address _addr;
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
             function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
             function getThis() public view returns (address) { return address(this); }
-            function setThis() public { _addr = address(this); }
         }`;
 
     let evm: EVM;

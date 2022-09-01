@@ -91,11 +91,13 @@ describe('bytecode', () => {
             before(() => {
                 const bytecode = readFileSync(`./test/data/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
+                evm.getBlocks();
+                console.log('sddsdsdsds');
                 text = evm.decompile();
             });
 
             it(`should decode bytecode correctly`, () => {
-                const opcodes = evm.getOpcodes();
+                const opcodes = evm.opcodes;
                 expect(opcodes).to.be.of.length(count);
             });
 

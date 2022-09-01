@@ -1,33 +1,40 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
+import { Stack, SWAPS } from '../../src';
+import { Operand } from '../../src/state';
+
+type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 describe('SWAP', () => {
-    [...Array(16).keys()].forEach(function (size) {
-        it(`should swap #${size + 1} element on the stack`, () => {
-            const evm = new EVM('0x' + (0x90 + size).toString(16));
-            evm.stack.push(2n);
+    [...Array(16).keys()]
+        .map(i => i + 1)
+        .forEach(function (size) {
+            it(`should swap #${size} element on the stack`, () => {
+                const stack = new Stack<Operand>();
+                stack.push(2n);
 
-            const ignored = [];
-            for (let i = 0; i < size; i++) {
-                ignored.push(1n);
-                evm.stack.push(1n);
-            }
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(1n);
+                    stack.push(1n);
+                }
 
-            evm.stack.push(3n);
+                stack.push(3n);
 
-            evm.parse();
+                SWAPS()[`SWAP${size as Size}`](stack);
 
-            expect(evm.stack.values).to.deep.equal([2n, ...ignored, 3n]);
+                expect(stack.values).to.deep.equal([2n, ...ignored, 3n]);
+            });
+
+            it(`should throw when #${size + 1} element is not present on the stack`, () => {
+                const stack = new Stack<Operand>();
+
+                for (let i = 1; i <= size; i++) {
+                    stack.push(1n);
+                }
+
+                expect(() => SWAPS()[`SWAP${size as Size}`](stack)).to.throw(
+                    'Invalid swap operation'
+                );
+            });
         });
-
-        it(`should throw when #${size + 2} element is not present on the stack`, () => {
-            const evm = new EVM('0x' + (0x90 + size).toString(16));
-
-            for (let i = 0; i <= size; i++) {
-                evm.stack.push(1n);
-            }
-
-            expect(() => evm.parse()).to.throw('Invalid swap operation');
-        });
-    });
 });
