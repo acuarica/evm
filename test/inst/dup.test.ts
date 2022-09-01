@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { DUPS, Stack } from '../../src';
+import { STACK, Stack } from '../../src';
 import { Operand } from '../../src/state';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
@@ -18,7 +18,7 @@ describe('DUP', () => {
                     stack.push(1n);
                 }
 
-                DUPS()[`DUP${size as Size}`](stack);
+                STACK()[`DUP${size as Size}`](stack);
 
                 expect(stack.values).to.deep.equal([2n, ...ignored, 2n]);
             });
@@ -30,7 +30,7 @@ describe('DUP', () => {
                     stack.push(1n);
                 }
 
-                expect(() => DUPS()[`DUP${size as Size}`](stack)).to.throw(
+                expect(() => STACK()[`DUP${size as Size}`](stack)).to.throw(
                     'Invalid duplication operation'
                 );
             });

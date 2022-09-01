@@ -50,21 +50,24 @@ export function stringifyInstructions(instructionTree: any, indentation = 0): st
     return lines;
 }
 
-export function stringifyBlocks(blocks: ControlFlowGraph, functionsHashes: EVM['functionHashes']) {
-    const pcs: { [pc: number]: true } = {};
+export function stringifyBlocks(
+    { blocks, entry }: ControlFlowGraph,
+    functionsHashes: EVM['functionHashes']
+) {
+    const pcs: { [key: string]: true } = {};
     let output = '';
-    stringifyBlock(0, 0);
+    stringifyBlock(entry, 0);
 
-    function stringifyBlock(pc: number, indent: number) {
-        if (pc in pcs) {
+    function stringifyBlock(key: string, indent: number) {
+        if (key in pcs) {
             return;
         }
 
-        pcs[pc] = true;
+        pcs[key] = true;
 
-        const block = blocks[pc];
+        const block = blocks[key];
         if (!block) {
-            console.log(pc);
+            console.log(key);
             return;
         }
 
@@ -72,20 +75,23 @@ export function stringifyBlocks(blocks: ControlFlowGraph, functionsHashes: EVM['
         const last = block.stmts.at(-1) as Operand;
         if (last instanceof Jumpi) {
             output += ' '.repeat(indent) + '{\n';
-            stringifyBlock(last.pc!, indent + 4);
+            stringifyBlock(block.exit.pc + ':' + last.pc!, indent + 4);
             output += ' '.repeat(indent) + '} else {\n';
-            stringifyBlock(block.opcodes.at(-1)!.pc + 1, indent + 4);
+            stringifyBlock(block.exit.pc + ':' + (block.opcodes.at(-1)!.pc + 1), indent + 4);
             output += ' '.repeat(indent) + '}\n';
 
             if (last.condition instanceof SIG) {
-                const tlf = new TopLevelFunction(blocks[last.pc!].stmts, last.condition.hash, {});
+                const tlf = new TopLevelFunction(
+                    blocks[block.exit.pc + ':' + last.pc!].stmts,
+                    last.condition.hash,
+                    {}
+                );
                 output += stringifyFunctions(last.condition.hash, tlf, functionsHashes);
             }
         } else if (last instanceof Jump) {
             output += ' '.repeat(indent) + '{\n';
-            stringifyBlock(last.pc!, indent + 4);
-            // stringifyBlock(last.offset, indent );
-            output += ' '.repeat(indent) + '} else {\n';
+            stringifyBlock(block.exit.pc + ':' + last.pc!, indent + 4);
+            output += ' '.repeat(indent) + '}\n';
         }
     }
 

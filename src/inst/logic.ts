@@ -1,4 +1,4 @@
-import { isBigInt } from './core';
+import { isBigInt } from './$lib';
 import { Stack } from '../stack';
 import stringify from '../utils/stringify';
 import { CallDataLoad } from '../inst/info';
@@ -54,6 +54,12 @@ export function fromDIVEXPsig(left: Operand, right: Operand, cc: () => SIG | EQ)
     }
 
     return cc();
+}
+
+export function eqHook(left: Operand, right: Operand, cc: () => EQ): SIG | EQ {
+    return fromDIVEXPsig(left, right, () =>
+        fromDIVEXPsig(right, left, () => fromSHRsig(left, right, () => fromSHRsig(right, left, cc)))
+    );
 }
 
 export class AND {
@@ -215,13 +221,7 @@ export const LOGIC = {
                 ? left === right
                     ? 1n
                     : 0n
-                : fromDIVEXPsig(left, right, () =>
-                      fromDIVEXPsig(right, left, () =>
-                          fromSHRsig(left, right, () =>
-                              fromSHRsig(right, left, () => new EQ(left, right))
-                          )
-                      )
-                  )
+                : eqHook(left, right, () => new EQ(left, right))
         );
     },
 

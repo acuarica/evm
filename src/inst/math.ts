@@ -1,4 +1,4 @@
-import { isBigInt } from './core';
+import { isBigInt } from './$lib';
 import { Stack } from '../stack';
 import stringify from '../utils/stringify';
 import { Sar, Shl } from './logic';

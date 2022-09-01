@@ -24,3 +24,7 @@ export function memArgs<T extends Operand>(
         stack.push(new Klass([], offset, size));
     }
 }
+
+export function isBigInt<T>(value: bigint | T): value is bigint {
+    return typeof value === 'bigint';
+}

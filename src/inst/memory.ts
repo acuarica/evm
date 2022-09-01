@@ -1,5 +1,4 @@
-import { Opcode } from '../opcode';
-import { isBigInt } from './core';
+import { isBigInt } from './$lib';
 import { State } from '../state';
 import stringify from '../utils/stringify';
 
@@ -28,7 +27,7 @@ export class MSTORE {
 }
 
 export const MEMORY = {
-    MLOAD: (_opcode: Opcode, { stack, memory }: State) => {
+    MLOAD: ({ stack, memory }: State) => {
         const memoryLocation = stack.pop();
         stack.push(
             isBigInt(memoryLocation) && Number(memoryLocation) in memory
@@ -40,7 +39,7 @@ export const MEMORY = {
     MSTORE8: mstore,
 };
 
-function mstore(_opcode: Opcode, { stack, memory, stmts }: State) {
+function mstore({ stack, memory, stmts }: State) {
     const storeLocation = stack.pop();
     const storeData = stack.pop();
     if (isBigInt(storeLocation)) {

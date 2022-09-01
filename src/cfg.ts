@@ -8,7 +8,7 @@ import { STORAGE } from './inst/storage';
 import { SYMBOLS } from './inst/symbols';
 import { INVALID, SYSTEM } from './inst/system';
 import { formatOpcode, Opcode } from './opcode';
-import { DUPS, PUSHES, SWAPS } from './inst/core';
+import { PUSHES, STACK } from './inst/core';
 import { LOGS } from './inst/log';
 import { Stack } from './stack';
 import { Operand, State } from './state';
@@ -30,9 +30,9 @@ export class Block {
     }
 }
 
-export type ControlFlowGraph = { [pc: number]: Block };
+export type ControlFlowGraph = { blocks: { [pc: string]: Block }; entry: string };
 
-function wrap2<F, T extends { [mnemonic: string]: F }>(
+function make<F, T extends { [mnemonic: string]: F }>(
     table: T,
     adapter: (fn: F) => (opcode: Opcode, state: State) => void
 ) {
@@ -41,38 +41,40 @@ function wrap2<F, T extends { [mnemonic: string]: F }>(
     ) as { [mnemonic in keyof T]: (opcode: Opcode, state: State) => void };
 }
 
-function wrap<T extends { [mnemonic: string]: (stack: Stack<Operand>) => void }>(table: T) {
-    return wrap2(
+function makeStack<T extends { [mnemonic: string]: (stack: Stack<Operand>) => void }>(table: T) {
+    return make(
         table,
         (fn: (stack: Stack<Operand>) => void) => (_opcode, state) => fn(state.stack)
     );
 }
 
+function makeState<T extends { [mnemonic: string]: (state: State) => void }>(table: T) {
+    return make(table, (fn: (state: State) => void) => (_opcode, state) => fn(state));
+}
+
 const TABLE = {
-    ...wrap(MATH),
-    ...wrap(LOGIC),
+    ...makeStack(MATH),
+    ...makeStack(LOGIC),
     ...SHA3,
-    ...INFO,
+    ...makeStack(INFO),
     ...SYMBOLS,
-    POP: (_opcode: Opcode, { stack }: State) => stack.pop(),
-    ...MEMORY,
+    ...makeState(MEMORY),
     PC: (opcode: Opcode, { stack }: State) => stack.push(BigInt(opcode.offset)),
-    JUMPDEST: (_opcode: Opcode, _state: State) => {
-        /* Empty */
-    },
-    ...wrap2(
-        PUSHES,
-        (fn: (pushData: Uint8Array, state: State) => void) => (opcode, state) =>
-            fn(opcode.pushData!, state)
+    JUMPDEST: (_opcode: Opcode, _state: State) => {},
+    ...make(
+        PUSHES(),
+        (fn: (pushData: Uint8Array, stack: Stack<Operand>) => void) => (opcode, state) =>
+            fn(opcode.pushData!, state.stack)
     ),
-    ...wrap(DUPS<Operand>()),
-    ...wrap(SWAPS<Operand>()),
-    ...wrap2(SYSTEM, (fn: (state: State) => void) => (_opcode, state) => fn(state)),
+    ...makeStack(STACK<Operand>()),
+    ...makeState(SYSTEM),
     INVALID,
 };
 
 export function getBlocks(evm: EVM): ControlFlowGraph {
-    const pcs: { pc: number; state: State }[] = [{ pc: 0, state: new State() }];
+    const pcs: { from: number; pc: number; state: State }[] = [
+        { from: 0, pc: 0, state: new State() },
+    ];
     const opcodes = evm.opcodes;
 
     const table = {
@@ -82,17 +84,31 @@ export function getBlocks(evm: EVM): ControlFlowGraph {
         ...JUMPS(evm.opcodes, pcs),
     };
 
-    const cfg: ControlFlowGraph = {};
+    const cfg: ControlFlowGraph['blocks'] = {};
     while (pcs.length > 0) {
         // The non-null assertion operator `!` is needed here because the
         // guard `length === 0` does not track array's emptiness.
         // See https://github.com/microsoft/TypeScript/issues/30406.
-        const { pc: pc0, state } = pcs.pop()!;
-        if (!(pc0 in cfg)) {
+        const { from, pc: pc0, state } = pcs.pop()!;
+        // if (!(pc0 in cfg) || cfg[pc0].stack.values.join('|') !== state.stack.values.join('|')) {
+        const key = from + ':' + pc0;
+        if (!(key in cfg)) {
             const bb: Opcode[] = [];
 
             for (let pc = pc0; !state.halted && pc < opcodes.length; pc++) {
                 const opcode = opcodes[pc];
+
+                if (opcode.mnemonic === 'JUMP') {
+                    const offset = state.stack.pop();
+                    const dest = opcodes.find(o => o.offset === Number(offset))!;
+                    if (dest && dest.mnemonic === 'JUMPDEST') {
+                        pc = dest.pc;
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+
                 bb.push(opcode);
                 try {
                     table[opcode.mnemonic](opcode, state);
@@ -107,11 +123,11 @@ export function getBlocks(evm: EVM): ControlFlowGraph {
                 }
             }
 
-            cfg[pc0] = new Block(bb, state.stack, state.memory, state.stmts);
+            cfg[key] = new Block(bb, state.stack, state.memory, state.stmts);
         }
     }
 
-    return cfg;
+    return { blocks: cfg, entry: '0:0' };
 }
 
 export class Jumpi {
@@ -136,7 +152,10 @@ export class Jump {
     }
 }
 
-function JUMPS(opcodes: Opcode[], pcs: { pc: number; state: State }[]) {
+function JUMPS(opcodes: Opcode[], pcs: { from: number; pc: number; state: State }[]) {
+    const branch = (from: number, pc: number, state: State) =>
+        pcs.push({ from, pc, state: state.clone() });
+
     return {
         JUMPI: (opcode: Opcode, state: State) => {
             const offset = state.stack.pop();
@@ -147,9 +166,8 @@ function JUMPS(opcodes: Opcode[], pcs: { pc: number; state: State }[]) {
                 const dest = opcodes.find(o => o.offset === Number(offset))!;
                 if (dest) {
                     pc = dest.pc;
-                    // const jumpIndex = opcodes.indexOf(dest);
-                    pcs.push({ pc: opcode.pc + 1, state: state.clone() });
-                    pcs.push({ pc: dest.pc, state: state.clone() });
+                    branch(opcode.pc, opcode.pc + 1, state);
+                    branch(opcode.pc, dest.pc, state);
                 }
             }
 
@@ -157,7 +175,7 @@ function JUMPS(opcodes: Opcode[], pcs: { pc: number; state: State }[]) {
             state.halted = true;
         },
 
-        JUMP: (_opcode: Opcode, state: State) => {
+        JUMP: (opcode: Opcode, state: State) => {
             const offset = state.stack.pop();
 
             let pc: number | null = null;
@@ -165,9 +183,7 @@ function JUMPS(opcodes: Opcode[], pcs: { pc: number; state: State }[]) {
                 const dest = opcodes.find(o => o.offset === Number(offset))!;
                 if (dest) {
                     pc = dest.pc;
-                    // const jumpIndex = opcodes.indexOf(dest);
-                    // state.pc = jumpIndex;
-                    pcs.push({ pc: dest.pc, state: state.clone() });
+                    branch(opcode.pc, dest.pc, state);
                 }
             }
 
@@ -177,9 +193,9 @@ function JUMPS(opcodes: Opcode[], pcs: { pc: number; state: State }[]) {
     };
 }
 
-export function pprint(blocks: ControlFlowGraph) {
+export function pprint({ blocks }: ControlFlowGraph) {
     for (const [pc, block] of Object.entries(blocks)) {
-        console.log(pc, ':');
+        console.log(pc, ':', block.entry.offset);
         block.opcodes.forEach(op => console.log('  ', formatOpcode(op)));
         console.log('  =| ', block.stack.values.join(' | '));
         block.stmts.forEach(stmt => console.log('  ', stmt.toString()));

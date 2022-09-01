@@ -7,14 +7,22 @@ import { compile, contract } from './utils/solc';
 contract('empty', version => {
     const CONTRACTS = [
         ['with no functions', `contract Empty { }`],
-
         [
             'with `internal` unused function',
             `contract Empty {
-            function get() internal pure returns (uint256) {
-                return 5;
-            }
-        }`,
+                function get() internal pure returns (uint256) {
+                    return 5;
+                }
+            }`,
+        ],
+        [
+            'with `internal` unused function emitting an event',
+            `contract Empty {
+                event Transfer(uint256, address);
+                function get() internal {
+                    emit Transfer(3, address(this));
+                }
+            }`,
         ],
     ];
 
@@ -30,7 +38,7 @@ contract('empty', version => {
                 verifyBlocks(evm);
             });
 
-            it('should not contain LOG1 nor LOG2 because metadata has been stripped', () => {
+            it('should not contain `LOG1` nor `LOG2` because metadata has been stripped', () => {
                 expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG1');
                 expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG2');
             });
@@ -58,12 +66,12 @@ contract('empty', version => {
             }
 
             it('should get CFG with 1 block & `revert`', () => {
-                const blocks = evm.getBlocks();
+                const { blocks, entry } = evm.getBlocks();
 
                 expect(Object.keys(blocks)).to.be.length(1);
-                expect(blocks[0].exit.opcode).to.be.equal(OPCODES.REVERT);
-
-                expect(blocks[0].stmts).to.be.length(1);
+                expect(blocks[entry].exit.opcode).to.be.equal(OPCODES.REVERT);
+                expect(blocks[entry].stmts).to.be.length(1);
+                expect(blocks[entry].stmts[0]).to.be.length(1);
             });
 
             it('should decompile bytecode', () => {

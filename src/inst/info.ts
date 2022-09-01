@@ -1,7 +1,6 @@
 import { Operand } from '../state';
-import { Opcode } from '../opcode';
-import { State } from '../state';
 import stringify from '../utils/stringify';
+import { Stack } from '../stack';
 
 export class CallDataLoad {
     readonly name = 'CALLDATALOAD';
@@ -40,14 +39,14 @@ export class CallValue {
 
 export const INFO = {
     // Environmental Information (since Frontier)
-    CALLVALUE: (_opcode: Opcode, { stack }: State) => {
+    CALLVALUE: (stack: Stack<Operand>) => {
         stack.push(new CallValue());
     },
-    CALLDATALOAD: (_opcode: Opcode, { stack }: State) => {
+    CALLDATALOAD: (stack: Stack<Operand>) => {
         const location = stack.pop();
         stack.push(new CallDataLoad(location));
     },
-    CALLDATASIZE: (_opcode: Opcode, { stack }: State) => {
+    CALLDATASIZE: (stack: Stack<Operand>) => {
         stack.push(new CALLDATASIZE());
     },
 };
