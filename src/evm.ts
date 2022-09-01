@@ -30,6 +30,11 @@ export class EVM {
      */
     readonly opcodes: Opcode[];
 
+    /**
+     *
+     */
+    private blocks: ControlFlowGraph | null = null;
+
     mappings: {
         [key: string]: {
             name: string | undefined;
@@ -55,7 +60,11 @@ export class EVM {
     }
 
     getBlocks(): ControlFlowGraph {
-        return getBlocks(this);
+        if (!this.blocks) {
+            this.blocks = getBlocks(this);
+        }
+
+        return this.blocks;
     }
 
     getFunctions(): string[] {
