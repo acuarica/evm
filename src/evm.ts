@@ -9,7 +9,7 @@ import { fromHex, toHex } from './hex';
 import { TopLevelFunction, Variable } from './inst/jumps';
 import { MetadataHash, stripMetadataHash } from './metadata';
 import { ControlFlowGraph, getBlocks } from './cfg';
-import { Instruction, Operand } from './state';
+import { Operand } from './state';
 
 /**
  *
@@ -30,7 +30,6 @@ export class EVM {
      */
     readonly opcodes: Opcode[];
 
-    jumps: { [label: string]: Instruction[] } = {};
     mappings: {
         [key: string]: {
             name: string | undefined;
@@ -39,7 +38,6 @@ export class EVM {
             values: Operand[];
         };
     } = {};
-    halted = false;
     functions: { [hash: string]: TopLevelFunction } = {};
     variables: { [key: string]: Variable } = {};
     events: { [key: string]: { label?: string; indexedCount: number } } = {};
