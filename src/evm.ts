@@ -44,7 +44,7 @@ export class EVM {
     variables: { [key: string]: Variable } = {};
     events: { [key: string]: { label?: string; indexedCount: number } } = {};
 
-    protected constructor(
+    constructor(
         bytecode: string,
         readonly functionHashes: { [s: string]: string },
         readonly eventHashes: { [s: string]: string }
