@@ -6,7 +6,7 @@ import { MEMORY } from './inst/memory';
 import { SHA3 } from './inst/sha3';
 import { STORAGE } from './inst/storage';
 import { SYMBOLS } from './inst/symbols';
-import { SYSTEM } from './inst/system';
+import { INVALID, SYSTEM } from './inst/system';
 import { formatOpcode, Opcode } from './opcode';
 import { DUPS, PUSHES, SWAPS } from './inst/core';
 import { LOGS } from './inst/log';
@@ -32,15 +32,20 @@ export class Block {
 
 export type ControlFlowGraph = { [pc: number]: Block };
 
-function wrap<T extends { [mnemonic: string]: (stack: Stack<Operand>) => void }>(table: T) {
+function wrap2<F, T extends { [mnemonic: string]: F }>(
+    table: T,
+    adapter: (fn: F) => (opcode: Opcode, state: State) => void
+) {
     return Object.fromEntries(
-        Object.entries(table).map(([k, v]) => [
-            k,
-            (_opcode: Opcode, state: State) => {
-                v(state.stack);
-            },
-        ])
+        Object.entries(table).map(([mnemonic, fn]) => [mnemonic, adapter(fn)])
     ) as { [mnemonic in keyof T]: (opcode: Opcode, state: State) => void };
+}
+
+function wrap<T extends { [mnemonic: string]: (stack: Stack<Operand>) => void }>(table: T) {
+    return wrap2(
+        table,
+        (fn: (stack: Stack<Operand>) => void) => (_opcode, state) => fn(state.stack)
+    );
 }
 
 const TABLE = {
@@ -55,10 +60,15 @@ const TABLE = {
     JUMPDEST: (_opcode: Opcode, _state: State) => {
         /* Empty */
     },
-    ...PUSHES,
+    ...wrap2(
+        PUSHES,
+        (fn: (pushData: Uint8Array, state: State) => void) => (opcode, state) =>
+            fn(opcode.pushData!, state)
+    ),
     ...wrap(DUPS<Operand>()),
     ...wrap(SWAPS<Operand>()),
-    ...SYSTEM,
+    ...wrap2(SYSTEM, (fn: (state: State) => void) => (_opcode, state) => fn(state)),
+    INVALID,
 };
 
 export function getBlocks(evm: EVM): ControlFlowGraph {

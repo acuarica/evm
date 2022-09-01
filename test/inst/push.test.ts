@@ -1,11 +1,13 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
+import { PUSHES } from '../../src/inst/core';
+import { State } from '../../src/state';
 
 describe('PUSH', () => {
     it('should modify stack', () => {
-        const evm = new EVM('0x6001');
-        expect(evm.stack.values).to.deep.equal([]);
-        evm.parse();
-        expect(evm.stack.values).to.deep.equal([1n]);
+        const one = new Uint8Array(1);
+        one[0] = 1;
+        const state = new State();
+        PUSHES.PUSH1(one, state);
+        expect(state.stack.values).to.deep.equal([1n]);
     });
 });

@@ -1,20 +1,12 @@
 import { expect } from 'chai';
 import { SYSTEM } from '../../src/inst/system';
-import EVM from '../utils/evmtest';
+import { State } from '../../src/state';
 
 describe('STOP', () => {
     it('should halt', () => {
-        const evm = new EVM('0x00');
-        expect(evm.halted).to.be.false;
-        evm.parse();
-        expect(evm.halted).to.be.true;
-    });
-
-    it('should halt', () => {
-        const evm = new EVM('0x00');
-        expect(evm.halted).to.be.false;
-        evm.parse();
-        SYSTEM.STOP();
-        expect(evm.halted).to.be.true;
+        const state = new State();
+        expect(state.halted).to.be.false;
+        SYSTEM.STOP(state);
+        expect(state.halted).to.be.true;
     });
 });

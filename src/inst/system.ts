@@ -348,18 +348,18 @@ export class SelfDestruct {
 }
 
 export const SYSTEM = {
-    STOP: (_opcode: Opcode, state: State) => {
+    STOP: (state: State) => {
         state.halted = true;
         state.stmts.push(new Stop());
     },
 
-    CREATE: (_opcode: Opcode, { stack }: State) => {
+    CREATE: ({ stack }: State) => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new CREATE(memoryStart, memoryLength, value));
     },
-    CALL: (_opcode: Opcode, { stack, memory }: State) => {
+    CALL: ({ stack, memory }: State) => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -377,7 +377,7 @@ export const SYSTEM = {
 
         memory[outputStart as any as number] = new ReturnData(outputStart, outputLength);
     },
-    CALLCODE: (_opcode: Opcode, { stack }: State) => {
+    CALLCODE: ({ stack }: State) => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -390,7 +390,7 @@ export const SYSTEM = {
             new CALLCODE(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
-    RETURN: (_opcode: Opcode, state: State) => {
+    RETURN: (state: State) => {
         // const memoryStart = state.stack.pop();
         // const memoryLength = state.stack.pop();
         state.halted = true;
@@ -405,7 +405,7 @@ export const SYSTEM = {
         //     state.stmts.push(new Return([], memoryStart, memoryLength));
         // }
     },
-    DELEGATECALL: (_opcode: Opcode, { stack }: State) => {
+    DELEGATECALL: ({ stack }: State) => {
         const gas = stack.pop();
         const address = stack.pop();
         const memoryStart = stack.pop();
@@ -416,13 +416,13 @@ export const SYSTEM = {
             new DELEGATECALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
-    CREATE2: (_opcode: Opcode, { stack }: State) => {
+    CREATE2: ({ stack }: State) => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new CREATE2(memoryStart, memoryLength, value));
     },
-    STATICCALL: (_opcode: Opcode, { stack }: State) => {
+    STATICCALL: ({ stack }: State) => {
         const gas = stack.pop();
         const address = stack.pop();
         const memoryStart = stack.pop();
@@ -433,7 +433,7 @@ export const SYSTEM = {
             new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
-    REVERT: (_opcode: Opcode, state: State) => {
+    REVERT: (state: State) => {
         // const memoryStart = state.stack.pop();
         // const memoryLength = state.stack.pop();
         state.halted = true;
@@ -448,14 +448,15 @@ export const SYSTEM = {
         //     state.stmts.push(new Revert([], memoryStart, memoryLength));
         // }
     },
-    INVALID: (opcode: Opcode, state: State) => {
-        state.halted = true;
-        state.stmts.push(new Invalid(opcode.opcode));
-    },
 
-    SELFDESTRUCT: (_opcode: Opcode, state: State) => {
+    SELFDESTRUCT: (state: State) => {
         const address = state.stack.pop();
         state.halted = true;
         state.stmts.push(new SelfDestruct(address));
     },
+};
+
+export const INVALID = (opcode: Opcode, state: State) => {
+    state.halted = true;
+    state.stmts.push(new Invalid(opcode.opcode));
 };

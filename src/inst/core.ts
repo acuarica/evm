@@ -1,4 +1,3 @@
-import { Opcode } from '../opcode';
 import { toHex } from '../hex';
 import { State } from '../state';
 import { Stack } from '../stack';
@@ -92,8 +91,8 @@ export function SWAPS<T>() {
     }
 }
 
-function push(opcode: Opcode, { stack }: State) {
-    stack.push(BigInt('0x' + toHex(opcode.pushData!)));
+function push(pushData: Uint8Array, { stack }: State) {
+    stack.push(BigInt('0x' + toHex(pushData)));
 }
 
 export function isBigInt<T>(value: bigint | T): value is bigint {
