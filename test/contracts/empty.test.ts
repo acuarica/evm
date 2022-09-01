@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { Revert } from '../../src/inst/system';
 import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
 import { verifyBlocks } from '../utils/verify';
@@ -65,16 +66,16 @@ contract('empty', version => {
                 });
             }
 
-            it('should get CFG with 1 block & `revert`', () => {
+            it('should `getBlocks` with 1 block & `revert`', () => {
                 const { blocks, entry } = evm.getBlocks();
 
                 expect(Object.keys(blocks)).to.be.length(1);
                 expect(blocks[entry].exit.opcode).to.be.equal(OPCODES.REVERT);
                 expect(blocks[entry].stmts).to.be.length(1);
-                expect(blocks[entry].stmts[0]).to.be.length(1);
+                expect(blocks[entry].stmts[0]).to.be.deep.equal(new Revert([]));
             });
 
-            it('should decompile bytecode', () => {
+            it('should `decompile` bytecode', () => {
                 expect(evm.decompile()).to.be.equal('revert();\n');
             });
         });
