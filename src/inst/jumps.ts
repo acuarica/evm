@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { stringify } from './utils';
 import { CallValue } from './info';
 import { IsZero } from './logic';
