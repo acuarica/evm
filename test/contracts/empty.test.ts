@@ -25,6 +25,21 @@ contract('empty', version => {
                 }
             }`,
         ],
+        [
+            'with a private variable and no usages',
+            `contract Empty {
+                uint256 private value;
+            }`,
+        ],
+        [
+            'with a private variable and unreachable usages',
+            `contract Empty {
+                uint256 private value;
+                function setValue(uint256 newValue) internal {
+                    value = newValue;
+                }
+            }`,
+        ],
     ];
 
     CONTRACTS.forEach(([name, CONTRACT], index) => {
@@ -37,19 +52,6 @@ contract('empty', version => {
 
             it('should have verified blocks', () => {
                 verifyBlocks(evm);
-            });
-
-            it('should not contain `LOG1` nor `LOG2` because metadata has been stripped', () => {
-                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG1');
-                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG2');
-            });
-
-            it('should not have functions', () => {
-                expect(evm.getFunctions()).to.be.empty;
-            });
-
-            it('should not have events', () => {
-                expect(evm.getEvents()).to.be.empty;
             });
 
             if (index === 0) {
@@ -65,6 +67,19 @@ contract('empty', version => {
                     expect(evm.metadataHash).to.be.equal(HASHES[version]);
                 });
             }
+
+            it('should not contain `LOG1` nor `LOG2` because metadata has been stripped', () => {
+                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG1');
+                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG2');
+            });
+
+            it('should not have functions', () => {
+                expect(evm.getFunctions()).to.be.empty;
+            });
+
+            it('should not have events', () => {
+                expect(evm.getEvents()).to.be.empty;
+            });
 
             it('should `getBlocks` with 1 block & `revert`', () => {
                 const { blocks, entry } = evm.getBlocks();
