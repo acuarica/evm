@@ -1,9 +1,7 @@
-import { expect, config } from 'chai';
+import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { verifyBlocks } from '../utils/verify';
 import { compile, contract } from './utils/solc';
-
-config.truncateThreshold = 0; // disable truncating
 
 contract('contracts::symbols', version => {
     const CONTRACT = `
