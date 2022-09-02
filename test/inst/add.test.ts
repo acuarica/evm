@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Stack } from '../../src';
-import { MATH } from '../../src/inst/math';
+import { Add, MATH } from '../../src/inst/math';
 import { Operand } from '../../src/state';
 import { Sym } from '../utils/evmtest';
 
@@ -19,7 +19,9 @@ describe('ADD', () => {
         stack.push(new Sym());
         expect(stack.values).to.be.deep.equal([new Sym(), 1n]);
         MATH.ADD(stack);
+
         expect(stack.values).has.length(1);
+        expect(stack.values[0]).to.be.deep.equal(new Add(new Sym(), 1n));
         expect(stack.values[0].toString()).to.equal('x + 1');
     });
 });
