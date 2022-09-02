@@ -1,7 +1,7 @@
-import { EVM } from '../evm';
 import { Opcode } from '../opcode';
 import { MLOAD } from './memory';
 import { Operand, State } from '../state';
+import { Contract } from '../contract';
 
 export class Log {
     readonly name = 'LOG';
@@ -46,17 +46,17 @@ export class Log {
     }
 }
 
-export const LOGS = (evm: EVM) => {
+export const LOGS = (contract: Contract) => {
     return {
-        LOG0: log(0, evm),
-        LOG1: log(1, evm),
-        LOG2: log(2, evm),
-        LOG3: log(3, evm),
-        LOG4: log(4, evm),
+        LOG0: log(0, contract),
+        LOG1: log(1, contract),
+        LOG2: log(2, contract),
+        LOG3: log(3, contract),
+        LOG4: log(4, contract),
     };
 };
 
-function log(topicsCount: number, evm: EVM) {
+function log(topicsCount: number, contract: Contract) {
     return (_opcode: Opcode, state: State): void => {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();
@@ -66,12 +66,12 @@ function log(topicsCount: number, evm: EVM) {
         }
         if (topics.length > 0) {
             const eventTopic = topics[0].toString(16);
-            if (!(eventTopic in evm.events)) {
-                evm.events[eventTopic] = {
+            if (!(eventTopic in contract.events)) {
+                contract.events[eventTopic] = {
                     indexedCount: topics.length - 1,
                 };
-                if (eventTopic in evm.eventHashes) {
-                    evm.events[eventTopic].label = evm.eventHashes[eventTopic];
+                if (eventTopic in contract.eventHashes) {
+                    contract.events[eventTopic].label = contract.eventHashes[eventTopic];
                 }
             }
         }
@@ -90,9 +90,9 @@ function log(topicsCount: number, evm: EVM) {
             // state.events['anonymous'].push({ items });
             // }
 
-            state.stmts.push(new Log(evm.eventHashes, topics, args));
+            state.stmts.push(new Log(contract.eventHashes, topics, args));
         } else {
-            state.stmts.push(new Log(evm.eventHashes, topics, [], memoryStart, memoryLength));
+            state.stmts.push(new Log(contract.eventHashes, topics, [], memoryStart, memoryLength));
         }
     };
 }

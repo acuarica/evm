@@ -6,27 +6,28 @@ import stringifyFunctions from './utils/stringifyFunctions';
 import { stringifyBlocks } from './utils/stringifyInstructions';
 import { decode, Opcode, OPCODES } from './opcode';
 import { fromHex, toHex } from './hex';
-import { TopLevelFunction, Variable } from './inst/jumps';
 import { MetadataHash, stripMetadataHash } from './metadata';
 import { ControlFlowGraph, getBlocks } from './cfg';
-import { Operand } from './state';
+import { Contract } from './contract';
 
 /**
  *
  */
 export class EVM {
     /**
-     *
+     * The `code` part from the `bytecode`.
+     * That is, the `bytecode` without its metadata hash, if any.
      */
     readonly code: string;
 
     /**
-     *
+     * The `metadataHash` part from the `bytecode`.
+     * That is, if present, the `bytecode` without its `code`.
      */
     readonly metadataHash: MetadataHash | null;
 
     /**
-     *
+     * The `Opcode[]` decoded from `bytecode`.
      */
     readonly opcodes: Opcode[];
 
@@ -35,23 +36,15 @@ export class EVM {
      */
     private blocks: ControlFlowGraph | null = null;
 
-    mappings: {
-        [key: string]: {
-            name: string | undefined;
-            structs: bigint[];
-            keys: Operand[][];
-            values: Operand[];
-        };
-    } = {};
-    functions: { [hash: string]: TopLevelFunction } = {};
-    variables: { [key: string]: Variable } = {};
-    events: { [key: string]: { label?: string; indexedCount: number } } = {};
+    contract: Contract;
 
     constructor(
         bytecode: string,
         readonly functionHashes: { [s: string]: string },
         readonly eventHashes: { [s: string]: string }
     ) {
+        this.contract = new Contract(functionHashes, eventHashes);
+
         const [code, metadataHash] = stripMetadataHash(bytecode);
         this.code = code;
         this.metadataHash = metadataHash;
@@ -61,7 +54,7 @@ export class EVM {
 
     getBlocks(): ControlFlowGraph {
         if (!this.blocks) {
-            this.blocks = getBlocks(this);
+            this.blocks = getBlocks(this.opcodes, this.contract);
         }
 
         return this.blocks;
@@ -99,24 +92,28 @@ export class EVM {
 
     getABI(): any {
         const abi = [];
-        Object.keys(this.functions).forEach(key => {
+        Object.keys(this.contract.functions).forEach(key => {
             const item: any = abi.push({ type: 'function' });
-            item.name = this.functions[key].label.split('(')[0];
-            item.payable = this.functions[key].payable;
-            item.constant = this.functions[key].constant;
+            item.name = this.contract.functions[key].label.split('(')[0];
+            item.payable = this.contract.functions[key].payable;
+            item.constant = this.contract.functions[key].constant;
         });
     }
 
     decompile(): string {
         const blocks = this.getBlocks();
 
-        const events = stringifyEvents(this.events, this.getEvents());
-        const structs = stringifyStructs(this.mappings);
-        const mappings = stringifyMappings(this.mappings);
-        const variables = stringifyVariables(this.variables);
-        const functions = Object.keys(this.functions)
+        const events = stringifyEvents(this.contract.events, this.getEvents());
+        const structs = stringifyStructs(this.contract.mappings);
+        const mappings = stringifyMappings(this.contract.mappings);
+        const variables = stringifyVariables(this.contract.variables);
+        const functions = Object.keys(this.contract.functions)
             .map(functionName =>
-                stringifyFunctions(functionName, this.functions[functionName], this.functionHashes)
+                stringifyFunctions(
+                    functionName,
+                    this.contract.functions[functionName],
+                    this.functionHashes
+                )
             )
             .join('');
         const code = stringifyBlocks(blocks, this.functionHashes);

@@ -1,4 +1,3 @@
-import { EVM } from './evm';
 import { INFO } from './inst/info';
 import { LOGIC } from './inst/logic';
 import { MATH } from './inst/math';
@@ -12,6 +11,7 @@ import { PUSHES, STACK } from './inst/core';
 import { LOGS } from './inst/log';
 import { Stack } from './stack';
 import { Operand, State } from './state';
+import { Contract } from './contract';
 
 export class Block {
     constructor(
@@ -71,17 +71,16 @@ const TABLE = {
     INVALID,
 };
 
-export function getBlocks(evm: EVM): ControlFlowGraph {
+export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGraph {
     const pcs: { from: number; pc: number; state: State }[] = [
         { from: 0, pc: 0, state: new State() },
     ];
-    const opcodes = evm.opcodes;
 
     const table = {
         ...TABLE,
-        ...STORAGE(evm),
-        ...LOGS(evm),
-        ...JUMPS(evm.opcodes, pcs),
+        ...STORAGE(contract),
+        ...LOGS(contract),
+        ...JUMPS(opcodes, pcs),
     };
 
     const cfg: ControlFlowGraph['blocks'] = {};
@@ -139,7 +138,8 @@ export class Jumpi {
         readonly pc: number | null
     ) {}
     toString() {
-        return 'if (' + this.condition + ') // goto ' + this.offset.toString();
+        // return 'if (' + this.condition + ') // goto ' + this.offset.toString();
+        return 'if (' + this.condition + ')';
     }
 }
 
