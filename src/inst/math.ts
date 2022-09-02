@@ -22,7 +22,9 @@ export class Add {
     //     }
     // }
 
-    toString = () => `${stringify(this.left)} + ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} + ${stringify(this.right)}`;
+    }
 }
 
 export class Mul {
@@ -31,7 +33,9 @@ export class Mul {
 
     constructor(readonly left: Operand, readonly right: Operand) {}
 
-    toString = () => `${stringify(this.left)} * ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} * ${stringify(this.right)}`;
+    }
 }
 
 export class Sub {
