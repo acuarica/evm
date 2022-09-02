@@ -35,23 +35,29 @@ export const SYMBOLS = {
 
 function symbol0(value: string, type?: string) {
     return (_opcode: Opcode, { stack }: State) => {
-        stack.push({
-            name: 'SYMBOL',
-            type,
-            wrapped: false,
-            toString: () => value,
-        });
+        stack.push(
+            new (class {
+                readonly wrapped = false;
+                readonly type = type;
+                toString() {
+                    return value;
+                }
+            })()
+        );
     };
 }
 
 function symbol1(fn: (value: string) => string) {
     return (_opcode: Opcode, { stack }: State) => {
         const value = stack.pop();
-        stack.push({
-            name: 'SYMBOL',
-            wrapped: false,
-            toString: () => fn(stringify(value)),
-        });
+        stack.push(
+            new (class {
+                readonly wrapped = false;
+                toString() {
+                    return fn(stringify(value));
+                }
+            })()
+        );
     };
 }
 
@@ -63,10 +69,11 @@ export function datacopy(fn: (offset: string, size: string) => string) {
         if (typeof dest !== 'number') {
             // throw new Error('expected number in returndatacopy');
         }
-        memory[dest as any] = {
-            name: 'SYMBOL',
-            wrapped: false,
-            toString: () => fn(stringify(offset), stringify(size)),
-        };
+        memory[dest as any] = new (class {
+            wrapped = false;
+            toString() {
+                return fn(stringify(offset), stringify(size));
+            }
+        })();
     };
 }

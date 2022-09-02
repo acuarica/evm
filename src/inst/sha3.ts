@@ -1,16 +1,16 @@
 import { Opcode } from '../opcode';
-import { Operand, State } from '../state';
-import { memArgs, stringify } from './utils';
+import { State } from '../state';
+import { Expr, memArgs, stringify } from './utils';
 
 export class Sha3 {
     readonly name = 'SHA3';
     readonly type?: string;
     readonly wrapped = false;
-    readonly memoryStart?: Operand;
-    readonly memoryLength?: Operand;
-    readonly items?: Operand[];
+    readonly memoryStart?: Expr;
+    readonly memoryLength?: Expr;
+    readonly items?: Expr[];
 
-    constructor(items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
+    constructor(items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

@@ -1,5 +1,5 @@
-import { TopLevelFunction, Variable } from './inst/jumps';
-import { Operand } from './state';
+import { TopLevelFunction } from './inst/jumps';
+import { Expr } from './inst/utils';
 
 export class Contract {
     /**
@@ -9,8 +9,8 @@ export class Contract {
         [key: string]: {
             name: string | undefined;
             structs: bigint[];
-            keys: Operand[][];
-            values: Operand[];
+            keys: Expr[][];
+            values: Expr[];
         };
     } = {};
 
@@ -44,4 +44,8 @@ export class Contract {
          */
         readonly eventHashes: { [hash: string]: string }
     ) {}
+}
+
+export class Variable {
+    constructor(public label: string | undefined, readonly types: any[]) {}
 }

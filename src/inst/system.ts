@@ -1,7 +1,7 @@
 import { hex2a } from '../hex';
 import { Opcode } from '../opcode';
-import { Operand, State } from '../state';
-import { memArgs, stringify } from './utils';
+import { State } from '../state';
+import { Expr, memArgs, stringify } from './utils';
 
 /**
  * https://www.evm.codes/#00
@@ -10,7 +10,9 @@ export class Stop {
     readonly name = 'STOP';
     readonly wrapped = false;
 
-    toString = () => 'return;';
+    toString() {
+        return 'return;';
+    }
 }
 
 export class CREATE {
@@ -132,13 +134,13 @@ export class CALLCODE {
     readonly wrapped = true;
 
     constructor(
-        readonly gas: Operand,
-        readonly address: Operand,
-        readonly value: Operand,
-        readonly memoryStart: Operand,
-        readonly memoryLength: Operand,
-        readonly outputStart: Operand,
-        readonly outputLength: Operand
+        readonly gas: Expr,
+        readonly address: Expr,
+        readonly value: Expr,
+        readonly memoryStart: Expr,
+        readonly memoryLength: Expr,
+        readonly outputStart: Expr,
+        readonly outputLength: Expr
     ) {}
 
     toString() {
@@ -190,12 +192,12 @@ export class STATICCALL {
     readonly wrapped = true;
 
     constructor(
-        readonly gas: Operand,
-        readonly address: Operand,
-        readonly memoryStart: Operand,
-        readonly memoryLength: Operand,
-        readonly outputStart: Operand,
-        readonly outputLength: Operand
+        readonly gas: Expr,
+        readonly address: Expr,
+        readonly memoryStart: Expr,
+        readonly memoryLength: Expr,
+        readonly outputStart: Expr,
+        readonly outputLength: Expr
     ) {}
 
     toString() {
@@ -223,12 +225,12 @@ export class DELEGATECALL {
     readonly wrapped = true;
 
     constructor(
-        readonly gas: Operand,
-        readonly address: Operand,
-        readonly memoryStart: Operand,
-        readonly memoryLength: Operand,
-        readonly outputStart: Operand,
-        readonly outputLength: Operand
+        readonly gas: Expr,
+        readonly address: Expr,
+        readonly memoryStart: Expr,
+        readonly memoryLength: Expr,
+        readonly outputStart: Expr,
+        readonly outputLength: Expr
     ) {}
 
     toString() {
@@ -254,10 +256,10 @@ export class Return {
     readonly name = 'RETURN';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: Operand;
-    readonly memoryLength?: Operand;
+    readonly memoryStart?: Expr;
+    readonly memoryLength?: Expr;
 
-    constructor(readonly items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
+    constructor(readonly items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -300,11 +302,11 @@ export class Revert {
     readonly name = 'REVERT';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: Operand;
-    readonly memoryLength?: Operand;
-    readonly items?: Operand[];
+    readonly memoryStart?: Expr;
+    readonly memoryLength?: Expr;
+    readonly items?: Expr[];
 
-    constructor(items: Operand[], memoryStart?: Operand, memoryLength?: Operand) {
+    constructor(items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;

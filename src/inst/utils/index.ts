@@ -1,4 +1,4 @@
-import { Operand, State } from '../../state';
+import { State } from '../../state';
 import { MLOAD } from '../memory';
 
 export type Expr =
@@ -7,9 +7,9 @@ export type Expr =
           wrapped: boolean;
       };
 
-export function memArgs<T extends Operand>(
+export function memArgs<T extends Expr>(
     { stack, memory }: State,
-    Klass: new (args: Operand[], memoryStart?: Operand, memoryLength?: Operand) => T
+    Klass: new (args: Expr[], memoryStart?: Expr, memoryLength?: Expr) => T
 ): T {
     const MAXSIZE = 1024;
 

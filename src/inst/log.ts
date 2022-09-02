@@ -1,7 +1,8 @@
 import { Opcode } from '../opcode';
 import { MLOAD } from './memory';
-import { Operand, State } from '../state';
+import { State } from '../state';
 import { Contract } from '../contract';
+import { Expr } from './utils';
 
 export class Log {
     readonly name = 'LOG';
@@ -14,10 +15,10 @@ export class Log {
 
     constructor(
         eventHashes: { [s: string]: string },
-        readonly topics: Operand[],
-        args?: Operand[],
-        memoryStart?: Operand,
-        memoryLength?: Operand
+        readonly topics: Expr[],
+        args?: Expr[],
+        memoryStart?: Expr,
+        memoryLength?: Expr
     ) {
         if (
             this.topics.length > 0 &&

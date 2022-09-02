@@ -1,5 +1,4 @@
-import { Operand } from '../state';
-import { stringify } from './utils';
+import { Expr, stringify } from './utils';
 import { Stack } from '../stack';
 
 export class CallDataLoad {
@@ -8,7 +7,7 @@ export class CallDataLoad {
     readonly returntype?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Operand) {}
+    constructor(readonly location: Expr) {}
 
     toString() {
         if (typeof this.location === 'bigint' && this.location === 0n) {
@@ -26,7 +25,9 @@ export class CALLDATASIZE {
     readonly type?: string;
     readonly wrapped = false;
 
-    toString = () => 'msg.data.length';
+    toString() {
+        return 'msg.data.length';
+    }
 }
 
 export class CallValue {
@@ -34,19 +35,21 @@ export class CallValue {
     readonly type?: string;
     readonly wrapped = false;
 
-    toString = () => 'msg.value';
+    toString() {
+        return 'msg.value';
+    }
 }
 
 export const INFO = {
     // Environmental Information (since Frontier)
-    CALLVALUE: (stack: Stack<Operand>) => {
+    CALLVALUE: (stack: Stack<Expr>) => {
         stack.push(new CallValue());
     },
-    CALLDATALOAD: (stack: Stack<Operand>) => {
+    CALLDATALOAD: (stack: Stack<Expr>) => {
         const location = stack.pop();
         stack.push(new CallDataLoad(location));
     },
-    CALLDATASIZE: (stack: Stack<Operand>) => {
+    CALLDATASIZE: (stack: Stack<Expr>) => {
         stack.push(new CALLDATASIZE());
     },
 };

@@ -1,9 +1,9 @@
 import { Opcode } from '../opcode';
-import { stringify } from './utils';
-import { Operand, State } from '../state';
-import { Variable } from './jumps';
+import { Expr, stringify } from './utils';
+import { State } from '../state';
 import { Sha3 } from './sha3';
-import type { Contract } from '../contract';
+import { Contract, Variable } from '../contract';
+import { Add } from './math';
 
 export class MappingStore {
     readonly name = 'MappingStore';
@@ -78,31 +78,29 @@ export class SSTORE {
     readonly wrapped = true;
 
     constructor(
-        readonly location: Operand,
+        readonly location: Expr,
         readonly data: any,
         readonly variables: Contract['variables']
     ) {
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
-            this.variables[this.location.toString()].types.push(() => this.data.type);
-        } else if (
-            typeof this.location === 'bigint' &&
-            !(this.location.toString() in this.variables)
-        ) {
-            this.variables[this.location.toString()] = new Variable(undefined, [
-                () => this.data.type,
-            ]);
+        if (typeof this.location === 'bigint') {
+            const loc = this.location.toString();
+            if (loc in this.variables) {
+                this.variables[loc].types.push(this.data.type);
+            } else {
+                this.variables[loc] = new Variable(undefined, [this.data.type]);
+            }
         }
     }
 
     toString() {
         let variableName = 'storage[' + stringify(this.location) + ']';
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
-            const label = this.variables[this.location.toString()].label;
+        const loc = this.location.toString();
+        if (typeof this.location === 'bigint' && loc in this.variables) {
+            const label = this.variables[loc].label;
             if (label) {
                 variableName = label;
             } else {
-                variableName =
-                    'var' + (Object.keys(this.variables).indexOf(this.location.toString()) + 1);
+                variableName = 'var' + (Object.keys(this.variables).indexOf(loc) + 1);
             }
         }
         if (
@@ -123,7 +121,7 @@ export class SSTORE {
     }
 }
 
-const parseMapping = (...items: Operand[]): Operand[] => {
+const parseMapping = (...items: Expr[]): Expr[] => {
     const mappings = [];
     for (const item of items) {
         if (item instanceof Sha3 && item.items) {
@@ -145,7 +143,7 @@ export class MappingLoad {
             [location: number]: Contract['mappings'][keyof Contract['mappings']];
         },
         readonly location: number,
-        readonly items: Operand[],
+        readonly items: Expr[],
         readonly count: number,
         readonly structlocation?: bigint
     ) {}
@@ -175,7 +173,7 @@ export class SLOAD {
     readonly type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Operand, readonly variables: Contract['variables']) {}
+    constructor(readonly location: Expr, readonly variables: Contract['variables']) {}
 
     toString() {
         if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
@@ -195,7 +193,7 @@ export const STORAGE = (contract: Contract) => {
     return {
         SLOAD: (_opcode: Opcode, state: State): void => {
             const storeLocation = state.stack.pop();
-            if (typeof storeLocation !== 'bigint' && storeLocation.name === 'SHA3') {
+            if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
@@ -227,7 +225,7 @@ export const STORAGE = (contract: Contract) => {
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
-                storeLocation.name === 'ADD' &&
+                storeLocation instanceof Add &&
                 storeLocation.left instanceof Sha3 &&
                 typeof storeLocation.right === 'bigint'
             ) {
@@ -263,7 +261,7 @@ export const STORAGE = (contract: Contract) => {
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
-                storeLocation.name === 'ADD' &&
+                storeLocation instanceof Add &&
                 typeof storeLocation.left === 'bigint' &&
                 storeLocation.right instanceof Sha3
             ) {
@@ -308,7 +306,7 @@ export const STORAGE = (contract: Contract) => {
             if (typeof storeLocation === 'bigint') {
                 // throw new Error('bigint not expected in sstore');
                 state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
-            } else if (storeLocation.name === 'SHA3') {
+            } else if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
@@ -341,7 +339,7 @@ export const STORAGE = (contract: Contract) => {
                     state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 }
             } else if (
-                storeLocation.name === 'ADD' &&
+                storeLocation instanceof Add &&
                 storeLocation.left instanceof Sha3 &&
                 typeof storeLocation.right === 'bigint'
             ) {
@@ -377,7 +375,7 @@ export const STORAGE = (contract: Contract) => {
                     state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 }
             } else if (
-                storeLocation.name === 'ADD' &&
+                storeLocation instanceof Add &&
                 typeof storeLocation.left === 'bigint' &&
                 storeLocation.right instanceof Sha3
             ) {
