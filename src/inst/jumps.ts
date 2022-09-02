@@ -123,10 +123,6 @@ export class TopLevelFunction {
     }
 }
 
-export class Variable {
-    constructor(public label: string | undefined, readonly types: any[]) {}
-}
-
 export class Require {
     readonly name = 'REQUIRE';
     readonly type?: string;

@@ -1,11 +1,11 @@
-import { Variable } from '../inst/jumps';
+import { Variable } from '../contract';
 
 export default (variables: { [key: string]: Variable }) => {
     let output = '';
 
     Object.keys(variables).forEach((key, index) => {
         const variable = variables[key];
-        stringifyVariable(variable, index);
+        output += stringifyVariable(variable, index);
     });
 
     if (Object.keys(variables).length > 0) {
@@ -17,15 +17,7 @@ export default (variables: { [key: string]: Variable }) => {
 
 export function stringifyVariable(variable: Variable, index: number) {
     let output = '';
-    const types = variable.types
-        .map(type => {
-            if (typeof type === 'function') {
-                return type();
-            } else {
-                return type;
-            }
-        })
-        .filter((type: any) => type);
+    const types = variable.types.filter(type => type !== undefined);
     if (types.length === 0) {
         types.push('unknown');
     }

@@ -1,10 +1,58 @@
 import { expect } from 'chai';
+import { Variable } from '../../src/contract';
 import { SSTORE } from '../../src/inst/storage';
 import { stripMetadataHash } from '../../src/metadata';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
 contract('variables', version => {
+    describe('with private variables in different locations', () => {
+        let evm: EVM;
+
+        before(() => {
+            const CONTRACT = `contract Contract {
+                uint256 private value256;
+                function setValue0(uint256 newValue) public {
+                    value256 = newValue;
+                }
+
+                bytes32 private value32;
+                function setValue0(bytes32 newValue) public {
+                    value32 = newValue;
+                }
+            }`;
+            evm = new EVM(compile('Contract', CONTRACT, version));
+        });
+
+        it('should not have functions nor events', () => {
+            expect(evm.getFunctions()).to.be.empty;
+            expect(evm.getEvents()).to.be.empty;
+        });
+
+        it('should get `SSTORE` in blocks', () => {
+            const { blocks } = evm.getBlocks();
+            const sstores = Object.values(blocks)
+                .map(block => block.stmts)
+                .filter(stmts => stmts.find(stmt => stmt instanceof SSTORE));
+            expect(sstores).to.be.of.length(2);
+        });
+
+        it('should get variables of different types', () => {
+            const vars = Object.values(evm.getContract().variables);
+            expect(vars).to.be.of.length(2);
+            expect(vars[0]).to.be.deep.equal(new Variable(undefined, [undefined]));
+            expect(vars[1]).to.be.deep.equal(new Variable(undefined, [undefined]));
+        });
+
+        it('should `decompile` bytecode', () => {
+            const text = evm.decompile();
+            expect(text, text).to.match(/^unknown var1;$/m);
+            expect(text, text).to.match(/^unknown var2;$/m);
+            expect(text, text).to.match(/var1 = _arg0;$/m);
+            expect(text, text).to.match(/var2 = _arg0;$/m);
+        });
+    });
+
     it.skip('should decompile with private variables of different types', () => {
         const CONTRACT = `contract C {
             uint256 private value256;
@@ -38,7 +86,7 @@ contract('variables', version => {
         ss.forEach(s => console.log(s[0]));
         expect(ss).to.be.of.length(4);
 
-        expect(Object.values(evm.contract.variables)).to.be.of.length(4);
+        expect(Object.values(evm.getContract().variables)).to.be.of.length(4);
 
         const text = evm.decompile();
         expect(text, text).to.match(/^unknown var1;$/m);
