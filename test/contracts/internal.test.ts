@@ -3,7 +3,7 @@ import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
 contract('internal', version => {
-    it('should decompile bytecode from `internal` method with no arguments', () => {
+    it.skip('should decompile bytecode from `internal` method with no arguments', () => {
         const CONTRACT = `contract C {
             mapping(address => uint256) private _values;
             function _msgSender() internal view returns (address) {

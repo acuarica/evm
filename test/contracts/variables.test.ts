@@ -1,33 +1,11 @@
 import { expect } from 'chai';
+import { SSTORE } from '../../src/inst/storage';
 import { stripMetadataHash } from '../../src/metadata';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
 contract('variables', version => {
-    it('should decompile with a private variable and no usages', () => {
-        const CONTRACT = `contract C {
-            uint256 private value;
-        }`;
-        const evm = new EVM(stripMetadataHash(compile('C', CONTRACT, version))[0]);
-        expect(evm.getFunctions()).to.be.empty;
-        expect(evm.getEvents()).to.be.empty;
-        expect(evm.decompile()).to.be.equal('revert();\n');
-    });
-
-    it('should decompile with a private variable and unreachable usages', () => {
-        const CONTRACT = `contract C {
-            uint256 private value;
-            function setValue(uint256 newValue) internal {
-                value = newValue;
-            }
-        }`;
-        const evm = new EVM(stripMetadataHash(compile('C', CONTRACT, version))[0]);
-        expect(evm.getFunctions()).to.be.empty;
-        expect(evm.getEvents()).to.be.empty;
-        expect(evm.decompile()).to.be.equal('revert();\n');
-    });
-
-    it('should decompile with private variables of different types', () => {
+    it.skip('should decompile with private variables of different types', () => {
         const CONTRACT = `contract C {
             uint256 private value256;
             function setValue0(uint256 newValue) public {
@@ -49,9 +27,19 @@ contract('variables', version => {
                 value8 = newValue;
             }
         }`;
-        const evm = new EVM(stripMetadataHash(compile('C', CONTRACT, version))[0]);
+        const evm = new EVM(compile('C', CONTRACT, version));
         expect(evm.getFunctions()).to.be.empty;
         expect(evm.getEvents()).to.be.empty;
+        const { blocks } = evm.getBlocks();
+        const ss = Object.values(blocks)
+            .map(block => block.stmts)
+            .filter(stmts => stmts.find(stmt => stmt instanceof SSTORE));
+
+        ss.forEach(s => console.log(s[0]));
+        expect(ss).to.be.of.length(4);
+
+        expect(Object.values(evm.contract.variables)).to.be.of.length(4);
+
         const text = evm.decompile();
         expect(text, text).to.match(/^unknown var1;$/m);
         expect(text, text).to.match(/^unknown var2;$/m);

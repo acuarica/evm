@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { inspect } from 'util';
 import EVM from './utils/evmtest';
 
-describe('bytecode', () => {
+describe.skip('bytecode', () => {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
