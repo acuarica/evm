@@ -36,15 +36,16 @@ export class EVM {
      */
     private blocks: ControlFlowGraph | null = null;
 
-    contract: Contract;
+    /**
+     *
+     */
+    private contract: Contract | null = null;
 
     constructor(
         bytecode: string,
         readonly functionHashes: { [s: string]: string },
         readonly eventHashes: { [s: string]: string }
     ) {
-        this.contract = new Contract(functionHashes, eventHashes);
-
         const [code, metadataHash] = stripMetadataHash(bytecode);
         this.code = code;
         this.metadataHash = metadataHash;
@@ -54,10 +55,16 @@ export class EVM {
 
     getBlocks(): ControlFlowGraph {
         if (!this.blocks) {
+            this.contract = new Contract(this.functionHashes, this.eventHashes);
             this.blocks = getBlocks(this.opcodes, this.contract);
         }
 
         return this.blocks;
+    }
+
+    getContract(): Contract {
+        this.getBlocks();
+        return this.contract!;
     }
 
     getFunctions(): string[] {
@@ -90,28 +97,30 @@ export class EVM {
         ];
     }
 
-    getABI(): any {
-        const abi = [];
-        Object.keys(this.contract.functions).forEach(key => {
-            const item: any = abi.push({ type: 'function' });
-            item.name = this.contract.functions[key].label.split('(')[0];
-            item.payable = this.contract.functions[key].payable;
-            item.constant = this.contract.functions[key].constant;
+    getABI() {
+        return Object.values(this.contract!).map(fn => {
+            return {
+                type: 'function',
+                name: fn.label.split('(')[0],
+                payable: fn.payable,
+                constant: fn.constant,
+            };
         });
     }
 
     decompile(): string {
         const blocks = this.getBlocks();
+        const contract = this.contract!;
 
-        const events = stringifyEvents(this.contract.events, this.getEvents());
-        const structs = stringifyStructs(this.contract.mappings);
-        const mappings = stringifyMappings(this.contract.mappings);
-        const variables = stringifyVariables(this.contract.variables);
-        const functions = Object.keys(this.contract.functions)
+        const events = stringifyEvents(contract.events, this.getEvents());
+        const structs = stringifyStructs(contract.mappings);
+        const mappings = stringifyMappings(contract.mappings);
+        const variables = stringifyVariables(contract.variables);
+        const functions = Object.keys(contract.functions)
             .map(functionName =>
                 stringifyFunctions(
                     functionName,
-                    this.contract.functions[functionName],
+                    contract.functions[functionName],
                     this.functionHashes
                 )
             )
