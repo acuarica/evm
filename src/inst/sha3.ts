@@ -34,7 +34,7 @@ export const SHA3 = {
     SHA3: (_opcode: Opcode, state: State) => {
         // const memoryStart = stack.pop();
         // const memoryLength = stack.pop();
-        memArgs(state, Sha3, state.stack.push.bind(state.stack));
+        state.stack.push(memArgs(state, Sha3));
         // if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint' && memoryLength <= 1024 * 32) {
         //     const items = [];
         //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {

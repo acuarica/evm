@@ -388,19 +388,8 @@ export const SYSTEM = {
         );
     },
     RETURN: (state: State) => {
-        // const memoryStart = state.stack.pop();
-        // const memoryLength = state.stack.pop();
         state.halted = true;
-        memArgs(state, Return, state.stmts.push.bind(state.stmts));
-        // if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
-        //     const items = [];
-        //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-        //         items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
-        //     }
-        //     state.stmts.push(new Return(items));
-        // } else {
-        //     state.stmts.push(new Return([], memoryStart, memoryLength));
-        // }
+        state.stmts.push(memArgs(state, Return));
     },
     DELEGATECALL: ({ stack }: State) => {
         const gas = stack.pop();
@@ -431,19 +420,8 @@ export const SYSTEM = {
         );
     },
     REVERT: (state: State) => {
-        // const memoryStart = state.stack.pop();
-        // const memoryLength = state.stack.pop();
         state.halted = true;
-        memArgs(state, Revert, state.stmts.push.bind(state.stmts));
-        // if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
-        //     const items = [];
-        //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-        //         items.push(i in state.memory ? state.memory[i] : new MLOAD(i));
-        //     }
-        //     state.stmts.push(new Revert(items));
-        // } else {
-        //     state.stmts.push(new Revert([], memoryStart, memoryLength));
-        // }
+        state.stmts.push(memArgs(state, Revert));
     },
 
     SELFDESTRUCT: (state: State) => {
