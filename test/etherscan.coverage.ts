@@ -10,9 +10,9 @@ describe('etherscan', () => {
         .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
         .forEach(([, address, name]) => {
             const path = `${BASE_PATH}${name}-${address}.bytecode`;
+            const bytecode = readFileSync(path, 'utf8');
 
             it(`should decode & decompile ${path}`, () => {
-                const bytecode = readFileSync(path, 'utf8');
                 const evm = new EVM(bytecode);
                 if (
                     [
@@ -34,6 +34,7 @@ describe('etherscan', () => {
                     );
                 } else {
                     evm.getBlocks();
+                    evm.decompile();
                 }
             });
         });
