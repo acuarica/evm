@@ -1,6 +1,6 @@
 import { isBigInt } from './$lib';
 import { Stack } from '../stack';
-import stringify from '../utils/stringify';
+import stringify from './utils/stringify';
 import { CallDataLoad } from '../inst/info';
 import { Div } from '../inst/math';
 import { Operand } from '../state';

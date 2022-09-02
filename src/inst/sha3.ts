@@ -1,6 +1,6 @@
 import { Opcode } from '../opcode';
 import { Operand, State } from '../state';
-import stringify from '../utils/stringify';
+import stringify from './utils/stringify';
 import { memArgs } from './$lib';
 // import { MLOAD } from "./memory";
 

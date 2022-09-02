@@ -1,6 +1,6 @@
 import { isBigInt } from './$lib';
 import { State } from '../state';
-import stringify from '../utils/stringify';
+import stringify from './utils/stringify';
 
 export class MLOAD {
     readonly name = 'MLOAD';

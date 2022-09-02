@@ -2,7 +2,7 @@ import { hex2a } from '../hex';
 import { Opcode } from '../opcode';
 // import { isBigInt } from './core';
 import { Operand, State } from '../state';
-import stringify from '../utils/stringify';
+import stringify from './utils/stringify';
 // import { MLOAD } from './memory';
 import { memArgs } from './$lib';
 
