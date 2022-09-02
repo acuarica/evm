@@ -3,7 +3,7 @@ import { stringify } from './utils';
 import { Operand, State } from '../state';
 import { Variable } from './jumps';
 import { Sha3 } from './sha3';
-import { Contract } from '../contract';
+import type { Contract } from '../contract';
 
 export class MappingStore {
     readonly name = 'MappingStore';
@@ -77,14 +77,18 @@ export class SSTORE {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly location: Operand, readonly data: any, readonly variables: any) {
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
-            this.variables()[this.location.toString()].types.push(() => this.data.type);
+    constructor(
+        readonly location: Operand,
+        readonly data: any,
+        readonly variables: Contract['variables']
+    ) {
+        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
+            this.variables[this.location.toString()].types.push(() => this.data.type);
         } else if (
             typeof this.location === 'bigint' &&
-            !(this.location.toString() in this.variables())
+            !(this.location.toString() in this.variables)
         ) {
-            this.variables()[this.location.toString()] = new Variable(undefined, [
+            this.variables[this.location.toString()] = new Variable(undefined, [
                 () => this.data.type,
             ]);
         }
@@ -92,12 +96,13 @@ export class SSTORE {
 
     toString() {
         let variableName = 'storage[' + stringify(this.location) + ']';
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
-            if (this.variables()[this.location.toString()].label) {
-                variableName = this.variables()[this.location.toString()].label;
+        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
+            const label = this.variables[this.location.toString()].label;
+            if (label) {
+                variableName = label;
             } else {
                 variableName =
-                    'var' + (Object.keys(this.variables()).indexOf(this.location.toString()) + 1);
+                    'var' + (Object.keys(this.variables).indexOf(this.location.toString()) + 1);
             }
         }
         if (
@@ -170,16 +175,15 @@ export class SLOAD {
     readonly type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: any, readonly variables: any) {}
+    constructor(readonly location: Operand, readonly variables: Contract['variables']) {}
 
     toString() {
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables()) {
-            if (this.variables()[this.location.toString()].label) {
-                return this.variables()[this.location.toString()].label;
+        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
+            const label = this.variables[this.location.toString()].label;
+            if (label) {
+                return label;
             } else {
-                return (
-                    'var' + (Object.keys(this.variables()).indexOf(this.location.toString()) + 1)
-                );
+                return 'var' + (Object.keys(this.variables).indexOf(this.location.toString()) + 1);
             }
         } else {
             return 'storage[' + stringify(this.location) + ']';
@@ -219,7 +223,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, () => contract.variables));
+                    state.stack.push(new SLOAD(storeLocation, contract.variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -255,7 +259,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, () => contract.variables));
+                    state.stack.push(new SLOAD(storeLocation, contract.variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -291,10 +295,10 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, () => contract.variables));
+                    state.stack.push(new SLOAD(storeLocation, contract.variables));
                 }
             } else {
-                state.stack.push(new SLOAD(storeLocation, () => contract.variables));
+                state.stack.push(new SLOAD(storeLocation, contract.variables));
             }
         },
 
@@ -303,7 +307,7 @@ export const STORAGE = (contract: Contract) => {
             const storeData = state.stack.pop();
             if (typeof storeLocation === 'bigint') {
                 // throw new Error('bigint not expected in sstore');
-                state.stmts.push(new SSTORE(storeLocation, storeData, () => contract.variables));
+                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
             } else if (storeLocation.name === 'SHA3') {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
@@ -334,9 +338,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(
-                        new SSTORE(storeLocation, storeData, () => contract.variables)
-                    );
+                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation.name === 'ADD' &&
@@ -372,9 +374,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(
-                        new SSTORE(storeLocation, storeData, () => contract.variables)
-                    );
+                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation.name === 'ADD' &&
@@ -410,9 +410,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(
-                        new SSTORE(storeLocation, storeData, () => contract.variables)
-                    );
+                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 // eslint-disable-next-line no-constant-condition
@@ -422,10 +420,10 @@ export const STORAGE = (contract: Contract) => {
                 // storeData.type &&
                 // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
             ) {
-                state.stmts.push(new SSTORE(storeLocation, storeData, () => contract.variables));
+                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
                 // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
-                state.stmts.push(new SSTORE(storeLocation, storeData, () => contract.variables));
+                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
             }
         },
     };

@@ -61,9 +61,11 @@ function log(topicsCount: number, contract: Contract) {
         const memoryStart = state.stack.pop();
         const memoryLength = state.stack.pop();
         const topics = [];
+
         for (let i = 0; i < topicsCount; i++) {
             topics.push(state.stack.pop());
         }
+
         if (topics.length > 0) {
             const eventTopic = topics[0].toString(16);
             if (!(eventTopic in contract.events)) {
@@ -81,15 +83,6 @@ function log(topicsCount: number, contract: Contract) {
             for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
                 args.push(i in state.memory ? state.memory[i] : new MLOAD(i));
             }
-
-            // aparently not used
-            // if (topics.length === 0) {
-            // if (!('anonymous' in state.events)) {
-            // state.events['anonymous'] = [];
-            // }
-            // state.events['anonymous'].push({ items });
-            // }
-
             state.stmts.push(new Log(contract.eventHashes, topics, args));
         } else {
             state.stmts.push(new Log(contract.eventHashes, topics, [], memoryStart, memoryLength));

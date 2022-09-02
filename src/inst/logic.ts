@@ -1,8 +1,7 @@
 import { Stack } from '../stack';
-import { isBigInt, stringify } from './utils';
-import { CallDataLoad } from '../inst/info';
-import { Div } from '../inst/math';
-import { Operand } from '../state';
+import { Expr, isBigInt, stringify } from './utils';
+import { CallDataLoad } from './info';
+import { Div } from './math';
 
 export class SIG {
     readonly name = 'SIG';
@@ -10,19 +9,23 @@ export class SIG {
 
     constructor(readonly hash: string) {}
 
-    toString = () => `msg.sig == ${this.hash}`;
+    toString() {
+        return `msg.sig == ${this.hash}`;
+    }
 }
 
 export class EQ {
     readonly name = 'EQ';
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => `${stringify(this.left)} == ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} == ${stringify(this.right)}`;
+    }
 }
 
-export function fromSHRsig(left: Operand, right: Operand, cc: () => SIG | EQ): SIG | EQ {
+export function fromSHRsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG | EQ {
     if (
         typeof left === 'bigint' &&
         right instanceof Shr &&
@@ -36,7 +39,7 @@ export function fromSHRsig(left: Operand, right: Operand, cc: () => SIG | EQ): S
     return cc();
 }
 
-export function fromDIVEXPsig(left: Operand, right: Operand, cc: () => SIG | EQ): SIG | EQ {
+export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG | EQ {
     if (typeof left === 'bigint' && right instanceof Div && typeof right.right === 'bigint') {
         left = left * right.right;
         right = right.left;
@@ -55,7 +58,7 @@ export function fromDIVEXPsig(left: Operand, right: Operand, cc: () => SIG | EQ)
     return cc();
 }
 
-export function eqHook(left: Operand, right: Operand, cc: () => EQ): SIG | EQ {
+export function eqHook(left: Expr, right: Expr, cc: () => EQ): SIG | EQ {
     return fromDIVEXPsig(left, right, () =>
         fromDIVEXPsig(right, left, () => fromSHRsig(left, right, () => fromSHRsig(right, left, cc)))
     );
@@ -66,7 +69,7 @@ export class AND {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: any, readonly right: any) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
     toString() {
         return stringify(this.left) + ' && ' + stringify(this.right);
@@ -78,7 +81,7 @@ export class OR {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: any, readonly right: any) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
     toString = () => stringify(this.left) + ' || ' + stringify(this.right);
 }
@@ -88,7 +91,7 @@ export class IsZero {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly value: Operand) {}
+    constructor(readonly value: Expr) {}
 
     toString() {
         return this.value instanceof EQ
@@ -102,7 +105,7 @@ export class GT {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
+    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
 
     toString() {
         return stringify(this.left) + (this.equal ? ' >= ' : ' > ') + stringify(this.right);
@@ -114,7 +117,7 @@ export class LT {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: any, readonly right: any, readonly equal: boolean = false) {}
+    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
 
     toString() {
         return stringify(this.left) + (this.equal ? ' <= ' : ' < ') + stringify(this.right);
@@ -125,13 +128,14 @@ export class LT {
  * https://www.evm.codes/#18
  */
 export class Xor {
-    readonly name = 'XOR';
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => `${stringify(this.left)} ^ ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} ^ ${stringify(this.right)}`;
+    }
 }
 
 /**
@@ -141,18 +145,22 @@ export class Not {
     readonly name = 'NOT';
     readonly wrapped = true;
 
-    constructor(readonly value: Operand) {}
+    constructor(readonly value: Expr) {}
 
-    toString = () => `~${stringify(this.value)}`;
+    toString() {
+        return `~${stringify(this.value)}`;
+    }
 }
 
 export class Neg {
     readonly name = 'SYMBOL';
     readonly wrapped = true;
 
-    constructor(readonly value: Operand) {}
+    constructor(readonly value: Expr) {}
 
-    toString = () => `!${stringify(this.value)}`;
+    toString() {
+        return `!${stringify(this.value)}`;
+    }
 }
 
 /**
@@ -163,9 +171,11 @@ export class Byte {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly position: Operand, readonly data: Operand) {}
+    constructor(readonly position: Expr, readonly data: Expr) {}
 
-    toString = () => `(${stringify(this.data)} >> ${stringify(this.position)}) & 1`;
+    toString() {
+        return `(${stringify(this.data)} >> ${stringify(this.position)}) & 1`;
+    }
 }
 
 /**
@@ -176,9 +186,11 @@ export class Shl {
     readonly type?: string;
     readonly wrapped: boolean = true;
 
-    constructor(readonly value: Operand, readonly shift: Operand) {}
+    constructor(readonly value: Expr, readonly shift: Expr) {}
 
-    toString = () => `${stringify(this.value)} << ${stringify(this.shift)}`;
+    toString() {
+        return `${stringify(this.value)} << ${stringify(this.shift)}`;
+    }
 }
 
 /**
@@ -188,9 +200,11 @@ export class Shr {
     readonly name = 'SHR';
     readonly wrapped = true;
 
-    constructor(readonly value: Operand, readonly shift: Operand) {}
+    constructor(readonly value: Expr, readonly shift: Expr) {}
 
-    toString = () => `${stringify(this.value)} >>> ${stringify(this.shift)}`;
+    toString() {
+        return `${stringify(this.value)} >>> ${stringify(this.shift)}`;
+    }
 }
 
 /**
@@ -200,7 +214,7 @@ export class Sar {
     readonly name = 'SAR';
     readonly wrapped = true;
 
-    constructor(readonly value: Operand, readonly shift: Operand) {}
+    constructor(readonly value: Expr, readonly shift: Expr) {}
 
     toString = () => `${stringify(this.value)} >> ${stringify(this.shift)}`;
 }
@@ -211,7 +225,7 @@ export const LOGIC = {
     SLT: lt,
     SGT: gt,
 
-    EQ: (stack: Stack<Operand>) => {
+    EQ: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
 
@@ -224,16 +238,16 @@ export const LOGIC = {
         );
     },
 
-    ISZERO: (stack: Stack<Operand>) => {
+    ISZERO: (stack: Stack<Expr>) => {
         const value = stack.pop();
         stack.push(
             isBigInt(value)
                 ? value === 0n
                     ? 1n
                     : 0n
-                : value.name === 'LT'
+                : value instanceof LT
                 ? new GT(value.left, value.right, !value.equal)
-                : value.name === 'GT'
+                : value instanceof GT
                 ? new LT(value.left, value.right, !value.equal)
                 : value instanceof IsZero
                 ? value.value
@@ -241,7 +255,7 @@ export const LOGIC = {
         );
     },
 
-    AND: (stack: Stack<Operand>) => {
+    AND: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         if (typeof left === 'bigint' && typeof right === 'bigint') {
@@ -276,24 +290,24 @@ export const LOGIC = {
         }
     },
 
-    OR: (stack: Stack<Operand>) => {
+    OR: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left | right : new OR(left, right));
     },
 
-    XOR: (stack: Stack<Operand>) => {
+    XOR: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left ^ right : new Xor(left, right));
     },
 
-    NOT: (stack: Stack<Operand>) => {
+    NOT: (stack: Stack<Expr>) => {
         const value = stack.pop();
         stack.push(isBigInt(value) ? ~value : new Not(value));
     },
 
-    BYTE: (stack: Stack<Operand>) => {
+    BYTE: (stack: Stack<Expr>) => {
         const position = stack.pop();
         const data = stack.pop();
         stack.push(
@@ -303,32 +317,32 @@ export const LOGIC = {
         );
     },
 
-    SHL: (stack: Stack<Operand>) => {
+    SHL: (stack: Stack<Expr>) => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value << shift : new Shl(value, shift));
     },
 
-    SHR: (stack: Stack<Operand>) => {
+    SHR: (stack: Stack<Expr>) => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Shr(value, shift));
     },
 
-    SAR: (stack: Stack<Operand>) => {
+    SAR: (stack: Stack<Expr>) => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Sar(value, shift));
     },
 };
 
-function lt(stack: Stack<Operand>) {
+function lt(stack: Stack<Expr>) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? (left < right ? 1n : 0n) : new LT(left, right));
 }
 
-function gt(stack: Stack<Operand>) {
+function gt(stack: Stack<Expr>) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? (left > right ? 1n : 0n) : new GT(left, right));

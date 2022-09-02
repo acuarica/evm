@@ -1,13 +1,12 @@
 import { Stack } from '../stack';
-import { isBigInt, stringify } from './utils';
+import { Expr, isBigInt, stringify } from './utils';
 import { Sar, Shl } from './logic';
-import { Operand } from '../state';
 
 export class Add {
     readonly name = 'ADD';
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
     // get type() {
     //     if (this.left.type === this.right.type) {
@@ -30,7 +29,7 @@ export class Mul {
     readonly name = 'MUL';
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
     toString() {
         return `${stringify(this.left)} * ${stringify(this.right)}`;
@@ -41,18 +40,22 @@ export class Sub {
     readonly name = 'SUB';
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => `${stringify(this.left)} - ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} - ${stringify(this.right)}`;
+    }
 }
 
 export class Div {
     readonly name = 'DIV';
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => `${stringify(this.left)} / ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} / ${stringify(this.right)}`;
+    }
 }
 
 export class Mod {
@@ -60,9 +63,11 @@ export class Mod {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => `${stringify(this.left)} % ${stringify(this.right)}`;
+    toString() {
+        return `${stringify(this.left)} % ${stringify(this.right)}`;
+    }
 }
 
 export class Exp {
@@ -70,13 +75,15 @@ export class Exp {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly left: Operand, readonly right: Operand) {}
+    constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => stringify(this.left) + ' ** ' + stringify(this.right);
+    toString() {
+        return stringify(this.left) + ' ** ' + stringify(this.right);
+    }
 }
 
 export const MATH = {
-    ADD: (stack: Stack<Operand>) => {
+    ADD: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -90,7 +97,7 @@ export const MATH = {
         );
     },
 
-    MUL: (stack: Stack<Operand>) => {
+    MUL: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -102,7 +109,7 @@ export const MATH = {
         );
     },
 
-    SUB: (stack: Stack<Operand>) => {
+    SUB: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left - right : new Sub(left, right));
@@ -113,7 +120,7 @@ export const MATH = {
     MOD: mod,
     SMOD: mod,
 
-    ADDMOD: (stack: Stack<Operand>) => {
+    ADDMOD: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         const mod = stack.pop();
@@ -126,7 +133,7 @@ export const MATH = {
         );
     },
 
-    MULMOD: (stack: Stack<Operand>) => {
+    MULMOD: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         const mod = stack.pop();
@@ -139,7 +146,7 @@ export const MATH = {
         );
     },
 
-    EXP: (stack: Stack<Operand>) => {
+    EXP: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -147,7 +154,7 @@ export const MATH = {
         );
     },
 
-    SIGNEXTEND: (stack: Stack<Operand>) => {
+    SIGNEXTEND: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -160,7 +167,7 @@ export const MATH = {
     },
 };
 
-function div(stack: Stack<Operand>) {
+function div(stack: Stack<Expr>) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(
@@ -174,7 +181,7 @@ function div(stack: Stack<Operand>) {
     );
 }
 
-function mod(stack: Stack<Operand>) {
+function mod(stack: Stack<Expr>) {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? left % right : new Mod(left, right));

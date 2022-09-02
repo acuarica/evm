@@ -1,6 +1,6 @@
-import { type EVM } from '../evm';
+import { Contract } from '../contract';
 
-export default (stateEvents: EVM['events'], events: string[]) => {
+export default (stateEvents: Contract['events'], events: string[]) => {
     const stateEventValues = Object.keys(stateEvents).map(key => stateEvents[key]);
     let output = '';
 
