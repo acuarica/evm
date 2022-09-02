@@ -1,5 +1,5 @@
 import { Operand } from '../state';
-import stringify from './utils/stringify';
+import { stringify } from './utils';
 import { Stack } from '../stack';
 
 export class CallDataLoad {

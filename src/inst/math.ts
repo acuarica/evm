@@ -1,6 +1,5 @@
-import { isBigInt } from './$lib';
 import { Stack } from '../stack';
-import stringify from './utils/stringify';
+import { isBigInt, stringify } from './utils';
 import { Sar, Shl } from './logic';
 import { Operand } from '../state';
 

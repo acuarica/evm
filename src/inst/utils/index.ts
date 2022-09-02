@@ -1,5 +1,5 @@
-import { Operand, State } from '../state';
-import { MLOAD } from './memory';
+import { Operand, State } from '../../state';
+import { MLOAD } from '../memory';
 
 const MAXSIZE = 1024;
 
@@ -27,4 +27,12 @@ export function memArgs<T extends Operand>(
 
 export function isBigInt<T>(value: bigint | T): value is bigint {
     return typeof value === 'bigint';
+}
+
+export function stringify(value: bigint | { wrapped: boolean }): string {
+    return typeof value === 'bigint'
+        ? value.toString(16)
+        : !value.wrapped
+        ? value.toString()
+        : `(${value.toString()})`;
 }

@@ -1,6 +1,6 @@
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import stringify from './utils/stringify';
+import { stringify } from './utils';
 
 export const SYMBOLS = {
     ADDRESS: symbol0('this', 'address'),

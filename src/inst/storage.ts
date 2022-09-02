@@ -1,5 +1,5 @@
 import { Opcode } from '../opcode';
-import stringify from './utils/stringify';
+import { stringify } from './utils';
 import { Operand, State } from '../state';
 import { Variable } from './jumps';
 import { Sha3 } from './sha3';
