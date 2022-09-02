@@ -1,13 +1,14 @@
 import { IsZero, LT, GT } from './inst/logic';
 import { Add, Div } from './inst/math';
-import { SIG } from './inst/logic';
+import { Sig } from './inst/logic';
 import { CallDataLoad } from './inst/info';
 import { CALL, Return, Revert } from './inst/system';
 import { Stack } from './stack';
 import { Sha3 } from './inst/sha3';
 import { OPCODES } from './opcode';
+import { Expr } from './inst/utils';
 
-type INST = GT | LT | Sha3 | Add | SIG | IsZero | CALL | Div | CallDataLoad | Return | Revert;
+type INST = GT | LT | Sha3 | Add | Sig | IsZero | CALL | Div | CallDataLoad | Return | Revert;
 
 export type Instruction =
     | {
@@ -54,8 +55,8 @@ export class State {
      * @param memory
      */
     constructor(
-        readonly stack = new Stack<Operand>(),
-        readonly memory: { [location: number]: Operand } = {}
+        readonly stack = new Stack<Expr>(),
+        readonly memory: { [location: number]: Expr } = {}
     ) {}
 
     /**

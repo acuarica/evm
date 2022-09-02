@@ -1,11 +1,12 @@
 import { ControlFlowGraph, Jump, Jumpi } from '../cfg';
 import { EVM } from '../evm';
-import { SIG } from '../inst/logic';
-import { TopLevelFunction, Variable } from '../inst/jumps';
+import { Sig } from '../inst/logic';
+import { TopLevelFunction } from '../inst/jumps';
 import { Operand } from '../state';
 import stringifyFunctions from './stringifyFunctions';
 import { SLOAD } from '../inst/storage';
 import { stringifyVariable } from './stringifyVariables';
+import { Variable } from '../contract';
 
 /**
  *
@@ -82,7 +83,7 @@ export function stringifyBlocks(
             stringifyBlock(block.exit.pc + ':' + (block.opcodes.at(-1)!.pc + 1), indent + 4);
             output += ' '.repeat(indent) + '}\n';
 
-            if (last.condition instanceof SIG) {
+            if (last.condition instanceof Sig) {
                 const tlf = new TopLevelFunction(
                     blocks[block.exit.pc + ':' + last.pc!].stmts,
                     last.condition.hash,
@@ -102,7 +103,7 @@ export function stringifyBlocks(
 }
 
 export function isVar(
-    jumpCondition: SIG,
+    jumpCondition: Sig,
     functionHashes: EVM['functionHashes'],
     tlf: TopLevelFunction
 ) {

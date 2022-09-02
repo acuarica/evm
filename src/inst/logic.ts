@@ -3,7 +3,7 @@ import { Expr, isBigInt, stringify } from './utils';
 import { CallDataLoad } from './info';
 import { Div } from './math';
 
-export class SIG {
+export class Sig {
     readonly name = 'SIG';
     readonly wrapped = false;
 
@@ -14,7 +14,7 @@ export class SIG {
     }
 }
 
-export class EQ {
+export class Eq {
     readonly name = 'EQ';
     readonly wrapped = true;
 
@@ -25,7 +25,7 @@ export class EQ {
     }
 }
 
-export function fromSHRsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG | EQ {
+export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
     if (
         typeof left === 'bigint' &&
         right instanceof Shr &&
@@ -34,19 +34,19 @@ export function fromSHRsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG | E
         right.value instanceof CallDataLoad &&
         right.value.location === 0n
     ) {
-        return new SIG(left.toString(16).padStart(8, '0'));
+        return new Sig(left.toString(16).padStart(8, '0'));
     }
     return cc();
 }
 
-export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG | EQ {
+export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
     if (typeof left === 'bigint' && right instanceof Div && typeof right.right === 'bigint') {
         left = left * right.right;
         right = right.left;
 
         // /^[0]+$/.test(left.toString(16).substring(8)) &&
         if (left % (1n << 0xe0n) === 0n && right instanceof CallDataLoad && right.location === 0n) {
-            return new SIG(
+            return new Sig(
                 left
                     .toString(16)
                     .substring(0, 8 - (64 - left.toString(16).length))
@@ -58,13 +58,13 @@ export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => SIG | EQ): SIG 
     return cc();
 }
 
-export function eqHook(left: Expr, right: Expr, cc: () => EQ): SIG | EQ {
+export function eqHook(left: Expr, right: Expr, cc: () => Eq): Sig | Eq {
     return fromDIVEXPsig(left, right, () =>
         fromDIVEXPsig(right, left, () => fromSHRsig(left, right, () => fromSHRsig(right, left, cc)))
     );
 }
 
-export class AND {
+export class And {
     readonly name = 'AND';
     readonly type?: string;
     readonly wrapped = true;
@@ -76,14 +76,16 @@ export class AND {
     }
 }
 
-export class OR {
+export class Or {
     readonly name = 'OR';
     readonly type?: string;
     readonly wrapped = true;
 
     constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString = () => stringify(this.left) + ' || ' + stringify(this.right);
+    toString() {
+        return stringify(this.left) + ' || ' + stringify(this.right);
+    }
 }
 
 export class IsZero {
@@ -94,7 +96,7 @@ export class IsZero {
     constructor(readonly value: Expr) {}
 
     toString() {
-        return this.value instanceof EQ
+        return this.value instanceof Eq
             ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
             : stringify(this.value) + ' == 0';
     }
@@ -234,7 +236,7 @@ export const LOGIC = {
                 ? left === right
                     ? 1n
                     : 0n
-                : eqHook(left, right, () => new EQ(left, right))
+                : eqHook(left, right, () => new Eq(left, right))
         );
     },
 
@@ -280,20 +282,20 @@ export const LOGIC = {
             /*    state.stack.push(left);*/
         } else if (
             typeof left === 'bigint' &&
-            right instanceof AND &&
+            right instanceof And &&
             typeof right.left === 'bigint' &&
             left === right.left
         ) {
             stack.push(right.right);
         } else {
-            stack.push(new AND(left, right));
+            stack.push(new And(left, right));
         }
     },
 
     OR: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
-        stack.push(isBigInt(left) && isBigInt(right) ? left | right : new OR(left, right));
+        stack.push(isBigInt(left) && isBigInt(right) ? left | right : new Or(left, right));
     },
 
     XOR: (stack: Stack<Expr>) => {
