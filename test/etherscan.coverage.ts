@@ -24,8 +24,10 @@ describe('etherscan', () => {
                         '`Stack.Error: POP with empty stack` at [1158] MSTORE =| '
                     );
                 } else if (
-                    'FairXYZWallets-0x033870acf44FaB6342EF1a114A6826D2F8D15B03' ===
-                    name + '-' + address
+                    [
+                        'FairXYZWallets-0x033870acf44FaB6342EF1a114A6826D2F8D15B03',
+                        'VotingContract-0x60Fb0abAECc398F122c28dafc288D3EE6c2835D6',
+                    ].includes(name + '-' + address)
                 ) {
                     expect(() => evm.getBlocks()).to.throw(
                         'TypeError: storeLocation.items is not iterable'
