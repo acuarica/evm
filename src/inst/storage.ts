@@ -72,7 +72,7 @@ export class MappingStore {
     }
 }
 
-export class SSTORE {
+export class SStore {
     readonly name = 'SSTORE';
     readonly type?: string;
     readonly wrapped = true;
@@ -305,7 +305,7 @@ export const STORAGE = (contract: Contract) => {
             const storeData = state.stack.pop();
             if (typeof storeLocation === 'bigint') {
                 // throw new Error('bigint not expected in sstore');
-                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             } else if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
@@ -336,7 +336,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation instanceof Add &&
@@ -372,7 +372,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation instanceof Add &&
@@ -408,7 +408,7 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 // eslint-disable-next-line no-constant-condition
@@ -418,10 +418,10 @@ export const STORAGE = (contract: Contract) => {
                 // storeData.type &&
                 // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
             ) {
-                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
-                state.stmts.push(new SSTORE(storeLocation, storeData, contract.variables));
+                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             }
         },
     };
