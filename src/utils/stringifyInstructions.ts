@@ -1,9 +1,11 @@
 import { ControlFlowGraph, Jump, Jumpi } from '../cfg';
 import { EVM } from '../evm';
 import { SIG } from '../inst/logic';
-import { TopLevelFunction } from '../inst/jumps';
+import { TopLevelFunction, Variable } from '../inst/jumps';
 import { Operand } from '../state';
 import stringifyFunctions from './stringifyFunctions';
+import { SLOAD } from '../inst/storage';
+import { stringifyVariable } from './stringifyVariables';
 
 /**
  *
@@ -87,6 +89,7 @@ export function stringifyBlocks(
                     {}
                 );
                 output += stringifyFunctions(last.condition.hash, tlf, functionsHashes);
+                output += isVar(last.condition, functionsHashes, tlf);
             }
         } else if (last instanceof Jump) {
             output += ' '.repeat(indent) + '{\n';
@@ -96,4 +99,26 @@ export function stringifyBlocks(
     }
 
     return output;
+}
+
+export function isVar(
+    jumpCondition: SIG,
+    functionHashes: EVM['functionHashes'],
+    tlf: TopLevelFunction
+) {
+    if (
+        jumpCondition.hash in functionHashes &&
+        (items =>
+            items.length === 1 &&
+            items[0].name === 'RETURN' &&
+            items[0].items.length === 1 &&
+            items[0].items[0] instanceof SLOAD &&
+            typeof items[0].items[0].location === 'bigint')(tlf.items)
+    ) {
+        // const item = (tlf.items[0] as Return) .items[0] as SLOAD;
+        const fullFunction = functionHashes[jumpCondition.hash];
+        const variable = new Variable(fullFunction.split('(')[0], []);
+        return stringifyVariable(variable, 0);
+    }
+    return '';
 }
