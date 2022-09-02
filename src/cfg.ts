@@ -10,8 +10,9 @@ import { formatOpcode, Opcode } from './opcode';
 import { PUSHES, STACK } from './inst/core';
 import { LOGS } from './inst/log';
 import { Stack } from './stack';
-import { Operand, State } from './state';
+import { State } from './state';
 import { Contract } from './contract';
+import { Expr } from './inst/utils';
 
 export class Block {
     constructor(
@@ -41,11 +42,8 @@ function make<F, T extends { [mnemonic: string]: F }>(
     ) as { [mnemonic in keyof T]: (opcode: Opcode, state: State) => void };
 }
 
-function makeStack<T extends { [mnemonic: string]: (stack: Stack<Operand>) => void }>(table: T) {
-    return make(
-        table,
-        (fn: (stack: Stack<Operand>) => void) => (_opcode, state) => fn(state.stack)
-    );
+function makeStack<T extends { [mnemonic: string]: (stack: Stack<Expr>) => void }>(table: T) {
+    return make(table, (fn: (stack: Stack<Expr>) => void) => (_opcode, state) => fn(state.stack));
 }
 
 function makeState<T extends { [mnemonic: string]: (state: State) => void }>(table: T) {
@@ -63,10 +61,10 @@ const TABLE = {
     JUMPDEST: (_opcode: Opcode, _state: State) => {},
     ...make(
         PUSHES(),
-        (fn: (pushData: Uint8Array, stack: Stack<Operand>) => void) => (opcode, state) =>
+        (fn: (pushData: Uint8Array, stack: Stack<Expr>) => void) => (opcode, state) =>
             fn(opcode.pushData!, state.stack)
     ),
-    ...makeStack(STACK<Operand>()),
+    ...makeStack(STACK<Expr>()),
     ...makeState(SYSTEM),
     INVALID,
 };
@@ -132,11 +130,7 @@ export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGra
 export class Jumpi {
     readonly name = 'Jumpi';
     readonly wrapped = true;
-    constructor(
-        readonly condition: Operand,
-        readonly offset: Operand,
-        readonly pc: number | null
-    ) {}
+    constructor(readonly condition: Expr, readonly offset: Expr, readonly pc: number | null) {}
     toString() {
         // return 'if (' + this.condition + ') // goto ' + this.offset.toString();
         return 'if (' + this.condition + ')';
@@ -146,7 +140,7 @@ export class Jumpi {
 export class Jump {
     readonly name = 'Jump';
     readonly wrapped = true;
-    constructor(readonly offset: Operand, readonly pc: number | null) {}
+    constructor(readonly offset: Expr, readonly pc: number | null) {}
     toString() {
         return 'go ' + this.offset.toString();
     }
