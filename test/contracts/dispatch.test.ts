@@ -25,7 +25,7 @@ contract('dispatch', version => {
             expect(evm.getFunctions()).to.have.members(['get()']);
         });
 
-        it('should decompile bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = evm.decompile();
             expect(text, `decompiled bytecode\n${text}`).to.match(
                 /function get\(\) public view payable/
