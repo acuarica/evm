@@ -32,6 +32,14 @@ describe('etherscan', () => {
                     expect(() => evm.getBlocks()).to.throw(
                         'TypeError: storeLocation.items is not iterable'
                     );
+                } else if (
+                    [
+                        'Snapshots-0xba31ab04a7fe99641e1e7884c21ecbe2692a3cdc',
+                        'RocketMinipoolFactory-0x54705f80D7C51Fcffd9C659ce3f3C9a7dCCf5788',
+                        'RocketNodeDistributorFactory-0xe228017f77B3E0785e794e4c0a8A6b935bB4037C',
+                    ].includes(name + '-' + address)
+                ) {
+                    expect(() => evm.getBlocks()).to.throw('Error: memargs sizeclass');
                 } else {
                     evm.getBlocks();
                     evm.decompile();
