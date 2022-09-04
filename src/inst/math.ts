@@ -2,14 +2,19 @@ import { Stack } from '../stack';
 import { Expr, isBigInt, isZero, stringify } from './utils';
 import { Sar, Shl } from './logic';
 
-export const Bin = <N extends string>(name: N, op: string) =>
+export const Name = <N extends string>(name: N, wrapped: boolean) =>
     class {
         readonly name: N = name;
-        readonly wrapped = true;
+        readonly wrapped = wrapped;
+    };
 
-        constructor(readonly left: Expr, readonly right: Expr) {}
+export const Bin = <N extends string>(name: N, op: string) =>
+    class extends Name(name, true) {
+        constructor(readonly left: Expr, readonly right: Expr) {
+            super();
+        }
 
-        toString() {
+        override toString() {
             return `${stringify(this.left)} ${op} ${stringify(this.right)}`;
         }
     };
