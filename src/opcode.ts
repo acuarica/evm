@@ -3,7 +3,7 @@ import { toHex } from './hex';
 /**
  * Set of `PUSHn` opcodes.
  */
-export const PUSHES = {
+const PUSHES = {
     PUSH1: 0x60,
     PUSH2: 0x61,
     PUSH3: 0x62,
@@ -276,9 +276,10 @@ export function decode(code: Uint8Array): Opcode[] {
 
 export function formatOpcode(op: Opcode) {
     const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
+    const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
     // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();
     const pushData = op.pushData ? ' 0x' + toHex(op.pushData) : '';
 
     // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
-    return `${offset}    ${op.mnemonic}${pushData}`;
+    return `${pc}:${offset}    ${op.mnemonic}${pushData}`;
 }
