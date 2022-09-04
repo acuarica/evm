@@ -1,7 +1,7 @@
-import { stringify } from './utils';
+import { Expr, isBigInt, stringify } from './utils';
 import { CallValue } from './info';
 import { IsZero } from './logic';
-import { Instruction, Operand } from '../state';
+import { Return } from './system';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {
@@ -9,7 +9,7 @@ const updateCallDataLoad = (item: any, types: any) => {
             if (
                 typeof item[i] === 'object' &&
                 item[i].name === 'CALLDATALOAD' &&
-                typeof item[i].location === 'bigint'
+                isBigInt(item[i].location)
             ) {
                 const argNumber = ((item[i].location - 4n) / 32n).toString();
                 item[i].type = types[argNumber];
@@ -27,7 +27,7 @@ const findReturns = (item: any) => {
         if (Object.prototype.hasOwnProperty.call(item, i)) {
             if (
                 typeof item[i] === 'object' &&
-                item[i].name === 'RETURN' &&
+                item[i] instanceof Return &&
                 item[i].items &&
                 item[i].items.length > 0
             ) {
@@ -52,7 +52,7 @@ export class TopLevelFunction {
     readonly returns: any;
 
     constructor(
-        readonly items: Instruction[],
+        readonly items: Expr[],
         readonly hash: string,
         // readonly gasUsed: number,
         functionHashes: { [s: string]: string }
@@ -75,7 +75,7 @@ export class TopLevelFunction {
             this.payable = false;
             this.items.shift();
         }
-        if (this.items.length === 1 && this.items[0].name === 'RETURN') {
+        if (this.items.length === 1 && this.items[0] instanceof Return) {
             this.constant = true;
         }
         if (this.hash in functionHashes) {
@@ -109,7 +109,7 @@ export class TopLevelFunction {
             )
         ) {
             returns[0].forEach((item: any) => {
-                if (typeof item === 'bigint') {
+                if (isBigInt(item)) {
                     this.returns.push('uint256');
                 } else if (item.type) {
                     this.returns.push(item.type);
@@ -124,11 +124,7 @@ export class TopLevelFunction {
 }
 
 export class Require {
-    readonly name = 'REQUIRE';
-    readonly type?: string;
-    readonly wrapped: boolean = true;
-
-    constructor(readonly condition: Operand) {}
+    constructor(readonly condition: Expr) {}
 
     toString() {
         return 'require(' + stringify(this.condition) + ');';
@@ -200,7 +196,7 @@ export class JUMPI {
 // state.halted = true;
 //state.instructions.push(new JUMPI(jumpCondition, jumpLocation));
 // state.stmts.push(new Require(jumpCondition));
-// } else if (typeof jumpCondition === 'bigint') {
+// } else if (isVal(jumpCondition)) {
 // const jumpIndex = opcodes.indexOf(jumpLocationData);
 //         if (
 //             jumpIndex >= 0 &&
@@ -253,7 +249,7 @@ export class JUMPI {
 //                     items[0].name === 'RETURN' &&
 //                     items[0].items.length === 1 &&
 //                     items[0].items[0] instanceof SLOAD &&
-//                     typeof items[0].items[0].location === 'bigint')(
+//                     isVal(items[0].items[0].location))(
 //                     state.functions[jumpCondition.hash].items
 //                 )
 //             ) {
@@ -277,7 +273,7 @@ export class JUMPI {
 //         !(opcode.pc + ':' + Number(jumpLocation) in state.jumps) &&
 //         ((jumpCondition.name === 'LT' &&
 //             jumpCondition.left.name === 'CALLDATASIZE' &&
-//             typeof jumpCondition.right === 'bigint' &&
+//             isVal(jumpCondition.right) &&
 //             jumpCondition.right === 4n) ||
 //             (jumpCondition.name === 'ISZERO' && jumpCondition.value instanceof CALLDATASIZE))
 //     ) {
@@ -338,13 +334,13 @@ export class JUMPI {
 
 //                 if (
 //                     jumpCondition.name === 'CALL' &&
-//                     typeof jumpCondition.memoryLength === 'bigint' &&
+//                     isVal(jumpCondition.memoryLength) &&
 //                     jumpCondition.memoryLength === 0n &&
-//                     typeof jumpCondition.outputLength === 'bigint' &&
+//                     isVal(jumpCondition.outputLength) &&
 //                     jumpCondition.outputLength === 0n &&
 //                     jumpCondition.gas.name === 'MUL' &&
 //                     jumpCondition.gas.left.name === 'ISZERO' &&
-//                     typeof jumpCondition.gas.right === 'bigint' &&
+//                     isVal(jumpCondition.gas.right) &&
 //                     jumpCondition.gas.right === 2300n
 //                 ) {
 //                     jumpCondition.throwOnFail = true;
@@ -377,13 +373,13 @@ export class JUMPI {
 // }
 // };
 
-export function isRevertBlock(falseCloneTree: Instruction[]): boolean {
-    return (
-        falseCloneTree.length === 1 &&
-        'name' in falseCloneTree[0] &&
-        falseCloneTree[0].name === 'REVERT' &&
-        falseCloneTree[0].items !== undefined &&
-        falseCloneTree[0].items.length === 0
-        // || falseCloneTree[0].name === 'INVALID'
-    );
-}
+// export function isRevertBlock(falseCloneTree: Expr[]): boolean {
+//     return (
+//         falseCloneTree.length === 1 &&
+//         'name' in falseCloneTree[0] &&
+//         falseCloneTree[0].name === 'REVERT' &&
+//         falseCloneTree[0].items !== undefined &&
+//         falseCloneTree[0].items.length === 0
+//         // || falseCloneTree[0].name === 'INVALID'
+//     );
+// }

@@ -1,5 +1,5 @@
 import { State } from '../../state';
-import { MLOAD } from '../memory';
+import { MLoad } from '../memory';
 
 export type Expr =
     | bigint
@@ -15,23 +15,27 @@ export function memArgs<T extends Expr>(
 
     const offset = stack.pop();
     const size = stack.pop();
-    if (typeof offset === 'bigint' && typeof size === 'bigint' && size <= MAXSIZE * 32) {
+    if (isBigInt(offset) && isBigInt(size) && size <= MAXSIZE * 32) {
         const args = [];
         for (let i = Number(offset); i < Number(offset + size); i += 32) {
-            args.push(i in memory ? memory[i] : new MLOAD(i));
+            args.push(i in memory ? memory[i] : new MLoad(BigInt(i)));
         }
         return new Klass(args);
     } else {
-        if (typeof size === 'bigint' && size > MAXSIZE * 32) {
-            // throw new Error('memargs size'+ Klass+ size);
+        if (isBigInt(size) && size > MAXSIZE * 32) {
+            throw new Error(`memargs size${Klass.toString()}${size}`);
         }
 
         return new Klass([], offset, size);
     }
 }
 
-export function isBigInt<T>(value: bigint | T): value is bigint {
-    return typeof value === 'bigint';
+export function isBigInt(expr: Expr): expr is bigint {
+    return typeof expr === 'bigint';
+}
+
+export function isZero(expr: Expr): expr is bigint {
+    return isBigInt(expr) && expr === 0n;
 }
 
 export function stringify(value: Expr): string {

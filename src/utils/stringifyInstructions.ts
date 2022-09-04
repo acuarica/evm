@@ -2,11 +2,13 @@ import { ControlFlowGraph, Jump, Jumpi } from '../cfg';
 import { EVM } from '../evm';
 import { Sig } from '../inst/logic';
 import { TopLevelFunction } from '../inst/jumps';
-import { Operand } from '../state';
 import stringifyFunctions from './stringifyFunctions';
-import { SLOAD } from '../inst/storage';
+import { SLoad } from '../inst/storage';
 import { stringifyVariable } from './stringifyVariables';
 import { Variable } from '../contract';
+import { Return } from '../inst/system';
+import { isBigInt } from '../inst/utils';
+import { Stmt } from '../state';
 
 /**
  *
@@ -75,26 +77,26 @@ export function stringifyBlocks(
         }
 
         output += stringifyInstructions(block.stmts, indent);
-        const last = block.stmts.at(-1) as Operand;
+        const last = block.stmts.at(-1);
         if (last instanceof Jumpi) {
             output += ' '.repeat(indent) + '{\n';
-            stringifyBlock(block.exit.pc + ':' + last.pc!, indent + 4);
+            stringifyBlock(last.destBranch!, indent + 4);
             output += ' '.repeat(indent) + '} else {\n';
-            stringifyBlock(block.exit.pc + ':' + (block.opcodes.at(-1)!.pc + 1), indent + 4);
+            stringifyBlock(last.fallBranch!, indent + 4);
             output += ' '.repeat(indent) + '}\n';
 
             if (last.condition instanceof Sig) {
                 const tlf = new TopLevelFunction(
-                    blocks[block.exit.pc + ':' + last.pc!].stmts,
+                    blocks[last.destBranch!].stmts as any,
                     last.condition.hash,
                     {}
                 );
                 output += stringifyFunctions(last.condition.hash, tlf, functionsHashes);
-                output += isVar(last.condition, functionsHashes, tlf);
+                output += isVar(last.condition, functionsHashes, tlf.items);
             }
         } else if (last instanceof Jump) {
             output += ' '.repeat(indent) + '{\n';
-            stringifyBlock(block.exit.pc + ':' + last.pc!, indent + 4);
+            stringifyBlock(last.destBranch!, indent + 4);
             output += ' '.repeat(indent) + '}\n';
         }
     }
@@ -102,19 +104,15 @@ export function stringifyBlocks(
     return output;
 }
 
-export function isVar(
-    jumpCondition: Sig,
-    functionHashes: EVM['functionHashes'],
-    tlf: TopLevelFunction
-) {
+export function isVar(jumpCondition: Sig, functionHashes: EVM['functionHashes'], stmts: Stmt[]) {
     if (
         jumpCondition.hash in functionHashes &&
         (items =>
             items.length === 1 &&
-            items[0].name === 'RETURN' &&
-            items[0].items.length === 1 &&
-            items[0].items[0] instanceof SLOAD &&
-            typeof items[0].items[0].location === 'bigint')(tlf.items)
+            items[0] instanceof Return &&
+            items[0].args.length === 1 &&
+            items[0].args[0] instanceof SLoad &&
+            isBigInt(items[0].args[0].location))(stmts)
     ) {
         // const item = (tlf.items[0] as Return) .items[0] as SLOAD;
         const fullFunction = functionHashes[jumpCondition.hash];

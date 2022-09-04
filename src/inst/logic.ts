@@ -1,10 +1,9 @@
 import { Stack } from '../stack';
-import { Expr, isBigInt, stringify } from './utils';
+import { Expr, isBigInt, isZero, stringify } from './utils';
 import { CallDataLoad } from './info';
-import { Div } from './math';
+import { Bin, Div } from './math';
 
 export class Sig {
-    readonly name = 'SIG';
     readonly wrapped = false;
 
     constructor(readonly hash: string) {}
@@ -14,25 +13,14 @@ export class Sig {
     }
 }
 
-export class Eq {
-    readonly name = 'EQ';
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} == ${stringify(this.right)}`;
-    }
-}
-
 export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
     if (
-        typeof left === 'bigint' &&
+        isBigInt(left) &&
         right instanceof Shr &&
-        typeof right.shift === 'bigint' &&
+        isBigInt(right.shift) &&
         right.shift === 0xe0n &&
         right.value instanceof CallDataLoad &&
-        right.value.location === 0n
+        isZero(right.value.location)
     ) {
         return new Sig(left.toString(16).padStart(8, '0'));
     }
@@ -40,12 +28,15 @@ export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | E
 }
 
 export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
-    if (typeof left === 'bigint' && right instanceof Div && typeof right.right === 'bigint') {
+    if (isBigInt(left) && right instanceof Div && isBigInt(right.right)) {
         left = left * right.right;
         right = right.left;
 
-        // /^[0]+$/.test(left.toString(16).substring(8)) &&
-        if (left % (1n << 0xe0n) === 0n && right instanceof CallDataLoad && right.location === 0n) {
+        if (
+            left % (1n << 0xe0n) === 0n &&
+            right instanceof CallDataLoad &&
+            isZero(right.location)
+        ) {
             return new Sig(
                 left
                     .toString(16)
@@ -64,32 +55,25 @@ export function eqHook(left: Expr, right: Expr, cc: () => Eq): Sig | Eq {
     );
 }
 
-export class And {
-    readonly name = 'AND';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return stringify(this.left) + ' && ' + stringify(this.right);
+export class Eq extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('==', left, right);
     }
 }
 
-export class Or {
-    readonly name = 'OR';
-    readonly type?: string;
-    readonly wrapped = true;
+export class And extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('&&', left, right);
+    }
+}
 
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return stringify(this.left) + ' || ' + stringify(this.right);
+export class Or extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('||', left, right);
     }
 }
 
 export class IsZero {
-    readonly name = 'ISZERO';
     readonly type?: string;
     readonly wrapped = true;
 
@@ -103,7 +87,6 @@ export class IsZero {
 }
 
 export class GT {
-    readonly name = 'GT';
     readonly type?: string;
     readonly wrapped = true;
 
@@ -115,7 +98,6 @@ export class GT {
 }
 
 export class LT {
-    readonly name = 'LT';
     readonly type?: string;
     readonly wrapped = true;
 
@@ -126,11 +108,7 @@ export class LT {
     }
 }
 
-/**
- * https://www.evm.codes/#18
- */
 export class Xor {
-    readonly type?: string;
     readonly wrapped = true;
 
     constructor(readonly left: Expr, readonly right: Expr) {}
@@ -232,7 +210,7 @@ export const LOGIC = {
         const right = stack.pop();
 
         stack.push(
-            typeof left === 'bigint' && typeof right === 'bigint'
+            isBigInt(left) && isBigInt(right)
                 ? left === right
                     ? 1n
                     : 0n
@@ -260,30 +238,30 @@ export const LOGIC = {
     AND: (stack: Stack<Expr>) => {
         const left = stack.pop();
         const right = stack.pop();
-        if (typeof left === 'bigint' && typeof right === 'bigint') {
+        if (isBigInt(left) && isBigInt(right)) {
             stack.push(left & right);
-        } else if (typeof left === 'bigint' && /^[f]+$/.test(left.toString(16))) {
-            (right as any).size = left.toString(16).length;
+        } else if (isBigInt(left) && /^[f]+$/.test(left.toString(16))) {
+            // (right as any).size = left.toString(16).length;
             stack.push(right);
-        } else if (typeof right === 'bigint' && /^[f]+$/.test(right.toString(16))) {
-            (left as any).size = right.toString(16).length;
+        } else if (isBigInt(right) && /^[f]+$/.test(right.toString(16))) {
+            // (left as any).size = right.toString(16).length;
             stack.push(left);
             /*} else if (
-            typeof left === 'bigint' &&
+            isVal(left) &&
             left.equals('1461501637330902918203684832716283019655932542975')
         ) {*/
             /* 2 ** 160 */
             /*    state.stack.push(right);
         } else if (
-            typeof right === 'bigint' &&
+            isVal(right) &&
             right.equals('1461501637330902918203684832716283019655932542975')
         ) {*/
             /* 2 ** 160 */
             /*    state.stack.push(left);*/
         } else if (
-            typeof left === 'bigint' &&
+            isBigInt(left) &&
             right instanceof And &&
-            typeof right.left === 'bigint' &&
+            isBigInt(right.left) &&
             left === right.left
         ) {
             stack.push(right.right);

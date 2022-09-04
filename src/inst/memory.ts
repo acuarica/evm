@@ -1,25 +1,24 @@
-import { isBigInt } from './utils';
+import { Expr, isBigInt } from './utils';
 import { State } from '../state';
 import { stringify } from './utils';
 
-export class MLOAD {
+export class MLoad {
     readonly name = 'MLOAD';
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly location: any) {}
+    constructor(readonly location: Expr) {}
 
     toString() {
         return 'memory[' + stringify(this.location) + ']';
     }
 }
 
-export class MSTORE {
+export class MStore {
     readonly name = 'MSTORE';
     readonly type?: string;
-    readonly wrapped = true;
 
-    constructor(readonly location: any, readonly data: any) {}
+    constructor(readonly location: Exclude<Expr, bigint>, readonly data: Expr) {}
 
     toString() {
         return 'memory[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';
@@ -32,7 +31,7 @@ export const MEMORY = {
         stack.push(
             isBigInt(memoryLocation) && Number(memoryLocation) in memory
                 ? memory[Number(memoryLocation)]
-                : new MLOAD(memoryLocation)
+                : new MLoad(memoryLocation)
         );
     },
     MSTORE: mstore,
@@ -45,6 +44,6 @@ function mstore({ stack, memory, stmts }: State) {
     if (isBigInt(storeLocation)) {
         memory[Number(storeLocation)] = storeData;
     } else {
-        stmts.push(new MSTORE(storeLocation, storeData));
+        stmts.push(new MStore(storeLocation, storeData));
     }
 }

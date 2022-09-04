@@ -33,17 +33,32 @@ export const SYMBOLS = {
     GAS: symbol0('gasleft()'),
 };
 
-function symbol0(value: string, type?: string) {
+export type Info =
+    | 'this'
+    | 'tx.origin'
+    | 'msg.sender'
+    | 'this.code.length'
+    | 'tx.gasprice'
+    | 'output.length'
+    | 'block.coinbase'
+    | 'block.timestamp'
+    | 'block.number'
+    | 'block.difficulty'
+    | 'block.gaslimit'
+    | 'memory.length'
+    | 'gasleft()';
+
+export class Symbol0 {
+    readonly wrapped = false;
+    constructor(readonly symbol: Info, readonly type?: string) {}
+    toString() {
+        return this.symbol;
+    }
+}
+
+function symbol0(value: Info, type?: string) {
     return (_opcode: Opcode, { stack }: State) => {
-        stack.push(
-            new (class {
-                readonly wrapped = false;
-                readonly type = type;
-                toString() {
-                    return value;
-                }
-            })()
-        );
+        stack.push(new Symbol0(value, type));
     };
 }
 

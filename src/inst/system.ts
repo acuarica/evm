@@ -1,28 +1,21 @@
 import { hex2a } from '../hex';
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import { Expr, memArgs, stringify } from './utils';
+import { IsZero } from './logic';
+import { Mul } from './math';
+import { Expr, isBigInt, memArgs, stringify, isZero } from './utils';
 
-/**
- * https://www.evm.codes/#00
- */
 export class Stop {
-    readonly name = 'STOP';
-    readonly wrapped = false;
-
     toString() {
         return 'return;';
     }
 }
 
 export class CREATE {
-    readonly name = 'CREATE';
-    readonly type?: string;
+    readonly type = 'address';
     readonly wrapped = true;
 
-    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {
-        // this.name = 'address';
-    }
+    constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
     toString() {
         return (
@@ -40,32 +33,26 @@ export class CREATE {
 }
 
 export class CALL {
-    readonly name = 'CALL';
     readonly type?: string;
     readonly wrapped = false;
     throwOnFail = false;
 
     constructor(
-        readonly gas: any,
-        readonly address: any,
-        readonly value: any,
-        readonly memoryStart: any,
-        readonly memoryLength: any,
-        readonly outputStart: any,
-        readonly outputLength: any
+        readonly gas: Expr,
+        readonly address: Expr,
+        readonly value: Expr,
+        readonly memoryStart: Expr,
+        readonly memoryLength: Expr,
+        readonly outputStart: Expr,
+        readonly outputLength: Expr
     ) {}
 
     toString() {
-        if (
-            typeof this.memoryLength === 'bigint' &&
-            this.memoryLength === 0n &&
-            typeof this.outputLength === 'bigint' &&
-            this.outputLength === 0n
-        ) {
+        if (isZero(this.memoryLength) && isZero(this.outputLength)) {
             if (
-                this.gas.name === 'MUL' &&
-                this.gas.left.name === 'ISZERO' &&
-                typeof this.gas.right === 'bigint' &&
+                this.gas instanceof Mul &&
+                this.gas.left instanceof IsZero &&
+                isBigInt(this.gas.right) &&
                 this.gas.right === 2300n
             ) {
                 if (this.throwOnFail) {
@@ -119,7 +106,6 @@ export class CALL {
 }
 
 export class ReturnData {
-    readonly name = 'ReturnData';
     readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {}
@@ -169,7 +155,7 @@ export class CREATE2 {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly memoryStart: any, readonly memoryLength: any, readonly value: any) {}
+    constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
     toString() {
         return (
@@ -253,13 +239,11 @@ export class DELEGATECALL {
 }
 
 export class Return {
-    readonly name = 'RETURN';
-    readonly type?: string;
     readonly wrapped = true;
     readonly memoryStart?: Expr;
     readonly memoryLength?: Expr;
 
-    constructor(readonly items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
+    constructor(readonly args: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
         if (memoryStart && memoryLength) {
             this.memoryStart = memoryStart;
             this.memoryLength = memoryLength;
@@ -277,23 +261,23 @@ export class Return {
                 stringify(this.memoryLength) +
                 ')];'
             );
-        } else if (this.items.length === 0) {
+        } else if (this.args.length === 0) {
             return 'return;';
         } else if (
-            this.items.length === 1 &&
-            (typeof this.items[0] === 'bigint' || (this.items[0] as any).static)
+            this.args.length === 1 &&
+            (isBigInt(this.args[0]) || (this.args[0] as any).static)
         ) {
-            return 'return ' + this.items[0] + ';';
+            return 'return ' + this.args[0] + ';';
         } else if (
-            this.items.length === 3 &&
-            this.items.every((item: any) => typeof item === 'bigint') &&
-            this.items[0] === 32n
+            this.args.length === 3 &&
+            this.args.every(item => isBigInt(item)) &&
+            this.args[0] === 32n
         ) {
-            return 'return "' + hex2a(this.items[2].toString(16)) + '";';
+            return 'return "' + hex2a(this.args[2].toString(16)) + '";';
         } else {
-            return this.items.length === 1
-                ? `return ${stringify(this.items[0])};`
-                : `return (${this.items.map(item => stringify(item)).join(', ')});`;
+            return this.args.length === 1
+                ? `return ${stringify(this.args[0])};`
+                : `return (${this.args.map(item => stringify(item)).join(', ')});`;
         }
     }
 }
@@ -327,7 +311,6 @@ export class Revert {
 }
 
 export class Invalid {
-    readonly name = 'INVALID';
     readonly type?: string;
     readonly wrapped = true;
 

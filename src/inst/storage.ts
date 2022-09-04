@@ -1,12 +1,11 @@
 import { Opcode } from '../opcode';
-import { Expr, stringify } from './utils';
+import { Expr, isBigInt, stringify } from './utils';
 import { State } from '../state';
 import { Sha3 } from './sha3';
 import { Contract, Variable } from '../contract';
-import { Add } from './math';
+import { Add, Sub } from './math';
 
 export class MappingStore {
-    readonly name = 'MappingStore';
     readonly type?: string;
     readonly wrapped = false;
 
@@ -73,29 +72,28 @@ export class MappingStore {
 }
 
 export class SStore {
-    readonly name = 'SSTORE';
     readonly type?: string;
     readonly wrapped = true;
 
     constructor(
         readonly location: Expr,
-        readonly data: any,
+        readonly data: Expr,
         readonly variables: Contract['variables']
     ) {
-        if (typeof this.location === 'bigint') {
-            const loc = this.location.toString();
-            if (loc in this.variables) {
-                this.variables[loc].types.push(this.data.type);
-            } else {
-                this.variables[loc] = new Variable(undefined, [this.data.type]);
-            }
-        }
+        // if (isVal(this.location)) {
+        //     const loc = this.location.toString();
+        //     if (loc in this.variables) {
+        //         this.variables[loc].types.push(this.data.type);
+        //     } else {
+        //         this.variables[loc] = new Variable(undefined, [this.data.type]);
+        //     }
+        // }
     }
 
     toString() {
         let variableName = 'storage[' + stringify(this.location) + ']';
         const loc = this.location.toString();
-        if (typeof this.location === 'bigint' && loc in this.variables) {
+        if (isBigInt(this.location) && loc in this.variables) {
             const label = this.variables[loc].label;
             if (label) {
                 variableName = label;
@@ -104,14 +102,14 @@ export class SStore {
             }
         }
         if (
-            this.data.name === 'ADD' &&
-            this.data.right.name === 'SLOAD' &&
+            this.data instanceof Add &&
+            this.data.right instanceof SLoad &&
             stringify(this.data.right.location) === stringify(this.location)
         ) {
             return variableName + ' += ' + stringify(this.data.left) + ';';
         } else if (
-            this.data.name === 'SUB' &&
-            this.data.left.name === 'SLOAD' &&
+            this.data instanceof Sub &&
+            this.data.left instanceof SLoad &&
             stringify(this.data.left.location) === stringify(this.location)
         ) {
             return variableName + ' -= ' + stringify(this.data.right) + ';';
@@ -168,7 +166,7 @@ export class MappingLoad {
     }
 }
 
-export class SLOAD {
+export class SLoad {
     readonly name = 'SLOAD';
     readonly type?: string;
     readonly wrapped = false;
@@ -176,7 +174,7 @@ export class SLOAD {
     constructor(readonly location: Expr, readonly variables: Contract['variables']) {}
 
     toString() {
-        if (typeof this.location === 'bigint' && this.location.toString() in this.variables) {
+        if (isBigInt(this.location) && this.location.toString() in this.variables) {
             const label = this.variables[this.location.toString()].label;
             if (label) {
                 return label;
@@ -196,7 +194,7 @@ export const STORAGE = (contract: Contract) => {
             if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
+                    mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -221,17 +219,17 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, contract.variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
                 storeLocation instanceof Add &&
                 storeLocation.left instanceof Sha3 &&
-                typeof storeLocation.right === 'bigint'
+                isBigInt(storeLocation.right)
             ) {
                 const mappingItems = parseMapping(...storeLocation.left.items!);
                 const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
+                    mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -257,18 +255,16 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, contract.variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
                 storeLocation instanceof Add &&
-                typeof storeLocation.left === 'bigint' &&
+                isBigInt(storeLocation.left) &&
                 storeLocation.right instanceof Sha3
             ) {
                 const mappingItems = parseMapping(...storeLocation.right.items!);
-                const mappingLocation = mappingItems.find(
-                    mappingItem => typeof mappingItem === 'bigint'
-                );
+                const mappingLocation = mappingItems.find(mappingItem => isBigInt(mappingItem));
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
                 );
@@ -293,23 +289,24 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLOAD(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, contract.variables));
                 }
             } else {
-                state.stack.push(new SLOAD(storeLocation, contract.variables));
+                state.stack.push(new SLoad(storeLocation, contract.variables));
             }
         },
 
         SSTORE: (_opcode: Opcode, state: State): void => {
             const storeLocation = state.stack.pop();
             const storeData = state.stack.pop();
-            if (typeof storeLocation === 'bigint') {
+            if (isBigInt(storeLocation)) {
                 // throw new Error('bigint not expected in sstore');
-                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                sstoreVariable();
+                // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             } else if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items!);
                 const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
+                    mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -336,16 +333,17 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                    sstoreVariable();
+                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation instanceof Add &&
                 storeLocation.left instanceof Sha3 &&
-                typeof storeLocation.right === 'bigint'
+                isBigInt(storeLocation.right)
             ) {
                 const mappingItems = parseMapping(...storeLocation.left.items!);
                 const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
+                    mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -372,16 +370,17 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                    sstoreVariable();
+                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 storeLocation instanceof Add &&
-                typeof storeLocation.left === 'bigint' &&
+                isBigInt(storeLocation.left) &&
                 storeLocation.right instanceof Sha3
             ) {
                 const mappingItems = parseMapping(...storeLocation.right.items!);
                 const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => typeof mappingItem === 'bigint')
+                    mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -408,12 +407,13 @@ export const STORAGE = (contract: Contract) => {
                         )
                     );
                 } else {
-                    state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                    sstoreVariable();
+                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
             } else if (
                 // eslint-disable-next-line no-constant-condition
                 false &&
-                // typeof storeLocation === 'bigint' &&
+                // isVal(storeLocation) &&
                 storeLocation.toString() in contract.variables //&&
                 // storeData.type &&
                 // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
@@ -421,6 +421,21 @@ export const STORAGE = (contract: Contract) => {
                 state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
+                sstoreVariable();
+                // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+            }
+
+            function sstoreVariable() {
+                if (isBigInt(storeLocation)) {
+                    const loc = storeLocation.toString();
+                    if (loc in contract.variables) {
+                        contract.variables[loc].types.push((storeData as any).type);
+                    } else {
+                        contract.variables[loc] = new Variable(undefined, [
+                            (storeData as any).type,
+                        ]);
+                    }
+                }
                 state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             }
         },

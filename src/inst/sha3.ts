@@ -35,7 +35,7 @@ export const SHA3 = {
         // const memoryStart = stack.pop();
         // const memoryLength = stack.pop();
         state.stack.push(memArgs(state, Sha3));
-        // if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint' && memoryLength <= 1024 * 32) {
+        // if (isVal(memoryStart === 'bigint' && typeof memoryLength) && memoryLength <= 1024 * 32) {
         //     const items = [];
         //     for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
         //         items.push(i in memory ? memory[i] : new MLOAD(i));

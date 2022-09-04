@@ -3,12 +3,12 @@ import { Stack } from '../../src';
 import { CallDataLoad } from '../../src/inst/info';
 import { LOGIC, Shr } from '../../src/inst/logic';
 import { Div } from '../../src/inst/math';
-import { Operand } from '../../src/state';
+import { Expr } from '../../src/inst/utils';
 import { Sym } from '../utils/evmtest';
 
 describe('EQ', () => {
     it('should calculate `1 == 1`', () => {
-        const stack = new Stack<Operand>();
+        const stack = new Stack<Expr>();
         stack.push(1n);
         stack.push(1n);
         LOGIC.EQ(stack);
@@ -16,7 +16,7 @@ describe('EQ', () => {
     });
 
     it('should calculate `1 == 2`', () => {
-        const stack = new Stack<Operand>();
+        const stack = new Stack<Expr>();
         stack.push(1n);
         stack.push(2n);
         LOGIC.EQ(stack);
@@ -24,10 +24,10 @@ describe('EQ', () => {
     });
 
     it('should stringify `x == 1`', () => {
-        const stack = new Stack<Operand>();
+        const stack = new Stack<Expr>();
         stack.push(1n);
-        stack.push(new Sym());
-        expect(stack.values).to.be.deep.equal([new Sym(), 1n]);
+        stack.push(new Sym('x'));
+        expect(stack.values).to.be.deep.equal([new Sym('x'), 1n]);
 
         LOGIC.EQ(stack);
 
@@ -38,7 +38,7 @@ describe('EQ', () => {
     ['06fdde03', '12345678', '00000001'].forEach(hash => {
         describe(`EQ detect msg.sig for hash ${hash}`, () => {
             it('should stringify signature `msg.sig` from RHS DIV&EXP', () => {
-                const stack = new Stack<Operand>();
+                const stack = new Stack<Expr>();
                 stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
                 stack.push(BigInt('0x' + hash));
                 LOGIC.EQ(stack);
@@ -48,7 +48,7 @@ describe('EQ', () => {
             });
 
             it('should stringify signature `msg.sig` from LHS DIV&EXP', () => {
-                const stack = new Stack<Operand>();
+                const stack = new Stack<Expr>();
                 stack.push(BigInt('0x' + hash));
                 stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
                 LOGIC.EQ(stack);
@@ -58,7 +58,7 @@ describe('EQ', () => {
             });
 
             it('should stringify signature `msg.sig` from RHS SHR', () => {
-                const stack = new Stack<Operand>();
+                const stack = new Stack<Expr>();
                 stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
                 stack.push(BigInt('0x' + hash));
                 LOGIC.EQ(stack);
@@ -68,7 +68,7 @@ describe('EQ', () => {
             });
 
             it('should stringify signature `msg.sig` from LHS SHR', () => {
-                const stack = new Stack<Operand>();
+                const stack = new Stack<Expr>();
                 stack.push(BigInt('0x' + hash));
                 stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
                 LOGIC.EQ(stack);

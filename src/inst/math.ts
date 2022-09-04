@@ -1,84 +1,49 @@
 import { Stack } from '../stack';
-import { Expr, isBigInt, stringify } from './utils';
+import { Expr, isBigInt, isZero, stringify } from './utils';
 import { Sar, Shl } from './logic';
 
-export class Add {
-    readonly name = 'ADD';
+export class Bin {
     readonly wrapped = true;
 
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    // get type() {
-    //     if (this.left.type === this.right.type) {
-    //         return this.left.type;
-    //     } else if (!this.left.type && this.right.type) {
-    //         return this.right.type;
-    //     } else if (!this.right.type && this.left.type) {
-    //         return this.left.type;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    constructor(readonly op: string, readonly left: Expr, readonly right: Expr) {}
 
     toString() {
-        return `${stringify(this.left)} + ${stringify(this.right)}`;
+        return `${stringify(this.left)} ${this.op} ${stringify(this.right)}`;
     }
 }
 
-export class Mul {
-    readonly name = 'MUL';
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} * ${stringify(this.right)}`;
+export class Add extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('+', left, right);
     }
 }
 
-export class Sub {
-    readonly name = 'SUB';
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} - ${stringify(this.right)}`;
+export class Mul extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('*', left, right);
     }
 }
 
-export class Div {
-    readonly name = 'DIV';
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} / ${stringify(this.right)}`;
+export class Sub extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('-', left, right);
     }
 }
 
-export class Mod {
-    readonly name = 'MOD';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} % ${stringify(this.right)}`;
+export class Div extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('/', left, right);
     }
 }
 
-export class Exp {
-    readonly name = 'EXP';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return stringify(this.left) + ' ** ' + stringify(this.right);
+export class Mod extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('%', left, right);
+    }
+}
+export class Exp extends Bin {
+    constructor(left: Expr, right: Expr) {
+        super('**', left, right);
     }
 }
 
@@ -89,9 +54,9 @@ export const MATH = {
         stack.push(
             isBigInt(left) && isBigInt(right)
                 ? left + right
-                : isBigInt(left) && left === 0n
+                : isZero(left)
                 ? right
-                : isBigInt(right) && right === 0n
+                : isZero(right)
                 ? left
                 : new Add(left, right)
         );
@@ -103,7 +68,7 @@ export const MATH = {
         stack.push(
             isBigInt(left) && isBigInt(right)
                 ? left * right
-                : (isBigInt(left) && left === 0n) || (isBigInt(right) && right === 0n)
+                : isZero(left) || isZero(right)
                 ? 0n
                 : new Mul(left, right)
         );

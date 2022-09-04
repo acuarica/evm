@@ -1,8 +1,8 @@
 import { Opcode } from '../opcode';
-import { MLOAD } from './memory';
+import { MLoad } from './memory';
 import { State } from '../state';
 import { Contract } from '../contract';
-import { Expr } from './utils';
+import { Expr, isBigInt } from './utils';
 
 export class Log {
     readonly name = 'LOG';
@@ -22,7 +22,7 @@ export class Log {
     ) {
         if (
             this.topics.length > 0 &&
-            typeof this.topics[0] === 'bigint' &&
+            isBigInt(this.topics[0]) &&
             this.topics[0].toString(16) in eventHashes
         ) {
             this.eventName = eventHashes[this.topics[0].toString(16)].split('(')[0];
@@ -79,10 +79,10 @@ function log(topicsCount: number, contract: Contract) {
             }
         }
 
-        if (typeof memoryStart === 'bigint' && typeof memoryLength === 'bigint') {
+        if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
             const args = [];
             for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
-                args.push(i in state.memory ? state.memory[i] : new MLOAD(i));
+                args.push(i in state.memory ? state.memory[i] : new MLoad(BigInt(i)));
             }
             state.stmts.push(new Log(contract.eventHashes, topics, args));
         } else {

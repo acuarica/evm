@@ -3,12 +3,13 @@ import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
 
 export class Sym {
-    readonly name = 'SYMBOL';
     readonly type?: string;
     readonly wrapped = false;
 
+    constructor(readonly sym: string) {}
+
     toString() {
-        return 'x';
+        return this.sym;
     }
 }
 

@@ -3,7 +3,7 @@ import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
 contract('modifiers', version => {
-    it.skip('should decompile bytecode', () => {
+    it('should decompile bytecode', () => {
         const CONTRACT = `contract C {
             uint256 private _value;
             address private _owner;
@@ -29,7 +29,7 @@ contract('modifiers', version => {
 
         const text = evm.decompile();
         expect(text, text).to.not.match(/return msg.sender;/);
-        expect(text, text).to.match(/if\(storage\[1\] == msg.sender\) \{$/m);
+        expect(text, text).to.match(/if \(storage\[1\] == msg.sender\)$/m);
         expect(text, text).to.match(/var1 = \(_arg0 \+ 3\);$/m);
     });
 });
