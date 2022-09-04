@@ -17,12 +17,12 @@ export class Contract {
     /**
      *
      */
-    readonly functions: { [hash: string]: TopLevelFunction } = {};
+    readonly variables: { [key: string]: Variable } = {};
 
     /**
      *
      */
-    readonly variables: { [key: string]: Variable } = {};
+    readonly functions: { [hash: string]: TopLevelFunction } = {};
 
     /**
      *
