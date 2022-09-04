@@ -55,23 +55,34 @@ export function eqHook(left: Expr, right: Expr, cc: () => Eq): Sig | Eq {
     );
 }
 
-export class Eq extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('==', left, right);
-    }
-}
+const Unary = <N extends string | null>(name: N, op: string) =>
+    class {
+        readonly name: N = name;
+        readonly wrapped = false;
 
-export class And extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('&&', left, right);
-    }
-}
+        constructor(readonly value: Expr) {}
 
-export class Or extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('||', left, right);
-    }
-}
+        toString() {
+            return `${op}${stringify(this.value)}`;
+        }
+    };
+
+const Shift = <N extends string>(name: N, op: string) =>
+    class {
+        readonly name: N = name;
+        readonly type?: string;
+        readonly wrapped = true;
+
+        constructor(readonly value: Expr, readonly shift: Expr) {}
+
+        toString() {
+            return `${stringify(this.value)} ${op} ${stringify(this.shift)}`;
+        }
+    };
+
+export class Eq extends Bin('Eq', '==') {}
+export class And extends Bin('And', '&&') {}
+export class Or extends Bin('Or', '||') {}
 
 export class IsZero {
     readonly type?: string;
@@ -108,44 +119,10 @@ export class LT {
     }
 }
 
-export class Xor {
-    readonly wrapped = true;
+export class Xor extends Bin('Xor', '^') {}
+export class Not extends Unary('Not', '~') {}
+export class Neg extends Unary(null, '!') {}
 
-    constructor(readonly left: Expr, readonly right: Expr) {}
-
-    toString() {
-        return `${stringify(this.left)} ^ ${stringify(this.right)}`;
-    }
-}
-
-/**
- * https://www.evm.codes/#19
- */
-export class Not {
-    readonly name = 'NOT';
-    readonly wrapped = true;
-
-    constructor(readonly value: Expr) {}
-
-    toString() {
-        return `~${stringify(this.value)}`;
-    }
-}
-
-export class Neg {
-    readonly name = 'SYMBOL';
-    readonly wrapped = true;
-
-    constructor(readonly value: Expr) {}
-
-    toString() {
-        return `!${stringify(this.value)}`;
-    }
-}
-
-/**
- * https://www.evm.codes/#1a
- */
 export class Byte {
     readonly name = 'BYTE';
     readonly type?: string;
@@ -158,46 +135,9 @@ export class Byte {
     }
 }
 
-/**
- * https://www.evm.codes/#1b
- */
-export class Shl {
-    readonly name = 'SHL';
-    readonly type?: string;
-    readonly wrapped: boolean = true;
-
-    constructor(readonly value: Expr, readonly shift: Expr) {}
-
-    toString() {
-        return `${stringify(this.value)} << ${stringify(this.shift)}`;
-    }
-}
-
-/**
- * https://www.evm.codes/#1c
- */
-export class Shr {
-    readonly name = 'SHR';
-    readonly wrapped = true;
-
-    constructor(readonly value: Expr, readonly shift: Expr) {}
-
-    toString() {
-        return `${stringify(this.value)} >>> ${stringify(this.shift)}`;
-    }
-}
-
-/**
- * https://www.evm.codes/#1d
- */
-export class Sar {
-    readonly name = 'SAR';
-    readonly wrapped = true;
-
-    constructor(readonly value: Expr, readonly shift: Expr) {}
-
-    toString = () => `${stringify(this.value)} >> ${stringify(this.shift)}`;
-}
+export class Shl extends Shift('Shl', '<<') {}
+export class Shr extends Shift('Shr', '>>>') {}
+export class Sar extends Shift('Sar', '>>') {}
 
 export const LOGIC = {
     LT: lt,

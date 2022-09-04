@@ -2,50 +2,24 @@ import { Stack } from '../stack';
 import { Expr, isBigInt, isZero, stringify } from './utils';
 import { Sar, Shl } from './logic';
 
-export class Bin {
-    readonly wrapped = true;
+export const Bin = <N extends string>(name: N, op: string) =>
+    class {
+        readonly name: N = name;
+        readonly wrapped = true;
 
-    constructor(readonly op: string, readonly left: Expr, readonly right: Expr) {}
+        constructor(readonly left: Expr, readonly right: Expr) {}
 
-    toString() {
-        return `${stringify(this.left)} ${this.op} ${stringify(this.right)}`;
-    }
-}
+        toString() {
+            return `${stringify(this.left)} ${op} ${stringify(this.right)}`;
+        }
+    };
 
-export class Add extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('+', left, right);
-    }
-}
-
-export class Mul extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('*', left, right);
-    }
-}
-
-export class Sub extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('-', left, right);
-    }
-}
-
-export class Div extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('/', left, right);
-    }
-}
-
-export class Mod extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('%', left, right);
-    }
-}
-export class Exp extends Bin {
-    constructor(left: Expr, right: Expr) {
-        super('**', left, right);
-    }
-}
+export class Add extends Bin('Add', '+') {}
+export class Mul extends Bin('Mul', '*') {}
+export class Sub extends Bin('Sub', '-') {}
+export class Div extends Bin('Div', '/') {}
+export class Mod extends Bin('Mod', '%') {}
+export class Exp extends Bin('Exp', '**') {}
 
 export const MATH = {
     ADD: (stack: Stack<Expr>) => {
