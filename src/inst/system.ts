@@ -4,19 +4,58 @@ import {
     CREATE,
     CREATE2,
     DELEGATECALL,
+    Expr,
     Invalid,
+    isBigInt,
+    MLoad,
     Return,
     ReturnData,
     Revert,
     SelfDestruct,
+    Sha3,
     STATICCALL,
     Stop,
 } from '../ast';
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import { memArgs } from './sha3';
+
+export function memArgs0<T>(
+    offset: Expr,
+    size: Expr,
+    { memory }: State,
+    Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
+): T {
+    const MAXSIZE = 1024;
+
+    if (isBigInt(offset) && isBigInt(size) && size <= MAXSIZE * 32) {
+        const args = [];
+        for (let i = Number(offset); i < Number(offset + size); i += 32) {
+            args.push(i in memory ? memory[i] : new MLoad(BigInt(i)));
+        }
+
+        return new Klass(args);
+    } else {
+        if (isBigInt(size) && size > MAXSIZE * 32) {
+            throw new Error(`memargs size${Klass.toString()}${size}`);
+        }
+
+        return new Klass([], offset, size);
+    }
+}
+
+export function memArgs<T>(
+    state: State,
+    Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
+): T {
+    const offset = state.stack.pop();
+    const size = state.stack.pop();
+    return memArgs0(offset, size, state, Klass);
+}
 
 export const SYSTEM = {
+    SHA3: (state: State) => {
+        state.stack.push(memArgs(state, Sha3));
+    },
     STOP: (state: State) => {
         state.halted = true;
         state.stmts.push(new Stop());

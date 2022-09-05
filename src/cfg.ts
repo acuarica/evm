@@ -2,7 +2,6 @@ import { INFO } from './inst/info';
 import { LOGIC } from './inst/logic';
 import { MATH } from './inst/math';
 import { MEMORY } from './inst/memory';
-import { SHA3 } from './inst/sha3';
 import { STORAGE } from './inst/storage';
 import { SYMBOLS } from './inst/symbols';
 import { INVALID, SYSTEM } from './inst/system';
@@ -54,7 +53,6 @@ function makeState<T extends { [mnemonic: string]: (state: State) => void }>(tab
 const TABLE = {
     ...makeStack(MATH),
     ...makeStack(LOGIC),
-    ...SHA3,
     ...makeStack(INFO),
     ...SYMBOLS,
     ...makeState(MEMORY),

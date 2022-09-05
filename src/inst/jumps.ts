@@ -124,6 +124,8 @@ export class TopLevelFunction {
 }
 
 export class Require {
+    readonly name = 'Require';
+
     constructor(readonly condition: Expr) {}
 
     toString() {

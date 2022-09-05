@@ -225,26 +225,20 @@ export class Sha3 {
     readonly name = 'SHA3';
     readonly type?: string;
     readonly wrapped = false;
-    readonly memoryStart?: Expr;
-    readonly memoryLength?: Expr;
-    readonly items?: Expr[];
 
-    constructor(items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
-        if (memoryStart && memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        } else {
-            this.items = items;
-        }
-    }
+    constructor(
+        readonly items: Expr[],
+        readonly memoryStart?: Expr,
+        readonly memoryLength?: Expr
+    ) {}
 
     toString() {
-        if (this.items) {
-            return `keccak256(${this.items.map(item => stringify(item)).join(', ')})`;
-        } else {
-            return `keccak256(memory[${stringify(this.memoryStart!)}:(${stringify(
-                this.memoryStart!
+        if (this.memoryStart && this.memoryLength) {
+            return `keccak256(memory[${stringify(this.memoryStart)}:(${stringify(
+                this.memoryStart
             )}+${stringify(this.memoryLength!)})])`;
+        } else {
+            return `keccak256(${this.items.map(item => stringify(item)).join(', ')})`;
         }
     }
 }
@@ -455,15 +449,8 @@ export class DELEGATECALL {
 export class Return {
     readonly name = 'Return';
     readonly wrapped = true;
-    readonly memoryStart?: Expr;
-    readonly memoryLength?: Expr;
 
-    constructor(readonly args: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
-        if (memoryStart && memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        }
-    }
+    constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {}
 
     toString(): string {
         if (this.memoryStart && this.memoryLength) {
@@ -495,26 +482,20 @@ export class Revert {
     readonly name = 'REVERT';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: Expr;
-    readonly memoryLength?: Expr;
-    readonly items?: Expr[];
 
-    constructor(items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
-        if (memoryStart && memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        } else {
-            this.items = items;
-        }
-    }
+    constructor(
+        readonly items: Expr[],
+        readonly memoryStart?: Expr,
+        readonly memoryLength?: Expr
+    ) {}
 
     toString() {
-        if (this.items) {
-            return 'revert(' + this.items.map(item => stringify(item)).join(', ') + ');';
-        } else {
+        if (this.memoryStart && this.memoryLength) {
             return `revert(memory[${stringify(this.memoryStart!)}:(${stringify(
                 this.memoryStart!
             )}+${stringify(this.memoryLength!)})]);`;
+        } else {
+            return 'revert(' + this.items.map(item => stringify(item)).join(', ') + ');';
         }
     }
 }
