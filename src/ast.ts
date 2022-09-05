@@ -100,23 +100,6 @@ export const Bin = <N extends string>(name: N, op: string) =>
         }
     };
 
-export class Add extends Bin('Add', '+') {}
-export class Mul extends Bin('Mul', '*') {}
-export class Sub extends Bin('Sub', '-') {}
-export class Div extends Bin('Div', '/') {}
-export class Mod extends Bin('Mod', '%') {}
-export class Exp extends Bin('Exp', '**') {}
-
-export class Sig {
-    readonly name = 'Sig';
-    readonly wrapped = false;
-
-    constructor(readonly hash: string) {}
-
-    toString() {
-        return `msg.sig == ${this.hash}`;
-    }
-}
 const Unary = <N extends string | null>(name: N, op: string) =>
     class {
         readonly name: N = name;
@@ -142,6 +125,24 @@ const Shift = <N extends string>(name: N, op: string) =>
         }
     };
 
+export class Add extends Bin('Add', '+') {}
+export class Mul extends Bin('Mul', '*') {}
+export class Sub extends Bin('Sub', '-') {}
+export class Div extends Bin('Div', '/') {}
+export class Mod extends Bin('Mod', '%') {}
+export class Exp extends Bin('Exp', '**') {}
+
+export class Sig {
+    readonly name = 'Sig';
+    readonly wrapped = false;
+
+    constructor(readonly hash: string) {}
+
+    toString() {
+        return `msg.sig == ${this.hash}`;
+    }
+}
+
 export class Eq extends Bin('Eq', '==') {}
 export class And extends Bin('And', '&&') {}
 export class Or extends Bin('Or', '||') {}
@@ -160,29 +161,21 @@ export class IsZero {
     }
 }
 
-export class GT {
-    readonly name = 'Gt';
-    readonly type?: string;
-    readonly wrapped = true;
+export const Cmp = <N extends string>(name: N, op: string) =>
+    class extends Name(name, true) {
+        constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
+            super();
+        }
 
-    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
+        override toString() {
+            return (
+                stringify(this.left) + (this.equal ? ` ${op}= ` : ` ${op} `) + stringify(this.right)
+            );
+        }
+    };
 
-    toString() {
-        return stringify(this.left) + (this.equal ? ' >= ' : ' > ') + stringify(this.right);
-    }
-}
-
-export class LT {
-    readonly name = 'Lt';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
-
-    toString() {
-        return stringify(this.left) + (this.equal ? ' <= ' : ' < ') + stringify(this.right);
-    }
-}
+export class GT extends Cmp('Gt', '>') {}
+export class LT extends Cmp('Lt', '<') {}
 
 export class Xor extends Bin('Xor', '^') {}
 export class Not extends Unary('Not', '~') {}
@@ -315,17 +308,9 @@ export class CREATE {
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
     toString() {
-        return (
-            '(new Contract(memory[' +
-            stringify(this.memoryStart) +
-            ':(' +
-            stringify(this.memoryStart) +
-            '+' +
-            stringify(this.memoryLength) +
-            ')]).value(' +
-            stringify(this.value) +
-            ')).address'
-        );
+        return `(new Contract(memory[${stringify(this.memoryStart)}:(${stringify(
+            this.memoryStart
+        )}+${stringify(this.memoryLength)})]).value(${stringify(this.value)})).address`;
     }
 }
 
@@ -354,51 +339,21 @@ export class CALL {
                 this.gas.right === 2300n
             ) {
                 if (this.throwOnFail) {
-                    return (
-                        'address(' +
-                        stringify(this.address) +
-                        ').transfer(' +
-                        stringify(this.value) +
-                        ')'
-                    );
+                    return `address(${stringify(this.address)}).transfer(${stringify(this.value)})`;
                 } else {
-                    return (
-                        'address(' +
-                        stringify(this.address) +
-                        ').send(' +
-                        stringify(this.value) +
-                        ')'
-                    );
+                    return `address(${stringify(this.address)}).send(${stringify(this.value)})`;
                 }
             } else {
-                return (
-                    'address(' +
-                    stringify(this.address) +
-                    ').call.gas(' +
-                    stringify(this.gas) +
-                    ').value(' +
-                    stringify(this.value) +
-                    ')'
-                );
+                return `address(${stringify(this.address)}).call.gas(${stringify(
+                    this.gas
+                )}).value(${stringify(this.value)})`;
             }
         } else {
-            return (
-                'call(' +
-                stringify(this.gas) +
-                ',' +
-                stringify(this.address) +
-                ',' +
-                stringify(this.value) +
-                ',' +
-                stringify(this.memoryStart) +
-                ',' +
-                stringify(this.memoryLength) +
-                ',' +
-                stringify(this.outputStart) +
-                ',' +
-                stringify(this.outputLength) +
-                ')'
-            );
+            return `call(${stringify(this.gas)},${stringify(this.address)},${stringify(
+                this.value
+            )},${stringify(this.memoryStart)},${stringify(this.memoryLength)},${stringify(
+                this.outputStart
+            )},${stringify(this.outputLength)})`;
         }
     }
 }
@@ -429,23 +384,11 @@ export class CALLCODE {
     ) {}
 
     toString() {
-        return (
-            'callcode(' +
-            stringify(this.gas) +
-            ',' +
-            stringify(this.address) +
-            ',' +
-            stringify(this.value) +
-            ',' +
-            stringify(this.memoryStart) +
-            ',' +
-            stringify(this.memoryLength) +
-            ',' +
-            stringify(this.outputStart) +
-            ',' +
-            stringify(this.outputLength) +
-            ')'
-        );
+        return `callcode(${stringify(this.gas)},${stringify(this.address)},${stringify(
+            this.value
+        )},${stringify(this.memoryStart)},${stringify(this.memoryLength)},${stringify(
+            this.outputStart
+        )},${stringify(this.outputLength)})`;
     }
 }
 
@@ -457,17 +400,9 @@ export class CREATE2 {
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
     toString() {
-        return (
-            '(new Contract(memory[' +
-            stringify(this.memoryStart) +
-            ':(' +
-            stringify(this.memoryStart) +
-            '+' +
-            stringify(this.memoryLength) +
-            ')]).value(' +
-            stringify(this.value) +
-            ')).address'
-        );
+        return `(new Contract(memory[${stringify(this.memoryStart)}:(${stringify(
+            this.memoryStart
+        )}+${stringify(this.memoryLength)})]).value(${stringify(this.value)})).address`;
     }
 }
 
@@ -486,21 +421,11 @@ export class STATICCALL {
     ) {}
 
     toString() {
-        return (
-            'staticcall(' +
-            stringify(this.gas) +
-            ',' +
-            stringify(this.address) +
-            ',' +
-            stringify(this.memoryStart) +
-            ',' +
-            stringify(this.memoryLength) +
-            ',' +
-            stringify(this.outputStart) +
-            ',' +
-            stringify(this.outputLength) +
-            ')'
-        );
+        return `staticcall(${stringify(this.gas)},${stringify(this.address)},${stringify(
+            this.memoryStart
+        )},${stringify(this.memoryLength)},${stringify(this.outputStart)},${stringify(
+            this.outputLength
+        )})`;
     }
 }
 
@@ -519,21 +444,11 @@ export class DELEGATECALL {
     ) {}
 
     toString() {
-        return (
-            'delegatecall(' +
-            stringify(this.gas) +
-            ',' +
-            stringify(this.address) +
-            ',' +
-            stringify(this.memoryStart) +
-            ',' +
-            stringify(this.memoryLength) +
-            ',' +
-            stringify(this.outputStart) +
-            ',' +
-            stringify(this.outputLength) +
-            ')'
-        );
+        return `delegatecall(${stringify(this.gas)},${stringify(this.address)},${stringify(
+            this.memoryStart
+        )},${stringify(this.memoryLength)},${stringify(this.outputStart)},${stringify(
+            this.outputLength
+        )})`;
     }
 }
 
@@ -552,15 +467,9 @@ export class Return {
 
     toString(): string {
         if (this.memoryStart && this.memoryLength) {
-            return (
-                'return memory[' +
-                stringify(this.memoryStart) +
-                ':(' +
-                stringify(this.memoryStart) +
-                '+' +
-                stringify(this.memoryLength) +
-                ')];'
-            );
+            return `return memory[${stringify(this.memoryStart)}:(${stringify(
+                this.memoryStart
+            )}+${stringify(this.memoryLength)})];`;
         } else if (this.args.length === 0) {
             return 'return;';
         } else if (
@@ -615,7 +524,7 @@ export class Invalid {
     readonly type?: string;
     readonly wrapped = true;
 
-    constructor(readonly opcode: any) {}
+    constructor(readonly opcode: number) {}
 
     toString = () => `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
 }
@@ -672,8 +581,8 @@ export class Log {
     readonly name = 'LOG';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
+    readonly memoryStart: Expr | undefined;
+    readonly memoryLength: Expr | undefined;
     readonly items?: any;
     readonly eventName?: string;
 
