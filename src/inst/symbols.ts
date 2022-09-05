@@ -1,6 +1,6 @@
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import { stringify } from './utils';
+import { Expr, stringify } from './utils';
 
 export const SYMBOLS = {
     ADDRESS: symbol0('this', 'address'),
@@ -55,6 +55,25 @@ export class Symbol0 {
         return this.symbol;
     }
 }
+export class Symbol1 {
+    readonly wrapped = false;
+    constructor(readonly fn: (value: string) => string, readonly value: Expr) {}
+    toString() {
+        return this.fn(stringify(this.value));
+    }
+}
+
+export class DataCopy {
+    readonly wrapped = false;
+    constructor(
+        readonly fn: (offset: string, size: string) => string,
+        readonly offset: Expr,
+        readonly size: Expr
+    ) {}
+    toString() {
+        return this.fn(stringify(this.offset), stringify(this.size));
+    }
+}
 
 function symbol0(value: Info, type?: string) {
     return (_opcode: Opcode, { stack }: State) => {
@@ -65,14 +84,7 @@ function symbol0(value: Info, type?: string) {
 function symbol1(fn: (value: string) => string) {
     return (_opcode: Opcode, { stack }: State) => {
         const value = stack.pop();
-        stack.push(
-            new (class {
-                readonly wrapped = false;
-                toString() {
-                    return fn(stringify(value));
-                }
-            })()
-        );
+        stack.push(new Symbol1(fn, value));
     };
 }
 
@@ -84,11 +96,6 @@ export function datacopy(fn: (offset: string, size: string) => string) {
         if (typeof dest !== 'number') {
             // throw new Error('expected number in returndatacopy');
         }
-        memory[dest as any] = new (class {
-            wrapped = false;
-            toString() {
-                return fn(stringify(offset), stringify(size));
-            }
-        })();
+        memory[dest as any] = new DataCopy(fn, offset, size);
     };
 }

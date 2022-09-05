@@ -3,8 +3,8 @@ import { Stack } from '../../src';
 import { CallDataLoad } from '../../src/inst/info';
 import { LOGIC, Shr } from '../../src/inst/logic';
 import { Div } from '../../src/inst/math';
+import { Symbol0 } from '../../src/inst/symbols';
 import { Expr } from '../../src/inst/utils';
-import { Sym } from '../utils/evmtest';
 
 describe('EQ', () => {
     it('should calculate `1 == 1`', () => {
@@ -23,16 +23,16 @@ describe('EQ', () => {
         expect(stack.values).to.be.deep.equal([0n]);
     });
 
-    it('should stringify `x == 1`', () => {
+    it('should stringify `block.number == 1`', () => {
         const stack = new Stack<Expr>();
         stack.push(1n);
-        stack.push(new Sym('x'));
-        expect(stack.values).to.be.deep.equal([new Sym('x'), 1n]);
+        stack.push(new Symbol0('block.number'));
+        expect(stack.values).to.be.deep.equal([new Symbol0('block.number'), 1n]);
 
         LOGIC.EQ(stack);
 
         expect(stack.values).has.length(1);
-        expect(stack.values[0].toString()).to.be.equal('x == 1');
+        expect(stack.values[0].toString()).to.be.equal('block.number == 1');
     });
 
     ['06fdde03', '12345678', '00000001'].forEach(hash => {

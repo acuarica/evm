@@ -8,13 +8,13 @@ export class CallDataLoad {
 
     constructor(readonly location: Expr) {}
 
-    toString() {
+    toString(): string {
         if (isBigInt(this.location) && isZero(this.location)) {
             return 'msg.data';
         } else if (isBigInt(this.location) && (this.location - 4n) % 32n === 0n) {
-            return '_arg' + ((this.location - 4n) / 32n).toString();
+            return `_arg${(this.location - 4n) / 32n}`;
         } else {
-            return 'msg.data[' + stringify(this.location) + ']';
+            return `msg.data[${stringify(this.location)}]`;
         }
     }
 }

@@ -7,7 +7,7 @@ export type Stmt = Stop;
 /**
  *
  */
-export class State {
+export class State<S = Stmt, E = Expr> {
     /**
      *
      */
@@ -16,23 +16,20 @@ export class State {
     /**
      *
      */
-    readonly stmts: Stmt[] = [];
+    readonly stmts: S[] = [];
 
     /**
      *
      * @param stack
      * @param memory
      */
-    constructor(
-        readonly stack = new Stack<Expr>(),
-        readonly memory: { [location: number]: Expr } = {}
-    ) {}
+    constructor(readonly stack = new Stack<E>(), readonly memory: { [location: number]: E } = {}) {}
 
     /**
      *
      * @returns
      */
-    clone(): State {
+    clone(): State<S, E> {
         return new State(this.stack.clone(), { ...this.memory });
     }
 }

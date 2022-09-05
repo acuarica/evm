@@ -1,13 +1,61 @@
 import { State } from '../../state';
+import { CallDataLoad, CALLDATASIZE, CallValue } from '../info';
+import { And, Byte, Eq, GT, IsZero, LT, Neg, Not, Or, Sar, Shl, Shr, Sig, Xor } from '../logic';
+import { Add, Div, Exp, Mod, Mul, Sub } from '../math';
 import { MLoad } from '../memory';
+import { Sha3 } from '../sha3';
+import { MappingLoad, SLoad } from '../storage';
+import { DataCopy, Symbol0, Symbol1 } from '../symbols';
+import { CALL, DELEGATECALL, ReturnData, STATICCALL } from '../system';
 
 export type Expr =
     | bigint
-    | {
-          wrapped: boolean;
-      };
+    // Math
+    | Add
+    | Mul
+    | Sub
+    | Div
+    | Mod
+    | Mod
+    | Exp
+    // Logic
+    | Sig
+    | Eq
+    | And
+    | Or
+    | IsZero
+    | GT
+    | LT
+    | Xor
+    | Not
+    | Neg
+    | Byte
+    | Shl
+    | Shr
+    | Sar
+    // Info
+    | CallDataLoad
+    | CALLDATASIZE
+    | CallValue
+    // Memory
+    | MLoad
+    | Sha3
+    // Storage
+    | MappingLoad
+    | SLoad
+    // Symbols
+    | Symbol0
+    | Symbol1
+    | DataCopy
+    // System
+    | CALL
+    | DELEGATECALL
+    | STATICCALL
+    | ReturnData;
 
-export function memArgs<T extends Expr>(
+// export type Stmt = ;
+
+export function memArgs<T>(
     { stack, memory }: State,
     Klass: new (args: Expr[], memoryStart?: Expr, memoryLength?: Expr) => T
 ): T {
