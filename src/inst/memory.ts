@@ -1,29 +1,6 @@
-import { Expr, isBigInt } from './utils';
+import { isBigInt } from '../ast';
 import { State } from '../state';
-import { stringify } from './utils';
-
-export class MLoad {
-    readonly name = 'MLOAD';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly location: Expr) {}
-
-    toString() {
-        return 'memory[' + stringify(this.location) + ']';
-    }
-}
-
-export class MStore {
-    readonly name = 'MSTORE';
-    readonly type?: string;
-
-    constructor(readonly location: Exclude<Expr, bigint>, readonly data: Expr) {}
-
-    toString() {
-        return 'memory[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';
-    }
-}
+import { MLoad, MStore } from '../ast';
 
 export const MEMORY = {
     MLOAD: ({ stack, memory }: State) => {

@@ -1,6 +1,7 @@
+import { DataCopy, Info, Symbol0, Symbol1 } from '../ast';
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import { Expr, stringify } from './utils';
+import { stringify } from '../ast';
 
 export const SYMBOLS = {
     ADDRESS: symbol0('this', 'address'),
@@ -32,51 +33,6 @@ export const SYMBOLS = {
     MSIZE: symbol0('memory.length'),
     GAS: symbol0('gasleft()'),
 };
-
-export type Info =
-    | 'this'
-    | 'tx.origin'
-    | 'msg.sender'
-    | 'this.code.length'
-    | 'tx.gasprice'
-    | 'output.length'
-    | 'block.coinbase'
-    | 'block.timestamp'
-    | 'block.number'
-    | 'block.difficulty'
-    | 'block.gaslimit'
-    | 'memory.length'
-    | 'gasleft()';
-
-export class Symbol0 {
-    readonly name = 'Symbol0';
-    readonly wrapped = false;
-    constructor(readonly symbol: Info, readonly type?: string) {}
-    toString() {
-        return this.symbol;
-    }
-}
-export class Symbol1 {
-    readonly name = 'Symbol1';
-    readonly wrapped = false;
-    constructor(readonly fn: (value: string) => string, readonly value: Expr) {}
-    toString() {
-        return this.fn(stringify(this.value));
-    }
-}
-
-export class DataCopy {
-    readonly name = 'DataCopy';
-    readonly wrapped = false;
-    constructor(
-        readonly fn: (offset: string, size: string) => string,
-        readonly offset: Expr,
-        readonly size: Expr
-    ) {}
-    toString() {
-        return this.fn(stringify(this.offset), stringify(this.size));
-    }
-}
 
 function symbol0(value: Info, type?: string) {
     return (_opcode: Opcode, { stack }: State) => {

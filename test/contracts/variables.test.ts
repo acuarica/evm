@@ -1,8 +1,6 @@
 import { config, expect } from 'chai';
+import { SStore, CallDataLoad, Stop } from '../../src/ast';
 import { Variable } from '../../src/contract';
-import { CallDataLoad } from '../../src/inst/info';
-import { SStore } from '../../src/inst/storage';
-import { Stop } from '../../src/inst/system';
 import { stripMetadataHash } from '../../src/metadata';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';

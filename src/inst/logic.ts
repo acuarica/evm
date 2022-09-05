@@ -1,18 +1,7 @@
 import { Stack } from '../stack';
-import { Expr, isBigInt, isZero, stringify } from './utils';
-import { CallDataLoad } from './info';
-import { Bin, Div } from './math';
-
-export class Sig {
-    readonly name = 'Sig';
-    readonly wrapped = false;
-
-    constructor(readonly hash: string) {}
-
-    toString() {
-        return `msg.sig == ${this.hash}`;
-    }
-}
+import { And, Byte, Expr, GT, isBigInt, IsZero, isZero, LT, Not, Or, Sar, Shl, Xor } from '../ast';
+import { CallDataLoad, Div, Eq } from '../ast';
+import { Shr, Sig } from '../ast';
 
 export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
     if (
@@ -55,93 +44,6 @@ export function eqHook(left: Expr, right: Expr, cc: () => Eq): Sig | Eq {
         fromDIVEXPsig(right, left, () => fromSHRsig(left, right, () => fromSHRsig(right, left, cc)))
     );
 }
-
-const Unary = <N extends string | null>(name: N, op: string) =>
-    class {
-        readonly name: N = name;
-        readonly wrapped = false;
-
-        constructor(readonly value: Expr) {}
-
-        toString() {
-            return `${op}${stringify(this.value)}`;
-        }
-    };
-
-const Shift = <N extends string>(name: N, op: string) =>
-    class {
-        readonly name: N = name;
-        readonly type?: string;
-        readonly wrapped = true;
-
-        constructor(readonly value: Expr, readonly shift: Expr) {}
-
-        toString() {
-            return `${stringify(this.value)} ${op} ${stringify(this.shift)}`;
-        }
-    };
-
-export class Eq extends Bin('Eq', '==') {}
-export class And extends Bin('And', '&&') {}
-export class Or extends Bin('Or', '||') {}
-
-export class IsZero {
-    readonly name = 'IsZero';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly value: Expr) {}
-
-    toString() {
-        return this.value instanceof Eq
-            ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
-            : stringify(this.value) + ' == 0';
-    }
-}
-
-export class GT {
-    readonly name = 'Gt';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
-
-    toString() {
-        return stringify(this.left) + (this.equal ? ' >= ' : ' > ') + stringify(this.right);
-    }
-}
-
-export class LT {
-    readonly name = 'Lt';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {}
-
-    toString() {
-        return stringify(this.left) + (this.equal ? ' <= ' : ' < ') + stringify(this.right);
-    }
-}
-
-export class Xor extends Bin('Xor', '^') {}
-export class Not extends Unary('Not', '~') {}
-export class Neg extends Unary(null, '!') {}
-
-export class Byte {
-    readonly name = 'BYTE';
-    readonly type?: string;
-    readonly wrapped = true;
-
-    constructor(readonly position: Expr, readonly data: Expr) {}
-
-    toString() {
-        return `(${stringify(this.data)} >> ${stringify(this.position)}) & 1`;
-    }
-}
-
-export class Shl extends Shift('Shl', '<<') {}
-export class Shr extends Shift('Shr', '>>>') {}
-export class Sar extends Shift('Sar', '>>') {}
 
 export const LOGIC = {
     LT: lt,

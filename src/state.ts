@@ -1,5 +1,5 @@
 import { Stack } from './stack';
-import { Expr, Stmt } from './inst/utils';
+import { Expr, Stmt } from './ast';
 
 /**
  *

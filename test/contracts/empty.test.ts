@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Revert } from '../../src/inst/system';
+import { Revert } from '../../src/ast';
 import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
 import { verifyBlocks } from '../utils/verify';

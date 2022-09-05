@@ -1,7 +1,7 @@
-import { Expr, isBigInt, Stmt, stringify } from './utils';
-import { CallValue } from './info';
-import { IsZero } from './logic';
-import { Return } from './system';
+import { Expr, isBigInt, Stmt, stringify } from '../ast';
+import { CallValue } from '../ast';
+import { IsZero } from '../ast';
+import { Return } from '../ast';
 
 const updateCallDataLoad = (item: any, types: any) => {
     for (const i in item) {

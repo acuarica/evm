@@ -1,35 +1,29 @@
+import { Expr, isBigInt, MLoad, Sha3 } from '../ast';
 import { Opcode } from '../opcode';
 import { State } from '../state';
-import { Expr, memArgs, stringify } from './utils';
 
-export class Sha3 {
-    readonly name = 'SHA3';
-    readonly type?: string;
-    readonly wrapped = false;
-    readonly memoryStart?: Expr;
-    readonly memoryLength?: Expr;
-    readonly items?: Expr[];
+export function memArgs<T>(
+    { stack, memory }: State,
+    Klass: new (args: Expr[], memoryStart?: Expr, memoryLength?: Expr) => T
+): T {
+    const MAXSIZE = 1024;
 
-    constructor(items: Expr[], memoryStart?: Expr, memoryLength?: Expr) {
-        if (memoryStart && memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        } else {
-            this.items = items;
+    const offset = stack.pop();
+    const size = stack.pop();
+    if (isBigInt(offset) && isBigInt(size) && size <= MAXSIZE * 32) {
+        const args = [];
+        for (let i = Number(offset); i < Number(offset + size); i += 32) {
+            args.push(i in memory ? memory[i] : new MLoad(BigInt(i)));
         }
-    }
-
-    toString() {
-        if (this.items) {
-            return `keccak256(${this.items.map(item => stringify(item)).join(', ')})`;
-        } else {
-            return `keccak256(memory[${stringify(this.memoryStart!)}:(${stringify(
-                this.memoryStart!
-            )}+${stringify(this.memoryLength!)})])`;
+        return new Klass(args);
+    } else {
+        if (isBigInt(size) && size > MAXSIZE * 32) {
+            throw new Error(`memargs size${Klass.toString()}${size}`);
         }
+
+        return new Klass([], offset, size);
     }
 }
-
 export const SHA3 = {
     SHA3: (_opcode: Opcode, state: State) => {
         // const memoryStart = stack.pop();

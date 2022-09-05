@@ -1,10 +1,7 @@
 import { expect } from 'chai';
 import { Stack } from '../../src';
-import { CallDataLoad } from '../../src/inst/info';
-import { LOGIC, Shr } from '../../src/inst/logic';
-import { Div } from '../../src/inst/math';
-import { Symbol0 } from '../../src/inst/symbols';
-import { Expr } from '../../src/inst/utils';
+import { Expr, Symbol0, Div, CallDataLoad, Shr } from '../../src/ast';
+import { LOGIC } from '../../src/inst/logic';
 
 describe('EQ', () => {
     it('should calculate `1 == 1`', () => {

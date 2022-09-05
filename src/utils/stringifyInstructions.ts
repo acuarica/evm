@@ -1,13 +1,10 @@
-import { ControlFlowGraph, Jump, Jumpi } from '../cfg';
+import { isBigInt, Jump, Jumpi, Return, Sig, SLoad, Stmt } from '../ast';
+import { type ControlFlowGraph } from '../cfg';
+import { Variable } from '../contract';
 import { EVM } from '../evm';
-import { Sig } from '../inst/logic';
 import { TopLevelFunction } from '../inst/jumps';
 import stringifyFunctions from './stringifyFunctions';
-import { SLoad } from '../inst/storage';
 import { stringifyVariable } from './stringifyVariables';
-import { Variable } from '../contract';
-import { Return } from '../inst/system';
-import { isBigInt, Stmt } from '../inst/utils';
 
 /**
  *

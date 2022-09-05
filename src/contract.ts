@@ -1,5 +1,5 @@
 import { TopLevelFunction } from './inst/jumps';
-import { Expr } from './inst/utils';
+import { Expr } from './ast';
 
 export class Contract {
     /**

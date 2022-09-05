@@ -1,30 +1,6 @@
 import { Stack } from '../stack';
-import { Expr, isBigInt, isZero, stringify } from './utils';
-import { Sar, Shl } from './logic';
-
-export const Name = <N extends string>(name: N, wrapped: boolean) =>
-    class {
-        readonly name: N = name;
-        readonly wrapped = wrapped;
-    };
-
-export const Bin = <N extends string>(name: N, op: string) =>
-    class extends Name(name, true) {
-        constructor(readonly left: Expr, readonly right: Expr) {
-            super();
-        }
-
-        override toString() {
-            return `${stringify(this.left)} ${op} ${stringify(this.right)}`;
-        }
-    };
-
-export class Add extends Bin('Add', '+') {}
-export class Mul extends Bin('Mul', '*') {}
-export class Sub extends Bin('Sub', '-') {}
-export class Div extends Bin('Div', '/') {}
-export class Mod extends Bin('Mod', '%') {}
-export class Exp extends Bin('Exp', '**') {}
+import { Add, Div, Exp, Expr, isBigInt, isZero, Mod, Mul, Sub } from '../ast';
+import { Sar, Shl } from '../ast';
 
 export const MATH = {
     ADD: (stack: Stack<Expr>) => {

@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import { Stack } from '../../src';
-import { LOGIC, Not } from '../../src/inst/logic';
-import { Symbol0 } from '../../src/inst/symbols';
-import { Expr } from '../../src/inst/utils';
+import { Expr, Symbol0, Not } from '../../src/ast';
+import { LOGIC } from '../../src/inst/logic';
 
 describe('NOT', () => {
     it('should calculate `~1`', () => {

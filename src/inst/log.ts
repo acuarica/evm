@@ -1,51 +1,8 @@
 import { Opcode } from '../opcode';
-import { MLoad } from './memory';
+import { Log, MLoad } from '../ast';
 import { State } from '../state';
 import { Contract } from '../contract';
-import { Expr, isBigInt } from './utils';
-
-export class Log {
-    readonly name = 'LOG';
-    readonly type?: string;
-    readonly wrapped = true;
-    readonly memoryStart?: any;
-    readonly memoryLength?: any;
-    readonly items?: any;
-    readonly eventName?: string;
-
-    constructor(
-        eventHashes: { [s: string]: string },
-        readonly topics: Expr[],
-        args?: Expr[],
-        memoryStart?: Expr,
-        memoryLength?: Expr
-    ) {
-        if (
-            this.topics.length > 0 &&
-            isBigInt(this.topics[0]) &&
-            this.topics[0].toString(16) in eventHashes
-        ) {
-            this.eventName = eventHashes[this.topics[0].toString(16)].split('(')[0];
-            this.topics.shift();
-        }
-        if (this.memoryStart && this.memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        } else {
-            this.items = args;
-        }
-    }
-
-    toString() {
-        if (this.eventName) {
-            return (
-                'emit ' + this.eventName + '(' + [...this.topics, ...this.items].join(', ') + ');'
-            );
-        } else {
-            return 'log(' + [...this.topics, ...this.items].join(', ') + ');';
-        }
-    }
-}
+import { isBigInt } from '../ast';
 
 export const LOGS = (contract: Contract) => {
     return {

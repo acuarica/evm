@@ -12,7 +12,7 @@ import { LOGS } from './inst/log';
 import { Stack } from './stack';
 import { State } from './state';
 import { Contract } from './contract';
-import { Expr, isBigInt, Stmt } from './inst/utils';
+import { Expr, isBigInt, Jump, Jumpi, Stmt } from './ast';
 
 export class Block {
     constructor(
@@ -216,30 +216,6 @@ function isReachable(key: string, blocks: ControlFlowGraph['blocks']) {
     }
 
     return false;
-}
-
-export class Jumpi {
-    readonly name = 'Jumpi';
-    readonly wrapped = true;
-    constructor(
-        readonly condition: Expr,
-        readonly offset: Expr,
-        readonly fallBranch?: string,
-        readonly destBranch?: string
-    ) {}
-    toString() {
-        // return 'if (' + this.condition + ') // goto ' + this.offset.toString();
-        return 'if (' + this.condition + ')';
-    }
-}
-
-export class Jump {
-    readonly name = 'Jump';
-    readonly wrapped = true;
-    constructor(readonly offset: Expr, readonly destBranch?: string) {}
-    toString() {
-        return 'go ' + this.offset.toString();
-    }
 }
 
 // export function JUMPS(opcodes: Opcode[], pcs: { pc: number[]; state: State }[]) {

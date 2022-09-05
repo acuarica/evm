@@ -1,10 +1,5 @@
 import { expect } from 'chai';
-import { CallDataLoad } from '../../src/inst/info';
-import { Add } from '../../src/inst/math';
-import { Sha3 } from '../../src/inst/sha3';
-import { SLoad, SStore } from '../../src/inst/storage';
-import { Symbol0 } from '../../src/inst/symbols';
-import { Return, Stop } from '../../src/inst/system';
+import { SStore, Stop, Sha3, Symbol0, Add, CallDataLoad, Return, SLoad } from '../../src/ast';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 

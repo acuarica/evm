@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import { Stack } from '../../src';
-import { Add, MATH } from '../../src/inst/math';
-import { Symbol0 } from '../../src/inst/symbols';
-import { Expr } from '../../src/inst/utils';
+import { Add, Expr, Symbol0 } from '../../src/ast';
+import { MATH } from '../../src/inst/math';
 
 describe('ADD', () => {
     it('should calculate `1 + 1`', () => {
