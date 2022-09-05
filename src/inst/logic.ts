@@ -4,6 +4,7 @@ import { CallDataLoad } from './info';
 import { Bin, Div } from './math';
 
 export class Sig {
+    readonly name = 'Sig';
     readonly wrapped = false;
 
     constructor(readonly hash: string) {}
@@ -85,6 +86,7 @@ export class And extends Bin('And', '&&') {}
 export class Or extends Bin('Or', '||') {}
 
 export class IsZero {
+    readonly name = 'IsZero';
     readonly type?: string;
     readonly wrapped = true;
 
@@ -98,6 +100,7 @@ export class IsZero {
 }
 
 export class GT {
+    readonly name = 'Gt';
     readonly type?: string;
     readonly wrapped = true;
 
@@ -109,6 +112,7 @@ export class GT {
 }
 
 export class LT {
+    readonly name = 'Lt';
     readonly type?: string;
     readonly wrapped = true;
 

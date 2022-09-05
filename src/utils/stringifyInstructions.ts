@@ -7,8 +7,7 @@ import { SLoad } from '../inst/storage';
 import { stringifyVariable } from './stringifyVariables';
 import { Variable } from '../contract';
 import { Return } from '../inst/system';
-import { isBigInt } from '../inst/utils';
-import { Stmt } from '../state';
+import { isBigInt, Stmt } from '../inst/utils';
 
 /**
  *

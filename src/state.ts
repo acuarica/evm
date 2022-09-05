@@ -1,8 +1,5 @@
 import { Stack } from './stack';
-import { Expr } from './inst/utils';
-import { Stop } from './inst/system';
-
-export type Stmt = Stop;
+import { Expr, Stmt } from './inst/utils';
 
 /**
  *

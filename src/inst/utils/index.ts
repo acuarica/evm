@@ -1,12 +1,27 @@
+import { Jump, Jumpi } from '../../cfg';
 import { State } from '../../state';
 import { CallDataLoad, CALLDATASIZE, CallValue } from '../info';
+import { Log } from '../log';
 import { And, Byte, Eq, GT, IsZero, LT, Neg, Not, Or, Sar, Shl, Shr, Sig, Xor } from '../logic';
 import { Add, Div, Exp, Mod, Mul, Sub } from '../math';
-import { MLoad } from '../memory';
+import { MLoad, MStore } from '../memory';
 import { Sha3 } from '../sha3';
-import { MappingLoad, SLoad } from '../storage';
+import { MappingLoad, MappingStore, SLoad, SStore } from '../storage';
 import { DataCopy, Symbol0, Symbol1 } from '../symbols';
-import { CALL, DELEGATECALL, ReturnData, STATICCALL } from '../system';
+import {
+    CALL,
+    CALLCODE,
+    CREATE,
+    CREATE2,
+    DELEGATECALL,
+    Invalid,
+    Return,
+    ReturnData,
+    Revert,
+    SelfDestruct,
+    STATICCALL,
+    Stop,
+} from '../system';
 
 export type Expr =
     | bigint
@@ -48,12 +63,28 @@ export type Expr =
     | Symbol1
     | DataCopy
     // System
+    | CREATE
     | CALL
+    | CALLCODE
     | DELEGATECALL
+    | CREATE2
     | STATICCALL
     | ReturnData;
 
-// export type Stmt = ;
+export type Stmt =
+    // Storage
+    | SStore
+    | MappingStore
+    | MStore
+    | Log
+    | Jumpi
+    | Jump
+    // System
+    | Stop
+    | Return
+    | Revert
+    | SelfDestruct
+    | Invalid;
 
 export function memArgs<T>(
     { stack, memory }: State,

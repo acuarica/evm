@@ -10,9 +10,9 @@ import { formatOpcode, Opcode } from './opcode';
 import { PUSHES, STACK } from './inst/core';
 import { LOGS } from './inst/log';
 import { Stack } from './stack';
-import { State, Stmt } from './state';
+import { State } from './state';
 import { Contract } from './contract';
-import { Expr, isBigInt } from './inst/utils';
+import { Expr, isBigInt, Stmt } from './inst/utils';
 
 export class Block {
     constructor(

@@ -1,4 +1,4 @@
-import { Expr, isBigInt, stringify } from './utils';
+import { Expr, isBigInt, Stmt, stringify } from './utils';
 import { CallValue } from './info';
 import { IsZero } from './logic';
 import { Return } from './system';
@@ -52,7 +52,7 @@ export class TopLevelFunction {
     readonly returns: any;
 
     constructor(
-        readonly items: Expr[],
+        readonly items: Stmt[],
         readonly hash: string,
         // readonly gasUsed: number,
         functionHashes: { [s: string]: string }

@@ -49,6 +49,7 @@ export type Info =
     | 'gasleft()';
 
 export class Symbol0 {
+    readonly name = 'Symbol0';
     readonly wrapped = false;
     constructor(readonly symbol: Info, readonly type?: string) {}
     toString() {
@@ -56,6 +57,7 @@ export class Symbol0 {
     }
 }
 export class Symbol1 {
+    readonly name = 'Symbol1';
     readonly wrapped = false;
     constructor(readonly fn: (value: string) => string, readonly value: Expr) {}
     toString() {
@@ -64,6 +66,7 @@ export class Symbol1 {
 }
 
 export class DataCopy {
+    readonly name = 'DataCopy';
     readonly wrapped = false;
     constructor(
         readonly fn: (offset: string, size: string) => string,

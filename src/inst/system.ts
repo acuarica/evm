@@ -6,6 +6,7 @@ import { Mul } from './math';
 import { Expr, isBigInt, memArgs, stringify, isZero } from './utils';
 
 export class Stop {
+    readonly name = 'Stop';
     toString() {
         return 'return;';
     }
@@ -33,6 +34,7 @@ export class CREATE {
 }
 
 export class CALL {
+    readonly name = 'Call';
     readonly type?: string;
     readonly wrapped = false;
     throwOnFail = false;
@@ -106,6 +108,7 @@ export class CALL {
 }
 
 export class ReturnData {
+    readonly name = 'ReturnData';
     readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {}
@@ -239,6 +242,7 @@ export class DELEGATECALL {
 }
 
 export class Return {
+    readonly name = 'Return';
     readonly wrapped = true;
     readonly memoryStart?: Expr;
     readonly memoryLength?: Expr;
@@ -311,6 +315,7 @@ export class Revert {
 }
 
 export class Invalid {
+    readonly name = 'Invalid';
     readonly type?: string;
     readonly wrapped = true;
 
