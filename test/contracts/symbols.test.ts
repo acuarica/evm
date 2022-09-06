@@ -3,7 +3,7 @@ import EVM from '../utils/evmtest';
 import { verifyBlocks } from '../utils/verify';
 import { compile, contract } from './utils/solc';
 
-contract('contracts::symbols', version => {
+contract('symbols', version => {
     const CONTRACT = `
         contract C {
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
@@ -30,6 +30,7 @@ contract('contracts::symbols', version => {
     });
 
     it('should find symbol blocks', () => {
+        // pprint(evm.getBlocks());
         const lasts = Object.values(evm.getBlocks().blocks).map(block =>
             block.stmts.at(-1)?.toString()
         );
