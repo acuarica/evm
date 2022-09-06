@@ -68,7 +68,6 @@ export function stringifyBlocks(
 
         const block = blocks[key];
         if (!block) {
-            console.log(key);
             return;
         }
 
