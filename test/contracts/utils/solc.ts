@@ -88,11 +88,11 @@ export function contract(title: string, fn: (version: Version) => void) {
     const [label, prefix] = ver ? [`${title} matching SOLC '^${ver}'`, ver] : [title, ''];
     describe(`contracts::${label}`, () => {
         VERSIONS.forEach(version => {
-            const desc = version.startsWith(prefix) ? describe : describe.skip;
-
-            desc(`using solc-v${version}`, () => {
-                fn(version);
-            });
+            if (version.startsWith(prefix)) {
+                describe(`using solc-v${version}`, () => {
+                    fn(version);
+                });
+            }
         });
     });
 }
