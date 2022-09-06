@@ -67,11 +67,11 @@ export type Stmt =
     | SelfDestruct
     | Invalid;
 
-export function isBigInt(expr: Expr): expr is bigint {
+export function isBigInt<E>(expr: bigint | E): expr is bigint {
     return typeof expr === 'bigint';
 }
 
-export function isZero(expr: Expr): expr is bigint {
+export function isZero<E>(expr: bigint | E): expr is bigint {
     return isBigInt(expr) && expr === 0n;
 }
 
