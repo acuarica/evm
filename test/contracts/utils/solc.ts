@@ -84,9 +84,13 @@ export function compile(
 }
 
 export function contract(title: string, fn: (version: Version) => void) {
-    describe(`contracts::${title}`, () => {
-        (process.env['SOLC'] ? [process.env['SOLC'] as Version] : VERSIONS).forEach(version => {
-            describe(`using solc-v${version}`, () => {
+    const ver = process.env['SOLC'];
+    const [label, prefix] = ver ? [`${title} matching SOLC '^${ver}'`, ver] : [title, ''];
+    describe(`contracts::${label}`, () => {
+        VERSIONS.forEach(version => {
+            const desc = version.startsWith(prefix) ? describe : describe.skip;
+
+            desc(`using solc-v${version}`, () => {
                 fn(version);
             });
         });
