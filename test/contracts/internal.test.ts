@@ -106,26 +106,32 @@ contract('internal', version => {
         });
     });
 
-    it('should decompile bytecode from `internal` method without inlining function', () => {
-        const CONTRACT = `contract C {
-            mapping(uint256 => uint256) private _values;
-            function _getValue(uint256 n) internal view returns (uint256) {
-                uint256 result = 0;
-                for (uint256 i = 0; i < n; i++) {
-                    result += _values[i];
-                }
-                return result;
-            }
-            function getFor5() external view returns (uint256) {
-                return _getValue(5);
-            }
-            function getForArg(uint256 n) external view returns (uint256) {
-                return _getValue(n);
-            }
-        }`;
-        const evm = new EVM(compile('C', CONTRACT, version));
+    describe('with `internal` method without inlining function', () => {
+        let evm: EVM;
 
-        const text = evm.decompile();
-        expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
+        before(() => {
+            const CONTRACT = `contract C {
+                mapping(uint256 => uint256) private _values;
+                function _getValue(uint256 n) internal view returns (uint256) {
+                    uint256 result = 0;
+                    for (uint256 i = 0; i < n; i++) {
+                        result += _values[i];
+                    }
+                    return result;
+                }
+                function getFor5() external view returns (uint256) {
+                    return _getValue(5);
+                }
+                function getForArg(uint256 n) external view returns (uint256) {
+                    return _getValue(n);
+                }
+            }`;
+            evm = new EVM(compile('C', CONTRACT, version));
+        });
+
+        it('should `decompile` bytecode', () => {
+            const text = evm.decompile();
+            expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
+        });
     });
 });
