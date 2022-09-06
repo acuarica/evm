@@ -70,6 +70,7 @@ const TABLE = {
 
 export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGraph {
     const pcs: { path: number[]; state: State }[] = [{ path: [0], state: new State() }];
+    const entry = keyOf(pcs[0]);
 
     const table = {
         ...TABLE,
@@ -84,9 +85,8 @@ export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGra
         // guard `length === 0` does not track array's emptiness.
         // See https://github.com/microsoft/TypeScript/issues/30406.
         const { path, state } = pcs.pop()!;
-        const key = path.join('->');
-        if (!(key in cfg) || cfg[key].stack.values.join('|') !== state.stack.values.join('|')) {
-            // if (!(key in cfg)) {
+        const key = keyOf({ path, state });
+        if (!(key in cfg)) {
             const bb: Opcode[] = [];
             for (let pc = path.at(-1)!; !state.halted && pc < opcodes.length; pc++) {
                 const opcode = opcodes[pc];
@@ -109,12 +109,12 @@ export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGra
 
                 const branch = (pc: number, state: State) => {
                     if (path.includes(pc)) {
-                        return path.join('->');
+                        return keyOf({ path, state });
                     }
 
                     const branchPath = [...path, pc];
                     pcs.push({ path: branchPath, state: state.clone() });
-                    return branchPath.join('->');
+                    return keyOf({ path: branchPath, state });
                 };
 
                 if (opcode.mnemonic === 'JUMP') {
@@ -170,7 +170,11 @@ export function getBlocks(opcodes: Opcode[], contract: Contract): ControlFlowGra
 
     // inlineBlocks(cfg, '0');
 
-    return { blocks: cfg, entry: '0' };
+    return { blocks: cfg, entry };
+
+    function keyOf({ path, state }: typeof pcs extends (infer T)[] ? T : never) {
+        return path.join('->') + ':' + state.stack.values.join('|');
+    }
 }
 
 export function inlineBlocks(blocks: ControlFlowGraph['blocks'], entry: string) {
