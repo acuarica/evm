@@ -73,11 +73,8 @@ contract('empty', version => {
                 expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG2');
             });
 
-            it('should not have functions', () => {
+            it('should not have functions nor events', () => {
                 expect(evm.getFunctions()).to.be.empty;
-            });
-
-            it('should not have events', () => {
                 expect(evm.getEvents()).to.be.empty;
             });
 
