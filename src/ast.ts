@@ -294,16 +294,25 @@ export const Cmp = <N extends string>(name: N, op: string) =>
             super();
         }
 
-        eval() {
-            return this;
-        }
         override toString() {
             return wrap(this.left) + (this.equal ? ` ${op}= ` : ` ${op} `) + wrap(this.right);
         }
     };
 
-export class GT extends Cmp('Gt', '>') {}
-export class LT extends Cmp('Lt', '<') {}
+export class GT extends Cmp('Gt', '>') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right) ? (left > right ? 1n : 0n) : new GT(left, right);
+    }
+}
+export class LT extends Cmp('Lt', '<') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right) ? (left < right ? 1n : 0n) : new LT(left, right);
+    }
+}
 
 export class Xor extends Bin('Xor', '^') {
     eval() {
