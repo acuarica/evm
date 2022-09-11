@@ -14,7 +14,7 @@ function generateFFMetadataContract() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         const randomData = crypto.randomBytes(16).toString('hex');
-        const evm = new EVM(compile('C', CONTRACT.replace('[randomData]', randomData), '0.5.5'));
+        const evm = new EVM(compile(CONTRACT.replace('[randomData]', randomData), '0.5.5'));
         const swarmHash = evm.metadataHash;
 
         if (swarmHash && typeof swarmHash === 'string' && swarmHash.includes('ff')) {

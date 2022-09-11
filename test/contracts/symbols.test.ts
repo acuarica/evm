@@ -15,7 +15,7 @@ contract('symbols', version => {
     let text: string;
 
     before(() => {
-        evm = new EVM(compile('C', CONTRACT, version));
+        evm = new EVM(compile(CONTRACT, version));
         text = evm.decompile();
     });
 

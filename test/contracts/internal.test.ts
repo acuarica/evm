@@ -31,7 +31,7 @@ contract('internal', version => {
                     _values[_msgSender()] = value + 5;
                 }
             }`;
-            evm = new EVM(compile('C', CONTRACT, version));
+            evm = new EVM(compile(CONTRACT, version));
         });
 
         [
@@ -85,7 +85,7 @@ contract('internal', version => {
                     return _getValue(from);
                 }
             }`;
-            evm = new EVM(compile('C', CONTRACT, version));
+            evm = new EVM(compile(CONTRACT, version));
         });
 
         [
@@ -138,7 +138,7 @@ contract('internal', version => {
                     return _getValue(n);
                 }
             }`;
-            evm = new EVM(compile('C', CONTRACT, version));
+            evm = new EVM(compile(CONTRACT, version));
         });
 
         it.skip('should `decompile` bytecode', () => {

@@ -46,7 +46,7 @@ contract('empty', version => {
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(compile('Empty', CONTRACT, version));
+                evm = new EVM(compile(CONTRACT, version));
             });
 
             if (index === 0) {

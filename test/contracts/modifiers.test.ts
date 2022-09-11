@@ -28,7 +28,7 @@ contract('modifiers', version => {
                     _value = value + 3;
                 }
             }`;
-            evm = new EVM(compile('C', CONTRACT, version));
+            evm = new EVM(compile(CONTRACT, version));
         });
 
         it('should `decompile` bytecode', () => {

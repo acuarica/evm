@@ -32,10 +32,10 @@ type SolcOutput = {
  * @returns
  */
 export function compile(
-    contractName: string,
     content: string,
     version: Version,
     opts: {
+        contractName?: string;
         license: 'MIT';
         context?: Mocha.Context;
     } = { license: 'MIT' }
@@ -74,15 +74,24 @@ export function compile(
     const { contracts } = output;
     const contract = contracts['SOURCE'];
 
-    if (!(contractName in contract)) {
-        throw new Error(
-            `Contract '${contractName}' is not a valid contract. Valid contracts are: ${Object.keys(
-                contract
-            ).join(', ')}.`
-        );
+    let selectedContract;
+    if (opts.contractName) {
+        if (!(opts.contractName in contract)) {
+            throw new Error(
+                `Contract '${
+                    opts.contractName
+                }' is not a valid contract. Valid contracts are: ${Object.keys(contract).join(
+                    ', '
+                )}.`
+            );
+        } else {
+            selectedContract = contract[opts.contractName];
+        }
+    } else {
+        selectedContract = Object.values(contract)[0];
     }
 
-    const bytecode = contract[contractName].evm.deployedBytecode.object;
+    const bytecode = selectedContract.evm.deployedBytecode.object;
 
     if (opts.context) {
         const basePath = './.contracts';

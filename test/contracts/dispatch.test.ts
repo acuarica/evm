@@ -9,7 +9,7 @@ contract('dispatch', version => {
                 return 5;
             }
         }`;
-        const evm = new EVM(compile('Contract', CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT, version));
         expect(evm.getFunctions()).to.be.include.members(['get()']);
 
         expect(Object.keys(evm.contract.functions)).to.be.of.length(1);
@@ -31,7 +31,7 @@ contract('dispatch', version => {
             function symbol() external pure returns (uint256) { return 3; }
             function thisAddress() external view returns (address) { return address(this); }
         }`;
-        const evm = new EVM(compile('Contract', CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT, version));
         expect(evm.getFunctions()).to.include.members([
             'balanceOf(uint256)',
             'symbol()',

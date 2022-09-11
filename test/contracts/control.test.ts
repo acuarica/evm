@@ -14,7 +14,7 @@ contract('control', (version, fallback) => {
                 val += 5;
             }
         }`;
-        const evm = new EVM(compile('C', CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT, version));
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
@@ -33,7 +33,7 @@ contract('control', (version, fallback) => {
             }
 
         }`;
-        const evm = new EVM(compile('C', CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT, version));
 
         const text = evm.decompile();
         expect(text, text).to.match(/require(\()+msg.sender/);
