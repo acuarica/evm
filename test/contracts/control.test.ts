@@ -1,11 +1,12 @@
+import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
-contract('control', version => {
-    it.skip('should `decompile` contract with `if` no-else', () => {
+contract('control', (version, fallback) => {
+    it('should `decompile` contract with `if` no-else', () => {
         const CONTRACT = `contract C {
             uint256 total = 0;
-            function() external payable {
+            ${fallback}() external payable {
                 uint256 val = 0;
                 if (block.number == 8) {
                     val = 3;
@@ -14,11 +15,12 @@ contract('control', version => {
             }
         }`;
         const evm = new EVM(compile('C', CONTRACT, version));
-        const cfg = evm.contract.main.blocks[0];
-        // cfg[cfg.entry]
+
+        const text = evm.decompile();
+        expect(text, text).to.match(/block\.number/);
     });
 
-    it('should ', () => {
+    it('should `decompile` contract with `require`s', () => {
         const CONTRACT = `contract C {
             mapping (address => uint256) private _allowances;
             function approve(uint256 amount) external {
@@ -32,6 +34,9 @@ contract('control', version => {
 
         }`;
         const evm = new EVM(compile('C', CONTRACT, version));
-        evm.contract;
+
+        const text = evm.decompile();
+        expect(text, text).to.match(/require(\()+msg.sender/);
+        expect(text, text).to.match(/require\(\(_arg0 > 0\), /);
     });
 });
