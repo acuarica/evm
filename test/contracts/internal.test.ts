@@ -1,6 +1,16 @@
 import { expect } from 'chai';
 import { FunctionFragment, Interface } from 'ethers/lib/utils';
-import { SStore, Stop, Sha3, Symbol0, Add, CallDataLoad } from '../../src/ast';
+import {
+    SStore,
+    Stop,
+    Sha3,
+    Symbol0,
+    Add,
+    CallDataLoad,
+    Require,
+    Return,
+    SLoad,
+} from '../../src/ast';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
@@ -29,6 +39,7 @@ contract('internal', version => {
             { sig: 'setInternal(uint256)', value: 5n },
         ].forEach(({ sig, value }) => {
             const hash = Interface.getSighash(FunctionFragment.from(sig)).substring(2);
+
             it(`should find \`SStore\`s in \`#${hash}\`\`${sig}\` blocks`, () => {
                 const fn = evm.contract.functions[hash];
 
@@ -77,20 +88,22 @@ contract('internal', version => {
             evm = new EVM(compile('C', CONTRACT, version));
         });
 
-        it('should find `SLoad`s in blocks', () => {
-            // const { blocks } = evm.getBlocks();
-            // const sloads = Object.values(blocks)
-            //     .map(block => block.stmts.at(-1)!)
-            //     .flatMap(stmt =>
-            //         stmt instanceof Return &&
-            //             stmt.args.length === 1 &&
-            //             stmt.args[0] instanceof SLoad
-            //             ? stmt.args[0]
-            //             : []
-            //     );
-            // expect(sloads).to.be.of.length(2);
-            // expect(sloads[0].location).to.be.deep.equal(new Sha3([new Symbol0('msg.sender'), 0n]));
-            // expect(sloads[1].location).to.be.deep.equal(new Sha3([new CallDataLoad(4n), 0n]));
+        [
+            { sig: 'getForSender()', value: new Symbol0('msg.sender') },
+            { sig: 'getForArg(address)', value: new CallDataLoad(4n) },
+        ].forEach(({ sig, value }) => {
+            const selector = Interface.getSighash(FunctionFragment.from(sig)).substring(2);
+
+            it('should find `SLoad`s in blocks', () => {
+                const stmts = evm.contract.functions[selector].stmts;
+                expect(stmts.length).to.be.at.least(1);
+
+                stmts.slice(0, -1).forEach(stmt => expect(stmt).to.be.instanceOf(Require));
+
+                expect(stmts.at(-1)).to.be.deep.equal(
+                    new Return([new SLoad(new Sha3([value, 0n]), evm.contract.variables)])
+                );
+            });
         });
 
         it('should not have `mappings` nor `variables`', () => {
