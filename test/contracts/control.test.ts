@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('control', (version, fallback) => {
+contract('control', (compile, fallback) => {
     it('should `decompile` contract with `if` no-else', () => {
         const CONTRACT = `contract C {
             uint256 total = 0;
@@ -14,7 +14,7 @@ contract('control', (version, fallback) => {
                 val += 5;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
@@ -33,7 +33,7 @@ contract('control', (version, fallback) => {
             }
 
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
 
         const text = evm.decompile();
         expect(text, text).to.match(/require(\()+msg.sender/);

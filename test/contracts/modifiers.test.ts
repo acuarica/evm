@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('modifiers', version => {
+contract('modifiers', (compile, _fallback, version) => {
     describe('with a `modifier` calling an `internal` function', () => {
         let evm: EVM;
 
@@ -28,7 +28,7 @@ contract('modifiers', version => {
                     _value = value + 3;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         it('should `decompile` bytecode', () => {

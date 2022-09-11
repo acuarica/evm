@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('dispatch', version => {
+contract('dispatch', compile => {
     it('should `decompile` a contract with a single `external` method', () => {
         const CONTRACT = `contract Contract {
             function get() external pure returns (uint256) {
                 return 5;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getFunctions()).to.be.include.members(['get()']);
 
         expect(Object.keys(evm.contract.functions)).to.be.of.length(1);
@@ -31,7 +31,7 @@ contract('dispatch', version => {
             function symbol() external pure returns (uint256) { return 3; }
             function thisAddress() external view returns (address) { return address(this); }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getFunctions()).to.include.members([
             'balanceOf(uint256)',
             'symbol()',

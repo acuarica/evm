@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('events', (version, fallback) => {
+contract('events', (compile, fallback) => {
     it('should emit unknown event', () => {
         const CONTRACT = `contract C {
             event Event0(string);
@@ -10,7 +10,7 @@ contract('events', (version, fallback) => {
                 emit Event0("Hello, world!");
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.empty;
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
@@ -25,7 +25,7 @@ contract('events', (version, fallback) => {
                 emit Transfer(newValue, address(this));
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal(['Transfer(uint256,address)']);
         const text = evm.decompile();
         expect(text, text).to.match(/event Transfer\(uint256 _arg0, address _arg1\);$/m);
@@ -39,7 +39,7 @@ contract('events', (version, fallback) => {
                 emit Send(123, address(this));
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal(['Send(uint256,address)']);
         const text = evm.decompile();
         expect(text, text).to.match(/event Send\(uint256 indexed _arg0, address _arg1\);$/m);
@@ -53,7 +53,7 @@ contract('events', (version, fallback) => {
                 emit Transfer();
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal(['Transfer()']);
         const text = evm.decompile();
         expect(text, text).to.match(/event Transfer\(\)$/m);
@@ -67,7 +67,7 @@ contract('events', (version, fallback) => {
                 emit Transfer(123, address(this));
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
@@ -81,7 +81,7 @@ contract('events', (version, fallback) => {
                 emit Transfer();
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
@@ -97,7 +97,7 @@ contract('events', (version, fallback) => {
                 emit Send(123, 124);
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         expect(evm.getEvents()).to.be.deep.equal([]);
 
         const text = evm.decompile();

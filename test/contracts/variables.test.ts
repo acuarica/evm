@@ -4,9 +4,9 @@ import { SStore, CallDataLoad, Stop, Require } from '../../src/ast';
 import { Variable } from '../../src/contract';
 import { stripMetadataHash } from '../../src/metadata';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('variables', version => {
+contract('variables', compile => {
     describe('with private variables in different locations', () => {
         let evm: EVM;
 
@@ -22,7 +22,7 @@ contract('variables', version => {
                     value32 = newValue;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         it('should not have functions nor events', () => {
@@ -88,7 +88,7 @@ contract('variables', version => {
                     value8 = newValue;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         it('should not have functions nor events', () => {
@@ -124,7 +124,7 @@ contract('variables', version => {
             const CONTRACT = `contract C {
                 uint256 public value;
             }`;
-            evm = new EVM(stripMetadataHash(compile(CONTRACT, version))[0]);
+            evm = new EVM(stripMetadataHash(compile(CONTRACT))[0]);
         });
 
         it('should `getFunctions` but not `getEvents`', () => {
@@ -148,7 +148,7 @@ contract('variables', version => {
                     value = newValue;
                 }
             }`;
-            evm = new EVM(stripMetadataHash(compile(CONTRACT, version))[0]);
+            evm = new EVM(stripMetadataHash(compile(CONTRACT))[0]);
         });
 
         it('should `getFunctions` but not `getEvents`', () => {

@@ -2,9 +2,9 @@ import { expect } from 'chai';
 import { Revert } from '../../src/ast';
 import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('empty', version => {
+contract('empty', (compile, _fallback, version) => {
     const CONTRACTS = [
         ['with no functions', `contract Empty { }`],
         [
@@ -46,7 +46,7 @@ contract('empty', version => {
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(compile(CONTRACT, version));
+                evm = new EVM(compile(CONTRACT));
             });
 
             if (index === 0) {

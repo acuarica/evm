@@ -12,9 +12,9 @@ import {
     SLoad,
 } from '../../src/ast';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('internal', version => {
+contract('internal', compile => {
     describe('with `internal` method with no arguments', () => {
         let evm: EVM;
 
@@ -31,7 +31,7 @@ contract('internal', version => {
                     _values[_msgSender()] = value + 5;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         [
@@ -85,7 +85,7 @@ contract('internal', version => {
                     return _getValue(from);
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         [
@@ -138,7 +138,7 @@ contract('internal', version => {
                     return _getValue(n);
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, version));
+            evm = new EVM(compile(CONTRACT));
         });
 
         it.skip('should `decompile` bytecode', () => {

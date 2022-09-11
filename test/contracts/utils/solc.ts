@@ -36,17 +36,14 @@ export function compile(
     version: Version,
     opts: {
         contractName?: string;
-        license: 'MIT';
-        context?: Mocha.Context;
-    } = { license: 'MIT' }
+        context?: Mocha.Context | undefined;
+    } = {}
 ): string {
     const input = {
         language: 'Solidity',
         sources: {
             SOURCE: {
-                content:
-                    `// SPDX-License-Identifier: ${opts.license}\npragma solidity ${version};\n` +
-                    content,
+                content: `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n` + content,
             },
         },
         settings: {
@@ -110,7 +107,14 @@ export function compile(
     }
 }
 
-export function contract(title: string, fn: (version: Version, fallback: string) => void) {
+export function contract(
+    title: string,
+    fn: (
+        compile: (content: string, context?: Mocha.Context) => string,
+        fallback: string,
+        version: Version
+    ) => void
+) {
     const ver = process.env['SOLC'];
     const [label, prefix] = ver ? [`${title} matching SOLC '^${ver}'`, ver] : [title, ''];
     describe(`contracts::${label}`, () => {
@@ -119,7 +123,14 @@ export function contract(title: string, fn: (version: Version, fallback: string)
                 const fallback = semver.gte(version, '0.8.0') ? 'fallback' : 'function';
 
                 describe(`using solc-v${version}`, () => {
-                    fn(version, fallback);
+                    fn(
+                        (content, context) =>
+                            compile(content, version, {
+                                context: context,
+                            }),
+                        fallback,
+                        version
+                    );
                 });
             }
         });

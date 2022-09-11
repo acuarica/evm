@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('loops', (version, fallback) => {
+contract('loops', (compile, fallback) => {
     it('should `decompile` contract with `for` loop', function () {
         const CONTRACT = `contract Contract {
             uint256 total = 0;
@@ -16,7 +16,7 @@ contract('loops', (version, fallback) => {
             }
         }`;
 
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
 
         const text = evm.decompile();
         expect(text, text).to.match(/< block\.number/);
@@ -34,7 +34,7 @@ contract('loops', (version, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         evm.contract;
     });
 
@@ -50,7 +50,7 @@ contract('loops', (version, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, version));
+        const evm = new EVM(compile(CONTRACT));
         evm.contract;
     });
 });

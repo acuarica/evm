@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { FunctionFragment, Interface } from 'ethers/lib/utils';
 import EVM from '../utils/evmtest';
-import { compile, contract } from './utils/solc';
+import { contract } from './utils/solc';
 
-contract('symbols', version => {
+contract('symbols', compile => {
     const CONTRACT = `
         contract C {
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
@@ -15,7 +15,7 @@ contract('symbols', version => {
     let text: string;
 
     before(() => {
-        evm = new EVM(compile(CONTRACT, version));
+        evm = new EVM(compile(CONTRACT));
         text = evm.decompile();
     });
 
