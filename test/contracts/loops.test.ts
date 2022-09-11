@@ -16,13 +16,13 @@ contract('loops', (compile, fallback) => {
             }
         }`;
 
-        const evm = new EVM(compile(CONTRACT));
+        const evm = new EVM(compile(CONTRACT, this));
 
         const text = evm.decompile();
         expect(text, text).to.match(/< block\.number/);
     });
 
-    it('should `decompile` contract with `while` loop', () => {
+    it('should `decompile` contract with `while` loop', function () {
         const CONTRACT = `contract Contract {
             function loop(uint256 n) external pure returns (uint256) {
                 uint256 sum = 0;
@@ -34,11 +34,11 @@ contract('loops', (compile, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT));
+        const evm = new EVM(compile(CONTRACT, this));
         evm.contract;
     });
 
-    it('non-terminating `while` loop', () => {
+    it('non-terminating `while` loop', function () {
         const CONTRACT = `contract Contract {
             function loop() external pure returns (uint256) {
                 uint256 sum = 0;
@@ -50,7 +50,7 @@ contract('loops', (compile, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT));
+        const evm = new EVM(compile(CONTRACT, this));
         evm.contract;
     });
 });
