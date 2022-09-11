@@ -19,7 +19,7 @@ describe('SWAP', () => {
 
                 stack.push(3n);
 
-                STACK()[`SWAP${size as Size}`](stack);
+                STACK<bigint>()[`SWAP${size as Size}`](stack);
 
                 expect(stack.values).to.deep.equal([2n, ...ignored, 3n]);
             });
@@ -31,7 +31,7 @@ describe('SWAP', () => {
                     stack.push(1n);
                 }
 
-                expect(() => STACK()[`SWAP${size as Size}`](stack)).to.throw(
+                expect(() => STACK<bigint>()[`SWAP${size as Size}`](stack)).to.throw(
                     'Invalid swap operation'
                 );
             });
