@@ -1,6 +1,6 @@
 import { expect } from 'chai';
+import { FunctionFragment, Interface } from 'ethers/lib/utils';
 import EVM from '../utils/evmtest';
-import { verifyBlocks } from '../utils/verify';
 import { compile, contract } from './utils/solc';
 
 contract('symbols', version => {
@@ -19,24 +19,22 @@ contract('symbols', version => {
         text = evm.decompile();
     });
 
-    it('should have verified blocks', () => {
-        verifyBlocks(evm);
-    });
-
     it('should find symbol opcodes', () => {
         expect(evm.opcodes.filter(op => op.mnemonic === 'BLOCKHASH')).to.be.of.length(1);
         expect(evm.opcodes.filter(op => op.mnemonic === 'BALANCE')).to.be.of.length(1);
         expect(evm.opcodes.filter(op => op.mnemonic === 'ADDRESS')).to.be.of.length(1);
     });
 
-    it('should find symbol blocks', () => {
-        // pprint(evm.getBlocks());
-        const lasts = Object.values(evm.getBlocks().blocks).map(block =>
-            block.stmts.at(-1)?.toString()
-        );
-        expect('return blockhash(7);').to.be.oneOf(lasts);
-        expect('return _arg0.balance;').to.be.oneOf(lasts);
-        expect('return this;').to.be.oneOf(lasts);
+    [
+        { sig: 'getBlockHash()', value: 'return blockhash(7);' },
+        { sig: 'getBalance(address)', value: 'return _arg0.balance;' },
+        { sig: 'getThis()', value: 'return this;' },
+    ].forEach(({ sig, value }) => {
+        const selector = Interface.getSighash(FunctionFragment.from(sig)).substring(2);
+        it('should find symbol blocks', () => {
+            const last = evm.contract.functions[selector].stmts.at(-1)!.toString();
+            expect(last).to.be.equal(value);
+        });
     });
 
     it('should find `BLOCKHASH` symbol', () => {

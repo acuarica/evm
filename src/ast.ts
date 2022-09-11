@@ -1,3 +1,4 @@
+import { Branch } from './cfg';
 import { type Contract } from './contract';
 import { hex2a } from './hex';
 
@@ -6,6 +7,7 @@ import { hex2a } from './hex';
  */
 export type Expr =
     | bigint
+    | Val
     // Math
     | Add
     | Mul
@@ -54,12 +56,17 @@ export type Expr =
 
 export type Stmt =
     // Storage
+    | If
+    | Require
     | SStore
     | MappingStore
     | MStore
     | Log
     | Jumpi
     | Jump
+    | JumpDest
+    | SigCase
+    | CallSite
     // System
     | Stop
     | Return
@@ -67,15 +74,36 @@ export type Stmt =
     | SelfDestruct
     | Invalid;
 
+export class Val {
+    readonly name = 'Val';
+    readonly wrapped = false;
+
+    isJumpDest = false;
+
+    constructor(readonly value: bigint) {}
+
+    toString() {
+        return `${this.isJumpDest ? '[J]' : ''}${this.value.toString(16)}`;
+    }
+
+    eval() {
+        return this.value;
+    }
+}
+
 export function isBigInt<E>(expr: bigint | E): expr is bigint {
     return typeof expr === 'bigint';
 }
 
-export function isZero<E>(expr: bigint | E): expr is bigint {
-    return isBigInt(expr) && expr === 0n;
+export function isVal(expr: Expr): expr is Val {
+    return expr instanceof Val;
 }
 
-export function stringify(value: Expr): string {
+export function isZero(expr: Expr): expr is bigint {
+    return (isBigInt(expr) && expr === 0n) || (isVal(expr) && expr.value === 0n);
+}
+
+export function wrap(value: Expr): string {
     return typeof value === 'bigint'
         ? value.toString(16)
         : !value.wrapped
@@ -96,7 +124,7 @@ export const Bin = <N extends string>(name: N, op: string) =>
         }
 
         override toString() {
-            return `${stringify(this.left)} ${op} ${stringify(this.right)}`;
+            return `${wrap(this.left)} ${op} ${wrap(this.right)}`;
         }
     };
 
@@ -107,8 +135,11 @@ const Unary = <N extends string | null>(name: N, op: string) =>
 
         constructor(readonly value: Expr) {}
 
+        eval() {
+            return this;
+        }
         toString() {
-            return `${op}${stringify(this.value)}`;
+            return `${op}${wrap(this.value)}`;
         }
     };
 
@@ -120,17 +151,67 @@ const Shift = <N extends string>(name: N, op: string) =>
 
         constructor(readonly value: Expr, readonly shift: Expr) {}
 
+        eval() {
+            return this;
+        }
         toString() {
-            return `${stringify(this.value)} ${op} ${stringify(this.shift)}`;
+            return `${wrap(this.value)} ${op} ${wrap(this.shift)}`;
         }
     };
 
-export class Add extends Bin('Add', '+') {}
-export class Mul extends Bin('Mul', '*') {}
-export class Sub extends Bin('Sub', '-') {}
-export class Div extends Bin('Div', '/') {}
-export class Mod extends Bin('Mod', '%') {}
-export class Exp extends Bin('Exp', '**') {}
+export class Add extends Bin('Add', '+') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right)
+            ? left + right
+            : isZero(left)
+            ? right
+            : isZero(right)
+            ? left
+            : new Add(left, right);
+    }
+}
+
+export class Mul extends Bin('Mul', '*') {
+    eval() {
+        return this;
+    }
+}
+export class Sub extends Bin('Sub', '-') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right) ? left - right : this;
+    }
+}
+export class Div extends Bin('Div', '/') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right)
+            ? right === 0n
+                ? new Div(left, right)
+                : left / right
+            : isBigInt(right) && right === 1n
+            ? left
+            : new Div(left, right);
+    }
+}
+export class Mod extends Bin('Mod', '%') {
+    eval() {
+        return this;
+    }
+}
+export class Exp extends Bin('Exp', '**') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+        return isBigInt(left) && isBigInt(right) && right >= 0
+            ? left ** right
+            : new Exp(left, right);
+    }
+}
 
 export class Sig {
     readonly name = 'Sig';
@@ -138,14 +219,40 @@ export class Sig {
 
     constructor(readonly hash: string) {}
 
+    eval() {
+        return this;
+    }
     toString() {
         return `msg.sig == ${this.hash}`;
     }
 }
 
-export class Eq extends Bin('Eq', '==') {}
-export class And extends Bin('And', '&&') {}
-export class Or extends Bin('Or', '||') {}
+export class Eq extends Bin('Eq', '==') {
+    eval(): Expr {
+        return new Eq(evalExpr(this.left), evalExpr(this.right));
+    }
+}
+export class And extends Bin('And', '&&') {
+    eval(): Expr {
+        const left = evalExpr(this.left);
+        const right = evalExpr(this.right);
+
+        return isBigInt(left) && isBigInt(right)
+            ? left & right
+            : isBigInt(left) && /^[f]+$/.test(left.toString(16))
+            ? right
+            : isBigInt(right) && /^[f]+$/.test(right.toString(16))
+            ? left
+            : isBigInt(left) && right instanceof And && isBigInt(right.left) && left === right.left
+            ? right.right
+            : new And(left, right);
+    }
+}
+export class Or extends Bin('Or', '||') {
+    eval() {
+        return this;
+    }
+}
 
 export class IsZero {
     readonly name = 'IsZero';
@@ -154,10 +261,25 @@ export class IsZero {
 
     constructor(readonly value: Expr) {}
 
+    eval(): Expr {
+        const value = evalExpr(this.value);
+
+        return isBigInt(value)
+            ? value === 0n
+                ? 1n
+                : 0n
+            : value instanceof LT
+            ? new GT(value.left, value.right, !value.equal)
+            : value instanceof GT
+            ? new LT(value.left, value.right, !value.equal)
+            : value instanceof IsZero
+            ? value.value
+            : new IsZero(value);
+    }
     toString() {
         return this.value instanceof Eq
-            ? stringify(this.value.left) + ' != ' + stringify(this.value.right)
-            : stringify(this.value) + ' == 0';
+            ? wrap(this.value.left) + ' != ' + wrap(this.value.right)
+            : wrap(this.value) + ' == 0';
     }
 }
 
@@ -167,17 +289,22 @@ export const Cmp = <N extends string>(name: N, op: string) =>
             super();
         }
 
+        eval() {
+            return this;
+        }
         override toString() {
-            return (
-                stringify(this.left) + (this.equal ? ` ${op}= ` : ` ${op} `) + stringify(this.right)
-            );
+            return wrap(this.left) + (this.equal ? ` ${op}= ` : ` ${op} `) + wrap(this.right);
         }
     };
 
 export class GT extends Cmp('Gt', '>') {}
 export class LT extends Cmp('Lt', '<') {}
 
-export class Xor extends Bin('Xor', '^') {}
+export class Xor extends Bin('Xor', '^') {
+    eval() {
+        return this;
+    }
+}
 export class Not extends Unary('Not', '~') {}
 export class Neg extends Unary(null, '!') {}
 
@@ -188,8 +315,11 @@ export class Byte {
 
     constructor(readonly position: Expr, readonly data: Expr) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return `(${stringify(this.data)} >> ${stringify(this.position)}) & 1`;
+        return `(${wrap(this.data)} >> ${wrap(this.position)}) & 1`;
     }
 }
 
@@ -205,8 +335,11 @@ export class MLoad {
 
     constructor(readonly location: Expr) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return 'memory[' + stringify(this.location) + ']';
+        return 'memory[' + wrap(this.location) + ']';
     }
 }
 
@@ -216,8 +349,12 @@ export class MStore {
 
     constructor(readonly location: Exclude<Expr, bigint>, readonly data: Expr) {}
 
+    eval() {
+        return this;
+    }
+
     toString() {
-        return 'memory[' + stringify(this.location) + '] = ' + stringify(this.data) + ';';
+        return 'memory[' + wrap(this.location) + '] = ' + wrap(this.data) + ';';
     }
 }
 
@@ -232,13 +369,17 @@ export class Sha3 {
         readonly memoryLength?: Expr
     ) {}
 
+    eval(): Expr {
+        return new Sha3(this.items.map(evalExpr), this.memoryStart, this.memoryLength);
+    }
+
     toString() {
         if (this.memoryStart && this.memoryLength) {
-            return `keccak256(memory[${stringify(this.memoryStart)}:(${stringify(
-                this.memoryStart
-            )}+${stringify(this.memoryLength!)})])`;
+            return `keccak256(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
+                this.memoryLength!
+            )})])`;
         } else {
-            return `keccak256(${this.items.map(item => stringify(item)).join(', ')})`;
+            return `keccak256(${this.items.map(item => wrap(item)).join(', ')})`;
         }
     }
 }
@@ -255,6 +396,8 @@ export type Info =
     | 'block.number'
     | 'block.difficulty'
     | 'block.gaslimit'
+    | 'chainid'
+    | 'self.balance'
     | 'memory.length'
     | 'gasleft()';
 
@@ -262,6 +405,9 @@ export class Symbol0 {
     readonly name = 'Symbol0';
     readonly wrapped = false;
     constructor(readonly symbol: Info, readonly type?: string) {}
+    eval() {
+        return this;
+    }
     toString() {
         return this.symbol;
     }
@@ -270,8 +416,11 @@ export class Symbol1 {
     readonly name = 'Symbol1';
     readonly wrapped = false;
     constructor(readonly fn: (value: string) => string, readonly value: Expr) {}
+    eval(): Expr {
+        return new Symbol1(this.fn, evalExpr(this.value));
+    }
     toString() {
-        return this.fn(stringify(this.value));
+        return this.fn(wrap(this.value));
     }
 }
 
@@ -283,13 +432,19 @@ export class DataCopy {
         readonly offset: Expr,
         readonly size: Expr
     ) {}
+    eval() {
+        return this;
+    }
     toString() {
-        return this.fn(stringify(this.offset), stringify(this.size));
+        return this.fn(wrap(this.offset), wrap(this.size));
     }
 }
 
 export class Stop {
     readonly name = 'Stop';
+    eval() {
+        return this;
+    }
     toString() {
         return 'return;';
     }
@@ -301,10 +456,13 @@ export class CREATE {
 
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return `(new Contract(memory[${stringify(this.memoryStart)}:(${stringify(
-            this.memoryStart
-        )}+${stringify(this.memoryLength)})]).value(${stringify(this.value)})).address`;
+        return `(new Contract(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
+            this.memoryLength
+        )})]).value(${wrap(this.value)})).address`;
     }
 }
 
@@ -324,6 +482,9 @@ export class CALL {
         readonly outputLength: Expr
     ) {}
 
+    eval() {
+        return this;
+    }
     toString() {
         if (isZero(this.memoryLength) && isZero(this.outputLength)) {
             if (
@@ -333,21 +494,19 @@ export class CALL {
                 this.gas.right === 2300n
             ) {
                 if (this.throwOnFail) {
-                    return `address(${stringify(this.address)}).transfer(${stringify(this.value)})`;
+                    return `address(${wrap(this.address)}).transfer(${wrap(this.value)})`;
                 } else {
-                    return `address(${stringify(this.address)}).send(${stringify(this.value)})`;
+                    return `address(${wrap(this.address)}).send(${wrap(this.value)})`;
                 }
             } else {
-                return `address(${stringify(this.address)}).call.gas(${stringify(
-                    this.gas
-                )}).value(${stringify(this.value)})`;
+                return `address(${wrap(this.address)}).call.gas(${wrap(this.gas)}).value(${wrap(
+                    this.value
+                )})`;
             }
         } else {
-            return `call(${stringify(this.gas)},${stringify(this.address)},${stringify(
-                this.value
-            )},${stringify(this.memoryStart)},${stringify(this.memoryLength)},${stringify(
-                this.outputStart
-            )},${stringify(this.outputLength)})`;
+            return `call(${wrap(this.gas)},${wrap(this.address)},${wrap(this.value)},${wrap(
+                this.memoryStart
+            )},${wrap(this.memoryLength)},${wrap(this.outputStart)},${wrap(this.outputLength)})`;
         }
     }
 }
@@ -358,6 +517,9 @@ export class ReturnData {
 
     constructor(readonly retOffset: any, readonly retSize: any) {}
 
+    eval() {
+        return this;
+    }
     toString() {
         return `output:ReturnData:${this.retOffset}:${this.retSize}`;
     }
@@ -377,12 +539,13 @@ export class CALLCODE {
         readonly outputLength: Expr
     ) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return `callcode(${stringify(this.gas)},${stringify(this.address)},${stringify(
-            this.value
-        )},${stringify(this.memoryStart)},${stringify(this.memoryLength)},${stringify(
-            this.outputStart
-        )},${stringify(this.outputLength)})`;
+        return `callcode(${wrap(this.gas)},${wrap(this.address)},${wrap(this.value)},${wrap(
+            this.memoryStart
+        )},${wrap(this.memoryLength)},${wrap(this.outputStart)},${wrap(this.outputLength)})`;
     }
 }
 
@@ -393,10 +556,13 @@ export class CREATE2 {
 
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return `(new Contract(memory[${stringify(this.memoryStart)}:(${stringify(
-            this.memoryStart
-        )}+${stringify(this.memoryLength)})]).value(${stringify(this.value)})).address`;
+        return `(new Contract(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
+            this.memoryLength
+        )})]).value(${wrap(this.value)})).address`;
     }
 }
 
@@ -414,12 +580,13 @@ export class STATICCALL {
         readonly outputLength: Expr
     ) {}
 
+    eval() {
+        return this;
+    }
     toString() {
-        return `staticcall(${stringify(this.gas)},${stringify(this.address)},${stringify(
-            this.memoryStart
-        )},${stringify(this.memoryLength)},${stringify(this.outputStart)},${stringify(
-            this.outputLength
-        )})`;
+        return `staticcall(${wrap(this.gas)},${wrap(this.address)},${wrap(this.memoryStart)},${wrap(
+            this.memoryLength
+        )},${wrap(this.outputStart)},${wrap(this.outputLength)})`;
     }
 }
 
@@ -437,13 +604,18 @@ export class DELEGATECALL {
         readonly outputLength: Expr
     ) {}
 
-    toString() {
-        return `delegatecall(${stringify(this.gas)},${stringify(this.address)},${stringify(
-            this.memoryStart
-        )},${stringify(this.memoryLength)},${stringify(this.outputStart)},${stringify(
-            this.outputLength
-        )})`;
+    eval() {
+        return this;
     }
+    toString() {
+        return `delegatecall(${wrap(this.gas)},${wrap(this.address)},${wrap(
+            this.memoryStart
+        )},${wrap(this.memoryLength)},${wrap(this.outputStart)},${wrap(this.outputLength)})`;
+    }
+}
+
+export function evalExpr(expr: Expr) {
+    return typeof expr === 'bigint' ? expr : expr.eval();
 }
 
 export class Return {
@@ -452,11 +624,15 @@ export class Return {
 
     constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {}
 
+    eval() {
+        return new Return(this.args.map(evalExpr), this.memoryStart, this.memoryLength);
+    }
+
     toString(): string {
         if (this.memoryStart && this.memoryLength) {
-            return `return memory[${stringify(this.memoryStart)}:(${stringify(
-                this.memoryStart
-            )}+${stringify(this.memoryLength)})];`;
+            return `return memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
+                this.memoryLength
+            )})];`;
         } else if (this.args.length === 0) {
             return 'return;';
         } else if (
@@ -472,8 +648,8 @@ export class Return {
             return 'return "' + hex2a(this.args[2].toString(16)) + '";';
         } else {
             return this.args.length === 1
-                ? `return ${stringify(this.args[0])};`
-                : `return (${this.args.map(item => stringify(item)).join(', ')});`;
+                ? `return ${wrap(this.args[0])};`
+                : `return (${this.args.map(item => wrap(item)).join(', ')});`;
         }
     }
 }
@@ -489,13 +665,17 @@ export class Revert {
         readonly memoryLength?: Expr
     ) {}
 
+    eval() {
+        return this;
+    }
+
     toString() {
         if (this.memoryStart && this.memoryLength) {
-            return `revert(memory[${stringify(this.memoryStart!)}:(${stringify(
-                this.memoryStart!
-            )}+${stringify(this.memoryLength!)})]);`;
+            return `revert(memory[${wrap(this.memoryStart!)}:(${wrap(this.memoryStart!)}+${wrap(
+                this.memoryLength!
+            )})]);`;
         } else {
-            return 'revert(' + this.items.map(item => stringify(item)).join(', ') + ');';
+            return 'revert(' + this.items.map(item => wrap(item)).join(', ') + ');';
         }
     }
 }
@@ -507,6 +687,10 @@ export class Invalid {
 
     constructor(readonly opcode: number) {}
 
+    eval() {
+        return this;
+    }
+
     toString = () => `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
 }
 
@@ -517,7 +701,11 @@ export class SelfDestruct {
 
     constructor(readonly address: any) {}
 
-    toString = () => `selfdestruct(${stringify(this.address)});`;
+    eval() {
+        return this;
+    }
+
+    toString = () => `selfdestruct(${wrap(this.address)});`;
 }
 
 export class CallDataLoad {
@@ -527,13 +715,16 @@ export class CallDataLoad {
 
     constructor(readonly location: Expr) {}
 
+    eval(): Expr {
+        return new CallDataLoad(evalExpr(this.location));
+    }
     toString(): string {
         if (isBigInt(this.location) && isZero(this.location)) {
             return 'msg.data';
         } else if (isBigInt(this.location) && (this.location - 4n) % 32n === 0n) {
             return `_arg${(this.location - 4n) / 32n}`;
         } else {
-            return `msg.data[${stringify(this.location)}]`;
+            return `msg.data[${wrap(this.location)}]`;
         }
     }
 }
@@ -543,6 +734,9 @@ export class CALLDATASIZE {
     readonly type?: string;
     readonly wrapped = false;
 
+    eval() {
+        return this;
+    }
     toString() {
         return 'msg.data.length';
     }
@@ -553,6 +747,9 @@ export class CallValue {
     readonly type?: string;
     readonly wrapped = false;
 
+    eval() {
+        return this;
+    }
     toString() {
         return 'msg.value';
     }
@@ -562,17 +759,14 @@ export class Log {
     readonly name = 'LOG';
     readonly type?: string;
     readonly wrapped = true;
-    readonly memoryStart: Expr | undefined;
-    readonly memoryLength: Expr | undefined;
-    readonly items?: any;
     readonly eventName?: string;
 
     constructor(
-        eventHashes: { [s: string]: string },
+        private readonly eventHashes: { [s: string]: string },
         readonly topics: Expr[],
-        args?: Expr[],
-        memoryStart?: Expr,
-        memoryLength?: Expr
+        readonly args: Expr[],
+        readonly memoryStart?: Expr,
+        readonly memoryLength?: Expr
     ) {
         if (
             this.topics.length > 0 &&
@@ -582,22 +776,29 @@ export class Log {
             this.eventName = eventHashes[this.topics[0].toString(16)].split('(')[0];
             this.topics.shift();
         }
-        if (this.memoryStart && this.memoryLength) {
-            this.memoryStart = memoryStart;
-            this.memoryLength = memoryLength;
-        } else {
-            this.items = args;
-        }
+    }
+
+    eval() {
+        return new Log(
+            this.eventHashes,
+            this.topics.map(evalExpr),
+            this.args.map(evalExpr),
+            this.memoryStart ? evalExpr(this.memoryStart) : undefined,
+            this.memoryLength ? evalExpr(this.memoryLength) : undefined
+        );
     }
 
     toString() {
-        if (this.eventName) {
-            return (
-                'emit ' + this.eventName + '(' + [...this.topics, ...this.items].join(', ') + ');'
-            );
-        } else {
-            return 'log(' + [...this.topics, ...this.items].join(', ') + ');';
-        }
+        return this.eventName
+            ? `emit ${this.eventName}(${[...this.topics, ...this.args].join(', ')});`
+            : 'log(' +
+                  (this.memoryStart && this.memoryLength
+                      ? [
+                            ...this.topics,
+                            `memory[${this.memoryStart.toString()}:${this.memoryLength.toString()} ]`,
+                        ].join(', ') + 'ii'
+                      : [...this.topics, ...this.args].join(', ')) +
+                  ');';
     }
 }
 
@@ -614,6 +815,10 @@ export class MappingStore {
         readonly structlocation?: any
     ) {}
 
+    eval() {
+        return this;
+    }
+
     toString() {
         let mappingName = 'mapping' + (this.count + 1);
         if (this.location in this.mappings() && this.mappings()[this.location].name) {
@@ -622,45 +827,45 @@ export class MappingStore {
         if (
             this.data.name === 'ADD' &&
             this.data.right.name === 'MappingLoad' &&
-            stringify(this.data.right.location) === stringify(this.location)
+            wrap(this.data.right.location) === wrap(this.location)
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
+                this.items.map((item: any) => '[' + wrap(item) + ']').join('') +
                 ' += ' +
-                stringify(this.data.left) +
+                wrap(this.data.left) +
                 ';'
             );
         } else if (
             this.data.name === 'ADD' &&
             this.data.left.name === 'MappingLoad' &&
-            stringify(this.data.left.location) === stringify(this.location)
+            wrap(this.data.left.location) === wrap(this.location)
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
+                this.items.map((item: any) => '[' + wrap(item) + ']').join('') +
                 ' += ' +
-                stringify(this.data.right) +
+                wrap(this.data.right) +
                 ';'
             );
         } else if (
             this.data.name === 'SUB' &&
             this.data.left.name === 'MappingLoad' &&
-            stringify(this.data.left.location) === stringify(this.location)
+            wrap(this.data.left.location) === wrap(this.location)
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
+                this.items.map((item: any) => '[' + wrap(item) + ']').join('') +
                 ' -= ' +
-                stringify(this.data.right) +
+                wrap(this.data.right) +
                 ';'
             );
         } else {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + stringify(item) + ']').join('') +
+                this.items.map((item: any) => '[' + wrap(item) + ']').join('') +
                 ' = ' +
-                stringify(this.data) +
+                wrap(this.data) +
                 ';'
             );
         }
@@ -686,8 +891,12 @@ export class SStore {
         // }
     }
 
+    eval() {
+        return new SStore(evalExpr(this.location), evalExpr(this.data), this.variables);
+    }
+
     toString() {
-        let variableName = 'storage[' + stringify(this.location) + ']';
+        let variableName = 'storage[' + wrap(this.location) + ']';
         const loc = this.location.toString();
         if (isBigInt(this.location) && loc in this.variables) {
             const label = this.variables[loc].label;
@@ -700,17 +909,17 @@ export class SStore {
         if (
             this.data instanceof Add &&
             this.data.right instanceof SLoad &&
-            stringify(this.data.right.location) === stringify(this.location)
+            wrap(this.data.right.location) === wrap(this.location)
         ) {
-            return variableName + ' += ' + stringify(this.data.left) + ';';
+            return variableName + ' += ' + wrap(this.data.left) + ';';
         } else if (
             this.data instanceof Sub &&
             this.data.left instanceof SLoad &&
-            stringify(this.data.left.location) === stringify(this.location)
+            wrap(this.data.left.location) === wrap(this.location)
         ) {
-            return variableName + ' -= ' + stringify(this.data.right) + ';';
+            return variableName + ' -= ' + wrap(this.data.right) + ';';
         } else {
-            return variableName + ' = ' + stringify(this.data) + ';';
+            return variableName + ' = ' + wrap(this.data) + ';';
         }
     }
 }
@@ -730,6 +939,9 @@ export class MappingLoad {
         readonly structlocation?: bigint
     ) {}
 
+    eval() {
+        return this;
+    }
     toString() {
         let mappingName = 'mapping' + (this.count + 1);
         const maybeName = this.mappings()[this.location].name;
@@ -739,13 +951,13 @@ export class MappingLoad {
         if (this.structlocation) {
             return (
                 mappingName +
-                this.items.map(item => '[' + stringify(item) + ']').join('') +
+                this.items.map(item => '[' + wrap(item) + ']').join('') +
                 '[' +
                 this.structlocation.toString() +
                 ']'
             );
         } else {
-            return mappingName + this.items.map(item => '[' + stringify(item) + ']').join('');
+            return mappingName + this.items.map(item => '[' + wrap(item) + ']').join('');
         }
     }
 }
@@ -757,6 +969,10 @@ export class SLoad {
 
     constructor(readonly location: Expr, readonly variables: Contract['variables']) {}
 
+    eval(): Expr {
+        return new SLoad(evalExpr(this.location), this.variables);
+    }
+
     toString() {
         if (isBigInt(this.location) && this.location.toString() in this.variables) {
             const label = this.variables[this.location.toString()].label;
@@ -766,8 +982,24 @@ export class SLoad {
                 return 'var' + (Object.keys(this.variables).indexOf(this.location.toString()) + 1);
             }
         } else {
-            return 'storage[' + stringify(this.location) + ']';
+            return 'storage[' + wrap(this.location) + ']';
         }
+    }
+}
+
+export class If {
+    readonly name = 'If';
+    readonly wrapped = true;
+    constructor(
+        readonly condition: Expr,
+        readonly trueBlock?: Stmt[],
+        readonly falseBlock?: Stmt[]
+    ) {}
+    toString() {
+        return '(' + this.condition + ')';
+    }
+    eval() {
+        return this;
     }
 }
 
@@ -777,20 +1009,75 @@ export class Jumpi {
     constructor(
         readonly condition: Expr,
         readonly offset: Expr,
-        readonly fallBranch?: string,
-        readonly destBranch?: string
+        readonly fallBranch: Branch,
+        readonly destBranch: Branch
     ) {}
+    eval() {
+        return this;
+    }
     toString() {
-        // return 'if (' + this.condition + ') // goto ' + this.offset.toString();
         return 'if (' + this.condition + ')';
+    }
+}
+
+export class SigCase {
+    readonly name = 'SigCase';
+    readonly wrapped = true;
+    constructor(readonly condition: Sig, readonly fallBranch: Branch) {}
+    eval() {
+        return this;
+    }
+    toString() {
+        return 'ifsig (' + this.condition + ')';
     }
 }
 
 export class Jump {
     readonly name = 'Jump';
     readonly wrapped = true;
-    constructor(readonly offset: Expr, readonly destBranch?: string) {}
+    constructor(readonly offset: Expr, readonly destBranch: Branch) {}
+    eval() {
+        return this;
+    }
     toString() {
         return 'go ' + this.offset.toString();
+    }
+}
+
+export class JumpDest {
+    readonly name = 'JumpDest';
+    readonly wrapped = true;
+    constructor(readonly fallBranch: Branch) {}
+    eval() {
+        return this;
+    }
+    toString() {
+        return 'fall';
+    }
+}
+
+export class Require {
+    readonly name = 'Require';
+
+    constructor(readonly condition: Expr, readonly args: Expr[]) {}
+
+    eval() {
+        return this;
+    }
+
+    toString() {
+        return `require(${wrap(this.condition)}, ${this.args.join(', ')});`;
+    }
+}
+
+export class CallSite {
+    readonly name = 'CallSite';
+    readonly wrapped = true;
+    constructor(readonly hash: string) {}
+    eval() {
+        return this;
+    }
+    toString() {
+        return '#' + this.hash + '();';
     }
 }

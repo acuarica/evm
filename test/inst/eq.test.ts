@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Stack } from '../../src';
-import { Expr, Symbol0, Div, CallDataLoad, Shr } from '../../src/ast';
+import { Expr, Symbol0, Div, CallDataLoad, Shr, Val } from '../../src/ast';
 import { LOGIC } from '../../src/inst/logic';
 
 describe('EQ', () => {
@@ -36,8 +36,8 @@ describe('EQ', () => {
         describe(`EQ detect msg.sig for hash ${hash}`, () => {
             it('should stringify signature `msg.sig` from RHS DIV&EXP', () => {
                 const stack = new Stack<Expr>();
-                stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
-                stack.push(BigInt('0x' + hash));
+                stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
+                stack.push(new Val(BigInt('0x' + hash)));
                 LOGIC.EQ(stack);
 
                 expect(stack.values).has.length(1);
@@ -46,8 +46,8 @@ describe('EQ', () => {
 
             it('should stringify signature `msg.sig` from LHS DIV&EXP', () => {
                 const stack = new Stack<Expr>();
-                stack.push(BigInt('0x' + hash));
-                stack.push(new Div(new CallDataLoad(0n), 2n ** 0xe0n));
+                stack.push(new Val(BigInt('0x' + hash)));
+                stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
                 LOGIC.EQ(stack);
 
                 expect(stack.values).has.length(1);
@@ -56,8 +56,8 @@ describe('EQ', () => {
 
             it('should stringify signature `msg.sig` from RHS SHR', () => {
                 const stack = new Stack<Expr>();
-                stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
-                stack.push(BigInt('0x' + hash));
+                stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
+                stack.push(new Val(BigInt('0x' + hash)));
                 LOGIC.EQ(stack);
 
                 expect(stack.values).has.length(1);
@@ -66,8 +66,8 @@ describe('EQ', () => {
 
             it('should stringify signature `msg.sig` from LHS SHR', () => {
                 const stack = new Stack<Expr>();
-                stack.push(BigInt('0x' + hash));
-                stack.push(new Shr(new CallDataLoad(0n), 0xe0n));
+                stack.push(new Val(BigInt('0x' + hash)));
+                stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
                 LOGIC.EQ(stack);
 
                 expect(stack.values).has.length(1);

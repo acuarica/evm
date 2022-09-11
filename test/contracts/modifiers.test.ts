@@ -34,7 +34,7 @@ contract('modifiers', version => {
         it('should `decompile` bytecode', () => {
             const text = evm.decompile();
             expect(text, text).to.not.match(/return msg.sender;/);
-            expect(text, text).to.match(/if \(storage\[1\] == msg.sender\)$/m);
+            expect(text, text).to.match(/storage\[1\] == msg.sender/m);
             expect(text, text).to.match(/var1 = \(_arg0 \+ 3\);$/m);
         });
     });

@@ -1,25 +1,40 @@
 import { Stack } from '../stack';
-import { And, Byte, Expr, GT, isBigInt, IsZero, isZero, LT, Not, Or, Sar, Shl, Xor } from '../ast';
+import {
+    And,
+    Byte,
+    Expr,
+    GT,
+    isBigInt,
+    isVal,
+    IsZero,
+    isZero,
+    LT,
+    Not,
+    Or,
+    Sar,
+    Shl,
+    Xor,
+} from '../ast';
 import { CallDataLoad, Div, Eq } from '../ast';
 import { Shr, Sig } from '../ast';
 
 export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
     if (
-        isBigInt(left) &&
+        isVal(left) &&
         right instanceof Shr &&
-        isBigInt(right.shift) &&
-        right.shift === 0xe0n &&
+        isVal(right.shift) &&
+        right.shift.value === 0xe0n &&
         right.value instanceof CallDataLoad &&
         isZero(right.value.location)
     ) {
-        return new Sig(left.toString(16).padStart(8, '0'));
+        return new Sig(left.value.toString(16).padStart(8, '0'));
     }
     return cc();
 }
 
 export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
-    if (isBigInt(left) && right instanceof Div && isBigInt(right.right)) {
-        left = left * right.right;
+    if (isVal(left) && right instanceof Div && isVal(right.right)) {
+        left = left.value * right.right.value;
         right = right.left;
 
         if (
@@ -67,17 +82,18 @@ export const LOGIC = {
     ISZERO: (stack: Stack<Expr>) => {
         const value = stack.pop();
         stack.push(
-            isBigInt(value)
-                ? value === 0n
-                    ? 1n
-                    : 0n
-                : value instanceof LT
-                ? new GT(value.left, value.right, !value.equal)
-                : value instanceof GT
-                ? new LT(value.left, value.right, !value.equal)
-                : value instanceof IsZero
-                ? value.value
-                : new IsZero(value)
+            // isBigInt(value)
+            //     ? value === 0n
+            //         ? 1n
+            //         : 0n
+            //     : value instanceof LT
+            //     ? new GT(value.left, value.right, !value.equal)
+            //     : value instanceof GT
+            //     ? new LT(value.left, value.right, !value.equal)
+            //     : value instanceof IsZero
+            //     ? value.value
+            //     :
+            new IsZero(value)
         );
     },
 

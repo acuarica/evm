@@ -1,4 +1,4 @@
-export class Stack<T> {
+export class Stack<in out T> {
     readonly values: T[] = [];
 
     push(item: T): void | never {

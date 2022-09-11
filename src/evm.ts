@@ -1,14 +1,8 @@
-import stringifyEvents from './utils/stringifyEvents';
-import stringifyStructs from './utils/stringifyStructs';
-import stringifyMappings from './utils/stringifyMappings';
-import stringifyVariables from './utils/stringifyVariables';
-import stringifyFunctions from './utils/stringifyFunctions';
-import { stringifyBlocks } from './utils/stringifyInstructions';
 import { decode, Opcode, OPCODES } from './opcode';
 import { fromHex, toHex } from './hex';
 import { MetadataHash, stripMetadataHash } from './metadata';
-import { ControlFlowGraph, getBlocks } from './cfg';
 import { Contract } from './contract';
+import { stringify } from './stringify';
 
 /**
  *
@@ -34,13 +28,14 @@ export class EVM {
     /**
      *
      */
-    private blocks: ControlFlowGraph | null = null;
+    private _contract: Contract | null = null;
 
     /**
      *
+     * @param bytecode
+     * @param functionHashes
+     * @param eventHashes
      */
-    private contract: Contract | null = null;
-
     constructor(
         bytecode: string,
         readonly functionHashes: { [s: string]: string },
@@ -53,20 +48,10 @@ export class EVM {
         this.opcodes = decode(fromHex(code.replace('0x', '')));
     }
 
-    getBlocks(): ControlFlowGraph {
-        if (!this.blocks) {
-            this.contract = new Contract(this.functionHashes, this.eventHashes);
-            this.blocks = getBlocks(this.opcodes, this.contract);
-        }
-
-        return this.blocks;
-    }
-
-    getContract(): Contract {
-        this.getBlocks();
-        return this.contract!;
-    }
-
+    /**
+     *
+     * @returns
+     */
     getFunctions(): string[] {
         return [
             ...new Set(
@@ -82,6 +67,10 @@ export class EVM {
         ];
     }
 
+    /**
+     *
+     * @returns
+     */
     getEvents(): string[] {
         return [
             ...new Set(
@@ -97,8 +86,23 @@ export class EVM {
         ];
     }
 
+    /**
+     *
+     * @returns
+     */
+    get contract(): Contract {
+        if (!this._contract) {
+            this._contract = new Contract(this.opcodes, this.functionHashes, this.eventHashes);
+        }
+        return this._contract;
+    }
+
+    /**
+     *
+     * @returns
+     */
     getABI() {
-        return Object.values(this.contract!).map(fn => {
+        return Object.values(this.contract).map(fn => {
             return {
                 type: 'function',
                 name: fn.label.split('(')[0],
@@ -109,24 +113,7 @@ export class EVM {
     }
 
     decompile(): string {
-        const blocks = this.getBlocks();
-        const contract = this.contract!;
-
-        const events = stringifyEvents(contract.events, this.getEvents());
-        const structs = stringifyStructs(contract.mappings);
-        const mappings = stringifyMappings(contract.mappings);
-        const variables = stringifyVariables(contract.variables);
-        const functions = Object.keys(contract.functions)
-            .map(functionName =>
-                stringifyFunctions(
-                    functionName,
-                    contract.functions[functionName],
-                    this.functionHashes
-                )
-            )
-            .join('');
-        const code = stringifyBlocks(blocks, this.functionHashes);
-        return events + structs + mappings + variables + functions + code;
+        return stringify(this.contract, this.getEvents());
     }
 
     isERC165(): boolean {

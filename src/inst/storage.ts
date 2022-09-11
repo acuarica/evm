@@ -1,5 +1,5 @@
 import { Opcode } from '../opcode';
-import { Expr, isBigInt, MappingLoad, MappingStore, SLoad, SStore } from '../ast';
+import { Expr, isBigInt, isVal, MappingLoad, MappingStore, SLoad, SStore } from '../ast';
 import { State } from '../state';
 import { Sha3 } from '../ast';
 import { Contract, Variable } from '../contract';
@@ -256,8 +256,8 @@ export const STORAGE = (contract: Contract) => {
             }
 
             function sstoreVariable() {
-                if (isBigInt(storeLocation)) {
-                    const loc = storeLocation.toString();
+                if (isVal(storeLocation)) {
+                    const loc = storeLocation.eval().toString();
                     if (loc in contract.variables) {
                         contract.variables[loc].types.push((storeData as any).type);
                     } else {

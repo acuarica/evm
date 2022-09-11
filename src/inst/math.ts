@@ -7,13 +7,14 @@ export const MATH = {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
-            isBigInt(left) && isBigInt(right)
-                ? left + right
-                : isZero(left)
-                ? right
-                : isZero(right)
-                ? left
-                : new Add(left, right)
+            // isBigInt(left) && isBigInt(right)
+            //     ? left + right
+            //     : isZero(left)
+            //     ? right
+            //     : isZero(right)
+            //     ? left
+            // :
+            new Add(left, right)
         );
     },
 

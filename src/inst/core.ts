@@ -1,7 +1,8 @@
+import { Expr, Val } from '../ast';
 import { toHex } from '../hex';
 import { Stack } from '../stack';
 
-export function PUSHES<T>() {
+export function PUSHES() {
     return {
         PUSH1: push,
         PUSH2: push,
@@ -37,8 +38,8 @@ export function PUSHES<T>() {
         PUSH32: push,
     };
 
-    function push(pushData: Uint8Array, stack: Stack<T | bigint>) {
-        stack.push(BigInt('0x' + toHex(pushData)));
+    function push(pushData: Uint8Array, stack: Stack<Expr>) {
+        stack.push(new Val(BigInt('0x' + toHex(pushData))));
     }
 }
 

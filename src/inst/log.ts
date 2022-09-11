@@ -1,8 +1,7 @@
 import { Opcode } from '../opcode';
-import { Log, MLoad } from '../ast';
+import { evalExpr, isBigInt, Log, MLoad } from '../ast';
 import { State } from '../state';
 import { Contract } from '../contract';
-import { isBigInt } from '../ast';
 
 export const LOGS = (contract: Contract) => {
     return {
@@ -16,8 +15,8 @@ export const LOGS = (contract: Contract) => {
 
 function log(topicsCount: number, contract: Contract) {
     return (_opcode: Opcode, state: State): void => {
-        const memoryStart = state.stack.pop();
-        const memoryLength = state.stack.pop();
+        let offset = state.stack.pop();
+        let size = state.stack.pop();
         const topics = [];
 
         for (let i = 0; i < topicsCount; i++) {
@@ -36,14 +35,16 @@ function log(topicsCount: number, contract: Contract) {
             }
         }
 
-        if (isBigInt(memoryStart) && isBigInt(memoryLength)) {
+        offset = evalExpr(offset);
+        size = evalExpr(size);
+        if (isBigInt(offset) && isBigInt(size)) {
             const args = [];
-            for (let i = Number(memoryStart); i < Number(memoryStart + memoryLength); i += 32) {
+            for (let i = Number(offset); i < Number(offset + size); i += 32) {
                 args.push(i in state.memory ? state.memory[i] : new MLoad(BigInt(i)));
             }
             state.stmts.push(new Log(contract.eventHashes, topics, args));
         } else {
-            state.stmts.push(new Log(contract.eventHashes, topics, [], memoryStart, memoryLength));
+            state.stmts.push(new Log(contract.eventHashes, topics, [], offset, size));
         }
     };
 }

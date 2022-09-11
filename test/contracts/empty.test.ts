@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { Revert } from '../../src/ast';
 import { OPCODES } from '../../src/opcode';
 import EVM from '../utils/evmtest';
-import { verifyBlocks } from '../utils/verify';
 import { compile, contract } from './utils/solc';
 
 contract('empty', version => {
@@ -50,10 +49,6 @@ contract('empty', version => {
                 evm = new EVM(compile('Empty', CONTRACT, version));
             });
 
-            it('should have verified blocks', () => {
-                verifyBlocks(evm);
-            });
-
             if (index === 0) {
                 const HASHES = {
                     '0.5.5':
@@ -79,12 +74,14 @@ contract('empty', version => {
             });
 
             it('should `getBlocks` with 1 block & `revert`', () => {
-                const { blocks, entry } = evm.getBlocks();
+                expect(Object.keys(evm.contract.main.cfg.blocks)).to.be.length(1);
 
-                expect(Object.keys(blocks)).to.be.length(1);
-                expect(blocks[entry].exit.opcode).to.be.equal(OPCODES.REVERT);
-                expect(blocks[entry].stmts).to.be.length(1);
-                expect(blocks[entry].stmts[0]).to.be.deep.equal(new Revert([]));
+                const block = evm.contract.main.cfg.blocks[evm.contract.main.cfg.entry];
+                expect(block.end.opcode).to.be.equal(OPCODES.REVERT);
+                expect(block.stmts.length).to.be.at.least(1);
+                expect(block.stmts.at(-1)).to.be.deep.equal(new Revert([]));
+
+                expect(Object.keys(evm.contract.functions)).to.be.length(0);
             });
 
             it('should `decompile` bytecode', () => {

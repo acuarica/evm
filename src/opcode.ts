@@ -97,6 +97,8 @@ export const OPCODES = {
     NUMBER: 0x43,
     DIFFICULTY: 0x44,
     GASLIMIT: 0x45,
+    CHAINID: 0x46, // https://www.evm.codes/#46
+    SELFBALANCE: 0x47, // https://www.evm.codes/#47
     POP: 0x50,
     MLOAD: 0x51,
     MSTORE: 0x52,
@@ -278,7 +280,9 @@ export function formatOpcode(op: Opcode) {
     const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
     const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
     // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();
-    const pushData = op.pushData ? ' 0x' + toHex(op.pushData) : '';
+    const pushData = op.pushData
+        ? ` 0x${toHex(op.pushData)} (${parseInt(toHex(op.pushData), 16)})`
+        : '';
 
     // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
     return `${pc}:${offset}    ${op.mnemonic}${pushData}`;

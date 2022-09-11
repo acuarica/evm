@@ -91,8 +91,6 @@ describe.skip('bytecode', () => {
             before(() => {
                 const bytecode = readFileSync(`./test/data/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
-                evm.getBlocks();
-                console.log('sddsdsdsds');
                 text = evm.decompile();
             });
 

@@ -1,7 +1,6 @@
 import { DataCopy, Info, Symbol0, Symbol1 } from '../ast';
-import { Opcode } from '../opcode';
 import { State } from '../state';
-import { stringify } from '../ast';
+import { wrap } from '../ast';
 
 export const SYMBOLS = {
     ADDRESS: symbol0('this', 'address'),
@@ -13,11 +12,9 @@ export const SYMBOLS = {
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
     GASPRICE: symbol0('tx.gasprice'),
     EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
-    EXTCODECOPY: (_opcode: Opcode, { stack }: State) => {
+    EXTCODECOPY: ({ stack }: State) => {
         const address = stack.pop();
-        datacopy(
-            (offset, size) => `address(${stringify(address)}).code[${offset}:(${offset}+${size})]`
-        );
+        datacopy((offset, size) => `address(${wrap(address)}).code[${offset}:(${offset}+${size})]`);
     },
     RETURNDATASIZE: symbol0('output.length'),
     RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
@@ -30,25 +27,27 @@ export const SYMBOLS = {
     NUMBER: symbol0('block.number'),
     DIFFICULTY: symbol0('block.difficulty'),
     GASLIMIT: symbol0('block.gaslimit'),
+    CHAINID: symbol0('chainid'),
+    SELFBALANCE: symbol0('self.balance'),
     MSIZE: symbol0('memory.length'),
     GAS: symbol0('gasleft()'),
 };
 
 function symbol0(value: Info, type?: string) {
-    return (_opcode: Opcode, { stack }: State) => {
+    return ({ stack }: State) => {
         stack.push(new Symbol0(value, type));
     };
 }
 
 function symbol1(fn: (value: string) => string) {
-    return (_opcode: Opcode, { stack }: State) => {
+    return ({ stack }: State) => {
         const value = stack.pop();
         stack.push(new Symbol1(fn, value));
     };
 }
 
 export function datacopy(fn: (offset: string, size: string) => string) {
-    return (_opcode: Opcode, { stack, memory }: State) => {
+    return ({ stack, memory }: State) => {
         const dest = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();

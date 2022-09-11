@@ -4,6 +4,7 @@ import {
     CREATE,
     CREATE2,
     DELEGATECALL,
+    evalExpr,
     Expr,
     Invalid,
     isBigInt,
@@ -26,6 +27,9 @@ export function memArgs0<T>(
     Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
 ): T {
     const MAXSIZE = 1024;
+
+    offset = evalExpr(offset);
+    size = evalExpr(size);
 
     if (isBigInt(offset) && isBigInt(size) && size <= MAXSIZE * 32) {
         const args = [];

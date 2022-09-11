@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import EVM from '../utils/evmtest';
 import { compile, contract } from './utils/solc';
 
-contract('events', version => {
+contract('events', (version, fallback) => {
     it('should emit unknown event', () => {
         const CONTRACT = `contract C {
             event Event0(string);
@@ -91,17 +91,18 @@ contract('events', version => {
     it('should emit anonymous event with both arguments and no arguments', () => {
         const CONTRACT = `contract C {
             event Transfer() anonymous;
-            event Send(uint256) anonymous;
-            function f() external {
+            event Send(uint256, uint256) anonymous;
+            ${fallback}() external payable {
                 emit Transfer();
-                emit Send(123);
+                emit Send(123, 124);
             }
         }`;
         const evm = new EVM(compile('C', CONTRACT, version));
         expect(evm.getEvents()).to.be.deep.equal([]);
+
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(\);$/m);
-        expect(text, text).to.match(/log\(123\);$/m);
+        expect(text, text).to.match(/log\(123, 124\);$/m);
     });
 });

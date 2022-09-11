@@ -1,137 +1,6 @@
-import { Expr, isBigInt, Stmt, stringify } from '../ast';
+import { Require, wrap } from '../ast';
 import { CallValue } from '../ast';
 import { IsZero } from '../ast';
-import { Return } from '../ast';
-
-const updateCallDataLoad = (item: any, types: any) => {
-    for (const i in item) {
-        if (Object.prototype.hasOwnProperty.call(item, i)) {
-            if (
-                typeof item[i] === 'object' &&
-                item[i].name === 'CALLDATALOAD' &&
-                isBigInt(item[i].location)
-            ) {
-                const argNumber = ((item[i].location - 4n) / 32n).toString();
-                item[i].type = types[argNumber];
-            }
-            if (typeof item[i] === 'object') {
-                updateCallDataLoad(item[i], types);
-            }
-        }
-    }
-};
-
-const findReturns = (item: any) => {
-    const returns = [];
-    for (const i in item) {
-        if (Object.prototype.hasOwnProperty.call(item, i)) {
-            if (
-                typeof item[i] === 'object' &&
-                item[i] instanceof Return &&
-                item[i].items &&
-                item[i].items.length > 0
-            ) {
-                returns.push(item[i].items);
-            }
-            if (typeof item[i] === 'object') {
-                const deepReturns: any = findReturns(item[i]);
-                if (deepReturns.length > 0) {
-                    returns.push(...deepReturns);
-                }
-            }
-        }
-    }
-    return returns;
-};
-
-export class TopLevelFunction {
-    readonly label: string;
-    readonly payable: boolean;
-    readonly visibility: string;
-    readonly constant: boolean;
-    readonly returns: any;
-
-    constructor(
-        readonly items: Stmt[],
-        readonly hash: string,
-        // readonly gasUsed: number,
-        functionHashes: { [s: string]: string }
-    ) {
-        this.payable = true;
-        this.visibility = 'public';
-        this.constant = true;
-        this.returns = [];
-        if (this.hash in functionHashes) {
-            this.label = functionHashes[this.hash];
-        } else {
-            this.label = this.hash + '()';
-        }
-        if (
-            this.items.length > 0 &&
-            this.items[0] instanceof Require &&
-            this.items[0].condition instanceof IsZero &&
-            this.items[0].condition.value instanceof CallValue
-        ) {
-            this.payable = false;
-            this.items.shift();
-        }
-        if (this.items.length === 1 && this.items[0] instanceof Return) {
-            this.constant = true;
-        }
-        if (this.hash in functionHashes) {
-            const functionName = functionHashes[this.hash].split('(')[0];
-            const argumentTypes = functionHashes[this.hash]
-                .replace(functionName, '')
-                .substr(1)
-                .slice(0, -1)
-                .split(',');
-            if (
-                argumentTypes.length > 1 ||
-                (argumentTypes.length === 1 && argumentTypes[0] !== '')
-            ) {
-                this.items.forEach(item => updateCallDataLoad(item, argumentTypes));
-            }
-        }
-        const returns: any = [];
-        this.items.forEach(item => {
-            const deepReturns = findReturns(item);
-            if (deepReturns.length > 0) {
-                returns.push(...deepReturns);
-            }
-        });
-        if (
-            returns.length > 0 &&
-            returns.every(
-                (returnItem: any) =>
-                    returnItem.length === returns[0].length &&
-                    returnItem.map((item: any) => item.type).join('') ===
-                        returns[0].map((item: any) => item.type).join('')
-            )
-        ) {
-            returns[0].forEach((item: any) => {
-                if (isBigInt(item)) {
-                    this.returns.push('uint256');
-                } else if (item.type) {
-                    this.returns.push(item.type);
-                } else {
-                    this.returns.push('unknown');
-                }
-            });
-        } else if (returns.length > 0) {
-            this.returns.push('<unknown>');
-        }
-    }
-}
-
-export class Require {
-    readonly name = 'Require';
-
-    constructor(readonly condition: Expr) {}
-
-    toString() {
-        return 'require(' + stringify(this.condition) + ');';
-    }
-}
 
 export class JUMPI {
     readonly name = 'JUMPI';
@@ -172,9 +41,9 @@ export class JUMPI {
 
     toString() {
         if (this.valid && this.true && this.false) {
-            return stringify(this.condition);
+            return wrap(this.condition);
         } else if (this.valid) {
-            return 'if' + stringify(this.condition) + ' goto(' + stringify(this.location) + ');';
+            return 'if' + wrap(this.condition) + ' goto(' + wrap(this.location) + ');';
         } else {
             return 'revert("Bad jump destination");';
         }
@@ -374,14 +243,3 @@ export class JUMPI {
 // }
 // }
 // };
-
-// export function isRevertBlock(falseCloneTree: Expr[]): boolean {
-//     return (
-//         falseCloneTree.length === 1 &&
-//         'name' in falseCloneTree[0] &&
-//         falseCloneTree[0].name === 'REVERT' &&
-//         falseCloneTree[0].items !== undefined &&
-//         falseCloneTree[0].items.length === 0
-//         // || falseCloneTree[0].name === 'INVALID'
-//     );
-// }

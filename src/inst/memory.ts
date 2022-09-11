@@ -1,10 +1,11 @@
-import { isBigInt } from '../ast';
+import { evalExpr, isBigInt } from '../ast';
 import { State } from '../state';
 import { MLoad, MStore } from '../ast';
 
 export const MEMORY = {
     MLOAD: ({ stack, memory }: State) => {
-        const memoryLocation = stack.pop();
+        let memoryLocation = stack.pop();
+        memoryLocation = evalExpr(memoryLocation);
         stack.push(
             isBigInt(memoryLocation) && Number(memoryLocation) in memory
                 ? memory[Number(memoryLocation)]
@@ -16,8 +17,9 @@ export const MEMORY = {
 };
 
 function mstore({ stack, memory, stmts }: State) {
-    const storeLocation = stack.pop();
+    let storeLocation = stack.pop();
     const storeData = stack.pop();
+    storeLocation = evalExpr(storeLocation);
     if (isBigInt(storeLocation)) {
         memory[Number(storeLocation)] = storeData;
     } else {

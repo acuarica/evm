@@ -9,7 +9,7 @@ describe('ADD', () => {
         stack.push(1n);
         stack.push(1n);
         MATH.ADD(stack);
-        expect(stack.values).to.be.deep.equal([2n]);
+        expect(stack.values).to.be.deep.equal([new Add(1n, 1n)]);
     });
 
     it('should stringify `block.number + 1`', () => {
