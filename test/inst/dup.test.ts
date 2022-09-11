@@ -17,7 +17,7 @@ describe('DUP', () => {
                     stack.push(1n);
                 }
 
-                STACK()[`DUP${size as Size}`](stack);
+                STACK<bigint>()[`DUP${size as Size}`](stack);
 
                 expect(stack.values).to.deep.equal([2n, ...ignored, 2n]);
             });
@@ -29,7 +29,7 @@ describe('DUP', () => {
                     stack.push(1n);
                 }
 
-                expect(() => STACK()[`DUP${size as Size}`](stack)).to.throw(
+                expect(() => STACK<bigint>()[`DUP${size as Size}`](stack)).to.throw(
                     'Invalid duplication operation'
                 );
             });
