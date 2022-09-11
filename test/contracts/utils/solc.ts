@@ -34,16 +34,18 @@ type SolcOutput = {
 export function compile(
     contractName: string,
     content: string,
-    version: Version = '0.5.5',
-    license: 'MIT' = 'MIT',
-    context?: Mocha.Context
+    version: Version,
+    opts: {
+        license: 'MIT';
+        context?: Mocha.Context;
+    } = { license: 'MIT' }
 ): string {
     const input = {
         language: 'Solidity',
         sources: {
             SOURCE: {
                 content:
-                    `// SPDX-License-Identifier: ${license}\npragma solidity ${version};\n` +
+                    `// SPDX-License-Identifier: ${opts.license}\npragma solidity ${version};\n` +
                     content,
             },
         },
@@ -82,9 +84,9 @@ export function compile(
 
     const bytecode = contract[contractName].evm.deployedBytecode.object;
 
-    if (context) {
+    if (opts.context) {
         const basePath = './.contracts';
-        const fileName = title(context.test).replace(/[:^'` ]/g, '_');
+        const fileName = title(opts.context.test).replace(/[:^'` ]/g, '_');
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
         }
