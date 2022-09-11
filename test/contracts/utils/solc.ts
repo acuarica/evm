@@ -1,3 +1,5 @@
+import * as semver from 'semver';
+
 const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
 
 type Version = typeof VERSIONS[number];
@@ -83,14 +85,16 @@ export function compile(
     }
 }
 
-export function contract(title: string, fn: (version: Version) => void) {
+export function contract(title: string, fn: (version: Version, fallback: string) => void) {
     const ver = process.env['SOLC'];
     const [label, prefix] = ver ? [`${title} matching SOLC '^${ver}'`, ver] : [title, ''];
     describe(`contracts::${label}`, () => {
         VERSIONS.forEach(version => {
             if (version.startsWith(prefix)) {
+                const fallback = semver.gte(version, '0.8.0') ? 'fallback' : 'function';
+
                 describe(`using solc-v${version}`, () => {
-                    fn(version);
+                    fn(version, fallback);
                 });
             }
         });
