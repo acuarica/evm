@@ -111,7 +111,7 @@ export function contract(
     title: string,
     fn: (
         compile: (content: string, context?: Mocha.Context) => string,
-        fallback: string,
+        fallback: 'fallback' | 'function',
         version: Version
     ) => void
 ) {
