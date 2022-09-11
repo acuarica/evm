@@ -6,7 +6,7 @@ type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16
 describe('DUP', () => {
     [...Array(16).keys()]
         .map(i => i + 1)
-        .forEach(function (size) {
+        .forEach(size => {
             it(`should dup #${size - 1} element on the stack`, () => {
                 const stack = new Stack<bigint>();
                 stack.push(2n);
