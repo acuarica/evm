@@ -182,9 +182,14 @@ export class Sub extends Bin('Sub', '-') {
     eval(): Expr {
         const left = evalExpr(this.left);
         const right = evalExpr(this.right);
-        return isBigInt(left) && isBigInt(right) ? left - right : this;
+        return isBigInt(left) && isBigInt(right)
+            ? left - right
+            : isZero(right)
+            ? left
+            : new Sub(left, right);
     }
 }
+
 export class Div extends Bin('Div', '/') {
     eval(): Expr {
         const left = evalExpr(this.left);
