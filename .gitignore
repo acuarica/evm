@@ -15,3 +15,6 @@
 /.nyc_output/
 # `report-dir`: Where to put the coverage report files
 /coverage/
+
+# Cached compiled `solc` output bytecode & CFG images from `evmjs`
+/.contracts/

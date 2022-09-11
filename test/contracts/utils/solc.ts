@@ -1,3 +1,5 @@
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { Runnable, Suite } from 'mocha';
 import * as semver from 'semver';
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
@@ -33,7 +35,8 @@ export function compile(
     contractName: string,
     content: string,
     version: Version = '0.5.5',
-    license: 'MIT' = 'MIT'
+    license: 'MIT' = 'MIT',
+    context?: Mocha.Context
 ): string {
     const input = {
         language: 'Solidity',
@@ -78,6 +81,17 @@ export function compile(
     }
 
     const bytecode = contract[contractName].evm.deployedBytecode.object;
+
+    if (context) {
+        const basePath = './.contracts';
+        const fileName = title(context.test).replace(/[:^'` ]/g, '_');
+        if (!existsSync(basePath)) {
+            mkdirSync(basePath);
+        }
+
+        writeFileSync(`${basePath}/${fileName}.bytecode`, bytecode);
+    }
+
     return bytecode;
 
     function valid(output: SolcOutput): boolean {
@@ -99,4 +113,8 @@ export function contract(title: string, fn: (version: Version, fallback: string)
             }
         });
     });
+}
+
+function title(test: Runnable | Suite | undefined): string {
+    return test ? title(test.parent) + '-' + test.title : '';
 }
