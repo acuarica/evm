@@ -259,11 +259,9 @@ export const STORAGE = (contract: Contract) => {
                 if (isVal(storeLocation)) {
                     const loc = storeLocation.eval().toString();
                     if (loc in contract.variables) {
-                        contract.variables[loc].types.push((storeData as any).type);
+                        contract.variables[loc].types.push(storeData);
                     } else {
-                        contract.variables[loc] = new Variable(undefined, [
-                            (storeData as any).type,
-                        ]);
+                        contract.variables[loc] = new Variable(undefined, [storeData]);
                     }
                 }
                 state.stmts.push(new SStore(storeLocation, storeData, contract.variables));

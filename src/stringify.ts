@@ -1,4 +1,4 @@
-import { If, Jump, Stmt } from './ast';
+import { evalExpr, If, isBigInt, Jump, Stmt } from './ast';
 import { Contract, TopLevelFunction } from './contract';
 
 /**
@@ -171,9 +171,11 @@ function stringifyMappings(mappings: any) {
  */
 function stringifyVariables(variables: Contract['variables']) {
     let output = '';
-
     Object.entries(variables).forEach(([hash, variable], index) => {
-        const types = variable.types.filter(type => type !== undefined);
+        const types = variable.types
+            .map(expr => evalExpr(expr))
+            .map(expr => (!isBigInt(expr) ? expr.type ?? '' : 'bigint'))
+            .filter(t => t.trim() !== '');
         if (types.length === 0) {
             types.push('unknown');
         }

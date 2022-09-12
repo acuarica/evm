@@ -1,4 +1,5 @@
 import {
+    CallDataLoad,
     CallSite,
     CallValue,
     evalExpr,
@@ -87,7 +88,13 @@ export class Contract {
             this.functions[branch.hash] = fn;
             if (branch.hash in functionHashes && isGetter(fn.stmts)) {
                 const fullFunction = functionHashes[branch.hash];
-                this.variables[branch.hash] = new Variable(fullFunction.split('(')[0], []);
+
+                const location = evalExpr(fn.stmts[0].args[0].location).toString();
+                const variable = this.variables[location];
+                this.variables[branch.hash] = new Variable(
+                    fullFunction.split('(')[0],
+                    variable ? variable.types : []
+                );
             }
         }
     }
@@ -103,7 +110,7 @@ export class Contract {
 }
 
 export class Variable {
-    constructor(public label: string | undefined, readonly types: any[]) {}
+    constructor(public label: string | undefined, readonly types: Expr[]) {}
 }
 
 export class TopLevelFunction {
@@ -123,7 +130,7 @@ export class TopLevelFunction {
         this.stmts = transform(cfg);
         this.payable = true;
         this.visibility = 'public';
-        this.constant = true;
+        this.constant = false;
         this.returns = [];
         this.label = this.hash in functionHashes ? functionHashes[this.hash] : this.hash + '()';
         if (
@@ -149,12 +156,14 @@ export class TopLevelFunction {
                 argumentTypes.length > 1 ||
                 (argumentTypes.length === 1 && argumentTypes[0] !== '')
             ) {
-                this.stmts.forEach(item => updateCallDataLoad(item, argumentTypes));
+                this.stmts.forEach(stmt =>
+                    updateCallDataLoad(stmt as unknown as Record<string, Expr>, argumentTypes)
+                );
             }
         }
         const returns: any = [];
-        this.stmts.forEach(item => {
-            const deepReturns = findReturns(item);
+        this.stmts.forEach(stmt => {
+            const deepReturns = findReturns(stmt as unknown as Record<string, Stmt>);
             if (deepReturns.length > 0) {
                 returns.push(...deepReturns);
             }
@@ -183,38 +192,40 @@ export class TopLevelFunction {
     }
 }
 
-const updateCallDataLoad = (item: any, types: any) => {
-    for (const i in item) {
-        if (Object.prototype.hasOwnProperty.call(item, i)) {
+function updateCallDataLoad(stmtOrExpr: Record<string, Expr>, types: any) {
+    for (const propKey in stmtOrExpr) {
+        if (Object.prototype.hasOwnProperty.call(stmtOrExpr, propKey)) {
+            const expr = stmtOrExpr[propKey];
             if (
-                typeof item[i] === 'object' &&
-                item[i].name === 'CALLDATALOAD' &&
-                isBigInt(item[i].location)
+                typeof expr === 'object' &&
+                expr instanceof CallDataLoad &&
+                isBigInt(expr.location)
             ) {
-                const argNumber = ((item[i].location - 4n) / 32n).toString();
-                item[i].type = types[argNumber];
+                const argNumber = ((expr.location - 4n) / 32n).toString();
+                expr.type = types[argNumber];
             }
-            if (typeof item[i] === 'object') {
-                updateCallDataLoad(item[i], types);
+            if (typeof expr === 'object') {
+                updateCallDataLoad(expr as unknown as Record<string, Expr>, types);
             }
         }
     }
-};
+}
 
-const findReturns = (item: any) => {
+function findReturns(stmt: Record<string, Stmt>) {
     const returns = [];
-    for (const i in item) {
-        if (Object.prototype.hasOwnProperty.call(item, i)) {
+    for (const i in stmt) {
+        if (Object.prototype.hasOwnProperty.call(stmt, i)) {
+            const prop = stmt[i];
             if (
-                typeof item[i] === 'object' &&
-                item[i] instanceof Return &&
-                item[i].items &&
-                item[i].items.length > 0
+                typeof prop === 'object' &&
+                prop instanceof Return &&
+                prop.args &&
+                prop.args.length > 0
             ) {
-                returns.push(item[i].items);
+                returns.push(prop.args);
             }
-            if (typeof item[i] === 'object') {
-                const deepReturns: any = findReturns(item[i]);
+            if (prop instanceof If) {
+                const deepReturns: any = findReturns(prop as unknown as Record<string, Stmt>);
                 if (deepReturns.length > 0) {
                     returns.push(...deepReturns);
                 }
@@ -222,7 +233,7 @@ const findReturns = (item: any) => {
         }
     }
     return returns;
-};
+}
 
 function transform({ blocks, entry }: ControlFlowGraph): Stmt[] {
     const pcs: { [key: string]: true } = {};
@@ -230,7 +241,8 @@ function transform({ blocks, entry }: ControlFlowGraph): Stmt[] {
 
     function transformBlock(key: string): Stmt[] {
         if (key in pcs) {
-            return blocks[key].stmts;
+            return [];
+            // return blocks[key].stmts;
         }
 
         pcs[key] = true;
@@ -278,7 +290,7 @@ export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
     );
 }
 
-function isGetter(stmts: Stmt[]) {
+function isGetter(stmts: Stmt[]): stmts is [Return & { args: [SLoad & { location: bigint }] }] {
     const exit = stmts[0];
     return (
         stmts.length === 1 &&

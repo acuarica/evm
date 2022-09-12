@@ -77,6 +77,7 @@ export type Stmt =
 export class Val {
     readonly name = 'Val';
     readonly wrapped = false;
+    readonly type?: string;
 
     isJumpDest = false;
 
@@ -119,6 +120,7 @@ export const Name = <N extends string>(name: N, wrapped: boolean) =>
 
 export const Bin = <N extends string>(name: N, op: string) =>
     class extends Name(name, true) {
+        readonly type?: string;
         constructor(readonly left: Expr, readonly right: Expr) {
             super();
         }
@@ -131,6 +133,7 @@ export const Bin = <N extends string>(name: N, op: string) =>
 const Unary = <N extends string | null>(name: N, op: string) =>
     class {
         readonly name: N = name;
+        readonly type?: string;
         readonly wrapped = false;
 
         constructor(readonly value: Expr) {}
@@ -221,6 +224,7 @@ export class Exp extends Bin('Exp', '**') {
 export class Sig {
     readonly name = 'Sig';
     readonly wrapped = false;
+    readonly type?: string;
 
     constructor(readonly hash: string) {}
 
@@ -253,6 +257,7 @@ export class And extends Bin('And', '&&') {
             : new And(left, right);
     }
 }
+
 export class Or extends Bin('Or', '||') {
     eval() {
         return this;
@@ -290,6 +295,7 @@ export class IsZero {
 
 export const Cmp = <N extends string>(name: N, op: string) =>
     class extends Name(name, true) {
+        readonly type?: string;
         constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
             super();
         }
@@ -428,6 +434,7 @@ export class Symbol0 {
 }
 export class Symbol1 {
     readonly name = 'Symbol1';
+    readonly type?: string;
     readonly wrapped = false;
     constructor(readonly fn: (value: string) => string, readonly value: Expr) {}
     eval(): Expr {
@@ -440,6 +447,7 @@ export class Symbol1 {
 
 export class DataCopy {
     readonly name = 'DataCopy';
+    readonly type?: string;
     readonly wrapped = false;
     constructor(
         readonly fn: (offset: string, size: string) => string,
@@ -527,6 +535,7 @@ export class CALL {
 
 export class ReturnData {
     readonly name = 'ReturnData';
+    readonly type?: string;
     readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {}
@@ -724,13 +733,14 @@ export class SelfDestruct {
 
 export class CallDataLoad {
     readonly name = 'CALLDATALOAD';
-    // readonly type = 'bytes32';
+    type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Expr) {}
+    constructor(public location: Expr) {}
 
     eval(): Expr {
-        return new CallDataLoad(evalExpr(this.location));
+        this.location = evalExpr(this.location);
+        return this;
     }
     toString(): string {
         if (isBigInt(this.location) && isZero(this.location)) {
