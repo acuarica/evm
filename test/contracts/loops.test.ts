@@ -19,7 +19,7 @@ contract('loops', (compile, fallback) => {
         const evm = new EVM(compile(CONTRACT, this));
 
         const text = evm.decompile();
-        expect(text, text).to.match(/< block\.number/);
+        expect(text, text).to.match(/block\.number/);
     });
 
     it('should `decompile` contract with `while` loop', function () {
