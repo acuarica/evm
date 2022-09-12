@@ -13,8 +13,7 @@ const path = process.argv[2];
 export const bytecode = readFileSync(path, 'utf8');
 const evm = new EVM(bytecode);
 
-// evm.opcodes.forEach(op => console.error(formatOpcode(op)));
-// dot(evm.contract.getFunction('balanceOf(uint256)')!.cfg);
+// evm.opcodes.forEach(op => console.log(formatOpcode(op)));
 
 const write = console.log;
 
