@@ -13,7 +13,7 @@ const path = process.argv[2];
 export const bytecode = readFileSync(path, 'utf8');
 const evm = new EVM(bytecode);
 
-// evm.opcodes.forEach(op => console.log(formatOpcode(op)));
+evm.opcodes.forEach(op => console.error(formatOpcode(op)));
 
 const write = console.log;
 
@@ -38,8 +38,8 @@ function dot({ blocks }: ControlFlowGraph) {
 
     function writeNode(pc: string, block: Block) {
         let label = 'key:' + pc;
-        // label += '\\l';
-        // label += block.branch.state.stack.values.map(elem => '=| ' + elem).join('\\l');
+        label += '\\l';
+        label += block.branch.state.stack.values.map(elem => '=| ' + elem).join('\\l');
         label += '\\l';
         label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
         label += '\\l';
