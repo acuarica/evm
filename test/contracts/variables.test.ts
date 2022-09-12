@@ -50,8 +50,8 @@ contract('variables', compile => {
         it('should get variables of different types', () => {
             const vars = Object.values(evm.contract.variables);
             expect(vars).to.be.of.length(2);
-            expect(vars[0]).to.be.deep.equal(new Variable(undefined, [undefined]));
-            expect(vars[1]).to.be.deep.equal(new Variable(undefined, [undefined]));
+            expect(vars[0]).to.be.deep.equal(new Variable(undefined, [new CallDataLoad(4n)]));
+            expect(vars[1]).to.be.deep.equal(new Variable(undefined, [new CallDataLoad(4n)]));
         });
 
         it('should `decompile` bytecode', () => {
@@ -138,7 +138,7 @@ contract('variables', compile => {
         });
     });
 
-    describe('with a hashed public variable', () => {
+    describe('with an unreachable hashed public variable', () => {
         let evm: EVM;
 
         before(() => {
@@ -157,7 +157,6 @@ contract('variables', compile => {
         });
 
         it('should `decompile` bytecode', () => {
-            // expect(evm.contract.getFunction('value()')!.stmts).deep.equal([]);
             const text = evm.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });
