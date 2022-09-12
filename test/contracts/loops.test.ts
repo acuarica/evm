@@ -20,6 +20,7 @@ contract('loops', (compile, fallback) => {
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
+        // expect(text, text).to.match(/while/);
     });
 
     it('should `decompile` contract with `while` loop', function () {
