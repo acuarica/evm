@@ -115,11 +115,9 @@ export function contract(
         version: Version
     ) => void
 ) {
-    const ver = process.env['SOLC'];
-    const [label, prefix] = ver ? [`${title} matching SOLC '^${ver}'`, ver] : [title, ''];
-    describe(`contracts::${label}`, () => {
+    describe(`contracts::${title}`, () => {
         VERSIONS.forEach(version => {
-            if (version.startsWith(prefix)) {
+            if (version.startsWith(process.env['SOLC'] ?? '')) {
                 const fallback = semver.gte(version, '0.8.0') ? 'fallback' : 'function';
 
                 describe(`using solc-v${version}`, () => {
