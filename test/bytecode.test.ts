@@ -18,7 +18,7 @@ describe.skip('bytecode', () => {
         },
         {
             name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
-            count: 2128,
+            count: 2118,
             lines: [],
         },
         {
@@ -57,10 +57,10 @@ describe.skip('bytecode', () => {
              * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
              */
             name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
-            count: 750,
+            count: 741,
             lines: [
-                /^address public implementation;$/m,
-                /^address public admin;$/m,
+                /^address public implementation;/m,
+                /^address public admin;/m,
                 /^function upgradeTo\(address _arg0\) public {$/m,
                 /^function upgradeToAndCall\(address _arg0, bytes _arg1\) public payable {$/m,
                 /^function changeAdmin\(address _arg0\) public {$/m,
@@ -68,11 +68,11 @@ describe.skip('bytecode', () => {
         },
         {
             name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            count: 1577,
+            count: 1555,
             lines: [
                 /^mapping \(address => unknown\) public balanceOf;$/m,
                 /^mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
-                /^unknown public decimals;$/m,
+                /^unknown public decimals;/m,
                 /^function name\(\)/m,
                 /^function approve\(address _arg0, uint256 _arg1\)/m,
                 /^function totalSupply\(\)/m,
@@ -141,6 +141,16 @@ describe.skip('bytecode', () => {
                         new Set(evm.getFunctions()),
                         `actual ${inspect(evm.getFunctions())} != expected ${inspect(expected)}`
                     ).to.be.deep.equal(new Set(expected));
+                }
+
+                for (const functionName of evm.getFunctions()) {
+                    const fn = evm.contract.getFunction(functionName);
+                    expect(
+                        fn,
+                        `${functionName} not found in ${Object.keys(
+                            evm.contract.functions
+                        ).toString()}`
+                    ).to.be.not.undefined;
                 }
             });
 
