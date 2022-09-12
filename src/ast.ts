@@ -8,6 +8,7 @@ import { hex2a } from './hex';
 export type Expr =
     | bigint
     | Val
+    | Phi
     // Math
     | Add
     | Mul
@@ -58,6 +59,7 @@ export type Stmt =
     // Storage
     | If
     | Require
+    | Assign
     | SStore
     | MappingStore
     | MStore
@@ -74,12 +76,16 @@ export type Stmt =
     | SelfDestruct
     | Invalid;
 
+export function isJumpDest(expr: Expr) {
+    return isVal(expr) && expr.isJumpDest !== null;
+}
+
 export class Val {
     readonly name = 'Val';
     readonly wrapped = false;
     readonly type?: string;
 
-    isJumpDest = false;
+    isJumpDest: number | null = null;
 
     constructor(readonly value: bigint) {}
 
@@ -129,6 +135,12 @@ export const Bin = <N extends string>(name: N, op: string) =>
             return `${wrap(this.left)} ${op} ${wrap(this.right)}`;
         }
     };
+
+export class Phi extends Bin('Phi', '$') {
+    eval(): Expr {
+        return this;
+    }
+}
 
 const Unary = <N extends string | null>(name: N, op: string) =>
     class {
@@ -1076,7 +1088,7 @@ export class JumpDest {
         return this;
     }
     toString() {
-        return 'fall';
+        return 'fall:' + this.fallBranch.key + ':' + this.fallBranch.path.join('->');
     }
 }
 
@@ -1103,5 +1115,17 @@ export class CallSite {
     }
     toString() {
         return '#' + this.hash + '();';
+    }
+}
+
+export class Assign {
+    readonly name = 'Asign';
+    readonly wrapped = true;
+    constructor(readonly i: number, readonly phi: Phi) {}
+    eval() {
+        return this;
+    }
+    toString() {
+        return `local${this.i} = ${this.phi.toString()};`;
     }
 }

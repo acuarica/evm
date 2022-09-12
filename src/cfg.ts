@@ -3,10 +3,12 @@ import { State } from './state';
 import {
     Expr,
     Invalid,
+    isJumpDest,
     isVal,
     Jump,
     JumpDest,
     Jumpi,
+    Phi,
     Return,
     Revert,
     Sig,
@@ -14,7 +16,7 @@ import {
     Stop,
     Val,
 } from './ast';
-import { assert } from './error';
+import { assert, assertiif } from './error';
 
 export class Branch {
     private constructor(readonly path: number[], readonly state: State) {}
@@ -36,8 +38,8 @@ export class Branch {
             this.pc +
             ':' +
             this.state.stack.values
-                .filter((elem): elem is Val => elem instanceof Val && elem.isJumpDest)
-                .map(val => 'j' + val.value.toString())
+                .filter((elem): elem is Val => elem instanceof Val && elem.isJumpDest !== null)
+                .map(val => 'j' + val.isJumpDest)
                 .join('|')
         );
     }
@@ -150,8 +152,17 @@ export class ControlFlowGraph {
                 blockLists[branch.pc] = [];
             }
 
+            let seen = false;
+            for (const b of blockLists[branch.pc]) {
+                if (b.key === branch.key) {
+                    seen = true;
+                }
+            }
+
             const block = new Block(branch);
             blockLists[branch.pc].push(block);
+
+            if (seen) continue;
 
             for (let pc = branch.pc; !block.state.halted && pc < opcodes.length; pc++) {
                 const opcode = opcodes[pc];
@@ -221,12 +232,27 @@ export class ControlFlowGraph {
                 if (!(key in this.blocks)) {
                     this.blocks[key] = block;
                 } else {
-                    // this.blocks[key] = block;
+                    const left = this.blocks[key].branch.state.stack.values;
+                    const right = block.branch.state.stack.values;
+
+                    // assert(left.length === right.length, key, this.blocks[key].branch.state.stack.values, block.branch.state.stack.values);
+
+                    for (let i = 0; i < Math.min(left.length, right.length); i++) {
+                        if (left[i].toString() !== right[i].toString()) {
+                            assertiif(
+                                isJumpDest(left[i]),
+                                isJumpDest(right[i]),
+                                'jump dest non-unified'
+                            );
+
+                            left[i] = new Phi(left[i], right[i]);
+                        }
+                    }
                 }
             }
         }
 
-        this.verify();
+        // this.verify();
 
         /**
          *
@@ -248,7 +274,7 @@ export class ControlFlowGraph {
                 );
             }
 
-            offset.isJumpDest = true;
+            offset.isJumpDest = dest.pc;
             return dest;
         }
 
@@ -273,7 +299,7 @@ export class ControlFlowGraph {
                     // console.log(block.key, backEdgeKey.key);
                     if (block.key === backEdgeKey.key) {
                         // console.log('---',block.key, backEdgeKey.key);
-                        return backEdgeKey;
+                        // return backEdgeKey;
                     }
                 }
             }
@@ -287,7 +313,7 @@ export class ControlFlowGraph {
     /**
      *
      */
-    private verify() {
+    public verify() {
         const HALTS = ['STOP', 'RETURN', 'INVALID', 'JUMP', 'JUMPI', 'REVERT'];
 
         for (const block of Object.values(this.blocks)) {

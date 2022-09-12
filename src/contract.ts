@@ -1,4 +1,5 @@
 import {
+    Assign,
     CallDataLoad,
     CallSite,
     CallValue,
@@ -10,6 +11,7 @@ import {
     Jump,
     JumpDest,
     Jumpi,
+    Phi,
     Require,
     Return,
     Revert,
@@ -204,7 +206,7 @@ function updateCallDataLoad(stmtOrExpr: Record<string, Expr>, types: any) {
                 const argNumber = ((expr.location - 4n) / 32n).toString();
                 expr.type = types[argNumber];
             }
-            if (typeof expr === 'object') {
+            if (typeof expr === 'object' && !(expr instanceof Variable)) {
                 updateCallDataLoad(expr as unknown as Record<string, Expr>, types);
             }
         }
@@ -249,6 +251,14 @@ function transform({ blocks, entry }: ControlFlowGraph): Stmt[] {
 
         const block = blocks[key];
         assert(block !== undefined, key, Object.keys(blocks));
+
+        let i = 0;
+        for (const elem of block.branch.state.stack.values) {
+            if (elem instanceof Phi) {
+                block.stmts.unshift(new Assign(i, elem));
+                i++;
+            }
+        }
 
         for (const i in block.stmts) {
             block.stmts[i] = block.stmts[i].eval();
