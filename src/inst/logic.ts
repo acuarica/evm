@@ -2,6 +2,7 @@ import { Stack } from '../stack';
 import {
     And,
     Byte,
+    evalExpr,
     Expr,
     GT,
     isBigInt,
@@ -33,8 +34,11 @@ export function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | E
 }
 
 export function fromDIVEXPsig(left: Expr, right: Expr, cc: () => Sig | Eq): Sig | Eq {
-    if (isVal(left) && right instanceof Div && isVal(right.right)) {
-        left = left.value * right.right.value;
+    left = evalExpr(left);
+    right = evalExpr(right);
+
+    if (isBigInt(left) && right instanceof Div && isBigInt(right.right)) {
+        left = left * right.right;
         right = right.left;
 
         if (
