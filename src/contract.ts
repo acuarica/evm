@@ -84,7 +84,15 @@ export class Contract {
         );
 
         for (const branch of this.main.cfg.functionBranches) {
-            const cfg = new ControlFlowGraph(opcodes, dispatch, branch);
+            let cfg;
+            try {
+                cfg = new ControlFlowGraph(opcodes, dispatch, branch);
+            } catch (err) {
+                const functionSignature =
+                    branch.hash in functionHashes ? functionHashes[branch.hash] : '';
+                throw new Error(branch.hash + functionSignature + (err as Error).message);
+            }
+
             const fn = new TopLevelFunction(cfg, branch.hash, functionHashes);
             assert(cfg.functionBranches.length === 0);
             this.functions[branch.hash] = fn;
@@ -237,7 +245,7 @@ function findReturns(stmt: Record<string, Stmt>) {
     return returns;
 }
 
-function transform({ blocks, entry }: ControlFlowGraph): Stmt[] {
+function transform({ blocks, entry, doms }: ControlFlowGraph): Stmt[] {
     const pcs: { [key: string]: true } = {};
     return transformBlock(entry);
 
@@ -253,19 +261,20 @@ function transform({ blocks, entry }: ControlFlowGraph): Stmt[] {
         assert(block !== undefined, key, Object.keys(blocks));
 
         let i = 0;
-        for (const elem of block.branch.state.stack.values) {
+        for (const elem of block.entry.state.stack.values) {
             if (elem instanceof Phi) {
                 block.stmts.unshift(new Assign(i, elem));
                 i++;
             }
         }
 
-        for (const i in block.stmts) {
+        for (let i = 0; i < block.stmts.length; i++) {
             block.stmts[i] = block.stmts[i].eval();
         }
 
         const last = block.stmts.at(-1);
         if (last instanceof Jumpi) {
+            // doms[last]
             const trueBlock = transformBlock(last.destBranch.key);
             const falseBlock = transformBlock(last.fallBranch.key);
             return [

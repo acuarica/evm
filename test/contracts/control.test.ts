@@ -3,21 +3,22 @@ import EVM from '../utils/evmtest';
 import { contract } from './utils/solc';
 
 contract('control', (compile, fallback) => {
-    it('should `decompile` contract with `if` no-else', () => {
+    it('should `decompile` contract with `if` no-else', function () {
         const CONTRACT = `contract C {
             uint256 total = 0;
             ${fallback}() external payable {
-                uint256 val = 0;
+                // uint256 val = 0;
                 if (block.number == 8) {
-                    val = 3;
+                    total = 3;
                 }
-                val += 5;
+                total += 5;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT));
+        const evm = new EVM(compile(CONTRACT, this));
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
+        expect(text, `decompiled bytecode\n${text}`).to.match(/bilock\.number/);
     });
 
     it('should `decompile` contract with `require`s', () => {

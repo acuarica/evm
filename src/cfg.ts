@@ -1,8 +1,10 @@
 import { formatOpcode, Opcode, OPCODES } from './opcode';
 import { State } from './state';
 import {
+    evalExpr,
     Expr,
     Invalid,
+    isBigInt,
     isJumpDest,
     isVal,
     Jump,
@@ -19,31 +21,43 @@ import {
 import { assert, assertiif } from './error';
 
 export class Branch {
-    private constructor(readonly path: number[], readonly state: State) {}
+    private constructor(readonly path: { readonly pc: number; readonly state: State }[]) {}
 
-    static from(pc: number, state: State) {
-        return new Branch([pc], state);
+    static from(pc: number, state: State): Branch {
+        return new Branch([{ pc, state }]);
     }
 
     to(pc: number, state: State): Branch {
-        return new Branch([...this.path, pc], state);
+        return new Branch([...this.path, { pc, state }]);
     }
 
     get pc(): number {
-        return this.path.at(-1)!;
+        return this.path.at(-1)!.pc;
     }
 
-    get key() {
+    get state(): State {
+        return this.path.at(-1)!.state;
+    }
+
+    get pred(): Branch | null {
+        return this.path.length === 1 ? null : new Branch(this.path.slice(0, -1));
+    }
+
+    get key(): string {
         return (
-            this.pc +
+            this.pc.toString() +
             ':' +
             this.state.stack.values
                 .filter((elem): elem is Val => elem instanceof Val && elem.isJumpDest !== null)
-                .map(val => 'j' + val.isJumpDest)
+                .map(val => 'j' + val.isJumpDest!.toString())
                 .join('|')
         );
     }
 }
+
+const HALTS = ['STOP', 'RETURN', 'INVALID', 'REVERT'];
+
+type ExitInst = Jumpi | SigCase | Jump | JumpDest;
 
 /**
  *
@@ -58,10 +72,15 @@ export class Block {
     /**
      *
      */
+    readonly preds: string[] = [];
+
+    /**
+     *
+     */
     readonly state: State;
 
-    constructor(readonly branch: Branch) {
-        this.state = branch.state.clone();
+    constructor(readonly entry: Branch) {
+        this.state = entry.state.clone();
     }
 
     /**
@@ -80,12 +99,8 @@ export class Block {
         return this.opcodes[this.opcodes.length - 1];
     }
 
-    get pc(): number {
-        return this.branch.pc;
-    }
-
     get key(): string {
-        return this.branch.key;
+        return this.entry.key;
     }
 
     get stack(): State['stack'] {
@@ -95,9 +110,12 @@ export class Block {
     get stmts(): State['stmts'] {
         return this.state.stmts;
     }
-
     get memory(): State['memory'] {
         return this.state.memory;
+    }
+
+    get last(): ExitInst {
+        return this.state.stmts.at(-1)! as ExitInst;
     }
 }
 
@@ -114,6 +132,8 @@ export class ControlFlowGraph {
      *
      */
     readonly entry: string;
+
+    readonly doms: { [key: string]: Set<string> } = {};
 
     /**
      *
@@ -145,7 +165,7 @@ export class ControlFlowGraph {
         while (branches.length > 0) {
             // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
             // See https://github.com/microsoft/TypeScript/issues/30406.
-            const branch = branches.pop()!;
+            const branch = branches.shift()!;
             assert(!branch.state.halted);
 
             if (!(branch.pc in blockLists)) {
@@ -154,7 +174,18 @@ export class ControlFlowGraph {
 
             let seen = false;
             for (const b of blockLists[branch.pc]) {
-                if (b.key === branch.key) {
+                if (
+                    b.key === branch.key
+                    // && b.branch.state.stack.length === branch.state.stack.length
+                ) {
+                    // assert(b.branch.state.stack.length === branch.state.stack.length);
+
+                    // console.log('  paths' , b.key);
+                    // console.log('  l',b.branch.path.map(p=>Branch.from(p.pc,p.state).key));
+                    // console.log('  r', branch.path.map(p=>Branch.from(p.pc,p.state).key));
+                    // for (let i=-0; i <  b.branch.path.length; i++) {
+                    //     console.log(b.branch.path[i].pc, branch.path[i].pc);
+                    // }
                     seen = true;
                 }
             }
@@ -200,12 +231,11 @@ export class ControlFlowGraph {
                     try {
                         dispatch[opcode.mnemonic](opcode, block.state);
                     } catch (err) {
+                        const message = (err as Error).message;
                         throw new Error(
-                            '`' +
-                                err +
-                                `\` at [${opcode.offset}] ${
-                                    opcode.mnemonic
-                                } =| ${block.state.stack.values.join(' | ')}`
+                            `\`${message}\` at [${opcode.offset}] ${
+                                opcode.mnemonic
+                            } =| ${block.state.stack.values.join(' | ')}`
                         );
                     }
                 }
@@ -231,9 +261,20 @@ export class ControlFlowGraph {
                 const key = block.key;
                 if (!(key in this.blocks)) {
                     this.blocks[key] = block;
+                    if (block.entry.pred !== null) {
+                        this.blocks[key].preds.push(block.entry.pred.key);
+                    }
                 } else {
-                    const left = this.blocks[key].branch.state.stack.values;
-                    const right = block.branch.state.stack.values;
+                    if (HALTS.includes(this.blocks[key].last.name)) {
+                        continue;
+                    }
+
+                    if (block.entry.pred !== null) {
+                        this.blocks[key].preds.push(block.entry.pred.key);
+                    }
+
+                    const left = this.blocks[key].entry.state.stack.values;
+                    const right = block.entry.state.stack.values;
 
                     // assert(left.length === right.length, key, this.blocks[key].branch.state.stack.values, block.branch.state.stack.values);
 
@@ -242,7 +283,13 @@ export class ControlFlowGraph {
                             assertiif(
                                 isJumpDest(left[i]),
                                 isJumpDest(right[i]),
-                                'jump dest non-unified'
+                                'jump dest non-unified at',
+                                i,
+                                'left',
+                                left[i],
+                                'right',
+                                right[i],
+                                key
                             );
 
                             left[i] = new Phi(left[i], right[i]);
@@ -253,17 +300,19 @@ export class ControlFlowGraph {
         }
 
         // this.verify();
+        // dominatorTree(this);
 
         /**
          *
          * @param offset
          */
         function getDest(offset: Expr): Opcode {
-            if (!isVal(offset)) {
+            const offset2 = evalExpr(offset);
+            if (!isBigInt(offset2)) {
                 throw new Error('Expected numeric offset, found' + offset.toString());
             }
 
-            const dest = opcodes.find(o => o.offset === Number(offset.value));
+            const dest = opcodes.find(o => o.offset === Number(offset2));
             if (!dest) {
                 throw new Error('Expected `JUMPDEST` in JUMP destination, but found is undefined');
             }
@@ -274,7 +323,8 @@ export class ControlFlowGraph {
                 );
             }
 
-            offset.isJumpDest = dest.pc;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            (offset as any).isJumpDest = dest.pc;
             return dest;
         }
 
@@ -286,26 +336,27 @@ export class ControlFlowGraph {
          * @returns
          */
         function makeBranch(from: Branch, pc: number, state: State): Branch {
-            const c = from.path.filter(p => p === pc && p !== from.pc);
+            // const c = from.path.filter(p => p === pc && p !== from.pc);
             // check(c.length <= 1, 'pc length ' + c.length.toString());
-            if (c.length >= 1) {
-                const backEdgeKey = from.to(pc, state);
-                assert(
-                    blockLists[backEdgeKey.pc] !== undefined,
-                    'back key undef' + backEdgeKey + ' ' + from.path.join('->')
-                );
+            // if (c.length >= 1) {
+            //     const backEdgeKey = from.to(pc, state);
+            //     assert(
+            //         blockLists[backEdgeKey.pc] !== undefined,
+            //         'back key undef' + backEdgeKey + ' ' + from.path.join('->')
+            //     );
 
-                for (const block of blockLists[backEdgeKey.pc]) {
-                    // console.log(block.key, backEdgeKey.key);
-                    if (block.key === backEdgeKey.key) {
-                        // console.log('---',block.key, backEdgeKey.key);
-                        // return backEdgeKey;
-                    }
-                }
-            }
+            //     for (const block of blockLists[backEdgeKey.pc]) {
+            // console.log(block.key, backEdgeKey.key);
+            // if (block.key === backEdgeKey.key) {
+            // console.log('---',block.key, backEdgeKey.key);
+            // return backEdgeKey;
+            //         }
+            //     }
+            // }
 
             const to = from.to(pc, state.clone());
-            branches.push(to);
+            // branches.push(to);
+            branches.unshift(to);
             return to;
         }
     }
@@ -317,14 +368,14 @@ export class ControlFlowGraph {
         const HALTS = ['STOP', 'RETURN', 'INVALID', 'JUMP', 'JUMPI', 'REVERT'];
 
         for (const block of Object.values(this.blocks)) {
-            assert(!block.branch.state.halted);
+            assert(!block.entry.state.halted);
         }
 
         const pcs: number[] = [];
         for (const [, block] of Object.entries(this.blocks)) {
             assert(block.opcodes.length > 0);
             assert(block.opcodes.filter(opcode => HALTS.includes(opcode.mnemonic)).length <= 1);
-            assert(!block.branch.state.halted);
+            assert(!block.entry.state.halted);
 
             const last = block.stmts.at(-1);
 
@@ -357,3 +408,50 @@ export class ControlFlowGraph {
 //         block.stmts.forEach(stmt => console.log('  ', stmt.toString()));
 //     }
 // }
+
+export function dominatorTree({ blocks, entry, doms }: ControlFlowGraph) {
+    doms[entry] = new Set([entry]);
+
+    for (const { key } of Object.values(blocks)) {
+        if (key !== entry) {
+            doms[key] = new Set(Object.keys(blocks));
+        }
+    }
+
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const { key } of Object.values(blocks)) {
+            if (key !== entry) {
+                const ds = union(
+                    new Set([key]),
+                    intersect(blocks[key].preds.map(pred => doms[pred]))
+                );
+                if (!equal(ds, doms[key])) {
+                    doms[key] = ds;
+                    changed = true;
+                }
+            }
+        }
+    }
+
+    function union<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left, ...right]);
+    }
+
+    function intersect<T>(sets: Set<T>[]) {
+        let result = sets[0];
+        for (let i = 1; i < sets.length; i++) {
+            result = _intersect(result, sets[i]);
+        }
+        return result;
+    }
+
+    function _intersect<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left].filter(elem => right.has(elem)));
+    }
+
+    function equal<T>(left: Set<T>, right: Set<T>) {
+        return left.size === right.size && [...left].every(elem => right.has(elem));
+    }
+}

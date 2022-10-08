@@ -1,6 +1,10 @@
 export class Stack<in out T> {
     readonly values: T[] = [];
 
+    get length() {
+        return this.values.length;
+    }
+
     push(item: T): void | never {
         if (this.values.length >= 1024) {
             throw new Stack.Error('Stack too deep');

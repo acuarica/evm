@@ -1,6 +1,6 @@
 {
     "name": "evm",
-    "version": "0.0.0",
+    "version": "0.5.0",
     "description": "An ethereum virtual machine (EVM) bytecode decompiler",
     "private": true,
     "main": "lib/EVM.node.js",
@@ -31,6 +31,7 @@
         "@types/mocha": "^9.1.1",
         "@types/node": "^18.7.2",
         "@types/semver": "^7.3.12",
+        "@types/yargs": "^17.0.12",
         "@typescript-eslint/eslint-plugin": "^5.33.0",
         "@typescript-eslint/parser": "^5.33.0",
         "chai": "^4.3.6",
@@ -51,7 +52,8 @@
         "typescript": "^4.7.4",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
-        "webpack-merge": "^5.8.0"
+        "webpack-merge": "^5.8.0",
+        "yargs": "^17.5.1"
     },
     "scripts": {
         "prepare": "husky install",

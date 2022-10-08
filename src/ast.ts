@@ -1052,7 +1052,9 @@ export class Jumpi {
         return this;
     }
     toString() {
-        return 'if (' + this.condition + ')';
+        return `if (${this.condition.toString()}) goto ${this.destBranch.key} elgoto ${
+            this.fallBranch.key
+        }`;
     }
 }
 
@@ -1064,7 +1066,7 @@ export class SigCase {
         return this;
     }
     toString() {
-        return 'ifsig (' + this.condition + ')';
+        return 'ifsig (' + this.condition + ') goto ' + this.fallBranch.key;
     }
 }
 
