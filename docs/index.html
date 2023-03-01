@@ -6,36 +6,72 @@
         <title>EVM Bytecode Decompiler</title>
         <link rel="icon" type="image/svg+xml" href="favicon.drawio.svg" />
         <style>
+            :root {
+                --theme-back: #27272a;
+                --theme-fore: #e5e5e5;
+            }
+
+            html {
+                color: var(--theme-fore);
+                background-color: var(--theme-back);
+            }
+
             .code,
-            .loading {
+            #contract,
+            #loading {
                 display: none;
             }
         </style>
+
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"
+            type="text/css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism_okaidia.css"
+        />
     </head>
 
     <body>
-        <h1>EVM Bytecode Decompiler</h1>
-        <section class="contracts">
-            <h2>Examples</h2>
-            <ul>
-                <li><a href="#0x3FDA67f7583380E67ef93072294a7fAc882FD7E7">Compound</a></li>
-                <li><a href="#0x06012c8cf97BEaD5deAe237070F9587f8E7A266d">CryptoKitties</a></li>
-                <li><a href="#0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359">DAI</a></li>
-                <li><a href="#0x314159265dD8dbb310642f98f50C066173C1259b">ENS</a></li>
-                <li>
-                    <a href="#0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">Wrapped Ether (WETH)</a>
-                </li>
-            </ul>
-            <footer>Or put any contract address in the address bar</footer>
-        </section>
-        <div class="loading">
-            <p>Loading...</p>
-        </div>
-        <div class="code">
-            <pre><code id="code"></code></pre>
-        </div>
+        <header style="display: flex; align-items: baseline; gap: 1rem">
+            <a href="/"
+                ><img src="favicon.drawio.svg" height="24rem" alt="EVM Bytecode Decompiler Logo"
+            /></a>
+            <h1>EVM Bytecode Decompiler</h1>
+        </header>
 
-        <!-- https://stackoverflow.com/questions/17341122/link-and-execute-external-javascript-file-hosted-on-github -->
+        <main>
+            <section id="examples">
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="#0x3FDA67f7583380E67ef93072294a7fAc882FD7E7">Compound</a></li>
+                    <li><a href="#0x06012c8cf97BEaD5deAe237070F9587f8E7A266d">CryptoKitties</a></li>
+                    <li><a href="#0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359">DAI</a></li>
+                    <li><a href="#0x314159265dD8dbb310642f98f50C066173C1259b">ENS</a></li>
+                    <li>
+                        <a href="#0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                            >Wrapped Ether (WETH)</a
+                        >
+                    </li>
+                </ul>
+                <footer>Or put any contract address in the address bar</footer>
+            </section>
+
+            <section id="contract">
+                <h2>Contract</h2>
+                <div id="loading">
+                    <p>Loading...</p>
+                </div>
+                <div class="code" style="width: 90vw">
+                    <pre
+                        style="overflow: auto"
+                    ><code id="code" class="language-solidity"></code></pre>
+                </div>
+            </section>
+        </main>
+
         <script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
@@ -46,22 +82,30 @@
             src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
             typea="application/javascript"
         ></script>
+        <script src="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism.js"></script>
+        <script src="https://prismjs.com/components/prism-solidity.js"></script>
 
         <script>
             const provider = new ethers.providers.EtherscanProvider();
             console.debug('Ethers provider', provider);
 
             function getCode() {
-                $('.contracts').fadeOut(function () {
-                    $('.loading').fadeIn();
+                $('#examples').fadeOut(function () {
+                    $('#contract').fadeIn();
+                    $('#loading').fadeIn();
                 });
+
+                const address = location.hash.replace('#', '');
+                console.debug('Getting code for address', address);
+
                 provider
-                    .getCode(location.hash.replace('#', ''))
+                    .getCode(address)
                     .then(code => {
                         try {
                             const evm = new EVM(code, {}, {});
                             $('#code').html(evm.decompile());
-                            $('.loading').fadeOut(function () {
+                            Prism.highlightAll();
+                            $('#loading').fadeOut(function () {
                                 $('.code').fadeIn();
                             });
                         } catch (err) {
