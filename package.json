@@ -10,7 +10,10 @@
         "type": "git",
         "url": "git+https://github.com/acuarica/evm.git"
     },
-    "author": "Luit Hollander <luit@hollander.email> (https://luit.me), Luis Mastrangelo",
+    "author": "Luit Hollander <luit@hollander.email> (https://luit.me)",
+    "contributors": [
+        "Luis Mastrangelo (https://acuarica.github.io)"
+    ],
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/acuarica/evm/issues"
