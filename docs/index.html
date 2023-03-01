@@ -90,33 +90,33 @@
             console.debug('Ethers provider', provider);
 
             function getCode() {
-                $('#examples').fadeOut(function () {
-                    $('#contract').fadeIn();
-                    $('#loading').fadeIn();
-                });
-
                 const address = location.hash.replace('#', '');
                 console.debug('Getting code for address', address);
 
-                provider
-                    .getCode(address)
-                    .then(code => {
-                        try {
-                            const evm = new EVM(code, {}, {});
-                            $('#code').html(evm.decompile());
-                            Prism.highlightAll();
-                            $('#loading').fadeOut(function () {
-                                $('.code').fadeIn();
-                            });
-                        } catch (err) {
+                $('#examples').fadeOut(function () {
+                    $('#contract').fadeIn();
+                    $('#loading').fadeIn();
+
+                    provider
+                        .getCode(address)
+                        .then(code => {
+                            try {
+                                const evm = new EVM(code, {}, {});
+                                $('#code').html(evm.decompile());
+                                Prism.highlightAll();
+                                $('#loading').fadeOut(function () {
+                                    $('.code').fadeIn();
+                                });
+                            } catch (err) {
+                                console.error(err);
+                                alert(err.message);
+                            }
+                        })
+                        .catch(err => {
                             console.error(err);
                             alert(err.message);
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert(err.message);
-                    });
+                        });
+                });
             }
 
             $(window).on('hashchange', getCode);
