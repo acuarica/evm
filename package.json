@@ -41,6 +41,7 @@
         "chalk": "4.1.0",
         "eslint": "^8.22.0",
         "ethers": "^5.6.9",
+        "http-server": "^14.1.1",
         "husky": "^8.0.1",
         "mocha": "^10.0.0",
         "nyc": "^15.1.0",
@@ -68,6 +69,7 @@
         "build": "webpack --mode production",
         "hash": "ts-node scripts/hash.ts",
         "prettier": "prettier --write .",
-        "prettier:staged": "pretty-quick --staged"
+        "prettier:staged": "pretty-quick --staged",
+        "docs": "http-server docs"
     }
 }
