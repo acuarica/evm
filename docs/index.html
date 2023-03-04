@@ -130,6 +130,11 @@
 
             function getCode() {
                 const address = location.hash.replace('#', '');
+
+                if (!address) {
+                    return;
+                }
+
                 console.debug('Getting code for address', address);
 
                 $('#examples').fadeOut(function () {
