@@ -116,7 +116,7 @@ describe.skip('bytecode', () => {
 
                 const variables = defs
                     .filter(line => line.includes(' public ') && !line.includes('('))
-                    .map(line => line.split(' ').pop() + '()');
+                    .map(line => line.split(' ').pop()! + '()');
                 expect(evm.getFunctions()).to.include.members(variables);
 
                 const mappings = defs
@@ -156,7 +156,7 @@ describe.skip('bytecode', () => {
 
             lines.forEach(line => {
                 it(`should match decompiled bytecode to '${line.source}'`, () => {
-                    expect(text, text).to.match(line);
+                    expect(text).to.match(line);
                 });
             });
         });
