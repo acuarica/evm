@@ -1,7 +1,7 @@
 export { Stack, State } from './state';
 export { Metadata, stripMetadataHash } from './metadata';
+export * from './opcode';
 export * as inst from './inst';
-export * as opcode from './opcode';
 export * as ast from './ast';
 
 import { decode, Opcode, OPCODES } from './opcode';

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { EVM, opcode, ast } from '../../src';
+import { EVM, ast, OPCODES } from '../../src';
 import { contract } from './utils/solc';
 
 contract('empty', (compile, _fallback, version) => {
@@ -85,7 +85,7 @@ contract('empty', (compile, _fallback, version) => {
                 expect(Object.keys(evm.contract.main.cfg.blocks)).to.be.length(1);
 
                 const block = evm.contract.main.cfg.blocks[evm.contract.main.cfg.entry];
-                expect(block.end.opcode).to.be.equal(opcode.OPCODES.REVERT);
+                expect(block.end.opcode).to.be.equal(OPCODES.REVERT);
                 expect(block.stmts.length).to.be.at.least(1);
                 expect(block.stmts.at(-1)).to.be.deep.equal(new ast.Revert([]));
 
