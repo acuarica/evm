@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { State, inst } from '../../src';
 
-describe('STOP', () => {
+describe('inst.STOP', () => {
     it('should halt', () => {
         const state = new State();
         expect(state.halted).to.be.false;

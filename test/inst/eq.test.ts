@@ -3,7 +3,7 @@ import { Stack, inst, ast } from '../../src';
 // import { Expr, Symbol0, Div, CallDataLoad, Shr, Val } from '../../src/ast';
 // import { LOGIC } from '../../src/inst/logic';
 
-describe('EQ', () => {
+describe('inst.EQ', () => {
     it('should calculate `1 == 1`', () => {
         const stack = new Stack<ast.Expr>();
         stack.push(1n);

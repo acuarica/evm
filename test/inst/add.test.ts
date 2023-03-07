@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Stack, inst, ast } from '../../src';
 
-describe('ADD', () => {
+describe('inst.ADD', () => {
     it('should calculate `1 + 1`', () => {
         const stack = new Stack<ast.Expr>();
         stack.push(1n);

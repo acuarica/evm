@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Stack, ast, inst } from '../../src';
 
-describe('PUSH', () => {
+describe('inst.PUSH', () => {
     it('should modify stack', () => {
         const one = new Uint8Array(1);
         one[0] = 1;
