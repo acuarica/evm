@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { Runnable, Suite } from 'mocha';
 import * as semver from 'semver';
 
-const VERSIONS = ['0.5.5', '0.5.17', '0.8.16'] as const;
+export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
 
 type Version = typeof VERSIONS[number];
 
@@ -38,7 +38,7 @@ export function compile(
         contractName?: string;
         context?: Mocha.Context | undefined;
     } = {}
-): string {
+): { bytecode: string; deployedBytecode: string } {
     const input = {
         language: 'Solidity',
         sources: {
@@ -49,7 +49,7 @@ export function compile(
         settings: {
             outputSelection: {
                 '*': {
-                    '*': ['evm.deployedBytecode'],
+                    '*': ['evm.bytecode', 'evm.deployedBytecode'],
                 },
             },
         },
@@ -88,7 +88,7 @@ export function compile(
         selectedContract = Object.values(contract)[0];
     }
 
-    const bytecode = selectedContract.evm.deployedBytecode.object;
+    const deployedBytecode = selectedContract.evm.deployedBytecode.object;
 
     if (opts.context) {
         const basePath = './.contracts';
@@ -97,10 +97,11 @@ export function compile(
             mkdirSync(basePath);
         }
 
-        writeFileSync(`${basePath}/${fileName}.bytecode`, bytecode);
+        writeFileSync(`${basePath}/${fileName}.bytecode`, deployedBytecode);
     }
 
-    return bytecode;
+    const bytecode = selectedContract.evm.bytecode.object;
+    return { bytecode, deployedBytecode };
 
     function valid(output: SolcOutput): boolean {
         return 'contracts' in output && (!('errors' in output) || output.errors.length === 0);
@@ -110,7 +111,7 @@ export function compile(
 export function contract(
     title: string,
     fn: (
-        compile: (content: string, context?: Mocha.Context) => string,
+        compile_: (content: string, context?: Mocha.Context) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
     ) => void
@@ -118,9 +119,9 @@ export function contract(
     describe(`contracts::${title}`, () => {
         VERSIONS.forEach(version => {
             if (version.startsWith(process.env['SOLC'] ?? '')) {
-                const fallback = semver.gte(version, '0.8.0') ? 'fallback' : 'function';
+                const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
 
-                describe(`using solc-v${version}`, () => {
+                describe(`solc-v${version}`, () => {
                     fn(
                         (content, context) =>
                             compile(content, version, {
