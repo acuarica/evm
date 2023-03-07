@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { STACK, Stack } from '../../src';
+import { Stack, inst } from '../../src';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
@@ -19,7 +19,7 @@ describe('SWAP', () => {
 
                 stack.push(3n);
 
-                STACK<bigint>()[`SWAP${size as Size}`](stack);
+                inst.STACK<bigint>()[`SWAP${size as Size}`](stack);
 
                 expect(stack.values).to.deep.equal([2n, ...ignored, 3n]);
             });
@@ -31,7 +31,7 @@ describe('SWAP', () => {
                     stack.push(1n);
                 }
 
-                expect(() => STACK<bigint>()[`SWAP${size as Size}`](stack)).to.throw(
+                expect(() => inst.STACK<bigint>()[`SWAP${size as Size}`](stack)).to.throw(
                     'Invalid swap operation'
                 );
             });
