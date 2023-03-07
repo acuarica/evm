@@ -1,6 +1,5 @@
 import { Branch } from './cfg';
 import { type Contract } from './contract';
-import { hex2a } from './hex';
 
 /**
  *
