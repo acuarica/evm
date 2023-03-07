@@ -11,9 +11,9 @@ describe('etherscan', () => {
         .slice(0, 100)
         .forEach(([, address, name]) => {
             const path = `${BASE_PATH}${name}-${address}.bytecode`;
-            const bytecode = readFileSync(path, 'utf8');
 
             it(`should decode & decompile ${path}`, () => {
+                const bytecode = readFileSync(path, 'utf8');
                 const evm = new EVM(bytecode);
                 if (
                     [
@@ -50,7 +50,7 @@ describe('etherscan', () => {
                             .map(fn => fn.label),
                         ...Object.values(contract.variables)
                             .filter(v => v.label !== undefined)
-                            .map(v => v.label + '()'),
+                            .map(v => v.label! + '()'),
                     ];
                     expect(evm.getFunctions().sort()).to.include.members(externals.sort());
 
