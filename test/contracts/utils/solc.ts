@@ -92,7 +92,12 @@ export function compile(
 
     if (opts.context) {
         const basePath = './.contracts';
-        const fileName = title(opts.context.test).replace(/[:^'` ]/g, '_');
+        const fileName = title(opts.context.test)
+            .replace('..contracts.', '')
+            .replace('solc-', '')
+            .replace(/`/g, '')
+            .replace(/[:^' ]/g, '-')
+            .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
         }
@@ -106,6 +111,10 @@ export function compile(
     function valid(output: SolcOutput): boolean {
         return 'contracts' in output && (!('errors' in output) || output.errors.length === 0);
     }
+
+    function title(test: Runnable | Suite | undefined): string {
+        return test ? title(test.parent) + '.' + test.title : '';
+    }
 }
 
 export function contract(
@@ -116,7 +125,7 @@ export function contract(
         version: Version
     ) => void
 ) {
-    describe(`contracts::${title}`, () => {
+    describe(`contracts.${title}`, () => {
         VERSIONS.forEach(version => {
             if (version.startsWith(process.env['SOLC'] ?? '')) {
                 const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
@@ -134,8 +143,4 @@ export function contract(
             }
         });
     });
-}
-
-function title(test: Runnable | Suite | undefined): string {
-    return test ? title(test.parent) + '-' + test.title : '';
 }

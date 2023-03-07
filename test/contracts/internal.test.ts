@@ -72,7 +72,7 @@ contract('internal', compile => {
     describe('with `internal` method with different arguments', () => {
         let evm: EVM;
 
-        before(() => {
+        before(function () {
             const CONTRACT = `contract C {
                 mapping(address => uint256) private _values;
                 function _getValue(address from) internal view returns (uint256) {
@@ -85,7 +85,7 @@ contract('internal', compile => {
                     return _getValue(from);
                 }
             }`;
-            evm = new EVM(compile(CONTRACT).deployedBytecode);
+            evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         });
 
         [
