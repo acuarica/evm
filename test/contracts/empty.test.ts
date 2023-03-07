@@ -61,7 +61,7 @@ contract('empty', (compile, _fallback, version) => {
                         'ipfs://122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
                 };
                 it(`should get metadata hash ${HASHES[version]} minimal contract definition`, () => {
-                    expect(evm.metadataHash).to.be.equal(HASHES[version]);
+                    expect(evm.metadata!.url).to.be.equal(HASHES[version]);
                 });
             }
 

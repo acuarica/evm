@@ -17,7 +17,7 @@ function generateFFMetadataContract() {
         const evm = new EVM(
             compile(CONTRACT.replace('[randomData]', randomData), '0.5.5').deployedBytecode
         );
-        const swarmHash = evm.metadataHash!.hash;
+        const swarmHash = evm.metadata!.hash;
 
         if (swarmHash && typeof swarmHash === 'string' && swarmHash.includes('ff')) {
             return evm;
@@ -33,7 +33,7 @@ describe('contracts::metadata', () => {
     });
 
     it('should include false positive selfdestruct (`ff`) in metadata hash', () => {
-        expect(evm.metadataHash).to.include('ff');
+        expect(evm.metadata!.hash).to.include('ff');
     });
 
     it('should not detect selfdestruct', () => {

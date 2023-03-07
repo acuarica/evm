@@ -24,7 +24,7 @@ export class EVM {
      * The `metadataHash` part from the `bytecode`.
      * That is, if present, the `bytecode` without its `code`.
      */
-    readonly metadataHash: Metadata | null;
+    readonly metadata: Metadata | null;
 
     /**
      * The `Opcode[]` decoded from `bytecode`.
@@ -47,9 +47,9 @@ export class EVM {
         readonly functionHashes: { [s: string]: string },
         readonly eventHashes: { [s: string]: string }
     ) {
-        const [code, metadataHash] = stripMetadataHash(bytecode);
+        const [code, metadata] = stripMetadataHash(bytecode);
         this.code = code;
-        this.metadataHash = metadataHash;
+        this.metadata = metadata;
 
         this.opcodes = decode(fromHex(code.replace('0x', '')));
     }

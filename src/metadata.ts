@@ -6,17 +6,20 @@ const SOLC = '736f6c63';
 
 const protocols: [RegExp, 'bzzr' | 'ipfs'][] = [
     /**
-     * https://docs.soliditylang.org/en/v0.5.5/metadata.html
+     * https://docs.soliditylang.org/en/v0.5.8/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
      */
     [new RegExp(`a165${BZZR0}5820([a-f0-9]{64})0029$`), 'bzzr'],
 
     /**
-     * https://docs.soliditylang.org/en/v0.5.17/metadata.html
+     * https://docs.soliditylang.org/en/v0.5.9/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
+     * https://blog.soliditylang.org/2019/05/28/solidity-0.5.9-release-announcement/
      */
     [new RegExp(`a265${BZZR1}5820([a-f0-9]{64})64${SOLC}43([a-f0-9]{6})0032$`), 'bzzr'],
 
     /**
-     * https://docs.soliditylang.org/en/v0.8.16/metadata.html
+     * v0.6.2 ends with `0x00 0x33` but v0.6.1 ends with `0x00 0x32`
+     * https://blog.soliditylang.org/2019/12/17/solidity-0.6.0-release-announcement/
+     * https://docs.soliditylang.org/en/v0.6.2/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
      */
     [new RegExp(`a264${IPFS}5822([a-f0-9]{68})64${SOLC}43([a-f0-9]{6})0033$`), 'ipfs'],
 ];
@@ -47,7 +50,7 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | null] {
         if (match && match[1]) {
             return [
                 bytecode.substring(0, match.index),
-                new Metadata(protocol, match[1], match[2] ? convertVersion(match[2]) : '0.5.5'),
+                new Metadata(protocol, match[1], match[2] ? convertVersion(match[2]) : '<0.5.9'),
             ];
         }
     }
