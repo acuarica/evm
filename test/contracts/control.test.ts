@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { JumpDest, Jumpi, Stop } from '../../src/ast';
+import { Jump, JumpDest, Jumpi, Stop } from '../../src/ast';
 import EVM from '../utils/evmtest';
 import { contract } from './utils/solc';
 
@@ -18,7 +18,6 @@ contract('control', (compile, fallback) => {
         const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         const cfg = evm.contract.main.cfg;
 
-        console.log(cfg.doms);
         expect(cfg.functionBranches).to.have.length(0);
 
         expect(Object.keys(cfg.blocks)).to.have.length(3);
@@ -50,7 +49,6 @@ contract('control', (compile, fallback) => {
         const CONTRACT = `contract C {
             uint256 total = 7;
             ${fallback}() external payable {
-                // uint256 val = 0;
                 if (block.number == 8) {
                     total = 3;
                 } else {
@@ -61,28 +59,30 @@ contract('control', (compile, fallback) => {
         }`;
         const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         const cfg = evm.contract.main.cfg;
-        console.log(cfg.doms);
 
         expect(cfg.functionBranches).to.have.length(0);
 
-        expect(Object.keys(cfg.blocks)).to.have.length(3);
+        expect(Object.keys(cfg.blocks)).to.have.length(4);
 
         const entry = cfg.blocks[cfg.entry];
         expect(entry.preds).to.have.length(0);
         expect(entry.last).to.be.instanceOf(Jumpi);
         expect((<Jumpi>entry.last).condition.toString()).to.be.equal('block.number != 8');
 
-        {
-            const then = cfg.blocks[(<Jumpi>entry.last).fallBranch.key];
-            expect(then.preds).to.have.length(1);
-            expect(then.last).to.be.instanceOf(JumpDest);
-        }
+        const trueBranch = cfg.blocks[(<Jumpi>entry.last).destBranch.key];
+        expect(trueBranch.preds).to.have.length(1);
+        expect(trueBranch.last).to.be.instanceOf(JumpDest);
 
-        {
-            const exit = cfg.blocks[(<Jumpi>entry.last).destBranch.key];
-            expect(exit.preds).to.have.length(2);
-            expect(exit.last).to.be.instanceOf(Stop);
-        }
+        const falseBranch = cfg.blocks[(<Jumpi>entry.last).fallBranch.key];
+        expect(falseBranch.preds).to.have.length(1);
+        expect(falseBranch.last).to.be.instanceOf(Jump);
+
+        expect((<JumpDest>trueBranch.last).fallBranch.key).to.be.equal(
+            (<Jump>falseBranch.last).destBranch.key
+        );
+
+        const exit = cfg.blocks[(<Jump>falseBranch.last).destBranch.key];
+        expect(exit.last).to.be.instanceOf(Stop);
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
@@ -109,24 +109,12 @@ contract('control', (compile, fallback) => {
 
         expect(cfg.functionBranches).to.have.length(0);
 
-        expect(Object.keys(cfg.blocks)).to.have.length(3);
+        expect(Object.keys(cfg.blocks)).to.have.length(5);
 
         const entry = cfg.blocks[cfg.entry];
         expect(entry.preds).to.have.length(0);
         expect(entry.last).to.be.instanceOf(Jumpi);
         expect((<Jumpi>entry.last).condition.toString()).to.be.equal('block.number != 8');
-
-        {
-            const then = cfg.blocks[(<Jumpi>entry.last).fallBranch.key];
-            expect(then.preds).to.have.length(1);
-            expect(then.last).to.be.instanceOf(JumpDest);
-        }
-
-        {
-            const exit = cfg.blocks[(<Jumpi>entry.last).destBranch.key];
-            expect(exit.preds).to.have.length(2);
-            expect(exit.last).to.be.instanceOf(Stop);
-        }
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
