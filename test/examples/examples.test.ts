@@ -2,9 +2,9 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { readFileSync } from 'fs';
 import { inspect } from 'util';
-import EVM from './utils/evmtest';
+import EVM from '../utils/evmtest';
 
-describe.skip('bytecode', () => {
+describe('examples', () => {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
@@ -89,7 +89,7 @@ describe.skip('bytecode', () => {
             let text: string;
 
             before(() => {
-                const bytecode = readFileSync(`./test/data/${name}.bytecode`, 'utf8');
+                const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 evm = new EVM(bytecode);
                 text = evm.decompile();
             });
