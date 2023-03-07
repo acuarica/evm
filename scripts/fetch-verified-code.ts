@@ -11,7 +11,7 @@ const provider = {
     providers: [
         new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth'),
         new providers.InfuraProvider(),
-        new providers.AlchemyProvider(),
+        // new providers.AlchemyProvider(),
         new providers.EtherscanProvider(),
         new providers.CloudflareProvider(),
     ],
@@ -24,18 +24,22 @@ const provider = {
     },
 };
 
-/**
- * Needs to be manually downloaded from
- *
- * https://etherscan.io/exportData?type=open-source-contract-codes
- */
-const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
-const lines = csv.toString().split('\n');
-const addresses = lines.map(
-    entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string]
-);
+function wait(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-(async () => {
+async function main() {
+    /**
+     * Needs to be manually downloaded from
+     *
+     * https://etherscan.io/exportData?type=open-source-contract-codes
+     */
+    const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
+    const lines = csv.toString().split('\n');
+    const addresses = lines.map(
+        entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string]
+    );
+
     for (const [, address, name] of addresses) {
         const path = `${BASE_PATH}${name}-${address}.bytecode`;
 
@@ -51,8 +55,6 @@ const addresses = lines.map(
             console.log(chalk.dim(`Code for ${name} at ${addr(address)} already fetched`));
         }
     }
-})();
-
-function wait(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+main().catch(err => console.error(err));

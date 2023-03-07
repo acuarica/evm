@@ -57,7 +57,7 @@ function writeDot(cfg: ControlFlowGraph) {
         function writeNode(pc: string, block: Block, doms: Set<string>) {
             let label = 'key:' + pc;
             label += '\\l';
-            label += 'doms: ' + [...doms].join(', ');
+            // label += 'doms: ' + [...doms].join(', ');
             label += '\\l';
             label += block.entry.state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
             label += '\\l';
@@ -122,6 +122,17 @@ void yargs
                 cfg = evm.contract.main.cfg;
             }
             writeDot(cfg);
+        }
+    )
+    .command(
+        'decompile [path]',
+        'Decompile the bytecode into Solidity pseudo-source code',
+        (yargs: Argv) => {
+            pathArg(yargs);
+        },
+        function (argv) {
+            const evm = getEVM(argv['path'] as string);
+            console.info(evm.decompile());
         }
     )
     .option('selector', {

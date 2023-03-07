@@ -17,7 +17,7 @@ const addresses = [
     ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 'WETH'],
 ];
 
-(async () => {
+async function main() {
     for (const [address, name] of addresses) {
         const path = `${BASE_PATH}${name}-${address}.bytecode`;
 
@@ -29,4 +29,6 @@ const addresses = [
             console.log(chalk.dim(`Code for ${name} at ${addr(address)} already fetched`));
         }
     }
-})();
+}
+
+main().catch(err => console.error(err));
