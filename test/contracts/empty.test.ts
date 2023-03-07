@@ -1,7 +1,5 @@
 import { expect } from 'chai';
-import { Revert } from '../../src/ast';
-import { OPCODES } from '../../src/opcode';
-import EVM from '../utils/evmtest';
+import { EVM, opcode, ast } from '../../src';
 import { contract } from './utils/solc';
 
 contract('empty', (compile, _fallback, version) => {
@@ -46,7 +44,7 @@ contract('empty', (compile, _fallback, version) => {
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(compile(CONTRACT));
+                evm = new EVM(compile(CONTRACT).deployedBytecode, {}, {});
             });
 
             if (index === 0) {
@@ -55,17 +53,27 @@ contract('empty', (compile, _fallback, version) => {
                         'bzzr://096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
                     '0.5.17':
                         'bzzr://b3196c0c582734d74810ef2241e728f6b83b6aa79d5f53732f29849c4bb4a25a',
+                    '0.6.12':
+                        'ipfs://12205823235d39a19a144ca0a76bbdf1e6ee8280514a68113e2c59bf79dd6000b767',
+                    '0.7.6':
+                        'ipfs://12206f1628c622f5b88ce2fc0b4eb82036ef4a13488b80241c68fb8cd209fc59f641',
                     '0.8.16':
                         'ipfs://122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
                 };
-                it(`should get metadata hash ${HASHES[version]}`, () => {
+                it(`should get metadata hash ${HASHES[version]} minimal contract definition`, () => {
                     expect(evm.metadataHash).to.be.equal(HASHES[version]);
                 });
             }
 
             it('should not contain `LOG1` nor `LOG2` because metadata has been stripped', () => {
-                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG1');
-                expect(evm.opcodes.map(op => op.mnemonic)).to.not.contain('LOG2');
+                expect(evm.opcodes).to.have.length(7);
+                expect(evm.opcodes[0].mnemonic).to.be.equal('PUSH1');
+                expect(evm.opcodes[1].mnemonic).to.be.equal('PUSH1');
+                expect(evm.opcodes[2].mnemonic).to.be.equal('MSTORE');
+                expect(evm.opcodes[3].mnemonic).to.be.equal('PUSH1');
+                expect(evm.opcodes[4].mnemonic).to.be.equal('DUP1');
+                expect(evm.opcodes[5].mnemonic).to.be.equal('REVERT');
+                expect(evm.opcodes[6].mnemonic).to.be.equal('INVALID');
             });
 
             it('should not have functions nor events', () => {
@@ -77,9 +85,9 @@ contract('empty', (compile, _fallback, version) => {
                 expect(Object.keys(evm.contract.main.cfg.blocks)).to.be.length(1);
 
                 const block = evm.contract.main.cfg.blocks[evm.contract.main.cfg.entry];
-                expect(block.end.opcode).to.be.equal(OPCODES.REVERT);
+                expect(block.end.opcode).to.be.equal(opcode.OPCODES.REVERT);
                 expect(block.stmts.length).to.be.at.least(1);
-                expect(block.stmts.at(-1)).to.be.deep.equal(new Revert([]));
+                expect(block.stmts.at(-1)).to.be.deep.equal(new ast.Revert([]));
 
                 expect(Object.keys(evm.contract.functions)).to.be.length(0);
             });
