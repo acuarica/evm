@@ -1,4 +1,4 @@
-import { Stack } from '../stack';
+import { Stack } from '../state';
 import { Add, Div, Exp, Expr, isBigInt, isZero, Mod, Mul, Sub } from '../ast';
 import { Sar, Shl } from '../ast';
 

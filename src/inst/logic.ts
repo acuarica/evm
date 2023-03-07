@@ -1,4 +1,4 @@
-import { Stack } from '../stack';
+import { Stack } from '../state';
 import {
     And,
     Byte,

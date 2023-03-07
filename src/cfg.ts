@@ -299,8 +299,8 @@ export class ControlFlowGraph {
             }
         }
 
-        // this.verify();
-        // dominatorTree(this);
+        this.verify();
+        dominatorTree(this);
 
         /**
          *

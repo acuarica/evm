@@ -1,6 +1,6 @@
 import { Expr, Val } from '../ast';
 import { toHex } from '../hex';
-import { Stack } from '../stack';
+import { Stack } from '../state';
 
 export function PUSHES() {
     return {

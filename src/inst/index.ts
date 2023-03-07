@@ -1,9 +1,14 @@
+export { PUSHES, STACK } from './stack';
+export { MATH } from './math';
+export { SYSTEM } from './system';
+export { LOGIC } from './logic';
+
 import { Expr } from '../ast';
 import { Contract } from '../contract';
 import { Opcode } from '../opcode';
-import { Stack } from '../stack';
-import { State } from '../state';
-import { PUSHES, STACK } from './core';
+import { Stack, State } from '../state';
+
+import { PUSHES, STACK } from './stack';
 import { INFO } from './info';
 import { LOGS } from './log';
 import { LOGIC } from './logic';
