@@ -22,7 +22,7 @@ contract('variables', compile => {
                     value32 = newValue;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT).deployedBytecode);
         });
 
         it('should not have functions nor events', () => {
@@ -88,7 +88,7 @@ contract('variables', compile => {
                     value8 = newValue;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT).deployedBytecode);
         });
 
         it('should not have functions nor events', () => {
@@ -124,7 +124,7 @@ contract('variables', compile => {
             const CONTRACT = `contract C {
                 uint256 public value;
             }`;
-            evm = new EVM(stripMetadataHash(compile(CONTRACT))[0]);
+            evm = new EVM(stripMetadataHash(compile(CONTRACT).deployedBytecode)[0]);
         });
 
         it('should `getFunctions` but not `getEvents`', () => {
@@ -148,7 +148,7 @@ contract('variables', compile => {
                     value = newValue;
                 }
             }`;
-            evm = new EVM(stripMetadataHash(compile(CONTRACT))[0]);
+            evm = new EVM(stripMetadataHash(compile(CONTRACT).deployedBytecode)[0]);
         });
 
         it('should `getFunctions` but not `getEvents`', () => {

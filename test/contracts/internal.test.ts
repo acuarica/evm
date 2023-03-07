@@ -31,7 +31,7 @@ contract('internal', compile => {
                     _values[_msgSender()] = value + 5;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT).deployedBytecode);
         });
 
         [
@@ -85,7 +85,7 @@ contract('internal', compile => {
                     return _getValue(from);
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT).deployedBytecode);
         });
 
         [
@@ -121,7 +121,7 @@ contract('internal', compile => {
     describe('with `internal` method without inlining function', () => {
         let evm: EVM;
 
-        before(() => {
+        before(function () {
             const CONTRACT = `contract C {
                 mapping(uint256 => uint256) private _values;
                 function _getValue(uint256 n) internal view returns (uint256) {
@@ -138,10 +138,10 @@ contract('internal', compile => {
                     return _getValue(n);
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = evm.decompile();
             expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
         });

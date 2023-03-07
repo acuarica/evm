@@ -15,7 +15,7 @@ describe('contracts::selfdestruct', () => {
     let evm: EVM;
 
     before(() => {
-        evm = new EVM(compile(CONTRACT, '0.5.5'));
+        evm = new EVM(compile(CONTRACT, '0.5.5').deployedBytecode);
     });
 
     it('should detect selfdestruct', () => {

@@ -15,7 +15,7 @@ contract('symbols', compile => {
     let text: string;
 
     before(() => {
-        evm = new EVM(compile(CONTRACT));
+        evm = new EVM(compile(CONTRACT).deployedBytecode);
         text = evm.decompile();
     });
 

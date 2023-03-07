@@ -16,7 +16,7 @@ contract('loops', (compile, fallback) => {
             }
         }`;
 
-        const evm = new EVM(compile(CONTRACT, this));
+        const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
 
         const text = evm.decompile();
         expect(text, text).to.match(/block\.number/);
@@ -35,7 +35,7 @@ contract('loops', (compile, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, this));
+        const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         evm.contract;
     });
 
@@ -51,7 +51,7 @@ contract('loops', (compile, fallback) => {
                 return sum;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT, this));
+        const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         evm.contract;
     });
 });

@@ -6,11 +6,11 @@ contract('modifiers', (compile, _fallback, version) => {
     describe('with a `modifier` calling an `internal` function', () => {
         let evm: EVM;
 
-        before(() => {
+        before(function () {
             const CONTRACT = `contract C {
                 uint256 private _value;
                 address private _owner;
-                constructor() ${version === '0.8.16' ? '' : 'public '}{
+                constructor() ${['0.7.6', '0.8.16'].includes(version) ? '' : 'public '}{
                     address msgSender = _msgSender();
                     _owner = msgSender;
                 }
@@ -28,7 +28,7 @@ contract('modifiers', (compile, _fallback, version) => {
                     _value = value + 3;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT));
+            evm = new EVM(compile(CONTRACT, this).deployedBytecode);
         });
 
         it('should `decompile` bytecode', () => {
