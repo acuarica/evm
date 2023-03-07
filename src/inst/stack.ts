@@ -1,5 +1,5 @@
 import { Expr, Val } from '../ast';
-import { toHex } from '../hex';
+import { toHex } from '../opcode';
 import { Stack } from '../state';
 
 export function PUSHES() {

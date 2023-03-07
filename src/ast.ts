@@ -653,6 +653,15 @@ export function evalExpr(expr: Expr) {
     return typeof expr === 'bigint' ? expr : expr.eval();
 }
 
+function hex2a(hexx: any) {
+    const hex = hexx.toString();
+    let str = '';
+    for (let i = 0; i < hex.length && hex.substr(i, 2) !== '00'; i += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return str;
+}
+
 export class Return {
     readonly name = 'Return';
     readonly wrapped = true;

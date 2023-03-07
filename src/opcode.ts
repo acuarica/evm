@@ -1,5 +1,3 @@
-import { toHex } from './hex';
-
 /**
  * Set of `PUSHn` opcodes.
  */
@@ -286,4 +284,13 @@ export function formatOpcode(op: Opcode) {
 
     // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
     return `${pc}:${offset}    ${op.mnemonic}${pushData}`;
+}
+
+/**
+ *
+ * @param buffer
+ * @returns
+ */
+export function toHex(buffer: Uint8Array): string {
+    return buffer.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
 }

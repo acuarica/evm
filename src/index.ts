@@ -5,7 +5,7 @@ export * as opcode from './opcode';
 export * as ast from './ast';
 
 import { decode, Opcode, OPCODES } from './opcode';
-import { toHex } from './hex';
+import { toHex } from './opcode';
 import { Metadata, stripMetadataHash } from './metadata';
 import { Contract } from './contract';
 import { stringify } from './stringify';
