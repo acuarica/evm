@@ -23,9 +23,9 @@ function writeDot(cfg: ControlFlowGraph) {
     dot(cfg);
     write('}');
 
-    function dot({ blocks, doms }: ControlFlowGraph) {
+    function dot({ blocks, doms, treed }: ControlFlowGraph) {
         for (const [pc, block] of Object.entries(blocks)) {
-            writeNode(pc, block, doms[pc]);
+            writeNode(pc, block, doms[pc], treed[pc]);
 
             switch (block.last.name) {
                 case 'Jumpi':
@@ -54,11 +54,15 @@ function writeDot(cfg: ControlFlowGraph) {
             // }
         }
 
-        function writeNode(pc: string, block: Block, doms: Set<string>) {
+        function writeNode(pc: string, block: Block, doms: Set<string>, tree: Set<string>) {
             let label = 'key:' + pc;
             label += '\\l';
             label += 'doms: ' + [...doms].join(', ');
             label += '\\l';
+            if (tree) {
+                label += 'tree: ' + [...tree].join(', ');
+                label += '\\l';
+            }
             label += block.entry.state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
             label += '\\l';
             label += block.opcodes.map(op => formatOpcode(op)).join('\\l');

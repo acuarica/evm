@@ -135,6 +135,8 @@ export class ControlFlowGraph {
 
     readonly doms: { [key: string]: Set<string> } = {};
 
+    readonly treed: { [key: string]: Set<string> } = {};
+
     /**
      *
      */
@@ -301,6 +303,27 @@ export class ControlFlowGraph {
 
         this.verify();
         dominatorTree(this);
+
+        {
+            const makeKey = (s: Set<string>) => [...s].sort().join('-');
+            const wt: { [key: string]: string } = {};
+
+            for (const [key, ds] of Object.entries(this.doms)) {
+                wt[makeKey(ds)] = key;
+            }
+
+            for (const [key, ds] of Object.entries(this.doms)) {
+                const x = new Set(ds);
+                x.delete(key);
+                const t = wt[makeKey(x)];
+                if (this.treed[t] === undefined) {
+                    this.treed[t] = new Set();
+                }
+                this.treed[t].add(key);
+            }
+            // console.log(this.treed);
+            // console.log(this.doms);
+        }
 
         /**
          *
