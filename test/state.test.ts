@@ -80,6 +80,15 @@ describe('state', () => {
             expect(stack1.values).to.deep.equal([]);
             expect(stack2.values).to.deep.equal([3]);
         });
+
+        it('should `throw` when stack is too deep', () => {
+            const stack = new Stack<number>();
+            for (let i = 0; i < 1024; i++) {
+                stack.push(1);
+            }
+
+            expect(() => stack.push(1)).to.throw(Error, 'Stack too deep');
+        });
     });
 
     describe('State', () => {
