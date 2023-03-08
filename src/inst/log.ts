@@ -1,8 +1,9 @@
-import { Opcode } from '../opcode';
+import type { Opcode } from '../opcode';
 import { evalExpr, isBigInt, Log, MLoad } from '../ast';
-import { State } from '../state';
-import { Contract } from '../contract';
+import type { State } from '../state';
+import type { Contract } from '../contract';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const LOGS = (contract: Contract) => {
     return {
         LOG0: log(0, contract),

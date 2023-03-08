@@ -1,8 +1,8 @@
-import { formatOpcode, Opcode, OPCODES } from './opcode';
-import { State } from './state';
+import { formatOpcode, type Opcode, OPCODES } from './opcode';
+import type { State } from './state';
 import {
     evalExpr,
-    Expr,
+    type Expr,
     Invalid,
     isBigInt,
     isJumpDest,

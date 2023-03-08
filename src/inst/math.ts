@@ -1,9 +1,9 @@
-import { Stack } from '../state';
-import { Add, Div, Exp, Expr, isBigInt, isZero, Mod, Mul, Sub } from '../ast';
+import type { Stack } from '../state';
+import { Add, Div, Exp, type Expr, isBigInt, isZero, Mod, Mul, Sub } from '../ast';
 import { Sar, Shl } from '../ast';
 
 export const MATH = {
-    ADD: (stack: Stack<Expr>) => {
+    ADD: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -18,7 +18,7 @@ export const MATH = {
         );
     },
 
-    MUL: (stack: Stack<Expr>) => {
+    MUL: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -30,7 +30,7 @@ export const MATH = {
         );
     },
 
-    SUB: (stack: Stack<Expr>) => {
+    SUB: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left - right : new Sub(left, right));
@@ -41,7 +41,7 @@ export const MATH = {
     MOD: mod,
     SMOD: mod,
 
-    ADDMOD: (stack: Stack<Expr>) => {
+    ADDMOD: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         const mod = stack.pop();
@@ -54,7 +54,7 @@ export const MATH = {
         );
     },
 
-    MULMOD: (stack: Stack<Expr>) => {
+    MULMOD: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         const mod = stack.pop();
@@ -67,7 +67,7 @@ export const MATH = {
         );
     },
 
-    EXP: (stack: Stack<Expr>) => {
+    EXP: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -75,7 +75,7 @@ export const MATH = {
         );
     },
 
-    SIGNEXTEND: (stack: Stack<Expr>) => {
+    SIGNEXTEND: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(
@@ -88,7 +88,7 @@ export const MATH = {
     },
 };
 
-function div(stack: Stack<Expr>) {
+function div(stack: Stack<Expr>): void {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(
@@ -102,7 +102,7 @@ function div(stack: Stack<Expr>) {
     );
 }
 
-function mod(stack: Stack<Expr>) {
+function mod(stack: Stack<Expr>): void {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? left % right : new Mod(left, right));

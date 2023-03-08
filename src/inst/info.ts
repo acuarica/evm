@@ -1,16 +1,16 @@
-import { Stack } from '../stack';
-import { CallDataLoad, CALLDATASIZE, CallValue, Expr } from '../ast';
+import type { Stack } from '../state';
+import { CallDataLoad, CALLDATASIZE, CallValue, type Expr } from '../ast';
 
 export const INFO = {
     // Environmental Information (since Frontier)
-    CALLVALUE: (stack: Stack<Expr>) => {
+    CALLVALUE: (stack: Stack<Expr>): void => {
         stack.push(new CallValue());
     },
-    CALLDATALOAD: (stack: Stack<Expr>) => {
+    CALLDATALOAD: (stack: Stack<Expr>): void => {
         const location = stack.pop();
         stack.push(new CallDataLoad(location));
     },
-    CALLDATASIZE: (stack: Stack<Expr>) => {
+    CALLDATASIZE: (stack: Stack<Expr>): void => {
         stack.push(new CALLDATASIZE());
     },
 };

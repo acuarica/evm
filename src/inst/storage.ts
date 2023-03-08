@@ -1,8 +1,8 @@
-import { Opcode } from '../opcode';
-import { Expr, isBigInt, isVal, MappingLoad, MappingStore, SLoad, SStore } from '../ast';
-import { State } from '../state';
+import type { Opcode } from '../opcode';
+import { type Expr, isBigInt, isVal, MappingLoad, MappingStore, SLoad, SStore } from '../ast';
+import type { State } from '../state';
 import { Sha3 } from '../ast';
-import { Contract, Variable } from '../contract';
+import { type Contract, Variable } from '../contract';
 import { Add } from '../ast';
 
 const parseMapping = (...items: Expr[]): Expr[] => {
@@ -17,12 +17,17 @@ const parseMapping = (...items: Expr[]): Expr[] => {
     return mappings;
 };
 
-export const STORAGE = (contract: Contract) => {
+export const STORAGE = (
+    contract: Contract
+): {
+    SLOAD: (opcode: Opcode, state: State) => void;
+    SSTORE: (opcode: Opcode, state: State) => void;
+} => {
     return {
         SLOAD: (_opcode: Opcode, state: State): void => {
             const storeLocation = state.stack.pop();
             if (storeLocation instanceof Sha3) {
-                const mappingItems = parseMapping(...storeLocation.items!);
+                const mappingItems = parseMapping(...storeLocation.items);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
@@ -57,7 +62,7 @@ export const STORAGE = (contract: Contract) => {
                 storeLocation.left instanceof Sha3 &&
                 isBigInt(storeLocation.right)
             ) {
-                const mappingItems = parseMapping(...storeLocation.left.items!);
+                const mappingItems = parseMapping(...storeLocation.left.items);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
@@ -93,7 +98,7 @@ export const STORAGE = (contract: Contract) => {
                 isBigInt(storeLocation.left) &&
                 storeLocation.right instanceof Sha3
             ) {
-                const mappingItems = parseMapping(...storeLocation.right.items!);
+                const mappingItems = parseMapping(...storeLocation.right.items);
                 const mappingLocation = mappingItems.find(mappingItem => isBigInt(mappingItem));
                 const mappingParts = mappingItems.filter(
                     mappingItem => typeof mappingItem !== 'bigint'
@@ -134,7 +139,7 @@ export const STORAGE = (contract: Contract) => {
                 sstoreVariable();
                 // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             } else if (storeLocation instanceof Sha3) {
-                const mappingItems = parseMapping(...storeLocation.items!);
+                const mappingItems = parseMapping(...storeLocation.items);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
@@ -171,7 +176,7 @@ export const STORAGE = (contract: Contract) => {
                 storeLocation.left instanceof Sha3 &&
                 isBigInt(storeLocation.right)
             ) {
-                const mappingItems = parseMapping(...storeLocation.left.items!);
+                const mappingItems = parseMapping(...storeLocation.left.items);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );
@@ -208,7 +213,7 @@ export const STORAGE = (contract: Contract) => {
                 isBigInt(storeLocation.left) &&
                 storeLocation.right instanceof Sha3
             ) {
-                const mappingItems = parseMapping(...storeLocation.right.items!);
+                const mappingItems = parseMapping(...storeLocation.right.items);
                 const mappingLocation = <bigint | undefined>(
                     mappingItems.find(mappingItem => isBigInt(mappingItem))
                 );

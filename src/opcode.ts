@@ -274,7 +274,7 @@ export function decode(code: Uint8Array): Opcode[] {
     }
 }
 
-export function formatOpcode(op: Opcode) {
+export function formatOpcode(op: Opcode): string {
     const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
     const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
     // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();

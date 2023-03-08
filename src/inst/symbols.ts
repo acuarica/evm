@@ -1,5 +1,5 @@
-import { DataCopy, Info, Symbol0, Symbol1 } from '../ast';
-import { State } from '../state';
+import { DataCopy, type Info, Symbol0, Symbol1 } from '../ast';
+import type { State } from '../state';
 import { wrap } from '../ast';
 
 export const SYMBOLS = {
@@ -12,7 +12,7 @@ export const SYMBOLS = {
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
     GASPRICE: symbol0('tx.gasprice'),
     EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
-    EXTCODECOPY: ({ stack }: State) => {
+    EXTCODECOPY: ({ stack }: State): void => {
         const address = stack.pop();
         datacopy((offset, size) => `address(${wrap(address)}).code[${offset}:(${offset}+${size})]`);
     },
@@ -47,7 +47,7 @@ function symbol1(fn: (value: string) => string) {
 }
 
 export function datacopy(fn: (offset: string, size: string) => string) {
-    return ({ stack, memory }: State) => {
+    return ({ stack, memory }: State): void => {
         const dest = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();

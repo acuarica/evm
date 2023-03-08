@@ -1,9 +1,9 @@
-import { Stack } from '../state';
+import type { Stack } from '../state';
 import {
     And,
     Byte,
     evalExpr,
-    Expr,
+    type Expr,
     GT,
     isBigInt,
     isVal,
@@ -70,7 +70,7 @@ export const LOGIC = {
     SLT: lt,
     SGT: gt,
 
-    EQ: (stack: Stack<Expr>) => {
+    EQ: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
 
@@ -83,7 +83,7 @@ export const LOGIC = {
         );
     },
 
-    ISZERO: (stack: Stack<Expr>) => {
+    ISZERO: (stack: Stack<Expr>): void => {
         const value = stack.pop();
         stack.push(
             // isBigInt(value)
@@ -101,7 +101,7 @@ export const LOGIC = {
         );
     },
 
-    AND: (stack: Stack<Expr>) => {
+    AND: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         if (isBigInt(left) && isBigInt(right)) {
@@ -136,24 +136,24 @@ export const LOGIC = {
         }
     },
 
-    OR: (stack: Stack<Expr>) => {
+    OR: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left | right : new Or(left, right));
     },
 
-    XOR: (stack: Stack<Expr>) => {
+    XOR: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(isBigInt(left) && isBigInt(right) ? left ^ right : new Xor(left, right));
     },
 
-    NOT: (stack: Stack<Expr>) => {
+    NOT: (stack: Stack<Expr>): void => {
         const value = stack.pop();
         stack.push(isBigInt(value) ? ~value : new Not(value));
     },
 
-    BYTE: (stack: Stack<Expr>) => {
+    BYTE: (stack: Stack<Expr>): void => {
         const position = stack.pop();
         const data = stack.pop();
         stack.push(
@@ -163,32 +163,32 @@ export const LOGIC = {
         );
     },
 
-    SHL: (stack: Stack<Expr>) => {
+    SHL: (stack: Stack<Expr>): void => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value << shift : new Shl(value, shift));
     },
 
-    SHR: (stack: Stack<Expr>) => {
+    SHR: (stack: Stack<Expr>): void => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Shr(value, shift));
     },
 
-    SAR: (stack: Stack<Expr>) => {
+    SAR: (stack: Stack<Expr>): void => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(isBigInt(value) && isBigInt(shift) ? value >> shift : new Sar(value, shift));
     },
 };
 
-function lt(stack: Stack<Expr>) {
+function lt(stack: Stack<Expr>): void {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? (left < right ? 1n : 0n) : new LT(left, right));
 }
 
-function gt(stack: Stack<Expr>) {
+function gt(stack: Stack<Expr>): void {
     const left = stack.pop();
     const right = stack.pop();
     stack.push(isBigInt(left) && isBigInt(right) ? (left > right ? 1n : 0n) : new GT(left, right));

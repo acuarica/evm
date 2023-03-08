@@ -30,7 +30,7 @@ const protocols: [RegExp, 'bzzr' | 'ipfs'][] = [
 export class Metadata {
     constructor(readonly protocol: 'bzzr' | 'ipfs', readonly hash: string, readonly solc: string) {}
 
-    get url() {
+    get url(): string {
         return `${this.protocol}://${this.hash}`;
     }
 }

@@ -1,9 +1,9 @@
 import { evalExpr, isBigInt } from '../ast';
-import { State } from '../state';
+import type { State } from '../state';
 import { MLoad, MStore } from '../ast';
 
 export const MEMORY = {
-    MLOAD: ({ stack, memory }: State) => {
+    MLOAD: ({ stack, memory }: State): void => {
         let memoryLocation = stack.pop();
         memoryLocation = evalExpr(memoryLocation);
         stack.push(
@@ -16,7 +16,7 @@ export const MEMORY = {
     MSTORE8: mstore,
 };
 
-function mstore({ stack, memory, stmts }: State) {
+function mstore({ stack, memory, stmts }: State): void {
     let storeLocation = stack.pop();
     const storeData = stack.pop();
     storeLocation = evalExpr(storeLocation);

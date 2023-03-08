@@ -4,9 +4,9 @@ export * from './opcode';
 export * as inst from './inst';
 export * as ast from './ast';
 
-import { decode, Opcode, OPCODES } from './opcode';
+import { decode, type Opcode, OPCODES } from './opcode';
 import { toHex } from './opcode';
-import { Metadata, stripMetadataHash } from './metadata';
+import { type Metadata, stripMetadataHash } from './metadata';
 import { Contract } from './contract';
 import { stringify } from './stringify';
 
