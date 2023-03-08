@@ -28,5 +28,19 @@ module.exports = {
         '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
 
         '@typescript-eslint/switch-exhaustiveness-check': 'warn',
+
+        /**
+         * Require explicit return and argument types on exported functions' and classes' public class methods.
+         *
+         * https://typescript-eslint.io/rules/explicit-module-boundary-types/
+         */
+        '@typescript-eslint/explicit-module-boundary-types': 'warn',
+
+        /**
+         * Enforce consistent usage of type imports.
+         *
+         * https://typescript-eslint.io/rules/consistent-type-imports
+         */
+        '@typescript-eslint/consistent-type-imports': 'warn',
     },
 };
