@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { decode, OPCODES } from '../src';
+import { decode, formatOpcode, OPCODES } from '../src';
 
 describe('opcode', () => {
     it('should `decode` empty buffer', () => {
@@ -95,5 +95,37 @@ describe('opcode', () => {
             mnemonic: 'INVALID',
             pushData: null,
         });
+    });
+
+    it('should `decode` format `INVALID` opcodes', () => {
+        expect(
+            formatOpcode({
+                offset: 10,
+                pc: 2,
+                opcode: OPCODES.ADD,
+                mnemonic: 'ADD',
+                pushData: null,
+            })
+        ).to.be.equal('   2:  10    ADD');
+
+        expect(
+            formatOpcode({
+                offset: 5,
+                pc: 1,
+                opcode: OPCODES.PUSH4,
+                mnemonic: 'PUSH4',
+                pushData: Buffer.from([1, 2, 3, 4]),
+            })
+        ).to.be.equal('   1:   5    PUSH4 0x01020304 (16909060)');
+
+        expect(
+            formatOpcode({
+                offset: 0,
+                pc: 0,
+                opcode: 0xb0,
+                mnemonic: 'INVALID',
+                pushData: null,
+            })
+        ).to.be.equal('   0:   0    INVALID');
     });
 });
