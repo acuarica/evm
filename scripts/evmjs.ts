@@ -57,7 +57,7 @@ function writeDot(cfg: ControlFlowGraph) {
         function writeNode(pc: string, block: Block, doms: Set<string>) {
             let label = 'key:' + pc;
             label += '\\l';
-            // label += 'doms: ' + [...doms].join(', ');
+            label += 'doms: ' + [...doms].join(', ');
             label += '\\l';
             label += block.entry.state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
             label += '\\l';
