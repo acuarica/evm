@@ -1,17 +1,10 @@
-import { Expr, Stmt } from './ast';
+import type { Expr, Stmt } from './ast';
 
 /**
  *
  */
 export class Stack<in out T> {
     readonly values: T[] = [];
-
-    /**
-     *
-     */
-    get length() {
-        return this.values.length;
-    }
 
     /**
      *
