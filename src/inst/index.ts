@@ -3,10 +3,10 @@ export { MATH } from './math';
 export { SYSTEM } from './system';
 export { LOGIC } from './logic';
 
-import { Expr } from '../ast';
-import { Contract } from '../contract';
-import { Opcode } from '../opcode';
-import { Stack, State } from '../state';
+import type { Expr } from '../ast';
+import type { Contract } from '../contract';
+import type { Opcode } from '../opcode';
+import type { Stack, State } from '../state';
 
 import { PUSHES, STACK } from './stack';
 import { INFO } from './info';
@@ -44,7 +44,7 @@ const TABLE = {
     PC: (opcode: Opcode, { stack }: State) => stack.push(BigInt(opcode.offset)),
     JUMPDEST: (_opcode: Opcode, _state: State) => {},
     ...make(
-        PUSHES(),
+        PUSHES,
         (fn: (pushData: Uint8Array, stack: Stack<Expr>) => void) => (opcode, state) =>
             fn(opcode.pushData!, state.stack)
     ),
@@ -53,6 +53,7 @@ const TABLE = {
     INVALID,
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function getDispatch(contract: Contract) {
     return {
         ...TABLE,
