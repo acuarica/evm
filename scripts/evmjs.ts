@@ -1,17 +1,31 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { readFileSync } from 'fs';
-import { Block, ControlFlowGraph } from '../src/cfg';
-import { formatOpcode } from '../src/opcode';
+import type { Block, ControlFlowGraph } from '../src/cfg';
+import { formatOpcode, type Opcode, toHex } from '../src/opcode';
 import EVM from '../test/utils/evmtest';
 import * as yargs from 'yargs';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
+import chalk = require('chalk');
 
 const write = console.log;
+
+const blue = chalk.blue;
+const dim = chalk.dim;
+const magenta = chalk.magenta;
 
 function getEVM(path: string) {
     const bytecode = readFileSync(path, 'utf8');
     return new EVM(bytecode);
+}
+
+function ansiOpcode(opcode: Opcode) {
+    const pc = opcode.pc.toString().padStart(6).toUpperCase();
+    const offset = ('0x' + opcode.offset.toString(16)).padStart(8);
+    const pushData = opcode.pushData
+        ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${toHex(opcode.pushData)}`
+        : '';
+    return `${dim(pc)} ${blue(offset)}  ${magenta(opcode.mnemonic)}    ${pushData}`;
 }
 
 function writeDot(cfg: ControlFlowGraph) {
@@ -96,6 +110,19 @@ void yargs
     .scriptName('evmjs')
     .usage('$0 <cmd> [path]')
     .command(
+        'abi [path]',
+        'Writes the abi of the selected function in `dot` format into standard output',
+        (yargs: Argv) => {
+            pathArg(yargs);
+        },
+        function (argv) {
+            const evm = getEVM(argv['path'] as string);
+            console.info(evm.getFunctions());
+            Object.values(evm.contract.functions).forEach(f => console.info(f.label, f.hash));
+            // console.info(evm.contract.main.cfg.functionBranches);
+        }
+    )
+    .command(
         'dis [path]',
         'Disassemble the bytecode into Opcodes',
         (yargs: Argv) => {
@@ -103,7 +130,45 @@ void yargs
         },
         function (argv) {
             const evm = getEVM(argv['path'] as string);
-            evm.opcodes.forEach(op => console.error(formatOpcode(op)));
+            console.info(
+                `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
+                    'mnemonic'
+                )}  ${'push data (PUSHx)'}`
+            );
+            evm.opcodes.forEach(opcode => console.info(ansiOpcode(opcode)));
+        }
+    )
+    .command(
+        'pp [path]',
+        'Pretty the bytecode into Opcodes',
+        (yargs: Argv) => {
+            pathArg(yargs);
+        },
+        function (argv) {
+            const evm = getEVM(argv['path'] as string);
+
+            const cfg = (() => {
+                const selector = argv['selector'] as string;
+                if (selector) {
+                    const fn = evm.contract.getFunction(selector);
+                    if (!fn) {
+                        throw new Error('function ' + selector + ' not found');
+                    }
+                    return fn.cfg;
+                } else {
+                    return evm.contract.main.cfg;
+                }
+            })();
+
+            pprint(cfg);
+            function pprint({ blocks }: ControlFlowGraph) {
+                for (const [pc, block] of Object.entries(blocks)) {
+                    console.log(pc, ':', block.entry.key);
+                    block.opcodes.forEach(op => console.info(ansiOpcode(op)));
+                    console.log('  〒 ', block.stack.values.join(' | '));
+                    block.stmts.forEach(stmt => console.info('  ', stmt.toString()));
+                }
+            }
         }
     )
     .command(
