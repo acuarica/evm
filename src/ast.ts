@@ -1,4 +1,4 @@
-import { Branch } from './cfg';
+import type { Branch } from './cfg';
 import { type Contract } from './contract';
 
 /**
@@ -188,7 +188,7 @@ export class Add extends Bin('Add', '+') {
 }
 
 export class Mul extends Bin('Mul', '*') {
-    eval() {
+    eval(): this {
         return this;
     }
 }
@@ -218,7 +218,7 @@ export class Div extends Bin('Div', '/') {
     }
 }
 export class Mod extends Bin('Mod', '%') {
-    eval() {
+    eval(): this {
         return this;
     }
 }
@@ -239,10 +239,10 @@ export class Sig {
 
     constructor(readonly hash: string) {}
 
-    eval() {
+    eval(): this {
         return this;
     }
-    toString() {
+    toString(): string {
         return `msg.sig == ${this.hash}`;
     }
 }
@@ -270,7 +270,7 @@ export class And extends Bin('And', '&&') {
 }
 
 export class Or extends Bin('Or', '||') {
-    eval() {
+    eval(): this {
         return this;
     }
 }
@@ -297,7 +297,7 @@ export class IsZero {
             ? value.value
             : new IsZero(value);
     }
-    toString() {
+    toString(): string {
         return this.value instanceof Eq
             ? wrap(this.value.left) + ' != ' + wrap(this.value.right)
             : wrap(this.value) + ' == 0';
@@ -332,7 +332,7 @@ export class LT extends Cmp('Lt', '<') {
 }
 
 export class Xor extends Bin('Xor', '^') {
-    eval() {
+    eval(): this {
         return this;
     }
 }
@@ -346,10 +346,10 @@ export class Byte {
 
     constructor(readonly position: Expr, readonly data: Expr) {}
 
-    eval() {
+    eval(): this {
         return this;
     }
-    toString() {
+    toString(): string {
         return `(${wrap(this.data)} >> ${wrap(this.position)}) & 1`;
     }
 }
@@ -366,10 +366,10 @@ export class MLoad {
 
     constructor(readonly location: Expr) {}
 
-    eval() {
+    eval(): this {
         return this;
     }
-    toString() {
+    toString(): string {
         return 'memory[' + wrap(this.location) + ']';
     }
 }
@@ -380,11 +380,11 @@ export class MStore {
 
     constructor(readonly location: Exclude<Expr, bigint>, readonly data: Expr) {}
 
-    eval() {
+    eval(): this {
         return this;
     }
 
-    toString() {
+    toString(): string {
         return 'memory[' + wrap(this.location) + '] = ' + wrap(this.data) + ';';
     }
 }
@@ -404,10 +404,10 @@ export class Sha3 {
         return new Sha3(this.items.map(evalExpr), this.memoryStart, this.memoryLength);
     }
 
-    toString() {
+    toString(): string {
         if (this.memoryStart && this.memoryLength) {
             return `keccak256(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
-                this.memoryLength!
+                this.memoryLength
             )})])`;
         } else {
             return `keccak256(${this.items.map(item => wrap(item)).join(', ')})`;
@@ -436,10 +436,10 @@ export class Symbol0 {
     readonly name = 'Symbol0';
     readonly wrapped = false;
     constructor(readonly symbol: Info, readonly type?: string) {}
-    eval() {
+    eval(): this {
         return this;
     }
-    toString() {
+    toString(): string {
         return this.symbol;
     }
 }
@@ -451,7 +451,7 @@ export class Symbol1 {
     eval(): Expr {
         return new Symbol1(this.fn, evalExpr(this.value));
     }
-    toString() {
+    toString(): string {
         return this.fn(wrap(this.value));
     }
 }
@@ -483,15 +483,19 @@ export class Stop {
     }
 }
 
-export class CREATE {
+interface E {
+    eval(): this;
+    toString(): string;
+}
+
+export class CREATE implements E {
     readonly type = 'address';
     readonly wrapped = true;
 
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {}
 
-    eval() {
-        return this;
-    }
+    eval = (): this => this;
+
     toString() {
         return `(new Contract(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
             this.memoryLength
@@ -714,8 +718,8 @@ export class Revert {
 
     toString() {
         if (this.memoryStart && this.memoryLength) {
-            return `revert(memory[${wrap(this.memoryStart!)}:(${wrap(this.memoryStart!)}+${wrap(
-                this.memoryLength!
+            return `revert(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
+                this.memoryLength
             )})]);`;
         } else {
             return 'revert(' + this.items.map(item => wrap(item)).join(', ') + ');';
