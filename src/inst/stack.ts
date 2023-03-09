@@ -41,59 +41,47 @@ function push(pushData: Uint8Array, stack: Stack<Expr>): void {
     stack.push(new Val(BigInt('0x' + toHex(pushData))));
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function STACK<T>() {
-    return {
-        POP: (stack: Stack<T>) => stack.pop(),
-        ...DUPS(),
-        ...SWAPS(),
-    };
+const dup =
+    (position: number) =>
+    (stack: Stack<Expr>): void =>
+        stack.dup(position);
+const swap =
+    (position: number) =>
+    (stack: Stack<Expr>): void =>
+        stack.swap(position);
 
-    function DUPS() {
-        return {
-            DUP1: dup(0),
-            DUP2: dup(1),
-            DUP3: dup(2),
-            DUP4: dup(3),
-            DUP5: dup(4),
-            DUP6: dup(5),
-            DUP7: dup(6),
-            DUP8: dup(7),
-            DUP9: dup(8),
-            DUP10: dup(9),
-            DUP11: dup(10),
-            DUP12: dup(11),
-            DUP13: dup(12),
-            DUP14: dup(13),
-            DUP15: dup(14),
-            DUP16: dup(15),
-        };
-        function dup(position: number) {
-            return (stack: Stack<T>): void => stack.dup(position);
-        }
-    }
-
-    function SWAPS() {
-        return {
-            SWAP1: swap(1),
-            SWAP2: swap(2),
-            SWAP3: swap(3),
-            SWAP4: swap(4),
-            SWAP5: swap(5),
-            SWAP6: swap(6),
-            SWAP7: swap(7),
-            SWAP8: swap(8),
-            SWAP9: swap(9),
-            SWAP10: swap(10),
-            SWAP11: swap(11),
-            SWAP12: swap(12),
-            SWAP13: swap(13),
-            SWAP14: swap(14),
-            SWAP15: swap(15),
-            SWAP16: swap(16),
-        };
-        function swap(position: number) {
-            return (stack: Stack<T>): void => stack.swap(position);
-        }
-    }
-}
+export const STACK = {
+    POP: (stack: Stack<Expr>): void => void stack.pop(),
+    DUP1: dup(0),
+    DUP2: dup(1),
+    DUP3: dup(2),
+    DUP4: dup(3),
+    DUP5: dup(4),
+    DUP6: dup(5),
+    DUP7: dup(6),
+    DUP8: dup(7),
+    DUP9: dup(8),
+    DUP10: dup(9),
+    DUP11: dup(10),
+    DUP12: dup(11),
+    DUP13: dup(12),
+    DUP14: dup(13),
+    DUP15: dup(14),
+    DUP16: dup(15),
+    SWAP1: swap(1),
+    SWAP2: swap(2),
+    SWAP3: swap(3),
+    SWAP4: swap(4),
+    SWAP5: swap(5),
+    SWAP6: swap(6),
+    SWAP7: swap(7),
+    SWAP8: swap(8),
+    SWAP9: swap(9),
+    SWAP10: swap(10),
+    SWAP11: swap(11),
+    SWAP12: swap(12),
+    SWAP13: swap(13),
+    SWAP14: swap(14),
+    SWAP15: swap(15),
+    SWAP16: swap(16),
+};

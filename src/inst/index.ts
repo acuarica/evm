@@ -48,7 +48,7 @@ const TABLE = {
         (fn: (pushData: Uint8Array, stack: Stack<Expr>) => void) => (opcode, state) =>
             fn(opcode.pushData!, state.stack)
     ),
-    ...makeStack(STACK<Expr>()),
+    ...makeStack(STACK),
     ...makeState(SYSTEM),
     INVALID,
 };
