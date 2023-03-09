@@ -1,21 +1,11 @@
 import type { Stack } from '../state';
-import { Add, Div, Exp, type Expr, isBigInt, isZero, Mod, Mul, Sub } from '../ast';
-import { Sar, Shl } from '../ast';
+import { Add, Div, Exp, type Expr, isBigInt, isZero, Mod, Mul, Sub, Sar, Shl } from '../ast';
 
 export const MATH = {
     ADD: (stack: Stack<Expr>): void => {
         const left = stack.pop();
         const right = stack.pop();
-        stack.push(
-            // isBigInt(left) && isBigInt(right)
-            //     ? left + right
-            //     : isZero(left)
-            //     ? right
-            //     : isZero(right)
-            //     ? left
-            // :
-            new Add(left, right)
-        );
+        stack.push(new Add(left, right));
     },
 
     MUL: (stack: Stack<Expr>): void => {
