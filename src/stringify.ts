@@ -275,8 +275,10 @@ function stringifyInstructions(stmts: Stmt[], indentation = 0): string {
             // } else {
             output += ' '.repeat(indentation) + 'if ' + condition + ' {\n';
             output += stringifyInstructions(instruction.trueBlock!, indentation + 4);
-            output += ' '.repeat(indentation) + '} else {\n';
-            output += stringifyInstructions(instruction.falseBlock!, indentation + 4);
+            if (instruction.falseBlock) {
+                output += ' '.repeat(indentation) + '} else {\n';
+                output += stringifyInstructions(instruction.falseBlock, indentation + 4);
+            }
             output += ' '.repeat(indentation) + '}\n';
             // }
         } else {

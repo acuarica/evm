@@ -4,7 +4,7 @@ import {
     CallSite,
     CallValue,
     evalExpr,
-    Expr,
+    type Expr,
     If,
     isBigInt,
     IsZero,
@@ -14,14 +14,15 @@ import {
     Phi,
     Require,
     Return,
-    Revert,
+    type Revert,
     SigCase,
     SLoad,
-    Stmt,
+    type Stmt,
+    Not,
 } from './ast';
 import { ControlFlowGraph } from './cfg';
 import { getDispatch } from './inst';
-import { Opcode } from './opcode';
+import type { Opcode } from './opcode';
 import { State } from './state';
 import { assert } from './error';
 
@@ -85,13 +86,13 @@ export class Contract {
 
         for (const branch of this.main.cfg.functionBranches) {
             let cfg;
-            try {
-                cfg = new ControlFlowGraph(opcodes, dispatch, branch);
-            } catch (err) {
-                const functionSignature =
-                    branch.hash in functionHashes ? functionHashes[branch.hash] : '';
-                throw new Error(branch.hash + functionSignature + (err as Error).message);
-            }
+            // try {
+            cfg = new ControlFlowGraph(opcodes, dispatch, branch);
+            // } catch (err) {
+            //     const functionSignature =
+            //         branch.hash in functionHashes ? functionHashes[branch.hash] : '';
+            //     throw new Error(branch.hash + functionSignature + (err as Error).message);
+            // }
 
             const fn = new TopLevelFunction(cfg, branch.hash, functionHashes);
             assert(cfg.functionBranches.length === 0);
@@ -245,7 +246,7 @@ function findReturns(stmt: Record<string, Stmt>) {
     return returns;
 }
 
-function transform({ blocks, entry, doms }: ControlFlowGraph): Stmt[] {
+function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {
     const pcs: { [key: string]: true } = {};
     return transformBlock(entry);
 
@@ -274,14 +275,26 @@ function transform({ blocks, entry, doms }: ControlFlowGraph): Stmt[] {
 
         const last = block.stmts.at(-1);
         if (last instanceof Jumpi) {
-            // doms[last]
+            const cc = [...treed[key]].find(
+                dk => ![last.destBranch.key, last.fallBranch.key].includes(dk)
+            );
+            const contBlock = cc ? transformBlock(cc) : undefined;
+
+            // const d = blocks[last.destBranch.key];
+            // const f = blocks[last.fallBranch.key];
+
             const trueBlock = transformBlock(last.destBranch.key);
             const falseBlock = transformBlock(last.fallBranch.key);
             return [
                 ...block.stmts.slice(0, -1),
                 ...(isRevertBlock(falseBlock)
                     ? [new Require(evalExpr(last.condition), falseBlock[0].items), ...trueBlock]
-                    : [new If(evalExpr(last.condition), trueBlock, falseBlock)]),
+                    : contBlock
+                    ? [new If(evalExpr(last.condition), trueBlock, falseBlock), ...contBlock]
+                    : //2
+                      // ?
+                      [new If(evalExpr(new Not(last.condition)), falseBlock), ...trueBlock]),
+                // : [new If(evalExpr(last.condition), trueBlock, falseBlock)]
             ];
         } else if (last instanceof SigCase) {
             const falseBlock = transformBlock(last.fallBranch.key);
@@ -291,8 +304,10 @@ function transform({ blocks, entry, doms }: ControlFlowGraph): Stmt[] {
             ];
         } else if (last instanceof Jump) {
             // delete pcs[last.destBranch!];
+            // return [...block.stmts.slice(0, -1)];
             return [...block.stmts.slice(0, -1), ...transformBlock(last.destBranch.key)];
         } else if (last instanceof JumpDest) {
+            // return [...block.stmts.slice(0, -1)];
             return [...block.stmts.slice(0, -1), ...transformBlock(last.fallBranch.key)];
         }
 

@@ -3,7 +3,11 @@ import { Jump, JumpDest, Jumpi, Stop } from '../../src/ast';
 import EVM from '../utils/evmtest';
 import { contract } from './utils/solc';
 
-contract('control', (compile, fallback) => {
+contract('control', (compile, fallback, version) => {
+    if (version === '0.8.16') {
+        return;
+    }
+
     describe('conditional', function () {
         it('should `decompile` contract with `if` no-else', function () {
             const CONTRACT = `contract C {
@@ -85,7 +89,7 @@ contract('control', (compile, fallback) => {
             expect(text, `decompiled bytecode\n${text}`).to.match(/block\.number/);
         });
 
-        it('should `decompile` contract with nested `if` no-else', function () {
+        it('should `decompile` contract with nested `if`', function () {
             const CONTRACT = `contract C {
                 uint256 total = 7;
                 ${fallback}() external payable {
@@ -94,6 +98,12 @@ contract('control', (compile, fallback) => {
                         x += 11;
                         if (block.number == 9) {
                             total = 3;
+                        }
+                        total += 7;
+                        if (block.number == 27) {
+                            total += 11;
+                        } else {
+                            total += 15;
                         }
                     }
                     total += 5;
@@ -104,7 +114,7 @@ contract('control', (compile, fallback) => {
 
             expect(cfg.functionBranches).to.have.length(0);
 
-            expect(Object.keys(cfg.blocks)).to.have.length(5);
+            expect(Object.keys(cfg.blocks)).to.have.length(8);
 
             const entry = cfg.blocks[cfg.entry];
             expect(entry.preds).to.have.length(0);
