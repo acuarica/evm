@@ -48,36 +48,17 @@ export type Expr =
     | { name: 'CallDataLoad'; location: Expr }
     | { name: 'Symbol0'; symbol: Info };
 
-export const Val = (val: bigint): Is<'Val'> => ({ name: 'Val', val });
-
 export const isVal = (expr: Expr): expr is Is<'Val'> => expr.name === 'Val';
 
 export const isZero = (expr: Expr): expr is Is<'Val'> => isVal(expr) && expr.val === 0n;
 
+export const Val = (val: bigint): Is<'Val'> => ({ name: 'Val', val });
 export const Add = (lhs: Expr, rhs: Expr): Is<'Add'> => ({ name: 'Add', lhs, rhs });
-
 export const Mul = (lhs: Expr, rhs: Expr): Is<'Mul'> => ({ name: 'Mul', lhs, rhs });
-
-export const Sub = (lhs: Expr, rhs: Expr): Is<'Sub'> => ({
-    name: 'Sub',
-    lhs,
-    rhs,
-});
-
-export const Div = (lhs: Expr, rhs: Expr): Is<'Div'> => ({
-    name: 'Div',
-    lhs,
-    rhs,
-});
-
+export const Sub = (lhs: Expr, rhs: Expr): Is<'Sub'> => ({ name: 'Sub', lhs, rhs });
+export const Div = (lhs: Expr, rhs: Expr): Is<'Div'> => ({ name: 'Div', lhs, rhs });
 export const Mod = (lhs: Expr, rhs: Expr): Is<'Mod'> => ({ name: 'Mod', lhs, rhs });
-
-export const Exp = (lhs: Expr, rhs: Expr): Is<'Exp'> => ({
-    name: 'Exp',
-    lhs,
-    rhs,
-});
-
+export const Exp = (lhs: Expr, rhs: Expr): Is<'Exp'> => ({ name: 'Exp', lhs, rhs });
 export const Lt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Lt'> => ({
     name: 'Lt',
     lhs,
