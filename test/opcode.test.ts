@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { decode, formatOpcode, OPCODES } from '../src';
+import { decode, formatOpcode, Opcode, OPCODES } from '../src';
 
-describe('opcode', () => {
+describe('opcode::', () => {
     it('should `decode` empty buffer', () => {
         const opcodes = decode(Buffer.from([]));
 
@@ -68,6 +68,28 @@ describe('opcode', () => {
             mnemonic: 'ADD',
             pushData: null,
         });
+    });
+
+    it('should not fail `PUSH`n does not have enough data', () => {
+        expect(decode(Buffer.from([OPCODES.PUSH32]))).to.be.deep.equal([
+            {
+                offset: 0,
+                pc: 0,
+                opcode: OPCODES.PUSH32,
+                mnemonic: 'PUSH32',
+                pushData: Buffer.from([]),
+            } satisfies Opcode,
+        ]);
+
+        expect(decode(Buffer.from([OPCODES.PUSH32, ...[1, 2, 3, 4]]))).to.deep.equal([
+            {
+                offset: 0,
+                pc: 0,
+                opcode: OPCODES.PUSH32,
+                mnemonic: 'PUSH32',
+                pushData: Buffer.from([1, 2, 3, 4]),
+            } satisfies Opcode,
+        ]);
     });
 
     it('should `decode` with `INVALID` opcodes', () => {
