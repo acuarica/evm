@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Metadata, stripMetadataHash } from '../src';
 import { compile, VERSIONS } from './contracts/utils/solc';
 
-describe('metadata', () => {
+describe('metadata::', () => {
     const HASHES = {
         '0.5.5': [
             'bzzr',
@@ -16,16 +16,30 @@ describe('metadata', () => {
     } as const;
 
     VERSIONS.forEach(version => {
-        it(`should get metadata for bytecode compiled with solc-${version}`, () => {
-            const [, metadata] = stripMetadataHash(
-                compile('contract C {}', version).deployedBytecode
-            );
+        let output: ReturnType<typeof compile>;
 
-            const [protocol, hash, expectedVersion] = HASHES[version];
-            expect(metadata).to.be.deep.equal(
-                new Metadata(protocol, hash, expectedVersion ?? version)
-            );
-            expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
+        before(() => {
+            output = compile('contract C {}', version);
         });
+
+        (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
+            it(`should get metadata for \`${prop}\` compiled with solc-${version}`, () => {
+                const [, metadata] = stripMetadataHash(output[prop]);
+
+                const [protocol, hash, expectedVersion] = HASHES[version];
+                expect(metadata).to.be.deep.equal(
+                    new Metadata(protocol, hash, expectedVersion ?? version)
+                );
+                expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
+            });
+        });
+    });
+
+    it(`should return original bytecode when no metadata`, () => {
+        const originalCode = '01020304';
+        const [code, metadata] = stripMetadataHash(originalCode);
+
+        expect(code).to.be.equal(originalCode);
+        expect(metadata).to.be.null;
     });
 });
