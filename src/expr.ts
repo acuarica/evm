@@ -65,7 +65,6 @@ export const Lt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Lt'> => ({
     rhs,
     isEqual,
 });
-
 export const Gt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Gt'> => ({
     name: 'Gt',
     lhs,
@@ -73,73 +72,21 @@ export const Gt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Gt'> => ({
     isEqual,
 });
 
-export const Eq = (lhs: Expr, rhs: Expr): Is<'Eq'> => ({
-    name: 'Eq',
-    lhs,
-    rhs,
-});
-
-export const IsZero = (val: Expr): Is<'IsZero'> => ({
-    name: 'IsZero',
-    val,
-});
-
-export const And = (lhs: Expr, rhs: Expr): Is<'And'> => ({
-    name: 'And',
-    lhs,
-    rhs,
-});
-
-export const Or = (lhs: Expr, rhs: Expr): Is<'Or'> => ({
-    name: 'Or',
-    lhs,
-    rhs,
-});
-
-export const Xor = (lhs: Expr, rhs: Expr): Is<'Xor'> => ({
-    name: 'Xor',
-    lhs,
-    rhs,
-});
-
-export const Not = (val: Expr): Is<'Not'> => ({
-    name: 'Not',
-    val,
-});
-
-export const Byte = (pos: Expr, data: Expr): Is<'Byte'> => ({
-    name: 'Byte',
-    pos,
-    data,
-});
-
-export const Shl = (val: Expr, shift: Expr): Is<'Shl'> => ({
-    name: 'Shl',
-    val,
-    shift,
-});
-
-export const Shr = (val: Expr, shift: Expr): Is<'Shl'> => ({
-    name: 'Shl',
-    val,
-    shift,
-});
-
-export const Sar = (val: Expr, shift: Expr): Is<'Sar'> => ({
-    name: 'Sar',
-    val,
-    shift,
-});
-
+export const Eq = (lhs: Expr, rhs: Expr): Is<'Eq'> => ({ name: 'Eq', lhs, rhs });
+export const IsZero = (val: Expr): Is<'IsZero'> => ({ name: 'IsZero', val });
+export const And = (lhs: Expr, rhs: Expr): Is<'And'> => ({ name: 'And', lhs, rhs });
+export const Or = (lhs: Expr, rhs: Expr): Is<'Or'> => ({ name: 'Or', lhs, rhs });
+export const Xor = (lhs: Expr, rhs: Expr): Is<'Xor'> => ({ name: 'Xor', lhs, rhs });
+export const Not = (val: Expr): Is<'Not'> => ({ name: 'Not', val });
+export const Byte = (pos: Expr, data: Expr): Is<'Byte'> => ({ name: 'Byte', pos, data });
+export const Shl = (val: Expr, shift: Expr): Is<'Shl'> => ({ name: 'Shl', val, shift });
+export const Shr = (val: Expr, shift: Expr): Is<'Shl'> => ({ name: 'Shl', val, shift });
+export const Sar = (val: Expr, shift: Expr): Is<'Sar'> => ({ name: 'Sar', val, shift });
 export const CallDataLoad = (location: Expr): Is<'CallDataLoad'> => ({
     name: 'CallDataLoad',
     location,
 });
-
-export const Symbol0 = (symbol: Info): Is<'Symbol0'> => ({
-    name: 'Symbol0',
-    symbol,
-});
+export const Symbol0 = (symbol: Info): Is<'Symbol0'> => ({ name: 'Symbol0', symbol });
 
 const Exec: Table = {
     Val: expr => expr,
