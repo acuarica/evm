@@ -48,10 +48,6 @@ export type Expr =
     | { name: 'CallDataLoad'; location: Expr }
     | { name: 'Symbol0'; symbol: Info };
 
-export const isVal = (expr: Expr): expr is Is<'Val'> => expr.name === 'Val';
-
-export const isZero = (expr: Expr): expr is Is<'Val'> => isVal(expr) && expr.val === 0n;
-
 export const Val = (val: bigint): Is<'Val'> => ({ name: 'Val', val });
 export const Add = (lhs: Expr, rhs: Expr): Is<'Add'> => ({ name: 'Add', lhs, rhs });
 export const Mul = (lhs: Expr, rhs: Expr): Is<'Mul'> => ({ name: 'Mul', lhs, rhs });
@@ -59,6 +55,17 @@ export const Sub = (lhs: Expr, rhs: Expr): Is<'Sub'> => ({ name: 'Sub', lhs, rhs
 export const Div = (lhs: Expr, rhs: Expr): Is<'Div'> => ({ name: 'Div', lhs, rhs });
 export const Mod = (lhs: Expr, rhs: Expr): Is<'Mod'> => ({ name: 'Mod', lhs, rhs });
 export const Exp = (lhs: Expr, rhs: Expr): Is<'Exp'> => ({ name: 'Exp', lhs, rhs });
+
+const Cmp = <N>(name: N, lhs: Expr, rhs: Expr, isEqual: boolean) => ({
+    name,
+    lhs,
+    rhs,
+    isEqual,
+});
+
+export const Lt0 = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Lt'> =>
+    Cmp('Lt', lhs, rhs, isEqual);
+
 export const Lt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Lt'> => ({
     name: 'Lt',
     lhs,
@@ -71,7 +78,6 @@ export const Gt = (lhs: Expr, rhs: Expr, isEqual = false): Is<'Gt'> => ({
     rhs,
     isEqual,
 });
-
 export const Eq = (lhs: Expr, rhs: Expr): Is<'Eq'> => ({ name: 'Eq', lhs, rhs });
 export const IsZero = (val: Expr): Is<'IsZero'> => ({ name: 'IsZero', val });
 export const And = (lhs: Expr, rhs: Expr): Is<'And'> => ({ name: 'And', lhs, rhs });
@@ -87,6 +93,9 @@ export const CallDataLoad = (location: Expr): Is<'CallDataLoad'> => ({
     location,
 });
 export const Symbol0 = (symbol: Info): Is<'Symbol0'> => ({ name: 'Symbol0', symbol });
+
+export const isVal = (expr: Expr): expr is Is<'Val'> => expr.name === 'Val';
+export const isZero = (expr: Expr): expr is Is<'Val'> => isVal(expr) && expr.val === 0n;
 
 const Exec: Table = {
     Val: expr => expr,
