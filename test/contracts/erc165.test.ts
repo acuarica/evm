@@ -9,7 +9,7 @@ contract C {
     }
 }`;
 
-describe('contracts::erc165', () => {
+describe('contracts erc165', () => {
     let evm: EVM;
 
     before(() => {

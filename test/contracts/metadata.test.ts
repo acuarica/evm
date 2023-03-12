@@ -25,7 +25,7 @@ function generateFFMetadataContract() {
     }
 }
 
-describe('contracts::metadata', () => {
+describe('contracts metadata', () => {
     let evm: EVM;
 
     before(() => {

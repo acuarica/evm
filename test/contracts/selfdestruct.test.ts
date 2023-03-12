@@ -11,7 +11,7 @@ contract C {
 }
 `;
 
-describe('contracts::selfdestruct', () => {
+describe('contracts selfdestruct', () => {
     let evm: EVM;
 
     before(() => {
