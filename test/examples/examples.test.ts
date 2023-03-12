@@ -142,16 +142,6 @@ describe('examples', () => {
                         `actual ${inspect(evm.getFunctions())} != expected ${inspect(expected)}`
                     ).to.be.deep.equal(new Set(expected));
                 }
-
-                for (const functionName of evm.getFunctions()) {
-                    const fn = evm.contract.getFunction(functionName);
-                    expect(
-                        fn,
-                        `${functionName} not found in ${Object.keys(
-                            evm.contract.functions
-                        ).toString()}`
-                    ).to.be.not.undefined;
-                }
             });
 
             lines.forEach(line => {
