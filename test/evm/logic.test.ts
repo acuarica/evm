@@ -7,52 +7,56 @@ import { Symbol0 } from '../../src/evm/sym';
 import { Stack } from '../../src/state';
 
 describe('evm::logic::', () => {
-    it.skip('should calculate `~1`', () => {
+    it('should calculate `~1`', () => {
         const stack = new Stack<Expr>();
         stack.push(new Val(1n));
+
         LOGIC.NOT(stack);
 
-        expect(stack.values).to.deep.equal([new Val(~1n)]);
+        expect(stack.values).to.deep.equal([new Not(new Val(1n))]);
+        expect(stack.values[0].eval()).to.deep.equal(new Val(~1n));
     });
 
-    it.skip('should stringify `~block.number`', () => {
+    it('should stringify `~block.number`', () => {
         const stack = new Stack<Expr>();
         stack.push(new Symbol0('block.number'));
         expect(stack.values).to.be.deep.equal([new Symbol0('block.number')]);
+
         LOGIC.NOT(stack);
+
         expect(stack.values).has.length(1);
         expect(stack.values[0]).to.be.deep.equal(new Not(new Symbol0('block.number')));
         expect(stack.values[0].str()).to.be.equal('~block.number');
     });
 
     describe('EQ', () => {
-        // it('should calculate `1 == 1`', () => {
-        //     const stack = new Stack<Expr>();
-        //     stack.push(1n);
-        //     stack.push(1n);
-        //     LOGIC.EQ(stack);
-        //     expect(stack.values).to.deep.equal([1n]);
-        // });
+        it('should calculate `1 == 1`', () => {
+            const stack = new Stack<Expr>();
+            stack.push(new Val(1n));
+            stack.push(new Val(1n));
+            LOGIC.EQ(stack);
+            expect(stack.values).to.deep.equal([new Val(1n)]);
+        });
 
-        // it('should calculate `1 == 2`', () => {
-        //     const stack = new Stack<Expr>();
-        //     stack.push(1n);
-        //     stack.push(2n);
-        //     inst.LOGIC.EQ(stack);
-        //     expect(stack.values).to.be.deep.equal([0n]);
-        // });
+        it('should calculate `1 == 2`', () => {
+            const stack = new Stack<Expr>();
+            stack.push(new Val(1n));
+            stack.push(new Val(2n));
+            LOGIC.EQ(stack);
+            expect(stack.values).to.be.deep.equal([new Val(0n)]);
+        });
 
-        // it('should stringify `block.number == 1`', () => {
-        //     const stack = new Stack<ast.Expr>();
-        //     stack.push(1n);
-        //     stack.push(new ast.Symbol0('block.number'));
-        //     expect(stack.values).to.be.deep.equal([new ast.Symbol0('block.number'), 1n]);
+        it('should stringify `block.number == 1`', () => {
+            const stack = new Stack<Expr>();
+            stack.push(new Val(1n));
+            stack.push(new Symbol0('block.number'));
+            expect(stack.values).to.be.deep.equal([new Symbol0('block.number'), new Val(1n)]);
 
-        //     inst.LOGIC.EQ(stack);
+            LOGIC.EQ(stack);
 
-        //     expect(stack.values).has.length(1);
-        //     expect(stack.values[0].toString()).to.be.equal('block.number == 1');
-        // });
+            expect(stack.values).has.length(1);
+            expect(stack.values[0].str()).to.be.equal('block.number == 1');
+        });
 
         ['06fdde03', '12345678', '00000001'].forEach(hash => {
             describe(`EQ detect msg.sig for hash ${hash}`, () => {
