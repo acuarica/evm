@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Metadata, stripMetadataHash } from '../src';
+import { Metadata, stripMetadataHash } from '../src/metadata';
 import { compile, VERSIONS } from './contracts/utils/solc';
 
 describe('metadata::', () => {

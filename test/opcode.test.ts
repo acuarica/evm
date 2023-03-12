@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { decode, formatOpcode, Opcode, OPCODES } from '../src';
+import { decode, formatOpcode, Opcode, OPCODES } from '../src/opcode';
 
 describe('opcode::', () => {
     it('should `decode` empty buffer', () => {
