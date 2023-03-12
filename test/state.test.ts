@@ -93,8 +93,10 @@ describe('state::', () => {
 
     describe('State', () => {
         it('should clone a state without aliasing with its source', () => {
-            const state = new State<never, number>();
-            expect(state.memory).to.have.be.empty;
+            const state = new State<number, number>();
+            expect(state.halted).to.be.false;
+            expect(state.stmts).to.be.empty;
+            expect(state.memory).to.be.empty;
 
             state.memory[0] = 1;
             const clone = state.clone();
@@ -103,6 +105,24 @@ describe('state::', () => {
 
             expect(state.memory).to.have.keys([0, 1]);
             expect(clone.memory).to.have.keys([0]);
+        });
+
+        it('should clone a state while aliasing its contents', () => {
+            const expr = { x: 'a' as 'a' | 'b' };
+
+            const state = new State<never, { x: 'a' | 'b' }>();
+            state.memory[0] = expr;
+            const clone = state.clone();
+
+            state.memory[1] = expr;
+            expr.x = 'b';
+
+            expect(state.memory).to.have.keys([0, 1]);
+            expect(state.memory[0]).to.be.deep.equal({ x: 'b' });
+            expect(state.memory[1]).to.be.deep.equal({ x: 'b' });
+
+            expect(clone.memory).to.have.keys([0]);
+            expect(state.memory[0]).to.be.deep.equal({ x: 'b' });
         });
     });
 });

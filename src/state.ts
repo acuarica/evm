@@ -1,5 +1,3 @@
-import type { Expr, Stmt } from './ast';
-
 /**
  *
  */
@@ -67,16 +65,17 @@ export class Stack<in out T> {
 }
 
 /**
- *
+ * Represents a `State` with statements `S` and expressions `E`.
  */
-export class State<S = Stmt, E = Expr> {
+export class State<S, E> {
     /**
-     *
+     * Whether this `State` has been halted.
+     * When `true`, no more execution should be allowed in this `State`.
      */
     halted = false;
 
     /**
-     *
+     * The statements executed that lead to this `State`.
      */
     readonly stmts: S[] = [];
 
@@ -88,8 +87,16 @@ export class State<S = Stmt, E = Expr> {
     constructor(readonly stack = new Stack<E>(), readonly memory: { [location: number]: E } = {}) {}
 
     /**
+     * Creates a detached clone from this `State`.
+     * The cloned state only shallow copies both `stack` and `memory`,
+     * while `stmts` will be empty and `halted` false.
      *
-     * @returns
+     * Note however the shallow copy means the structure of both `stack` and `memory` are cloned,
+     * not their contents.
+     * This means that any expression `E` in either the `stack` or `memory`
+     * will be shared across instances if they are references.
+     *
+     * @returns a new `State` detached from this one.
      */
     clone(): State<S, E> {
         return new State(this.stack.clone(), { ...this.memory });
