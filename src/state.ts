@@ -102,3 +102,8 @@ export class State<S, E> {
         return new State(this.stack.clone(), { ...this.memory });
     }
 }
+
+/**
+ * Represents the volatile memory of `State`, _i.e._, its `stack` and `memory`.
+ */
+export type Ram<E> = Pick<State<never, E>, 'stack' | 'memory'>;
