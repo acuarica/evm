@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Stack, State } from '../src';
+import { Stack, State } from '../src/state';
 
 describe('state::', () => {
     describe('Stack', () => {
