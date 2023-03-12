@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { Runnable, Suite } from 'mocha';
+import type { Runnable, Suite } from 'mocha';
 import * as semver from 'semver';
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
 
-type Version = typeof VERSIONS[number];
+type Version = (typeof VERSIONS)[number];
 
 type Bytecode = {
     object: string;
