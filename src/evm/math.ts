@@ -1,5 +1,6 @@
 import type { Stack } from '../state';
 import { Bin, type Expr, Val } from './def';
+import { Sar, Shl } from './logic';
 
 export class Add extends Bin('Add', '+', 11) {
     eval(): Expr {
@@ -125,6 +126,18 @@ export const MATH = {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(new Exp(left, right));
+    },
+
+    SIGNEXTEND: (stack: Stack<Expr>): void => {
+        const left = stack.pop();
+        const right = stack.pop();
+        stack.push(
+            left.isVal() && right.isVal()
+                ? new Val((right.val << (32n - left.val)) >> (32n - left.val))
+                : left.isVal()
+                ? new Sar(new Shl(right, new Val(32n - left.val)), new Val(32n - left.val))
+                : new Sar(new Shl(right, new Sub(new Val(32n), left)), new Sub(new Val(32n), left))
+        );
     },
 };
 

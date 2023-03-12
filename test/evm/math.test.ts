@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Stack } from '../../src/state';
 import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/def';
-import { Symbol0 } from '../../src/evm/sym';
+import { SYM, Symbol0 } from '../../src/evm/sym';
 
 describe('evm::math::', () => {
     it('should test `isVal`', () => {
@@ -15,24 +15,26 @@ describe('evm::math::', () => {
         expect(new Val(1n).isZero()).to.be.false;
     });
 
-    it('should stringify `block.number + 1`', () => {
-        const stack = new Stack<Expr>();
-        stack.push(new Val(1n));
-        stack.push(new Symbol0('block.number'));
-        expect(stack.values).to.be.deep.equal([new Symbol0('block.number'), new Val(1n)]);
-        MATH.ADD(stack);
-
-        expect(stack.values).has.length(1);
-        expect(stack.values[0]).to.be.deep.equal(new Add(new Symbol0('block.number'), new Val(1n)));
-        expect(stack.values[0].str()).to.equal('block.number + 1');
-    });
-
     [
+        {
+            insts: ['NUMBER', 1, 'ADD'] as const,
+            expr: new Add(new Val(1n), new Symbol0('block.number')),
+            get val() {
+                return this.expr;
+            },
+            str: '1 + block.number',
+        },
         {
             insts: [2, 1, 'ADD'] as const,
             expr: new Add(new Val(1n), new Val(2n)),
             val: new Val(3n),
             str: '1 + 2',
+        },
+        {
+            insts: [2, 1, 'SUB'] as const,
+            expr: new Sub(new Val(1n), new Val(2n)),
+            val: new Val(-1n),
+            str: '1 - 2',
         },
         {
             insts: [3, 2, 'ADD', 1, 'ADD'] as const,
@@ -89,7 +91,7 @@ describe('evm::math::', () => {
             val,
             str,
         }: {
-            insts: readonly (keyof typeof MATH | number)[];
+            insts: readonly (keyof typeof MATH | keyof typeof SYM | number)[];
             expr: Expr;
             val: Expr;
             str: string;
@@ -100,7 +102,14 @@ describe('evm::math::', () => {
                     if (typeof inst === 'number') {
                         stack.push(new Val(BigInt(inst)));
                     } else {
-                        MATH[inst](stack);
+                        const sym = Object.fromEntries(
+                            Object.entries(SYM).map(([k, fn]) => [
+                                k,
+                                (stack: Stack<Expr>) => fn({ stack, memory: {} }),
+                            ])
+                        ) as { [key in keyof typeof SYM]: (stack: Stack<Expr>) => void };
+                        const evm = { ...MATH, ...sym };
+                        evm[inst](stack);
                     }
                 }
 
