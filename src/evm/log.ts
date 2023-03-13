@@ -47,7 +47,7 @@ export class Log implements IStmt {
     //     );
     // }
 
-    str() {
+    toString() {
         return this.eventName
             ? `emit ${this.eventName}(${[...this.topics, ...this.args].join(', ')});`
             : 'log(' +

@@ -290,7 +290,9 @@ export class Invalid implements IStmt {
     //     return this;
     // }
 
-    toString = () => `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
+    toString() {
+        return `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
+    }
 }
 
 export class SelfDestruct implements IStmt {
@@ -302,7 +304,9 @@ export class SelfDestruct implements IStmt {
     //     return this;
     // }
 
-    toString = () => `selfdestruct(${wrap(this.address)});`;
+    toString(): string {
+        return `selfdestruct(${wrap(this.address)});`;
+    }
 }
 
 export function memArgs0<T>(

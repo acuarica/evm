@@ -20,7 +20,7 @@ export class MStore implements IStmt {
 
     constructor(readonly location: Expr, readonly data: Expr) {}
 
-    str(): string {
+    toString(): string {
         return `memory[${this.location.str()}] = ${this.data.str()};`;
     }
 }
