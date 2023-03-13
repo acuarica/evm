@@ -6,23 +6,23 @@ import { MLoad } from './memory';
 /**
  *
  */
-export interface Events {
+export interface IEvents {
     get(topic: string): { label?: string; indexedCount: number } | undefined;
 
     // has(topic: string): boolean;
 
-    set(topic: string, value: ReturnType<Events['get']>): void;
+    set(topic: string, value: NonNullable<ReturnType<IEvents['get']>>): void;
 }
 
 export class Log implements IStmt {
     readonly name = 'Log';
-    readonly type?: string;
-    readonly wrapped = true;
+    // readonly type?: string;
+    // readonly wrapped = true;
     readonly eventName?: string;
 
     constructor(
         // private readonly eventHashes: { [s: string]: string },
-        events: Events,
+        events: IEvents,
         readonly topics: Expr[],
         readonly args: Expr[],
         readonly memoryStart?: Expr,
@@ -61,7 +61,7 @@ export class Log implements IStmt {
     }
 }
 
-export const LOGS = (events: Events) => {
+export const LOGS = (events: IEvents) => {
     return {
         LOG0: log(0, events),
         LOG1: log(1, events),
@@ -71,7 +71,7 @@ export const LOGS = (events: Events) => {
     };
 };
 
-function log(topicsCount: number, events: Events) {
+function log(topicsCount: number, events: IEvents) {
     return (_opcode: Opcode, state: State<Stmt, Expr>): void => {
         let offset = state.stack.pop();
         let size = state.stack.pop();

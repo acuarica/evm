@@ -103,6 +103,10 @@ export function Tag<N extends string>(tag: N, prec: number) {
             const text = this.str();
             return Tag.prec < prec ? `(${text})` : text;
         }
+
+        toString() {
+            return this.str();
+        }
     }
 
     return Tag;
@@ -124,12 +128,15 @@ export function Bin<N extends string>(tag: N, op: string, prec: number) {
 
 export class Val extends Tag('Val', 16) {
     jumpDest: number | null = null;
+
     constructor(readonly val: bigint) {
         super();
     }
+
     eval(): Expr {
         return this;
     }
+
     str(): string {
         return `${this.isJumpDest() ? '[J]' : ''}${this.val.toString(16)}`;
     }

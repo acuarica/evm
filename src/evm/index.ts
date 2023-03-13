@@ -9,7 +9,7 @@ import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
 import { INVALID, PC, SYSTEM } from './system';
-import { LOGS, type Events } from './log';
+import { LOGS, type IEvents } from './log';
 
 // import { STORAGE } from './storage';
 
@@ -52,7 +52,7 @@ const TABLE = {
     INVALID,
 };
 
-export function EVM(opcodes: Opcode[], events: Events) {
+export function EVM(opcodes: Opcode[], events: IEvents) {
     const insts = {
         ...TABLE,
         // ...STORAGE(contract),
