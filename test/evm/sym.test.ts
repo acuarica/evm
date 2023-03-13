@@ -14,7 +14,10 @@ describe('evm::sym', () => {
             it('should get it programatically', () => {
                 const state = new State<never, Expr>();
                 SYM[name as keyof typeof INFO](state);
-                expect(state.stack.values).to.be.deep.equal([new Symbol0(value)]);
+
+                const expr = new Symbol0(value);
+                expect(state.stack.values).to.be.deep.equal([expr]);
+                expect(expr.str()).to.be.deep.equal(value);
             });
 
             const sol = `contract C {
