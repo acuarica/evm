@@ -136,30 +136,33 @@ export function compile(
     }
 }
 
-export function contract(
-    title: string,
+export function forVersion(
     fn: (
         compile_: (content: string, context?: Mocha.Context) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
     ) => void
 ) {
-    describe(`contracts.${title}`, () => {
-        VERSIONS.forEach(version => {
-            if (version.startsWith(process.env['SOLC'] ?? '')) {
-                const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
+    VERSIONS.forEach(version => {
+        if (version.startsWith(process.env['SOLC'] ?? '')) {
+            const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
 
-                describe(`solc-v${version}`, () => {
-                    fn(
-                        (content, context) =>
-                            compile(content, version, {
-                                context: context,
-                            }),
-                        fallback,
-                        version
-                    );
-                });
-            }
-        });
+            describe(`solc-v${version}`, () => {
+                fn(
+                    (content, context) =>
+                        compile(content, version, {
+                            context: context,
+                        }),
+                    fallback,
+                    version
+                );
+            });
+        }
+    });
+}
+
+export function contract(title: string, fn: Parameters<typeof forVersion>[0]) {
+    describe(`contracts.${title}`, () => {
+        forVersion(fn);
     });
 }

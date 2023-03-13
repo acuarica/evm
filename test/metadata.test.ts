@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Metadata, stripMetadataHash } from '../src/metadata';
-import { compile, VERSIONS } from './contracts/utils/solc';
+import { forVersion } from './contracts/utils/solc';
 
 describe('metadata::', () => {
     it(`should return original bytecode when no metadata`, () => {
@@ -23,24 +23,22 @@ describe('metadata::', () => {
         '0.8.16': ['ipfs', '12208ebe81467a9118d8a0387f22cc7713981d4c8f85aea00cbf07fa8848b20ca85b'],
     } as const;
 
-    VERSIONS.forEach(version => {
+    forVersion((compile, _fallback, version) => {
         let output: ReturnType<typeof compile>;
 
-        describe(version, () => {
-            before(function () {
-                output = compile('contract C {}', version, { context: this });
-            });
+        before(function () {
+            output = compile('contract C {}', this);
+        });
 
-            (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
-                it(`should get metadata for \`${prop}\``, () => {
-                    const [, metadata] = stripMetadataHash(output[prop]);
+        (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
+            it(`should get metadata for \`${prop}\``, () => {
+                const [, metadata] = stripMetadataHash(output[prop]);
 
-                    const [protocol, hash, expectedVersion] = HASHES[version];
-                    expect(metadata).to.be.deep.equal(
-                        new Metadata(protocol, hash, expectedVersion ?? version)
-                    );
-                    expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
-                });
+                const [protocol, hash, expectedVersion] = HASHES[version];
+                expect(metadata).to.be.deep.equal(
+                    new Metadata(protocol, hash, expectedVersion ?? version)
+                );
+                expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
             });
         });
     });
