@@ -65,7 +65,7 @@ export class Stack<in out T> {
 }
 
 /**
- * Represents a `State` with statements `S` and expressions `E`.
+ * Represents the state of an EVM run with statements `S` and expressions `E`.
  */
 export class State<S, E> {
     /**
