@@ -201,10 +201,6 @@ export class DELEGATECALL extends Tag('DelegateCall', Val.prec) {
 export class Stop implements IStmt {
     readonly name = 'Stop';
 
-    // eval() {
-    //     return this;
-    // }
-
     toString() {
         return 'return;';
     }
@@ -222,26 +218,24 @@ export class Return implements IStmt {
 
     toString(): string {
         if (this.memoryStart && this.memoryLength) {
-            return `return memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
-                this.memoryLength
-            )})];`;
+            return `return memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})];`;
         } else if (this.args.length === 0) {
             return 'return;';
         } else if (
             this.args.length === 1 &&
             (isBigInt(this.args[0]) || (this.args[0] as any).static)
         ) {
-            return 'return ' + this.args[0] + ';';
+            return `return ${this.args[0]};`;
         } else if (
             this.args.length === 3 &&
-            this.args.every(item => isBigInt(item)) &&
-            this.args[0] === 32n
+            this.args.every(item => item.isVal()) &&
+            (this.args[0] as Val).val === 32n
         ) {
             return 'return "' + hex2a(this.args[2].toString(16)) + '";';
         } else {
             return this.args.length === 1
-                ? `return ${wrap(this.args[0])};`
-                : `return (${this.args.map(item => wrap(item)).join(', ')});`;
+                ? `return ${this.args[0]};`
+                : `return (${this.args.join(', ')});`;
         }
     }
 }
@@ -257,8 +251,6 @@ function hex2a(hexx: any) {
 
 export class Revert implements IStmt {
     readonly name = 'Revert';
-    // readonly type?: string;
-    // readonly wrapped = true;
 
     constructor(
         readonly items: Expr[],
@@ -266,18 +258,10 @@ export class Revert implements IStmt {
         readonly memoryLength?: Expr
     ) {}
 
-    // eval() {
-    //     return this;
-    // }
-
     toString() {
-        if (this.memoryStart && this.memoryLength) {
-            return `revert(memory[${wrap(this.memoryStart)}:(${wrap(this.memoryStart)}+${wrap(
-                this.memoryLength
-            )})]);`;
-        } else {
-            return 'revert(' + this.items.map(item => wrap(item)).join(', ') + ');';
-        }
+        return this.memoryStart && this.memoryLength
+            ? `revert(memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})]);`
+            : `revert(${this.items.join(', ')});`;
     }
 }
 
@@ -285,10 +269,6 @@ export class Invalid implements IStmt {
     readonly name = 'Invalid';
 
     constructor(readonly opcode: number) {}
-
-    // eval() {
-    //     return this;
-    // }
 
     toString() {
         return `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
@@ -298,14 +278,10 @@ export class Invalid implements IStmt {
 export class SelfDestruct implements IStmt {
     readonly name = 'SelfDestruct';
 
-    constructor(readonly address: any) {}
-
-    // eval() {
-    //     return this;
-    // }
+    constructor(readonly address: Expr) {}
 
     toString(): string {
-        return `selfdestruct(${wrap(this.address)});`;
+        return `selfdestruct(${this.address});`;
     }
 }
 
