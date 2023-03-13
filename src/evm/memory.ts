@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import { type Stmt, Tag, Val, type Expr } from './ast';
+import { type Stmt, Tag, Val, type Expr, type IStmt } from './ast';
 
 export class MLoad extends Tag('MLoad', Val.prec) {
     constructor(readonly location: Expr) {
@@ -15,8 +15,8 @@ export class MLoad extends Tag('MLoad', Val.prec) {
     }
 }
 
-export class MStore {
-    readonly tag = 'MStore';
+export class MStore implements IStmt {
+    readonly name = 'MStore';
 
     constructor(readonly location: Expr, readonly data: Expr) {}
 

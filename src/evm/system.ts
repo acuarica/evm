@@ -1,6 +1,6 @@
 import type { Opcode } from '../opcode';
 import type { State } from '../state';
-import { Tag, Val, type Expr, type Stmt } from './ast';
+import { type IStmt, Tag, Val, type Expr, type Stmt } from './ast';
 import { MLoad } from './memory';
 
 export class Sha3 extends Tag('Sha3', Val.prec) {
@@ -192,26 +192,27 @@ export class DELEGATECALL extends Tag('DelegateCall', Val.prec) {
     eval(): Expr {
         return this;
     }
+
     str(): string {
         return `delegatecall(${this.gas.str()},${this.address.str()},${this.memoryStart.str()},${this.memoryLength.str()},${this.outputStart.str()},${this.outputLength.str()})`;
     }
 }
 
-export class Stop {
+export class Stop implements IStmt {
     readonly name = 'Stop';
 
-    eval() {
-        return this;
-    }
+    // eval() {
+    //     return this;
+    // }
 
     toString() {
         return 'return;';
     }
 }
 
-export class Return {
+export class Return implements IStmt {
     readonly name = 'Return';
-    readonly wrapped = true;
+    // readonly wrapped = true;
 
     constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {}
 
@@ -254,10 +255,10 @@ function hex2a(hexx: any) {
     return str;
 }
 
-export class Revert {
-    readonly name = 'REVERT';
-    readonly type?: string;
-    readonly wrapped = true;
+export class Revert implements IStmt {
+    readonly name = 'Revert';
+    // readonly type?: string;
+    // readonly wrapped = true;
 
     constructor(
         readonly items: Expr[],
@@ -265,9 +266,9 @@ export class Revert {
         readonly memoryLength?: Expr
     ) {}
 
-    eval() {
-        return this;
-    }
+    // eval() {
+    //     return this;
+    // }
 
     toString() {
         if (this.memoryStart && this.memoryLength) {
@@ -280,30 +281,26 @@ export class Revert {
     }
 }
 
-export class Invalid {
+export class Invalid implements IStmt {
     readonly name = 'Invalid';
-    readonly type?: string;
-    readonly wrapped = true;
 
     constructor(readonly opcode: number) {}
 
-    eval() {
-        return this;
-    }
+    // eval() {
+    //     return this;
+    // }
 
     toString = () => `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
 }
 
-export class SelfDestruct {
-    readonly name = 'SELFDESTRUCT';
-    readonly type?: string;
-    readonly wrapped = true;
+export class SelfDestruct implements IStmt {
+    readonly name = 'SelfDestruct';
 
     constructor(readonly address: any) {}
 
-    eval() {
-        return this;
-    }
+    // eval() {
+    //     return this;
+    // }
 
     toString = () => `selfdestruct(${wrap(this.address)});`;
 }
@@ -433,6 +430,9 @@ export const SYSTEM = {
         state.stmts.push(new SelfDestruct(address));
     },
 };
+
+export const PC = (opcode: Opcode, { stack }: State<Stmt, Expr>) =>
+    stack.push(new Val(BigInt(opcode.offset)));
 
 export const INVALID = (opcode: Opcode, state: State<Stmt, Expr>): void => {
     state.halted = true;
