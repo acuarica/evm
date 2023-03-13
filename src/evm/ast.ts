@@ -4,18 +4,18 @@ import type { CallDataLoad, CallDataSize, CallValue } from './env';
 import type { DataCopy, Symbol0, Symbol1 } from './sym';
 import type { MLoad, MStore } from './memory';
 import type {
-    CALL,
-    CALLCODE,
+    Call,
+    CallCode,
     Create,
-    CREATE2,
-    DELEGATECALL,
+    Create2,
+    DelegateCall,
     Invalid,
     Return,
     ReturnData,
     Revert,
     SelfDestruct,
     Sha3,
-    STATICCALL,
+    StaticCall,
     Stop,
 } from './system';
 import type { Log } from './log';
@@ -53,12 +53,12 @@ export type Expr =
     | MLoad
     | Sha3
     | Create
-    | CALL
+    | Call
     | ReturnData
-    | CALLCODE
-    | CREATE2
-    | STATICCALL
-    | DELEGATECALL;
+    | CallCode
+    | Create2
+    | StaticCall
+    | DelegateCall;
 
 /**
  * Base definition for any type that is `Stmt`.

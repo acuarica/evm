@@ -18,8 +18,8 @@ export class Sha3 extends Tag('Sha3') {
 
     str(): string {
         return this.memoryStart && this.memoryLength
-            ? `keccak256(memory[${this.memoryStart.str()}:(${this.memoryStart.str()}+${this.memoryLength.str()})])`
-            : `keccak256(${this.items.map(item => item.str()).join(', ')})`;
+            ? `keccak256(memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})])`
+            : `keccak256(${this.items.join(', ')})`;
     }
 }
 
@@ -27,6 +27,7 @@ export class Create extends Tag('Create') {
     readonly type = 'address';
 
     /**
+     * Creates a new account with associated code.
      *
      * @param value Value in _wei_ to send to the new account.
      * @param offset Byte offset in the memory in bytes, the initialisation code for the new account.
@@ -45,8 +46,7 @@ export class Create extends Tag('Create') {
     }
 }
 
-export class CALL extends Tag('Call', Val.prec) {
-    readonly type?: string;
+export class Call extends Tag('Call') {
     throwOnFail = false;
 
     constructor(
@@ -74,20 +74,20 @@ export class CALL extends Tag('Call', Val.prec) {
                 this.gas.right.val === 2300n
             ) {
                 if (this.throwOnFail) {
-                    return `address(${this.address.str()}).transfer(${this.value.str()})`;
+                    return `address(${this.address}).transfer(${this.value})`;
                 } else {
-                    return `address(${this.address.str()}).send(${this.value.str()})`;
+                    return `address(${this.address}).send(${this.value})`;
                 }
             } else {
-                return `address(${this.address.str()}).call.gas(${this.gas.str()}).value(${this.value.str()})`;
+                return `address(${this.address}).call.gas(${this.gas}).value(${this.value})`;
             }
         } else {
-            return `call(${this.gas.str()},${this.address.str()},${this.value.str()},${this.memoryStart.str()},${this.memoryLength.str()},${this.outputStart.str()},${this.outputLength.str()})`;
+            return `call(${this.gas},${this.address},${this.value},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
         }
     }
 }
 
-export class ReturnData extends Tag('ReturnData', Val.prec) {
+export class ReturnData extends Tag('ReturnData') {
     readonly name = 'ReturnData';
     readonly type?: string;
     readonly wrapped = false;
@@ -104,10 +104,8 @@ export class ReturnData extends Tag('ReturnData', Val.prec) {
     }
 }
 
-export class CALLCODE extends Tag('CallCode', Val.prec) {
-    readonly name = 'CALLCODE';
-    readonly type?: string;
-    readonly wrapped = true;
+export class CallCode extends Tag('CallCode') {
+    readonly name = 'CallCode';
 
     constructor(
         readonly gas: Expr,
@@ -126,12 +124,12 @@ export class CALLCODE extends Tag('CallCode', Val.prec) {
     }
 
     str(): string {
-        return `callcode(${this.gas.str()},${this.address.str()},${this.value.str()},${this.memoryStart.str()},${this.memoryLength.str()},${this.outputStart.str()},${this.outputLength.str()})`;
+        return `callcode(${this.gas},${this.address},${this.value},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
     }
 }
 
-export class CREATE2 extends Tag('Create2', Val.prec) {
-    constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {
+export class Create2 extends Tag('Create2') {
+    constructor(readonly offset: Expr, readonly size: Expr, readonly value: Expr) {
         super();
     }
 
@@ -140,11 +138,11 @@ export class CREATE2 extends Tag('Create2', Val.prec) {
     }
 
     str(): string {
-        return `(new Contract(memory[${this.memoryStart.str()}:(${this.memoryStart.str()}+${this.memoryLength.str()})]).value(${this.value.str()})).address`;
+        return `(new Contract(memory[${this.offset}:(${this.offset}+${this.size})]).value(${this.value})).address`;
     }
 }
 
-export class STATICCALL extends Tag('StaticCall', Val.prec) {
+export class StaticCall extends Tag('StaticCall') {
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -165,7 +163,7 @@ export class STATICCALL extends Tag('StaticCall', Val.prec) {
     }
 }
 
-export class DELEGATECALL extends Tag('DelegateCall', Val.prec) {
+export class DelegateCall extends Tag('DelegateCall') {
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -196,17 +194,23 @@ export class Stop implements IStmt {
 
 export class Return implements IStmt {
     readonly name = 'Return';
-    // readonly wrapped = true;
 
-    constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {}
+    /**
+     * Exits the current context successfully.
+     *
+     * @param args
+     * @param offset Byte offset in the memory in bytes, to copy what will be the return data of this context.
+     * @param size Byte size to copy (size of the return data).
+     */
+    constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
 
     // eval() {
     //     return new Return(this.args.map(evalExpr), this.memoryStart, this.memoryLength);
     // }
 
     toString(): string {
-        if (this.memoryStart && this.memoryLength) {
-            return `return memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})];`;
+        if (this.offset && this.size) {
+            return `return memory[${this.offset}:(${this.offset}+${this.size})];`;
         } else if (this.args.length === 0) {
             return 'return;';
         } else if (
@@ -313,14 +317,12 @@ export const SYSTEM = {
     SHA3: (state: State<Stmt, Expr>): void => {
         state.stack.push(memArgs(state, Sha3));
     },
+
     STOP: (state: State<Stmt, Expr>): void => {
         state.halted = true;
         state.stmts.push(new Stop());
     },
 
-    /**
-     * Create a new account with associated code.
-     */
     CREATE: ({ stack }: State<Stmt, Expr>): void => {
         const value = stack.pop();
         const offset = stack.pop();
@@ -337,7 +339,7 @@ export const SYSTEM = {
         const outputStart = stack.pop();
         const outputLength = stack.pop();
         stack.push(
-            new CALL(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
+            new Call(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
         );
 
         // if (typeof outputStart !== 'number') {
@@ -356,7 +358,7 @@ export const SYSTEM = {
         const outputLength = stack.pop();
 
         stack.push(
-            new CALLCODE(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
+            new CallCode(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
     RETURN: (state: State<Stmt, Expr>): void => {
@@ -371,14 +373,14 @@ export const SYSTEM = {
         const outputStart = stack.pop();
         const outputLength = stack.pop();
         stack.push(
-            new DELEGATECALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+            new DelegateCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
     CREATE2: ({ stack }: State<Stmt, Expr>): void => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
-        stack.push(new CREATE2(memoryStart, memoryLength, value));
+        stack.push(new Create2(memoryStart, memoryLength, value));
     },
     STATICCALL: ({ stack }: State<Stmt, Expr>): void => {
         const gas = stack.pop();
@@ -388,7 +390,7 @@ export const SYSTEM = {
         const outputStart = stack.pop();
         const outputLength = stack.pop();
         stack.push(
-            new STATICCALL(gas, address, memoryStart, memoryLength, outputStart, outputLength)
+            new StaticCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
     REVERT: (state: State<Stmt, Expr>): void => {
