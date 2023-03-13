@@ -48,7 +48,7 @@ export function compile(
             .replace(/^../, '')
             .replace('solc-', '')
             .replace(/`/g, '')
-            .replace(/::/g, '')
+            .replace(/::/g, '.')
             .replace(/[:^' ]/g, '-')
             .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
         if (!existsSync(basePath)) {
