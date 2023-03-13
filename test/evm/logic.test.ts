@@ -6,7 +6,7 @@ import { Div } from '../../src/evm/math';
 import { Symbol0 } from '../../src/evm/sym';
 import { Stack } from '../../src/state';
 
-describe('evm::logic::', () => {
+describe('evm::logic', () => {
     it('should calculate `~1`', () => {
         const stack = new Stack<Expr>();
         stack.push(new Val(1n));

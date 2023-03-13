@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Metadata, stripMetadataHash } from '../src/metadata';
 import { forVersion } from './utils/solc';
 
-describe('metadata::', () => {
+describe('metadata', () => {
     it(`should return original bytecode when no metadata`, () => {
         const originalCode = '01020304';
         const [code, metadata] = stripMetadataHash(originalCode);

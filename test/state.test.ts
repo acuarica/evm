@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Stack, State } from '../src/state';
 
-describe('state::', () => {
+describe('state', () => {
     describe('Stack', () => {
         it('should create an instance with an empty stack', () => {
             const stack = new Stack<never>();

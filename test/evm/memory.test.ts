@@ -4,7 +4,7 @@ import { type Expr, Val, type Stmt } from '../../src/evm/ast';
 import { Symbol0 } from '../../src/evm/sym';
 import { MEMORY } from '../../src/evm/memory';
 
-describe('evm::memory::', () => {
+describe('evm::memory', () => {
     it('should load values into stack', () => {
         const state = new State<Stmt, Expr>();
 

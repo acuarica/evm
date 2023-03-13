@@ -4,7 +4,7 @@ import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/ast';
 import { SYM, Symbol0 } from '../../src/evm/sym';
 
-describe('evm::math::', () => {
+describe('evm::math', () => {
     it('should test `isVal`', () => {
         expect(new Val(0n).isVal()).to.be.true;
         expect(new Add(new Val(1n), new Val(2n)).isVal()).to.be.false;
