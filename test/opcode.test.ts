@@ -119,6 +119,11 @@ describe('opcode', () => {
         });
     });
 
+    it('should `decode` all `INVALID` opcodes', () => {
+        const opcodes = decode(Buffer.from('0c0d0e0ffc', 'hex'));
+        expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('INVALID'));
+    });
+
     it('should `decode` format `INVALID` opcodes', () => {
         expect(
             formatOpcode({
