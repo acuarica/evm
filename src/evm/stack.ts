@@ -1,4 +1,4 @@
-import { type Expr, Val } from './def';
+import { type Expr, Val } from './ast';
 import { toHex } from '../opcode';
 import { type Stack } from '../state';
 

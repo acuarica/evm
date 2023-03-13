@@ -2,7 +2,7 @@ import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
 import type { CallDataLoad, CallDataSize, CallValue } from './info';
 import type { DataCopy, Symbol0, Symbol1 } from './sym';
-import type { MLoad } from './memory';
+import type { MLoad, MStore } from './memory';
 
 /**
  *
@@ -35,6 +35,11 @@ export type Expr =
     | Symbol1
     | DataCopy
     | MLoad;
+
+/**
+ *
+ */
+export type Stmt = MStore;
 
 export function Tag<N extends string>(tag: N, prec: number) {
     abstract class Tag {

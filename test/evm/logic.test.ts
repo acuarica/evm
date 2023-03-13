@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { type Expr, Val } from '../../src/evm/def';
+import { type Expr, Val } from '../../src/evm/ast';
 import { CallDataLoad } from '../../src/evm/info';
 import { LOGIC, Not, Shr } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';

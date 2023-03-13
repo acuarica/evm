@@ -1,5 +1,5 @@
 import type { Stack } from '../state';
-import { Bin, type Expr, Val } from './def';
+import { Bin, type Expr, Val } from './ast';
 import { Sar, Shl } from './logic';
 
 export class Add extends Bin('Add', '+', 11) {

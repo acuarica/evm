@@ -1,5 +1,5 @@
 import type { Ram } from '../state';
-import { type Expr, Tag, Val } from './def';
+import { type Expr, Tag, Val } from './ast';
 
 export type Info =
     | 'this'

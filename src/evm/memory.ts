@@ -1,6 +1,5 @@
 import type { State } from '../state';
-import { Tag, Val, type Expr } from './def';
-import type { Stmt } from './stmt';
+import { type Stmt, Tag, Val, type Expr } from './ast';
 
 export class MLoad extends Tag('MLoad', Val.prec) {
     constructor(readonly location: Expr) {
