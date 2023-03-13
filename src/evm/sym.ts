@@ -1,22 +1,25 @@
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './ast';
 
-export type Info =
-    | 'this'
-    | 'tx.origin'
-    | 'msg.sender'
-    | 'this.code.length'
-    | 'tx.gasprice'
-    | 'output.length'
-    | 'block.coinbase'
-    | 'block.timestamp'
-    | 'block.number'
-    | 'block.difficulty'
-    | 'block.gaslimit'
-    | 'chainid'
-    | 'self.balance'
-    | 'memory.length'
-    | 'gasleft()';
+export const INFO = {
+    ADDRESS: 'this',
+    ORIGIN: 'tx.origin',
+    CALLER: 'msg.sender',
+    CODESIZE: 'this.code.length',
+    GASPRICE: 'tx.gasprice',
+    RETURNDATASIZE: 'output.length',
+    COINBASE: 'block.coinbase',
+    TIMESTAMP: 'block.timestamp',
+    NUMBER: 'block.number',
+    DIFFICULTY: 'block.difficulty',
+    GASLIMIT: 'block.gaslimit',
+    CHAINID: 'chainid',
+    SELFBALANCE: 'self.balance',
+    MSIZE: 'memory.length',
+    GAS: 'gasleft()',
+} as const;
+
+export type Info = (typeof INFO)[keyof typeof INFO];
 
 export class Symbol0 extends Tag('Symbol0', Val.prec) {
     constructor(readonly symbol: Info, readonly type: string | undefined = undefined) {
@@ -65,34 +68,37 @@ export class DataCopy extends Tag('DataCopy', Val.prec) {
 }
 
 export const SYM = {
-    ADDRESS: symbol0('this', 'address'),
+    ...(Object.fromEntries(Object.entries(INFO).map(([name, value]) => [name, symbol0(value)])) as {
+        [name in keyof typeof INFO]: ReturnType<typeof symbol0>;
+    }),
+    // ADDRESS: symbol0('this', 'address'),
     BALANCE: symbol1(address => `${address}.balance`),
-    ORIGIN: symbol0('tx.origin'),
-    CALLER: symbol0('msg.sender'),
+    // ORIGIN: symbol0('tx.origin'),
+    // CALLER: symbol0('msg.sender'),
     CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
-    CODESIZE: symbol0('this.code.length'),
+    // CODESIZE: symbol0('this.code.length'),
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
-    GASPRICE: symbol0('tx.gasprice'),
+    // GASPRICE: symbol0('tx.gasprice'),
     EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
     EXTCODECOPY: ({ stack }: Ram<Expr>): void => {
         const address = stack.pop();
         datacopy((offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`);
     },
-    RETURNDATASIZE: symbol0('output.length'),
+    // RETURNDATASIZE: symbol0('output.length'),
     RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
     EXTCODEHASH: symbol1(address => `keccak256(address(${address}).code)`),
 
     // Block Information
     BLOCKHASH: symbol1(blockNumber => `blockhash(${blockNumber})`),
-    COINBASE: symbol0('block.coinbase'),
-    TIMESTAMP: symbol0('block.timestamp'),
-    NUMBER: symbol0('block.number'),
-    DIFFICULTY: symbol0('block.difficulty'),
-    GASLIMIT: symbol0('block.gaslimit'),
-    CHAINID: symbol0('chainid'),
-    SELFBALANCE: symbol0('self.balance'),
-    MSIZE: symbol0('memory.length'),
-    GAS: symbol0('gasleft()'),
+    // COINBASE: symbol0('block.coinbase'),
+    // TIMESTAMP: symbol0('block.timestamp'),
+    // NUMBER: symbol0('block.number'),
+    // DIFFICULTY: symbol0('block.difficulty'),
+    // GASLIMIT: symbol0('block.gaslimit'),
+    // CHAINID: symbol0('chainid'),
+    // SELFBALANCE: symbol0('self.balance'),
+    // MSIZE: symbol0('memory.length'),
+    // GAS: symbol0('gasleft()'),
 };
 
 function symbol0(value: Info, type?: string) {
