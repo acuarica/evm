@@ -4,10 +4,6 @@ import { type IStmt, Tag, Val, type Expr, type Stmt } from './ast';
 import { MLoad } from './memory';
 
 export class Sha3 extends Tag('Sha3', Val.prec) {
-    readonly name = 'SHA3';
-    readonly type?: string;
-    readonly wrapped = false;
-
     constructor(readonly items: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
         super();
     }
@@ -21,11 +17,9 @@ export class Sha3 extends Tag('Sha3', Val.prec) {
     }
 
     str(): string {
-        if (this.memoryStart && this.memoryLength) {
-            return `keccak256(memory[${this.memoryStart.str()}:(${this.memoryStart.str()}+${this.memoryLength.str()})])`;
-        } else {
-            return `keccak256(${this.items.map(item => item.str()).join(', ')})`;
-        }
+        return this.memoryStart && this.memoryLength
+            ? `keccak256(memory[${this.memoryStart.str()}:(${this.memoryStart.str()}+${this.memoryLength.str()})])`
+            : `keccak256(${this.items.map(item => item.str()).join(', ')})`;
     }
 }
 
@@ -285,7 +279,7 @@ export class SelfDestruct implements IStmt {
     }
 }
 
-export function memArgs0<T>(
+function memArgs0<T>(
     offset: Expr,
     size: Expr,
     { memory }: State<Stmt, Expr>,
@@ -298,7 +292,7 @@ export function memArgs0<T>(
 
     if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
         const args = [];
-        for (let i = Number(offset); i < Number(offset.val + size.val); i += 32) {
+        for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
             args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
         }
 
