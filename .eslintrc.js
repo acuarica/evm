@@ -15,7 +15,7 @@ module.exports = {
     rules: {
         semi: [2, 'always'],
         '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-        '@typescript-eslint/restrict-template-expressions': ['error', { allowAny: true }],
+        '@typescript-eslint/restrict-template-expressions': ['off'],
         '@typescript-eslint/no-explicit-any': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
 
