@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createHash } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import type { Runnable, Suite } from 'mocha';
 import * as semver from 'semver';
 
@@ -39,6 +40,38 @@ export function compile(
         context?: Mocha.Context | undefined;
     } = {}
 ): { bytecode: string; deployedBytecode: string } {
+    let writeCacheFn: (output: ReturnType<typeof compile>) => void;
+    if (opts.context) {
+        const basePath = './.contracts';
+        const fileName = title(opts.context.test)
+            // .replace('..contracts.', '')
+            .replace(/^../, '')
+            .replace('solc-', '')
+            .replace(/`/g, '')
+            .replace(/::/g, '')
+            .replace(/[:^' ]/g, '-')
+            .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
+        if (!existsSync(basePath)) {
+            mkdirSync(basePath);
+        }
+
+        const hash = createHash('md5').update(content).digest('hex');
+        const path = `${basePath}/${fileName}-${hash}`;
+
+        try {
+            const bytecode = readFileSync(`${path}.bytecode`, 'utf8');
+            const deployedBytecode = readFileSync(`${path}.deployedBytecode`, 'utf8');
+            return { bytecode, deployedBytecode };
+        } catch {
+            writeCacheFn = ({ bytecode, deployedBytecode }) => {
+                writeFileSync(`${path}.bytecode`, bytecode);
+                writeFileSync(`${path}.deployedBytecode`, deployedBytecode);
+            };
+        }
+    } else {
+        writeCacheFn = _output => {};
+    }
+
     const input = {
         language: 'Solidity',
         sources: {
@@ -89,23 +122,9 @@ export function compile(
     }
 
     const deployedBytecode = selectedContract.evm.deployedBytecode.object;
-
-    if (opts.context) {
-        const basePath = './.contracts';
-        const fileName = title(opts.context.test)
-            .replace('..contracts.', '')
-            .replace('solc-', '')
-            .replace(/`/g, '')
-            .replace(/[:^' ]/g, '-')
-            .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
-        if (!existsSync(basePath)) {
-            mkdirSync(basePath);
-        }
-
-        writeFileSync(`${basePath}/${fileName}.bytecode`, deployedBytecode);
-    }
-
     const bytecode = selectedContract.evm.bytecode.object;
+    writeCacheFn({ bytecode, deployedBytecode });
+
     return { bytecode, deployedBytecode };
 
     function valid(output: SolcOutput): boolean {
