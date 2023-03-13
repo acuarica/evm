@@ -1,8 +1,23 @@
 import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
-import type { CallDataLoad, CallDataSize, CallValue } from './info';
+import type { CallDataLoad, CallDataSize, CallValue } from './env';
 import type { DataCopy, Symbol0, Symbol1 } from './sym';
 import type { MLoad, MStore } from './memory';
+import type {
+    CALL,
+    CALLCODE,
+    CREATE,
+    CREATE2,
+    DELEGATECALL,
+    Invalid,
+    Return,
+    ReturnData,
+    Revert,
+    SelfDestruct,
+    Sha3,
+    STATICCALL,
+    Stop,
+} from './system';
 
 /**
  *
@@ -34,12 +49,20 @@ export type Expr =
     | Symbol0
     | Symbol1
     | DataCopy
-    | MLoad;
+    | MLoad
+    | Sha3
+    | CREATE
+    | CALL
+    | ReturnData
+    | CALLCODE
+    | CREATE2
+    | STATICCALL
+    | DELEGATECALL;
 
 /**
  *
  */
-export type Stmt = MStore;
+export type Stmt = MStore | Stop | Return | Revert | SelfDestruct | Invalid;
 
 export function Tag<N extends string>(tag: N, prec: number) {
     abstract class Tag {

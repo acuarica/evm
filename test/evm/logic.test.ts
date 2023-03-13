@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { type Expr, Val } from '../../src/evm/ast';
-import { CallDataLoad } from '../../src/evm/info';
+import { CallDataLoad } from '../../src/evm/env';
 import { LOGIC, Not, Shr } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
 import { Symbol0 } from '../../src/evm/sym';

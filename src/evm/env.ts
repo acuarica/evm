@@ -36,8 +36,14 @@ export class CallDataSize extends Tag('CallDataSize', Val.prec) {
     }
 }
 
-export const INFO = {
+export const ENV = {
     // Environmental Information (since Frontier)
+
+    /**
+     * Get deposited value by the instruction/transaction responsible for this execution.
+     *
+     * @param stack
+     */
     CALLVALUE: (stack: Stack<Expr>): void => {
         stack.push(new CallValue());
     },
