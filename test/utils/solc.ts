@@ -49,7 +49,7 @@ export function compile(
             .replace('solc-', '')
             .replace(/`/g, '')
             .replace(/::/g, '.')
-            .replace(/[:^' ]/g, '-')
+            .replace(/[:^'() ]/g, '-')
             .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
