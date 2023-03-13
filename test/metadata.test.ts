@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Metadata, stripMetadataHash } from '../src/metadata';
-import { forVersion } from './contracts/utils/solc';
+import { forVersion } from './utils/solc';
 
 describe('metadata::', () => {
     it(`should return original bytecode when no metadata`, () => {
