@@ -3,6 +3,14 @@ import { Metadata, stripMetadataHash } from '../src/metadata';
 import { compile, VERSIONS } from './contracts/utils/solc';
 
 describe('metadata::', () => {
+    it(`should return original bytecode when no metadata`, () => {
+        const originalCode = '01020304';
+        const [code, metadata] = stripMetadataHash(originalCode);
+
+        expect(code).to.be.equal(originalCode);
+        expect(metadata).to.be.null;
+    });
+
     const HASHES = {
         '0.5.5': [
             'bzzr',
@@ -35,13 +43,5 @@ describe('metadata::', () => {
                 });
             });
         });
-    });
-
-    it(`should return original bytecode when no metadata`, () => {
-        const originalCode = '01020304';
-        const [code, metadata] = stripMetadataHash(originalCode);
-
-        expect(code).to.be.equal(originalCode);
-        expect(metadata).to.be.null;
     });
 });
