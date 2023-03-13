@@ -18,19 +18,21 @@ describe('metadata::', () => {
     VERSIONS.forEach(version => {
         let output: ReturnType<typeof compile>;
 
-        before(() => {
-            output = compile('contract C {}', version);
-        });
+        describe(version, () => {
+            before(function () {
+                output = compile('contract C {}', version, { context: this });
+            });
 
-        (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
-            it(`should get metadata for \`${prop}\` compiled with solc-${version}`, () => {
-                const [, metadata] = stripMetadataHash(output[prop]);
+            (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
+                it(`should get metadata for \`${prop}\``, () => {
+                    const [, metadata] = stripMetadataHash(output[prop]);
 
-                const [protocol, hash, expectedVersion] = HASHES[version];
-                expect(metadata).to.be.deep.equal(
-                    new Metadata(protocol, hash, expectedVersion ?? version)
-                );
-                expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
+                    const [protocol, hash, expectedVersion] = HASHES[version];
+                    expect(metadata).to.be.deep.equal(
+                        new Metadata(protocol, hash, expectedVersion ?? version)
+                    );
+                    expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
+                });
             });
         });
     });
