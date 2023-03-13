@@ -2,18 +2,33 @@ import { expect } from 'chai';
 import { type Expr, type Stmt, Val } from '../../src/evm/ast';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';
-import { INVALID, Invalid, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
+import { Create, INVALID, Invalid, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
 import { State } from '../../src/state';
 
 describe('evm::system', () => {
-    it('should with SHA3', () => {
+    it('should exec `SHA3`', () => {
         const state = new State<never, Expr>();
         state.stack.push(new Val(4n));
-        state.stack.push(new Val(16n));
+        state.stack.push(new Val(0x10n));
         SYSTEM.SHA3(state);
         expect(state.halted).to.be.false;
-        expect(state.stack.values).to.be.deep.equal([new Sha3([new MLoad(new Val(16n))])]);
-        expect(`${state.stack.values[0]}`).to.be.equal('keccak256(memory[10])');
+        expect(state.stack.values).to.be.deep.equal([new Sha3([new MLoad(new Val(0x10n))])]);
+        expect(`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
+    });
+
+    it('should exec `CREATE`', () => {
+        const state = new State<Stmt, Expr>();
+        state.stack.push(new Val(0x20n));
+        state.stack.push(new Val(0x10n));
+        state.stack.push(new Val(0x1000n));
+        SYSTEM.CREATE(state);
+        expect(state.halted).to.be.false;
+        expect(state.stack.values).to.be.deep.equal([
+            new Create(new Val(0x1000n), new Val(16n), new Val(32n)),
+        ]);
+        expect(`${state.stack.values[0]}`).to.be.equal(
+            'new Contract(memory[0x10..0x10+0x20]).value(0x1000).address'
+        );
     });
 
     it('should halt with STOP', () => {
