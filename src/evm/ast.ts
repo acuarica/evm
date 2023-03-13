@@ -18,6 +18,7 @@ import type {
     STATICCALL,
     Stop,
 } from './system';
+import type { Log } from './log';
 
 /**
  *
@@ -60,9 +61,19 @@ export type Expr =
     | DELEGATECALL;
 
 /**
+ * Base definition for any type that is `Stmt`.
+ */
+export interface IStmt {
+    /**
+     * The `name` tag of this `IStmt`.
+     */
+    readonly name: string;
+}
+
+/**
  *
  */
-export type Stmt = MStore | Stop | Return | Revert | SelfDestruct | Invalid;
+export type Stmt = MStore | Stop | Return | Revert | SelfDestruct | Invalid | Log;
 
 export function Tag<N extends string>(tag: N, prec: number) {
     abstract class Tag {
