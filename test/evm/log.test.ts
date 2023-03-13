@@ -32,7 +32,7 @@ describe('evm::log', () => {
             const stmt = state.stmts[0];
             assert(stmt.name === 'Log');
             expect(stmt.args).to.be.deep.equal([new Val(1n)]);
-            expect(`${stmt}`).to.be.deep.equal(`emit Deposit(1);`);
+            expect(`${stmt}`).to.be.deep.equal(`emit Deposit(0x1);`);
         }
 
         {
@@ -41,7 +41,7 @@ describe('evm::log', () => {
             expect(stmt.args).to.be.deep.equal([new Val(2n), new Val(3n), new Val(4n)]);
 
             const topic = Interface.getEventTopic(EventFragment.from(unknownEventSig)).substring(2);
-            expect(`${stmt}`).to.be.deep.equal(`log(${topic}, 2, 3, 4);`);
+            expect(`${stmt}`).to.be.deep.equal(`log(0x${topic}, 0x2, 0x3, 0x4);`);
         }
     });
 });

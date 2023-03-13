@@ -55,7 +55,7 @@ describe('evm::logic', () => {
             LOGIC.EQ(stack);
 
             expect(stack.values).has.length(1);
-            expect(stack.values[0].str()).to.be.equal('block.number == 1');
+            expect(stack.values[0].str()).to.be.equal('block.number == 0x1');
         });
 
         ['06fdde03', '12345678', '00000001'].forEach(hash => {

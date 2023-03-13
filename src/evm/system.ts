@@ -3,7 +3,7 @@ import type { State } from '../state';
 import { type IStmt, Tag, Val, type Expr, type Stmt } from './ast';
 import { MLoad } from './memory';
 
-export class Sha3 extends Tag('Sha3', Val.prec) {
+export class Sha3 extends Tag('Sha3') {
     constructor(readonly items: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
         super();
     }
@@ -23,10 +23,16 @@ export class Sha3 extends Tag('Sha3', Val.prec) {
     }
 }
 
-export class CREATE extends Tag('Create', Val.prec) {
+export class Create extends Tag('Create') {
     readonly type = 'address';
 
-    constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {
+    /**
+     *
+     * @param value Value in _wei_ to send to the new account.
+     * @param offset Byte offset in the memory in bytes, the initialisation code for the new account.
+     * @param size Byte size to copy (size of the initialisation code).
+     */
+    constructor(readonly value: Expr, readonly offset: Expr, readonly size: Expr) {
         super();
     }
 
@@ -35,14 +41,12 @@ export class CREATE extends Tag('Create', Val.prec) {
     }
 
     str(): string {
-        return `(new Contract(memory[${this.memoryStart.str()}:(${this.memoryStart.str()}+${this.memoryLength.str()})]).value(${this.value.str()})).address`;
+        return `new Contract(memory[${this.offset}..${this.offset}+${this.size}]).value(${this.value}).address`;
     }
 }
 
 export class CALL extends Tag('Call', Val.prec) {
-    readonly name = 'Call';
     readonly type?: string;
-    readonly wrapped = false;
     throwOnFail = false;
 
     constructor(
@@ -60,6 +64,7 @@ export class CALL extends Tag('Call', Val.prec) {
     eval(): Expr {
         return this;
     }
+
     str(): string {
         if (this.memoryLength.isZero() && this.outputLength.isZero()) {
             if (
@@ -98,6 +103,7 @@ export class ReturnData extends Tag('ReturnData', Val.prec) {
         return `output:ReturnData:${this.retOffset}:${this.retSize}`;
     }
 }
+
 export class CALLCODE extends Tag('CallCode', Val.prec) {
     readonly name = 'CALLCODE';
     readonly type?: string;
@@ -125,10 +131,6 @@ export class CALLCODE extends Tag('CallCode', Val.prec) {
 }
 
 export class CREATE2 extends Tag('Create2', Val.prec) {
-    readonly name = 'CREATE2';
-    readonly type?: string;
-    readonly wrapped = true;
-
     constructor(readonly memoryStart: Expr, readonly memoryLength: Expr, readonly value: Expr) {
         super();
     }
@@ -143,10 +145,6 @@ export class CREATE2 extends Tag('Create2', Val.prec) {
 }
 
 export class STATICCALL extends Tag('StaticCall', Val.prec) {
-    readonly name = 'STATICCALL';
-    readonly type?: string;
-    readonly wrapped = true;
-
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -163,15 +161,11 @@ export class STATICCALL extends Tag('StaticCall', Val.prec) {
     }
 
     str(): string {
-        return `staticcall(${this.gas.str()},${this.address.str()},${this.memoryStart.str()},${this.memoryLength.str()},${this.outputStart.str()},${this.outputLength.str()})`;
+        return `staticcall(${this.gas},${this.address},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
     }
 }
 
 export class DELEGATECALL extends Tag('DelegateCall', Val.prec) {
-    readonly name = 'DELEGATECALL';
-    readonly type?: string;
-    readonly wrapped = true;
-
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -188,7 +182,7 @@ export class DELEGATECALL extends Tag('DelegateCall', Val.prec) {
     }
 
     str(): string {
-        return `delegatecall(${this.gas.str()},${this.address.str()},${this.memoryStart.str()},${this.memoryLength.str()},${this.outputStart.str()},${this.outputLength.str()})`;
+        return `delegatecall(${this.gas},${this.address},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
     }
 }
 
@@ -324,12 +318,16 @@ export const SYSTEM = {
         state.stmts.push(new Stop());
     },
 
+    /**
+     * Create a new account with associated code.
+     */
     CREATE: ({ stack }: State<Stmt, Expr>): void => {
         const value = stack.pop();
-        const memoryStart = stack.pop();
-        const memoryLength = stack.pop();
-        stack.push(new CREATE(memoryStart, memoryLength, value));
+        const offset = stack.pop();
+        const size = stack.pop();
+        stack.push(new Create(value, offset, size));
     },
+
     CALL: ({ stack, memory }: State<Stmt, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();

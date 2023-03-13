@@ -6,7 +6,7 @@ import type { MLoad, MStore } from './memory';
 import type {
     CALL,
     CALLCODE,
-    CREATE,
+    Create,
     CREATE2,
     DELEGATECALL,
     Invalid,
@@ -52,7 +52,7 @@ export type Expr =
     | DataCopy
     | MLoad
     | Sha3
-    | CREATE
+    | Create
     | CALL
     | ReturnData
     | CALLCODE
@@ -75,16 +75,20 @@ export interface IStmt {
  */
 export type Stmt = MStore | Stop | Return | Revert | SelfDestruct | Invalid | Log;
 
-export function Tag<N extends string>(tag: N, prec: number) {
+export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
     abstract class Tag {
         readonly tag: N = tag;
+
         static readonly prec = prec;
+
         isVal(): this is Val {
             return this.tag === 'Val';
         }
+
         isZero(): this is Val {
             return this.isVal() && this.val === 0n;
         }
+
         isJumpDest() {
             return this.isVal() && this.jumpDest !== null;
         }
@@ -138,6 +142,6 @@ export class Val extends Tag('Val', 16) {
     }
 
     str(): string {
-        return `${this.isJumpDest() ? '[J]' : ''}${this.val.toString(16)}`;
+        return `${this.isJumpDest() ? '[J]' : ''}0x${this.val.toString(16)}`;
     }
 }
