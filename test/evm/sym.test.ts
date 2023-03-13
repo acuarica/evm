@@ -1,11 +1,9 @@
 import assert = require('assert');
 import { expect } from 'chai';
-import { EVM } from '../../src/evm';
 import type { Expr, Stmt } from '../../src/evm/ast';
 import { INFO, SYM, Symbol0 } from '../../src/evm/sym';
-import { stripMetadataHash } from '../../src/metadata';
-import { decode } from '../../src/opcode';
 import { State } from '../../src/state';
+import { EVM } from '../utils/evm';
 import { compile } from '../utils/solc';
 
 describe('evm::sym', () => {
@@ -30,20 +28,7 @@ describe('evm::sym', () => {
             let evm: ReturnType<typeof EVM>;
 
             before(function () {
-                evm = EVM(
-                    decode(
-                        Buffer.from(
-                            stripMetadataHash(
-                                compile(sol, '0.7.6', { context: this }).deployedBytecode
-                            )[0],
-                            'hex'
-                        )
-                    ),
-                    {
-                        get: _topic => undefined,
-                        set: _topic => {},
-                    }
-                );
+                evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
             });
 
             it('should get it from compiled code', () => {
