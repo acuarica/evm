@@ -13,7 +13,7 @@ import {
     SYSTEM,
 } from '../../src/evm/system';
 import { State } from '../../src/state';
-import { EVM } from '../utils/evm';
+import { EVM, getFunctionSelector } from '../utils/evm';
 import { compile } from '../utils/solc';
 
 describe('evm::system', () => {
@@ -102,17 +102,18 @@ describe('evm::system', () => {
 
         it('should return `string`', function () {
             const sol = `contract C {
-                    fallback(bytes calldata) external payable returns (bytes memory) {
-                        return "message";
-                    }
-                }`;
+                function name() external pure returns (string memory) {
+                    return "123456789";
+                }
+            }`;
 
             const evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
 
             const state = new State<Stmt, Expr>();
-            evm.exec(0, state);
+            evm.run(0, state);
 
-            expect(state.stmts[0].name).to.be.equal('Return');
+            const selector = getFunctionSelector('name()');
+            expect(evm.functionBranches).to.have.keys(selector);
         });
     });
 });
