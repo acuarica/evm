@@ -138,7 +138,7 @@ export class Create2 extends Tag('Create2') {
     }
 
     str(): string {
-        return `(new Contract(memory[${this.offset}:(${this.offset}+${this.size})]).value(${this.value})).address`;
+        return `new Contract(memory[${this.offset}:(${this.offset}+${this.size})]).value(${this.value}).address`;
     }
 }
 
@@ -204,10 +204,6 @@ export class Return implements IStmt {
      */
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
 
-    // eval() {
-    //     return new Return(this.args.map(evalExpr), this.memoryStart, this.memoryLength);
-    // }
-
     toString(): string {
         if (this.offset && this.size) {
             return `return memory[${this.offset}:(${this.offset}+${this.size})];`;
@@ -268,13 +264,14 @@ export class SelfDestruct implements IStmt {
     }
 }
 
-function memArgs0<T>(
-    offset: Expr,
-    size: Expr,
-    { memory }: State<Stmt, Expr>,
+export function memArgs<T>(
+    { stack, memory }: State<Stmt, Expr>,
     Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
 ): T {
     const MAXSIZE = 1024;
+
+    let offset = stack.pop();
+    let size = stack.pop();
 
     offset = offset.eval();
     size = size.eval();
@@ -293,15 +290,6 @@ function memArgs0<T>(
 
         return new Klass([], offset, size);
     }
-}
-
-export function memArgs<T>(
-    state: State<Stmt, Expr>,
-    Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
-): T {
-    const offset = state.stack.pop();
-    const size = state.stack.pop();
-    return memArgs0(offset, size, state, Klass);
 }
 
 export const SYSTEM = {
