@@ -40,6 +40,8 @@ export function compile(
         context?: Mocha.Context;
     } = {}
 ): { bytecode: string; deployedBytecode: string } {
+    content = `// SPDX-License-Identifier: MiIT\npragma solidity ${version};\n${content}`;
+
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (opts.context !== undefined) {
         const basePath = './.contracts';
@@ -76,7 +78,7 @@ export function compile(
         language: 'Solidity',
         sources: {
             SOURCE: {
-                content: `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n` + content,
+                content,
             },
         },
         settings: {
