@@ -37,11 +37,11 @@ export function compile(
     version: Version,
     opts: {
         contractName?: string;
-        context?: Mocha.Context | undefined;
+        context?: Mocha.Context;
     } = {}
 ): { bytecode: string; deployedBytecode: string } {
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
-    if (opts.context) {
+    if (opts.context !== undefined) {
         const basePath = './.contracts';
         const fileName = title(opts.context.test)
             // .replace('..contracts.', '')
@@ -151,7 +151,7 @@ export function forVersion(
                 fn(
                     (content, context) =>
                         compile(content, version, {
-                            context: context,
+                            ...(context ? { context } : {}),
                         }),
                     fallback,
                     version

@@ -4,7 +4,7 @@ import { decode, getFunctionSelector } from './utils/evm';
 import { compile } from './utils/solc';
 
 describe('evm', () => {
-    it('`PUSH4` method selector to invoke external contract', () => {
+    it('`PUSH4` method selector to invoke external contract', function () {
         const sig = 'balanceOf(uint256)';
         const sol = `
         interface IERC20 {
