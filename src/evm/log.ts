@@ -52,10 +52,9 @@ export class Log implements IStmt {
             ? `emit ${this.eventName}(${[...this.topics, ...this.args].join(', ')});`
             : 'log(' +
                   (this.memoryStart && this.memoryLength
-                      ? [
-                            ...this.topics,
-                            `memory[${this.memoryStart.str()}:${this.memoryLength.str()} ]`,
-                        ].join(', ') + 'ii'
+                      ? [...this.topics, `memory[${this.memoryStart}:${this.memoryLength} ]`].join(
+                            ', '
+                        ) + 'ii'
                       : [...this.topics, ...this.args].join(', ')) +
                   ');';
     }
