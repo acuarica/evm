@@ -298,8 +298,7 @@ export const SYSTEM = {
     },
 
     STOP: (state: State<Stmt, Expr>): void => {
-        state.halted = true;
-        state.stmts.push(new Stop());
+        state.halt(new Stop());
     },
 
     CREATE: ({ stack }: State<Stmt, Expr>): void => {
@@ -340,10 +339,11 @@ export const SYSTEM = {
             new CallCode(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
+
     RETURN: (state: State<Stmt, Expr>): void => {
-        state.halted = true;
-        state.stmts.push(memArgs(state, Return));
+        state.halt(memArgs(state, Return));
     },
+
     DELEGATECALL: ({ stack }: State<Stmt, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
@@ -355,12 +355,14 @@ export const SYSTEM = {
             new DelegateCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
+
     CREATE2: ({ stack }: State<Stmt, Expr>): void => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new Create2(memoryStart, memoryLength, value));
     },
+
     STATICCALL: ({ stack }: State<Stmt, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
@@ -372,15 +374,14 @@ export const SYSTEM = {
             new StaticCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
         );
     },
+
     REVERT: (state: State<Stmt, Expr>): void => {
-        state.halted = true;
-        state.stmts.push(memArgs(state, Revert));
+        state.halt(memArgs(state, Revert));
     },
 
     SELFDESTRUCT: (state: State<Stmt, Expr>): void => {
         const address = state.stack.pop();
-        state.halted = true;
-        state.stmts.push(new SelfDestruct(address));
+        state.halt(new SelfDestruct(address));
     },
 };
 
@@ -388,6 +389,5 @@ export const PC = (opcode: Opcode, { stack }: State<Stmt, Expr>) =>
     stack.push(new Val(BigInt(opcode.offset)));
 
 export const INVALID = (opcode: Opcode, state: State<Stmt, Expr>): void => {
-    state.halted = true;
-    state.stmts.push(new Invalid(opcode.opcode));
+    state.halt(new Invalid(opcode.opcode));
 };

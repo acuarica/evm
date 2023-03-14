@@ -87,25 +87,23 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
                     const offset = state.stack.pop();
                     const dest = getDest(offset);
                     const destBranch = makeBranch(dest.pc, state);
-                    state.halts(new Jump(offset, destBranch));
+                    state.halt(new Jump(offset, destBranch));
                 } else if (opcode.mnemonic === 'JUMPI') {
                     const offset = state.stack.pop();
                     const condition = state.stack.pop();
 
                     const dest = getDest(offset);
                     const fallBranch = makeBranch(opcode.pc + 1, state);
-                    if (condition instanceof Sig) {
-                        //     this.functionBranches.push({
-                        //         hash: condition.hash,
-                        //         pc: dest.pc,
-                        //         state: state.clone(),
-                        //     });
-                        state.stmts.push(new SigCase(condition, fallBranch));
-                    } else {
-                        const destBranch = makeBranch(dest.pc, state);
-                        state.stmts.push(new Jumpi(condition, offset, fallBranch, destBranch));
-                    }
-                    state.halted = true;
+                    state.halt(
+                        condition instanceof Sig
+                            ? //     this.functionBranches.push({
+                              //         hash: condition.hash,
+                              //         pc: dest.pc,
+                              //         state: state.clone(),
+                              //     });
+                              new SigCase(condition, fallBranch)
+                            : new Jumpi(condition, offset, fallBranch, makeBranch(dest.pc, state))
+                    );
                 } else {
                     try {
                         // dispatch[opcode.mnemonic](opcode, state);
@@ -126,8 +124,7 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
                     opcodes[pc + 1].mnemonic === 'JUMPDEST'
                 ) {
                     const fallBranch = makeBranch(opcode.pc + 1, state);
-                    state.stmts.push(new JumpDest(fallBranch));
-                    state.halted = true;
+                    state.halt(new JumpDest(fallBranch));
                 }
             }
 

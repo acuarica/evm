@@ -69,10 +69,9 @@ export class Stack<in out T> {
  */
 export class State<S, E> {
     /**
-     * Whether this `State` has been halted.
-     * When `true`, no more execution should be allowed in this `State`.
+     * Indicates whether this `State` has been halted.
      */
-    halted = false;
+    private _halted = false;
 
     /**
      * The statements executed that lead to this `State`.
@@ -85,6 +84,33 @@ export class State<S, E> {
      * @param memory
      */
     constructor(readonly stack = new Stack<E>(), readonly memory: { [location: number]: E } = {}) {}
+
+    /**
+     * Indicates whether this `State` has been halted.
+     *
+     * When `true`, no more execution should be allowed against this `State`.
+     */
+    get halted(): boolean {
+        return this._halted;
+    }
+
+    /**
+     * The last statement in this `State`.
+     */
+    get last(): S | undefined {
+        return this.stmts.at(-1);
+    }
+
+    /**
+     * Halts this `State`.
+     * It adds `last` to `stmts` and sets `halted` to `true`.
+     *
+     * @param last The `S` that halts this `State`.
+     */
+    halt(last: S): void {
+        this.stmts.push(last);
+        this._halted = true;
+    }
 
     /**
      * Creates a detached clone from this `State`.
