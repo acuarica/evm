@@ -1,8 +1,13 @@
 import type { State } from '../state';
-import { type Stmt, Tag, Val, type Expr, type IStmt } from './ast';
+import { type Stmt, Tag, type Expr, type IStmt } from './ast';
 
-export class MLoad extends Tag('MLoad', Val.prec) {
-    constructor(readonly location: Expr) {
+export class MLoad extends Tag('MLoad') {
+    /**
+     * Loads word from memory.
+     *
+     * @param loc
+     */
+    constructor(readonly loc: Expr) {
         super();
     }
 
@@ -11,7 +16,7 @@ export class MLoad extends Tag('MLoad', Val.prec) {
     }
 
     str(): string {
-        return `memory[${this.location.str()}]`;
+        return `memory[${this.loc}]`;
     }
 }
 
@@ -21,18 +26,16 @@ export class MStore implements IStmt {
     constructor(readonly location: Expr, readonly data: Expr) {}
 
     toString(): string {
-        return `memory[${this.location.str()}] = ${this.data.str()};`;
+        return `memory[${this.location}] = ${this.data};`;
     }
 }
 
 export const MEMORY = {
     MLOAD: ({ stack, memory }: State<Stmt, Expr>): void => {
-        let memoryLocation = stack.pop();
-        memoryLocation = memoryLocation.eval();
+        let loc = stack.pop();
+        loc = loc.eval();
         stack.push(
-            memoryLocation.isVal() && Number(memoryLocation.val) in memory
-                ? memory[Number(memoryLocation.val)]
-                : new MLoad(memoryLocation)
+            loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new MLoad(loc)
         );
     },
     MSTORE: mstore,
@@ -40,12 +43,13 @@ export const MEMORY = {
 };
 
 function mstore({ stack, memory, stmts }: State<Stmt, Expr>): void {
-    let storeLocation = stack.pop();
-    const storeData = stack.pop();
-    storeLocation = storeLocation.eval();
-    if (storeLocation.isVal()) {
-        memory[Number(storeLocation.val)] = storeData;
+    let loc = stack.pop();
+    const data = stack.pop();
+
+    loc = loc.eval();
+    if (loc.isVal()) {
+        memory[Number(loc.val)] = data;
     } else {
-        stmts.push(new MStore(storeLocation, storeData));
+        stmts.push(new MStore(loc, data));
     }
 }
