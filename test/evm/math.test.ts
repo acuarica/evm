@@ -55,6 +55,12 @@ describe('evm::math', () => {
             str: '0x2 + 0x5 * 0x3',
         },
         {
+            insts: [7, 3, 4, 'ADD', 'SUB'] as const,
+            expr: new Sub(new Add(new Val(4n), new Val(3n)), new Val(7n)),
+            val: new Val(0n),
+            str: '0x4 + 0x3 - 0x7',
+        },
+        {
             insts: [3, 4, 'ADD', 7, 'SUB'] as const,
             expr: new Sub(new Val(7n), new Add(new Val(4n), new Val(3n))),
             val: new Val(0n),
