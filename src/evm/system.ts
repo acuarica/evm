@@ -214,11 +214,6 @@ export class Return implements IStmt {
         } else if (this.args.length === 0) {
             return 'return;';
         } else if (
-            this.args.length === 1 &&
-            (isBigInt(this.args[0]) || (this.args[0] as any).static)
-        ) {
-            return `return ${this.args[0]};`;
-        } else if (
             this.args.length === 3 &&
             this.args.every(item => item.isVal()) &&
             (this.args[0] as Val).val === 32n
@@ -244,16 +239,12 @@ function hex2a(hexx: any) {
 export class Revert implements IStmt {
     readonly name = 'Revert';
 
-    constructor(
-        readonly items: Expr[],
-        readonly memoryStart?: Expr,
-        readonly memoryLength?: Expr
-    ) {}
+    constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
 
     toString() {
-        return this.memoryStart && this.memoryLength
-            ? `revert(memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})]);`
-            : `revert(${this.items.join(', ')});`;
+        return this.offset && this.size
+            ? `revert(memory[${this.offset}:(${this.offset}+${this.size})]);`
+            : `revert(${this.args.join(', ')});`;
     }
 }
 
