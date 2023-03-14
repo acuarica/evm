@@ -16,7 +16,7 @@ export class Jump implements IStmt {
     constructor(readonly offset: Expr, readonly destBranch: Branch) {}
 
     toString() {
-        return `goto :${this.offset}`;
+        return `goto :${this.offset} branch:${this.destBranch.key}`;
     }
     next() {
         return [this.destBranch];
@@ -34,9 +34,7 @@ export class Jumpi implements IStmt {
     ) {}
 
     toString() {
-        return `goto ${this.destBranch.key} when (${this.condition.toString()}) fall ${
-            this.fallBranch.key
-        }`;
+        return `goto ${this.destBranch.key} when (${this.condition}) fall ${this.fallBranch.key}`;
     }
 
     next() {

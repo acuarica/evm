@@ -1,5 +1,5 @@
 import { formatOpcode, type Opcode } from '../opcode';
-import type { Stack, State as TState } from '../state';
+import { type Stack, State as TState } from '../state';
 import type { Expr, IStmt, Stmt } from './ast';
 
 import { PUSHES, STACK } from './stack';
@@ -62,6 +62,15 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
 
     return {
         opcodes,
+        chunks: new Map<number, { pcend: number; states: State[] }>(),
+        functionBranches: new Map<string, { pc: number; state: State }>(),
+
+        start() {
+            this.run(0, new TState());
+            for (const [, branch] of this.functionBranches) {
+                this.run(branch.pc, branch.state);
+            }
+        },
 
         run(pc0: number, state: State) {
             const branches: Branch[] = [new Branch(pc0, state)];
@@ -69,16 +78,24 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
                 // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
                 // See https://github.com/microsoft/TypeScript/issues/30406.
                 const branch = branches.shift()!;
+
+                const chunk = this.chunks.get(branch.pc);
+                if (chunk !== undefined) {
+                    continue;
+                }
+
                 this.exec(branch.pc, branch.state);
-                const last = branch.state.stmts.at(-1)! as IStmt;
+                const last = branch.state.last! as IStmt;
                 if (last.next) {
-                    branches.unshift(...last.next());
+                    // branches.unshift(...last.next());
+                    branches.push(...last.next());
                 }
             }
         },
 
         exec(pc0: number, state: State) {
-            for (let pc = pc0; !state.halted && pc < opcodes.length; pc++) {
+            let pc = pc0;
+            for (; !state.halted && pc < opcodes.length; pc++) {
                 const opcode = opcodes[pc];
 
                 // block.opcodes.push(opcode);
@@ -90,19 +107,20 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
                     state.halt(new Jump(offset, destBranch));
                 } else if (opcode.mnemonic === 'JUMPI') {
                     const offset = state.stack.pop();
-                    const condition = state.stack.pop();
+                    const cond = state.stack.pop();
 
                     const dest = getDest(offset);
                     const fallBranch = makeBranch(opcode.pc + 1, state);
                     state.halt(
-                        condition instanceof Sig
-                            ? //     this.functionBranches.push({
-                              //         hash: condition.hash,
-                              //         pc: dest.pc,
-                              //         state: state.clone(),
-                              //     });
-                              new SigCase(condition, fallBranch)
-                            : new Jumpi(condition, offset, fallBranch, makeBranch(dest.pc, state))
+                        cond instanceof Sig
+                            ? (() => {
+                                  this.functionBranches.set(cond.selector, {
+                                      pc: dest.pc,
+                                      state: state.clone(),
+                                  });
+                                  return new SigCase(cond, fallBranch);
+                              })()
+                            : new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state))
                     );
                 } else {
                     try {
@@ -131,6 +149,18 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
             assert(state.halted);
             // assert(!branch.state.halted);
 
+            let chunk = this.chunks.get(pc0);
+            if (chunk === undefined) {
+                chunk = {
+                    pcend: pc,
+                    states: [state],
+                };
+                this.chunks.set(pc0, chunk);
+            } else {
+                assert(chunk.pcend === pc);
+                chunk.states.push(state);
+            }
+
             function getDest(offset: Expr): Opcode {
                 const offset2 = offset.eval();
                 if (!offset2.isVal()) {
@@ -151,7 +181,7 @@ export function EVM(opcodes: Opcode[], events: IEvents) {
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                (offset as any).isJumpDest = dest.pc;
+                (offset as any).jumpDest = dest.pc;
                 return dest;
             }
         },
