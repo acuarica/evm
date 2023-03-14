@@ -1,7 +1,7 @@
 import type { Stack } from '../state';
-import { type Expr, Tag, Val } from './ast';
+import { type Expr, Tag } from './ast';
 
-export class CallValue extends Tag('CallValue', Val.prec) {
+export class CallValue extends Tag('CallValue') {
     eval(): Expr {
         return this;
     }
@@ -10,7 +10,7 @@ export class CallValue extends Tag('CallValue', Val.prec) {
     }
 }
 
-export class CallDataLoad extends Tag('CallDataLoad', Val.prec) {
+export class CallDataLoad extends Tag('CallDataLoad') {
     constructor(public location: Expr) {
         super();
     }
@@ -27,7 +27,7 @@ export class CallDataLoad extends Tag('CallDataLoad', Val.prec) {
     }
 }
 
-export class CallDataSize extends Tag('CallDataSize', Val.prec) {
+export class CallDataSize extends Tag('CallDataSize') {
     eval(): Expr {
         return this;
     }
@@ -37,8 +37,6 @@ export class CallDataSize extends Tag('CallDataSize', Val.prec) {
 }
 
 export const ENV = {
-    // Environmental Information (since Frontier)
-
     /**
      * Get deposited value by the instruction/transaction responsible for this execution.
      *
