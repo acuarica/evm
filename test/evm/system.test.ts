@@ -2,8 +2,19 @@ import { expect } from 'chai';
 import { type Expr, type Stmt, Val } from '../../src/evm/ast';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';
-import { Create, INVALID, Invalid, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
+import {
+    Create,
+    INVALID,
+    Invalid,
+    Return,
+    SelfDestruct,
+    Sha3,
+    Stop,
+    SYSTEM,
+} from '../../src/evm/system';
 import { State } from '../../src/state';
+import { EVM } from '../utils/evm';
+import { compile } from '../utils/solc';
 
 describe('evm::system', () => {
     it('should exec `SHA3`', () => {
@@ -54,5 +65,54 @@ describe('evm::system', () => {
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
         expect(`${state.stmts[0]}`).to.be.equal('revert("Invalid instruction (0x1)");');
+    });
+
+    describe('RETURN', () => {
+        it('should return with no arguments', () => {
+            const state = new State<Stmt, Expr>();
+            state.stack.push(new Val(0x0n));
+            state.stack.push(new Val(0x0n));
+            SYSTEM.RETURN(state);
+            expect(state.halted).to.be.true;
+            expect(state.stmts).to.be.deep.equal([new Return([])]);
+            expect(`${state.stmts[0]}`).to.be.equal('return;');
+        });
+
+        it('should return with a single argument', () => {
+            const state = new State<Stmt, Expr>();
+            state.stack.push(new Val(0x20n));
+            state.stack.push(new Val(0x4n));
+            SYSTEM.RETURN(state);
+            expect(state.halted).to.be.true;
+            expect(state.stmts).to.be.deep.equal([new Return([new MLoad(new Val(0x4n))])]);
+            expect(`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
+        });
+
+        it('should return more than one argument', () => {
+            const state = new State<Stmt, Expr>();
+            state.stack.push(new Val(0x30n));
+            state.stack.push(new Val(0x4n));
+            SYSTEM.RETURN(state);
+            expect(state.halted).to.be.true;
+            expect(state.stmts).to.be.deep.equal([
+                new Return([new MLoad(new Val(0x4n)), new MLoad(new Val(0x24n))]),
+            ]);
+            expect(`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
+        });
+
+        it('should return `string`', function () {
+            const sol = `contract C {
+                    fallback(bytes calldata) external payable returns (bytes memory) {
+                        return "message";
+                    }
+                }`;
+
+            const evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+
+            const state = new State<Stmt, Expr>();
+            evm.exec(0, state);
+
+            expect(state.stmts[0].name).to.be.equal('Return');
+        });
     });
 });
