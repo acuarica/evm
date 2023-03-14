@@ -1,13 +1,27 @@
-// import * as functionHashes from '../../data/functionHashes.json';
+import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
+
 import { EVM as EVM_ } from '../../src/evm';
-import { decode } from '../../src/opcode';
+import { decode as decode_, type Opcode } from '../../src/opcode';
 import { stripMetadataHash } from '../../src/metadata';
 import type { IEvents } from '../../src/evm/log';
+import { FunctionFragment, Interface } from 'ethers/lib/utils';
+
+export function decode(bytecode: string): Opcode[] {
+    return decode_(Buffer.from(stripMetadataHash(bytecode)[0], 'hex'));
+}
+
+export function getFunctionSignature(selector: string): string {
+    return (functionHashes as { [selector: string]: string })[selector];
+}
+
+export function getFunctionSelector(signature: string): string {
+    return Interface.getSighash(FunctionFragment.from(signature)).substring(2);
+}
 
 export function EVM(bytecode: string) {
     return EVM_(
-        decode(Buffer.from(stripMetadataHash(bytecode)[0], 'hex')),
+        decode_(Buffer.from(stripMetadataHash(bytecode)[0], 'hex')),
         new (class implements IEvents {
             readonly events: { [topic: string]: { label?: string; indexedCount: number } } = {};
 
