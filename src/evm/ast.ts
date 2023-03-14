@@ -19,6 +19,7 @@ import type {
     Stop,
 } from './system';
 import type { Log } from './log';
+import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
 
 /**
  *
@@ -68,12 +69,25 @@ export interface IStmt {
      * The `name` tag of this `IStmt`.
      */
     readonly name: string;
+
+    next?(): Branch[];
 }
 
 /**
  *
  */
-export type Stmt = MStore | Stop | Return | Revert | SelfDestruct | Invalid | Log;
+export type Stmt =
+    | MStore
+    | Stop
+    | Return
+    | Revert
+    | SelfDestruct
+    | Invalid
+    | Log
+    | Jump
+    | Jumpi
+    | JumpDest
+    | SigCase;
 
 export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
     abstract class Tag {
