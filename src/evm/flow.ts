@@ -1,6 +1,7 @@
 import type { Stmt, Expr, IStmt } from './ast';
 import type { State } from '../state';
 import type { Sig } from './logic';
+import { formatOpcode, type Opcode } from '../opcode';
 
 export class Branch {
     constructor(readonly pc: number, readonly state: State<Stmt, Expr>) {}
@@ -111,3 +112,66 @@ export class SigCase implements IStmt {
 //         return `local${this.i} = ${this.phi.toString()};`;
 //     }
 // }
+
+export function makeBranch(pc: number, state: State<Stmt, Expr>) {
+    return new Branch(pc, state.clone());
+}
+
+export interface ISelectorBranches {
+    /**
+     * store selectors starting point.
+     */
+    readonly functionBranches: Map<string, { pc: number; state: State<Stmt, Expr> }>;
+}
+
+export function FLOW(opcodes: Opcode[], evm: ISelectorBranches) {
+    return {
+        JUMP: (_opcode: Opcode, state: State<Stmt, Expr>): void => {
+            const offset = state.stack.pop();
+            const dest = getDest(offset);
+            const destBranch = makeBranch(dest.pc, state);
+            state.halt(new Jump(offset, destBranch));
+        },
+
+        JUMPI: (opcode: Opcode, state: State<Stmt, Expr>): void => {
+            const offset = state.stack.pop();
+            const cond = state.stack.pop();
+
+            const dest = getDest(offset);
+            const fallBranch = makeBranch(opcode.pc + 1, state);
+            state.halt(
+                cond.tag === 'Sig'
+                    ? (() => {
+                          evm.functionBranches.set(cond.selector, {
+                              pc: dest.pc,
+                              state: state.clone(),
+                          });
+                          return new SigCase(cond, offset, fallBranch);
+                      })()
+                    : new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state))
+            );
+        },
+    };
+
+    /**
+     *
+     * @param offset
+     * @returns
+     */
+    function getDest(offset: Expr): Opcode {
+        const offset2 = offset.eval();
+        if (!offset2.isVal()) {
+            throw new Error('Expected numeric offset, found' + offset.toString());
+        }
+        const dest = opcodes.find(o => o.offset === Number(offset2.val));
+        if (!dest) {
+            throw new Error('Expected `JUMPDEST` in JUMP destination, but none was found');
+        }
+        if (dest.mnemonic !== 'JUMPDEST') {
+            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (offset as any).jumpDest = dest.pc;
+        return dest;
+    }
+}

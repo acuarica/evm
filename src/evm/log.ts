@@ -1,4 +1,3 @@
-import type { Opcode } from '../opcode';
 import type { State } from '../state';
 import { type Expr, type Stmt, Val, type IStmt } from './ast';
 import { MLoad } from './memory';
@@ -71,7 +70,7 @@ export const LOGS = (events: IEvents) => {
 };
 
 function log(topicsCount: number, events: IEvents) {
-    return (_opcode: Opcode, state: State<Stmt, Expr>): void => {
+    return (state: State<Stmt, Expr>): void => {
         let offset = state.stack.pop();
         let size = state.stack.pop();
         const topics = [];

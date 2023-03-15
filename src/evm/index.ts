@@ -1,21 +1,21 @@
-import { decode, formatOpcode, type Opcode } from '../opcode';
+import { decode, formatOpcode, type OPCODES, type Opcode } from '../opcode';
 import { type Stack, State as TState } from '../state';
+import { type Metadata, stripMetadataHash } from '../metadata';
+
 import type { Expr, IStmt, Stmt } from './ast';
 
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';
-import { LOGIC, Sig } from './logic';
+import { LOGIC } from './logic';
 import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
 import { INVALID, PC, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
-
-// import { STORAGE } from './storage';
+import { type IStore, STORAGE } from './storage';
+import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
 
 import { assert } from '../error';
-import { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
-import { type Metadata, stripMetadataHash } from '../metadata';
 
 type State = TState<Stmt, Expr>;
 
@@ -54,11 +54,13 @@ const TABLE = {
     INVALID,
 };
 
-export class EVM {
+export class EVM implements IStore, ISelectorBranches {
     /**
      *
      */
-    private readonly insts;
+    private readonly insts: {
+        [mnemonic in keyof typeof OPCODES]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
+    };
 
     /**
      *
@@ -70,6 +72,10 @@ export class EVM {
      */
     readonly functionBranches = new Map<string, { pc: number; state: State }>();
 
+    readonly variables: IStore['variables'] = {};
+
+    readonly mappings: IStore['mappings'] = {};
+
     constructor(
         readonly opcodes: Opcode[],
         readonly events: IEvents,
@@ -77,8 +83,9 @@ export class EVM {
     ) {
         this.insts = {
             ...TABLE,
-            // ...STORAGE(contract),
-            ...LOGS(events),
+            ...FLOW(opcodes, this),
+            ...makeState(STORAGE(this)),
+            ...makeState(LOGS(events)),
         };
     }
 
@@ -118,53 +125,24 @@ export class EVM {
             this.exec(branch.pc, branch.state);
             const last = branch.state.last! as IStmt;
             if (last.next) {
-                // branches.unshift(...last.next());
-                branches.push(...last.next());
+                branches.unshift(...last.next());
             }
         }
     }
 
     exec(pc0: number, state: State) {
-        const makeBranch = (pc: number, state: State) => new Branch(pc, state.clone());
-
         let pc = pc0;
         for (; !state.halted && pc < this.opcodes.length; pc++) {
             const opcode = this.opcodes[pc];
-
-            if (opcode.mnemonic === 'JUMP') {
-                const offset = state.stack.pop();
-                const dest = this.getDest(offset);
-                const destBranch = makeBranch(dest.pc, state);
-                state.halt(new Jump(offset, destBranch));
-            } else if (opcode.mnemonic === 'JUMPI') {
-                const offset = state.stack.pop();
-                const cond = state.stack.pop();
-
-                const dest = this.getDest(offset);
-                const fallBranch = makeBranch(opcode.pc + 1, state);
-                state.halt(
-                    cond instanceof Sig
-                        ? (() => {
-                              this.functionBranches.set(cond.selector, {
-                                  pc: dest.pc,
-                                  state: state.clone(),
-                              });
-                              return new SigCase(cond, offset, fallBranch);
-                          })()
-                        : new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state))
+            try {
+                this.insts[opcode.mnemonic](opcode, state);
+            } catch (err) {
+                const message = (err as Error).message;
+                throw new Error(
+                    `\`${message}\` at [${opcode.offset}] ${
+                        opcode.mnemonic
+                    } =| ${state.stack.values.join(' | ')}`
                 );
-            } else {
-                try {
-                    // dispatch[opcode.mnemonic](opcode, state);
-                    this.insts[opcode.mnemonic as keyof typeof this.insts](opcode, state);
-                } catch (err) {
-                    const message = (err as Error).message;
-                    throw new Error(
-                        `\`${message}\` at [${opcode.offset}] ${
-                            opcode.mnemonic
-                        } =| ${state.stack.values.join(' | ')}`
-                    );
-                }
             }
 
             if (
@@ -178,7 +156,6 @@ export class EVM {
         }
 
         assert(state.halted);
-        // assert(!branch.state.halted);
 
         let chunk = this.chunks.get(pc0);
         if (chunk === undefined) {
