@@ -34,7 +34,7 @@ export class Jumpi implements IStmt {
     ) {}
 
     toString() {
-        return `goto ${this.destBranch.key} when (${this.condition}) fall ${this.fallBranch.key}`;
+        return `when ${this.condition} goto ${this.destBranch.key} or fall ${this.fallBranch.key}`;
     }
 
     next() {
@@ -57,9 +57,13 @@ export class JumpDest implements IStmt {
 
 export class SigCase implements IStmt {
     readonly name = 'SigCase';
-    constructor(readonly condition: Sig, readonly fallBranch: Branch) {}
+    constructor(readonly condition: Sig, readonly offset: Expr, readonly fallBranch: Branch) {}
     toString() {
-        return `ifsig (${this.condition}) goto ${this.fallBranch.key}`;
+        return `case when ${this.condition} goto ${this.offset} or fall ${this.fallBranch.key}`;
+    }
+
+    next(): Branch[] {
+        return [this.fallBranch];
     }
 }
 
