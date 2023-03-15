@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { type Expr, type Stmt, Val } from '../../src/evm/ast';
+import type { Jump } from '../../src/evm/flow';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';
 import {
@@ -102,18 +103,32 @@ describe('evm::system', () => {
 
         it('should return `string`', function () {
             const sol = `contract C {
-                function name() external pure returns (string memory) {
-                    return "123456789";
+                function name() external pure returns (uint256) {
+                    return 7;
+                }
+
+                function symbol() external pure returns (uint256) {
+                    return 11;
                 }
             }`;
 
             const evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
 
-            const state = new State<Stmt, Expr>();
+            let state = new State<Stmt, Expr>();
             evm.run(0, state);
 
             const selector = getFunctionSelector('name()');
-            expect(evm.functionBranches).to.have.keys(selector);
+            const symbolSelector = getFunctionSelector('symbol()');
+            expect(evm.functionBranches).to.have.keys(selector, symbolSelector);
+
+            const branch = evm.functionBranches.get(selector)!;
+            evm.run(branch.pc, branch.state);
+            state = branch.state;
+            state = (state.last as Jump).destBranch.state;
+            state = (state.last as Jump).destBranch.state;
+
+            expect(state.last).to.be.deep.equal(new Return([new Val(7n)]));
+            expect(`${state.last}`).to.be.equal('return 0x7;');
         });
     });
 });
