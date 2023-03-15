@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import type { Expr, Stmt } from './ast';
+import { type Expr, type IStmt, type Stmt, Tag } from './ast';
 import { Sha3 } from './system';
 import { Add, Sub } from './math';
 
@@ -25,7 +25,9 @@ export interface IStore {
 export class Variable {
     constructor(public label: string | undefined, readonly types: Expr[]) {}
 }
-export class MappingStore {
+export class MappingStore implements IStmt {
+    readonly name = 'MappingStore';
+
     readonly type?: string;
     readonly wrapped = false;
 
@@ -147,7 +149,7 @@ export class SStore {
     }
 }
 
-export class MappingLoad {
+export class MappingLoad extends Tag('MappingLoad') {
     readonly name = 'MappingLoad';
     readonly type?: string;
     readonly wrapped = false;
@@ -160,12 +162,14 @@ export class MappingLoad {
         readonly items: Expr[],
         readonly count: number,
         readonly structlocation?: bigint
-    ) {}
+    ) {
+        super();
+    }
 
     eval() {
         return this;
     }
-    toString() {
+    str(): string {
         let mappingName = 'mapping' + (this.count + 1);
         const maybeName = this.mappings()[this.location].name;
         if (this.location in this.mappings() && maybeName) {
@@ -185,18 +189,20 @@ export class MappingLoad {
     }
 }
 
-export class SLoad {
+export class SLoad extends Tag('SLoad') {
     readonly name = 'SLOAD';
     readonly type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Expr, readonly variables: IStore['variables']) {}
+    constructor(readonly location: Expr, readonly variables: IStore['variables']) {
+        super();
+    }
 
     eval(): Expr {
         return new SLoad(this.location.eval(), this.variables);
     }
 
-    toString() {
+    str(): string {
         if (this.location.isVal() && this.location.toString() in this.variables) {
             const label = this.variables[this.location.toString()].label;
             if (label) {
@@ -285,7 +291,7 @@ export const STORAGE = (contract: IStore) => {
                             loc,
                             mappingParts,
                             Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.right
+                            storeLocation.right.val
                         )
                     );
                 } else {
@@ -319,7 +325,7 @@ export const STORAGE = (contract: IStore) => {
                             loc,
                             mappingParts,
                             Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.left
+                            storeLocation.left.val
                         )
                     );
                 } else {
@@ -400,7 +406,7 @@ export const STORAGE = (contract: IStore) => {
                             mappingParts,
                             storeData,
                             Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.right
+                            storeLocation.right.val
                         )
                     );
                 } else {

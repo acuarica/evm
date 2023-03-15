@@ -20,6 +20,7 @@ import type {
 } from './system';
 import type { Log } from './log';
 import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
+import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
 
 /**
  *
@@ -59,7 +60,9 @@ export type Expr =
     | CallCode
     | Create2
     | StaticCall
-    | DelegateCall;
+    | DelegateCall
+    | SLoad
+    | MappingLoad;
 
 /**
  * Base definition for any type that is `Stmt`.
@@ -87,7 +90,9 @@ export type Stmt =
     | Jump
     | Jumpi
     | JumpDest
-    | SigCase;
+    | SigCase
+    | SStore
+    | MappingStore;
 
 export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
     abstract class Tag {
