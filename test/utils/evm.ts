@@ -20,8 +20,8 @@ export function getFunctionSelector(signature: string): string {
 }
 
 export function EVM(bytecode: string) {
-    return EVM_(
-        decode_(Buffer.from(stripMetadataHash(bytecode)[0], 'hex')),
+    return EVM_.from(
+        bytecode,
         new (class implements IEvents {
             readonly events: { [topic: string]: { label?: string; indexedCount: number } } = {};
 

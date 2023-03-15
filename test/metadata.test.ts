@@ -8,7 +8,7 @@ describe('metadata', () => {
         const [code, metadata] = stripMetadataHash(originalCode);
 
         expect(code).to.be.equal(originalCode);
-        expect(metadata).to.be.null;
+        expect(metadata).to.be.undefined;
     });
 
     const HASHES = {
