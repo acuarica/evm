@@ -1,6 +1,7 @@
 import { expect } from 'chai';
+import { EVM } from '../src/evm';
 import { toHex } from '../src/opcode';
-import { decode, getFunctionSelector } from './utils/evm';
+import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
 
 describe('evm', () => {
@@ -17,9 +18,9 @@ describe('evm', () => {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = decode(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        const opcodes = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode).opcodes;
 
-        const selector = getFunctionSelector(sig);
+        const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);
         expect(push4, `PUSH4 ${selector} not found`).to.be.not.undefined;
     });

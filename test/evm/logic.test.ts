@@ -1,12 +1,13 @@
 import assert = require('assert');
 import { expect } from 'chai';
+import { EVM } from '../../src/evm';
 import { type Expr, Val, type Stmt } from '../../src/evm/ast';
 import { CallDataLoad } from '../../src/evm/env';
 import { LOGIC, Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
 import { Symbol0 } from '../../src/evm/sym';
 import { Stack, State } from '../../src/state';
-import { EVM, getFunctionSelector } from '../utils/evm';
+import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 
 describe('evm::logic', () => {
@@ -107,14 +108,14 @@ describe('evm::logic', () => {
 
         it('should detect EQ `balanceOf` function identifier ', function () {
             const balanceOf = 'balanceOf(address addr)';
-            const selector = getFunctionSelector(balanceOf);
+            const selector = fnselector(balanceOf);
             const sol = `contract C {
                 function ${balanceOf} external payable returns (address) {
                     return addr;
                 }
             }`;
 
-            const evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
 
             const state = new State<Stmt, Expr>();
             evm.run(0, state);

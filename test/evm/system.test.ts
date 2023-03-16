@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { EVM } from '../../src/evm';
 import { type Expr, type Stmt, Val } from '../../src/evm/ast';
 import type { Jump } from '../../src/evm/flow';
 import { MLoad } from '../../src/evm/memory';
@@ -14,7 +15,7 @@ import {
     SYSTEM,
 } from '../../src/evm/system';
 import { State } from '../../src/state';
-import { EVM, getFunctionSelector } from '../utils/evm';
+import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 
 describe('evm::system', () => {
@@ -112,13 +113,13 @@ describe('evm::system', () => {
                 }
             }`;
 
-            const evm = EVM(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
 
             let state = new State<Stmt, Expr>();
             evm.run(0, state);
 
-            const selector = getFunctionSelector('name()');
-            const symbolSelector = getFunctionSelector('symbol()');
+            const selector = fnselector('name()');
+            const symbolSelector = fnselector('symbol()');
             expect(evm.functionBranches).to.have.keys(selector, symbolSelector);
 
             const branch = evm.functionBranches.get(selector)!;
