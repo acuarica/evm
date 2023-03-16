@@ -42,9 +42,9 @@ export class Metadata {
  * @param bytecode the contract `bytecode` to test for metadata hash from, hex encoded.
  * @returns An tuple where the first component is the executable code and
  * second one is the metadata hash when the metadata is present.
- * Otherwise, the original `bytecode` and `null` respectively.
+ * Otherwise, the original `bytecode` and `undefined` respectively.
  */
-export function stripMetadataHash(bytecode: string): [string, Metadata | null] {
+export function stripMetadataHash(bytecode: string): [string, Metadata | undefined] {
     for (const [re, protocol] of protocols) {
         const match = bytecode.match(re);
         if (match && match[1]) {
@@ -55,7 +55,7 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | null] {
         }
     }
 
-    return [bytecode, null];
+    return [bytecode, undefined];
 
     /**
      *
