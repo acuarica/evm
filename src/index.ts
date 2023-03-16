@@ -1,9 +1,3 @@
-export { Stack, State } from './state';
-export { Metadata, stripMetadataHash } from './metadata';
-export * from './opcode';
-export * as inst from './inst';
-export * as ast from './ast';
-
 import { decode, type Opcode, OPCODES } from './opcode';
 import { toHex } from './opcode';
 import { type Metadata, stripMetadataHash } from './metadata';
