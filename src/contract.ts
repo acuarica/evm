@@ -43,11 +43,6 @@ export class Contract {
     /**
      *
      */
-    readonly events: { [topic: string]: { label?: string; indexedCount: number } } = {};
-
-    /**
-     *
-     */
     readonly variables: { [key: string]: Variable } = {};
 
     /**
@@ -118,10 +113,6 @@ export class Contract {
         }
         return undefined;
     }
-}
-
-export class Variable {
-    constructor(public label: string | undefined, readonly types: Expr[]) {}
 }
 
 export class TopLevelFunction {
@@ -259,6 +250,7 @@ function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {
         pcs[key] = true;
 
         const block = blocks[key];
+        if (block === undefined) return [];
         assert(block !== undefined, key, Object.keys(blocks));
 
         let i = 0;
