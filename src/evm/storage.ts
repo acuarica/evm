@@ -3,7 +3,7 @@ import { type Expr, type IStmt, type Stmt, Tag } from './ast';
 import { Sha3 } from './system';
 import { Add, Sub } from './math';
 
-export interface IStore {
+export interface IEVMStore {
     /**
      * vars definition
      */
@@ -27,9 +27,6 @@ export class Variable {
 }
 export class MappingStore implements IStmt {
     readonly name = 'MappingStore';
-
-    readonly type?: string;
-    readonly wrapped = false;
 
     constructor(
         readonly mappings: any,
@@ -98,13 +95,12 @@ export class MappingStore implements IStmt {
 }
 
 export class SStore {
-    readonly type?: string;
-    readonly wrapped = true;
+    readonly name = 'SStore';
 
     constructor(
         readonly location: Expr,
         readonly data: Expr,
-        readonly variables: IStore['variables']
+        readonly variables: IEVMStore['variables']
     ) {
         // if (isVal(this.location)) {
         //     const loc = this.location.toString();
@@ -156,7 +152,7 @@ export class MappingLoad extends Tag('MappingLoad') {
 
     constructor(
         readonly mappings: () => {
-            [location: number]: IStore['mappings'][keyof IStore['mappings']];
+            [location: number]: IEVMStore['mappings'][keyof IEVMStore['mappings']];
         },
         readonly location: number,
         readonly items: Expr[],
@@ -194,7 +190,7 @@ export class SLoad extends Tag('SLoad') {
     readonly type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Expr, readonly variables: IStore['variables']) {
+    constructor(readonly location: Expr, readonly variables: IEVMStore['variables']) {
         super();
     }
 
@@ -227,7 +223,7 @@ const parseMapping = (...items: Expr[]): Expr[] => {
     return mappings;
 };
 
-export const STORAGE = (contract: IStore) => {
+export const STORAGE = ({ variables, mappings }: IEVMStore) => {
     return {
         SLOAD: (state: State<Stmt, Expr>): void => {
             const storeLocation = state.stack.pop();
@@ -241,25 +237,25 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
+                    mappings[loc].keys.push(mappingParts);
                     state.stack.push(
                         new MappingLoad(
-                            () => contract.mappings,
+                            () => mappings,
                             loc,
                             mappingParts,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString())
+                            Object.keys(mappings).indexOf(mappingLocation.toString())
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -276,26 +272,26 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
+                    mappings[loc].keys.push(mappingParts);
                     state.stack.push(
                         new MappingLoad(
-                            () => contract.mappings,
+                            () => mappings,
                             loc,
                             mappingParts,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
+                            Object.keys(mappings).indexOf(mappingLocation.toString()),
                             storeLocation.right.val
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -310,29 +306,29 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
+                    mappings[loc].keys.push(mappingParts);
                     state.stack.push(
                         new MappingLoad(
-                            () => contract.mappings,
+                            () => mappings,
                             loc,
                             mappingParts,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
+                            Object.keys(mappings).indexOf(mappingLocation.toString()),
                             storeLocation.left.val
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, contract.variables));
+                    state.stack.push(new SLoad(storeLocation, variables));
                 }
             } else {
-                state.stack.push(new SLoad(storeLocation, contract.variables));
+                state.stack.push(new SLoad(storeLocation, variables));
             }
         },
 
@@ -353,23 +349,23 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
-                    contract.mappings[loc].values.push(storeData);
+                    mappings[loc].keys.push(mappingParts);
+                    mappings[loc].values.push(storeData);
                     state.stmts.push(
                         new MappingStore(
-                            () => contract.mappings,
+                            () => mappings,
                             mappingLocation,
                             mappingParts,
                             storeData,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString())
+                            Object.keys(mappings).indexOf(mappingLocation.toString())
                         )
                     );
                 } else {
@@ -390,22 +386,22 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
+                    mappings[loc].keys.push(mappingParts);
                     state.stmts.push(
                         new MappingStore(
-                            () => contract.mappings,
+                            () => mappings,
                             mappingLocation,
                             mappingParts,
                             storeData,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
+                            Object.keys(mappings).indexOf(mappingLocation.toString()),
                             storeLocation.right.val
                         )
                     );
@@ -427,22 +423,22 @@ export const STORAGE = (contract: IStore) => {
                 );
                 if (mappingLocation && mappingParts.length > 0) {
                     const loc = Number(mappingLocation);
-                    if (!(loc in contract.mappings)) {
-                        contract.mappings[loc] = {
+                    if (!(loc in mappings)) {
+                        mappings[loc] = {
                             name: undefined,
                             structs: [],
                             keys: [],
                             values: [],
                         };
                     }
-                    contract.mappings[loc].keys.push(mappingParts);
+                    mappings[loc].keys.push(mappingParts);
                     state.stmts.push(
                         new MappingStore(
-                            () => contract.mappings,
+                            () => mappings,
                             mappingLocation,
                             mappingParts,
                             storeData,
-                            Object.keys(contract.mappings).indexOf(mappingLocation.toString()),
+                            Object.keys(mappings).indexOf(mappingLocation.toString()),
                             storeLocation.left
                         )
                     );
@@ -454,11 +450,11 @@ export const STORAGE = (contract: IStore) => {
                 // eslint-disable-next-line no-constant-condition
                 false &&
                 // isVal(storeLocation) &&
-                storeLocation.toString() in contract.variables //&&
+                storeLocation.toString() in variables //&&
                 // storeData.type &&
                 // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
             ) {
-                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                state.stmts.push(new SStore(storeLocation, storeData, variables));
                 // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
                 sstoreVariable();
@@ -468,13 +464,13 @@ export const STORAGE = (contract: IStore) => {
             function sstoreVariable() {
                 if (storeLocation.isVal()) {
                     const loc = storeLocation.eval().toString();
-                    if (loc in contract.variables) {
-                        contract.variables[loc].types.push(storeData);
+                    if (loc in variables) {
+                        variables[loc].types.push(storeData);
                     } else {
-                        contract.variables[loc] = new Variable(undefined, [storeData]);
+                        variables[loc] = new Variable(undefined, [storeData]);
                     }
                 }
-                state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
+                state.stmts.push(new SStore(storeLocation, storeData, variables));
             }
         },
     };

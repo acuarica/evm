@@ -117,14 +117,14 @@ export function makeBranch(pc: number, state: State<Stmt, Expr>) {
     return new Branch(pc, state.clone());
 }
 
-export interface ISelectorBranches {
+export interface IEVMSelectorBranches {
     /**
      * store selectors starting point.
      */
     readonly functionBranches: Map<string, { pc: number; state: State<Stmt, Expr> }>;
 }
 
-export function FLOW(opcodes: Opcode[], evm: ISelectorBranches) {
+export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranches) {
     return {
         JUMP: (_opcode: Opcode, state: State<Stmt, Expr>): void => {
             const offset = state.stack.pop();
@@ -139,17 +139,18 @@ export function FLOW(opcodes: Opcode[], evm: ISelectorBranches) {
 
             const dest = getDest(offset);
             const fallBranch = makeBranch(opcode.pc + 1, state);
-            state.halt(
-                cond.tag === 'Sig'
-                    ? (() => {
-                          evm.functionBranches.set(cond.selector, {
-                              pc: dest.pc,
-                              state: state.clone(),
-                          });
-                          return new SigCase(cond, offset, fallBranch);
-                      })()
-                    : new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state))
-            );
+
+            let last: SigCase | Jumpi;
+            if (cond.tag === 'Sig') {
+                functionBranches.set(cond.selector, {
+                    pc: dest.pc,
+                    state: state.clone(),
+                });
+                last = new SigCase(cond, offset, fallBranch);
+            } else {
+                last = new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state));
+            }
+            state.halt(last);
         },
     };
 

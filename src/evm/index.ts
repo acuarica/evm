@@ -1,4 +1,4 @@
-import { decode, formatOpcode, type OPCODES, type Opcode } from '../opcode';
+import { decode, type OPCODES, type Opcode } from '../opcode';
 import { type Stack, State as TState } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
@@ -11,9 +11,9 @@ import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
 import { INVALID, PC, SYSTEM } from './system';
-import { LOGS, type IEvents } from './log';
-import { type IStore, STORAGE } from './storage';
-import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
+import { LOGS, type IEVMEvents } from './log';
+import { type IEVMStore, STORAGE } from './storage';
+import { Branch, FLOW, type IEVMSelectorBranches, JumpDest, makeBranch } from './flow';
 
 import { assert } from '../error';
 
@@ -54,7 +54,7 @@ const TABLE = {
     INVALID,
 };
 
-export class EVM implements IStore, ISelectorBranches {
+export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
     /**
      *
      */
@@ -67,37 +67,31 @@ export class EVM implements IStore, ISelectorBranches {
      */
     readonly chunks = new Map<number, { pcend: number; states: State[] }>();
 
-    /**
-     *
-     */
-    readonly functionBranches = new Map<string, { pc: number; state: State }>();
+    readonly events: IEVMEvents['events'] = {};
+    readonly variables: IEVMStore['variables'] = {};
+    readonly mappings: IEVMStore['mappings'] = {};
+    readonly functionBranches: IEVMSelectorBranches['functionBranches'] = new Map<
+        string,
+        { pc: number; state: State }
+    >();
 
-    readonly variables: IStore['variables'] = {};
-
-    readonly mappings: IStore['mappings'] = {};
-
-    constructor(
-        readonly opcodes: Opcode[],
-        readonly events: IEvents,
-        readonly metadata?: Metadata
-    ) {
+    constructor(readonly opcodes: Opcode[], readonly metadata?: Metadata) {
         this.insts = {
             ...TABLE,
             ...FLOW(opcodes, this),
             ...makeState(STORAGE(this)),
-            ...makeState(LOGS(events)),
+            ...makeState(LOGS(this)),
         };
     }
 
     /**
      *
      * @param bytecode
-     * @param events
      * @returns
      */
-    static from(bytecode: string, events: IEvents): EVM {
+    static from(bytecode: string): EVM {
         const [code, metadata] = stripMetadataHash(bytecode);
-        return new EVM(decode(Buffer.from(code, 'hex')), events, metadata);
+        return new EVM(decode(Buffer.from(code, 'hex')), metadata);
     }
 
     /**
@@ -168,27 +162,5 @@ export class EVM implements IStore, ISelectorBranches {
             assert(chunk.pcend === pc);
             chunk.states.push(state);
         }
-    }
-
-    /**
-     *
-     * @param offset
-     * @returns
-     */
-    getDest(offset: Expr): Opcode {
-        const offset2 = offset.eval();
-        if (!offset2.isVal()) {
-            throw new Error('Expected numeric offset, found' + offset.toString());
-        }
-        const dest = this.opcodes.find(o => o.offset === Number(offset2.val));
-        if (!dest) {
-            throw new Error('Expected `JUMPDEST` in JUMP destination, but none was found');
-        }
-        if (dest.mnemonic !== 'JUMPDEST') {
-            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (offset as any).jumpDest = dest.pc;
-        return dest;
     }
 }
