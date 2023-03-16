@@ -225,8 +225,8 @@ const parseMapping = (...items: Expr[]): Expr[] => {
 
 export const STORAGE = ({ variables, mappings }: IEVMStore) => {
     return {
-        SLOAD: (state: State<Stmt, Expr>): void => {
-            const storeLocation = state.stack.pop();
+        SLOAD: ({ stack }: State<Stmt, Expr>): void => {
+            const storeLocation = stack.pop();
             if (storeLocation instanceof Sha3) {
                 const mappingItems = parseMapping(...storeLocation.items);
                 const mappingLocation = <bigint | undefined>(
@@ -246,7 +246,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         };
                     }
                     mappings[loc].keys.push(mappingParts);
-                    state.stack.push(
+                    stack.push(
                         new MappingLoad(
                             () => mappings,
                             loc,
@@ -255,7 +255,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(storeLocation, variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -281,7 +281,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         };
                     }
                     mappings[loc].keys.push(mappingParts);
-                    state.stack.push(
+                    stack.push(
                         new MappingLoad(
                             () => mappings,
                             loc,
@@ -291,7 +291,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(storeLocation, variables));
                 }
             } else if (
                 typeof storeLocation !== 'bigint' &&
@@ -315,7 +315,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         };
                     }
                     mappings[loc].keys.push(mappingParts);
-                    state.stack.push(
+                    stack.push(
                         new MappingLoad(
                             () => mappings,
                             loc,
@@ -325,16 +325,17 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         )
                     );
                 } else {
-                    state.stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(storeLocation, variables));
                 }
             } else {
-                state.stack.push(new SLoad(storeLocation, variables));
+                stack.push(new SLoad(storeLocation, variables));
             }
         },
 
-        SSTORE: (state: State<Stmt, Expr>): void => {
-            const storeLocation = state.stack.pop();
-            const storeData = state.stack.pop();
+        SSTORE: ({ stack, stmts }: State<Stmt, Expr>): void => {
+            const storeLocation = stack.pop();
+            const storeData = stack.pop();
+
             if (storeLocation.isVal()) {
                 // throw new Error('bigint not expected in sstore');
                 sstoreVariable();
@@ -359,7 +360,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                     }
                     mappings[loc].keys.push(mappingParts);
                     mappings[loc].values.push(storeData);
-                    state.stmts.push(
+                    stmts.push(
                         new MappingStore(
                             () => mappings,
                             mappingLocation,
@@ -395,7 +396,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         };
                     }
                     mappings[loc].keys.push(mappingParts);
-                    state.stmts.push(
+                    stmts.push(
                         new MappingStore(
                             () => mappings,
                             mappingLocation,
@@ -432,7 +433,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         };
                     }
                     mappings[loc].keys.push(mappingParts);
-                    state.stmts.push(
+                    stmts.push(
                         new MappingStore(
                             () => mappings,
                             mappingLocation,
@@ -454,7 +455,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                 // storeData.type &&
                 // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
             ) {
-                state.stmts.push(new SStore(storeLocation, storeData, variables));
+                stmts.push(new SStore(storeLocation, storeData, variables));
                 // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
                 sstoreVariable();
@@ -470,7 +471,7 @@ export const STORAGE = ({ variables, mappings }: IEVMStore) => {
                         variables[loc] = new Variable(undefined, [storeData]);
                     }
                 }
-                state.stmts.push(new SStore(storeLocation, storeData, variables));
+                stmts.push(new SStore(storeLocation, storeData, variables));
             }
         },
     };
