@@ -18,26 +18,36 @@ describe('evm::sym', () => {
                 expect(expr.str()).to.be.deep.equal(value);
             });
 
-            const sol = `contract C {
-                event Deposit(uint256);
-                fallback() external payable {
-                    emit Deposit(block.number);
+            it('should get it from compiled code', function () {
+                if (
+                    [
+                        'msg.sender',
+                        'memory.length',
+                        'self.balance',
+                        'chainid',
+                        'block.coinbase',
+                        'output.length',
+                        'this.code.length',
+                        'tx.origin',
+                        'this',
+                    ].includes(value)
+                ) {
+                    this.skip();
                 }
-            }`;
 
-            let evm: EVM;
-
-            before(function () {
-                evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
-            });
-
-            it('should get it from compiled code', () => {
+                const sol = `contract C {
+                    event Deposit(uint256);
+                    fallback() external payable {
+                        emit Deposit(${value});
+                    }
+                }`;
+                const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
                 const state = new State<Stmt, Expr>();
                 evm.exec(0, state);
 
                 const stmt = state.stmts[0];
                 assert(stmt.name === 'Log');
-                expect(stmt.args[0]).to.be.deep.equal(new Symbol0('block.number'));
+                expect(stmt.args[0]).to.be.deep.equal(new Symbol0(value));
             });
         });
     }

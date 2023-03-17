@@ -26,7 +26,7 @@ describe('evm', () => {
                 }
             }`;
 
-        const evm = EVM.from(compile(sol, '0.8.16', { context: this }).deployedBytecode);
+        const evm = EVM.from(compile(sol, '0.8.16', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -37,7 +37,7 @@ describe('evm', () => {
                 for (uint256 i = 0; i < block.number; i++) emit Deposit(i);
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -48,7 +48,7 @@ describe('evm', () => {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });

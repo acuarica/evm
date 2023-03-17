@@ -113,7 +113,7 @@ describe('evm::system', () => {
                 }
             }`;
 
-            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
 
             let state = new State<Stmt, Expr>();
             evm.run(0, state);

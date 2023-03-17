@@ -1,8 +1,10 @@
 EVMJS=yarn --silent ts-node scripts/evmjs.ts
 
-BYTECODES=$(wildcard .contracts/*.bytecode)
-PNGS=$(BYTECODES:.contracts/%=.contracts/%.png)
-SOLS=$(BYTECODES:.contracts/%=.contracts/%.sol)
+BYTECODE=.bytecode
+
+BYTECODES=$(wildcard $(BYTECODE)/*.bytecode)
+PNGS=$(BYTECODES:$(BYTECODE)/%=.contracts/%.png)
+SOLS=$(BYTECODES:$(BYTECODE)/%=.contracts/%.sol)
 
 .PHONY: all clean
 
@@ -15,4 +17,4 @@ all: $(PNGS) $(SOLS)
 	$(EVMJS) decompile $* > $*.sol
 
 clean:
-	-rm -r .contracts/
+	-rm -r $(BYTECODE)/

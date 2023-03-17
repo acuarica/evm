@@ -115,7 +115,7 @@ describe('evm::logic', () => {
                 }
             }`;
 
-            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
 
             const state = new State<Stmt, Expr>();
             evm.run(0, state);

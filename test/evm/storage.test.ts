@@ -13,7 +13,7 @@ describe('evm::storage', () => {
                 val2 += 11;
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         expect(evm.variables).to.be.have.keys('0x0', '0x1');
     });
@@ -32,7 +32,7 @@ describe('evm::storage', () => {
                 t.val2 += 11;
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         expect(evm.variables).to.be.have.keys('0x0', '0x1');
         expect(evm.mappings).to.be.deep.equal({});

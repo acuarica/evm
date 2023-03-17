@@ -21,7 +21,7 @@ describe('evm::log', () => {
     let evm: EVM;
 
     before(function () {
-        evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
+        evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
     });
 
     it.skip('should get it from compiled code', () => {

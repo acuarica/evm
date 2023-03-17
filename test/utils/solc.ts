@@ -39,35 +39,33 @@ export function compile(
         contractName?: string;
         context?: Mocha.Context;
     } = {}
-): { bytecode: string; deployedBytecode: string } {
+): { bytecode: string } {
     content = `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`;
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (opts.context !== undefined) {
-        const basePath = './.contracts';
+        const basePath = './.bytecode';
         const fileName = title(opts.context.test)
-            // .replace('..contracts.', '')
             .replace(/^../, '')
             .replace('solc-', '')
             .replace(/`/g, '')
             .replace(/::/g, '.')
-            .replace(/[:^'() ]/g, '-')
+            .replace(/ /g, '-')
+            .replace(/[:^'()]/g, '_')
             .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
         }
 
-        const hash = createHash('md5').update(content).digest('hex');
+        const hash = createHash('md5').update(content).digest('hex').substring(0, 6);
         const path = `${basePath}/${fileName}-${hash}`;
 
         try {
             const bytecode = readFileSync(`${path}.bytecode`, 'utf8');
-            const deployedBytecode = readFileSync(`${path}.deployedBytecode`, 'utf8');
-            return { bytecode, deployedBytecode };
+            return { bytecode };
         } catch {
-            writeCacheFn = ({ bytecode, deployedBytecode }) => {
+            writeCacheFn = ({ bytecode }) => {
                 writeFileSync(`${path}.bytecode`, bytecode);
-                writeFileSync(`${path}.deployedBytecode`, deployedBytecode);
             };
         }
     } else {
@@ -84,7 +82,7 @@ export function compile(
         settings: {
             outputSelection: {
                 '*': {
-                    '*': ['evm.bytecode', 'evm.deployedBytecode'],
+                    '*': ['evm.deployedBytecode'],
                 },
             },
         },
@@ -123,11 +121,10 @@ export function compile(
         selectedContract = Object.values(contract)[0];
     }
 
-    const deployedBytecode = selectedContract.evm.deployedBytecode.object;
-    const bytecode = selectedContract.evm.bytecode.object;
-    writeCacheFn({ bytecode, deployedBytecode });
+    const bytecode = selectedContract.evm.deployedBytecode.object;
+    writeCacheFn({ bytecode });
 
-    return { bytecode, deployedBytecode };
+    return { bytecode };
 
     function valid(output: SolcOutput): boolean {
         return 'contracts' in output && (!('errors' in output) || output.errors.length === 0);

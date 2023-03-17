@@ -30,16 +30,14 @@ describe('metadata', () => {
             output = compile('contract C {}', this);
         });
 
-        (['bytecode', 'deployedBytecode'] as const).forEach(prop => {
-            it(`should get metadata for \`${prop}\``, () => {
-                const [, metadata] = stripMetadataHash(output[prop]);
+        it('should get metadata for deployed bytecode', () => {
+            const [, metadata] = stripMetadataHash(output.bytecode);
 
-                const [protocol, hash, expectedVersion] = HASHES[version];
-                expect(metadata).to.be.deep.equal(
-                    new Metadata(protocol, hash, expectedVersion ?? version)
-                );
-                expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
-            });
+            const [protocol, hash, expectedVersion] = HASHES[version];
+            expect(metadata).to.be.deep.equal(
+                new Metadata(protocol, hash, expectedVersion ?? version)
+            );
+            expect(metadata?.url).to.be.equal(`${protocol}://${hash}`);
         });
     });
 });

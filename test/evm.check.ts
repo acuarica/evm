@@ -18,7 +18,7 @@ describe('evm', () => {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode).opcodes;
+        const opcodes = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode).opcodes;
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);
