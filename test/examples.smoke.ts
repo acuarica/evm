@@ -1,10 +1,10 @@
 import { expect } from 'chai';
+import chalk = require('chalk');
+import { providers } from 'ethers';
 // import { utils } from 'ethers';
-import { readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { EVM } from '../src/evm';
 import { State } from '../src/state';
-
-// mocha.timeout ( 5000);
 
 describe('examples', function () {
     this.timeout(5000);
@@ -12,12 +12,12 @@ describe('examples', function () {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
-            count: 13245,
+            count: 13208,
             lines: [],
         },
         {
             name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
-            count: 8108,
+            count: 8098,
             lines: [],
         },
         {
@@ -54,14 +54,8 @@ describe('examples', function () {
             ],
         },
         {
-            /**
-             * Bytecode of USDC _proxy_ contract.
-             * Fetched with this RPC provider https://api.avax-test.network/ext/bc/C/rpc.
-             *
-             * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
-             */
-            name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
-            count: 741,
+            name: 'USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            count: 807,
             lines: [
                 /^address public implementation;/m,
                 /^address public admin;/m,
@@ -88,12 +82,13 @@ describe('examples', function () {
             ],
         },
     ].forEach(({ name, count }) => {
-        describe(`for ${name}`, () => {
+        describe(`${name}`, () => {
             let evm: EVM;
             // let text: string;
 
-            before(() => {
-                const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
+            before(async () => {
+                const path = await fetchBytecode(name);
+                const bytecode = readFileSync(path, 'utf8');
                 evm = EVM.from(bytecode);
                 // evm.start();
                 // text = evm.decompile();
@@ -105,7 +100,7 @@ describe('examples', function () {
             });
 
             it(`should decode bytecode correctly`, () => {
-                // expect(evm.opcodes).to.be.of.length(count);
+                expect(evm.opcodes).to.be.of.length(count);
             });
 
             // it(`should detect functions correctly`, () => {
@@ -161,3 +156,23 @@ describe('examples', function () {
         });
     });
 });
+
+async function fetchBytecode(contract: string): Promise<string> {
+    const BASE_PATH = './test/examples/';
+    const addr = chalk.blue;
+    const provider = new providers.EtherscanProvider();
+    const path = `${BASE_PATH}${contract}.bytecode`;
+
+    if (!existsSync(path)) {
+        const [name, address] = contract.split('-');
+        console.info(`Fetching code for ${name} at ${addr(address)} into ${BASE_PATH}`);
+        const code = await provider.getCode(address);
+
+        if (!existsSync(BASE_PATH)) {
+            mkdirSync(BASE_PATH);
+        }
+        writeFileSync(path, code);
+    }
+
+    return path;
+}
