@@ -113,7 +113,7 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
 
             const chunk = this.chunks.get(branch.pc);
             if (chunk !== undefined && chunk.states.length > 4) {
-                continue;
+                // continue;
             }
 
             this.exec(branch.pc, branch.state);

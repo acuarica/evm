@@ -65,8 +65,8 @@ describe('evm::system', () => {
         const state = new State<Stmt, Expr>();
         INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
         expect(state.halted).to.be.true;
-        expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
-        expect(`${state.stmts[0]}`).to.be.equal('revert("Invalid instruction (0x1)");');
+        expect(state.stmts).to.be.deep.equal([new Invalid('Invalid instruction (0x1)')]);
+        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
     });
 
     describe('RETURN', () => {

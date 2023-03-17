@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { type Opcode, toHex } from '../src/opcode';
+import { type Opcode, toHex, formatOpcode } from '../src/opcode';
 import * as yargs from 'yargs';
 import type { Argv } from 'yargs';
 import chalk = require('chalk');
@@ -145,7 +145,13 @@ function writeDot(evm: EVM) {
             write(`subgraph cluster_${pc} {`);
             // write(`  style=filled;`);
             // write(`  node [style=filled,color=white];`);
-            write(`  label = "pc ${pc}";`);
+            let label = `pc ${pc}\\l`;
+
+            for (let i = pc; i < chunk.pcend; i++) {
+                const opcode = evm.opcodes[i];
+                label += formatOpcode(opcode) + '\\l';
+            }
+            write(`  label = "${label}";`);
 
             for (const state of chunk.states) {
                 writeNode(pc, state);

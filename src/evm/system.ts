@@ -247,10 +247,10 @@ export class Revert implements IStmt {
 export class Invalid implements IStmt {
     readonly name = 'Invalid';
 
-    constructor(readonly opcode: number) {}
+    constructor(readonly reason: string) {}
 
     toString() {
-        return `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
+        return `revert('${this.reason}');`;
     }
 }
 
@@ -389,5 +389,5 @@ export const PC = (opcode: Opcode, { stack }: State<Stmt, Expr>) =>
     stack.push(new Val(BigInt(opcode.offset)));
 
 export const INVALID = (opcode: Opcode, state: State<Stmt, Expr>): void => {
-    state.halt(new Invalid(opcode.opcode));
+    state.halt(new Invalid(`Invalid instruction (0x${opcode.opcode.toString(16)})`));
 };

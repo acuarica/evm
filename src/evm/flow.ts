@@ -2,6 +2,17 @@ import type { Stmt, Expr, IStmt } from './ast';
 import type { State } from '../state';
 import type { Sig } from './logic';
 import { formatOpcode, type Opcode } from '../opcode';
+import { Invalid } from './system';
+
+type Result<T, E> =
+    | { readonly tag: 'ok'; readonly val: T }
+    | { readonly tag: 'err'; readonly err: E };
+const Ok = <T>(val: T) => ({ tag: 'ok' as const, val });
+const Err = <E>(err: E) => ({ tag: 'err' as const, err });
+
+const isOk = <T, E>(result: Result<T, E>): result is ReturnType<typeof Ok<T>> =>
+    result.tag === 'ok';
+// const unwrap = <T>(result: { tag: 'ok', val: T }) => result.val;
 
 export class Branch {
     constructor(readonly pc: number, readonly state: State<Stmt, Expr>) {}
@@ -129,8 +140,12 @@ export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranch
         JUMP: (_opcode: Opcode, state: State<Stmt, Expr>): void => {
             const offset = state.stack.pop();
             const dest = getDest(offset);
-            const destBranch = makeBranch(dest.pc, state);
-            state.halt(new Jump(offset, destBranch));
+            if (isOk(dest)) {
+                const destBranch = makeBranch(dest.val.pc, state);
+                state.halt(new Jump(offset, destBranch));
+            } else {
+                state.halt(new Invalid(dest.err));
+            }
         },
 
         JUMPI: (opcode: Opcode, state: State<Stmt, Expr>): void => {
@@ -138,19 +153,23 @@ export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranch
             const cond = state.stack.pop();
 
             const dest = getDest(offset);
-            const fallBranch = makeBranch(opcode.pc + 1, state);
+            if (isOk(dest)) {
+                const fallBranch = makeBranch(opcode.pc + 1, state);
 
-            let last: SigCase | Jumpi;
-            if (cond.tag === 'Sig') {
-                functionBranches.set(cond.selector, {
-                    pc: dest.pc,
-                    state: state.clone(),
-                });
-                last = new SigCase(cond, offset, fallBranch);
+                let last: SigCase | Jumpi;
+                if (cond.tag === 'Sig') {
+                    functionBranches.set(cond.selector, {
+                        pc: dest.val.pc,
+                        state: state.clone(),
+                    });
+                    last = new SigCase(cond, offset, fallBranch);
+                } else {
+                    last = new Jumpi(cond, offset, fallBranch, makeBranch(dest.val.pc, state));
+                }
+                state.halt(last);
             } else {
-                last = new Jumpi(cond, offset, fallBranch, makeBranch(dest.pc, state));
+                state.halt(new Invalid(dest.err));
             }
-            state.halt(last);
         },
     };
 
@@ -159,20 +178,20 @@ export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranch
      * @param offset
      * @returns
      */
-    function getDest(offset: Expr): Opcode {
+    function getDest(offset: Expr): Result<Opcode, string> {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
-            throw new Error('Expected numeric offset, found' + offset.toString());
+            return Err(`Expected numeric offset, found ${offset}`);
         }
         const dest = opcodes.find(o => o.offset === Number(offset2.val));
         if (!dest) {
-            throw new Error('Expected `JUMPDEST` in JUMP destination, but none was found');
+            return Err('Expected `JUMPDEST` in JUMP destination, but none was found');
         }
         if (dest.mnemonic !== 'JUMPDEST') {
-            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
+            return Err('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
         }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         (offset as any).jumpDest = dest.pc;
-        return dest;
+        return Ok(dest);
     }
 }
