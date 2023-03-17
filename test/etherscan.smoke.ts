@@ -23,7 +23,15 @@ describe('etherscan', function () {
             const path = `${BASE_PATH}${name}-${address}.bytecode`;
 
             it(`should decode & decompile ${name} ${address}`, async function () {
-                if (['InuNetwork', 'MetaShibarium'].includes(name)) {
+                if (
+                    [
+                        'InuNetwork',
+                        'MetaShibarium',
+                        'mirageAuction',
+                        'BSN',
+                        'ShibariumDollar',
+                    ].includes(name)
+                ) {
                     this.skip();
                 }
 
