@@ -207,3 +207,18 @@ function writeDot(evm: EVM) {
         }
     }
 }
+
+// function sel() {
+
+//             let cfg;
+//             const selector = argv['selector'] as string;
+//             if (selector) {
+//                 const fn = evm.contract.getFunction(selector);
+//                 if (!fn) {
+//                     throw new Error('function ' + selector + ' not found');
+//                 }
+//                 cfg = fn.cfg;
+//             } else {
+//                 cfg = evm.contract.main.cfg;
+//             }
+// }
