@@ -38,7 +38,9 @@ export const PUSHES = {
 };
 
 function push(pushData: Uint8Array, stack: Stack<Expr>): void {
-    stack.push(new Val(BigInt('0x' + toHex(pushData))));
+    const val = new Val(BigInt('0x' + toHex(pushData)));
+    val.isPush = true;
+    stack.push(val);
 }
 
 export function STACK<E>() {

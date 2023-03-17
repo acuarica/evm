@@ -91,7 +91,7 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
      */
     static from(bytecode: string): EVM {
         const [code, metadata] = stripMetadataHash(bytecode);
-        return new EVM(decode(Buffer.from(code, 'hex')), metadata);
+        return new EVM(decode(Buffer.from(code.replace('0x', ''), 'hex')), metadata);
     }
 
     /**
@@ -119,12 +119,21 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
             this.exec(branch.pc, branch.state);
             const last = branch.state.last! as IStmt;
             if (last.next) {
-                branches.unshift(...last.next());
+                for (const b of last.next()) {
+                    const s = gc(b, this.chunks);
+                    if (s === undefined) {
+                        branches.unshift(b);
+                    } else {
+                        b.state = s;
+                    }
+                }
+                // branches.unshift(...last.next());
             }
         }
     }
 
     exec(pc0: number, state: State) {
+        assert(!state.halted);
         let pc = pc0;
         for (; !state.halted && pc < this.opcodes.length; pc++) {
             const opcode = this.opcodes[pc];
@@ -149,7 +158,7 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
             }
         }
 
-        assert(state.halted);
+        assert(state.halted, pc0, pc);
 
         let chunk = this.chunks.get(pc0);
         if (chunk === undefined) {
@@ -162,5 +171,33 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
             assert(chunk.pcend === pc);
             chunk.states.push(state);
         }
+    }
+}
+
+function gc(b: Branch, chunks: EVM['chunks']) {
+    const chunk = chunks.get(b.pc);
+    if (chunk !== undefined) {
+        for (const s of chunk.states) {
+            if (cmp(b.state, s)) {
+                return s;
+            }
+        }
+    }
+    return undefined;
+}
+
+function cmp({ stack: lhs }: TState<Stmt, Expr>, { stack: rhs }: TState<Stmt, Expr>) {
+    if (lhs.values.length !== rhs.values.length) {
+        return false;
+    }
+    for (let i = 0; i < lhs.values.length; i++) {
+        if (!cmpval(lhs.values[i], rhs.values[i])) {
+            return false;
+        }
+    }
+    return true;
+
+    function cmpval(lhs: Expr, rhs: Expr) {
+        return !(lhs.isVal() && lhs.isPush) || !(rhs.isVal() && rhs.isPush) || lhs.val === rhs.val;
     }
 }
