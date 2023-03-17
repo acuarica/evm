@@ -329,15 +329,19 @@ export class ControlFlowGraph {
          *
          * @param offset
          */
-        function getDest(offset: Expr): Opcode {
+        function getDest(offset: Expr, from: number): Opcode {
             const offset2 = evalExpr(offset);
             if (!isBigInt(offset2)) {
                 throw new Error('Expected numeric offset, found' + offset.toString());
             }
 
             const dest = opcodes.find(o => o.offset === Number(offset2));
-            if (!dest) {
-                throw new Error('Expected `JUMPDEST` in JUMP destination, but found is undefined');
+            if (dest === undefined) {
+                throw new Error(
+                    `Expected opcode at (0x${offset2.toString(
+                        16
+                    )}) from JUMP or JUMPI instruction, but none was found. Coming PC ${from}`
+                );
             }
 
             if (dest.mnemonic !== 'JUMPDEST') {
@@ -423,16 +427,7 @@ export class ControlFlowGraph {
     }
 }
 
-// export function pprint({ blocks }: ControlFlowGraph) {
-//     for (const [pc, block] of Object.entries(blocks)) {
-//         console.log(pc, ':', block.entry.offset);
-//         block.opcodes.forEach(op => console.log('  ', formatOpcode(op)));
-//         console.log('  =| ', block.stack.values.join(' | '));
-//         block.stmts.forEach(stmt => console.log('  ', stmt.toString()));
-//     }
-// }
-
-export function dominatorTree({ blocks, entry, doms }: ControlFlowGraph) {
+export function dominatorTree({ blocks, entry, doms }: ControlFlowGraph): void {
     doms[entry] = new Set([entry]);
 
     for (const { key } of Object.values(blocks)) {
@@ -444,8 +439,13 @@ export function dominatorTree({ blocks, entry, doms }: ControlFlowGraph) {
     let changed = true;
     while (changed) {
         changed = false;
-        for (const { key } of Object.values(blocks)) {
+        for (const [key0, { key }] of Object.entries(blocks)) {
+            assert(key0 === key);
+            assert(blocks[key] !== undefined);
+
             if (key !== entry) {
+                if (blocks[key] === undefined) continue;
+
                 const ds = union(
                     new Set([key]),
                     intersect(blocks[key].preds.map(pred => doms[pred]))
