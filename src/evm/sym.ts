@@ -120,9 +120,9 @@ export function datacopy(fn: (offset: string, size: string) => string) {
         const offset = stack.pop();
         const size = stack.pop();
         if (!dest.isVal()) {
-            throw new Error('expected number in returndatacopy');
+            // throw new Error('expected number in returndatacopy');
+        } else {
+            memory[Number(dest.val)] = new DataCopy(fn, offset, size);
         }
-
-        memory[Number(dest.val)] = new DataCopy(fn, offset, size);
     };
 }
