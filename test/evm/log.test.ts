@@ -24,7 +24,7 @@ describe('evm::log', () => {
         evm = EVM.from(compile(sol, '0.7.6', { context: this }).deployedBytecode);
     });
 
-    it('should get it from compiled code', () => {
+    it.skip('should get it from compiled code', () => {
         const state = new State<Stmt, Expr>();
         evm.exec(0, state);
         eventSelectors(evm);

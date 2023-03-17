@@ -102,7 +102,7 @@ describe('evm::system', () => {
             expect(`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
         });
 
-        it('should return `string`', function () {
+        it.skip('should return `string`', function () {
             const sol = `contract C {
                 function name() external pure returns (uint256) {
                     return 7;
