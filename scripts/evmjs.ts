@@ -110,19 +110,6 @@ void yargs
     .scriptName('evmjs')
     .usage('$0 <cmd> [path]')
     .command(
-        'abi [path]',
-        'Writes the abi of the selected function in `dot` format into standard output',
-        (yargs: Argv) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            const evm = getEVM(argv['path'] as string);
-            console.info(evm.getFunctions());
-            Object.values(evm.contract.functions).forEach(f => console.info(f.label, f.hash));
-            // console.info(evm.contract.main.cfg.functionBranches);
-        }
-    )
-    .command(
         'dis [path]',
         'Disassemble the bytecode into Opcodes',
         (yargs: Argv) => {
