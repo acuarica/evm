@@ -7,8 +7,6 @@ import { EVM } from '../src/evm';
 const BASE_PATH = './data/smoke/';
 
 describe('etherscan', function () {
-    this.timeout(5000);
-
     /**
      * Needs to be manually downloaded from
      *

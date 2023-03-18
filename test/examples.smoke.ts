@@ -7,8 +7,6 @@ import { EVM } from '../src/evm';
 import { State } from '../src/state';
 
 describe('examples', function () {
-    this.timeout(5000);
-
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
