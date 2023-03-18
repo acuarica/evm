@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import { type Expr, type Stmt, Val } from '../../src/evm/ast';
+import { type Expr, type Stmt, Val } from '../../src/evm/expr';
 import type { Jump } from '../../src/evm/flow';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';

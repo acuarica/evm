@@ -1,6 +1,6 @@
 import type { Opcode } from '../opcode';
 import type { State } from '../state';
-import { type IStmt, Tag, Val, type Expr, type Stmt } from './ast';
+import { type IStmt, Tag, Val, type Expr, type Stmt } from './expr';
 import { MLoad } from './memory';
 
 export class Sha3 extends Tag('Sha3') {

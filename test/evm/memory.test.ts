@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { State } from '../../src/state';
-import { type Expr, Val, type Stmt } from '../../src/evm/ast';
+import { type Expr, Val, type Stmt } from '../../src/evm/expr';
 import { Symbol0 } from '../../src/evm/sym';
 import { MEMORY } from '../../src/evm/memory';
 

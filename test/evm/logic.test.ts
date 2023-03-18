@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import { type Expr, Val, type Stmt } from '../../src/evm/ast';
+import { type Expr, Val, type Stmt } from '../../src/evm/expr';
 import { CallDataLoad } from '../../src/evm/env';
 import { LOGIC, Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';

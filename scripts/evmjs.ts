@@ -5,7 +5,7 @@ import type { Argv } from 'yargs';
 import chalk = require('chalk');
 import { EVM } from '../src/evm';
 import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
-import type { Expr, Stmt } from '../src/evm/ast';
+import type { Expr, Stmt } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
 

@@ -1,5 +1,5 @@
 import type { Stack } from '../state';
-import { type Expr, Tag } from './ast';
+import { type Expr, Tag } from './expr';
 
 export class CallValue extends Tag('CallValue') {
     eval(): Expr {

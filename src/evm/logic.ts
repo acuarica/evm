@@ -1,5 +1,5 @@
 import type { Stack } from '../state';
-import { type Expr, Tag, Bin, Val } from './ast';
+import { type Expr, Tag, Bin, Val } from './expr';
 
 function Cmp<N extends string>(tag: N, op: string) {
     abstract class Cmp extends Tag(tag, 9) {

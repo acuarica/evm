@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import type { Expr, Stmt } from '../../src/evm/ast';
+import type { Expr, Stmt } from '../../src/evm/expr';
 import { INFO, SYM, Symbol0 } from '../../src/evm/sym';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';

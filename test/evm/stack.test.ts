@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { type Expr, Val } from '../../src/evm/ast';
+import { type Expr, Val } from '../../src/evm/expr';
 import { PUSHES, STACK } from '../../src/evm/stack';
 import { Stack } from '../../src/state';
 

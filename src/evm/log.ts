@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import { type Expr, type Stmt, Val, type IStmt } from './ast';
+import { type Expr, type Stmt, Val, type IStmt } from './expr';
 import { MLoad } from './memory';
 
 /**

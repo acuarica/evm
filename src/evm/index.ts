@@ -2,7 +2,7 @@ import { decode, type OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { type Stack, State as TState } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
-import type { Expr, IStmt, Stmt } from './ast';
+import type { Expr, IStmt, Stmt } from './expr';
 
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';

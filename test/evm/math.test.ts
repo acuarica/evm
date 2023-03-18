@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Stack } from '../../src/state';
 import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
-import { type Expr, Val } from '../../src/evm/ast';
+import { type Expr, Val } from '../../src/evm/expr';
 import { SYM, Symbol0 } from '../../src/evm/sym';
 
 describe('evm::math', () => {

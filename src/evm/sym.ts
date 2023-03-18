@@ -1,5 +1,5 @@
 import type { Ram } from '../state';
-import { type Expr, Tag, Val } from './ast';
+import { type Expr, Tag, Val } from './expr';
 
 export const INFO = {
     ADDRESS: 'this',

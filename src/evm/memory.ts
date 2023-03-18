@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import { type Stmt, Tag, type Expr, type IStmt } from './ast';
+import { type Stmt, Tag, type Expr, type IStmt } from './expr';
 
 export class MLoad extends Tag('MLoad') {
     /**

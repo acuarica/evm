@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import { type Expr, type Stmt, Val } from '../../src/evm/ast';
+import { type Expr, type Stmt, Val } from '../../src/evm/expr';
 import { State } from '../../src/state';
 import { eventSelector, eventSelectors } from '../utils/selector';
 import { compile } from '../utils/solc';

@@ -1,4 +1,4 @@
-import type { Stmt, Expr, IStmt, Val } from './ast';
+import type { Stmt, Expr, IStmt, Val } from './expr';
 import type { State } from '../state';
 import type { Sig } from './logic';
 import { type decode, formatOpcode, type Opcode } from '../opcode';

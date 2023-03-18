@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import { type Expr, type IStmt, type Stmt, Tag } from './ast';
+import { type Expr, type IStmt, type Stmt, Tag } from './expr';
 import { Sha3 } from './system';
 import { Add, Sub } from './math';
 
