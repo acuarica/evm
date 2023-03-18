@@ -20,7 +20,16 @@ type SolcOutput = {
         };
     };
     sources: { SOURCE: { id: 0 } }; // Not currently used
-    errors: { formattedMessage: string }[];
+    errors?: {
+        severity: string;
+        formattedMessage: string;
+    }[];
+};
+
+const SEVERITY = {
+    error: 1,
+    warning: 2,
+    info: 3,
 };
 
 /**
@@ -36,6 +45,7 @@ export function compile(
     content: string,
     version: Version,
     opts: {
+        severity?: keyof typeof SEVERITY;
         contractName?: string;
         context?: Mocha.Context;
     } = {}
@@ -127,7 +137,14 @@ export function compile(
     return { bytecode };
 
     function valid(output: SolcOutput): boolean {
-        return 'contracts' in output && (!('errors' in output) || output.errors.length === 0);
+        const sev = opts.severity ?? 'error';
+        return (
+            'contracts' in output &&
+            (!('errors' in output) ||
+                output.errors.filter(
+                    err => SEVERITY[err.severity as keyof typeof SEVERITY] >= SEVERITY[sev]
+                ).length === 0)
+        );
     }
 
     function title(test: Runnable | Suite | undefined): string {
