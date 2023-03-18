@@ -54,10 +54,13 @@ const TABLE = {
     INVALID,
 };
 
+/**
+ * Swaps `insts` keying by `opcode` and fills the gaps using `INVALID` inst.
+ *
+ * @param insts
+ * @returns
+ */
 function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
-    // Object.entries(insts).map(([mnemonic, fn]) => [OPCODES[mnemonic as keyof typeof OPCODES], fn])
-
-    // Object.fromEntries([...Array(256).keys()].filter(k => MNEMONICS[k] === undefined).map(k => [k, INVALID]));
     return Object.fromEntries(
         [...Array(256).keys()].map(k => [
             k,
@@ -71,8 +74,7 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
      *
      */
     private readonly insts: {
-        // [mnemonic in keyof typeof OPCODES]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
-        [mnemonic in string]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
+        [opcode in string]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
     };
 
     /**
@@ -90,13 +92,14 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
 
     readonly opcodes: ReturnType<typeof decode>['opcodes'];
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
+
     constructor({ opcodes, jumpdests }: ReturnType<typeof decode>, readonly metadata?: Metadata) {
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
 
         this.insts = fill({
             ...TABLE,
-            ...FLOW(opcodes, this),
+            ...FLOW({ opcodes, jumpdests }, this),
             ...makeState(STORAGE(this)),
             ...makeState(LOGS(this)),
         });

@@ -21,7 +21,7 @@ export const INFO = {
 
 export type Info = (typeof INFO)[keyof typeof INFO];
 
-export class Symbol0 extends Tag('Symbol0', Val.prec) {
+export class Symbol0 extends Tag('Symbol0') {
     constructor(readonly symbol: Info, readonly type: string | undefined = undefined) {
         super();
     }
@@ -35,7 +35,7 @@ export class Symbol0 extends Tag('Symbol0', Val.prec) {
     }
 }
 
-export class Symbol1 extends Tag('Symbol1', Val.prec) {
+export class Symbol1 extends Tag('Symbol1') {
     constructor(readonly fn: (value: string) => string, readonly value: Expr) {
         super();
     }
@@ -49,7 +49,7 @@ export class Symbol1 extends Tag('Symbol1', Val.prec) {
     }
 }
 
-export class DataCopy extends Tag('DataCopy', Val.prec) {
+export class DataCopy extends Tag('DataCopy') {
     constructor(
         readonly fn: (offset: string, size: string) => string,
         readonly offset: Expr,

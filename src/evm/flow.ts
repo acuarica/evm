@@ -1,19 +1,16 @@
 import type { Stmt, Expr, IStmt, Val } from './ast';
 import type { State } from '../state';
 import type { Sig } from './logic';
-import { formatOpcode, type Opcode } from '../opcode';
+import { type decode, formatOpcode, type Opcode } from '../opcode';
 import { Invalid } from './system';
-import type { EVM } from '.';
 
 type Result<T, E> =
     | { readonly tag: 'ok'; readonly val: T }
     | { readonly tag: 'err'; readonly err: E };
 const Ok = <T>(val: T) => ({ tag: 'ok' as const, val });
 const Err = <E>(err: E) => ({ tag: 'err' as const, err });
-
 const isOk = <T, E>(result: Result<T, E>): result is ReturnType<typeof Ok<T>> =>
     result.tag === 'ok';
-// const unwrap = <T>(result: { tag: 'ok', val: T }) => result.val;
 
 export class Branch {
     constructor(readonly pc: number, readonly state: State<Stmt, Expr>) {}
@@ -136,7 +133,10 @@ export interface IEVMSelectorBranches {
     readonly functionBranches: Map<string, { pc: number; state: State<Stmt, Expr> }>;
 }
 
-export function FLOW(opcodes: Opcode[], { functionBranches, jumpdests }: EVM) {
+export function FLOW(
+    { opcodes, jumpdests }: ReturnType<typeof decode>,
+    { functionBranches }: IEVMSelectorBranches
+) {
     return {
         JUMP: (_opcode: Opcode, state: State<Stmt, Expr>): void => {
             const offset = state.stack.pop();
