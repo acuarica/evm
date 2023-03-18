@@ -1,4 +1,4 @@
-import { decode, type OPCODES, type Opcode } from '../opcode';
+import { decode, type OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { type Stack, State as TState } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
@@ -54,12 +54,25 @@ const TABLE = {
     INVALID,
 };
 
+function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
+    // Object.entries(insts).map(([mnemonic, fn]) => [OPCODES[mnemonic as keyof typeof OPCODES], fn])
+
+    // Object.fromEntries([...Array(256).keys()].filter(k => MNEMONICS[k] === undefined).map(k => [k, INVALID]));
+    return Object.fromEntries(
+        [...Array(256).keys()].map(k => [
+            k,
+            MNEMONICS[k] === undefined ? INVALID : insts[MNEMONICS[k]],
+        ])
+    );
+}
+
 export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
     /**
      *
      */
     private readonly insts: {
-        [mnemonic in keyof typeof OPCODES]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
+        // [mnemonic in keyof typeof OPCODES]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
+        [mnemonic in string]: (opcode: Opcode, state: TState<Stmt, Expr>) => void;
     };
 
     /**
@@ -75,13 +88,18 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
         { pc: number; state: State }
     >();
 
-    constructor(readonly opcodes: Opcode[], readonly metadata?: Metadata) {
-        this.insts = {
+    readonly opcodes: ReturnType<typeof decode>['opcodes'];
+    readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
+    constructor({ opcodes, jumpdests }: ReturnType<typeof decode>, readonly metadata?: Metadata) {
+        this.opcodes = opcodes;
+        this.jumpdests = jumpdests;
+
+        this.insts = fill({
             ...TABLE,
             ...FLOW(opcodes, this),
             ...makeState(STORAGE(this)),
             ...makeState(LOGS(this)),
-        };
+        });
     }
 
     /**
@@ -138,13 +156,19 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
         for (; !state.halted && pc < this.opcodes.length; pc++) {
             const opcode = this.opcodes[pc];
             try {
-                this.insts[opcode.mnemonic](opcode, state);
+                // this.insts[opcode.mnemonic](opcode, state);
+                this.insts[opcode.opcode](opcode, state);
             } catch (err) {
                 const message = (err as Error).message;
+                // state.halt(new Invalid(
+                //     `\`${message}\` at [${opcode.offset}] ${
+                //         opcode.mnemonic
+                //     } =| ${state.stack.values.join(' | ').substring(0, 100) }`
+                // ));
                 throw new Error(
-                    `\`${message}\` at [${opcode.offset}] ${
-                        opcode.mnemonic
-                    } =| ${state.stack.values.join(' | ')}`
+                    `\`${message}\` at [${opcode.offset}] ${opcode.mnemonic} =| ${state.stack.values
+                        .slice(0, 20)
+                        .join(' | ')}`
                 );
             }
 

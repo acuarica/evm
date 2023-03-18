@@ -1,8 +1,9 @@
-import type { Stmt, Expr, IStmt } from './ast';
+import type { Stmt, Expr, IStmt, Val } from './ast';
 import type { State } from '../state';
 import type { Sig } from './logic';
 import { formatOpcode, type Opcode } from '../opcode';
 import { Invalid } from './system';
+import type { EVM } from '.';
 
 type Result<T, E> =
     | { readonly tag: 'ok'; readonly val: T }
@@ -135,13 +136,13 @@ export interface IEVMSelectorBranches {
     readonly functionBranches: Map<string, { pc: number; state: State<Stmt, Expr> }>;
 }
 
-export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranches) {
+export function FLOW(opcodes: Opcode[], { functionBranches, jumpdests }: EVM) {
     return {
         JUMP: (_opcode: Opcode, state: State<Stmt, Expr>): void => {
             const offset = state.stack.pop();
             const dest = getDest(offset);
             if (isOk(dest)) {
-                const destBranch = makeBranch(dest.val.pc, state);
+                const destBranch = makeBranch(dest.val, state);
                 state.halt(new Jump(offset, destBranch));
             } else {
                 state.halt(new Invalid(dest.err));
@@ -159,12 +160,12 @@ export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranch
                 let last: SigCase | Jumpi;
                 if (cond.tag === 'Sig') {
                     functionBranches.set(cond.selector, {
-                        pc: dest.val.pc,
+                        pc: dest.val,
                         state: state.clone(),
                     });
                     last = new SigCase(cond, offset, fallBranch);
                 } else {
-                    last = new Jumpi(cond, offset, fallBranch, makeBranch(dest.val.pc, state));
+                    last = new Jumpi(cond, offset, fallBranch, makeBranch(dest.val, state));
                 }
                 state.halt(last);
             } else {
@@ -178,20 +179,26 @@ export function FLOW(opcodes: Opcode[], { functionBranches }: IEVMSelectorBranch
      * @param offset
      * @returns
      */
-    function getDest(offset: Expr): Result<Opcode, string> {
+    function getDest(offset: Expr): Result<number, string> {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
             return Err(`Expected numeric offset, found ${offset}`);
         }
-        const dest = opcodes.find(o => o.offset === Number(offset2.val));
-        if (!dest) {
-            return Err('Expected `JUMPDEST` in JUMP destination, but none was found');
+        const dest = jumpdests[Number(offset2.val)];
+        if (dest !== undefined) {
+            (offset as Val).jumpDest = dest;
+            return Ok(dest);
+        } else {
+            const dest = opcodes.find(o => o.offset === Number(offset2.val));
+            if (!dest) {
+                return Err('Expected `JUMPDEST` in JUMP destination, but none was found');
+            }
+            if (dest.mnemonic !== 'JUMPDEST') {
+                return Err('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            (offset as any).jumpDest = dest.pc;
+            return Ok(dest.pc);
         }
-        if (dest.mnemonic !== 'JUMPDEST') {
-            return Err('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (offset as any).jumpDest = dest.pc;
-        return Ok(dest);
     }
 }

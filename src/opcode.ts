@@ -162,7 +162,7 @@ export const OPCODES = {
 /**
  * A map from numeric opcodes to string mnemonics.
  */
-const MNEMONICS = Object.fromEntries(
+export const MNEMONICS = Object.fromEntries(
     Object.entries(OPCODES).map(([key, value]) => [value, key as keyof typeof OPCODES])
 );
 
@@ -229,16 +229,33 @@ export type Opcode = {
 } & (Unary | Push);
 
 /**
+ * Represents the `Opcode`s found in `code`.
  *
- * @param code
+ * @param code the buffer containing the bytecode to decode
  * @returns
  */
-export function decode(code: Uint8Array): Opcode[] {
+export function decode(code: Uint8Array): {
+    /**
+     * Represents the `Opcode`s found in `code`.
+     */
+    opcodes: Opcode[];
+    /**
+     * Map between `JUMPDEST` instructions offset, _i.e._,
+     * as they appear in the `code` buffer and its index in the `opcodes` array.
+     *
+     * It allows to quickly find the `JUMPDEST` instruction.
+     */
+    jumpdests: { [jd: number]: number };
+} {
     const opcodes = [];
+    const jumpdests: { [jd: number]: number } = {};
 
     for (let i = 0; i < code.length; i++) {
         const opcode = code[i];
         const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
+        if (mnemonic === 'JUMPDEST') {
+            jumpdests[i] = opcodes.length;
+        }
         opcodes.push({
             offset: i,
             pc: opcodes.length,
@@ -260,7 +277,7 @@ export function decode(code: Uint8Array): Opcode[] {
         });
     }
 
-    return opcodes;
+    return { opcodes, jumpdests };
 
     /**
      * Asserts whether `mnemonic` is a `PUSHn` opcode.
