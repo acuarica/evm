@@ -8,6 +8,7 @@ import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
 import type { Expr, Stmt } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
+import { inspect } from 'util';
 
 const blue = chalk.blue;
 const dim = chalk.dim;
@@ -190,6 +191,8 @@ function writeDot(evm: EVM) {
             // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
             // label += '\\l';
             label += state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
+            label += '\\l';
+            label += inspect(state.memory);
             label += '\\l';
             label += state.stmts.map(stmt => stmt.toString()).join('\\l');
             label += '\\l';
