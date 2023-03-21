@@ -90,6 +90,15 @@ export function compile(
             },
         },
         settings: {
+            // optimizer: {
+            //     enabled:true,
+            //     details: {
+            //         deduplicate: true,
+            //         cse: true,
+            //         constantOptimizer: true,
+            //         yul: true,
+            //     }
+            // },
             outputSelection: {
                 '*': {
                     '*': ['evm.deployedBytecode'],
