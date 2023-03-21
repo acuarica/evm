@@ -7,12 +7,12 @@ type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16
 
 describe('evm::stack', () => {
     describe('PUSHES', () => {
-        it.skip('should modify stack', () => {
+        it('should modify stack', () => {
             const one = new Uint8Array(1);
             one[0] = 1;
             const stack = new Stack<Expr>();
             PUSHES.PUSH1(Buffer.from([1]), stack);
-            expect(stack.values).to.deep.equal([new Val(1n)]);
+            expect(stack.values).to.deep.equal([new Val(1n, true)]);
         });
     });
 

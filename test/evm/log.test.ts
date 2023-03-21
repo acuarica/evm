@@ -24,7 +24,7 @@ describe('evm::log', () => {
         evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
     });
 
-    it.skip('should get it from compiled code', () => {
+    it('should get it from compiled code', () => {
         const state = new State<Stmt, Expr>();
         evm.exec(0, state);
         eventSelectors(evm);
@@ -41,7 +41,7 @@ describe('evm::log', () => {
         {
             const stmt = state.stmts[0];
             assert(stmt.name === 'Log');
-            expect(stmt.args).to.be.deep.equal([new Val(1n)]);
+            expect(stmt.args).to.be.deep.equal([new Val(1n, true)]);
             expect(stmt.eventName).to.be.deep.equal('Deposit');
             expect(`${stmt}`).to.be.deep.equal(`emit Deposit(0x1);`);
         }
@@ -49,7 +49,11 @@ describe('evm::log', () => {
         {
             const stmt = state.stmts[1];
             assert(stmt.name === 'Log');
-            expect(stmt.args).to.be.deep.equal([new Val(2n), new Val(3n), new Val(4n)]);
+            expect(stmt.args).to.be.deep.equal([
+                new Val(2n, true),
+                new Val(3n, true),
+                new Val(4n, true),
+            ]);
 
             const topic = eventSelector(unknownEventSig);
             expect(`${stmt}`).to.be.deep.equal(`log(0x${topic}, 0x2, 0x3, 0x4);`);

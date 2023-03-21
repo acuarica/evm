@@ -152,8 +152,7 @@ export function Bin<N extends string>(tag: N, op: string, prec: number) {
 export class Val extends Tag('Val', 16) {
     jumpDest: number | null = null;
 
-    isPush = false;
-    constructor(readonly val: bigint) {
+    constructor(readonly val: bigint, readonly isPush = false) {
         super();
     }
 
