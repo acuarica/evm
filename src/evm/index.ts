@@ -10,7 +10,7 @@ import { LOGIC } from './logic';
 import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
-import { INVALID, PC, SYSTEM } from './system';
+import { Invalid, INVALID, PC, SYSTEM } from './system';
 import { LOGS, type IEVMEvents } from './log';
 import { type IEVMStore, STORAGE } from './storage';
 import { Branch, FLOW, type IEVMSelectorBranches, JumpDest, makeBranch } from './flow';
@@ -132,21 +132,21 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
             // See https://github.com/microsoft/TypeScript/issues/30406.
             const branch = branches.shift()!;
 
-            const chunk = this.chunks.get(branch.pc);
-            if (chunk !== undefined && chunk.states.length > 4) {
-                // continue;
-            }
+            // const chunk = this.chunks.get(branch.pc);
+            // if (chunk !== undefined && chunk.states.length > 10) {
+            // continue;
+            // }
 
             this.exec(branch.pc, branch.state);
             const last = branch.state.last! as IStmt;
             if (last.next) {
                 for (const b of last.next()) {
-                    const s = gc(b, this.chunks);
-                    if (s === undefined) {
-                        branches.unshift(b);
-                    } else {
-                        b.state = s;
-                    }
+                    // const s = gc(b, this.chunks);
+                    // if (s === undefined) {
+                    branches.unshift(b);
+                    // } else {
+                    // b.state = s;
+                    // }
                 }
                 // branches.unshift(...last.next());
             }
@@ -163,11 +163,13 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
                 this.insts[opcode.opcode](opcode, state);
             } catch (err) {
                 const message = (err as Error).message;
-                // state.halt(new Invalid(
-                //     `\`${message}\` at [${opcode.offset}] ${
-                //         opcode.mnemonic
-                //     } =| ${state.stack.values.join(' | ').substring(0, 100) }`
-                // ));
+                state.halt(
+                    new Invalid(
+                        `\`${message}\` at [${opcode.offset}] ${
+                            opcode.mnemonic
+                        } =| ${state.stack.values.slice(0, -1).join(' | ')}`
+                    )
+                );
                 throw new Error(
                     `\`${message}\` at [${opcode.offset}] ${opcode.mnemonic} =| ${state.stack.values
                         .slice(0, 20)
@@ -195,7 +197,7 @@ export class EVM implements IEVMEvents, IEVMStore, IEVMSelectorBranches {
             };
             this.chunks.set(pc0, chunk);
         } else {
-            assert(chunk.pcend === pc);
+            assert(chunk.pcend === pc, chunk.pcend, pc, state.last);
             chunk.states.push(state);
         }
     }

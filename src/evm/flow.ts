@@ -77,51 +77,6 @@ export class SigCase implements IStmt {
     }
 }
 
-// export class If {
-//     readonly name = 'If';
-//     readonly wrapped = true;
-//     constructor(
-//         readonly condition: Expr,
-//         readonly trueBlock?: Stmt[],
-//         readonly falseBlock?: Stmt[]
-//     ) {}
-//     toString() {
-//         return '(' + this.condition + ')';
-//     }
-//     eval() {
-//         return this;
-//     }
-// }
-
-// export class Require {
-//     readonly name = 'Require';
-
-//     constructor(readonly condition: Expr, readonly args: Expr[]) {}
-
-//     toString() {
-//         return `require(${this.condition}, ${this.args.join(', ')});`;
-//     }
-// }
-
-// export class CallSite {
-//     readonly name = 'CallSite';
-//     constructor(readonly hash: string) {}
-//     toString() {
-//         return '#' + this.hash + '();';
-//     }
-// }
-
-// export class Assign {
-//     readonly name = 'Asign';
-//     constructor(readonly i: number, readonly phi: Phi) {}
-//     eval() {
-//         return this;
-//     }
-//     toString() {
-//         return `local${this.i} = ${this.phi.toString()};`;
-//     }
-// }
-
 export function makeBranch(pc: number, state: State<Stmt, Expr>) {
     return new Branch(pc, state.clone());
 }
@@ -155,6 +110,18 @@ export function FLOW(
 
             const dest = getDest(offset);
             if (isOk(dest)) {
+                const cond2 = cond.eval();
+                if (cond2.isVal()) {
+                    if (cond2.val === 0n) {
+                        const fallBranch = makeBranch(opcode.pc + 1, state);
+                        state.halt(new Jump(offset, fallBranch));
+                    } else {
+                        const destBranch = makeBranch(dest.val, state);
+                        state.halt(new Jump(offset, destBranch));
+                    }
+                    return;
+                }
+
                 const fallBranch = makeBranch(opcode.pc + 1, state);
 
                 let last: SigCase | Jumpi;
