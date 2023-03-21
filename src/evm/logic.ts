@@ -1,5 +1,6 @@
 import type { Stack } from '../state';
 import { type Expr, Tag, Bin, Val } from './expr';
+import { bin } from './math';
 
 function Cmp<N extends string>(tag: N, op: string) {
     abstract class Cmp extends Tag(tag, 9) {
@@ -229,10 +230,10 @@ function eqHook(left: Expr, right: Expr, cc: () => Eq) {
 }
 
 export const LOGIC = {
-    LT: lt,
-    GT: gt,
-    SLT: lt,
-    SGT: gt,
+    LT: bin(Lt),
+    GT: bin(Gt),
+    SLT: bin(Lt),
+    SGT: bin(Gt),
 
     EQ: (stack: Stack<Expr>): void => {
         const left = stack.pop();
@@ -252,24 +253,9 @@ export const LOGIC = {
         stack.push(new IsZero(value));
     },
 
-    AND: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new And(left, right));
-    },
-
-    OR: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Or(left, right));
-    },
-
-    XOR: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Xor(left, right));
-    },
-
+    AND: bin(And),
+    OR: bin(Or),
+    XOR: bin(Xor),
     NOT: (stack: Stack<Expr>): void => {
         const value = stack.pop();
         stack.push(new Not(value));
@@ -281,33 +267,15 @@ export const LOGIC = {
         stack.push(new Byte(position, data));
     },
 
-    SHL: (stack: Stack<Expr>): void => {
-        const shift = stack.pop();
-        const value = stack.pop();
-        stack.push(new Shl(value, shift));
-    },
-
-    SHR: (stack: Stack<Expr>): void => {
-        const shift = stack.pop();
-        const value = stack.pop();
-        stack.push(new Shr(value, shift));
-    },
-
-    SAR: (stack: Stack<Expr>): void => {
-        const shift = stack.pop();
-        const value = stack.pop();
-        stack.push(new Sar(value, shift));
-    },
+    SHL: shift(Shl),
+    SHR: shift(Shr),
+    SAR: shift(Sar),
 };
 
-function lt(stack: Stack<Expr>): void {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(new Lt(left, right));
-}
-
-function gt(stack: Stack<Expr>): void {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(new Gt(left, right));
+export function shift(Cons: new (value: Expr, shift: Expr) => Expr): (stack: Stack<Expr>) => void {
+    return function (stack: Stack<Expr>) {
+        const shift = stack.pop();
+        const value = stack.pop();
+        stack.push(new Cons(value, shift));
+    };
 }

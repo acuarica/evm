@@ -73,28 +73,13 @@ export class Exp extends Bin('Exp', '**', 14) {
 }
 
 export const MATH = {
-    ADD: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Add(left, right));
-    },
-
-    MUL: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Mul(left, right));
-    },
-
-    SUB: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Sub(left, right));
-    },
-
-    DIV: div,
-    SDIV: div,
-    MOD: mod,
-    SMOD: mod,
+    ADD: bin(Add),
+    MUL: bin(Mul),
+    SUB: bin(Sub),
+    DIV: bin(Div),
+    SDIV: bin(Div),
+    MOD: bin(Mod),
+    SMOD: bin(Mod),
 
     ADDMOD: (stack: Stack<Expr>): void => {
         const left = stack.pop();
@@ -122,11 +107,7 @@ export const MATH = {
         );
     },
 
-    EXP: (stack: Stack<Expr>): void => {
-        const left = stack.pop();
-        const right = stack.pop();
-        stack.push(new Exp(left, right));
-    },
+    EXP: bin(Exp),
 
     SIGNEXTEND: (stack: Stack<Expr>): void => {
         const left = stack.pop();
@@ -141,14 +122,10 @@ export const MATH = {
     },
 };
 
-function div(stack: Stack<Expr>): void {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(new Div(left, right));
-}
-
-function mod(stack: Stack<Expr>): void {
-    const left = stack.pop();
-    const right = stack.pop();
-    stack.push(new Mod(left, right));
+export function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): (stack: Stack<Expr>) => void {
+    return function (stack: Stack<Expr>) {
+        const lhs = stack.pop();
+        const rhs = stack.pop();
+        stack.push(new Cons(lhs, rhs));
+    };
 }
