@@ -209,12 +209,8 @@ export class Return implements IStmt {
             return `return memory[${this.offset}:(${this.offset}+${this.size})];`;
         } else if (this.args.length === 0) {
             return 'return;';
-        } else if (
-            this.args.length === 3 &&
-            this.args.every(item => item.isVal()) &&
-            (this.args[0] as Val).val === 32n
-        ) {
-            return 'return "' + hex2a(this.args[2].toString(16)) + '";';
+        } else if (isStringReturn(this.args) && this.args[0].val === 32n) {
+            return `return '${hex2a(this.args[2].val.toString(16))}';`;
         } else {
             return this.args.length === 1
                 ? `return ${this.args[0]};`
@@ -223,11 +219,14 @@ export class Return implements IStmt {
     }
 }
 
-function hex2a(hexx: any) {
-    const hex = hexx.toString();
+function isStringReturn(args: Expr[]): args is [Val, Val, Val] {
+    return args.length === 3 && args.every(arg => arg.isVal());
+}
+
+function hex2a(hexstr: string) {
     let str = '';
-    for (let i = 0; i < hex.length && hex.substr(i, 2) !== '00'; i += 2) {
-        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    for (let i = 0; i < hexstr.length && hexstr.slice(i, i + 2) !== '00'; i += 2) {
+        str += String.fromCharCode(parseInt(hexstr.substring(i, i + 2), 16));
     }
     return str;
 }
@@ -279,7 +278,7 @@ export function memArgs<T>(
     if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
         const args = [];
         for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-            args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+            args.push(i in memory ? memory[i].eval() : new MLoad(new Val(BigInt(i))));
         }
 
         return new Klass(args);
