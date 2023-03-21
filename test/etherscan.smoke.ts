@@ -3,9 +3,32 @@ import chalk = require('chalk');
 import { providers } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { EVM } from '../src/evm';
+import { State } from '../src/state';
 
 const BASE_PATH = './data/smoke/';
 
+const addr = chalk.cyan;
+const error = chalk.red;
+const provider = {
+    providers: [
+        new providers.InfuraProvider(),
+        // new providers.AlchemyProvider(),
+        new providers.EtherscanProvider(),
+        new providers.CloudflareProvider(),
+        new providers.PocketProvider(),
+    ],
+    current: 0,
+    getCode: async function (address: string) {
+        this.current = (this.current + 1) % this.providers.length;
+        const code = await this.providers[this.current].getCode(address);
+        // await wait(500);
+        return code;
+    },
+};
+
+// function wait(ms: number): Promise<void> {
+//     return new Promise(resolve => setTimeout(resolve, ms));
+// }
 describe('etherscan', function () {
     /**
      * Needs to be manually downloaded from
@@ -14,26 +37,39 @@ describe('etherscan', function () {
      */
     const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
     csv.toString()
+        .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
-        .slice(0, 50)
+        // .slice(0, 4000)
         .forEach(([_tx, address, name]) => {
-            const path = `${BASE_PATH}${name}-${address}.bytecode`;
-
             it(`should decode & decompile ${name} ${address}`, async function () {
                 if (
                     [
-                        'InuNetwork',
+                        // 'InuNetwork',
                         'MetaShibarium',
                         'mirageAuction',
                         'BSN',
                         'ShibariumDollar',
                     ].includes(name)
                 ) {
-                    this.skip();
+                    // this.skip();
                 }
 
-                await fetchBytecode(name, address);
+                const path = `${BASE_PATH}${name}-${address}.bytecode`;
+                if (!existsSync(path)) {
+                    this.timeout(10000);
+                    console.log(`Fetching code for ${name} at ${addr(address)} into ${BASE_PATH}`);
+                    try {
+                        const code = await provider.getCode(address);
+                        writeFileSync(path, code);
+                    } catch (err) {
+                        console.info(
+                            error((err as { message: string }).message),
+                            provider.providers[provider.current]
+                        );
+                    }
+                }
+
                 const bytecode = readFileSync(path, 'utf8');
                 const evm = EVM.from(bytecode);
                 if (
@@ -64,7 +100,6 @@ describe('etherscan', function () {
                     // expect(() => evm.contract).to.throw('Error: memargs sizeclass');
                 } else {
                     // const contract = evm.contract;
-
                     // const externals = [
                     //     ...Object.values(contract.functions)
                     //         .filter(fn => fn.label !== fn.hash + '()')
@@ -74,45 +109,14 @@ describe('etherscan', function () {
                     //         .map(v => v.label! + '()'),
                     // ];
                     // expect(evm.getFunctions().sort()).to.include.members(externals.sort());
-
-                    evm.start();
                 }
+
+                evm.start();
+                // evm.run(0, new State());
+                // for (const [selector, branch] of evm.functionBranches) {
+                //     console.log(selector);
+                //     evm.run(branch.pc, branch.state);
+                // }
             });
         });
 });
-
-const provider = {
-    providers: [
-        new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth'),
-        new providers.InfuraProvider(),
-        // new providers.AlchemyProvider(),
-        new providers.EtherscanProvider(),
-        new providers.CloudflareProvider(),
-    ],
-    current: 0,
-    getCode: async function (address: string) {
-        this.current = (this.current + 1) % this.providers.length;
-        const code = await this.providers[this.current].getCode(address);
-        await wait(2000);
-        return code;
-    },
-};
-
-function wait(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-async function fetchBytecode(name: string, address: string) {
-    const addr = chalk.blue;
-    const error = chalk.red;
-    const path = `${BASE_PATH}${name}-${address}.bytecode`;
-
-    if (!existsSync(path)) {
-        console.log(`Fetching code for ${name} at ${addr(address)} into ${BASE_PATH}`);
-        try {
-            const code = await provider.getCode(address);
-            writeFileSync(path, code);
-        } catch (err) {
-            console.log(error((err as { message: string }).message));
-        }
-    }
-}
