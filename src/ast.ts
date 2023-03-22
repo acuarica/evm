@@ -1,4 +1,4 @@
-import type { Expr, Stmt } from './evm/expr';
+import type { Expr, Inst } from './evm/expr';
 import { Not } from './evm/logic';
 import type { Revert } from './evm/system';
 import type { State } from './state';
@@ -7,8 +7,8 @@ export class If {
     readonly name = 'If';
     constructor(
         readonly condition: Expr,
-        readonly trueBlock?: Stmt2[],
-        readonly falseBlock?: Stmt2[]
+        readonly trueBlock?: Stmt[],
+        readonly falseBlock?: Stmt[]
     ) {}
 
     toString() {
@@ -26,7 +26,7 @@ export class CallSite {
     }
 }
 
-export function isRevertBlock(falseBlock: Stmt2[]): falseBlock is [Revert] {
+export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
     return (
         falseBlock.length === 1 && 'name' in falseBlock[0] && falseBlock[0].name === 'Revert' //&&
         // falseBlock[0].items !== undefined &&
@@ -55,13 +55,13 @@ export class Require {
 //     }
 // }
 
-type Stmt2 = Stmt | If | CallSite | Require;
+export type Stmt = Inst | If | CallSite | Require;
 
-export function build(state: State<Stmt, Expr>): Stmt2[] {
+export function build(state: State<Inst, Expr>): Stmt[] {
     const visited = new WeakSet();
     return buildState(state);
 
-    function buildState(state: State<Stmt, Expr>): Stmt2[] {
+    function buildState(state: State<Inst, Expr>): Stmt[] {
         if (visited.has(state)) {
             return [];
         }
@@ -73,13 +73,21 @@ export function build(state: State<Stmt, Expr>): Stmt2[] {
 
         switch (last.name) {
             case 'Jumpi': {
+                if (last.evalCond.isVal()) {
+                    if (last.evalCond.val === 0n) {
+                        return [...state.stmts.slice(0, -1), ...buildState(last.fallBranch.state)];
+                    } else {
+                        return [...state.stmts.slice(0, -1), ...buildState(last.destBranch.state)];
+                    }
+                }
+
                 const trueBlock = buildState(last.destBranch.state);
                 const falseBlock = buildState(last.fallBranch.state);
                 return [
                     ...state.stmts.slice(0, -1),
                     ...(isRevertBlock(falseBlock)
-                        ? [new Require(last.condition, falseBlock[0].args), ...trueBlock]
-                        : [new If(new Not(last.condition), falseBlock), ...trueBlock]),
+                        ? [new Require(last.cond, falseBlock[0].args), ...trueBlock]
+                        : [new If(new Not(last.cond), falseBlock), ...trueBlock]),
                 ];
             }
             case 'SigCase': {
@@ -105,7 +113,7 @@ export function build(state: State<Stmt, Expr>): Stmt2[] {
  * @param indentation
  * @returns
  */
-export function stringify(stmts: Stmt2[], indentation = 0): string {
+export function stringify(stmts: Stmt[], indentation = 0): string {
     let output = '';
     for (const instruction of stmts) {
         if (instruction instanceof If) {
