@@ -88,9 +88,9 @@ describe('examples', function () {
                 const path = await fetchBytecode(name);
                 const bytecode = readFileSync(path, 'utf8');
                 evm = EVM.from(bytecode);
-                // evm.start();
+                evm.start();
                 // text = evm.decompile();
-                evm.run(0, new State());
+                // evm.run(0, new State());
                 for (const [s, branch] of evm.functionBranches) {
                     // console.log(s);
                     if (s === 'f2b9fdb8') evm.run(branch.pc, branch.state);
