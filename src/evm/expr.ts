@@ -67,7 +67,7 @@ export type Expr =
 /**
  * Base definition for any type that is `Stmt`.
  */
-export interface IStmt {
+export interface IInst {
     /**
      * The `name` tag of this `IStmt`.
      */
@@ -79,7 +79,7 @@ export interface IStmt {
 /**
  *
  */
-export type Stmt =
+export type Inst =
     | MStore
     | Stop
     | Return

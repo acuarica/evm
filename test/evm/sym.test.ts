@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import type { Expr, Stmt } from '../../src/evm/expr';
+import type { Expr, Inst } from '../../src/evm/expr';
 import { INFO, SYM, Symbol0 } from '../../src/evm/sym';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
@@ -42,7 +42,7 @@ describe('evm::sym', () => {
                     }
                 }`;
                 const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
-                const state = new State<Stmt, Expr>();
+                const state = new State<Inst, Expr>();
                 evm.exec(0, state);
 
                 const stmt = state.stmts[0];

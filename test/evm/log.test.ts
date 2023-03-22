@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import { type Expr, type Stmt, Val } from '../../src/evm/expr';
+import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { State } from '../../src/state';
 import { eventSelector, eventSelectors } from '../utils/selector';
 import { compile } from '../utils/solc';
@@ -25,7 +25,7 @@ describe('evm::log', () => {
     });
 
     it('should get it from compiled code', () => {
-        const state = new State<Stmt, Expr>();
+        const state = new State<Inst, Expr>();
         evm.exec(0, state);
         eventSelectors(evm);
 

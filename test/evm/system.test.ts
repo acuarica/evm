@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { build, stringify } from '../../src/ast';
 import { EVM } from '../../src/evm';
-import { type Expr, type Stmt, Val } from '../../src/evm/expr';
+import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';
 import {
@@ -30,7 +30,7 @@ describe('evm::system', () => {
     });
 
     it('should exec `CREATE`', () => {
-        const state = new State<Stmt, Expr>();
+        const state = new State<Inst, Expr>();
         state.stack.push(new Val(0x20n));
         state.stack.push(new Val(0x10n));
         state.stack.push(new Val(0x1000n));
@@ -45,7 +45,7 @@ describe('evm::system', () => {
     });
 
     it('should halt with STOP', () => {
-        const state = new State<Stmt, Expr>();
+        const state = new State<Inst, Expr>();
         SYSTEM.STOP(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Stop()]);
@@ -53,7 +53,7 @@ describe('evm::system', () => {
     });
 
     it('should halt with SELFDESTRUCT', () => {
-        const state = new State<Stmt, Expr>();
+        const state = new State<Inst, Expr>();
         SYM.ADDRESS(state);
         SYSTEM.SELFDESTRUCT(state);
         expect(state.halted).to.be.true;
@@ -62,7 +62,7 @@ describe('evm::system', () => {
     });
 
     it('should halt with `INVALID`', () => {
-        const state = new State<Stmt, Expr>();
+        const state = new State<Inst, Expr>();
         INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid('Invalid instruction (0x1)')]);
@@ -71,7 +71,7 @@ describe('evm::system', () => {
 
     describe('RETURN', () => {
         it('should return with no arguments', () => {
-            const state = new State<Stmt, Expr>();
+            const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x0n));
             state.stack.push(new Val(0x0n));
             SYSTEM.RETURN(state);
@@ -81,7 +81,7 @@ describe('evm::system', () => {
         });
 
         it('should return with a single argument', () => {
-            const state = new State<Stmt, Expr>();
+            const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x4n));
             SYSTEM.RETURN(state);
@@ -91,7 +91,7 @@ describe('evm::system', () => {
         });
 
         it('should return more than one argument', () => {
-            const state = new State<Stmt, Expr>();
+            const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x30n));
             state.stack.push(new Val(0x4n));
             SYSTEM.RETURN(state);

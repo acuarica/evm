@@ -1,11 +1,11 @@
 import type { State } from '../state';
-import { type Expr, type Stmt, Val, type IStmt } from './expr';
+import { type Expr, type Inst, Val, type IInst } from './expr';
 import { MLoad } from './memory';
 
 /**
  *
  */
-export interface IEVMEvents {
+export interface IEvents {
     /**
      * Events found through `LOG` instructions.
      *
@@ -26,11 +26,11 @@ export interface IEVMEvents {
     };
 }
 
-export class Log implements IStmt {
+export class Log implements IInst {
     readonly name = 'Log';
 
     constructor(
-        readonly event: IEVMEvents['events'][string] | undefined,
+        readonly event: IEvents['events'][string] | undefined,
         readonly topics: Expr[],
         readonly args: Expr[],
         readonly mem?: { offset: Expr; size: Expr }
@@ -56,7 +56,7 @@ export class Log implements IStmt {
     }
 }
 
-export const LOGS = (events: IEVMEvents) => {
+export const LOGS = (events: IEvents) => {
     return {
         LOG0: log(0, events),
         LOG1: log(1, events),
@@ -66,8 +66,8 @@ export const LOGS = (events: IEVMEvents) => {
     };
 };
 
-function log(topicsCount: number, { events }: IEVMEvents) {
-    return ({ stack, memory, stmts }: State<Stmt, Expr>): void => {
+function log(topicsCount: number, { events }: IEvents) {
+    return ({ stack, memory, stmts }: State<Inst, Expr>): void => {
         let offset = stack.pop();
         let size = stack.pop();
 
@@ -76,7 +76,7 @@ function log(topicsCount: number, { events }: IEVMEvents) {
             topics.push(stack.pop());
         }
 
-        let event: IEVMEvents['events'][string] | undefined = undefined;
+        let event: IEvents['events'][string] | undefined = undefined;
         if (topics.length > 0 && topics[0].isVal()) {
             const eventTopic = topics[0].val.toString(16);
             event = events[eventTopic];

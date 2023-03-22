@@ -1,16 +1,16 @@
 import type { Opcode } from '../opcode';
 import type { State } from '../state';
-import { type IStmt, Tag, Val, type Expr, type Stmt } from './expr';
+import { type IInst, Tag, Val, type Expr, type Inst } from './expr';
 import { MLoad } from './memory';
 
 export class Sha3 extends Tag('Sha3') {
-    constructor(readonly items: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
+    constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
         super();
     }
 
     eval(): Expr {
         return new Sha3(
-            this.items.map(e => e.eval()),
+            this.args.map(e => e.eval()),
             this.memoryStart,
             this.memoryLength
         );
@@ -19,7 +19,7 @@ export class Sha3 extends Tag('Sha3') {
     str(): string {
         return this.memoryStart && this.memoryLength
             ? `keccak256(memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})])`
-            : `keccak256(${this.items.join(', ')})`;
+            : `keccak256(${this.args.join(', ')})`;
     }
 }
 
@@ -184,7 +184,7 @@ export class DelegateCall extends Tag('DelegateCall') {
     }
 }
 
-export class Stop implements IStmt {
+export class Stop implements IInst {
     readonly name = 'Stop';
 
     toString() {
@@ -192,7 +192,7 @@ export class Stop implements IStmt {
     }
 }
 
-export class Return implements IStmt {
+export class Return implements IInst {
     readonly name = 'Return';
 
     /**
@@ -231,7 +231,7 @@ function hex2a(hexstr: string) {
     return str;
 }
 
-export class Revert implements IStmt {
+export class Revert implements IInst {
     readonly name = 'Revert';
 
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
@@ -243,7 +243,7 @@ export class Revert implements IStmt {
     }
 }
 
-export class Invalid implements IStmt {
+export class Invalid implements IInst {
     readonly name = 'Invalid';
 
     constructor(readonly reason: string) {}
@@ -253,7 +253,7 @@ export class Invalid implements IStmt {
     }
 }
 
-export class SelfDestruct implements IStmt {
+export class SelfDestruct implements IInst {
     readonly name = 'SelfDestruct';
 
     constructor(readonly address: Expr) {}
@@ -264,7 +264,7 @@ export class SelfDestruct implements IStmt {
 }
 
 export function memArgs<T>(
-    { stack, memory }: State<Stmt, Expr>,
+    { stack, memory }: State<Inst, Expr>,
     Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
 ): T {
     const MAXSIZE = 1024;
@@ -292,22 +292,17 @@ export function memArgs<T>(
 }
 
 export const SYSTEM = {
-    SHA3: (state: State<Stmt, Expr>): void => {
-        state.stack.push(memArgs(state, Sha3));
-    },
+    SHA3: (state: State<Inst, Expr>): void => state.stack.push(memArgs(state, Sha3)),
+    STOP: (state: State<Inst, Expr>): void => state.halt(new Stop()),
 
-    STOP: (state: State<Stmt, Expr>): void => {
-        state.halt(new Stop());
-    },
-
-    CREATE: ({ stack }: State<Stmt, Expr>): void => {
+    CREATE: ({ stack }: State<Inst, Expr>): void => {
         const value = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
         stack.push(new Create(value, offset, size));
     },
 
-    CALL: ({ stack, memory }: State<Stmt, Expr>): void => {
+    CALL: ({ stack, memory }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -325,7 +320,7 @@ export const SYSTEM = {
 
         memory[outputStart as any as number] = new ReturnData(outputStart, outputLength);
     },
-    CALLCODE: ({ stack }: State<Stmt, Expr>): void => {
+    CALLCODE: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -339,11 +334,9 @@ export const SYSTEM = {
         );
     },
 
-    RETURN: (state: State<Stmt, Expr>): void => {
-        state.halt(memArgs(state, Return));
-    },
+    RETURN: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Return)),
 
-    DELEGATECALL: ({ stack }: State<Stmt, Expr>): void => {
+    DELEGATECALL: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const memoryStart = stack.pop();
@@ -355,14 +348,14 @@ export const SYSTEM = {
         );
     },
 
-    CREATE2: ({ stack }: State<Stmt, Expr>): void => {
+    CREATE2: ({ stack }: State<Inst, Expr>): void => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new Create2(memoryStart, memoryLength, value));
     },
 
-    STATICCALL: ({ stack }: State<Stmt, Expr>): void => {
+    STATICCALL: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const memoryStart = stack.pop();
@@ -374,19 +367,17 @@ export const SYSTEM = {
         );
     },
 
-    REVERT: (state: State<Stmt, Expr>): void => {
-        state.halt(memArgs(state, Revert));
-    },
+    REVERT: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Revert)),
 
-    SELFDESTRUCT: (state: State<Stmt, Expr>): void => {
+    SELFDESTRUCT: (state: State<Inst, Expr>): void => {
         const address = state.stack.pop();
         state.halt(new SelfDestruct(address));
     },
 };
 
-export const PC = (opcode: Opcode, { stack }: State<Stmt, Expr>) =>
+export const PC = (opcode: Opcode, { stack }: State<Inst, Expr>) =>
     stack.push(new Val(BigInt(opcode.offset)));
 
-export const INVALID = (opcode: Opcode, state: State<Stmt, Expr>): void => {
+export const INVALID = (opcode: Opcode, state: State<Inst, Expr>): void => {
     state.halt(new Invalid(`Invalid instruction (0x${opcode.opcode.toString(16)})`));
 };

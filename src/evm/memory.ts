@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import { type Stmt, Tag, type Expr, type IStmt } from './expr';
+import { type Inst, Tag, type Expr, type IInst } from './expr';
 
 export class MLoad extends Tag('MLoad') {
     /**
@@ -20,7 +20,7 @@ export class MLoad extends Tag('MLoad') {
     }
 }
 
-export class MStore implements IStmt {
+export class MStore implements IInst {
     readonly name = 'MStore';
 
     constructor(readonly location: Expr, readonly data: Expr) {}
@@ -31,7 +31,7 @@ export class MStore implements IStmt {
 }
 
 export const MEMORY = {
-    MLOAD: ({ stack, memory }: State<Stmt, Expr>): void => {
+    MLOAD: ({ stack, memory }: State<Inst, Expr>): void => {
         let loc = stack.pop();
         loc = loc.eval();
         stack.push(
@@ -42,7 +42,7 @@ export const MEMORY = {
     MSTORE8: mstore,
 };
 
-function mstore({ stack, memory, stmts }: State<Stmt, Expr>): void {
+function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
     let loc = stack.pop();
     const data = stack.pop();
 

@@ -1,7 +1,7 @@
 import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
-import { type Expr, Val, type Stmt } from '../../src/evm/expr';
+import { type Expr, Val, type Inst } from '../../src/evm/expr';
 import { CallDataLoad } from '../../src/evm/env';
 import { LOGIC, Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
@@ -117,7 +117,7 @@ describe('evm::logic', () => {
 
             const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
 
-            const state = new State<Stmt, Expr>();
+            const state = new State<Inst, Expr>();
             evm.run(0, state);
 
             assert(state.last!.name === 'Jumpi');

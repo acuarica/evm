@@ -1,7 +1,7 @@
 import * as functionHashes from '../../data/functionHashes.json';
 import * as eventHashes from '../../data/eventHashes.json';
 
-import type { IEVMEvents } from '../../src/evm/log';
+import type { IEvents } from '../../src/evm/log';
 import { EventFragment, FunctionFragment, Interface } from 'ethers/lib/utils';
 
 export function getFunctionSignature(selector: string): string {
@@ -16,7 +16,7 @@ export function eventSelector(sig: string): string {
     return Interface.getEventTopic(EventFragment.from(sig)).substring(2);
 }
 
-export function eventSelectors({ events }: IEVMEvents) {
+export function eventSelectors({ events }: IEvents) {
     for (const [topic, event] of Object.entries(events)) {
         if (topic in eventHashes) {
             event.sig = (eventHashes as { [key: string]: string })[topic];
