@@ -1,19 +1,19 @@
 import type { State } from '../state';
-import { type Expr, type IStmt, type Stmt, Tag } from './expr';
-import { Sha3 } from './system';
+import { type Expr, type IInst, type Inst, Tag } from './expr';
+import type { Sha3 } from './system';
 import { Add, Sub } from './math';
 
-export interface IEVMStore {
+export interface IStore {
     /**
      * vars definition
      */
-    readonly variables: { [key: string]: Variable };
+    readonly variables: { [location: string]: Variable };
 
     /**
      * mappings definition
      */
     readonly mappings: {
-        [key: string]: {
+        [location: string]: {
             name: string | undefined;
             structs: bigint[];
             keys: Expr[][];
@@ -25,59 +25,69 @@ export interface IEVMStore {
 export class Variable {
     constructor(public label: string | undefined, readonly types: Expr[]) {}
 }
-export class MappingStore implements IStmt {
+
+export class MappingStore implements IInst {
     readonly name = 'MappingStore';
 
     constructor(
-        readonly mappings: any,
-        readonly location: any,
-        readonly items: any,
-        readonly data: any,
-        readonly count: any,
-        readonly structlocation?: any
-    ) {}
+        readonly mappings: IStore['mappings'],
+        readonly location: number,
+        readonly items: Expr[],
+        readonly data: Expr,
+        readonly structlocation?: bigint
+    ) {
+        const loc = location;
+        if (!(loc in mappings)) {
+            mappings[loc] = { name: undefined, structs: [], keys: [], values: [] };
+        }
+        mappings[loc].keys.push(items);
+        if (structlocation === undefined) {
+            mappings[loc].values.push(data);
+        }
+    }
 
     eval() {
         return this;
     }
 
     toString() {
-        let mappingName = 'mapping' + (this.count + 1);
-        if (this.location in this.mappings() && this.mappings()[this.location].name) {
-            mappingName = this.mappings()[this.location].name;
+        let mappingName = `mapping${this.location + 1}`;
+        if (this.location in this.mappings && this.mappings[this.location].name) {
+            mappingName = this.mappings[this.location].name!;
         }
+
         if (
-            this.data.name === 'ADD' &&
-            this.data.right.name === 'MappingLoad' &&
-            this.data.right.location.str() === this.location.str()
+            this.data.tag === 'Add' &&
+            this.data.right.tag === 'MappingLoad' &&
+            this.data.right.location === this.location
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + item.str() + ']').join('') +
+                this.items.map(item => '[' + item.str() + ']').join('') +
                 ' += ' +
                 this.data.left.str() +
                 ';'
             );
         } else if (
-            this.data.name === 'ADD' &&
-            this.data.left.name === 'MappingLoad' &&
-            this.data.left.location.str() === this.location.str()
+            this.data.tag === 'Add' &&
+            this.data.left.tag === 'MappingLoad' &&
+            this.data.left.location === this.location
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + item.str() + ']').join('') +
+                this.items.map(item => '[' + item.str() + ']').join('') +
                 ' += ' +
                 this.data.right.str() +
                 ';'
             );
         } else if (
-            this.data.name === 'SUB' &&
-            this.data.left.name === 'MappingLoad' &&
-            this.data.left.location.str() === this.location.str()
+            this.data.tag === 'Sub' &&
+            this.data.left.tag === 'MappingLoad' &&
+            this.data.left.location === this.location
         ) {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + item.str() + ']').join('') +
+                this.items.map(item => '[' + item.str() + ']').join('') +
                 ' -= ' +
                 this.data.right.str() +
                 ';'
@@ -85,7 +95,7 @@ export class MappingStore implements IStmt {
         } else {
             return (
                 mappingName +
-                this.items.map((item: any) => '[' + item.str() + ']').join('') +
+                this.items.map(item => `[${item.str()}]`).join('') +
                 ' = ' +
                 this.data.str() +
                 ';'
@@ -100,7 +110,7 @@ export class SStore {
     constructor(
         readonly location: Expr,
         readonly data: Expr,
-        readonly variables: IEVMStore['variables']
+        readonly variables: IStore['variables']
     ) {
         // if (isVal(this.location)) {
         //     const loc = this.location.toString();
@@ -124,7 +134,7 @@ export class SStore {
             if (label) {
                 variableName = label;
             } else {
-                variableName = 'var' + (Object.keys(this.variables).indexOf(loc) + 1);
+                variableName = `var${Object.keys(this.variables).indexOf(loc) + 1}`;
             }
         }
         if (
@@ -146,35 +156,40 @@ export class SStore {
 }
 
 export class MappingLoad extends Tag('MappingLoad') {
-    readonly name = 'MappingLoad';
     readonly type?: string;
-    readonly wrapped = false;
 
     constructor(
-        readonly mappings: () => {
-            [location: number]: IEVMStore['mappings'][keyof IEVMStore['mappings']];
-        },
+        readonly mappings: IStore['mappings'],
         readonly location: number,
         readonly items: Expr[],
-        readonly count: number,
         readonly structlocation?: bigint
     ) {
         super();
+        if (!(location in mappings)) {
+            mappings[location] = {
+                name: undefined,
+                structs: [],
+                keys: [],
+                values: [],
+            };
+        }
+        mappings[location].keys.push(items);
     }
 
     eval() {
         return this;
     }
+
     str(): string {
-        let mappingName = 'mapping' + (this.count + 1);
-        const maybeName = this.mappings()[this.location].name;
-        if (this.location in this.mappings() && maybeName) {
+        let mappingName = `mapping${this.location + 1}`;
+        const maybeName = this.mappings[this.location].name;
+        if (this.location in this.mappings && maybeName) {
             mappingName = maybeName;
         }
         if (this.structlocation) {
             return (
                 mappingName +
-                this.items.map(item => '[' + item.str() + ']').join('') +
+                this.items.map(item => `[${item.str()}]`).join('') +
                 '[' +
                 this.structlocation.toString() +
                 ']'
@@ -190,7 +205,7 @@ export class SLoad extends Tag('SLoad') {
     readonly type?: string;
     readonly wrapped = false;
 
-    constructor(readonly location: Expr, readonly variables: IEVMStore['variables']) {
+    constructor(readonly location: Expr, readonly variables: IStore['variables']) {
         super();
     }
 
@@ -204,274 +219,105 @@ export class SLoad extends Tag('SLoad') {
             if (label) {
                 return label;
             } else {
-                return 'var' + (Object.keys(this.variables).indexOf(this.location.toString()) + 1);
+                return `var${Object.keys(this.variables).indexOf(this.location.toString()) + 1}`;
             }
         } else {
             return 'storage[' + this.location.str() + ']';
         }
     }
 }
-const parseMapping = (...items: Expr[]): Expr[] => {
+
+function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
+    const shas = [sha];
     const mappings = [];
-    for (const item of items) {
-        if (item instanceof Sha3 && item.items) {
-            mappings.push(...parseMapping(...item.items));
-        } else {
-            mappings.push(item);
+    let base = undefined;
+    while (shas.length > 0) {
+        const sha = shas.shift()!;
+        for (const arg of sha.args) {
+            if (arg.tag === 'Sha3' && arg.args) {
+                shas.unshift(arg);
+            } else if (base === undefined && arg.tag === 'Val') {
+                base = Number(arg.val);
+            } else {
+                mappings.unshift(arg);
+            }
         }
     }
-    return mappings;
-};
+    return [base, mappings];
+}
 
-export const STORAGE = ({ variables, mappings }: IEVMStore) => {
+export const STORAGE = ({ variables, mappings }: IStore) => {
     return {
-        SLOAD: ({ stack }: State<Stmt, Expr>): void => {
-            const storeLocation = stack.pop();
-            if (storeLocation instanceof Sha3) {
-                const mappingItems = parseMapping(...storeLocation.items);
-                const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => mappingItem.isVal())
-                );
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    stack.push(
-                        new MappingLoad(
-                            () => mappings,
-                            loc,
-                            mappingParts,
-                            Object.keys(mappings).indexOf(mappingLocation.toString())
-                        )
-                    );
+        SLOAD: ({ stack }: State<Inst, Expr>): void => {
+            const loc = stack.pop();
+
+            if (loc.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts));
                 } else {
-                    stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(loc, variables));
                 }
-            } else if (
-                typeof storeLocation !== 'bigint' &&
-                storeLocation instanceof Add &&
-                storeLocation.left instanceof Sha3 &&
-                storeLocation.right.isVal()
-            ) {
-                const mappingItems = parseMapping(...storeLocation.left.items);
-                const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => mappingItem.isVal())
-                );
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    stack.push(
-                        new MappingLoad(
-                            () => mappings,
-                            loc,
-                            mappingParts,
-                            Object.keys(mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.right.val
-                        )
-                    );
+            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
+                const [base, parts] = parseSha3(loc.left);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts, loc.right.val));
                 } else {
-                    stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(loc, variables));
                 }
-            } else if (
-                typeof storeLocation !== 'bigint' &&
-                storeLocation instanceof Add &&
-                storeLocation.left.isVal() &&
-                storeLocation.right instanceof Sha3
-            ) {
-                const mappingItems = parseMapping(...storeLocation.right.items);
-                const mappingLocation = mappingItems.find(mappingItem => mappingItem.isVal());
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    stack.push(
-                        new MappingLoad(
-                            () => mappings,
-                            loc,
-                            mappingParts,
-                            Object.keys(mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.left.val
-                        )
-                    );
+            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc.right);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts, loc.left.val));
                 } else {
-                    stack.push(new SLoad(storeLocation, variables));
+                    stack.push(new SLoad(loc, variables));
                 }
             } else {
-                stack.push(new SLoad(storeLocation, variables));
+                stack.push(new SLoad(loc, variables));
             }
         },
 
-        SSTORE: ({ stack, stmts }: State<Stmt, Expr>): void => {
-            const storeLocation = stack.pop();
-            const storeData = stack.pop();
+        SSTORE: ({ stack, stmts }: State<Inst, Expr>): void => {
+            const loc = stack.pop();
+            const data = stack.pop();
 
-            if (storeLocation.isVal()) {
-                // throw new Error('bigint not expected in sstore');
+            if (loc.isVal()) {
                 sstoreVariable();
-                // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
-            } else if (storeLocation instanceof Sha3) {
-                const mappingItems = parseMapping(...storeLocation.items);
-                const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => mappingItem.isVal())
-                );
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    mappings[loc].values.push(storeData);
-                    stmts.push(
-                        new MappingStore(
-                            () => mappings,
-                            mappingLocation,
-                            mappingParts,
-                            storeData,
-                            Object.keys(mappings).indexOf(mappingLocation.toString())
-                        )
-                    );
+            } else if (loc.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data));
                 } else {
                     sstoreVariable();
-                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
-            } else if (
-                storeLocation instanceof Add &&
-                storeLocation.left instanceof Sha3 &&
-                storeLocation.right.isVal()
-            ) {
-                const mappingItems = parseMapping(...storeLocation.left.items);
-                const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => mappingItem.isVal())
-                );
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    stmts.push(
-                        new MappingStore(
-                            () => mappings,
-                            mappingLocation,
-                            mappingParts,
-                            storeData,
-                            Object.keys(mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.right.val
-                        )
-                    );
+            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
+                const [base, parts] = parseSha3(loc.left);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data, loc.right.val));
                 } else {
                     sstoreVariable();
-                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
-            } else if (
-                storeLocation instanceof Add &&
-                storeLocation.left.isVal() &&
-                storeLocation.right instanceof Sha3
-            ) {
-                const mappingItems = parseMapping(...storeLocation.right.items);
-                const mappingLocation = <bigint | undefined>(
-                    mappingItems.find(mappingItem => mappingItem.isVal())
-                );
-                const mappingParts = mappingItems.filter(
-                    mappingItem => typeof mappingItem !== 'bigint'
-                );
-                if (mappingLocation && mappingParts.length > 0) {
-                    const loc = Number(mappingLocation);
-                    if (!(loc in mappings)) {
-                        mappings[loc] = {
-                            name: undefined,
-                            structs: [],
-                            keys: [],
-                            values: [],
-                        };
-                    }
-                    mappings[loc].keys.push(mappingParts);
-                    stmts.push(
-                        new MappingStore(
-                            () => mappings,
-                            mappingLocation,
-                            mappingParts,
-                            storeData,
-                            Object.keys(mappings).indexOf(mappingLocation.toString()),
-                            storeLocation.left
-                        )
-                    );
+            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc.right);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data, loc.left.val));
                 } else {
                     sstoreVariable();
-                    // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
                 }
-            } else if (
-                // eslint-disable-next-line no-constant-condition
-                false &&
-                // isVal(storeLocation) &&
-                storeLocation.toString() in variables //&&
-                // storeData.type &&
-                // (!)state.variables[storeLocation.toString()].types.includes(storeData.type)
-            ) {
-                stmts.push(new SStore(storeLocation, storeData, variables));
-                // state.variables[storeLocation.toString()].types.push(storeData.type);
             } else {
                 sstoreVariable();
-                // state.stmts.push(new SStore(storeLocation, storeData, contract.variables));
             }
 
             function sstoreVariable() {
-                if (storeLocation.isVal()) {
-                    const loc = storeLocation.eval().toString();
-                    if (loc in variables) {
-                        variables[loc].types.push(storeData);
+                if (loc.isVal()) {
+                    const key = loc.val.toString();
+                    if (key in variables) {
+                        variables[key].types.push(data);
                     } else {
-                        variables[loc] = new Variable(undefined, [storeData]);
+                        variables[key] = new Variable(undefined, [data]);
                     }
                 }
-                stmts.push(new SStore(storeLocation, storeData, variables));
+                stmts.push(new SStore(loc, data, variables));
             }
         },
     };
