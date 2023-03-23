@@ -15,8 +15,6 @@ import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
 
-import { assert } from '../error';
-
 type State = TState<Inst, Expr>;
 
 function make<F, T extends { [mnemonic: string]: F }>(
@@ -160,7 +158,8 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
     }
 
     exec(pc0: number, state: State) {
-        assert(!state.halted);
+        if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
+
         let pc = pc0;
         const oplen = this.opcodes.length;
         for (; !state.halted && pc < oplen; pc++) {
@@ -187,7 +186,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
             }
         }
 
-        assert(state.halted, pc0, pc);
+        if (!state.halted) throw new Error(`State must be halted after exec at ${pc0}:${pc}`);
 
         let chunk = this.chunks.get(pc0);
         if (chunk === undefined) {
@@ -197,7 +196,6 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
             };
             this.chunks.set(pc0, chunk);
         } else {
-            assert(chunk.pcend === pc, chunk.pcend, pc, state.last);
             chunk.states.push(state);
         }
     }
