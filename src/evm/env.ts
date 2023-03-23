@@ -42,16 +42,10 @@ export const ENV = {
      *
      * @param stack
      */
-    CALLVALUE: (stack: Stack<Expr>): void => {
-        stack.push(new CallValue());
-    },
-
+    CALLVALUE: (stack: Stack<Expr>): void => stack.push(new CallValue()),
     CALLDATALOAD: (stack: Stack<Expr>): void => {
         const location = stack.pop();
         stack.push(new CallDataLoad(location));
     },
-
-    CALLDATASIZE: (stack: Stack<Expr>): void => {
-        stack.push(new CallDataSize());
-    },
+    CALLDATASIZE: (stack: Stack<Expr>): void => stack.push(new CallDataSize()),
 };
