@@ -5,10 +5,10 @@ import type { Argv } from 'yargs';
 import chalk = require('chalk');
 import { EVM } from '../src/evm';
 import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
-import type { Expr, Stmt } from '../src/evm/expr';
+import type { Expr, Inst } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
-import { inspect } from 'util';
+import { Contract } from '../src/contract';
 
 const blue = chalk.blue;
 const dim = chalk.dim;
@@ -110,6 +110,19 @@ void yargs
         }
     )
 
+    .command(
+        'decompile [path]',
+        'Decompile',
+        (yargs: Argv) => {
+            pathArg(yargs);
+        },
+        function (argv) {
+            const evm = getEVM(argv['path'] as string);
+            const contract = new Contract(evm);
+            console.info(contract.decompile());
+        }
+    )
+
     .option('selector', {
         alias: 's',
         type: 'string',
@@ -124,7 +137,10 @@ function writeDot(evm: EVM) {
     const write = console.log;
     write(`digraph G {    
     color="#efefef";
-    node[shape=box style=filled fontsize=8 fontname="Verdana" fillcolor="#efefef"];
+    #rankdir = LR;
+    #graph[fontsize=6];
+
+    node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
     `);
 
     let id = 0;
@@ -144,7 +160,7 @@ function writeDot(evm: EVM) {
         let edges = '';
         for (const [pc, chunk] of evm.chunks) {
             write(`subgraph cluster_${pc} {`);
-            // write(`  style=filled;`);
+            write(`  style=filled;`);
             // write(`  node [style=filled,color=white];`);
             let label = `pc ${pc}\\l`;
 
@@ -177,7 +193,7 @@ function writeDot(evm: EVM) {
         }
         write(edges);
 
-        function writeNode(pc: number, state: State<Stmt, Expr>) {
+        function writeNode(pc: number, state: State<Inst, Expr>) {
             let label = `key:${pc} ${state.id}`;
             label += '\\l';
             // label += 'doms: ' + [...doms].join(', ');
@@ -190,18 +206,15 @@ function writeDot(evm: EVM) {
             // label += '\\l';
             // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
             // label += '\\l';
-            label += state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
+            label += state.stack.values.map(elem => `=| ${elem.eval().toString()}`).join('');
             label += '\\l';
-            label += inspect(state.memory);
-            label += '\\l';
+            // label += inspect(state.memory);
+            // label += '\\l';
+            Object.entries(state.memory).forEach(([k, v]) => (label += `${k}: ${v}\\l`));
             label += state.stmts.map(stmt => stmt.toString()).join('\\l');
             label += '\\l';
 
-            write(
-                `"${state.id}" [label="${label}" fillcolor="${
-                    pc === '137:j86' ? '#ffa500' : '#efefef'
-                }"];`
-            );
+            write(`"${state.id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
         }
 
         function writeEdge(src: string, branch: Branch) {
