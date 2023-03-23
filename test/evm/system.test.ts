@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { build, stringify } from '../../src/ast';
+import { build, stringify } from '../../src';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';

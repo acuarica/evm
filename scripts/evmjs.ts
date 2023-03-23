@@ -8,7 +8,7 @@ import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
 import type { Expr, Inst } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
-import { Contract } from '../src/contract';
+import { Contract } from '../src';
 
 const blue = chalk.blue;
 const dim = chalk.dim;

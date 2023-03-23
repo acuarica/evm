@@ -130,7 +130,7 @@ export function stringifyMappings(mappings: IStore['mappings']) {
                         })
                     );
                 } else if (mappingChild.length === 1 && !deepMapping) {
-                    mapping.values.forEach((mappingChild2: any) => {
+                    mapping.values.forEach(mappingChild2 => {
                         if (mappingChild2.type && !mappingValue.includes(mappingChild2.type)) {
                             mappingValue.push(mappingChild2.type);
                         }
