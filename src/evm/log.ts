@@ -26,6 +26,40 @@ export interface IEvents {
     };
 }
 
+/**
+ *
+ * @param events
+ * @returns
+ */
+export function stringifyEvents(events: IEvents['events']) {
+    let text = '';
+
+    for (const [topic, event] of Object.entries(events)) {
+        text += 'event ';
+        if (event.sig === undefined) {
+            text += topic;
+        } else {
+            const eventName = event.sig.split('(')[0];
+            const params = event.sig.replace(eventName, '').substring(1).slice(0, -1);
+            if (params) {
+                text += eventName + '(';
+                text += params
+                    .split(',')
+                    .map((param, i) =>
+                        i < event.indexedCount ? `${param} indexed _arg${i}` : `${param} _arg${i}`
+                    )
+                    .join(', ');
+                text += ')';
+            } else {
+                text += event;
+            }
+        }
+        text += ';\n';
+    }
+
+    return text;
+}
+
 export class Log implements IInst {
     readonly name = 'Log';
 

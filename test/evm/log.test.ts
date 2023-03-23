@@ -2,6 +2,7 @@ import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
+import { stringifyEvents } from '../../src/evm/log';
 import { State } from '../../src/state';
 import { eventSelector, eventSelectors } from '../utils/selector';
 import { compile } from '../utils/solc';
@@ -37,6 +38,10 @@ describe('evm::log', () => {
             sig: knownEventSig,
             indexedCount: 0,
         });
+
+        expect(stringifyEvents(evm.events)).to.be.equal(`event Deposit(uint256 _arg0);
+event ${eventSelector(unknownEventSig)};
+`);
 
         {
             const stmt = state.stmts[0];
