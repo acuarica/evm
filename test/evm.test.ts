@@ -1,9 +1,29 @@
 import { expect } from 'chai';
+import { Contract } from '../src';
 import { EVM } from '../src/evm';
-import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
 
 describe('evm', () => {
+    describe('erc165', () => {
+        it('should detect ERC165', function () {
+            const sol = `contract C {
+                function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
+                    return (interfaceID == 0xffffffff);
+                } }`;
+            const contract = new Contract(compile(sol, '0.7.6', { context: this }).bytecode);
+            expect(contract.isERC165()).to.be.true;
+        });
+
+        it('should detect not-ERC165', function () {
+            const sol = `contract C {
+                function supportsInterface2(bytes4 interfaceID) external pure returns (bool) {
+                    return (interfaceID == 0xffffffff);
+                } }`;
+            const contract = new Contract(compile(sol, '0.7.6', { context: this }).bytecode);
+            expect(contract.isERC165()).to.be.false;
+        });
+    });
+
     describe('conditional', () => {
         it('if ', function () {
             const sol = `contract C {
