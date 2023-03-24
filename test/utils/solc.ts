@@ -187,7 +187,7 @@ export function forVersion(
 }
 
 export function contract(title: string, fn: Parameters<typeof forVersion>[0]) {
-    describe(`contracts.${title}`, () => {
+    describe(`contracts::${title}`, () => {
         forVersion(fn);
     });
 }

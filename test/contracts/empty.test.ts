@@ -1,6 +1,8 @@
 import { expect } from 'chai';
-import { EVM, ast, OPCODES } from '../../src';
-import { contract } from './utils/solc';
+import { Contract } from '../../src';
+import type { EVM } from '../../src/evm';
+import { Revert } from '../../src/evm/system';
+import { contract } from '../utils/solc';
 
 contract('empty', (compile, _fallback, version) => {
     const CONTRACTS = [
@@ -41,10 +43,12 @@ contract('empty', (compile, _fallback, version) => {
 
     CONTRACTS.forEach(([name, CONTRACT], index) => {
         describe(name, () => {
+            let contract: Contract;
             let evm: EVM;
 
             before(() => {
-                evm = new EVM(compile(CONTRACT).deployedBytecode, {}, {});
+                contract = new Contract(compile(CONTRACT).bytecode);
+                evm = contract.evm;
             });
 
             if (index === 0) {
@@ -65,7 +69,7 @@ contract('empty', (compile, _fallback, version) => {
                 });
             }
 
-            it('should not contain `LOG1` nor `LOG2` because metadata has been stripped', () => {
+            it('should not contain `LOG1`/`LOG2` given metadata has been stripped', () => {
                 expect(evm.opcodes).to.have.length(7);
                 expect(evm.opcodes[0].mnemonic).to.be.equal('PUSH1');
                 expect(evm.opcodes[1].mnemonic).to.be.equal('PUSH1');
@@ -77,23 +81,25 @@ contract('empty', (compile, _fallback, version) => {
             });
 
             it('should not have functions nor events', () => {
-                expect(evm.getFunctions()).to.be.empty;
-                expect(evm.getEvents()).to.be.empty;
+                expect(contract.functions).to.be.empty;
+                expect(evm.functionBranches).to.be.empty;
+                expect(evm.events).to.be.empty;
             });
 
-            it('should `getBlocks` with 1 block & `revert`', () => {
-                expect(Object.keys(evm.contract.main.cfg.blocks)).to.be.length(1);
+            it('should have 1 block & 1 `revert`', () => {
+                expect(contract.evm.chunks).to.be.of.length(1);
+                const chunk = contract.evm.chunks.get(0)!;
+                expect(evm.opcodes[chunk.pcend - 1].mnemonic).to.be.equal('REVERT');
+                expect(chunk.states).to.be.of.length(1);
+                const state = chunk.states[0];
+                expect(state.last).to.be.deep.equal(new Revert([]));
 
-                const block = evm.contract.main.cfg.blocks[evm.contract.main.cfg.entry];
-                expect(block.end.opcode).to.be.equal(OPCODES.REVERT);
-                expect(block.stmts.length).to.be.at.least(1);
-                expect(block.stmts.at(-1)).to.be.deep.equal(new ast.Revert([]));
-
-                expect(Object.keys(evm.contract.functions)).to.be.length(0);
+                expect(contract.main.length).to.be.at.least(1);
+                expect(contract.main.at(-1)).to.be.deep.equal(new Revert([]));
             });
 
             it('should `decompile` bytecode', () => {
-                expect(evm.decompile()).to.be.equal('revert();\n');
+                expect(contract.decompile()).to.be.equal('revert();\n');
             });
         });
     });
