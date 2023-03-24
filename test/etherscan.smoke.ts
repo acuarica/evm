@@ -3,7 +3,6 @@ import chalk = require('chalk');
 import { providers } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { EVM } from '../src/evm';
-import { State } from '../src/state';
 
 const BASE_PATH = './data/smoke/';
 

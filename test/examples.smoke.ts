@@ -1,10 +1,8 @@
 import { expect } from 'chai';
 import chalk = require('chalk');
 import { providers } from 'ethers';
-// import { utils } from 'ethers';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { EVM } from '../src/evm';
-import { State } from '../src/state';
 
 describe('examples', function () {
     [
