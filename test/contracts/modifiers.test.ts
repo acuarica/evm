@@ -1,13 +1,13 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
-import { contract } from './utils/solc';
+import { Contract } from '../../src';
+import { contracts } from '../utils/solc';
 
-contract('modifiers', (compile, _fallback, version) => {
+contracts('modifiers', (compile, _fallback, version) => {
     describe('with a `modifier` calling an `internal` function', () => {
-        let evm: EVM;
+        let contract: Contract;
 
         before(function () {
-            const CONTRACT = `contract C {
+            const sol = `contract C {
                 uint256 private _value;
                 address private _owner;
                 constructor() ${['0.7.6', '0.8.16'].includes(version) ? '' : 'public '}{
@@ -28,14 +28,14 @@ contract('modifiers', (compile, _fallback, version) => {
                     _value = value + 3;
                 }
             }`;
-            evm = new EVM(compile(CONTRACT, this).deployedBytecode);
+            contract = new Contract(compile(sol, this).bytecode);
         });
 
         it('should `decompile` bytecode', () => {
-            const text = evm.decompile();
+            const text = contract.decompile();
             expect(text, text).to.not.match(/return msg.sender;/);
-            expect(text, text).to.match(/storage\[1\] == msg.sender/m);
-            expect(text, text).to.match(/var1 = \(_arg0 \+ 3\);$/m);
+            expect(text, text).to.match(/storage\[0x1\] == msg.sender/m);
+            expect(text, text).to.match(/var1 = _arg0 \+ 0x3;$/m);
         });
     });
 });

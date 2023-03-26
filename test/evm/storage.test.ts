@@ -32,8 +32,15 @@ describe('evm::storage', () => {
             }
         }`;
         const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
-        evm.start();
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
+
         expect(evm.variables).to.be.have.keys('0', '1');
+        expect(state.stmts).to.be.have.length(3);
+
+        expect(`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
+        expect(`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
+        expect(`${state.last}`).to.be.equal('return;');
     });
 
     it.skip('should find storage struct', function () {

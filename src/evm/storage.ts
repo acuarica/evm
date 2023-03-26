@@ -251,8 +251,8 @@ export class SStore {
 
     toString() {
         let variableName = 'storage[' + this.location.str() + ']';
-        const loc = this.location.toString();
-        if (this.location.isVal() && loc in this.variables) {
+        if (this.location.isVal() && this.location.val.toString() in this.variables) {
+            const loc = this.location.val.toString();
             const label = this.variables[loc].label;
             if (label) {
                 variableName = label;
@@ -261,14 +261,14 @@ export class SStore {
             }
         }
         if (
-            this.data instanceof Add &&
-            this.data.right instanceof SLoad &&
-            this.data.right.location.str() === this.location.str()
+            this.data.tag === 'Add' &&
+            this.data.left.tag === 'SLoad' &&
+            this.data.left.location.str() === this.location.str()
         ) {
-            return variableName + ' += ' + this.data.left.str() + ';';
+            return variableName + ' += ' + this.data.right.str() + ';';
         } else if (
-            this.data instanceof Sub &&
-            this.data.left instanceof SLoad &&
+            this.data.tag === 'Sub' &&
+            this.data.left.tag === 'SLoad' &&
             this.data.left.location.str() === this.location.str()
         ) {
             return variableName + ' -= ' + this.data.right.str() + ';';
@@ -324,9 +324,7 @@ export class MappingLoad extends Tag('MappingLoad') {
 }
 
 export class SLoad extends Tag('SLoad') {
-    readonly name = 'SLOAD';
     readonly type?: string;
-    readonly wrapped = false;
 
     constructor(readonly location: Expr, readonly variables: IStore['variables']) {
         super();
@@ -337,12 +335,13 @@ export class SLoad extends Tag('SLoad') {
     }
 
     str(): string {
-        if (this.location.isVal() && this.location.toString() in this.variables) {
-            const label = this.variables[this.location.toString()].label;
+        if (this.location.isVal() && this.location.val.toString() in this.variables) {
+            const loc = this.location.val.toString();
+            const label = this.variables[loc].label;
             if (label) {
                 return label;
             } else {
-                return `var${Object.keys(this.variables).indexOf(this.location.toString()) + 1}`;
+                return `var${Object.keys(this.variables).indexOf(loc) + 1}`;
             }
         } else {
             return 'storage[' + this.location.str() + ']';
