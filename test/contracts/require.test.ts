@@ -1,10 +1,10 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
-import { contract } from './utils/solc';
+import { Contract } from '../../src';
+import { contracts } from '../utils/solc';
 
-contract('require', compile => {
-    it('should `decompile` contract with `require`s', () => {
-        const CONTRACT = `contract C {
+contracts('require', compile => {
+    it('should `decompile` contract with `require`s', function () {
+        const sol = `contract C {
             mapping (address => uint256) private _allowances;
             function approve(uint256 amount) external {
                 _approve(msg.sender, amount);
@@ -15,10 +15,9 @@ contract('require', compile => {
                 _allowances[owner] = amount;
             }
         }`;
-        const evm = new EVM(compile(CONTRACT).deployedBytecode);
-
-        const text = evm.decompile();
+        const contract = new Contract(compile(sol, this).bytecode);
+        const text = contract.decompile();
         expect(text, text).to.match(/require(\()+msg.sender/);
-        expect(text, text).to.match(/require\(\(_arg0 > 0\), /);
+        expect(text, text).to.match(/require\(_arg0 > 0x0, /);
     });
 });

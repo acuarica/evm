@@ -299,7 +299,13 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                 return [
                     ...state.stmts.slice(0, -1),
                     ...(isRevertBlock(falseBlock)
-                        ? [new Require(last.cond, falseBlock[0].args), ...trueBlock]
+                        ? [
+                              new Require(
+                                  last.cond.eval(),
+                                  falseBlock[0].args.map(e => e.eval())
+                              ),
+                              ...trueBlock,
+                          ]
                         : [new If(new Not(last.cond), falseBlock), ...trueBlock]),
                 ];
             }
