@@ -3,20 +3,21 @@ import { type Opcode, toHex, formatOpcode } from '../src/opcode';
 import * as yargs from 'yargs';
 import type { Argv } from 'yargs';
 import chalk = require('chalk');
-import { EVM } from '../src/evm';
+import type { EVM } from '../src/evm';
 import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
 import type { Expr, Inst } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
 import { Contract } from '../src';
+import { assert } from 'console';
 
 const blue = chalk.blue;
 const dim = chalk.dim;
 const magenta = chalk.magenta;
 
-function getEVM(path: string) {
+function getContract(path: string) {
     const bytecode = readFileSync(path, 'utf8');
-    return EVM.from(bytecode);
+    return new Contract(bytecode);
 }
 
 function ansiOpcode(opcode: Opcode) {
@@ -47,7 +48,8 @@ void yargs
             pathArg(yargs);
         },
         function (argv) {
-            const evm = getEVM(argv['path'] as string);
+            const contract = getContract(argv['path'] as string);
+            const evm = contract.evm;
             evm.start();
             eventSelectors(evm);
 
@@ -68,13 +70,14 @@ void yargs
             pathArg(yargs);
         },
         function (argv) {
-            const evm = getEVM(argv['path'] as string);
             console.info(
                 `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
                     'mnemonic'
                 )}  ${'push data (PUSHx)'}`
             );
-            evm.start();
+            const contract = getContract(argv['path'] as string);
+            // evm.start();
+            const evm = contract.evm;
 
             const keys = [...evm.chunks.keys()];
             keys.sort((a, b) => a - b);
@@ -104,9 +107,8 @@ void yargs
             pathArg(yargs);
         },
         function (argv) {
-            const evm = getEVM(argv['path'] as string);
-            evm.start();
-            writeDot(evm);
+            const contract = getContract(argv['path'] as string);
+            writeDot(contract.evm);
         }
     )
 
@@ -117,8 +119,7 @@ void yargs
             pathArg(yargs);
         },
         function (argv) {
-            const evm = getEVM(argv['path'] as string);
-            const contract = new Contract(evm);
+            const contract = getContract(argv['path'] as string);
             console.info(contract.decompile());
         }
     )
@@ -143,11 +144,15 @@ function writeDot(evm: EVM) {
     node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
     `);
 
+    const ids = new WeakMap<State<Inst, Expr>, string>();
     let id = 0;
     for (const [, chunk] of evm.chunks) {
         for (const state of chunk.states) {
-            if (state.id === undefined) {
-                state.id = `id-${id}`;
+            assert(!ids.has(state));
+
+            if (!ids.has(state)) {
+                // state.id = `id-${id}`;
+                ids.set(state, `id-${id}`);
                 id++;
             }
         }
@@ -174,19 +179,20 @@ function writeDot(evm: EVM) {
                 writeNode(pc, state);
                 switch (state.last?.name) {
                     case 'Jumpi':
-                        writeEdge(state.id, state.last.destBranch);
-                        writeEdge(state.id, state.last.fallBranch);
+                        writeEdge(state, state.last.destBranch);
+                        writeEdge(state, state.last.fallBranch);
                         break;
                     case 'SigCase':
                         // writeEdge(pc, state.last.condition.hash);
-                        writeEdge(state.id, state.last.fallBranch);
+                        writeEdge(state, state.last.fallBranch);
                         break;
                     case 'Jump':
-                        writeEdge(state.id, state.last.destBranch);
+                        writeEdge(state, state.last.destBranch);
                         break;
                     case 'JumpDest':
-                        writeEdge(state.id, state.last.fallBranch);
+                        writeEdge(state, state.last.fallBranch);
                         break;
+                    default:
                 }
             }
             write('}\n');
@@ -194,7 +200,8 @@ function writeDot(evm: EVM) {
         write(edges);
 
         function writeNode(pc: number, state: State<Inst, Expr>) {
-            let label = `key:${pc} ${state.id}`;
+            const id = ids.get(state)!;
+            let label = `key:${pc} ${id}`;
             label += '\\l';
             // label += 'doms: ' + [...doms].join(', ');
             // label += '\\l';
@@ -214,12 +221,13 @@ function writeDot(evm: EVM) {
             label += state.stmts.map(stmt => stmt.toString()).join('\\l');
             label += '\\l';
 
-            write(`"${state.id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
+            write(`"${id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
         }
 
-        function writeEdge(src: string, branch: Branch) {
+        function writeEdge(src: State<Inst, Expr>, branch: Branch) {
             // write(`"${src}" -> "${branch.state.id}";`);
-            edges += `"${src}" -> "${branch.state.id}";\n`;
+            const id = ids.get(src)!;
+            edges += `"${id}" -> "${ids.get(branch.state)}";\n`;
         }
     }
 }
