@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 
 const config: Configuration = {
