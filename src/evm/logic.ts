@@ -10,7 +10,7 @@ function Cmp<N extends string>(tag: N, op: string) {
 
         str() {
             return `${this.left._str(Cmp.prec)} ${
-                this.equal ? ` ${op}= ` : ` ${op} `
+                this.equal ? `${op}=` : `${op}`
             } ${this.right._str(Cmp.prec)}`;
         }
     }
