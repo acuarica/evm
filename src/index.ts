@@ -7,6 +7,9 @@ import { stringifyEvents } from './evm/log';
 import { stringifyMappings, stringifyStructs, stringifyVariables } from './evm/storage';
 import { OPCODES } from './opcode';
 
+/**
+ *
+ */
 export class Contract {
     /**
      *
@@ -34,6 +37,47 @@ export class Contract {
         }
     }
 
+    // getFunctions(): string[] {
+    //     return [
+    //         ...new Set(
+    //             this.opcodes
+    //                 .filter(
+    //                     (opcode): opcode is Opcode & { mnemonic: 'PUSH4' } =>
+    //                         opcode.opcode === OPCODES.PUSH4
+    //                 )
+    //                 .map(opcode => toHex(opcode.pushData))
+    //                 .filter(hash => hash in this.functionHashes)
+    //                 .map(hash => this.functionHashes[hash])
+    //         ),
+    //     ];
+    // }
+
+    // getEvents(): string[] {
+    //     return [
+    //         ...new Set(
+    //             this.opcodes
+    //                 .filter(
+    //                     (opcode): opcode is Opcode & { mnemonic: 'PUSH32' } =>
+    //                         opcode.opcode === OPCODES.PUSH32
+    //                 )
+    //                 .map(opcode => toHex(opcode.pushData))
+    //                 .filter(hash => hash in this.eventHashes)
+    //                 .map(hash => this.eventHashes[hash])
+    //         ),
+    //     ];
+    // }
+
+    // getABI() {
+    //     return Object.values(this.contract).map(fn => {
+    //         return {
+    //             type: 'function',
+    //             name: fn.label.split('(')[0],
+    //             payable: fn.payable,
+    //             constant: fn.constant,
+    //         };
+    //     });
+    // }
+
     /**
      * https://eips.ethereum.org/EIPS/eip-165
      *
@@ -47,6 +91,10 @@ export class Contract {
         return this.evm.functionBranches.has(selector);
     }
 
+    /**
+     *
+     * @returns
+     */
     decompile(): string {
         let text = '';
 
@@ -73,7 +121,7 @@ export class Contract {
 
     /**
      * Migrated from old codebase.
-     * Evaluate if make sense to keep it.
+     * Evaluate if it makes sense to keep it.
      *
      * @param opcode
      * @returns

@@ -93,12 +93,24 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         { pc: number; state: State }
     >();
 
+    /**
+     * The `Opcode[]` decoded from `bytecode`.
+     */
     readonly opcodes: ReturnType<typeof decode>['opcodes'];
 
+    /**
+     * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
+     * This is used to speed up offset search.
+     */
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
 
     private constructor(
         { opcodes, jumpdests }: ReturnType<typeof decode>,
+
+        /**
+         * The `metadataHash` part from the `bytecode`.
+         * That is, if present, the `bytecode` without its `code`.
+         */
         readonly metadata?: Metadata
     ) {
         this.opcodes = opcodes;
@@ -118,6 +130,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      * @returns
      */
     static from(bytecode: string): EVM {
+        /**
+         * The `code` part from the `bytecode`.
+         * That is, the `bytecode` without its metadata hash, if any.
+         */
         const [code, metadata] = stripMetadataHash(bytecode);
         return new EVM(decode(Buffer.from(code.replace('0x', ''), 'hex')), metadata);
     }
