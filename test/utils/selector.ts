@@ -3,6 +3,7 @@ import * as eventHashes from '../../data/eventHashes.json';
 
 import type { IEvents } from '../../src/evm/log';
 import { EventFragment, FunctionFragment, Interface } from 'ethers/lib/utils';
+import type { Contract } from '../../src';
 
 export function getFunctionSignature(selector: string): string {
     return (functionHashes as { [selector: string]: string })[selector];
@@ -22,4 +23,9 @@ export function eventSelectors({ events }: IEvents) {
             event.sig = (eventHashes as { [key: string]: string })[topic];
         }
     }
+}
+
+export function patch(contract: Contract): Contract {
+    eventSelectors(contract.evm);
+    return contract;
 }
