@@ -37,6 +37,10 @@ export class Contract {
         }
     }
 
+    get metadata(): EVM['metadata'] {
+        return this.evm.metadata;
+    }
+
     // getFunctions(): string[] {
     //     return [
     //         ...new Set(
