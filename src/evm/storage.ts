@@ -1,7 +1,6 @@
 import type { State } from '../state';
 import { type Expr, type IInst, type Inst, Tag } from './expr';
 import type { Sha3 } from './system';
-import { Add, Sub } from './math';
 
 export interface IStore {
     /**
