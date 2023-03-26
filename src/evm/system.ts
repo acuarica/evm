@@ -187,6 +187,10 @@ export class DelegateCall extends Tag('DelegateCall') {
 export class Stop implements IInst {
     readonly name = 'Stop';
 
+    eval() {
+        return this;
+    }
+
     toString() {
         return 'return;';
     }
@@ -203,6 +207,10 @@ export class Return implements IInst {
      * @param size Byte size to copy (size of the return data).
      */
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
+
+    eval() {
+        return this;
+    }
 
     toString(): string {
         if (this.offset && this.size) {
@@ -236,6 +244,10 @@ export class Revert implements IInst {
 
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
 
+    eval() {
+        return this;
+    }
+
     toString() {
         return this.offset && this.size
             ? `revert(memory[${this.offset}:(${this.offset}+${this.size})]);`
@@ -248,6 +260,10 @@ export class Invalid implements IInst {
 
     constructor(readonly reason: string) {}
 
+    eval() {
+        return this;
+    }
+
     toString() {
         return `revert('${this.reason}');`;
     }
@@ -258,7 +274,11 @@ export class SelfDestruct implements IInst {
 
     constructor(readonly address: Expr) {}
 
-    toString(): string {
+    eval() {
+        return this;
+    }
+
+    toString() {
         return `selfdestruct(${this.address});`;
     }
 }

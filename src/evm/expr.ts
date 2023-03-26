@@ -73,6 +73,8 @@ export interface IInst {
      */
     readonly name: string;
 
+    eval(): Inst;
+
     next?(): Branch[];
 }
 

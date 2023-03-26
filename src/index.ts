@@ -40,7 +40,7 @@ export class Contract {
      */
     isERC165(): boolean {
         /**
-         * bytes4(keccak256('supportsInterface(bytes4)'))
+         * `bytes4(keccak256('supportsInterface(bytes4)'))`
          */
         const selector = '01ffc9a7';
         return this.evm.functionBranches.has(selector);
@@ -188,6 +188,10 @@ export function build(state: State<Inst, Expr>): Stmt[] {
 
         const last = state.last!;
         if (last === undefined) return [];
+
+        for (let i = 0; i < state.stmts.length; i++) {
+            state.stmts[i] = state.stmts[i].eval();
+        }
 
         switch (last.name) {
             case 'Jumpi': {

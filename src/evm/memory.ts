@@ -25,6 +25,10 @@ export class MStore implements IInst {
 
     constructor(readonly location: Expr, readonly data: Expr) {}
 
+    eval() {
+        return this;
+    }
+
     toString(): string {
         return `memory[${this.location}] = ${this.data};`;
     }

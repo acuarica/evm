@@ -51,7 +51,7 @@ export function stringifyEvents(events: IEvents['events']) {
                     .join(', ');
                 text += ')';
             } else {
-                text += event;
+                text += event.sig;
             }
         }
         text += ';\n';
@@ -75,6 +75,15 @@ export class Log implements IInst {
             return this.event.sig.split('(')[0];
         }
         return undefined;
+    }
+
+    eval() {
+        return new Log(
+            this.event,
+            this.topics.map(e => e.eval()),
+            this.args.map(e => e.eval()),
+            this.mem ? { offset: this.mem.offset.eval(), size: this.mem.size.eval() } : undefined
+        );
     }
 
     toString() {
@@ -112,7 +121,7 @@ function log(topicsCount: number, { events }: IEvents) {
 
         let event: IEvents['events'][string] | undefined = undefined;
         if (topics.length > 0 && topics[0].isVal()) {
-            const eventTopic = topics[0].val.toString(16);
+            const eventTopic = topics[0].val.toString(16).padStart(64, '0');
             event = events[eventTopic];
             if (event === undefined) {
                 event = { indexedCount: topics.length - 1 };
