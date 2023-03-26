@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { Contract } from '../../src';
-import { contract } from '../utils/solc';
+import { contracts } from '../utils/solc';
 
-contract('erc165', compile => {
+contracts('erc165', compile => {
     it('should detect ERC165', function () {
         const sol = `contract C {
                 function supportsInterface(bytes4 interfaceID) external pure returns (bool) {

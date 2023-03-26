@@ -2,9 +2,9 @@ import { expect } from 'chai';
 import { Contract } from '../../src';
 import type { EVM } from '../../src/evm';
 import { Revert } from '../../src/evm/system';
-import { contract } from '../utils/solc';
+import { contracts } from '../utils/solc';
 
-contract('empty', (compile, _fallback, version) => {
+contracts('empty', (compile, _fallback, version) => {
     const CONTRACTS = [
         ['with no functions', `contract Empty { }`],
         [
@@ -41,13 +41,13 @@ contract('empty', (compile, _fallback, version) => {
         ],
     ];
 
-    CONTRACTS.forEach(([name, CONTRACT], index) => {
+    CONTRACTS.forEach(([name, sol], index) => {
         describe(name, () => {
             let contract: Contract;
             let evm: EVM;
 
-            before(() => {
-                contract = new Contract(compile(CONTRACT).bytecode);
+            before(function () {
+                contract = new Contract(compile(sol, this).bytecode);
                 evm = contract.evm;
             });
 
@@ -64,12 +64,12 @@ contract('empty', (compile, _fallback, version) => {
                     '0.8.16':
                         'ipfs://122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
                 };
-                it(`should get metadata hash ${HASHES[version]} minimal contract definition`, () => {
+                it(`should get metadata hash for minimal contract definition`, () => {
                     expect(evm.metadata!.url).to.be.equal(HASHES[version]);
                 });
             }
 
-            it('should not contain `LOG1`/`LOG2` given metadata has been stripped', () => {
+            it('should not contain `LOG1` nor `LOG2` given metadata has been stripped', () => {
                 expect(evm.opcodes).to.have.length(7);
                 expect(evm.opcodes[0].mnemonic).to.be.equal('PUSH1');
                 expect(evm.opcodes[1].mnemonic).to.be.equal('PUSH1');
