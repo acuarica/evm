@@ -97,7 +97,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
 
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
 
-    constructor({ opcodes, jumpdests }: ReturnType<typeof decode>, readonly metadata?: Metadata) {
+    private constructor(
+        { opcodes, jumpdests }: ReturnType<typeof decode>,
+        readonly metadata?: Metadata
+    ) {
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
 
