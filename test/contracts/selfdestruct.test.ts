@@ -1,25 +1,24 @@
 import { expect } from 'chai';
+import { Contract } from '../../src';
 import { OPCODES } from '../../src/opcode';
-import EVM from '../utils/evmtest';
-import { compile } from './utils/solc';
+import { contracts } from '../utils/solc';
 
-const CONTRACT = `
-contract C {
-    function () external {
-        selfdestruct(msg.sender);
-    }
-}
-`;
+contracts('selfdestruct', (compile, fallback, version) => {
+    let contract: Contract;
 
-describe('contracts selfdestruct', () => {
-    let evm: EVM;
+    if (version === '0.8.16') return;
 
-    before(() => {
-        evm = new EVM(compile(CONTRACT, '0.5.5').deployedBytecode);
+    before(function () {
+        const sol = `contract C {
+            ${fallback}() external {
+                selfdestruct(msg.sender);
+            }
+        }`;
+        contract = new Contract(compile(sol, this).bytecode);
     });
 
     it('should detect selfdestruct', () => {
-        expect(evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
-        expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
+        expect(contract.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
+        expect(contract.containsOpcode('SELFDESTRUCT')).to.be.true;
     });
 });

@@ -5,6 +5,7 @@ import { State } from './state';
 import { EVM } from './evm';
 import { stringifyEvents } from './evm/log';
 import { stringifyMappings, stringifyStructs, stringifyVariables } from './evm/storage';
+import { OPCODES } from './opcode';
 
 export class Contract {
     /**
@@ -68,6 +69,48 @@ export class Contract {
         //     )
         //     .join('');
         return text;
+    }
+
+    /**
+     * Migrated from old codebase.
+     * Evaluate if make sense to keep it.
+     *
+     * @param opcode
+     * @returns
+     */
+    containsOpcode(opcode: number | string): boolean {
+        const HALTS = [
+            OPCODES.STOP,
+            OPCODES.RETURN,
+            OPCODES.REVERT,
+            OPCODES.INVALID,
+            OPCODES.SELFDESTRUCT,
+        ] as number[];
+        let halted = false;
+        if (typeof opcode === 'string' && opcode in OPCODES) {
+            opcode = OPCODES[opcode as keyof typeof OPCODES];
+        } else if (typeof opcode === 'string') {
+            throw new Error('Invalid opcode provided');
+        }
+        for (let index = 0; index < this.evm.opcodes.length; index++) {
+            const currentOpcode = this.evm.opcodes[index].opcode;
+            if (currentOpcode === opcode && !halted) {
+                return true;
+            } else if (currentOpcode === OPCODES.JUMPDEST) {
+                halted = false;
+            } else if (HALTS.includes(currentOpcode)) {
+                halted = true;
+            }
+        }
+        return false;
+
+        // function fromHex(str: string): Uint8Array {
+        //     const buffer = new Uint8Array(str.length / 2);
+        //     for (let i = 0; i < buffer.length; i++) {
+        //         buffer[i] = parseInt(str.substr(i * 2, 2), 16);
+        //     }
+        //     return buffer;
+        // }
     }
 }
 
