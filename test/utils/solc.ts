@@ -186,7 +186,7 @@ export function forVersion(
     });
 }
 
-export function contract(title: string, fn: Parameters<typeof forVersion>[0]) {
+export function contracts(title: string, fn: Parameters<typeof forVersion>[0]) {
     describe(`contracts::${title}`, () => {
         forVersion(fn);
     });
