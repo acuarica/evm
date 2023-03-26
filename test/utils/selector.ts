@@ -27,5 +27,12 @@ export function eventSelectors({ events }: IEvents) {
 
 export function patch(contract: Contract): Contract {
     eventSelectors(contract.evm);
+
+    for (const [selector, fn] of Object.entries(contract.functions)) {
+        if (selector in functionHashes) {
+            fn.label = (functionHashes as { [selector: string]: string })[selector];
+        }
+    }
+
     return contract;
 }
