@@ -1,16 +1,14 @@
 import { providers } from 'ethers';
-import { EVM } from '../src';
-
-import * as functionHashes from '../data/functionHashes.min.json';
-import * as eventHashes from '../data/eventHashes.min.json';
+import { Contract } from '../src';
+import { patch } from '../test/utils/selector';
 
 const provider = new providers.JsonRpcProvider('https://api.mycryptoapi.com/eth');
 
 (async () => {
     const address = '0x3FDA67f7583380E67ef93072294a7fAc882FD7E7';
-    const code = await provider.getCode(address);
+    const bytecode = await provider.getCode(address);
     console.time();
-    const evm = new EVM(code, functionHashes, eventHashes);
+    const evm = patch(new Contract(bytecode));
     console.log(evm.decompile());
     console.timeEnd();
 })();
