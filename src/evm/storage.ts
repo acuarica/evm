@@ -108,12 +108,13 @@ export function stringifyMappings(mappings: IStore['mappings']) {
         mapping.keys
             .filter(mappingChild => mappingChild.length > 0)
             .forEach(mappingChild => {
+                const mappingChild0 = mappingChild[0];
                 if (
                     mappingChild.length > 0 &&
-                    mappingChild[0].type &&
-                    !mappingKey.includes(mappingChild[0].type)
+                    mappingChild0.type &&
+                    !mappingKey.includes(mappingChild0.type)
                 ) {
-                    mappingKey.push(mappingChild[0].type);
+                    mappingKey.push(mappingChild0.type);
                 }
                 if (mappingChild.length > 1 && !deepMapping) {
                     deepMapping = true;
@@ -278,8 +279,6 @@ export class SStore {
 }
 
 export class MappingLoad extends Tag('MappingLoad') {
-    readonly type?: string;
-
     constructor(
         readonly mappings: IStore['mappings'],
         readonly location: number,
@@ -323,8 +322,6 @@ export class MappingLoad extends Tag('MappingLoad') {
 }
 
 export class SLoad extends Tag('SLoad') {
-    readonly type?: string;
-
     constructor(readonly location: Expr, readonly variables: IStore['variables']) {
         super();
     }

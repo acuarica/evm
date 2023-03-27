@@ -22,7 +22,7 @@ export const INFO = {
 export type Info = (typeof INFO)[keyof typeof INFO];
 
 export class Symbol0 extends Tag('Symbol0') {
-    constructor(readonly symbol: Info, readonly type: string | undefined = undefined) {
+    constructor(readonly symbol: Info, readonly type2?: string | undefined) {
         super();
     }
 

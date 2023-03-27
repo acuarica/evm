@@ -24,7 +24,7 @@ export class Sha3 extends Tag('Sha3') {
 }
 
 export class Create extends Tag('Create') {
-    readonly type = 'address';
+    override readonly type = 'address';
 
     /**
      * Creates a new account with associated code.
@@ -89,7 +89,7 @@ export class Call extends Tag('Call') {
 
 export class ReturnData extends Tag('ReturnData') {
     readonly name = 'ReturnData';
-    readonly type?: string;
+    override readonly type?: string;
     readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {
