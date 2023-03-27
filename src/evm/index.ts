@@ -220,7 +220,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
     }
 }
 
-function gc(b: Branch, chunks: EVM['chunks']) {
+export function gc(b: Branch, chunks: EVM['chunks']) {
     const chunk = chunks.get(b.pc);
     if (chunk !== undefined) {
         for (const s of chunk.states) {
