@@ -3,11 +3,7 @@ import * as eventHashes from '../../data/eventHashes.json';
 
 import type { IEvents } from '../../src/evm/log';
 import { EventFragment, FunctionFragment, Interface } from 'ethers/lib/utils';
-import type { Contract } from '../../src';
-
-export function getFunctionSignature(selector: string): string {
-    return (functionHashes as { [selector: string]: string })[selector];
-}
+import { Contract } from '../../src';
 
 export function fnselector(sig: string): string {
     return Interface.getSighash(FunctionFragment.from(sig)).substring(2);
@@ -36,3 +32,13 @@ export function patch(contract: Contract): Contract {
 
     return contract;
 }
+
+declare module '../../src' {
+    interface Contract {
+        patch(): this;
+    }
+}
+
+Contract.prototype.patch = function () {
+    return patch(this);
+};

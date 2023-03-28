@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Contract } from '../../src';
-import { eventSelector, eventSelectors, patch } from '../utils/selector';
+import { eventSelector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('events', (compile, fallback) => {
@@ -27,9 +27,8 @@ contracts('events', (compile, fallback) => {
                 emit Transfer(newValue, address(this));
             }
         }`;
-        const contract = patch(new Contract(compile(sol, this).bytecode));
-        const Transfer = eventSelector('Transfer(uint256,address)');
-        expect(contract.evm.events).to.be.have.keys(Transfer);
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+        expect(contract.getEvents()).to.be.deep.equal(['Transfer(uint256,address)']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Transfer\(uint256 _arg0, address _arg1\);$/m);
         expect(text, text).to.match(/emit Transfer\(_arg0 \+ 0x123, this\);$/m);
@@ -42,12 +41,11 @@ contracts('events', (compile, fallback) => {
                 emit Send(123, address(this));
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode);
-        eventSelectors(contract.evm);
-        // expect(evm.getEvents()).to.be.deep.equal(['Send(uint256,address)']);
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+        expect(contract.getEvents()).to.be.deep.equal(['Send(uint256,address)']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Send\(uint256 indexed _arg0, address _arg1\);$/m);
-        // expect(text, text).to.match(/emit Send\(this, 123\);$/m);
+        expect(text, text).to.match(/emit Send\(this, 0x7b\);$/m);
     });
 
     it('should emit hashed event with no arguments', function () {
@@ -57,9 +55,8 @@ contracts('events', (compile, fallback) => {
                 emit Transfer();
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode);
-        eventSelectors(contract.evm);
-        // expect(evm.getEvents()).to.be.deep.equal(['Transfer()']);
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+        expect(contract.getEvents()).to.be.deep.equal(['Transfer()']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Transfer\(\);$/m);
         expect(text, text).to.match(/emit Transfer\(\);$/m);
@@ -72,8 +69,8 @@ contracts('events', (compile, fallback) => {
                 emit Transfer(123, address(this));
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode);
-        // expect(evm.getEvents()).to.be.deep.equal([]);
+        const evm = new Contract(compile(sol, this).bytecode).patch();
+        expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(0x7b, this\);$/m);
@@ -86,8 +83,8 @@ contracts('events', (compile, fallback) => {
                 emit Transfer();
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode);
-        // expect(evm.getEvents()).to.be.deep.equal([]);
+        const evm = new Contract(compile(sol, this).bytecode).patch();
+        expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(\);$/m);
@@ -102,8 +99,8 @@ contracts('events', (compile, fallback) => {
                 emit Send(123, 124);
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode);
-        // expect(evm.getEvents()).to.be.deep.equal([]);
+        const evm = new Contract(compile(sol, this).bytecode).patch();
+        expect(evm.getEvents()).to.be.deep.equal([]);
 
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
