@@ -44,7 +44,7 @@ export function stringifyVariables(variables: IStore['variables']) {
             types.push('unknown');
         }
         const name = variable.label ? ` public ${variable.label}` : ` var${index + 1}`;
-        output += [...new Set(types)].join('|') + name + '; // #' + hash;
+        output += [...new Set(types)].join('|') + name + '; // Slot #' + hash;
         output += '\n';
     });
 
