@@ -43,6 +43,31 @@ export class Contract {
 
     /**
      *
+     */
+    chunks(): { pcstart: number; pcend: number; states?: State<Inst, Expr>[] }[] {
+        let lastPc = 0;
+
+        const result = [];
+        const pcs = [...this.evm.chunks.keys()];
+        pcs.sort((a, b) => a - b);
+        for (const pc of pcs) {
+            const chunk = this.evm.chunks.get(pc)!;
+            if (lastPc !== pc) {
+                result.push({ pcstart: lastPc, pcend: pc });
+            }
+            lastPc = chunk.pcend;
+            result.push({ pcstart: pc, pcend: chunk.pcend, states: chunk.states });
+        }
+
+        if (lastPc !== this.evm.opcodes.length) {
+            result.push({ pcstart: lastPc, pcend: this.evm.opcodes.length });
+        }
+
+        return result;
+    }
+
+    /**
+     *
      * @returns
      */
     getFunctions(): string[] {
@@ -201,9 +226,8 @@ export class PublicFunction {
 
     constructor(
         readonly stmts: Stmt[],
-        readonly selector: string // readonly gasUsed: number,
-    ) // functionHashes: { [s: string]: string }
-    {
+        readonly selector: string // readonly gasUsed: number, // functionHashes: { [s: string]: string }
+    ) {
         this.payable = true;
         this.visibility = 'public';
         this.constant = false;

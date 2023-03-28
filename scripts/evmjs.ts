@@ -4,20 +4,22 @@ import * as yargs from 'yargs';
 import type { Argv } from 'yargs';
 import chalk = require('chalk');
 import type { EVM } from '../src/evm';
-import { eventSelectors, getFunctionSignature } from '../test/utils/selector';
+import '../test/utils/selector';
 import type { Expr, Inst } from '../src/evm/expr';
 import type { State } from '../src/state';
 import type { Branch } from '../src/evm/flow';
 import { Contract } from '../src';
 import { assert } from 'console';
 
+const underline = chalk.underline;
 const blue = chalk.blue;
 const dim = chalk.dim;
 const magenta = chalk.magenta;
+const red = chalk.red;
 
 function getContract(path: string) {
     const bytecode = readFileSync(path, 'utf8');
-    return new Contract(bytecode);
+    return new Contract(bytecode).patch();
 }
 
 function ansiOpcode(opcode: Opcode) {
@@ -49,17 +51,13 @@ void yargs
         },
         function (argv) {
             const contract = getContract(argv['path'] as string);
-            const evm = contract.evm;
-            evm.start();
-            eventSelectors(evm);
 
-            console.info('Function Selectors');
-            [...evm.functionBranches.keys()].forEach(s =>
-                console.info(dim(s), getFunctionSignature(s))
-            );
+            console.info(underline('Function Selectors'));
+            contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
 
-            console.info('Events');
-            [...Object.entries(evm.events)].forEach(([s, b]) => console.info(dim(s), b.sig));
+            console.info();
+            console.info(underline('Events'));
+            contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
         }
     )
 
@@ -76,25 +74,25 @@ void yargs
                 )}  ${'push data (PUSHx)'}`
             );
             const contract = getContract(argv['path'] as string);
-            // evm.start();
-            const evm = contract.evm;
 
-            const keys = [...evm.chunks.keys()];
-            keys.sort((a, b) => a - b);
-            for (const pc of keys) {
-                const chunk = evm.chunks.get(pc)!;
-                console.info(pc, ':');
-                // console.log(pc, ':', block.entry.key);
+            for (const chunk of contract.chunks()) {
+                console.info(
+                    chunk.pcstart,
+                    ':',
+                    chunk.states === undefined ? red('unreachable') : ''
+                );
 
-                for (let i = pc; i < chunk.pcend; i++) {
-                    const opcode = evm.opcodes[i];
+                for (let i = chunk.pcstart; i < chunk.pcend; i++) {
+                    const opcode = contract.evm.opcodes[i];
                     console.info(ansiOpcode(opcode));
                 }
 
-                for (const state of chunk.states) {
-                    console.info('state');
-                    console.info('    〒 ', state.stack.values.join(' | '));
-                    state.stmts.forEach(stmt => console.info('  ', stmt.toString()));
+                if (chunk.states !== undefined) {
+                    for (const state of chunk.states) {
+                        console.info('state');
+                        console.info('    〒 ', state.stack.values.join(' | '));
+                        state.stmts.forEach(stmt => console.info('  ', stmt.toString()));
+                    }
                 }
             }
         }
