@@ -51,20 +51,15 @@ export class Contract {
         );
     }
 
-    // getEvents(): string[] {
-    //     return [
-    //         ...new Set(
-    //             this.opcodes
-    //                 .filter(
-    //                     (opcode): opcode is Opcode & { mnemonic: 'PUSH32' } =>
-    //                         opcode.opcode === OPCODES.PUSH32
-    //                 )
-    //                 .map(opcode => toHex(opcode.pushData))
-    //                 .filter(hash => hash in this.eventHashes)
-    //                 .map(hash => this.eventHashes[hash])
-    //         ),
-    //     ];
-    // }
+    /**
+     *
+     * @returns
+     */
+    getEvents(): string[] {
+        return Object.values(this.evm.events).flatMap(event =>
+            event.sig === undefined ? [] : [event.sig]
+        );
+    }
 
     // getABI() {
     //     return Object.values(this.contract).map(fn => {
@@ -117,13 +112,13 @@ export class Contract {
      * @returns
      */
     containsOpcode(opcode: number | string): boolean {
-        const HALTS = [
+        const HALTS: number[] = [
             OPCODES.STOP,
             OPCODES.RETURN,
             OPCODES.REVERT,
             OPCODES.INVALID,
             OPCODES.SELFDESTRUCT,
-        ] as number[];
+        ];
         let halted = false;
         if (typeof opcode === 'string' && opcode in OPCODES) {
             opcode = OPCODES[opcode as keyof typeof OPCODES];
@@ -204,8 +199,10 @@ export class PublicFunction {
     readonly constant: boolean;
     readonly returns: [] = [];
 
-    constructor(readonly stmts: Stmt[], readonly selector: string) // readonly gasUsed: number,
-    // functionHashes: { [s: string]: string }
+    constructor(
+        readonly stmts: Stmt[],
+        readonly selector: string // readonly gasUsed: number,
+    ) // functionHashes: { [s: string]: string }
     {
         this.payable = true;
         this.visibility = 'public';
