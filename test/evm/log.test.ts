@@ -22,7 +22,7 @@ describe('evm::log', () => {
     let evm: EVM;
 
     before(function () {
-        evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
     });
 
     it('should get it from compiled code', () => {

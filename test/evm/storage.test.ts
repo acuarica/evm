@@ -31,7 +31,7 @@ describe('evm::storage', () => {
                 val2 += 11;
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
@@ -57,7 +57,7 @@ describe('evm::storage', () => {
                 t.val2 += 11;
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         expect(evm.variables).to.be.have.keys('0x0', '0x1');
         expect(evm.mappings).to.be.deep.equal({});
@@ -76,7 +76,7 @@ describe('evm::storage', () => {
                     allowance[address(this)][msg.sender] -= 11;
                 }
             }`;
-            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+            const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 

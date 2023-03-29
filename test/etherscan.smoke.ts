@@ -70,7 +70,7 @@ describe('etherscan', function () {
                 }
 
                 const bytecode = readFileSync(path, 'utf8');
-                const evm = EVM.from(bytecode);
+                const evm = new EVM(bytecode);
                 if (
                     [
                         'Vyper_contract-0x5c22c615eefbaa896c6e34db8d1e9835ae215832',

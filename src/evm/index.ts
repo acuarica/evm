@@ -69,6 +69,12 @@ function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
 
 export class EVM implements IEvents, IStore, ISelectorBranches {
     /**
+     * The `metadataHash` part from the `bytecode`.
+     * That is, if present, the `bytecode` without its `code`.
+     */
+    readonly metadata?: Metadata | undefined;
+
+    /**
      *
      */
     private readonly insts: {
@@ -104,15 +110,16 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      */
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
 
-    private constructor(
-        { opcodes, jumpdests }: ReturnType<typeof decode>,
-
+    constructor(bytecode: string) {
         /**
-         * The `metadataHash` part from the `bytecode`.
-         * That is, if present, the `bytecode` without its `code`.
+         * The `code` part from the `bytecode`.
+         * That is, the `bytecode` without its metadata hash, if any.
          */
-        readonly metadata?: Metadata
-    ) {
+        const [code, metadata] = stripMetadataHash(bytecode);
+        this.metadata = metadata;
+
+        const { opcodes, jumpdests } = decode(Buffer.from(code.replace('0x', ''), 'hex'));
+
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
 
@@ -122,20 +129,6 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
             ...makeState(STORAGE(this)),
             ...makeState(LOGS(this)),
         });
-    }
-
-    /**
-     *
-     * @param bytecode
-     * @returns
-     */
-    static from(bytecode: string): EVM {
-        /**
-         * The `code` part from the `bytecode`.
-         * That is, the `bytecode` without its metadata hash, if any.
-         */
-        const [code, metadata] = stripMetadataHash(bytecode);
-        return new EVM(decode(Buffer.from(code.replace('0x', ''), 'hex')), metadata);
     }
 
     /**

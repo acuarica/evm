@@ -27,7 +27,7 @@ export class Contract {
     readonly functions: { [selector: string]: PublicFunction } = {};
 
     constructor(bytecode: string) {
-        this.evm = EVM.from(bytecode);
+        this.evm = new EVM(bytecode);
         const main = new State<Inst, Expr>();
         this.evm.run(0, main);
         this.main = build(main);

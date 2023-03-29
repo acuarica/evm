@@ -105,8 +105,6 @@ export class ReturnData extends Tag('ReturnData') {
 }
 
 export class CallCode extends Tag('CallCode') {
-    readonly name = 'CallCode';
-
     constructor(
         readonly gas: Expr,
         readonly address: Expr,

@@ -18,7 +18,7 @@ describe('evm', () => {
                 }
             }`;
 
-            const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+            const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
             evm.start();
             expect(evm.functionBranches).to.be.empty;
         });
@@ -46,7 +46,7 @@ describe('evm', () => {
                 }
             }`;
 
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -57,7 +57,7 @@ describe('evm', () => {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -68,7 +68,7 @@ describe('evm', () => {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
             }
         }`;
-        const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -91,7 +91,7 @@ describe('evm', () => {
                 }
         }`;
 
-            const evm = EVM.from(
+            const evm = new EVM(
                 compile(sol, '0.7.6', { context: this, severity: 'info' }).bytecode
             );
             evm.start();

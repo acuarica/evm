@@ -41,7 +41,7 @@ describe('evm::sym', () => {
                         emit Deposit(${value});
                     }
                 }`;
-                const evm = EVM.from(compile(sol, '0.7.6', { context: this }).bytecode);
+                const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
                 const state = new State<Inst, Expr>();
                 evm.exec(0, state);
 

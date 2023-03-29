@@ -109,7 +109,7 @@ describe('evm::system', () => {
                 function hola() external pure returns (string memory) { return "12345"; }
             }`;
 
-            const evm = EVM.from(compile(sol, '0.8.16', { context: this }).bytecode);
+            const evm = new EVM(compile(sol, '0.8.16', { context: this }).bytecode);
             evm.start();
 
             const selector = fnselector('name()');
