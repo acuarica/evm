@@ -1,26 +1,31 @@
 import { expect } from 'chai';
 import { Contract } from '../../src';
-import { patch } from '../utils/selector';
+import { Return } from '../../src/evm/system';
+import { fnselector, patch } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('dispatch', compile => {
-    it('should `decompile` a contract with a single `external` method', function () {
-        const sol = `contract Contract {
-            function get() external pure returns (uint256) {
-                return 5;
-            }
+    it("should decompile function's return type and non-payable", function () {
+        const sol = `contract C {
+            function get() external pure returns (uint256) { return 5; }
         }`;
-        const contract = patch(new Contract(compile(sol, this).bytecode));
-
-        expect(Object.keys(contract.functions)).to.be.of.length(1);
-
-        const [[selector, fn]] = Object.entries(contract.functions);
-
-        expect(selector).to.be.equal('6d4ce63c');
-        expect(fn.label).to.be.equal('get()');
-
+        const contract = new Contract(compile(sol, this).bytecode).patch();
         const text = contract.decompile();
-        expect(text, `decompiled text\n${text}`).to.match(/function get\(\) public view payable/);
+        expect(text, `decompiled text\n${text}`).to.match(
+            /^function get\(\) public view returns \(uint256\) {$/m
+        );
+    });
+
+    it('should `decompile` a contract with a single `external` method', function () {
+        const sol = `contract C {
+            function set() external payable { }
+            function get() external pure returns (uint256) { return 5; }
+        }`;
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const text = contract.decompile();
+        expect(text, `decompiled text\n${text}`).to.match(
+            /^function get\(\) public view returns \(uint256\) {$/m
+        );
     });
 
     it('should `decompile` a contract with multiple `external` functions', function () {
@@ -38,11 +43,9 @@ contracts('dispatch', compile => {
 
         expect(Object.keys(contract.functions)).to.be.of.length(3);
 
-        // const fn = contract.contract.getFunction('balanceOf(uint256)');
-        // expect(fn.stmts.filter(stmt => stmt instanceof Require).length).to.be.greaterThan(0);
-        // expect(fn).to.not.be.undefined;
-        // expect(fn!.stmts).to.be.deep.equal([]);
-        // expect(fn!.stmts.at(-1)).instanceOf(Return);
+        const fn = contract.functions[fnselector('balanceOf(uint256)')];
+        expect(fn.stmts.filter(stmt => stmt.name === 'Require').length).to.be.greaterThan(0);
+        expect(fn.stmts.at(-1)).instanceOf(Return);
 
         const text = contract.decompile();
         expect(text, `decompiled bytecode\n${text}`).to.match(/return this;$/m);

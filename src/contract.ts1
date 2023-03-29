@@ -135,18 +135,6 @@ export class TopLevelFunction {
         this.constant = false;
         this.returns = [];
         this.label = this.hash in functionHashes ? functionHashes[this.hash] : this.hash + '()';
-        if (
-            this.stmts.length > 0 &&
-            this.stmts[0] instanceof Require &&
-            this.stmts[0].condition instanceof IsZero &&
-            this.stmts[0].condition.value instanceof CallValue
-        ) {
-            this.payable = false;
-            this.stmts.shift();
-        }
-        if (this.stmts.length === 1 && this.stmts[0] instanceof Return) {
-            this.constant = true;
-        }
         if (this.hash in functionHashes) {
             const functionName = functionHashes[this.hash].split('(')[0];
             const argumentTypes = functionHashes[this.hash]
@@ -162,34 +150,6 @@ export class TopLevelFunction {
                     updateCallDataLoad(stmt as unknown as Record<string, Expr>, argumentTypes)
                 );
             }
-        }
-        const returns: any = [];
-        this.stmts.forEach(stmt => {
-            const deepReturns = findReturns(stmt as unknown as Record<string, Stmt>);
-            if (deepReturns.length > 0) {
-                returns.push(...deepReturns);
-            }
-        });
-        if (
-            returns.length > 0 &&
-            returns.every(
-                (returnItem: any) =>
-                    returnItem.length === returns[0].length &&
-                    returnItem.map((item: any) => item.type).join('') ===
-                        returns[0].map((item: any) => item.type).join('')
-            )
-        ) {
-            returns[0].forEach((item: any) => {
-                if (isBigInt(item)) {
-                    this.returns.push('uint256');
-                } else if (item.type) {
-                    this.returns.push(item.type);
-                } else {
-                    this.returns.push('unknown');
-                }
-            });
-        } else if (returns.length > 0) {
-            this.returns.push('<unknown>');
         }
     }
 }
@@ -211,30 +171,6 @@ function updateCallDataLoad(stmtOrExpr: Record<string, Expr>, types: any) {
             }
         }
     }
-}
-
-function findReturns(stmt: Record<string, Stmt>) {
-    const returns = [];
-    for (const i in stmt) {
-        if (Object.prototype.hasOwnProperty.call(stmt, i)) {
-            const prop = stmt[i];
-            if (
-                typeof prop === 'object' &&
-                prop instanceof Return &&
-                prop.args &&
-                prop.args.length > 0
-            ) {
-                returns.push(prop.args);
-            }
-            if (prop instanceof If) {
-                const deepReturns: any = findReturns(prop as unknown as Record<string, Stmt>);
-                if (deepReturns.length > 0) {
-                    returns.push(...deepReturns);
-                }
-            }
-        }
-    }
-    return returns;
 }
 
 function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {

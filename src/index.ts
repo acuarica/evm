@@ -26,14 +26,23 @@ export class Contract {
      */
     readonly functions: { [selector: string]: PublicFunction } = {};
 
+    readonly payable: boolean;
+
     constructor(bytecode: string) {
         this.evm = new EVM(bytecode);
         const main = new State<Inst, Expr>();
         this.evm.run(0, main);
         this.main = build(main);
+
+        this.payable = !requiresNoValue(this.main);
+
         for (const [selector, branch] of this.evm.functionBranches) {
             this.evm.run(branch.pc, branch.state);
-            this.functions[selector] = new PublicFunction(build(branch.state), selector);
+            this.functions[selector] = new PublicFunction(
+                build(branch.state),
+                selector,
+                !this.payable
+            );
         }
     }
 
@@ -222,25 +231,24 @@ export class PublicFunction {
     readonly payable: boolean;
     readonly visibility: string;
     readonly constant: boolean;
-    readonly returns: [] = [];
+    readonly returns: string[] = [];
 
     constructor(
         readonly stmts: Stmt[],
-        readonly selector: string // readonly gasUsed: number, // functionHashes: { [s: string]: string }
+        readonly selector: string, // readonly gasUsed: number, // functionHashes: { [s: string]: string }
+        mainRequiresNoValue: boolean
     ) {
-        this.payable = true;
         this.visibility = 'public';
         this.constant = false;
-        this.returns = [];
         // this.label = this.hash in functionHashes ? functionHashes[this.hash] : this.hash + '()';
-        if (
-            this.stmts.length > 0 &&
-            this.stmts[0] instanceof Require &&
-            this.stmts[0].condition.tag === 'IsZero' &&
-            this.stmts[0].condition.value.tag === 'CallValue'
-        ) {
+
+        if (requiresNoValue(this.stmts)) {
             this.payable = false;
             this.stmts.shift();
+        } else if (mainRequiresNoValue) {
+            this.payable = false;
+        } else {
+            this.payable = true;
         }
         if (this.stmts.length === 1 && this.stmts[0].name === 'Return') {
             this.constant = true;
@@ -254,6 +262,43 @@ export class PublicFunction {
         // );
         // }
         // }
+
+        const returns: Expr[][] = [];
+        PublicFunction.findReturns(stmts, returns);
+        if (
+            returns.length > 0 &&
+            returns.every(
+                args =>
+                    args.length === returns[0].length &&
+                    args.map(arg => arg.type).join('') === returns[0].map(arg => arg.type).join('')
+            )
+        ) {
+            returns[0].forEach(arg => {
+                if (arg.isVal()) {
+                    this.returns.push('uint256');
+                } else if (arg.type) {
+                    this.returns.push(arg.type);
+                } else {
+                    this.returns.push('unknown');
+                }
+            });
+        } else if (returns.length > 0) {
+            this.returns.push('<unknown>');
+        }
+    }
+
+    static findReturns(stmts: Stmt[], returns: Expr[][]) {
+        for (const stmt of stmts) {
+            if (stmt.name === 'Return' && stmt.args && stmt.args.length > 0) {
+                returns.push(stmt.args);
+            } else if (stmt.name === 'If') {
+                [stmt.trueBlock, stmt.falseBlock].forEach(stmts => {
+                    if (stmts !== undefined) {
+                        PublicFunction.findReturns(stmts, returns);
+                    }
+                });
+            }
+        }
     }
 }
 
@@ -401,4 +446,13 @@ function stringifyFunction(fn: PublicFunction): string {
     output += stringify(fn.stmts, 4);
     output += '}\n\n';
     return output;
+}
+
+function requiresNoValue(stmts: Stmt[]): boolean {
+    return (
+        stmts.length > 0 &&
+        stmts[0] instanceof Require &&
+        stmts[0].condition.tag === 'IsZero' &&
+        stmts[0].condition.value.tag === 'CallValue'
+    );
 }
