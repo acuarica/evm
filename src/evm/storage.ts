@@ -38,7 +38,7 @@ export function stringifyVariables(variables: IStore['variables']) {
     Object.entries(variables).forEach(([hash, variable], index) => {
         const types: string[] = variable.types
             .map(expr => expr.eval())
-            .map(expr => (!expr.isVal() ? '???expr.type' ?? '' : 'bigint'))
+            .map(expr => (expr.isVal() ? 'bigint' : expr.type ?? ''))
             .filter(t => t.trim() !== '');
         if (types.length === 0) {
             types.push('unknown');

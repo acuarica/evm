@@ -14,14 +14,10 @@ contracts('variables', (compile, _fallback, version) => {
         before(function () {
             const sol = `contract Contract {
                 uint256 private value256;
-                function setValue0(uint256 newValue) public {
-                    value256 = newValue;
-                }
+                function setValue0(uint256 newValue) public { value256 = newValue; }
 
                 bytes32 private value32;
-                function setValue0(bytes32 newValue) public {
-                    value32 = newValue;
-                }
+                function setValue0(bytes32 newValue) public { value32 = newValue; }
             }`;
             contract = new Contract(compile(sol, this).bytecode);
         });
@@ -59,7 +55,7 @@ contracts('variables', (compile, _fallback, version) => {
             );
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown var1;/m);
             expect(text, text).to.match(/^unknown var2;/m);
@@ -74,44 +70,25 @@ contracts('variables', (compile, _fallback, version) => {
         before(function () {
             const sol = `contract C {
                 uint256 private value256;
-                function setValue0(uint256 newValue) public {
-                    value256 = newValue;
-                }
+                function setValue0(uint256 newValue) public { value256 = newValue; }
 
                 bytes32 private value32;
-                function setValue0(bytes32 newValue) public {
-                    value32 = newValue;
-                }
+                function setValue0(bytes32 newValue) public { value32 = newValue; }
 
                 uint64 private value64;
-                function setValue0(uint64 newValue) public {
-                    value64 = newValue;
-                }
+                function setValue0(uint64 newValue) public { value64 = newValue; }
 
                 bytes8 private value8;
-                function setValue0(bytes8 newValue) public {
-                    value8 = newValue;
-                }
+                function setValue0(bytes8 newValue) public { value8 = newValue; }
             }`;
             contract = new Contract(compile(sol, this).bytecode);
         });
 
-        it('should not have functions nor events', () => {
-            // expect(contract.getFunctions()).to.be.empty;
-            // expect(contract.getEvents()).to.be.empty;
+        it.skip('should detect variables', () => {
+            expect(Object.values(contract.evm.variables)).to.be.of.length(4);
         });
 
-        // const { blocks } = evm.getBlocks();
-        // const ss = Object.values(blocks)
-        //     .map(block => block.stmts)
-        //     .filter(stmts => stmts.find(stmt => stmt instanceof SStore));
-
-        // ss.forEach(s => console.log(s[0]));
-        // expect(ss).to.be.of.length(4);
-
-        // expect(Object.values(evm.getContract().variables)).to.be.of.length(4);
-
-        it.skip('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown var1;/m);
             expect(text, text).to.match(/^unknown var2;/m);
@@ -129,15 +106,14 @@ contracts('variables', (compile, _fallback, version) => {
             const sol = `contract C {
                 uint256 public value;
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(sol, this).bytecode).patch();
         });
 
         it('should `getFunctions` but not `getEvents`', () => {
-            // expect(contract.getFunctions()).to.be.deep.equal(['value()']);
-            // expect(contract.getEvents()).to.be.empty;
+            expect(contract.getFunctions()).to.be.deep.equal(['value()']);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });
@@ -153,15 +129,14 @@ contracts('variables', (compile, _fallback, version) => {
                     value = newValue;
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(sol, this).bytecode).patch();
         });
 
         it('should `getFunctions` but not `getEvents`', () => {
-            // expect(contract.getFunctions()).to.be.deep.equal(['value()']);
-            // expect(contract.getEvents()).to.be.empty;
+            expect(contract.getFunctions()).to.be.deep.equal(['value()']);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', () => {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });

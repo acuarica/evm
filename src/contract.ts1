@@ -92,16 +92,6 @@ export class Contract {
             const fn = new TopLevelFunction(cfg, branch.hash, functionHashes);
             assert(cfg.functionBranches.length === 0);
             this.functions[branch.hash] = fn;
-            if (branch.hash in functionHashes && isGetter(fn.stmts)) {
-                const fullFunction = functionHashes[branch.hash];
-
-                const location = evalExpr(fn.stmts[0].args[0].location).toString();
-                const variable = this.variables[location];
-                this.variables[branch.hash] = new Variable(
-                    fullFunction.split('(')[0],
-                    variable ? variable.types : []
-                );
-            }
         }
     }
 
@@ -241,25 +231,4 @@ function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {
 
         return block.stmts;
     }
-}
-
-export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
-    return (
-        falseBlock.length === 1 && 'name' in falseBlock[0] && falseBlock[0].name === 'REVERT' //&&
-        // falseBlock[0].items !== undefined &&
-        // falseBlock[0].items.length === 0
-        // || falseCloneTree[0].name === 'INVALID'
-    );
-}
-
-function isGetter(stmts: Stmt[]): stmts is [Return & { args: [SLoad & { location: bigint }] }] {
-    const exit = stmts[0];
-    return (
-        stmts.length === 1 &&
-        // stmts[0] instanceof MStore &&
-        exit instanceof Return &&
-        exit.args.length === 1 &&
-        exit.args[0] instanceof SLoad &&
-        isBigInt(exit.args[0].location)
-    );
 }

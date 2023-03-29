@@ -1,10 +1,16 @@
-import type { Expr, Inst } from './evm/expr';
+import type { Expr, Inst, Val } from './evm/expr';
 import { Not } from './evm/logic';
-import type { Revert } from './evm/system';
+import type { Return, Revert } from './evm/system';
 import { State } from './state';
 import { EVM } from './evm';
 import { stringifyEvents } from './evm/log';
-import { stringifyMappings, stringifyStructs, stringifyVariables } from './evm/storage';
+import {
+    type SLoad,
+    stringifyMappings,
+    stringifyStructs,
+    stringifyVariables,
+    Variable,
+} from './evm/storage';
 import { OPCODES } from './opcode';
 
 /**
@@ -38,11 +44,7 @@ export class Contract {
 
         for (const [selector, branch] of this.evm.functionBranches) {
             this.evm.run(branch.pc, branch.state);
-            this.functions[selector] = new PublicFunction(
-                build(branch.state),
-                selector,
-                !this.payable
-            );
+            this.functions[selector] = new PublicFunction(this, build(branch.state), selector);
         }
     }
 
@@ -205,11 +207,17 @@ export class CallSite {
 }
 
 export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
+    return falseBlock.length === 1 && falseBlock[0].name === 'Revert';
+}
+
+function isGetter(stmts: Stmt[]): stmts is [Return & { args: [SLoad & { location: Val }] }] {
+    const exit = stmts[0];
     return (
-        falseBlock.length === 1 && 'name' in falseBlock[0] && falseBlock[0].name === 'Revert' //&&
-        // falseBlock[0].items !== undefined &&
-        // falseBlock[0].items.length === 0
-        // || falseCloneTree[0].name === 'INVALID'
+        stmts.length === 1 &&
+        exit.name === 'Return' &&
+        exit.args.length === 1 &&
+        exit.args[0].tag === 'SLoad' &&
+        exit.args[0].location.isVal()
     );
 }
 
@@ -227,16 +235,16 @@ export class PublicFunction {
     /**
      *
      */
-    label: string | undefined = undefined;
+    _label: string | undefined = undefined;
     readonly payable: boolean;
     readonly visibility: string;
     readonly constant: boolean;
     readonly returns: string[] = [];
 
     constructor(
+        readonly contract: Contract,
         readonly stmts: Stmt[],
-        readonly selector: string, // readonly gasUsed: number, // functionHashes: { [s: string]: string }
-        mainRequiresNoValue: boolean
+        readonly selector: string // readonly gasUsed: number, // functionHashes: { [s: string]: string }
     ) {
         this.visibility = 'public';
         this.constant = false;
@@ -245,7 +253,7 @@ export class PublicFunction {
         if (requiresNoValue(this.stmts)) {
             this.payable = false;
             this.stmts.shift();
-        } else if (mainRequiresNoValue) {
+        } else if (!contract.payable) {
             this.payable = false;
         } else {
             this.payable = true;
@@ -284,6 +292,22 @@ export class PublicFunction {
             });
         } else if (returns.length > 0) {
             this.returns.push('<unknown>');
+        }
+    }
+
+    get label() {
+        return this._label;
+    }
+
+    set label(value: string | undefined) {
+        this._label = value;
+        if (value !== undefined && isGetter(this.stmts)) {
+            const location = this.stmts[0].args[0].location.val.toString();
+            const variable = this.contract.evm.variables[location];
+            this.contract.evm.variables[this.selector] = new Variable(
+                value.split('(')[0],
+                variable ? variable.types : []
+            );
         }
     }
 
