@@ -30,6 +30,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn test
       - run: yarn test:check
+      - run: yarn test:smoke
 
   coverage:
     runs-on: ubuntu-latest

@@ -4,7 +4,7 @@ import { providers } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Contract } from '../src';
 
-const BASE_PATH = './data/smoke/';
+const MAX = process.env['MAX'];
 
 const addr = chalk.cyan;
 const error = chalk.red;
@@ -19,28 +19,35 @@ const provider = {
     getCode: async function (address: string) {
         this.current = (this.current + 1) % this.providers.length;
         const code = await this.providers[this.current].getCode(address);
-        // await wait(500);
         return code;
     },
 };
 
-// function wait(ms: number): Promise<void> {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
-describe('etherscan', function () {
-    /**
-     * Needs to be manually downloaded from
-     *
-     * https://etherscan.io/exportData?type=open-source-contract-codes
-     */
-    const csv = readFileSync('data/export-verified-contractaddress-opensource-license.csv');
+describe(`etherscan | MAX=\`${MAX ?? ''}\``, function () {
+    this.bail(true);
+
+    const csvPath = 'data/export-verified-contractaddress-opensource-license.csv';
+    let csv: Buffer;
+    try {
+        /**
+         * Needs to be manually downloaded from
+         *
+         * https://etherscan.io/exportData?type=open-source-contract-codes
+         */
+        csv = readFileSync(csvPath);
+    } catch {
+        it.skip(`Addresses CSV \`${csvPath}\` not found, skipping`, () => {});
+        return;
+    }
+
     csv.toString()
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
-        // .slice(0, 500)
+        .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
         .forEach(([_tx, address, name]) => {
             it(`should decode & decompile ${name} ${address}`, async function () {
+                const BASE_PATH = './data/smoke/';
                 const path = `${BASE_PATH}${name}-${address}.bytecode`;
                 if (!existsSync(path)) {
                     this.timeout(10000);
@@ -62,6 +69,8 @@ describe('etherscan', function () {
                 }
 
                 const contract = new Contract(bytecode).patch();
+                // expect(contract.evm.errors).to.be.deep.equal([]);
+
                 const externals = [
                     ...Object.values(contract.functions).flatMap(fn =>
                         fn.label !== undefined ? [fn.label] : []
