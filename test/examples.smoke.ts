@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 import chalk = require('chalk');
-import { providers } from 'ethers';
+import { providers, utils } from 'ethers';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { EVM } from '../src/evm';
+import { inspect } from 'util';
+import { Contract } from '../src';
+import './utils/selector';
 
 describe('examples', function () {
     [
@@ -77,78 +79,80 @@ describe('examples', function () {
                 /^function deposit\(\)/m,
             ],
         },
-    ].forEach(({ name, count }) => {
+    ].forEach(({ name, count, lines }) => {
         describe(`${name}`, () => {
-            let evm: EVM;
-            // let text: string;
+            const defs = lines.map(line =>
+                line.source
+                    .replace(/\\/g, '')
+                    .replace('^', '')
+                    .replace('$', '')
+                    .replace('{', '')
+                    .replace(';', '')
+            );
+            const functions = defs
+                .filter(line => line.startsWith('function '))
+                .map(line => utils.Fragment.from(line).format());
+            const variables = defs
+                .filter(line => line.includes(' public ') && !line.includes('('))
+                .map(line => line.split(' ').pop()! + '()');
+            const mappings = defs
+                .filter(line => line.startsWith('mapping ') && line.includes(' public '))
+                .map(line => {
+                    const parts = line
+                        .replace(/mapping /g, '')
+                        .replace(/\(/g, '')
+                        .replace(/\)/g, '')
+                        .replace(/ => /g, ' ')
+                        .replace(' public ', ' ')
+                        .split(' ');
+                    const name = parts.pop();
+                    parts.pop();
+                    return `${name!}(${parts.join(',')})`;
+                });
+
+            let contract: Contract;
+            let text: string;
 
             before(async () => {
                 const path = await fetchBytecode(name);
                 const bytecode = readFileSync(path, 'utf8');
-                evm = EVM.from(bytecode);
-                evm.start();
-                // text = evm.decompile();
-                // evm.run(0, new State());
-                for (const [s, branch] of evm.functionBranches) {
-                    // console.log(s);
-                    if (s === 'f2b9fdb8') evm.run(branch.pc, branch.state);
+                contract = new Contract(bytecode).patch();
+                text = contract.decompile();
+            });
+
+            it(`should decode bytecode`, () => {
+                expect(contract.evm.opcodes).to.be.of.length(count);
+            });
+
+            it(`should detect functions`, () => {
+                expect(contract.getFunctions()).to.include.members(functions);
+            });
+
+            it(`should detect variables`, () => {
+                expect(contract.getFunctions()).to.include.members(variables);
+            });
+
+            it(`should detect mappings`, () => {
+                expect(contract.getFunctions()).to.include.members(mappings);
+            });
+
+            it('functions, variables & mappings should cover `getFunctions`', () => {
+                if (lines.length > 0) {
+                    const expected = [...functions, ...variables, ...mappings];
+                    expect(
+                        new Set(contract.getFunctions()),
+                        `actual ${inspect(contract.getFunctions())} != expected ${inspect(
+                            expected
+                        )}`
+                    ).to.be.deep.equal(new Set(expected));
                 }
             });
 
-            it(`should decode bytecode correctly`, () => {
-                expect(evm.opcodes).to.be.of.length(count);
+            lines.forEach(line => {
+                it.skip(`should match decompiled bytecode to '${truncate(line.source)}'`, () => {
+                    expect(text).to.match(line);
+                });
             });
-
-            // it(`should detect functions correctly`, () => {
-            //     const defs = lines.map(line =>
-            //         line.source
-            //             .replace(/\\/g, '')
-            //             .replace('^', '')
-            //             .replace('$', '')
-            //             .replace('{', '')
-            //             .replace(';', '')
-            //     );
-
-            //     const functions = defs
-            //         .filter(line => line.startsWith('function '))
-            //         .map(line => utils.Fragment.from(line).format());
-            //     expect(evm.getFunctions()).to.include.members(functions);
-
-            //     const variables = defs
-            //         .filter(line => line.includes(' public ') && !line.includes('('))
-            //         .map(line => line.split(' ').pop()! + '()');
-            //     expect(evm.getFunctions()).to.include.members(variables);
-
-            //     const mappings = defs
-            //         .filter(line => line.startsWith('mapping ') && line.includes(' public '))
-            //         .map(line => {
-            //             const parts = line
-            //                 .replace(/mapping /g, '')
-            //                 .replace(/\(/g, '')
-            //                 .replace(/\)/g, '')
-            //                 .replace(/ => /g, ' ')
-            //                 .replace(' public ', ' ')
-            //                 .split(' ');
-            //             const name = parts.pop();
-            //             parts.pop();
-            //             return `${name!}(${parts.join(',')})`;
-            //         });
-            //     expect(evm.getFunctions()).to.include.members(mappings);
-
-            //     if (lines.length > 0) {
-            //         const expected = [...functions, ...variables, ...mappings];
-            //         expect(
-            //             new Set(evm.getFunctions()),
-            //             `actual ${inspect(evm.getFunctions())} != expected ${inspect(expected)}`
-            //         ).to.be.deep.equal(new Set(expected));
-            //     }
-            // });
-
-            // lines.forEach(line => {
-            //     it(`should match decompiled bytecode to '${line.source}'`, () => {
-            //         expect(text).to.match(line);
-            //     });
-            // });
         });
     });
 });
@@ -171,4 +175,8 @@ async function fetchBytecode(contract: string): Promise<string> {
     }
 
     return path;
+}
+
+function truncate(str: string) {
+    return str.length < 50 ? str : str.substring(0, 50) + '...';
 }
