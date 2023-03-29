@@ -48,6 +48,6 @@ contracts('dispatch', compile => {
         expect(fn.stmts.at(-1)).instanceOf(Return);
 
         const text = contract.decompile();
-        expect(text, `decompiled bytecode\n${text}`).to.match(/return this;$/m);
+        expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
     });
 });

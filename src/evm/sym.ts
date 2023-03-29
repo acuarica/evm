@@ -1,21 +1,24 @@
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './expr';
 
+/**
+ * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
+ */
 export const INFO = {
-    ADDRESS: 'this',
+    ADDRESS: 'address(this)',
     ORIGIN: 'tx.origin',
     CALLER: 'msg.sender',
-    CODESIZE: 'this.code.length',
+    CODESIZE: 'codesize()',
     GASPRICE: 'tx.gasprice',
-    RETURNDATASIZE: 'output.length',
+    RETURNDATASIZE: 'returndatasize()',
     COINBASE: 'block.coinbase',
     TIMESTAMP: 'block.timestamp',
     NUMBER: 'block.number',
     DIFFICULTY: 'block.difficulty',
     GASLIMIT: 'block.gaslimit',
-    CHAINID: 'chainid',
-    SELFBALANCE: 'self.balance',
-    MSIZE: 'memory.length',
+    CHAINID: 'block.chainid',
+    SELFBALANCE: 'address(this).balance',
+    MSIZE: 'msize()',
     GAS: 'gasleft()',
 } as const;
 

@@ -112,17 +112,17 @@ describe('evm::storage', () => {
                 new MappingStore(
                     evm.mappings,
                     2,
-                    [new Symbol0('this'), new Symbol0('msg.sender')],
+                    [new Symbol0('address(this)'), new Symbol0('msg.sender')],
                     new Sub(
                         new MappingLoad(evm.mappings, 2, [
-                            new Symbol0('this'),
+                            new Symbol0('address(this)'),
                             new Symbol0('msg.sender'),
                         ]),
                         new Val(11n, true)
                     )
                 )
             );
-            expect(`${state.stmts[2]}`).to.be.equal('mapping3[this][msg.sender] -= 0xb;');
+            expect(`${state.stmts[2]}`).to.be.equal('mapping3[address(this)][msg.sender] -= 0xb;');
 
             expect(state.last).to.be.deep.equal(new Stop());
 

@@ -57,8 +57,8 @@ describe('evm::system', () => {
         SYM.ADDRESS(state);
         SYSTEM.SELFDESTRUCT(state);
         expect(state.halted).to.be.true;
-        expect(state.stmts).to.be.deep.equal([new SelfDestruct(new Symbol0('this'))]);
-        expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(this);');
+        expect(state.stmts).to.be.deep.equal([new SelfDestruct(new Symbol0('address(this)'))]);
+        expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
     });
 
     it('should halt with `INVALID`', () => {

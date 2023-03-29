@@ -27,7 +27,7 @@ contracts('symbols', compile => {
     [
         { sig: 'getBlockHash()', value: 'return blockhash(0x7);' },
         { sig: 'getBalance(address)', value: 'return _arg0.balance;' },
-        { sig: 'getThis()', value: 'return this;' },
+        { sig: 'getThis()', value: 'return address(this);' },
     ].forEach(({ sig, value }) => {
         it(`should find symbol block for \`${sig}\``, () => {
             const selector = fnselector(sig);
@@ -45,6 +45,6 @@ contracts('symbols', compile => {
     });
 
     it('should find `ADDRESS` symbol', () => {
-        expect(text, `decompiled bytecode\n${text}`).to.match(/return this;$/m);
+        expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
     });
 });
