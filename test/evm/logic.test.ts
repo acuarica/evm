@@ -11,15 +11,18 @@ import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 
 describe('evm::logic', () => {
-    it('should calculate `~1`', () => {
-        const stack = new Stack<Expr>();
-        stack.push(new Val(1n));
-
-        LOGIC.NOT(stack);
-
-        expect(stack.values).to.deep.equal([new Not(new Val(1n))]);
-        expect(stack.values[0].eval()).to.deep.equal(new Val(~1n));
-    });
+    [[0n, '0x' + 'ff'.repeat(32)] as const, [1n, '0x' + 'ff'.repeat(31) + 'fe'] as const].forEach(
+        ([value, expected]) => {
+            it(`should calculate \`~${value}\``, () => {
+                const stack = new Stack<Expr>();
+                stack.push(new Val(value));
+                LOGIC.NOT(stack);
+                expect(stack.values).to.deep.equal([new Not(new Val(value))]);
+                expect(stack.values[0].eval()).to.be.deep.equal(new Val(BigInt(expected)));
+                expect(`${stack.values[0].eval()}`).to.be.equal(expected);
+            });
+        }
+    );
 
     it('should stringify `~block.number`', () => {
         const stack = new Stack<Expr>();
