@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { Contract } from '../../src';
 import { Return } from '../../src/evm/system';
+import { toHex } from '../../src/opcode';
 import { fnselector, patch } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
@@ -49,5 +50,28 @@ contracts('dispatch', compile => {
 
         const text = contract.decompile();
         expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
+    });
+
+    it('should detect selectors only reachable functions', function () {
+        const sig = 'balanceOf(uint256)';
+        const sol = `interface IERC20 {
+            function ${sig} external view returns (uint256);
+        }
+
+        contract C {
+            function get() external view returns (uint256) {
+                IERC20 addr = IERC20 (0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359);
+                return addr.balanceOf(7);
+            }
+        }`;
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+
+        const selector = fnselector(sig);
+        const push4 = contract.evm.opcodes.find(
+            o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector
+        );
+        expect(push4, `PUSH4 for ${selector} should be in bytecode`).to.be.not.undefined;
+
+        expect(contract.functions).to.have.keys(fnselector('get()'));
     });
 });
