@@ -280,7 +280,7 @@ export function decode(code: Uint8Array): {
     return { opcodes, jumpdests };
 
     /**
-     * Asserts whether `mnemonic` is a `PUSHn` opcode.
+     * Checks whether `mnemonic` is a `PUSHn` opcode.
      *
      * @param mnemonic the `mnemonic` to check.
      * @returns `true` when `mnemonic` is a `PUSHn` opcode.
