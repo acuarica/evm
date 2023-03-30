@@ -4,12 +4,16 @@ import { toHex } from '../src/opcode';
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
 import { keccak_256 } from '@noble/hashes/sha3';
+import { State } from '../src/state';
+import { type Expr, type Inst, Val } from '../src/evm/expr';
+import assert = require('assert');
+import { And, Not } from '../src/evm/logic';
+import { Symbol0 } from '../src/evm/sym';
 
 describe('evm', () => {
     it('`PUSH4` method selector to invoke external contract', function () {
         const sig = 'balanceOf(uint256)';
-        const sol = `
-        interface IERC20 {
+        const sol = `interface IERC20 {
             function ${sig} external view returns (uint256);
         }
 
@@ -30,5 +34,25 @@ describe('evm', () => {
         const sig = 'supportsInterface(bytes4)';
         const hash = Buffer.from(keccak_256(sig).slice(0, 4)).toString('hex');
         expect(hash).to.be.equal('01ffc9a7');
+    });
+
+    it('selector ', function () {
+        const sol = `contract C {
+            event Deposit(uint128); 
+            fallback () external payable {
+                uint128 a = uint128(~block.number);
+                emit Deposit(a);
+            }
+        }`;
+        const evm = new EVM(compile(sol, '0.7.6', { context: this, severity: 'info' }).bytecode);
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
+        assert(state.stmts[0].name === 'Log');
+        expect(state.stmts[0].args[0]).to.be.deep.equal(
+            new And(
+                new Val(BigInt('0x' + 'ff'.repeat(16)), true),
+                new Not(new Symbol0('block.number'))
+            )
+        );
     });
 });

@@ -21,11 +21,10 @@ describe('evm::storage', () => {
         expect(store.variables).to.have.keys('2');
     });
 
-    it('should find storage variable', function () {
+    it('should detect storage variable', function () {
         const sol = `contract C {
             uint256 val1 = 5;
             uint256 val2 = 7;
-
             fallback() external payable {
                 val1 += 3;
                 val2 += 11;
@@ -41,6 +40,24 @@ describe('evm::storage', () => {
         expect(`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
         expect(`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
         expect(`${state.last}`).to.be.equal('return;');
+    });
+
+    it.skip('should detect packed storage variable', function () {
+        const sol = `contract C {
+            uint256 val1 = 0;
+            uint128 val2 = 7;
+            uint128 val3 = 11;
+            fallback() external payable {
+                val1 = 5;
+                val2 = 7;
+                val3 = 11;
+            }
+        }`;
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
+
+        expect(Object.keys(evm.variables)).to.be.have.length(3);
     });
 
     it.skip('should find storage struct', function () {
