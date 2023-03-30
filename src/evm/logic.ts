@@ -93,7 +93,7 @@ export class IsZero extends Tag('IsZero', Eq.prec) {
     }
 }
 
-export class And extends Bin('And', '&&', 4) {
+export class And extends Bin('And', '&', 4) {
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -109,7 +109,7 @@ export class And extends Bin('And', '&&', 4) {
     }
 }
 
-export class Or extends Bin('Or', '||', 3) {
+export class Or extends Bin('Or', '|', 3) {
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -125,10 +125,22 @@ export class Xor extends Bin('Xor', '^', 6) {
     }
 }
 
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder
+ *
+ * > For `BigInt`s, there's no truncation.
+ * > Conceptually, understand positive `BigInt`s as having an infinite number of leading 0 bits,
+ * > and negative `BigInt`s having an infinite number of leading 1 bits.
+ */
+const X = 1n << 0x100n;
+const mod = (n: bigint) => ((n % X) + X) % X;
+
 export class Not extends Unary('Not', '~', 14) {
     eval(): Expr {
         const val = this.value.eval();
-        return val.isVal() ? new Val(~val.val) : new Not(val);
+        return val.isVal() ? new Val(mod(~val.val)) : new Not(val);
     }
 }
 
