@@ -263,7 +263,7 @@ export class Invalid implements IInst {
     }
 
     toString() {
-        return `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
+        return `revert('Invalid instruction (0x${this.opcode.toString(16)})');`;
     }
 }
 
