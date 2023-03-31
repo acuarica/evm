@@ -256,14 +256,14 @@ export class Revert implements IInst {
 export class Invalid implements IInst {
     readonly name = 'Invalid';
 
-    constructor(readonly reason: string) {}
+    constructor(readonly opcode: number) {}
 
     eval() {
         return this;
     }
 
     toString() {
-        return `revert('${this.reason}');`;
+        return `revert("Invalid instruction (0x${this.opcode.toString(16)})");`;
     }
 }
 
@@ -302,7 +302,7 @@ export function memArgs<T>(
         return new Klass(args);
     } else {
         if (size.isVal() && size.val > MAXSIZE * 32) {
-            throw new Error(`memargs size${Klass.toString()}${size.val}`);
+            throw new Error(`memargs size ${Klass.name} ${size.val}`);
         }
 
         return new Klass([], offset, size);
@@ -397,5 +397,5 @@ export const PC = (opcode: Opcode, { stack }: State<Inst, Expr>) =>
     stack.push(new Val(BigInt(opcode.offset)));
 
 export const INVALID = (opcode: Opcode, state: State<Inst, Expr>): void => {
-    state.halt(new Invalid(`Invalid instruction (0x${opcode.opcode.toString(16)})`));
+    state.halt(new Invalid(opcode.opcode));
 };

@@ -2,7 +2,7 @@ import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { type Stack, State as TState } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
-import type { Expr, IInst, Inst } from './expr';
+import { type Expr, type IInst, type Inst, Throw } from './expr';
 
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';
@@ -10,7 +10,7 @@ import { LOGIC } from './logic';
 import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
-import { Invalid, INVALID, PC, SYSTEM } from './system';
+import { INVALID, PC, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
@@ -92,7 +92,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
     /**
      *
      */
-    readonly errors: Invalid[] = [];
+    readonly errors: Throw[] = [];
 
     readonly events: IEvents['events'] = {};
     readonly variables: IStore['variables'] = {};
@@ -191,11 +191,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
                 }
             } catch (err) {
                 const message = (err as Error).message;
-                const inv = new Invalid(
-                    `\`${message}\` at [${opcode.offset}] ${opcode.mnemonic} =| ${state.stack.values
-                        .slice(0, -1)
-                        .join(' | ')}`
-                );
+                const inv = new Throw(message, opcode, state);
+                // `\`${message}\` at [${opcode.offset}] ${opcode.mnemonic} =| ${state.stack.values
+                // .slice(0, -1)
+                // .join(' | ')}`
                 state.halt(inv);
                 this.errors.push(inv);
             }

@@ -21,6 +21,8 @@ import type {
 import type { Log } from './log';
 import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
 import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
+import type { State } from '../state';
+import type { Opcode } from '../opcode';
 
 /**
  *
@@ -94,7 +96,26 @@ export type Inst =
     | JumpDest
     | SigCase
     | SStore
-    | MappingStore;
+    | MappingStore
+    | Throw;
+
+export class Throw implements IInst {
+    readonly name = 'Throw';
+
+    constructor(
+        readonly reason: string,
+        readonly opcode: Opcode,
+        readonly state: State<Inst, Expr>
+    ) {}
+
+    eval() {
+        return this;
+    }
+
+    toString() {
+        return `throw('${this.reason}');`;
+    }
+}
 
 export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
     abstract class Tag {
