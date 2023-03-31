@@ -67,6 +67,9 @@ function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
     );
 }
 
+/**
+ * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
+ */
 export class EVM implements IEvents, IStore, ISelectorBranches {
     /**
      * The `metadataHash` part from the `bytecode`.

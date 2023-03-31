@@ -1,6 +1,9 @@
 import type { Expr } from './evm/expr';
 import { type Info, INFO } from './evm/sym';
 
+/**
+ * https://docs.soliditylang.org/en/v0.8.17/types.html
+ */
 export type Type = 'address' | 'address payable' | 'uint256';
 
 function bin(_expr: { left: Expr; right: Expr }): Type {

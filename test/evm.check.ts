@@ -36,7 +36,7 @@ describe('evm', () => {
         expect(hash).to.be.equal('01ffc9a7');
     });
 
-    it('selector ', function () {
+    it('find type cast for `uint128` using `And`', function () {
         const sol = `contract C {
             event Deposit(uint128); 
             fallback () external payable {
