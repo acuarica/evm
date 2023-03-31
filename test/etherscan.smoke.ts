@@ -3,11 +3,15 @@ import chalk = require('chalk');
 import { providers } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Contract } from '../src';
+import type { Throw } from '../src/evm/expr';
 
 const MAX = process.env['MAX'];
+const CONTRACT = process.env['CONTRACT'];
 
 const addr = chalk.cyan;
 const error = chalk.red;
+const warn = chalk.yellow;
+
 const provider = {
     providers: [
         new providers.InfuraProvider(),
@@ -23,7 +27,7 @@ const provider = {
     },
 };
 
-describe(`etherscan | MAX=\`${MAX ?? ''}\``, function () {
+describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
     this.bail(true);
 
     const csvPath = 'data/export-verified-contractaddress-opensource-license.csv';
@@ -40,10 +44,22 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\``, function () {
         return;
     }
 
+    const errors = new Map<string, Throw[]>();
+
     csv.toString()
         .trimEnd()
         .split('\n')
-        .map(entry => entry.trimEnd().replace(/"/g, '').split(',') as [string, string, string])
+        .map(
+            entry =>
+                entry.trimEnd().replace(/"/g, '').split(',') as [
+                    tx: string,
+                    address: string,
+                    name: string
+                ]
+        )
+        .filter(
+            ([_, name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT)
+        )
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
         .forEach(([_tx, address, name]) => {
             it(`should decode & decompile ${name} ${address}`, async function () {
@@ -69,7 +85,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\``, function () {
                 }
 
                 const contract = new Contract(bytecode).patch();
-                // expect(contract.evm.errors).to.be.deep.equal([]);
+                if (contract.evm.errors.length > 0) {
+                    errors.set(`${name}-${address}`, contract.evm.errors);
+                }
 
                 const externals = [
                     ...Object.values(contract.functions).flatMap(fn =>
@@ -82,4 +100,14 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\``, function () {
                 expect(contract.getFunctions().sort()).to.include.members(externals.sort());
             });
         });
+
+    after(() => {
+        console.info(`\n  Errors (${warn(errors.size)} contracts)`);
+        for (const [id, errs] of errors.entries()) {
+            console.info(warn('    -', id + ` (${errs.length} error(s))`));
+            errs.forEach(err => {
+                console.info('        ' + err.reason);
+            });
+        }
+    });
 });
