@@ -119,7 +119,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with an unreachable hashed public variable', () => {
+    describe('with an unreachable setter hashed public variable', () => {
         let contract: Contract;
 
         before(function () {
@@ -140,5 +140,15 @@ contracts('variables', (compile, _fallback, version) => {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });
+    });
+
+    it.skip('with a public `address` variable', () => {
+        const sol = `contract C { address public owner; }`;
+        const contract = new Contract(compile(sol, this).bytecode).patch();
+
+        expect(contract.getFunctions()).to.be.deep.equal(['owner()']);
+
+        const text = contract.decompile();
+        expect(text, text).to.match(/^address public owner;/m);
     });
 });
