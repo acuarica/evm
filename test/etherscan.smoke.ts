@@ -44,7 +44,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         return;
     }
 
-    const errors = new Map<string, Throw[]>();
+    const errorsByContract = new Map<string, Throw[]>();
 
     csv.toString()
         .trimEnd()
@@ -86,7 +86,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
 
                 const contract = new Contract(bytecode).patch();
                 if (contract.evm.errors.length > 0) {
-                    errors.set(`${name}-${address}`, contract.evm.errors);
+                    errorsByContract.set(`${name}-${address}`, contract.evm.errors);
                 }
 
                 const externals = [
@@ -102,12 +102,21 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         });
 
     after(() => {
-        console.info(`\n  Errors (${warn(errors.size)} contracts)`);
-        for (const [id, errs] of errors.entries()) {
-            console.info(warn('    -', id + ` (${errs.length} error(s))`));
-            errs.forEach(err => {
-                console.info('        ' + err.reason);
+        console.info(`\n  Errors (${warn(errorsByContract.size)} contracts)`);
+        for (const [id, errors] of errorsByContract.entries()) {
+            console.info(warn('    •', id + ` - ${errors.length} error(s)`));
+            const errorsByReason = new Map<string, number>();
+            errors.forEach(err => {
+                const count = errorsByReason.get(err.reason) ?? 0;
+                errorsByReason.set(err.reason, count + 1);
             });
+            for (const [reason, count] of errorsByReason) {
+                console.info(
+                    '        ' + error('⨯'),
+                    reason,
+                    count === 1 ? '' : warn(`(x${count})`)
+                );
+            }
         }
     });
 });

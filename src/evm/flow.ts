@@ -103,9 +103,9 @@ export function FLOW(
     { functionBranches }: ISelectorBranches
 ) {
     return {
-        JUMP: (_opcode: Opcode, state: State<Inst, Expr>): void => {
+        JUMP: (opcode: Opcode, state: State<Inst, Expr>): void => {
             const offset = state.stack.pop();
-            const destpc = getDest(offset);
+            const destpc = getDest(offset, opcode);
             const destBranch = makeBranch(destpc, state);
             state.halt(new Jump(offset, destBranch));
         },
@@ -113,7 +113,7 @@ export function FLOW(
         JUMPI: (opcode: Opcode, state: State<Inst, Expr>): void => {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
-            const destpc = getDest(offset);
+            const destpc = getDest(offset, opcode);
 
             const fallBranch = makeBranch(opcode.pc + 1, state);
 
@@ -134,12 +134,17 @@ export function FLOW(
     /**
      *
      * @param offset
+     * @param opcode Only used for error reporting.
      * @returns
      */
-    function getDest(offset: Expr): number {
+    function getDest(offset: Expr, opcode: Opcode): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
-            throw new Error(`Expected numeric offset, found ${offset}`);
+            throw new Error(
+                `Expected numeric offset in top of stack, found ${offset} at ${formatOpcode(
+                    opcode
+                )}`
+            );
         }
         const destpc = jumpdests[Number(offset2.val)];
         if (destpc !== undefined) {
@@ -148,7 +153,11 @@ export function FLOW(
         } else {
             const dest = opcodes.find(o => o.offset === Number(offset2.val));
             if (!dest) {
-                throw new Error('Expected `JUMPDEST` in JUMP destination, but none was found');
+                throw new Error(
+                    `Expected JUMPDEST in ${
+                        opcode.mnemonic
+                    } destination, ${offset2} , but none was found at '${formatOpcode(opcode)}'`
+                );
             }
             throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
         }
