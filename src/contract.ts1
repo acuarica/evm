@@ -144,25 +144,6 @@ export class TopLevelFunction {
     }
 }
 
-function updateCallDataLoad(stmtOrExpr: Record<string, Expr>, types: any) {
-    for (const propKey in stmtOrExpr) {
-        if (Object.prototype.hasOwnProperty.call(stmtOrExpr, propKey)) {
-            const expr = stmtOrExpr[propKey];
-            if (
-                typeof expr === 'object' &&
-                expr instanceof CallDataLoad &&
-                isBigInt(expr.location)
-            ) {
-                const argNumber = ((expr.location - 4n) / 32n).toString();
-                expr.type = types[argNumber];
-            }
-            if (typeof expr === 'object' && !(expr instanceof Variable)) {
-                updateCallDataLoad(expr as unknown as Record<string, Expr>, types);
-            }
-        }
-    }
-}
-
 function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {
     const pcs: { [key: string]: true } = {};
     return transformBlock(entry);

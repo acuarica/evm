@@ -1,4 +1,4 @@
-import type { Expr, Inst, Val } from './evm/expr';
+import { type Expr, type Inst, Throw, type Val } from './evm/expr';
 import { Not } from './evm/logic';
 import type { Return, Revert } from './evm/system';
 import { State } from './state';
@@ -10,6 +10,7 @@ import {
     stringifyStructs,
     stringifyVariables,
     Variable,
+    type MappingLoad,
 } from './evm/storage';
 import { OPCODES } from './opcode';
 
@@ -210,17 +211,6 @@ export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
     return falseBlock.length === 1 && falseBlock[0].name === 'Revert';
 }
 
-function isGetter(stmts: Stmt[]): stmts is [Return & { args: [SLoad & { location: Val }] }] {
-    const exit = stmts[0];
-    return (
-        stmts.length === 1 &&
-        exit.name === 'Return' &&
-        exit.args.length === 1 &&
-        exit.args[0].tag === 'SLoad' &&
-        exit.args[0].location.isVal()
-    );
-}
-
 export class Require {
     readonly name = 'Require';
 
@@ -261,15 +251,6 @@ export class PublicFunction {
         if (this.stmts.length === 1 && this.stmts[0].name === 'Return') {
             this.constant = true;
         }
-        // if (this.selector in functionHashes) {
-        // const functionName = functionHashes[this.selector].split('(')[0];
-        // const argumentTypes = functionHashes[this.selector] .replace(functionName, '') .substr(1) .slice(0, -1) .split(',');
-        // if ( argumentTypes.length > 1 || (argumentTypes.length === 1 && argumentTypes[0] !== '')) {
-        // this.stmts.forEach(stmt =>
-        // updateCallDataLoad(stmt as unknown as Record<string, Expr>, argumentTypes)
-        // );
-        // }
-        // }
 
         const returns: Expr[][] = [];
         PublicFunction.findReturns(stmts, returns);
@@ -301,17 +282,57 @@ export class PublicFunction {
 
     set label(value: string | undefined) {
         this._label = value;
-        if (value !== undefined && isGetter(this.stmts)) {
-            const location = this.stmts[0].args[0].location.val.toString();
-            const variable = this.contract.evm.variables[location];
-            this.contract.evm.variables[this.selector] = new Variable(
-                value.split('(')[0],
-                variable ? variable.types : []
-            );
+        if (value !== undefined) {
+            const functionName = value.split('(')[0];
+
+            if (this.isGetter()) {
+                const location = this.stmts[0].args[0].location.val.toString();
+                const variable = this.contract.evm.variables[location];
+                this.contract.evm.variables[this.selector] = new Variable(
+                    functionName,
+                    variable ? variable.types : []
+                );
+            }
+
+            if (this.isMappingGetter()) {
+                const location = this.stmts[0].args[0].location;
+                this.contract.evm.mappings[location].name = functionName;
+            }
+
+            const paramTypes = value.replace(functionName, '').slice(1, -1).split(',');
+            if (paramTypes.length > 1 || (paramTypes.length === 1 && paramTypes[0] !== '')) {
+                this.stmts.forEach(stmt =>
+                    PublicFunction.patchCallDataLoad(
+                        stmt as unknown as Record<string, Expr>,
+                        paramTypes
+                    )
+                );
+            }
         }
     }
 
-    static findReturns(stmts: Stmt[], returns: Expr[][]) {
+    private isGetter(): // stmts: Stmt[]
+    this is { stmts: [Return & { args: [SLoad & { location: Val }] }] } {
+        const exit = this.stmts[0];
+        return (
+            this.stmts.length === 1 &&
+            exit.name === 'Return' &&
+            exit.args.length === 1 &&
+            exit.args[0].tag === 'SLoad' &&
+            exit.args[0].location.isVal()
+        );
+    }
+
+    private isMappingGetter(): this is { stmts: [Return & { args: MappingLoad[] }] } {
+        const exit = this.stmts[0];
+        return (
+            this.stmts.length === 1 &&
+            exit.name === 'Return' &&
+            exit.args.every(arg => arg.tag === 'MappingLoad')
+        );
+    }
+
+    private static findReturns(stmts: Stmt[], returns: Expr[][]) {
         for (const stmt of stmts) {
             if (stmt.name === 'Return' && stmt.args && stmt.args.length > 0) {
                 returns.push(stmt.args);
@@ -321,6 +342,30 @@ export class PublicFunction {
                         PublicFunction.findReturns(stmts, returns);
                     }
                 });
+            }
+        }
+    }
+
+    private static patchCallDataLoad(stmtOrExpr: Record<string, Expr>, paramTypes: string[]) {
+        for (const propKey in stmtOrExpr) {
+            if (propKey === 'mappings') continue;
+
+            if (Object.prototype.hasOwnProperty.call(stmtOrExpr, propKey)) {
+                const expr = stmtOrExpr[propKey];
+                if (expr && expr.tag === 'CallDataLoad' && expr.location.isVal()) {
+                    const argNumber = Number((expr.location.val - 4n) / 32n);
+                    expr.type = paramTypes[argNumber];
+                }
+                if (
+                    typeof expr === 'object' &&
+                    !(expr instanceof Variable) &&
+                    !(expr instanceof Throw)
+                ) {
+                    PublicFunction.patchCallDataLoad(
+                        expr as unknown as Record<string, Expr>,
+                        paramTypes
+                    );
+                }
             }
         }
     }

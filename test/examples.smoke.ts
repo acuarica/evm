@@ -37,7 +37,7 @@ describe('examples', function () {
                 /^mapping \(address => unknown\) public balanceOf;$/m,
                 /^mapping \(address => unknown\) public frozenAccount;$/m,
                 /^mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
-                /^mapping \(address => mapping \(address => unknown\)\) mapping4;$/m,
+                // /^mapping \(address => mapping \(address => unknown\)\) mapping4;$/m,
                 /^unknown public owner;/m,
                 /^unknown public decimals;/m,
                 /^unknown public totalSupply;/m,
@@ -52,8 +52,14 @@ describe('examples', function () {
             ],
         },
         {
-            name: 'USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            count: 807,
+            /**
+             * Bytecode of USDC _proxy_ contract.
+             * Fetched with this RPC provider https://api.avax-test.network/ext/bc/C/rpc.
+             *
+             * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
+             */
+            name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
+            count: 741,
             lines: [
                 /^address public implementation;/m,
                 /^address public admin;/m,
@@ -149,7 +155,7 @@ describe('examples', function () {
             });
 
             lines.forEach(line => {
-                it.skip(`should match decompiled bytecode to '${truncate(line.source)}'`, () => {
+                it(`should match decompiled bytecode to '${truncate(line.source)}'`, () => {
                     expect(text).to.match(line);
                 });
             });

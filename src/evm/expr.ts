@@ -123,7 +123,7 @@ export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
 
         static readonly prec = prec;
 
-        readonly type?: string;
+        type?: string;
 
         isVal(): this is Val {
             return this.tag === 'Val';
