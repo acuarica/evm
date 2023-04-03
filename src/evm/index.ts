@@ -14,46 +14,46 @@ import { INVALID, PC, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
+import { mapValues } from '../object';
 
 type State = TState<Inst, Expr>;
 
-function make<F, T extends { [mnemonic: string]: F }>(
-    table: T,
-    adapter: (fn: F) => (opcode: Opcode, state: State) => void
-) {
-    return Object.fromEntries(
-        Object.entries(table).map(([mnemonic, fn]) => [mnemonic, adapter(fn)])
-    ) as { [mnemonic in keyof T]: (opcode: Opcode, state: State) => void };
+function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
+    return mapValues(
+        table,
+        fn =>
+            (_opcode: Opcode, { stack }: State) =>
+                fn(stack)
+    );
 }
 
-function makeStack<T extends { [mnemonic: string]: (stack: Stack<Expr>) => void }>(table: T) {
-    return make(table, (fn: (stack: Stack<Expr>) => void) => (_opcode, state) => fn(state.stack));
-}
-
-function makeState<T extends { [mnemonic: string]: (state: State) => void }>(table: T) {
-    return make(table, (fn: (state: State) => void) => (_opcode, state) => fn(state));
+function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => void }) {
+    return mapValues(table, fn => (_opcode: Opcode, state: State) => fn(state));
 }
 
 const TABLE = {
-    ...makeStack(MATH),
-    ...makeStack(LOGIC),
-    ...makeStack(ENV),
-    ...makeState(SYMBOLS),
-    ...makeState(MEMORY),
+    ...mapStack(MATH),
+    ...mapStack(LOGIC),
+    ...mapStack(ENV),
+    ...mapState(SYMBOLS),
+    ...mapState(MEMORY),
     JUMPDEST: (_opcode: Opcode, _state: State) => {},
-    ...make(
+    ...mapValues(
         PUSHES,
-        (fn: (pushData: Uint8Array, stack: Stack<Expr>) => void) => (opcode, state) =>
-            fn(opcode.pushData!, state.stack)
+        fn =>
+            (opcode: Opcode, { stack }: State) =>
+                fn(opcode.pushData!, stack)
     ),
-    ...makeStack(STACK<Expr>()),
-    ...makeState(SYSTEM),
+    ...mapStack(STACK<Expr>()),
+    ...mapState(SYSTEM),
     PC,
     INVALID,
 };
 
 /**
- * Swaps `insts` keying by `opcode` and fills the gaps using `INVALID` inst.
+ * Maps `mnemonic` keys of `insts` to their corresponding `opcode` in the byte range, _i.e._, `0-255`.
+ * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
+ * `INVALID` is used instead.
  *
  * @param insts
  * @returns
@@ -129,8 +129,8 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         this.insts = fill({
             ...TABLE,
             ...FLOW({ opcodes, jumpdests }, this),
-            ...makeState(STORAGE(this)),
-            ...makeState(LOGS(this)),
+            ...mapState(STORAGE(this)),
+            ...mapState(LOGS(this)),
         });
     }
 
