@@ -12,7 +12,7 @@ describe('evm::sym', () => {
         describe(`\`${value}\` from \`${name}\``, () => {
             it('should get it programatically', () => {
                 const state = new State<never, Expr>();
-                SYM[name as keyof typeof INFO](state);
+                SYM[name](state);
 
                 const expr = new Symbol0(value);
                 expect(state.stack.values).to.be.deep.equal([expr]);

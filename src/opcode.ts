@@ -163,7 +163,7 @@ export const OPCODES = {
  * A map from numeric opcodes to string mnemonics.
  */
 export const MNEMONICS = Object.fromEntries(
-    Object.entries(OPCODES).map(([key, value]) => [value, key as keyof typeof OPCODES])
+    Object.entries(OPCODES).map(([key, value]) => [value, key])
 );
 
 /**
