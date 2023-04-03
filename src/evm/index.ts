@@ -19,12 +19,7 @@ import { mapValues } from '../object';
 type State = TState<Inst, Expr>;
 
 function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
-    return mapValues(
-        table,
-        fn =>
-            (_: Opcode, { stack }: State) =>
-                fn(stack)
-    );
+    return mapValues(table, fn => (_: Opcode, state: State) => fn(state.stack));
 }
 
 function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => void }) {
