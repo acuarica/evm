@@ -2,7 +2,7 @@ import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { type Stack, State as TState } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
-import { type Expr, type IInst, type Inst, Throw } from './expr';
+import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
 
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';
@@ -10,7 +10,7 @@ import { LOGIC } from './logic';
 import { ENV } from './env';
 import { SYM as SYMBOLS } from './sym';
 import { MEMORY } from './memory';
-import { INVALID, PC, SYSTEM } from './system';
+import { Invalid, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
@@ -26,7 +26,7 @@ function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => 
     return mapValues(table, fn => (_: Opcode, state: State) => fn(state));
 }
 
-const TABLE = {
+export const INSTS = {
     ...mapStack(MATH),
     ...mapStack(LOGIC),
     ...mapStack(ENV),
@@ -36,8 +36,8 @@ const TABLE = {
     ...mapValues(PUSHES, fn => (op: Opcode, state: State) => fn(op.pushData!, state.stack)),
     ...mapStack(STACK<Expr>()),
     ...mapState(SYSTEM),
-    PC,
-    INVALID,
+    PC: (op: Opcode, { stack }: TState<Inst, Expr>) => stack.push(new Val(BigInt(op.offset))),
+    INVALID: (op: Opcode, state: TState<Inst, Expr>): void => state.halt(new Invalid(op.opcode)),
 };
 
 /**
@@ -52,7 +52,7 @@ function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
     return Object.fromEntries(
         [...Array(256).keys()].map(k => [
             k,
-            MNEMONICS[k] === undefined ? INVALID : insts[MNEMONICS[k]],
+            MNEMONICS[k] === undefined ? INSTS.INVALID : insts[MNEMONICS[k]],
         ])
     );
 }
@@ -117,7 +117,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         this.jumpdests = jumpdests;
 
         this.insts = fill({
-            ...TABLE,
+            ...INSTS,
             ...FLOW({ opcodes, jumpdests }, this),
             ...mapState(STORAGE(this)),
             ...mapState(LOGS(this)),

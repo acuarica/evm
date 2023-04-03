@@ -1,8 +1,19 @@
 import { expect } from 'chai';
-import { EVM } from '../src/evm';
+import { EVM, INSTS } from '../src/evm';
 import { compile } from './utils/solc';
+import { State } from '../src/state';
+import type { Expr, Inst } from '../src/evm/expr';
+import { Invalid } from '../src/evm/system';
 
 describe('evm', () => {
+    it('should halt with `INVALID`', () => {
+        const state = new State<Inst, Expr>();
+        INSTS.INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
+        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
+    });
+
     describe('conditional', () => {
         it('if ', function () {
             const sol = `contract C {

@@ -4,16 +4,7 @@ import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';
 import { SYM, Symbol0 } from '../../src/evm/sym';
-import {
-    Create,
-    INVALID,
-    Invalid,
-    Return,
-    SelfDestruct,
-    Sha3,
-    Stop,
-    SYSTEM,
-} from '../../src/evm/system';
+import { Create, Return, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
@@ -59,14 +50,6 @@ describe('evm::system', () => {
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new SelfDestruct(new Symbol0('address(this)'))]);
         expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
-    });
-
-    it('should halt with `INVALID`', () => {
-        const state = new State<Inst, Expr>();
-        INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
-        expect(state.halted).to.be.true;
-        expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
-        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
     });
 
     describe('RETURN', () => {

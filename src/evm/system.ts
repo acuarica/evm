@@ -1,4 +1,3 @@
-import type { Opcode } from '../opcode';
 import type { State } from '../state';
 import { type IInst, Tag, Val, type Expr, type Inst } from './expr';
 import { MLoad } from './memory';
@@ -391,11 +390,4 @@ export const SYSTEM = {
         const address = state.stack.pop();
         state.halt(new SelfDestruct(address));
     },
-};
-
-export const PC = (opcode: Opcode, { stack }: State<Inst, Expr>) =>
-    stack.push(new Val(BigInt(opcode.offset)));
-
-export const INVALID = (opcode: Opcode, state: State<Inst, Expr>): void => {
-    state.halt(new Invalid(opcode.opcode));
 };
