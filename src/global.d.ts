@@ -1,7 +1,7 @@
 /**
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/object.fromentries/index.d.ts
  */
-declare global {
+export declare global {
     interface ObjectConstructor {
         entries<K extends string, V>(o: { [k in K]: V }): [K, V][];
 
