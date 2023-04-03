@@ -5,7 +5,18 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Contract } from '../src';
 import type { Throw } from '../src/evm/expr';
 
+/**
+ * Restricts the number of Etherscan contracts to test.
+ * If provided, tests only the first `MAX` contracts.
+ * Otherwise, tests all contracts.
+ */
 const MAX = process.env['MAX'];
+
+/**
+ * Filters the Etherscan contracts to test.
+ * If provided, tests the contracts where their names matches `CONTRACT`.
+ * Otherwise, tests all contracts.
+ */
 const CONTRACT = process.env['CONTRACT'];
 
 const addr = chalk.cyan;
