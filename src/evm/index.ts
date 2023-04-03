@@ -33,12 +33,7 @@ const TABLE = {
     ...mapState(SYMBOLS),
     ...mapState(MEMORY),
     JUMPDEST: (_: Opcode, _state: State) => {},
-    ...mapValues(
-        PUSHES,
-        fn =>
-            (op: Opcode, { stack }: State) =>
-                fn(op.pushData!, stack)
-    ),
+    ...mapValues(PUSHES, fn => (op: Opcode, state: State) => fn(op.pushData!, state.stack)),
     ...mapStack(STACK<Expr>()),
     ...mapState(SYSTEM),
     PC,
