@@ -22,13 +22,13 @@ function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr
     return mapValues(
         table,
         fn =>
-            (_opcode: Opcode, { stack }: State) =>
+            (_: Opcode, { stack }: State) =>
                 fn(stack)
     );
 }
 
 function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => void }) {
-    return mapValues(table, fn => (_opcode: Opcode, state: State) => fn(state));
+    return mapValues(table, fn => (_: Opcode, state: State) => fn(state));
 }
 
 const TABLE = {
@@ -37,12 +37,12 @@ const TABLE = {
     ...mapStack(ENV),
     ...mapState(SYMBOLS),
     ...mapState(MEMORY),
-    JUMPDEST: (_opcode: Opcode, _state: State) => {},
+    JUMPDEST: (_: Opcode, _state: State) => {},
     ...mapValues(
         PUSHES,
         fn =>
-            (opcode: Opcode, { stack }: State) =>
-                fn(opcode.pushData!, stack)
+            (op: Opcode, { stack }: State) =>
+                fn(op.pushData!, stack)
     ),
     ...mapStack(STACK<Expr>()),
     ...mapState(SYSTEM),
