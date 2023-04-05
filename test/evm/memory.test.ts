@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { State } from '../../src/state';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
-import { Symbol0 } from '../../src/evm/sym';
+import { Info } from '../../src/evm/sym';
 import { MEMORY } from '../../src/evm/memory';
 
 describe('evm::memory', () => {
@@ -18,10 +18,10 @@ describe('evm::memory', () => {
     it('should store values into memory', () => {
         const state = new State<Inst, Expr>();
 
-        state.stack.push(new Symbol0('block.coinbase'));
+        state.stack.push(Info.COINBASE);
         state.stack.push(new Val(4n));
         MEMORY.MSTORE(state);
 
-        expect(state.memory).to.be.deep.equal({ '4': new Symbol0('block.coinbase') });
+        expect(state.memory).to.be.deep.equal({ '4': Info.COINBASE });
     });
 });

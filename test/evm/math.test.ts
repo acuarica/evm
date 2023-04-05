@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Stack } from '../../src/state';
 import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/expr';
-import { SYM, Symbol0 } from '../../src/evm/sym';
+import { Info, SYM } from '../../src/evm/sym';
 
 describe('evm::math', () => {
     it('should test `isVal`', () => {
@@ -18,7 +18,7 @@ describe('evm::math', () => {
     [
         {
             insts: ['NUMBER', 15, 'ADD'] as const,
-            expr: new Add(new Val(15n), new Symbol0('block.number')),
+            expr: new Add(new Val(15n), Info.NUMBER),
             get val() {
                 return this.expr;
             },

@@ -4,7 +4,7 @@ import { CallDataLoad } from '../../src/evm/env';
 import { Val } from '../../src/evm/expr';
 import { Add } from '../../src/evm/math';
 import { SLoad, SStore } from '../../src/evm/storage';
-import { Symbol0 } from '../../src/evm/sym';
+import { Info } from '../../src/evm/sym';
 import { Return, Sha3, Stop } from '../../src/evm/system';
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
@@ -42,7 +42,7 @@ contracts('internal', compile => {
 
                 expect(fn.stmts.at(-2)).to.be.deep.equal(
                     new SStore(
-                        new Sha3([new Symbol0('msg.sender'), new Val(0n)]),
+                        new Sha3([Info.CALLER, new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
                         contract.evm.variables
                     )
@@ -84,7 +84,7 @@ contracts('internal', compile => {
         });
 
         [
-            { sig: 'getForSender()', value: new Symbol0('msg.sender') },
+            { sig: 'getForSender()', value: Info.CALLER },
             { sig: 'getForArg(address)', value: new CallDataLoad(new Val(4n)) },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
