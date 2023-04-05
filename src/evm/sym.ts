@@ -2,22 +2,36 @@ import { mapValues } from '../object';
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './expr';
 
+type M<F extends { [k: string]: readonly [string, string] }, P extends string> = {
+    [field in keyof F]: readonly [`${P}.${F[field][0]}`, F[field][1]];
+};
+
+const BLOCK = {
+    // BASEFEE: [ 'basefee', 'uint'],
+    COINBASE: ['coinbase', 'address payable'],
+    TIMESTAMP: ['timestamp', 'uint'],
+    NUMBER: ['number', 'uint'],
+    DIFFICULTY: ['difficulty', 'uint'],
+    // prevrandao
+    GASLIMIT: ['gaslimit', 'uint'],
+    CHAINID: ['chainid', 'uint'],
+} as const;
+
+const MSG = {
+    CALLER: ['sender', 'address'],
+} as const;
+
 /**
  * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 const INFO = {
     ADDRESS: ['address(this)', 'address'],
     ORIGIN: ['tx.origin', 'address'],
-    CALLER: ['msg.sender', 'address'],
     CODESIZE: ['codesize()', 'uint'],
     GASPRICE: ['tx.gasprice', 'uint'],
     RETURNDATASIZE: ['returndatasize()', 'uint'],
-    COINBASE: ['block.coinbase', 'address payable'],
-    TIMESTAMP: ['block.timestamp', 'uint'],
-    NUMBER: ['block.number', 'uint'],
-    DIFFICULTY: ['block.difficulty', 'uint'],
-    GASLIMIT: ['block.gaslimit', 'uint'],
-    CHAINID: ['block.chainid', 'uint'],
+    ...(mapValues(BLOCK, ([field, type]) => [`block.${field}`, type]) as M<typeof BLOCK, 'block'>),
+    ...(mapValues(MSG, ([field, type]) => [`msg.${field}`, type]) as M<typeof MSG, 'msg'>),
     SELFBALANCE: ['address(this).balance', 'uint'],
     MSIZE: ['msize()', 'uint'],
     GAS: ['gasleft()', 'uint'],
@@ -42,6 +56,14 @@ export class Symbol0 extends Tag('Symbol0') {
 }
 
 export const Info = mapValues(INFO, info => new Symbol0(info));
+
+export const Block = Object.fromEntries(
+    Object.entries(BLOCK).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
+);
+
+export const Msg = Object.fromEntries(
+    Object.entries(MSG).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
+);
 
 export class Symbol1 extends Tag('Symbol1') {
     constructor(readonly fn: (value: string) => string, readonly value: Expr) {

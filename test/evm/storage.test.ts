@@ -3,7 +3,7 @@ import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { Add, Sub } from '../../src/evm/math';
 import { MappingLoad, MappingStore, STORAGE } from '../../src/evm/storage';
-import { Info } from '../../src/evm/sym';
+import { Info, Msg } from '../../src/evm/sym';
 import { Stop } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
@@ -103,8 +103,8 @@ describe('evm::storage', () => {
                 new MappingStore(
                     evm.mappings,
                     0,
-                    [Info.CALLER],
-                    new Add(new MappingLoad(evm.mappings, 0, [Info.CALLER]), new Val(3n, true))
+                    [Msg.sender],
+                    new Add(new MappingLoad(evm.mappings, 0, [Msg.sender]), new Val(3n, true))
                 )
             );
             expect(`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
@@ -114,7 +114,7 @@ describe('evm::storage', () => {
                     evm.mappings,
                     1,
                     [Info.CALLER],
-                    new Add(new MappingLoad(evm.mappings, 1, [Info.CALLER]), new Val(5n, true))
+                    new Add(new MappingLoad(evm.mappings, 1, [Msg.sender]), new Val(5n, true))
                 )
             );
             expect(`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
@@ -123,9 +123,9 @@ describe('evm::storage', () => {
                 new MappingStore(
                     evm.mappings,
                     2,
-                    [Info.ADDRESS, Info.CALLER],
+                    [Info.ADDRESS, Msg.sender],
                     new Sub(
-                        new MappingLoad(evm.mappings, 2, [Info.ADDRESS, Info.CALLER]),
+                        new MappingLoad(evm.mappings, 2, [Info.ADDRESS, Msg.sender]),
                         new Val(11n, true)
                     )
                 )

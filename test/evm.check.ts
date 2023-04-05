@@ -8,7 +8,7 @@ import { State } from '../src/state';
 import { type Expr, type Inst, Val } from '../src/evm/expr';
 import assert = require('assert');
 import { And, Not } from '../src/evm/logic';
-import { Info } from '../src/evm/sym';
+import { Block } from '../src/evm/sym';
 
 describe('evm', () => {
     it('`PUSH4` method selector to invoke external contract', function () {
@@ -49,7 +49,7 @@ describe('evm', () => {
         evm.run(0, state);
         assert(state.stmts[0].name === 'Log');
         expect(state.stmts[0].args[0]).to.be.deep.equal(
-            new And(new Val(BigInt('0x' + 'ff'.repeat(16)), true), new Not(Info.NUMBER))
+            new And(new Val(BigInt('0x' + 'ff'.repeat(16)), true), new Not(Block.number))
         );
     });
 });

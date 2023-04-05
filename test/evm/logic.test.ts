@@ -5,7 +5,7 @@ import { type Expr, Val, type Inst } from '../../src/evm/expr';
 import { CallDataLoad } from '../../src/evm/env';
 import { LOGIC, Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
-import { Info } from '../../src/evm/sym';
+import { Block } from '../../src/evm/sym';
 import { Stack, State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
@@ -26,13 +26,13 @@ describe('evm::logic', () => {
 
     it('should stringify `~block.number`', () => {
         const stack = new Stack<Expr>();
-        stack.push(Info.NUMBER);
-        expect(stack.values).to.be.deep.equal([Info.NUMBER]);
+        stack.push(Block.number);
+        expect(stack.values).to.be.deep.equal([Block.number]);
 
         LOGIC.NOT(stack);
 
         expect(stack.values).has.length(1);
-        expect(stack.values[0]).to.be.deep.equal(new Not(Info.NUMBER));
+        expect(stack.values[0]).to.be.deep.equal(new Not(Block.number));
         expect(stack.values[0].str()).to.be.equal('~block.number');
     });
 
@@ -56,8 +56,8 @@ describe('evm::logic', () => {
         it('should stringify `block.number == 1`', () => {
             const stack = new Stack<Expr>();
             stack.push(new Val(1n));
-            stack.push(Info.NUMBER);
-            expect(stack.values).to.be.deep.equal([Info.NUMBER, new Val(1n)]);
+            stack.push(Block.number);
+            expect(stack.values).to.be.deep.equal([Block.number, new Val(1n)]);
 
             LOGIC.EQ(stack);
 
