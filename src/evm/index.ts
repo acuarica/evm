@@ -7,7 +7,7 @@ import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';
 import { LOGIC } from './logic';
-import { SPECIAL as SYMBOLS } from './special';
+import { SPECIAL } from './special';
 import { MEMORY } from './memory';
 import { Invalid, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
@@ -28,7 +28,7 @@ function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => 
 export const INSTS = {
     ...mapStack(MATH),
     ...mapStack(LOGIC),
-    ...mapState(SYMBOLS),
+    ...mapState(SPECIAL),
     ...mapState(MEMORY),
     JUMPDEST: (_: Opcode, _state: State) => {},
     ...mapValues(PUSHES, fn => (op: Opcode, state: State) => fn(op.pushData!, state.stack)),
