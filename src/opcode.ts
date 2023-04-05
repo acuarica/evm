@@ -97,6 +97,10 @@ export const OPCODES = {
     GASLIMIT: 0x45,
     CHAINID: 0x46, // https://www.evm.codes/#46
     SELFBALANCE: 0x47, // https://www.evm.codes/#47
+    /**
+     * https://eips.ethereum.org/EIPS/eip-3198
+     */
+    BASEFEE: 0x48,
     POP: 0x50,
     MLOAD: 0x51,
     MSTORE: 0x52,

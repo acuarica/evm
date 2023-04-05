@@ -1,10 +1,10 @@
-import assert = require('assert');
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import type { Expr, Inst } from '../../src/evm/expr';
 import { Info, SYM } from '../../src/evm/sym';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
+import type { Log } from '../../src/evm/log';
 
 describe('evm::sym', () => {
     for (const [mnemonic, sym] of Object.entries(Info)) {
@@ -39,8 +39,8 @@ describe('evm::sym', () => {
                 }
 
                 const stmt = state.stmts[0];
-                assert(stmt.name === 'Log');
-                expect(stmt.args[0].eval()).to.be.deep.equal(sym);
+                expect(stmt.name, `Expected 'Log' but got '${stmt}'`).to.be.equal('Log');
+                expect((<Log>stmt).args[0].eval()).to.be.deep.equal(sym);
             });
         });
     }

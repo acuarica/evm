@@ -7,7 +7,7 @@ type M<F extends { [k: string]: readonly [string, string] }, P extends string> =
 };
 
 const BLOCK = {
-    // BASEFEE: [ 'basefee', 'uint'],
+    BASEFEE: ['basefee', 'uint'],
     COINBASE: ['coinbase', 'address payable'],
     TIMESTAMP: ['timestamp', 'uint'],
     NUMBER: ['number', 'uint'],
