@@ -2,16 +2,6 @@ import { mapValues } from '../object';
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './expr';
 
-type Props = { [k: string]: readonly [string, string] };
-
-type M<P extends Props, O extends string> = {
-    [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
-};
-
-function mapProps<P extends Props, O extends string>(props: P, obj: O) {
-    return mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as M<P, O>;
-}
-
 const BLOCK = {
     BASEFEE: ['basefee', 'uint'],
     COINBASE: ['coinbase', 'address payable'],
@@ -32,6 +22,13 @@ const TX = {
     ORIGIN: ['origin', 'address'],
     GASPRICE: ['gasprice', 'uint'],
 } as const;
+
+type Props<K extends string = string> = { [k in K]: readonly [string, string] };
+
+const mapProps = <P extends Props, O extends string>(props: P, obj: O) =>
+    mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as {
+        [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
+    };
 
 /**
  * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
