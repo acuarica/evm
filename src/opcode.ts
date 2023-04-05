@@ -1,5 +1,7 @@
 /**
  * Set of `PUSHn` opcodes.
+ *
+ * Keep track of `PUSH0` https://eips.ethereum.org/EIPS/eip-3855
  */
 const PUSHES = {
     PUSH1: 0x60,
@@ -165,6 +167,10 @@ export const OPCODES = {
     STATICCALL: 0xfa,
     REVERT: 0xfd,
     INVALID: 0xfe,
+
+    /**
+     * Keep track of https://eips.ethereum.org/EIPS/eip-6780
+     */
     SELFDESTRUCT: 0xff,
 } as const;
 
