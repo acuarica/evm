@@ -25,6 +25,11 @@ import type { State } from '../state';
 import type { Opcode } from '../opcode';
 
 /**
+ * https://docs.soliditylang.org/en/v0.8.17/types.html
+ */
+export type Type = 'address' | 'address payable' | 'uint256';
+
+/**
  *
  */
 export type Expr =
