@@ -2,9 +2,15 @@ import { mapValues } from '../object';
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './expr';
 
-type M<F extends { [k: string]: readonly [string, string] }, P extends string> = {
-    [field in keyof F]: readonly [`${P}.${F[field][0]}`, F[field][1]];
+type Props = { [k: string]: readonly [string, string] };
+
+type M<P extends Props, O extends string> = {
+    [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
 };
+
+function mapProps<P extends Props, O extends string>(props: P, obj: O) {
+    return mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as M<P, O>;
+}
 
 const BLOCK = {
     BASEFEE: ['basefee', 'uint'],
@@ -21,17 +27,21 @@ const MSG = {
     CALLER: ['sender', 'address'],
 } as const;
 
+const TX = {
+    ORIGIN: ['origin', 'address'],
+    GASPRICE: ['gasprice', 'uint'],
+} as const;
+
 /**
  * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 const INFO = {
     ADDRESS: ['address(this)', 'address'],
-    ORIGIN: ['tx.origin', 'address'],
     CODESIZE: ['codesize()', 'uint'],
-    GASPRICE: ['tx.gasprice', 'uint'],
     RETURNDATASIZE: ['returndatasize()', 'uint'],
-    ...(mapValues(BLOCK, ([field, type]) => [`block.${field}`, type]) as M<typeof BLOCK, 'block'>),
-    ...(mapValues(MSG, ([field, type]) => [`msg.${field}`, type]) as M<typeof MSG, 'msg'>),
+    ...mapProps(BLOCK, 'block'),
+    ...mapProps(MSG, 'msg'),
+    ...mapProps(TX, 'tx'),
     SELFBALANCE: ['address(this).balance', 'uint'],
     MSIZE: ['msize()', 'uint'],
     GAS: ['gasleft()', 'uint'],
@@ -63,6 +73,10 @@ export const Block = Object.fromEntries(
 
 export const Msg = Object.fromEntries(
     Object.entries(MSG).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
+);
+
+export const Tx = Object.fromEntries(
+    Object.entries(TX).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
 );
 
 export class Symbol1 extends Tag('Symbol1') {

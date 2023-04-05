@@ -1,12 +1,31 @@
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import type { Expr, Inst } from '../../src/evm/expr';
-import { Info, SYM } from '../../src/evm/sym';
+import { Block, Info, Msg, SYM, Tx } from '../../src/evm/sym';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
 import type { Log } from '../../src/evm/log';
 
 describe('evm::sym', () => {
+    it(`should stringify Block's props`, () => {
+        expect(`${Block.basefee}`).to.be.equal('block.basefee');
+        expect(`${Block.chainid}`).to.be.equal('block.chainid');
+        expect(`${Block.coinbase}`).to.be.equal('block.coinbase');
+        expect(`${Block.difficulty}`).to.be.equal('block.difficulty');
+        expect(`${Block.gaslimit}`).to.be.equal('block.gaslimit');
+        expect(`${Block.number}`).to.be.equal('block.number');
+        expect(`${Block.timestamp}`).to.be.equal('block.timestamp');
+    });
+
+    it(`should stringify Msg's props`, () => {
+        expect(`${Msg.sender}`).to.be.equal('msg.sender');
+    });
+
+    it(`should stringify Tx's props`, () => {
+        expect(`${Tx.origin}`).to.be.equal('tx.origin');
+        expect(`${Tx.gasprice}`).to.be.equal('tx.gasprice');
+    });
+
     for (const [mnemonic, sym] of Object.entries(Info)) {
         describe(`\`${sym.value}\` from \`${mnemonic}\``, () => {
             it('should get it programatically', () => {
