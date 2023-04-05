@@ -8,7 +8,7 @@ import { State } from '../src/state';
 import { type Expr, type Inst, Val } from '../src/evm/expr';
 import assert = require('assert');
 import { And, Not } from '../src/evm/logic';
-import { Block } from '../src/evm/sym';
+import { Block } from '../src/evm/special';
 
 describe('evm', () => {
     it('`PUSH4` method selector to invoke external contract', function () {

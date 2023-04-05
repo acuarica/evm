@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Stack } from '../../src/state';
 import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/expr';
-import { Block, SYM } from '../../src/evm/sym';
+import { Block, SPECIAL } from '../../src/evm/special';
 
 describe('evm::math', () => {
     it('should test `isVal`', () => {
@@ -97,7 +97,7 @@ describe('evm::math', () => {
             val,
             str,
         }: {
-            insts: readonly (keyof typeof MATH | keyof typeof SYM | number)[];
+            insts: readonly (keyof typeof MATH | keyof typeof SPECIAL | number)[];
             expr: Expr;
             val: Expr;
             str: string;
@@ -109,11 +109,11 @@ describe('evm::math', () => {
                         stack.push(new Val(BigInt(inst)));
                     } else {
                         const sym = Object.fromEntries(
-                            Object.entries(SYM).map(([k, fn]) => [
+                            Object.entries(SPECIAL).map(([k, fn]) => [
                                 k,
                                 (stack: Stack<Expr>) => fn({ stack, memory: {} }),
                             ])
-                        ) as { [key in keyof typeof SYM]: (stack: Stack<Expr>) => void };
+                        ) as { [key in keyof typeof SPECIAL]: (stack: Stack<Expr>) => void };
                         const evm = { ...MATH, ...sym };
                         evm[inst](stack);
                     }

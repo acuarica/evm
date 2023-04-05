@@ -3,7 +3,7 @@ import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { Add, Sub } from '../../src/evm/math';
 import { MappingLoad, MappingStore, STORAGE } from '../../src/evm/storage';
-import { Info, Msg } from '../../src/evm/sym';
+import { Info, Msg } from '../../src/evm/special';
 import { Stop } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';

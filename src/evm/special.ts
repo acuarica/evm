@@ -25,6 +25,7 @@ const BLOCK = {
 
 const MSG = {
     CALLER: ['sender', 'address'],
+    CALLDATASIZE: ['data.length', 'uint'],
 } as const;
 
 const TX = {
@@ -47,7 +48,7 @@ const INFO = {
     GAS: ['gasleft()', 'uint'],
 } as const;
 
-export class Symbol0 extends Tag('Symbol0') {
+export class Prop extends Tag('Prop') {
     value: (typeof INFO)[keyof typeof INFO][0];
 
     constructor([value, type]: (typeof INFO)[keyof typeof INFO]) {
@@ -65,7 +66,7 @@ export class Symbol0 extends Tag('Symbol0') {
     }
 }
 
-export const Info = mapValues(INFO, info => new Symbol0(info));
+export const Info = mapValues(INFO, info => new Prop(info));
 
 export const Block = Object.fromEntries(
     Object.entries(BLOCK).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
@@ -111,8 +112,43 @@ export class DataCopy extends Tag('DataCopy') {
     }
 }
 
-export const SYM = {
+/**
+ * Get deposited value by the instruction/transaction responsible for this execution.
+ */
+export class CallValue extends Tag('CallValue') {
+    eval(): Expr {
+        return this;
+    }
+
+    str(): string {
+        return 'msg.value';
+    }
+}
+
+export class CallDataLoad extends Tag('CallDataLoad') {
+    constructor(public location: Expr) {
+        super();
+    }
+    eval(): Expr {
+        this.location = this.location.eval();
+        return this;
+    }
+    str(): string {
+        return this.location.isVal() && this.location.val === 0n
+            ? 'msg.data'
+            : this.location.isVal() && (this.location.val - 4n) % 32n === 0n
+            ? `_arg${(this.location.val - 4n) / 32n}`
+            : `msg.data[${this.location._str(CallDataLoad.prec)}]`;
+    }
+}
+
+export const SPECIAL = {
     ...mapValues(Info, sym => (state: Ram<Expr>) => state.stack.push(sym)),
+    CALLVALUE: ({ stack }: Ram<Expr>): void => stack.push(new CallValue()),
+    CALLDATALOAD: ({ stack }: Ram<Expr>): void => {
+        const location = stack.pop();
+        stack.push(new CallDataLoad(location));
+    },
     BALANCE: symbol1(address => `${address}.balance`),
     CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),

@@ -3,7 +3,7 @@ import { build, stringify } from '../../src';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';
-import { Info, SYM } from '../../src/evm/sym';
+import { Info, SPECIAL } from '../../src/evm/special';
 import { Create, Return, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
@@ -45,7 +45,7 @@ describe('evm::system', () => {
 
     it('should halt with SELFDESTRUCT', () => {
         const state = new State<Inst, Expr>();
-        SYM.ADDRESS(state);
+        SPECIAL.ADDRESS(state);
         SYSTEM.SELFDESTRUCT(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new SelfDestruct(Info.ADDRESS)]);

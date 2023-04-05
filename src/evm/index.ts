@@ -7,8 +7,7 @@ import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
 import { PUSHES, STACK } from './stack';
 import { MATH } from './math';
 import { LOGIC } from './logic';
-import { ENV } from './env';
-import { SYM as SYMBOLS } from './sym';
+import { SPECIAL as SYMBOLS } from './special';
 import { MEMORY } from './memory';
 import { Invalid, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
@@ -29,7 +28,6 @@ function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => 
 export const INSTS = {
     ...mapStack(MATH),
     ...mapStack(LOGIC),
-    ...mapStack(ENV),
     ...mapState(SYMBOLS),
     ...mapState(MEMORY),
     JUMPDEST: (_: Opcode, _state: State) => {},

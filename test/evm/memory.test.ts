@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { State } from '../../src/state';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
-import { Block } from '../../src/evm/sym';
+import { Block } from '../../src/evm/special';
 import { MEMORY } from '../../src/evm/memory';
 
 describe('evm::memory', () => {
