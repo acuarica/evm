@@ -112,7 +112,12 @@ export const OPCODES = {
     PC: 0x58,
     MSIZE: 0x59,
     GAS: 0x5a,
+
+    /**
+     * Keep track of https://eips.ethereum.org/EIPS/eip-4200
+     */
     JUMPDEST: 0x5b,
+
     ...PUSHES,
     DUP1: 0x80,
     DUP2: 0x81,
