@@ -1,6 +1,6 @@
 import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
-import type { DataCopy, Prop, Symbol1, CallDataLoad, CallValue } from './special';
+import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
 import type { MLoad, MStore } from './memory';
 import type {
     Call,
@@ -55,7 +55,7 @@ export type Expr =
     | CallValue
     | CallDataLoad
     | Prop
-    | Symbol1
+    | Fn
     | DataCopy
     | MLoad
     | Sha3

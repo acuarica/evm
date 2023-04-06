@@ -1,4 +1,4 @@
-import { mapValues } from '../object';
+import { mapKeys, mapValues } from '../object';
 import type { Ram } from '../state';
 import { type Expr, Tag, Val } from './expr';
 
@@ -25,30 +25,30 @@ const TX = {
 
 type Props<K extends string = string> = { [k in K]: readonly [string, string] };
 
-const mapProps = <P extends Props, O extends string>(props: P, obj: O) =>
+const applyPrefix = <P extends Props, O extends string>(props: P, obj: O) =>
     mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as {
         [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
     };
 
-/**
- * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
- */
-const INFO = {
+const PROPS = {
     ADDRESS: ['address(this)', 'address'],
     CODESIZE: ['codesize()', 'uint'],
     RETURNDATASIZE: ['returndatasize()', 'uint'],
-    ...mapProps(BLOCK, 'block'),
-    ...mapProps(MSG, 'msg'),
-    ...mapProps(TX, 'tx'),
+    ...applyPrefix(BLOCK, 'block'),
+    ...applyPrefix(MSG, 'msg'),
+    ...applyPrefix(TX, 'tx'),
     SELFBALANCE: ['address(this).balance', 'uint'],
     MSIZE: ['msize()', 'uint'],
     GAS: ['gasleft()', 'uint'],
 } as const;
 
+/**
+ * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
+ */
 export class Prop extends Tag('Prop') {
-    value: (typeof INFO)[keyof typeof INFO][0];
+    readonly value: (typeof PROPS)[keyof typeof PROPS][0];
 
-    constructor([value, type]: (typeof INFO)[keyof typeof INFO]) {
+    constructor([value, type]: (typeof PROPS)[keyof typeof PROPS]) {
         super();
         this.value = value;
         this.type = type;
@@ -63,7 +63,7 @@ export class Prop extends Tag('Prop') {
     }
 }
 
-export const Info = mapValues(INFO, info => new Prop(info));
+export const Info = mapValues(PROPS, info => new Prop(info));
 
 export const Block = Object.fromEntries(
     Object.entries(BLOCK).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
@@ -77,17 +77,24 @@ export const Tx = Object.fromEntries(
     Object.entries(TX).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
 );
 
-export class Symbol1 extends Tag('Symbol1') {
-    constructor(readonly fn: (value: string) => string, readonly value: Expr) {
+const FNS = {
+    BALANCE: (address: string) => `${address}.balance`,
+    EXTCODESIZE: (address: string) => `address(${address}).code.length`,
+    EXTCODEHASH: (address: string) => `keccak256(address(${address}).code)`,
+    BLOCKHASH: (blockNumber: string) => `blockhash(${blockNumber})`,
+};
+
+export class Fn extends Tag('Fn') {
+    constructor(readonly mnemonic: keyof typeof FNS, readonly value: Expr) {
         super();
     }
 
     eval(): Expr {
-        return new Symbol1(this.fn, this.value.eval());
+        return new Fn(this.mnemonic, this.value.eval());
     }
 
     str(): string {
-        return this.fn(this.value._str(Val.prec));
+        return FNS[this.mnemonic](this.value._str(Val.prec));
     }
 }
 
@@ -141,30 +148,23 @@ export class CallDataLoad extends Tag('CallDataLoad') {
 
 export const SPECIAL = {
     ...mapValues(Info, sym => (state: Ram<Expr>) => state.stack.push(sym)),
+    ...mapKeys(FNS, mnemonic => ({ stack }: Ram<Expr>) => {
+        const value = stack.pop();
+        stack.push(new Fn(mnemonic, value));
+    }),
     CALLVALUE: ({ stack }: Ram<Expr>): void => stack.push(new CallValue()),
     CALLDATALOAD: ({ stack }: Ram<Expr>): void => {
         const location = stack.pop();
         stack.push(new CallDataLoad(location));
     },
-    BALANCE: symbol1(address => `${address}.balance`),
     CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
-    EXTCODESIZE: symbol1(address => `address(${address}).code.length`),
     EXTCODECOPY: ({ stack }: Ram<Expr>): void => {
         const address = stack.pop();
         datacopy((offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`);
     },
     RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
-    EXTCODEHASH: symbol1(address => `keccak256(address(${address}).code)`),
-    BLOCKHASH: symbol1(blockNumber => `blockhash(${blockNumber})`),
 };
-
-function symbol1(fn: (value: string) => string) {
-    return ({ stack }: Ram<Expr>) => {
-        const value = stack.pop();
-        stack.push(new Symbol1(fn, value));
-    };
-}
 
 export function datacopy(fn: (offset: string, size: string) => string) {
     return ({ stack, memory }: Ram<Expr>): void => {
