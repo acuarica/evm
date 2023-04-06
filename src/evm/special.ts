@@ -78,15 +78,16 @@ export const Tx = Object.fromEntries(
 );
 
 const FNS = {
-    BALANCE: (address: string) => `${address}.balance`,
-    EXTCODESIZE: (address: string) => `address(${address}).code.length`,
-    EXTCODEHASH: (address: string) => `keccak256(address(${address}).code)`,
-    BLOCKHASH: (blockNumber: string) => `blockhash(${blockNumber})`,
-};
+    BALANCE: [(address: string) => `${address}.balance`, 'uint256'],
+    EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256'],
+    EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32'],
+    BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32'],
+} as const;
 
 export class Fn extends Tag('Fn') {
     constructor(readonly mnemonic: keyof typeof FNS, readonly value: Expr) {
         super();
+        this.type = FNS[mnemonic][1];
     }
 
     eval(): Expr {
@@ -94,7 +95,7 @@ export class Fn extends Tag('Fn') {
     }
 
     str(): string {
-        return FNS[this.mnemonic](this.value._str(Val.prec));
+        return FNS[this.mnemonic][0](this.value._str(Val.prec));
     }
 }
 
