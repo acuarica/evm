@@ -88,7 +88,7 @@ export class Call extends Tag('Call') {
 
 export class ReturnData extends Tag('ReturnData') {
     readonly name = 'ReturnData';
-    override readonly type?: string;
+    override readonly type = 'bytes';
     readonly wrapped = false;
 
     constructor(readonly retOffset: any, readonly retSize: any) {

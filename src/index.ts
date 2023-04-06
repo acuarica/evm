@@ -1,4 +1,4 @@
-import { type Expr, type Inst, Throw, type Val } from './evm/expr';
+import { type Expr, type Inst, Throw, type Val, type Type } from './evm/expr';
 import { Not } from './evm/logic';
 import type { Return, Revert } from './evm/system';
 import { State } from './state';
@@ -304,7 +304,7 @@ export class PublicFunction {
                 this.stmts.forEach(stmt =>
                     PublicFunction.patchCallDataLoad(
                         stmt as unknown as Record<string, Expr>,
-                        paramTypes
+                        paramTypes as Type[]
                     )
                 );
             }
@@ -346,7 +346,7 @@ export class PublicFunction {
         }
     }
 
-    private static patchCallDataLoad(stmtOrExpr: Record<string, Expr>, paramTypes: string[]) {
+    private static patchCallDataLoad(stmtOrExpr: Record<string, Expr>, paramTypes: Type[]) {
         for (const propKey in stmtOrExpr) {
             if (propKey === 'mappings') continue;
 
