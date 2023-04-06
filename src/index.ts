@@ -311,8 +311,7 @@ export class PublicFunction {
         }
     }
 
-    private isGetter(): // stmts: Stmt[]
-    this is { stmts: [Return & { args: [SLoad & { location: Val }] }] } {
+    private isGetter(): this is { stmts: [Return & { args: [SLoad & { location: Val }] }] } {
         const exit = this.stmts[0];
         return (
             this.stmts.length === 1 &&
