@@ -123,7 +123,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
             });
             for (const [reason, count] of errorsByReason) {
                 console.info(
-                    '        ' + error('⨯'),
+                    '        ' + error('x'),
                     reason,
                     count === 1 ? '' : warn(`(x${count})`)
                 );
