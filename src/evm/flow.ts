@@ -42,8 +42,9 @@ export class Jumpi implements IInst {
     }
 
     eval() {
-        return this;
+        return new Jumpi(this.cond.eval(), this.offset, this.fallBranch, this.destBranch);
     }
+
     toString() {
         return `when ${this.cond} goto ${this.destBranch.key} or fall ${this.fallBranch.key}`;
     }

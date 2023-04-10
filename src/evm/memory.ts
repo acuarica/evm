@@ -11,8 +11,8 @@ export class MLoad extends Tag('MLoad') {
         super();
     }
 
-    eval(): this {
-        return this;
+    eval(): Expr {
+        return new MLoad(this.loc.eval());
     }
 
     str(): string {
@@ -26,7 +26,7 @@ export class MStore implements IInst {
     constructor(readonly location: Expr, readonly data: Expr) {}
 
     eval() {
-        return this;
+        return new MStore(this.location.eval(), this.data.eval());
     }
 
     toString(): string {
