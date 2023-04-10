@@ -228,19 +228,15 @@ export const LOGIC = {
             return orElse();
         };
 
-        const SHRsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) => {
-            if (
-                left.isVal() &&
-                right.tag === 'Shr' &&
-                right.shift.isVal() &&
-                right.shift.val === 0xe0n &&
-                right.value.tag === 'CallDataLoad' &&
-                right.value.location.isZero()
-            ) {
-                return new Sig(left.val.toString(16).padStart(8, '0'));
-            }
-            return orElse();
-        };
+        const SHRsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) =>
+            left.isVal() &&
+            right.tag === 'Shr' &&
+            right.shift.isVal() &&
+            right.shift.val === 0xe0n &&
+            right.value.tag === 'CallDataLoad' &&
+            right.value.location.isZero()
+                ? new Sig(left.val.toString(16).padStart(8, '0'))
+                : orElse();
 
         const left = stack.pop();
         const right = stack.pop();
