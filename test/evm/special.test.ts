@@ -5,6 +5,7 @@ import { Block, CallDataLoad, CallValue, Info, Msg, SPECIAL, Tx } from '../../sr
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
 import type { Log } from '../../src/evm/log';
+import { Add } from '../../src/evm/math';
 
 describe('evm::sym', () => {
     it(`should stringify Block's props`, () => {
@@ -37,19 +38,20 @@ describe('evm::sym', () => {
 
     describe('CallDataLoad', () => {
         [
-            [0n, 'msg.data'] as const,
-            [4n, '_arg0'] as const,
-            [36n, '_arg1'] as const,
-            [68n, '_arg2'] as const,
-            [1n, 'msg.data[0x1]'] as const,
-            [32n, 'msg.data[0x20]'] as const,
-        ].forEach(([loc, str]) => {
-            it(`should push \`CallDataLoad\` at :${loc} stringified to \`${str}\``, () => {
+            [new Val(0n), 'msg.data'] as const,
+            [new Val(4n), '_arg0'] as const,
+            [new Val(36n), '_arg1'] as const,
+            [new Val(68n), '_arg2'] as const,
+            [new Val(1n), 'msg.data[0x1]'] as const,
+            [new Val(32n), 'msg.data[0x20]'] as const,
+            [new Add(new Val(1n), new Val(2n)), 'msg.data[0x1 + 0x2]'] as const,
+        ].forEach(([location, str]) => {
+            it(`should push \`CallDataLoad\` at :${location} stringified to \`${str}\``, () => {
                 const state = new State<never, Expr>();
-                state.stack.push(new Val(loc));
+                state.stack.push(location);
                 SPECIAL.CALLDATALOAD(state);
 
-                expect(state.stack.values).to.deep.equal([new CallDataLoad(new Val(loc))]);
+                expect(state.stack.values).to.deep.equal([new CallDataLoad(location)]);
                 expect(state.stack.values[0].toString()).to.equal(str);
             });
         });
