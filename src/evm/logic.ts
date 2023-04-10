@@ -196,51 +196,6 @@ export class Sig extends Tag('Sig', Eq.prec) {
     }
 }
 
-function fromSHRsig(left: Expr, right: Expr, cc: () => Sig | Eq) {
-    if (
-        left.isVal() &&
-        right.tag === 'Shr' &&
-        right.shift.isVal() &&
-        right.shift.val === 0xe0n &&
-        right.value.tag === 'CallDataLoad' &&
-        right.value.location.isZero()
-    ) {
-        return new Sig(left.val.toString(16).padStart(8, '0'));
-    }
-    return cc();
-}
-
-function fromDIVEXPsig(left: Expr, right: Expr, cc: () => Sig | Eq) {
-    left = left.eval();
-    right = right.eval();
-
-    if (left.isVal() && right.tag === 'Div' && right.right.isVal()) {
-        const selector = left.val * right.right.val;
-        right = right.left;
-
-        if (
-            selector % (1n << 0xe0n) === 0n &&
-            right.tag === 'CallDataLoad' &&
-            right.location.isZero()
-        ) {
-            return new Sig(
-                selector
-                    .toString(16)
-                    .substring(0, 8 - (64 - selector.toString(16).length))
-                    .padStart(8, '0')
-            );
-        }
-    }
-
-    return cc();
-}
-
-function eqHook(left: Expr, right: Expr, cc: () => Eq) {
-    return fromDIVEXPsig(left, right, () =>
-        fromDIVEXPsig(right, left, () => fromSHRsig(left, right, () => fromSHRsig(right, left, cc)))
-    );
-}
-
 export const LOGIC = {
     LT: bin(Lt),
     GT: bin(Gt),
@@ -248,6 +203,45 @@ export const LOGIC = {
     SGT: bin(Gt),
 
     EQ: (stack: Stack<Expr>): void => {
+        const DIVEXPsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) => {
+            left = left.eval();
+            right = right.eval();
+
+            if (left.isVal() && right.tag === 'Div' && right.right.isVal()) {
+                const selector = left.val * right.right.val;
+                right = right.left;
+
+                if (
+                    selector % (1n << 0xe0n) === 0n &&
+                    right.tag === 'CallDataLoad' &&
+                    right.location.isZero()
+                ) {
+                    return new Sig(
+                        selector
+                            .toString(16)
+                            .substring(0, 8 - (64 - selector.toString(16).length))
+                            .padStart(8, '0')
+                    );
+                }
+            }
+
+            return orElse();
+        };
+
+        const SHRsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) => {
+            if (
+                left.isVal() &&
+                right.tag === 'Shr' &&
+                right.shift.isVal() &&
+                right.shift.val === 0xe0n &&
+                right.value.tag === 'CallDataLoad' &&
+                right.value.location.isZero()
+            ) {
+                return new Sig(left.val.toString(16).padStart(8, '0'));
+            }
+            return orElse();
+        };
+
         const left = stack.pop();
         const right = stack.pop();
 
@@ -256,7 +250,11 @@ export const LOGIC = {
                 ? left.val === right.val
                     ? new Val(1n)
                     : new Val(0n)
-                : eqHook(left, right, () => new Eq(left, right))
+                : DIVEXPsig(left, right, () =>
+                      DIVEXPsig(right, left, () =>
+                          SHRsig(left, right, () => SHRsig(right, left, () => new Eq(left, right)))
+                      )
+                  )
         );
     },
 
