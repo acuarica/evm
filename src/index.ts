@@ -217,7 +217,7 @@ export class Require {
     constructor(readonly condition: Expr, readonly args: Expr[]) {}
 
     toString() {
-        return `require(${this.condition}, ${this.args.join(', ')});`;
+        return `require(${[this.condition, ...this.args].join(', ')});`;
     }
 }
 
