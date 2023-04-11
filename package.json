@@ -3,7 +3,7 @@
     "version": "0.5.0",
     "description": "An ethereum virtual machine (EVM) bytecode decompiler",
     "private": true,
-    "main": "lib/EVM.node.js",
+    "main": "types/src/index.js",
     "module": "lib/EVM.js",
     "types": "types/src/index.d.ts",
     "repository": {

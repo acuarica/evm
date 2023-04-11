@@ -9,7 +9,7 @@
         "isolatedModules": true,
         "skipLibCheck": true,
         "declaration": true,
-        "emitDeclarationOnly": true,
+        // "emitDeclarationOnly": true,
         "strict": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
