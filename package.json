@@ -1,18 +1,21 @@
 {
-    "name": "evm",
-    "version": "0.5.0",
+    "name": "@acuarica/evm",
+    "version": "0.0.1",
     "description": "An ethereum virtual machine (EVM) bytecode decompiler",
-    "private": true,
-    "main": "types/src/index.js",
+    "main": "lib/EVM.node.js",
     "module": "lib/EVM.js",
     "types": "types/src/index.d.ts",
+    "files": [
+        "lib/",
+        "types/src/"
+    ],
     "repository": {
         "type": "git",
         "url": "git+https://github.com/acuarica/evm.git"
     },
-    "author": "Luit Hollander <luit@hollander.email> (https://luit.me)",
+    "author": "Luis Mastrangelo (https://acuarica.github.io)",
     "contributors": [
-        "Luis Mastrangelo (https://acuarica.github.io)"
+        "Luit Hollander <luit@hollander.email> (https://luit.me)"
     ],
     "license": "MIT",
     "bugs": {
@@ -65,13 +68,12 @@
     "scripts": {
         "prepare": "husky install",
         "compile": "tsc",
-        "build": "tsc",
         "lint": "eslint .",
         "test": "mocha",
         "test:check": "mocha --config .mocharc.check.js",
         "test:smoke": "mocha --config .mocharc.smoke.js",
         "coverage": "nyc mocha",
-        "build2": "webpack --mode production",
+        "bundle": "webpack --mode production",
         "hash": "ts-node scripts/hash.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
