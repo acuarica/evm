@@ -38,11 +38,11 @@ export type Type =
     | 'address'
     | 'address payable'
     | 'bool'
-    | `uint`
+    | 'uint'
     | `uint${Bits}`
-    | `int`
+    | 'int'
     | `int${Bits}`
-    | `bytes`
+    | 'bytes'
     | `bytes${Bytes}`;
 
 /**
