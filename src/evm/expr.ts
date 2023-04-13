@@ -167,7 +167,7 @@ export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
          */
         abstract str(): string;
 
-        _str(prec: any): string {
+        _str(prec: number): string {
             const text = this.str();
             return Tag.prec < prec ? `(${text})` : text;
         }

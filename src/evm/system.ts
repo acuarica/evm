@@ -91,7 +91,7 @@ export class ReturnData extends Tag('ReturnData') {
     override readonly type = 'bytes';
     readonly wrapped = false;
 
-    constructor(readonly retOffset: any, readonly retSize: any) {
+    constructor(readonly retOffset: Expr, readonly retSize: Expr) {
         super();
     }
 
@@ -331,11 +331,11 @@ export const SYSTEM = {
             new Call(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
         );
 
-        // if (typeof outputStart !== 'number') {
-        //     console.log('WARN:CALL outstart should be number');
-        // }
+        if (!outputStart.isVal()) {
+            throw new Error('WARN:CALL output start should be number');
+        }
 
-        memory[outputStart as any as number] = new ReturnData(outputStart, outputLength);
+        memory[Number(outputStart.val)] = new ReturnData(outputStart, outputLength);
     },
     CALLCODE: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
