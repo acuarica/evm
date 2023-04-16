@@ -2,9 +2,11 @@
     "name": "@acuarica/evm",
     "version": "0.0.1",
     "description": "An ethereum virtual machine (EVM) bytecode decompiler",
-    "main": "lib/EVM.node.js",
     "module": "lib/EVM.js",
-    "types": "types/src/index.d.ts",
+    "exports": {
+        ".": "./dist/src/index.js",
+        "./evm": "./dist/src/evm/index.js"
+    },
     "files": [
         "lib/",
         "types/src/"

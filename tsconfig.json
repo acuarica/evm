@@ -3,7 +3,7 @@
         "module": "commonjs",
         "target": "es2020",
         "lib": ["es2020"],
-        "outDir": "types",
+        "outDir": "dist",
         "sourceMap": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
@@ -22,5 +22,5 @@
     "ts-node": {
         "swc": true
     },
-    "exclude": ["node_modules", "types"]
+    "exclude": ["node_modules", "dist"]
 }
