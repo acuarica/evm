@@ -46,6 +46,8 @@ jobs:
           git config --global user.email 'acuarica@users.noreply.github.com'
       - name: 'Build package, bump ${{ inputs.version }} in `package.json`, publish into Marketplace and commit and tag this release'
         run: yarn publish --new-version ${{ inputs.version }} --message "Bump new version v%s"
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: 'Push bumped `package.json` commit and newly created tag for this release'
         run: |
           git push
