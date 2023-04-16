@@ -1,5 +1,5 @@
 import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
-import { type Stack, State as TState } from '../state';
+import { type Stack, State } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
 import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
@@ -15,14 +15,14 @@ import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
 import { mapValues } from '../object';
 
-type State = TState<Inst, Expr>;
+type EVMState = State<Inst, Expr>;
 
 function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
-    return mapValues(table, fn => (_: Opcode, state: State) => fn(state.stack));
+    return mapValues(table, fn => (_: Opcode, state: EVMState) => fn(state.stack));
 }
 
-function mapState<K extends string>(table: { [mnemonic in K]: (state: State) => void }) {
-    return mapValues(table, fn => (_: Opcode, state: State) => fn(state));
+function mapState<K extends string>(table: { [mnemonic in K]: (state: EVMState) => void }) {
+    return mapValues(table, fn => (_: Opcode, state: EVMState) => fn(state));
 }
 
 export const INSTS = {
@@ -30,12 +30,12 @@ export const INSTS = {
     ...mapStack(LOGIC),
     ...mapState(SPECIAL),
     ...mapState(MEMORY),
-    JUMPDEST: (_: Opcode, _state: State) => {},
-    ...mapValues(PUSHES, fn => (op: Opcode, state: State) => fn(op.pushData!, state.stack)),
+    JUMPDEST: (_: Opcode, _state: EVMState) => {},
+    ...mapValues(PUSHES, fn => (op: Opcode, state: EVMState) => fn(op.pushData!, state.stack)),
     ...mapStack(STACK<Expr>()),
     ...mapState(SYSTEM),
-    PC: (op: Opcode, { stack }: TState<Inst, Expr>) => stack.push(new Val(BigInt(op.offset))),
-    INVALID: (op: Opcode, state: TState<Inst, Expr>): void => state.halt(new Invalid(op.opcode)),
+    PC: (op: Opcode, { stack }: EVMState) => stack.push(new Val(BigInt(op.offset))),
+    INVALID: (op: Opcode, state: EVMState): void => state.halt(new Invalid(op.opcode)),
 };
 
 /**
@@ -69,13 +69,13 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      *
      */
     private readonly insts: {
-        [opcode in string]: (opcode: Opcode, state: TState<Inst, Expr>) => void;
+        [opcode in string]: (opcode: Opcode, state: EVMState) => void;
     };
 
     /**
      *
      */
-    readonly chunks = new Map<number, { pcend: number; states: State[] }>();
+    readonly chunks = new Map<number, { pcend: number; states: EVMState[] }>();
 
     /**
      *
@@ -87,7 +87,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: ISelectorBranches['functionBranches'] = new Map<
         string,
-        { pc: number; state: State }
+        { pc: number; state: EVMState }
     >();
 
     /**
@@ -126,13 +126,13 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      *
      */
     start() {
-        this.run(0, new TState());
+        this.run(0, new State());
         for (const [, branch] of this.functionBranches) {
             this.run(branch.pc, branch.state);
         }
     }
 
-    run(pc0: number, state: State) {
+    run(pc0: number, state: EVMState) {
         const branches: Branch[] = [new Branch(pc0, state)];
         while (branches.length > 0) {
             // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
@@ -160,7 +160,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         }
     }
 
-    exec(pc0: number, state: State) {
+    exec(pc0: number, state: EVMState) {
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
         let pc = pc0;
@@ -215,7 +215,7 @@ export function gc(b: Branch, chunks: EVM['chunks']) {
     return undefined;
 }
 
-function cmp({ stack: lhs }: TState<Inst, Expr>, { stack: rhs }: TState<Inst, Expr>) {
+function cmp({ stack: lhs }: EVMState, { stack: rhs }: EVMState) {
     if (lhs.values.length !== rhs.values.length) {
         return false;
     }
