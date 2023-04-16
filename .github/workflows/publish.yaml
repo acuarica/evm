@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - published
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Auto-increment current version by'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      confirm:
+        description: 'Type `yes` to confirm to publish the package into the NPM registry and create a version commit and tag'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    if: inputs.confirm == 'yes'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Display input values
+        run: |
+          echo "Version: $VERSION"
+          echo "Confirm: $CONFIRM"
+        env:
+          VERSION: ${{ inputs.version }}
+          CONFIRM: ${{ inputs.confirm }}
+
+      - run: yarn install --frozen-lockfile
+      - name: 'Compile'
+        run: |
+          yarn compile
+          yarn lint
+      - run: yarn test
+      - name: 'Set up git user to be able to commit, tag and push'
+        run: |
+          git config --global user.name 'acuarica'
+          git config --global user.email 'acuarica@users.noreply.github.com'
+      - name: 'Build package, bump ${{ inputs.version }} in `package.json`, publish into Marketplace and commit and tag this release'
+        run: yarn publish --new-version ${{ inputs.version }} --message "Bump new version v%s"
+      - name: 'Push bumped `package.json` commit and newly created tag for this release'
+        run: |
+          git push
+          git push --tags
