@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const blessed = require('blessed');
 const assert = require('assert');
 
-const { Contract } = require('@acuarica/evm');
+const { Contract, stringify } = require('@acuarica/evm');
 require('@acuarica/evm/selector');
 
 const { formatOpcode, toHex } = require('@acuarica/evm/opcode');
@@ -319,6 +319,7 @@ function showConsole(contract) {
         parent: screen,
         // top: 'center',
         // left: 'center',
+        right: 0,
         width: '80%',
         // height: '50%',
         content: 'Hello {bold}world{/bold}!',
@@ -360,17 +361,34 @@ function showConsole(contract) {
         return process.exit(0);
     });
 
-    const list = blessed.list({
+    blessed.box({
+        parent: screen,
+        label: ' {bold}{cyan-fg}Metadata{/cyan-fg}{/bold} ',
+        width: '20%',
+        height: '20%',
+        content: getMetadata(contract.metadata),
+        tags: true,
+        border: {
+            type: 'line'
+        },
+        style: {
+            fg: 'white',
+            border: {
+                fg: '#f0f0f0'
+            },
+        }
+    });
+
+    const functionList = blessed.list({
         parent: screen,
         label: ' {bold}{cyan-fg}Functions{/cyan-fg}{/bold} ',
         tags: true,
-        top: 0,
-        right: 0,
+        top: '20%',
         width: '20%',
-        // height: '50%',
+        height: '40%',
         keys: true,
         vi: true,
-        mouse: true,
+        // mouse: true,
         border: 'line',
         scrollbar: {
             ch: ' ',
@@ -392,25 +410,47 @@ function showConsole(contract) {
                 bold: true
             }
         },
-        search: function (callback) {
-            prompt.input('Search:', '', function (err, value) {
-                if (err) return;
-                return callback(null, value);
-            });
+        search: function (_callback) {
+            // prompt.input('Search:', '', function (err, value) {
+            //     if (err) return;
+            //     return callback(null, value);
+            // });
         },
     });
-    list.on('select', elem => {
+    functionList.on('select item', elem => {
         const fn = fns[elem.getText()];
         box.setContent(fn.decompile());
         screen.render();
     });
 
-    const fns = Object.fromEntries(Object.entries(contract.functions).map(([selector, fn]) => [fn.label ?? selector, fn]));
-    list.setItems(Object.keys(fns));
+    const entries = [
+        /** @type {const} */(['main', { decompile: () => stringify(contract.main) } ]) ,
+        ...Object.entries(contract.functions).map(([selector, fn]) => /**@type{const}*/([fn.label ?? selector, fn]))
+    ];
+    const fns = Object.fromEntries(entries);
+    functionList.setItems(Object.keys(fns));
 
-    // Focus our element.
-    list.focus();
+    const eventList = blessed.list({
+        parent: screen,
+        label: ' {bold}{cyan-fg}Events{/cyan-fg}{/bold} ',
+        tags: true,
+        bottom: 0,
+        width: '20%',
+        height: '40%',
+        keys: true,
+        vi: true,
+        border: 'line',
+    });
+    eventList.setItems(contract.getEvents());
 
-    // Render the screen.
+    functionList.focus();
     screen.render();
+}
+
+/**
+ * 
+ * @param {EVM['metadata']} metadata 
+ */
+function getMetadata(metadata) {
+    return metadata ? `solc ${metadata.solc} ${metadata.url}` : '--';
 }
