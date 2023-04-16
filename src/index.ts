@@ -136,7 +136,7 @@ export class Contract {
         text += stringifyVariables(this.evm.variables);
         text += stringify(this.main);
         for (const [, fn] of Object.entries(this.functions)) {
-            text += stringifyFunction(fn);
+            text += fn.decompile();
         }
 
         return text;
@@ -369,6 +369,49 @@ export class PublicFunction {
             }
         }
     }
+
+    /**
+     *
+     * @returns the decompiled text for `thia` function.
+     */
+    decompile(): string {
+        let output = '';
+        output += 'function ';
+        if (this.label !== undefined) {
+            const fullFunction = this.label;
+            const fullFunctionName = fullFunction.split('(')[0];
+            const fullFunctionArguments = fullFunction
+                .replace(fullFunctionName, '')
+                .substring(1)
+                .slice(0, -1);
+            if (fullFunctionArguments) {
+                output += fullFunctionName + '(';
+                output += fullFunctionArguments
+                    .split(',')
+                    .map((a: string, i: number) => `${a} _arg${i}`)
+                    .join(', ');
+                output += ')';
+            } else {
+                output += fullFunction;
+            }
+        } else {
+            output += this.selector + '()';
+        }
+        output += ' ' + this.visibility;
+        if (this.constant) {
+            output += ' view';
+        }
+        if (this.payable) {
+            output += ' payable';
+        }
+        if (this.returns.length > 0) {
+            output += ` returns (${this.returns.join(', ')})`;
+        }
+        output += ' {\n';
+        output += stringify(this.stmts, 4);
+        output += '}\n\n';
+        return output;
+    }
 }
 
 // export class Assign {
@@ -469,52 +512,6 @@ export function stringify(stmts: Stmt[], indentation = 0): string {
     }
 
     return text;
-}
-
-/**
- *
- * @param functionName
- * @param fn
- * @param functionHashes
- * @returns
- */
-function stringifyFunction(fn: PublicFunction): string {
-    let output = '';
-    output += 'function ';
-    if (fn.label !== undefined) {
-        const fullFunction = fn.label;
-        const fullFunctionName = fullFunction.split('(')[0];
-        const fullFunctionArguments = fullFunction
-            .replace(fullFunctionName, '')
-            .substring(1)
-            .slice(0, -1);
-        if (fullFunctionArguments) {
-            output += fullFunctionName + '(';
-            output += fullFunctionArguments
-                .split(',')
-                .map((a: string, i: number) => `${a} _arg${i}`)
-                .join(', ');
-            output += ')';
-        } else {
-            output += fullFunction;
-        }
-    } else {
-        output += fn.selector + '()';
-    }
-    output += ' ' + fn.visibility;
-    if (fn.constant) {
-        output += ' view';
-    }
-    if (fn.payable) {
-        output += ' payable';
-    }
-    if (fn.returns.length > 0) {
-        output += ` returns (${fn.returns.join(', ')})`;
-    }
-    output += ' {\n';
-    output += stringify(fn.stmts, 4);
-    output += '}\n\n';
-    return output;
 }
 
 function requiresNoValue(stmts: Stmt[]): boolean {
