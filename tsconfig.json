@@ -3,13 +3,11 @@
         "module": "commonjs",
         "target": "es2020",
         "lib": ["es2020"],
-        "outDir": "types",
+        "outDir": "dist",
         "sourceMap": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "skipLibCheck": true,
         "declaration": true,
-        "emitDeclarationOnly": true,
         "strict": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
@@ -19,11 +17,10 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
-
     // Use SWC to speed up `mocha` tests.
     // See https://typestrong.org/ts-node/docs/swc.
     "ts-node": {
         "swc": true
     },
-    "exclude": ["node_modules", "types"]
+    "exclude": ["node_modules", "dist"]
 }

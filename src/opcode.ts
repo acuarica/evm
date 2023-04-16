@@ -1,7 +1,7 @@
-import { toHex } from './hex';
-
 /**
  * Set of `PUSHn` opcodes.
+ *
+ * Keep track of `PUSH0` https://eips.ethereum.org/EIPS/eip-3855
  */
 const PUSHES = {
     PUSH1: 0x60,
@@ -99,6 +99,10 @@ export const OPCODES = {
     GASLIMIT: 0x45,
     CHAINID: 0x46, // https://www.evm.codes/#46
     SELFBALANCE: 0x47, // https://www.evm.codes/#47
+    /**
+     * https://eips.ethereum.org/EIPS/eip-3198
+     */
+    BASEFEE: 0x48,
     POP: 0x50,
     MLOAD: 0x51,
     MSTORE: 0x52,
@@ -110,7 +114,12 @@ export const OPCODES = {
     PC: 0x58,
     MSIZE: 0x59,
     GAS: 0x5a,
+
+    /**
+     * Keep track of https://eips.ethereum.org/EIPS/eip-4200
+     */
     JUMPDEST: 0x5b,
+
     ...PUSHES,
     DUP1: 0x80,
     DUP2: 0x81,
@@ -158,14 +167,18 @@ export const OPCODES = {
     STATICCALL: 0xfa,
     REVERT: 0xfd,
     INVALID: 0xfe,
+
+    /**
+     * Keep track of https://eips.ethereum.org/EIPS/eip-6780
+     */
     SELFDESTRUCT: 0xff,
 } as const;
 
 /**
  * A map from numeric opcodes to string mnemonics.
  */
-const MNEMONICS = Object.fromEntries(
-    Object.entries(OPCODES).map(([key, value]) => [value, key as keyof typeof OPCODES])
+export const MNEMONICS = Object.fromEntries(
+    Object.entries(OPCODES).map(([key, value]) => [value, key])
 );
 
 /**
@@ -231,16 +244,33 @@ export type Opcode = {
 } & (Unary | Push);
 
 /**
+ * Represents the `Opcode`s found in `code`.
  *
- * @param code
+ * @param code the buffer containing the bytecode to decode
  * @returns
  */
-export function decode(code: Uint8Array): Opcode[] {
+export function decode(code: Uint8Array): {
+    /**
+     * Represents the `Opcode`s found in `code`.
+     */
+    opcodes: Opcode[];
+    /**
+     * Map between `JUMPDEST` instructions offset, _i.e._,
+     * as they appear in the `code` buffer and its index in the `opcodes` array.
+     *
+     * It allows to quickly find the `JUMPDEST` instruction.
+     */
+    jumpdests: { [jd: number]: number };
+} {
     const opcodes = [];
+    const jumpdests: { [jd: number]: number } = {};
 
     for (let i = 0; i < code.length; i++) {
         const opcode = code[i];
         const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
+        if (mnemonic === 'JUMPDEST') {
+            jumpdests[i] = opcodes.length;
+        }
         opcodes.push({
             offset: i,
             pc: opcodes.length,
@@ -262,10 +292,10 @@ export function decode(code: Uint8Array): Opcode[] {
         });
     }
 
-    return opcodes;
+    return { opcodes, jumpdests };
 
     /**
-     * Asserts whether `mnemonic` is a `PUSHn` opcode.
+     * Checks whether `mnemonic` is a `PUSHn` opcode.
      *
      * @param mnemonic the `mnemonic` to check.
      * @returns `true` when `mnemonic` is a `PUSHn` opcode.
@@ -276,14 +306,21 @@ export function decode(code: Uint8Array): Opcode[] {
     }
 }
 
-export function formatOpcode(op: Opcode) {
+export function formatOpcode(op: Opcode): string {
     const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
     const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
-    // const opcode = op.opcode.toString(16).padStart(2, '0').toUpperCase();
     const pushData = op.pushData
         ? ` 0x${toHex(op.pushData)} (${parseInt(toHex(op.pushData), 16)})`
         : '';
 
-    // return `${pc}    ${opcode}    ${op.mnemonic}${pushData}`;
     return `${pc}:${offset}    ${op.mnemonic}${pushData}`;
+}
+
+/**
+ *
+ * @param buffer
+ * @returns
+ */
+export function toHex(buffer: Uint8Array): string {
+    return buffer.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
 }

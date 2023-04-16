@@ -9,6 +9,18 @@
  */
 module.exports = {
     /**
+     * It's used to specify `ts` tests instead of `js`.
+     *
+     * > By default, `mocha` looks for the glob `"./test/*.{js,cjs,mjs}"`,
+     * > so you may want to put your tests in `test/` folder.
+     * > https://mochajs.org/#the-test-directory
+     *
+     * https://mochajs.org/#configuration-format
+     * https://github.com/mochajs/mocha/blob/9f24d0d03fd3dc1d15681d9b1548f77ddbeb9ef3/example/config/.mocharc.js#L41
+     */
+    spec: 'test/**/*.test.ts',
+
+    /**
      * From `mocha -h`
      *
      * ```txt

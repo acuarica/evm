@@ -1,22 +1,23 @@
 import { expect } from 'chai';
-import EVM from '../utils/evmtest';
-import { compile } from './utils/solc';
+import { Contract } from '../../src';
+import { contracts } from '../utils/solc';
 
-const CONTRACT = `
-contract C {
-    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
-        return (interfaceID == 0xffffffff);
-    }
-}`;
-
-describe('contracts::erc165', () => {
-    let evm: EVM;
-
-    before(() => {
-        evm = new EVM(compile(CONTRACT, '0.5.5'));
+contracts('erc165', compile => {
+    it('should detect ERC165', function () {
+        const sol = `contract C {
+                function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
+                    return (interfaceID == 0xffffffff);
+                } }`;
+        const contract = new Contract(compile(sol, this).bytecode);
+        expect(contract.isERC165()).to.be.true;
     });
 
-    it('should detect ERC165', () => {
-        expect(evm.isERC165()).to.be.true;
+    it('should detect not-ERC165', function () {
+        const sol = `contract C {
+                function supportsInterface2(bytes4 interfaceID) external pure returns (bool) {
+                    return (interfaceID == 0xffffffff);
+                } }`;
+        const contract = new Contract(compile(sol, this).bytecode);
+        expect(contract.isERC165()).to.be.false;
     });
 });

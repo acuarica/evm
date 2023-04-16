@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { EventFragment, FunctionFragment, ParamType } from 'ethers/lib/utils';
+import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
 import { inspect } from 'util';
 import * as functions from '../data/functions.json';
 import * as events from '../data/events.json';

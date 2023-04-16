@@ -17,23 +17,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: yarn lint
-      - run: yarn build
+      - run: yarn bundle
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: yarn install --frozen-lockfile
       - run: yarn test
       - run: yarn test:check
+      - run: yarn test:smoke
 
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: yarn install --frozen-lockfile
       - run: yarn coverage
+
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn install --frozen-lockfile
+      - run: yarn compile
+      - run: yarn ts-node examples/Compound.ts
+      - run: node examples/DAI.js
+      - run: node examples/unicornToken.js
+      - run: node examples/usdc-proxy.js

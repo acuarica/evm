@@ -1,0 +1,215 @@
+import {
+    Assign,
+    CallDataLoad,
+    CallSite,
+    CallValue,
+    evalExpr,
+    type Expr,
+    If,
+    isBigInt,
+    IsZero,
+    Jump,
+    JumpDest,
+    Jumpi,
+    Phi,
+    Require,
+    Return,
+    type Revert,
+    SigCase,
+    SLoad,
+    type Stmt,
+    Not,
+} from './ast';
+import { ControlFlowGraph } from './cfg';
+import { getDispatch } from './inst';
+import type { Opcode } from './opcode';
+import { State } from './state';
+import { assert } from './error';
+
+/**
+ *
+ */
+export class Contract {
+    /**
+     *
+     */
+    readonly main: { cfg: ControlFlowGraph; stmts: Stmt[] };
+
+    /**
+     *
+     */
+    readonly functions: { [hash: string]: TopLevelFunction } = {};
+
+    /**
+     *
+     */
+    readonly variables: { [key: string]: Variable } = {};
+
+    /**
+     *
+     */
+    readonly mappings: {
+        [key: string]: {
+            name: string | undefined;
+            structs: bigint[];
+            keys: Expr[][];
+            values: Expr[];
+        };
+    } = {};
+
+    /**
+     *
+     * @param opcodes
+     * @param functionHashes
+     * @param eventHashes
+     */
+    constructor(
+        opcodes: Opcode[],
+        /**
+         *
+         */
+        readonly functionHashes: { [hash: string]: string },
+        /**
+         *
+         */
+        readonly eventHashes: { [hash: string]: string }
+    ) {
+        const dispatch = getDispatch(this);
+        this.main = (cfg => ({ cfg, stmts: transform(cfg) }))(
+            new ControlFlowGraph(opcodes, dispatch, { pc: 0, state: new State() })
+        );
+
+        for (const branch of this.main.cfg.functionBranches) {
+            let cfg;
+            // try {
+            cfg = new ControlFlowGraph(opcodes, dispatch, branch);
+            // } catch (err) {
+            //     const functionSignature =
+            //         branch.hash in functionHashes ? functionHashes[branch.hash] : '';
+            //     throw new Error(branch.hash + functionSignature + (err as Error).message);
+            // }
+
+            const fn = new TopLevelFunction(cfg, branch.hash, functionHashes);
+            assert(cfg.functionBranches.length === 0);
+            this.functions[branch.hash] = fn;
+        }
+    }
+
+    getFunction(signature: string): TopLevelFunction | undefined {
+        for (const fn of Object.values(this.functions)) {
+            if (fn.label === signature) {
+                return fn;
+            }
+        }
+        return undefined;
+    }
+}
+
+export class TopLevelFunction {
+    readonly stmts: Stmt[];
+    readonly label: string;
+    readonly payable: boolean;
+    readonly visibility: string;
+    readonly constant: boolean;
+    readonly returns: any;
+
+    constructor(
+        readonly cfg: ControlFlowGraph,
+        readonly hash: string,
+        // readonly gasUsed: number,
+        functionHashes: { [s: string]: string }
+    ) {
+        this.stmts = transform(cfg);
+        this.payable = true;
+        this.visibility = 'public';
+        this.constant = false;
+        this.returns = [];
+        this.label = this.hash in functionHashes ? functionHashes[this.hash] : this.hash + '()';
+        if (this.hash in functionHashes) {
+            const functionName = functionHashes[this.hash].split('(')[0];
+            const argumentTypes = functionHashes[this.hash]
+                .replace(functionName, '')
+                .substr(1)
+                .slice(0, -1)
+                .split(',');
+            if (
+                argumentTypes.length > 1 ||
+                (argumentTypes.length === 1 && argumentTypes[0] !== '')
+            ) {
+                this.stmts.forEach(stmt =>
+                    updateCallDataLoad(stmt as unknown as Record<string, Expr>, argumentTypes)
+                );
+            }
+        }
+    }
+}
+
+function transform({ blocks, entry, doms, treed }: ControlFlowGraph): Stmt[] {
+    const pcs: { [key: string]: true } = {};
+    return transformBlock(entry);
+
+    function transformBlock(key: string): Stmt[] {
+        if (key in pcs) {
+            return [];
+            // return blocks[key].stmts;
+        }
+
+        pcs[key] = true;
+
+        const block = blocks[key];
+        if (block === undefined) return [];
+        assert(block !== undefined, key, Object.keys(blocks));
+
+        let i = 0;
+        for (const elem of block.entry.state.stack.values) {
+            if (elem instanceof Phi) {
+                block.stmts.unshift(new Assign(i, elem));
+                i++;
+            }
+        }
+
+        for (let i = 0; i < block.stmts.length; i++) {
+            block.stmts[i] = block.stmts[i].eval();
+        }
+
+        const last = block.stmts.at(-1);
+        if (last instanceof Jumpi) {
+            const cc = [...treed[key]].find(
+                dk => ![last.destBranch.key, last.fallBranch.key].includes(dk)
+            );
+            const contBlock = cc ? transformBlock(cc) : undefined;
+
+            // const d = blocks[last.destBranch.key];
+            // const f = blocks[last.fallBranch.key];
+
+            const trueBlock = transformBlock(last.destBranch.key);
+            const falseBlock = transformBlock(last.fallBranch.key);
+            return [
+                ...block.stmts.slice(0, -1),
+                ...(isRevertBlock(falseBlock)
+                    ? [new Require(evalExpr(last.condition), falseBlock[0].items), ...trueBlock]
+                    : contBlock
+                    ? [new If(evalExpr(last.condition), trueBlock, falseBlock), ...contBlock]
+                    : //2
+                      // ?
+                      [new If(evalExpr(new Not(last.condition)), falseBlock), ...trueBlock]),
+                // : [new If(evalExpr(last.condition), trueBlock, falseBlock)]
+            ];
+        } else if (last instanceof SigCase) {
+            const falseBlock = transformBlock(last.fallBranch.key);
+            return [
+                ...block.stmts.slice(0, -1),
+                new If(last.condition, [new CallSite(last.condition.hash)], falseBlock),
+            ];
+        } else if (last instanceof Jump) {
+            // delete pcs[last.destBranch!];
+            // return [...block.stmts.slice(0, -1)];
+            return [...block.stmts.slice(0, -1), ...transformBlock(last.destBranch.key)];
+        } else if (last instanceof JumpDest) {
+            // return [...block.stmts.slice(0, -1)];
+            return [...block.stmts.slice(0, -1), ...transformBlock(last.fallBranch.key)];
+        }
+
+        return block.stmts;
+    }
+}
