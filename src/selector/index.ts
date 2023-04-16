@@ -11,7 +11,7 @@ export function eventSelectors({ events }: IEvents) {
     }
 }
 
-export function patch(contract: Contract): Contract {
+function patch(contract: Contract): Contract {
     eventSelectors(contract.evm);
 
     for (const [selector, fn] of Object.entries(contract.functions)) {
