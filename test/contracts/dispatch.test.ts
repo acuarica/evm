@@ -2,8 +2,9 @@ import { expect } from 'chai';
 import { Contract } from '../../src';
 import { Return } from '../../src/evm/system';
 import { toHex } from '../../src/opcode';
-import { fnselector, patch } from '../utils/selector';
+import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
+import '../../src/selector';
 
 contracts('dispatch', compile => {
     it("should decompile function's return type and non-payable", function () {
@@ -35,7 +36,7 @@ contracts('dispatch', compile => {
             function symbol() external pure returns (uint256) { return 3; }
             function thisAddress() external view returns (address) { return address(this); }
         }`;
-        const contract = patch(new Contract(compile(sol, this).bytecode));
+        const contract = new Contract(compile(sol, this).bytecode).patch();
         expect(contract.getFunctions()).to.include.members([
             'balanceOf(uint256)',
             'symbol()',

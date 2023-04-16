@@ -4,8 +4,9 @@ import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { stringifyEvents } from '../../src/evm/log';
 import { State } from '../../src/state';
-import { eventSelector, eventSelectors } from '../utils/selector';
+import { eventSelector } from '../utils/selector';
 import { compile } from '../utils/solc';
+import { eventSelectors } from '../../src/selector';
 
 describe('evm::log', () => {
     const knownEventSig = 'Deposit(uint256)';

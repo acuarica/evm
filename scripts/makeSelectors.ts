@@ -16,8 +16,9 @@ const functionHashes = reduce(functions, s => s.substring(2, 10));
 const eventHashes = reduce(events, s => s.substring(2));
 
 writeFileSync('./data/functionHashes.json', JSON.stringify(functionHashes, null, 4));
-writeFileSync('./data/functionHashes.min.json', JSON.stringify(functionHashes));
 writeFileSync('./data/eventHashes.json', JSON.stringify(eventHashes, null, 4));
-writeFileSync('./data/eventHashes.min.json', JSON.stringify(eventHashes));
+
+writeFileSync('./src/selector/functionHashes.min.json', JSON.stringify(functionHashes));
+writeFileSync('./src/selector/eventHashes.min.json', JSON.stringify(eventHashes));
 
 console.log('Updated hashes successfully');
