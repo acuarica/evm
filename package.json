@@ -77,7 +77,7 @@
         "test:smoke": "mocha --config .mocharc.smoke.js",
         "coverage": "nyc mocha",
         "bundle": "webpack --mode production",
-        "hash": "ts-node scripts/hash.ts",
+        "makeSelectors": "ts-node scripts/makeSelectors.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs"
