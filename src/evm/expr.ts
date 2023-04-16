@@ -22,28 +22,7 @@ import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
 import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
 import type { State } from '../state';
 import type { Opcode } from '../opcode';
-
-export type SizeN<N extends number, T extends number[]> = T['length'] extends N
-    ? T[number]
-    : SizeN<N, [AsNumber<Plus<T[0], T[-1]>>, ...T]>;
-
-export type Bits = SizeN<32, [8]>;
-
-export type Bytes = SizeN<32, [1]>;
-
-/**
- * https://docs.soliditylang.org/en/v0.8.17/types.html
- */
-export type Type =
-    | 'address'
-    | 'address payable'
-    | 'bool'
-    | 'uint'
-    | `uint${Bits}`
-    | 'int'
-    | `int${Bits}`
-    | 'bytes'
-    | `bytes${Bytes}`;
+import type { Type } from '../type';
 
 /**
  *

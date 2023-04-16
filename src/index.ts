@@ -1,4 +1,5 @@
-import { type Expr, type Inst, Throw, type Val, type Type } from './evm/expr';
+import { type Expr, type Inst, Throw, type Val } from './evm/expr';
+import type { Type } from './type';
 import { Not } from './evm/logic';
 import type { Return, Revert } from './evm/system';
 import { State } from './state';
