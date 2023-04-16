@@ -372,7 +372,7 @@ export class PublicFunction {
 
     /**
      *
-     * @returns the decompiled text for `thia` function.
+     * @returns the decompiled text for `this` function.
      */
     decompile(): string {
         let output = '';
