@@ -1,7 +1,7 @@
 /**
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/object.fromentries/index.d.ts
  */
-export declare global {
+declare global {
     interface ObjectConstructor {
         keys<K extends string>(o: { [k in K]: unknown }): K[];
 
@@ -10,3 +10,5 @@ export declare global {
         fromEntries<K extends string, V>(entries: Iterable<readonly [K, V]>): { [k in K]: V };
     }
 }
+
+export {};
