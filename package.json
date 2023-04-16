@@ -1,0 +1,22 @@
+{
+  "name": "@acuarica/evm-cli",
+  "version": "0.0.1",
+  "description": "A CLI for the Ethereum Virtual Machine (EVM) bytecode decompiler",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@acuarica/evm": "^0.0.7",
+    "blessed": "^0.1.81",
+    "chalk": "4.1.0",
+    "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.21",
+    "@types/node": "^18.15.11",
+    "@types/yargs": "^17.0.24",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "compile": "tsc"
+  }
+}
