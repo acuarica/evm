@@ -1,6 +1,6 @@
 {
     "name": "@acuarica/evm",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "An ethereum virtual machine (EVM) bytecode decompiler",
     "exports": {
         ".": {
