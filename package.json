@@ -5,11 +5,11 @@
     "module": "lib/EVM.js",
     "exports": {
         ".": "./dist/src/index.js",
-        "./evm": "./dist/src/evm/index.js"
+        "./evm": "./dist/src/evm/index.js",
+        "./selector": "./dist/src/selector/index.js"
     },
     "files": [
-        "lib/",
-        "types/src/"
+        "dist/src/"
     ],
     "repository": {
         "type": "git",
