@@ -15,7 +15,12 @@ import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
 import { mapValues } from '../object';
 
-type EVMState = State<Inst, Expr>;
+/**
+ * An alias `type` for the `State` used in the `EVM`.
+ */
+export type EVMState = State<Inst, Expr>;
+
+export { Branch };
 
 function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
     return mapValues(table, fn => (_: Opcode, state: EVMState) => fn(state.stack));

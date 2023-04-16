@@ -3,6 +3,9 @@ import type { State } from '../state';
 import type { Sig } from './logic';
 import { type decode, formatOpcode, type Opcode } from '../opcode';
 
+/**
+ * Represents a jump from one `State` to another from the given `pc`.
+ */
 export class Branch {
     constructor(readonly pc: number, readonly state: State<Inst, Expr>) {}
 
