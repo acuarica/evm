@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import chalk = require('chalk');
+import c = require('ansi-colors');
 import { providers } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Contract } from '../src';
@@ -19,9 +19,9 @@ const MAX = process.env['MAX'];
  */
 const CONTRACT = process.env['CONTRACT'];
 
-const addr = chalk.cyan;
-const error = chalk.red;
-const warn = chalk.yellow;
+const addr = c.cyan;
+const error = c.red;
+const warn = c.yellow;
 
 const provider = {
     providers: [
@@ -113,9 +113,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         });
 
     after(() => {
-        console.info(`\n  Errors (${warn(errorsByContract.size)} contracts)`);
+        console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
-            console.info(warn('    •', id + ` - ${errors.length} error(s)`));
+            console.info(warn(`    • ${id} - ${errors.length} error(s)`));
             const errorsByReason = new Map<string, number>();
             errors.forEach(err => {
                 const count = errorsByReason.get(err.reason) ?? 0;

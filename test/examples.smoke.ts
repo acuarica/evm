@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import chalk = require('chalk');
+import c = require('ansi-colors');
 import { providers, utils } from 'ethers';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { inspect } from 'util';
@@ -165,7 +165,7 @@ describe('examples', function () {
 
 async function fetchBytecode(contract: string): Promise<string> {
     const BASE_PATH = './test/examples/';
-    const addr = chalk.blue;
+    const addr = c.blue;
     const provider = new providers.EtherscanProvider();
     const path = `${BASE_PATH}${contract}.bytecode`;
 
