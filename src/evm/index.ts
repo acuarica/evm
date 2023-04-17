@@ -51,13 +51,9 @@ export const INSTS = {
  * @param insts
  * @returns
  */
-function fill<F>(insts: { [mnemonic in keyof typeof OPCODES]: F }) {
-    return Object.fromEntries(
-        [...Array(256).keys()].map(k => [
-            k,
-            MNEMONICS[k] === undefined ? INSTS.INVALID : insts[MNEMONICS[k]],
-        ])
-    );
+function fill(insts: { [mnemonic in keyof typeof OPCODES]: typeof INSTS.INVALID }) {
+    const entry = (k: number) => (MNEMONICS[k] === undefined ? INSTS.INVALID : insts[MNEMONICS[k]]);
+    return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
 }
 
 /**
