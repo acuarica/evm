@@ -82,7 +82,7 @@
         "test": "yarn compile && mocha 'dist/test/**/*.test.js'",
         "test:check": "yarn compile && mocha 'dist/test/*.check.js'",
         "test:smoke": "yarn compile && mocha 'dist/test/*.smoke.js'",
-        "coverage": "nyc mocha",
+        "coverage": "yarn compile && nyc mocha 'dist/test/**/*.test.js'",
         "bundle": "webpack --mode production",
         "makeSelectors": "ts-node scripts/makeSelectors.ts",
         "prettier": "prettier --write .",
