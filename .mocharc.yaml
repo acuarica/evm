@@ -1,0 +1,7 @@
+# This configuration[1] is used when `mocha` is invoked directly
+# from the command line.
+#
+# [1] https://mochajs.org/#configuring-mocha-nodejs
+
+# https://mochajs.org/#-enable-source-maps
+enable-source-maps: true

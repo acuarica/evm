@@ -1,4 +1,0 @@
-{
-    "spec": "test/*.smoke.ts",
-    "require": "ts-node/register"
-}

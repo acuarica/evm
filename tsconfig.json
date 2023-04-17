@@ -4,6 +4,7 @@
         "target": "es2020",
         "lib": ["es2020"],
         "outDir": "dist",
+        "incremental": true,
         "sourceMap": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
@@ -16,11 +17,5 @@
         "noPropertyAccessFromIndexSignature": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true
-    },
-    // Use SWC to speed up `mocha` tests.
-    // See https://typestrong.org/ts-node/docs/swc.
-    "ts-node": {
-        "swc": true
-    },
-    "exclude": ["node_modules", "dist"]
+    }
 }
