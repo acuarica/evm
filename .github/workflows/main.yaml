@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: yarn install --frozen-lockfile
       - run: yarn compile
-      - run: yarn ts-node examples/Compound.ts
+      - run: node dist/examples/Compound.js
       - run: node examples/DAI.js
       - run: node examples/unicornToken.js
       - run: node examples/usdc-proxy.js
