@@ -1,6 +1,5 @@
 /.nyc_output/
 /coverage/
-/data/
 /dist/
 /src/selector/eventHashes.min.json
 /src/selector/functionHashes.min.json
