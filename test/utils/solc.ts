@@ -32,6 +32,8 @@ const SEVERITY = {
     info: 3,
 };
 
+const versionsLoaded = new Set<Version>();
+
 /**
  *
  * https://docs.soliditylang.org/en/v0.8.16/using-the-compiler.html#compiler-input-and-output-json-description
@@ -74,6 +76,12 @@ export function compile(
             const bytecode = readFileSync(`${path}.bytecode`, 'utf8');
             return { bytecode };
         } catch {
+            if (!versionsLoaded.has(version)) {
+                opts.context.timeout(opts.context.timeout() + 2000);
+                if (opts.context.test) {
+                    opts.context.test.title += `--loads \`solc-${version}\``;
+                }
+            }
             writeCacheFn = ({ bytecode }) => {
                 writeFileSync(`${path}.bytecode`, bytecode);
             };
@@ -107,6 +115,7 @@ export function compile(
         },
     };
 
+    versionsLoaded.add(version);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const solc = require(`solc-${version}`) as {
         // Not used
