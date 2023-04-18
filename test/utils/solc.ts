@@ -62,7 +62,7 @@ export function compile(
             .replace(/::/g, '.')
             .replace(/ /g, '-')
             .replace(/[:^'()]/g, '_')
-            .replace(/\."before-all"-hook-for-"[\w-]+"/, '');
+            .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
         }
