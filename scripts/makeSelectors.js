@@ -1,13 +1,19 @@
-import { writeFileSync } from 'fs';
-import { utils } from 'ethers';
+const { writeFileSync } = require('fs');
+const { utils } = require('ethers');
 
-import * as functions from '../data/functions.json';
-import * as events from '../data/events.json';
+const functions = require('../data/functions.json');
+const events = require('../data/events.json');
 
-type Hashes = { [hash: string]: string };
+/** @typedef {{ [hash: string]: string }} Hashes */
 
-const reduce = (entries: string[], replacer: (value: string) => string) =>
-    entries.reduce((map: Hashes, entry: string) => {
+/**
+ *
+ * @param {string[]} entries
+ * @param {(value: string) => string} replacer
+ * @returns
+ */
+const reduce = (entries, replacer) =>
+    entries.reduce((/** @type {Hashes}*/ map, /** @type {string}*/ entry) => {
         map[replacer(utils.keccak256(utils.toUtf8Bytes(entry)))] = entry;
         return map;
     }, {});
