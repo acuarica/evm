@@ -77,7 +77,7 @@ export function compile(
             return { bytecode };
         } catch {
             if (!versionsLoaded.has(version)) {
-                opts.context.timeout(opts.context.timeout() + 2000);
+                opts.context.timeout(opts.context.timeout() + 5000);
                 if (opts.context.test) {
                     opts.context.test.title += `--loads \`solc-${version}\``;
                 }
