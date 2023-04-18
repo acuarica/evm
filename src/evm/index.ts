@@ -5,8 +5,8 @@ import { type Metadata, stripMetadataHash } from '../metadata';
 import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
 
 import { PUSHES, STACK } from './stack';
-import { MATH } from './math';
 import { LOGIC } from './logic';
+import { MATH } from './math';
 import { SPECIAL } from './special';
 import { MEMORY } from './memory';
 import { Invalid, SYSTEM } from './system';
