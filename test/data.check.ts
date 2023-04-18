@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
 import { inspect } from 'util';
-import * as functions from '../data/functions.json';
-import * as events from '../data/events.json';
+import * as functions from '../selectors/functions.json';
+import * as events from '../selectors/events.json';
 
 describe('data', () => {
     describe('functions.json', () => {
