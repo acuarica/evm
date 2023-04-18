@@ -25,6 +25,7 @@ jobs:
 
   test:
     strategy:
+      max-parallel: 1
       matrix:
         os: [windows-latest, ubuntu-latest]
         # https://nodejs.dev/en/about/releases/
