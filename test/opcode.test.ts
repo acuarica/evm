@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { decode, formatOpcode, type Opcode, OPCODES } from '../src/opcode';
 
+const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
+
 describe('opcode', () => {
     it('should `decode` empty buffer', () => {
         const { opcodes, jumpdests } = decode('');
@@ -10,10 +12,11 @@ describe('opcode', () => {
     });
 
     it('should `decode` unary opcodes', () => {
-        const { opcodes, jumpdests } = decode(
-            Buffer.from([OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD]).toString(
-                'hex'
-            )
+        const { opcodes, jumpdests } = decodeFromArray(
+            OPCODES.ADDRESS,
+            OPCODES.ADDRESS,
+            OPCODES.JUMPDEST,
+            OPCODES.ADD
         );
 
         expect(opcodes).to.have.length(4);
@@ -49,16 +52,14 @@ describe('opcode', () => {
     });
 
     it('should `decode` `PUSH`n opcodes', () => {
-        const { opcodes, jumpdests } = decode(
-            Buffer.from([
-                OPCODES.PUSH4,
-                ...[1, 2, 3, 4],
-                OPCODES.JUMPDEST,
-                OPCODES.PUSH4,
-                ...[5, 6, 7, 8],
-                OPCODES.JUMPDEST,
-                OPCODES.ADD,
-            ]).toString('hex')
+        const { opcodes, jumpdests } = decodeFromArray(
+            OPCODES.PUSH4,
+            ...[1, 2, 3, 4],
+            OPCODES.JUMPDEST,
+            OPCODES.PUSH4,
+            ...[5, 6, 7, 8],
+            OPCODES.JUMPDEST,
+            OPCODES.ADD
         );
 
         expect(opcodes).to.have.length(5);
@@ -101,7 +102,7 @@ describe('opcode', () => {
     });
 
     it('should not fail `PUSH`n does not have enough data', () => {
-        expect(decode(Buffer.from([OPCODES.PUSH32]).toString('hex')).opcodes).to.be.deep.equal([
+        expect(decodeFromArray(OPCODES.PUSH32).opcodes).to.be.deep.equal([
             {
                 offset: 0,
                 pc: 0,
@@ -111,9 +112,7 @@ describe('opcode', () => {
             } satisfies Opcode,
         ]);
 
-        expect(
-            decode(Buffer.from([OPCODES.PUSH32, ...[1, 2, 3, 4]]).toString('hex')).opcodes
-        ).to.deep.equal([
+        expect(decodeFromArray(OPCODES.PUSH32, ...[1, 2, 3, 4]).opcodes).to.deep.equal([
             {
                 offset: 0,
                 pc: 0,
@@ -125,7 +124,7 @@ describe('opcode', () => {
     });
 
     it('should `decode` with `INVALID` opcodes', () => {
-        const { opcodes } = decode(Buffer.from([0xb0, OPCODES.ADD, 0xb1]).toString('hex'));
+        const { opcodes } = decodeFromArray(0xb0, OPCODES.ADD, 0xb1);
 
         expect(opcodes).to.have.length(3);
         expect(opcodes[0]).to.be.deep.equal({
