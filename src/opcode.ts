@@ -246,10 +246,10 @@ export type Opcode = {
 /**
  * Represents the `Opcode`s found in `code`.
  *
- * @param code the buffer containing the bytecode to decode
+ * @param code the hexadecimal string containing the bytecode to decode
  * @returns
  */
-export function decode(code: Uint8Array): {
+export function decode(code: string): {
     /**
      * Represents the `Opcode`s found in `code`.
      */
@@ -265,8 +265,9 @@ export function decode(code: Uint8Array): {
     const opcodes = [];
     const jumpdests: { [jd: number]: number } = {};
 
-    for (let i = 0; i < code.length; i++) {
-        const opcode = code[i];
+    const buffer = fromHexString(code);
+    for (let i = 0; i < buffer.length; i++) {
+        const opcode = buffer[i];
         const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
         if (mnemonic === 'JUMPDEST') {
             jumpdests[i] = opcodes.length;
@@ -280,7 +281,7 @@ export function decode(code: Uint8Array): {
                       mnemonic,
                       pushData: (() => {
                           const pushSize = opcode - OPCODES.PUSH1 + 0x01;
-                          const data = code.subarray(i + 1, i + pushSize + 1);
+                          const data = buffer.subarray(i + 1, i + pushSize + 1);
                           i += pushSize;
                           return data;
                       })(),
@@ -293,6 +294,19 @@ export function decode(code: Uint8Array): {
     }
 
     return { opcodes, jumpdests };
+
+    /**
+     *
+     * @param hexstr the hexadecimal string to convert to `Uint8Array`
+     * @returns the `Uint8Array` representation of `hexstr`
+     */
+    function fromHexString(hexstr: string): Uint8Array {
+        const buffer = new Uint8Array(hexstr.length / 2);
+        for (let i = 0; i < buffer.length; i++) {
+            buffer[i] = parseInt(hexstr.substring(i * 2, i * 2 + 2), 16);
+        }
+        return buffer;
+    }
 
     /**
      * Checks whether `mnemonic` is a `PUSHn` opcode.

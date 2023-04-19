@@ -174,14 +174,6 @@ export class Contract {
             }
         }
         return false;
-
-        // function fromHex(str: string): Uint8Array {
-        //     const buffer = new Uint8Array(str.length / 2);
-        //     for (let i = 0; i < buffer.length; i++) {
-        //         buffer[i] = parseInt(str.substr(i * 2, 2), 16);
-        //     }
-        //     return buffer;
-        // }
     }
 }
 

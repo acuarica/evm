@@ -110,7 +110,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
-        const { opcodes, jumpdests } = decode(Buffer.from(code.replace('0x', ''), 'hex'));
+        const { opcodes, jumpdests } = decode(code.replace('0x', ''));
 
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
