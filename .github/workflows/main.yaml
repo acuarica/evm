@@ -42,11 +42,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
       - uses: actions/cache@v3
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn test
       - run: yarn test:check
