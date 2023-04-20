@@ -13,10 +13,11 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
     ],
     rules: {
-        semi: [2, 'always'],
+        semi: ['error', 'always'],
+
         '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
         '@typescript-eslint/restrict-template-expressions': ['off'],
-        '@typescript-eslint/no-non-null-assertion': 0,
+        '@typescript-eslint/no-non-null-assertion': 'off',
 
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
@@ -39,5 +40,15 @@ module.exports = {
         '@typescript-eslint/consistent-type-imports': 'warn',
 
         'import/order': 'warn',
+        'import/no-useless-path-segments': 'warn',
     },
+    overrides: [
+        {
+            files: ['src/**/*.ts'],
+            rules: {
+                'no-console': 'error',
+                'import/no-nodejs-modules': 'error',
+            },
+        },
+    ],
 };
