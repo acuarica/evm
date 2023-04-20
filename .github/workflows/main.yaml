@@ -30,7 +30,8 @@ jobs:
 
   test:
     strategy:
-      max-parallel: 1
+      # Runs all node versions using the same `os` in parallel
+      max-parallel: 2
       matrix:
         os: [ubuntu-latest, windows-latest]
         # https://nodejs.dev/en/about/releases/
@@ -41,6 +42,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn test
       - run: yarn test:check
@@ -50,6 +56,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn coverage
 
@@ -57,6 +68,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn compile
       - run: node dist/examples/Compound.js
