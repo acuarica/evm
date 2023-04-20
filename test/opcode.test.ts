@@ -4,14 +4,14 @@ import { decode, formatOpcode, type Opcode, OPCODES } from '../src/opcode';
 const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
 describe('opcode', () => {
-    it('should `decode` empty buffer', () => {
-        const { opcodes, jumpdests } = decode('');
-
-        expect(opcodes).to.be.empty;
-        expect(jumpdests).to.be.empty;
-    });
-
     ['', '0x'].forEach(p => {
+        it(`should \`decode\` empty buffer with prefix \`${p}\``, () => {
+            const { opcodes, jumpdests } = decode(p + '');
+
+            expect(opcodes).to.be.empty;
+            expect(jumpdests).to.be.empty;
+        });
+
         it(`should \`decode\` opcodes with prefix \`${p}\``, () => {
             const { opcodes } = decode(p + '00010203');
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
