@@ -11,6 +11,13 @@ describe('opcode', () => {
         expect(jumpdests).to.be.empty;
     });
 
+    ['', '0x'].forEach(prefix => {
+        it(`should \`decode\` opcodes with prefix \`${prefix}\``, () => {
+            const { opcodes } = decode(prefix + '00010203');
+            expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
+        });
+    });
+
     it('should `decode` unary opcodes', () => {
         const { opcodes, jumpdests } = decodeFromArray(
             OPCODES.ADDRESS,

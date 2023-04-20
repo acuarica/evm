@@ -246,7 +246,9 @@ export type Opcode = {
 /**
  * Represents the `Opcode`s found in `code`.
  *
- * @param code the hexadecimal string containing the bytecode to decode
+ * Given `code` is a hexadecimal string, it may begin with hex prefix `0x`.
+ *
+ * @param code the hexadecimal string containing the bytecode to decode.
  * @returns
  */
 export function decode(code: string): {
@@ -301,6 +303,9 @@ export function decode(code: string): {
      * @returns the `Uint8Array` representation of `hexstr`
      */
     function fromHexString(hexstr: string): Uint8Array {
+        if (hexstr.slice(0, 2) === '0x') {
+            hexstr = hexstr.slice(2);
+        }
         const buffer = new Uint8Array(hexstr.length / 2);
         for (let i = 0; i < buffer.length; i++) {
             buffer[i] = parseInt(hexstr.substring(i * 2, i * 2 + 2), 16);
