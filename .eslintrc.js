@@ -46,6 +46,7 @@ module.exports = {
         {
             files: ['src/**/*.ts'],
             rules: {
+                'no-restricted-globals': ['error', 'Buffer'],
                 'no-console': 'error',
                 'import/no-nodejs-modules': 'error',
             },
