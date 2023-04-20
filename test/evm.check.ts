@@ -1,14 +1,17 @@
+import assert = require('assert');
+
 import { expect } from 'chai';
+import { keccak_256 } from '@noble/hashes/sha3';
+
 import { EVM } from '../src/evm';
 import { toHex } from '../src/opcode';
-import { fnselector } from './utils/selector';
-import { compile } from './utils/solc';
-import { keccak_256 } from '@noble/hashes/sha3';
 import { State } from '../src/state';
 import { type Expr, type Inst, Val } from '../src/evm/expr';
-import assert = require('assert');
 import { And, Not } from '../src/evm/logic';
 import { Block } from '../src/evm/special';
+
+import { fnselector } from './utils/selector';
+import { compile } from './utils/solc';
 
 describe('evm', () => {
     it('`PUSH4` method selector to invoke external contract', function () {

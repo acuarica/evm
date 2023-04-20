@@ -1,8 +1,8 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { inspect } from 'util';
 import { expect } from 'chai';
 import c = require('ansi-colors');
 import { providers, utils } from 'ethers';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { inspect } from 'util';
 import { Contract } from '../src';
 import '../src/selector';
 

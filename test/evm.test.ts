@@ -1,9 +1,11 @@
 import { expect } from 'chai';
+
 import { EVM, INSTS } from '../src/evm';
-import { compile } from './utils/solc';
 import { State } from '../src/state';
 import type { Expr, Inst } from '../src/evm/expr';
 import { Invalid } from '../src/evm/system';
+
+import { compile } from './utils/solc';
 
 describe('evm', () => {
     it('should halt with `INVALID`', () => {

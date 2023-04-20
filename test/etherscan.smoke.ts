@@ -1,7 +1,8 @@
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+
 import { expect } from 'chai';
 import c = require('ansi-colors');
 import { providers } from 'ethers';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Contract } from '../src';
 import type { Throw } from '../src/evm/expr';
 

@@ -1,3 +1,6 @@
+import type { State } from '../state';
+import type { Opcode } from '../opcode';
+import type { Type } from '../type';
 import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
 import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
@@ -20,9 +23,6 @@ import type {
 import type { Log } from './log';
 import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
 import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
-import type { State } from '../state';
-import type { Opcode } from '../opcode';
-import type { Type } from '../type';
 
 /**
  *

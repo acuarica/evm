@@ -1,7 +1,8 @@
-import * as functionHashes from './functionHashes.min.json';
-import * as eventHashes from './eventHashes.min.json';
 import type { IEvents } from '../evm/log';
 import { Contract } from '../';
+
+import * as functionHashes from './functionHashes.min.json';
+import * as eventHashes from './eventHashes.min.json';
 
 export function eventSelectors({ events }: IEvents) {
     for (const [topic, event] of Object.entries(events)) {

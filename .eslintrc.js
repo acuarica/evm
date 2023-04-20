@@ -1,12 +1,12 @@
-/**@type {import('eslint').Linter.Config} */
 // eslint-disable-next-line no-undef
+/**@type {import('eslint').Linter.Config} */
 module.exports = {
     root: true,
     parser: '@typescript-eslint/parser',
     parserOptions: {
         project: ['./tsconfig.json'],
     },
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'import'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
@@ -37,5 +37,7 @@ module.exports = {
          * https://typescript-eslint.io/rules/consistent-type-imports
          */
         '@typescript-eslint/consistent-type-imports': 'warn',
+
+        'import/order': 'warn',
     },
 };

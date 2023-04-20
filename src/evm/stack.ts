@@ -1,6 +1,7 @@
-import { type Expr, Val } from './expr';
 import { toHex } from '../opcode';
 import { type Stack } from '../state';
+
+import { type Expr, Val } from './expr';
 
 export const PUSHES = {
     PUSH1: push,

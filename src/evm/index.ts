@@ -2,6 +2,8 @@ import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { type Stack, State } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
 
+import { mapValues } from '../object';
+
 import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
 
 import { PUSHES, STACK } from './stack';
@@ -13,7 +15,6 @@ import { Invalid, SYSTEM } from './system';
 import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
-import { mapValues } from '../object';
 
 /**
  * An alias `type` for the `State` used in the `EVM`.

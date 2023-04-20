@@ -1,7 +1,8 @@
-import type { Inst, Expr, IInst, Val } from './expr';
 import type { State } from '../state';
-import type { Sig } from './logic';
 import { type decode, formatOpcode, type Opcode } from '../opcode';
+
+import type { Inst, Expr, IInst, Val } from './expr';
+import type { Sig } from './logic';
 
 /**
  * Represents a jump from one `State` to another from the given `pc`.
