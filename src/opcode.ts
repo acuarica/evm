@@ -303,12 +303,18 @@ export function decode(code: string): {
      * @returns the `Uint8Array` representation of `hexstr`
      */
     function fromHexString(hexstr: string): Uint8Array {
-        if (hexstr.slice(0, 2) === '0x') {
-            hexstr = hexstr.slice(2);
+        if (hexstr.length % 2 !== 0) {
+            throw new Error('Unable to decode, input should have even length');
         }
-        const buffer = new Uint8Array(hexstr.length / 2);
-        for (let i = 0; i < buffer.length; i++) {
-            buffer[i] = parseInt(hexstr.substring(i * 2, i * 2 + 2), 16);
+        const start = hexstr.slice(0, 2) === '0x' ? 2 : 0;
+        const buffer = new Uint8Array((hexstr.length - start) / 2);
+        for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
+            const value = parseInt(hexstr.slice(i, i + 2), 16);
+            if (value >= 0) {
+                buffer[j] = value;
+            } else {
+                throw new Error(`Unable to decode, invalid value at ${i}`);
+            }
         }
         return buffer;
     }

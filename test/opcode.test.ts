@@ -11,10 +11,18 @@ describe('opcode', () => {
         expect(jumpdests).to.be.empty;
     });
 
-    ['', '0x'].forEach(prefix => {
-        it(`should \`decode\` opcodes with prefix \`${prefix}\``, () => {
-            const { opcodes } = decode(prefix + '00010203');
+    ['', '0x'].forEach(p => {
+        it(`should \`decode\` opcodes with prefix \`${p}\``, () => {
+            const { opcodes } = decode(p + '00010203');
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
+        });
+
+        it(`should throw when input is not even with prefix \`${p}\``, () => {
+            expect(() => decode(p + '1')).to.throw('input should have even length');
+        });
+
+        it(`should throw when input has an invalid number with prefix \`${p}\``, () => {
+            expect(() => decode(p + '010x')).to.throw(`invalid value at ${p.length + 2}`);
         });
     });
 
