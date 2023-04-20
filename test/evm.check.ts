@@ -32,7 +32,7 @@ describe('evm', () => {
 
     it('`keccak_256` hash selector for `supportsInterface(bytes4)`', function () {
         const sig = 'supportsInterface(bytes4)';
-        const hash = Buffer.from(keccak_256(sig).slice(0, 4)).toString('hex');
+        const hash = toHex(keccak_256(sig).slice(0, 4));
         expect(hash).to.be.equal('01ffc9a7');
     });
 

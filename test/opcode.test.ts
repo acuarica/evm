@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { decode, formatOpcode, type Opcode, OPCODES } from '../src/opcode';
+import { decode, formatOpcode, type Opcode, OPCODES, toHex } from '../src/opcode';
 
 const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
@@ -200,5 +200,10 @@ describe('opcode', () => {
                 pushData: null,
             })
         ).to.be.equal('   0:   0    INVALID');
+    });
+
+    it('should convert buffer `toHex`', () => {
+        const output = toHex(Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]));
+        expect(output).to.be.equal('010203040c0d0e0ffeff00');
     });
 });
