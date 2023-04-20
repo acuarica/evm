@@ -1,5 +1,5 @@
 import type { IEvents } from '../evm/log';
-import { Contract } from '../';
+import { Contract } from '..';
 
 import * as functionHashes from './functionHashes.min.json';
 import * as eventHashes from './eventHashes.min.json';
