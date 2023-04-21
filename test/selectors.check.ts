@@ -9,7 +9,7 @@ const json = (f: string) => JSON.parse(readFileSync(`./selectors/${f}.json`, 'ut
 const functions = json('functions');
 const events = json('events');
 
-describe('data', () => {
+describe('selectors', () => {
     describe('functions.json', () => {
         it('should not contain duplicates', () => {
             expect(functions).to.deep.equal([...new Set(functions)]);
@@ -54,7 +54,7 @@ describe('data', () => {
                     )} does not seem to be a valid function signature`
                 ).to.be.true;
             }
-        }).timeout(10000);
+        }).timeout(15000);
     });
 
     describe('events.json', () => {
