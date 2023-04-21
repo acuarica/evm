@@ -1,10 +1,13 @@
 import { inspect } from 'util';
-
+import { readFileSync } from 'fs';
 import { expect } from 'chai';
 import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
-import * as functions from '../selectors/functions.json';
-import * as events from '../selectors/events.json';
+
 import { isElemType } from '../src/type';
+
+const json = (f: string) => JSON.parse(readFileSync(`./selectors/${f}.json`, 'utf-8')) as string[];
+const functions = json('functions');
+const events = json('events');
 
 describe('data', () => {
     describe('functions.json', () => {
