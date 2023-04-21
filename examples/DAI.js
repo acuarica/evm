@@ -1,7 +1,7 @@
+const { providers } = require('ethers');
+
 const { Contract } = require('@acuarica/evm');
 require('@acuarica/evm/selector');
-
-const { providers } = require('ethers');
 
 const provider = new providers.EtherscanProvider();
 
