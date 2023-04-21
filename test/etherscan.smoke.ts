@@ -42,6 +42,17 @@ const provider = {
     },
 };
 
+class SelectorStats {
+    readonly hitSelectors = new Set<string>();
+    readonly missedSelectors = new Set<string>();
+
+    append(functions: Contract['functions']) {
+        for (const fn of Object.values(functions)) {
+            (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(fn.selector);
+        }
+    }
+}
+
 describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
     this.bail(true);
 
@@ -74,6 +85,8 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
             metadataStats.noMetadata++;
         }
     }
+
+    const selectorStats = new SelectorStats();
 
     csv.toString()
         .trimEnd()
@@ -115,6 +128,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
 
                 const contract = new Contract(bytecode).patch();
                 addMetadata(contract.metadata);
+                selectorStats.append(contract.functions);
 
                 if (contract.evm.errors.length > 0) {
                     errorsByContract.set(`${name}-${address}`, contract.evm.errors);
@@ -134,11 +148,12 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
 
     after(() => {
         console.info('\n  Metadata Stats');
-        console.info(
-            `    • ${info('Contracts with no metadata')} ${metadataStats.noMetadata.toString()}`
-        );
+        console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
         console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
-        console.info(`    • ${info('SOLC Versions')} ${[...metadataStats.solcs].join('|')}`);
+        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].join('|')}`);
+        console.info('\n  Selector Stats');
+        console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
+        console.info(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));
