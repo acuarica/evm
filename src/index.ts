@@ -218,7 +218,7 @@ export class PublicFunction {
     /**
      *
      */
-    _label: string | undefined = undefined;
+    private _label: string | undefined = undefined;
     readonly payable: boolean;
     readonly visibility: string;
     readonly constant: boolean;
@@ -269,7 +269,7 @@ export class PublicFunction {
         }
     }
 
-    get label() {
+    get label(): string | undefined {
         return this._label;
     }
 
