@@ -13,10 +13,22 @@ type Bytecode = {
     sourceMap: string;
 };
 
+type ABI = {
+    type: 'function' | 'event';
+    name: string;
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+}[];
+
 type SolcOutput = {
     contracts: {
         SOURCE: {
-            [contractName: string]: { evm: { bytecode: Bytecode; deployedBytecode: Bytecode } };
+            [contractName: string]: {
+                abi: ABI;
+                evm: { bytecode: Bytecode; deployedBytecode: Bytecode };
+            };
         };
     };
     sources: { SOURCE: { id: 0 } }; // Not currently used
@@ -51,12 +63,12 @@ export function compile(
         contractName?: string;
         context?: Mocha.Context;
     } = {}
-): { bytecode: string } {
+): { bytecode: string; abi: ABI } {
     content = `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`;
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (opts.context !== undefined) {
-        const basePath = './.bytecode';
+        const basePath = './.artifacts';
         const fileName = title(opts.context.test)
             .replace(/^../, '')
             .replace('solc-', '')
@@ -73,8 +85,7 @@ export function compile(
         const path = `${basePath}/${fileName}-${hash}`;
 
         try {
-            const bytecode = readFileSync(`${path}.bytecode`, 'utf8');
-            return { bytecode };
+            return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
             if (!versionsLoaded.has(version)) {
                 opts.context.timeout(opts.context.timeout() + 5000);
@@ -82,9 +93,7 @@ export function compile(
                     opts.context.test.title += `--loads \`solc-${version}\``;
                 }
             }
-            writeCacheFn = ({ bytecode }) => {
-                writeFileSync(`${path}.bytecode`, bytecode);
-            };
+            writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
         }
     } else {
         writeCacheFn = _output => {};
@@ -109,7 +118,7 @@ export function compile(
             // },
             outputSelection: {
                 '*': {
-                    '*': ['evm.deployedBytecode'],
+                    '*': ['abi', 'evm.deployedBytecode'],
                 },
             },
         },
@@ -150,9 +159,10 @@ export function compile(
     }
 
     const bytecode = selectedContract.evm.deployedBytecode.object;
-    writeCacheFn({ bytecode });
+    const abi = selectedContract.abi;
+    writeCacheFn({ bytecode, abi });
 
-    return { bytecode };
+    return { bytecode, abi };
 
     function valid(output: SolcOutput): boolean {
         const sev = opts.severity ?? 'error';

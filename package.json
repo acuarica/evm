@@ -87,6 +87,6 @@
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
-        "clean": "rm .bytecode/*.bytecode"
+        "clean": "rm -r .artifacts/"
     }
 }

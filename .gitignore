@@ -14,5 +14,8 @@
 # `report-dir`: Where to put the coverage report files
 /coverage/
 
-# Compiled `solc` output & downloaded bytecode cache 
-/.bytecode/
+# Compiled `solc` output
+/.artifacts/
+
+# Downloaded Etherscan bytecode cache 
+/.etherscan/

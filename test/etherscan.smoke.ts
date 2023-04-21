@@ -104,7 +104,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
         .forEach(([_tx, address, name]) => {
             it(`should decode & decompile ${name} ${address}`, async function () {
-                const BASE_PATH = '.bytecode/etherscan/';
+                const BASE_PATH = '.etherscan/';
                 const path = `${BASE_PATH}${name}-${address}.bytecode`;
                 if (!existsSync(path)) {
                     this.timeout(10000);
