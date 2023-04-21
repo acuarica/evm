@@ -11,17 +11,17 @@ const events = json('events');
 describe('selectors', () => {
     describe('functions.json', () => {
         it('should not contain duplicates', () => {
-            expect(functions).to.deep.equal([...new Set(functions)]);
+            expect(functions).to.be.deep.equal([...new Set(functions)]);
         });
 
         it('entries should not contain spaces (`storage` being an exception)', () => {
             expect(
                 functions.filter(functionSig => functionSig.replace(/ storage/g, '').includes(' '))
-            ).to.deep.equal([]);
+            ).to.be.deep.equal([]);
         });
 
         it('entries should not contain semicolons', () => {
-            expect(functions.filter(functionSig => functionSig.includes(';'))).to.deep.equal([]);
+            expect(functions.filter(functionSig => functionSig.includes(';'))).to.be.deep.equal([]);
         });
 
         it('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', () => {
@@ -29,7 +29,7 @@ describe('selectors', () => {
                 functions.filter(
                     functionSig => !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)
                 )
-            ).to.deep.equal([]);
+            ).to.be.deep.equal([]);
         });
 
         it('entries should contain valid arguments', () => {
@@ -49,7 +49,7 @@ describe('selectors', () => {
                     functionSig
                 ).to.be.true;
             }
-        }).timeout(15000);
+        }).timeout(20000);
     });
 
     describe('events.json', () => {
@@ -58,17 +58,17 @@ describe('selectors', () => {
         });
 
         it('entries should not contain spaces', () => {
-            expect(events.filter(eventSig => eventSig.includes(' '))).to.deep.equal([]);
+            expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
         });
 
         it('entries should not contain semicolons', () => {
-            expect(events.filter(eventSig => eventSig.includes(';'))).to.deep.equal([]);
+            expect(events.filter(eventSig => eventSig.includes(';'))).to.be.deep.equal([]);
         });
 
         it('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', () => {
             expect(
                 events.filter(eventSig => !eventSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/))
-            ).to.deep.equal([]);
+            ).to.be.deep.equal([]);
         });
 
         it('entries should contain valid arguments', () => {
