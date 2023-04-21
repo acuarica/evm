@@ -1,4 +1,3 @@
-import { inspect } from 'util';
 import { readFileSync } from 'fs';
 import { expect } from 'chai';
 import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
@@ -38,9 +37,7 @@ describe('selectors', () => {
                 functionSig = functionSig.replace(/ storage/g, '');
 
                 const func = FunctionFragment.from(functionSig);
-                expect(functionSig, `${functionSig} may contain uint, int or byte`).to.be.equal(
-                    func.format()
-                );
+                expect(functionSig, functionSig).to.be.equal(func.format());
                 expect(
                     func.inputs.every(
                         isValidType(
@@ -49,9 +46,7 @@ describe('selectors', () => {
                                 paramType.charAt(0).toUpperCase() === paramType.charAt(0)
                         )
                     ),
-                    `${functionSig}:${inspect(
-                        func.inputs
-                    )} does not seem to be a valid function signature`
+                    functionSig
                 ).to.be.true;
             }
         }).timeout(15000);
@@ -79,15 +74,8 @@ describe('selectors', () => {
         it('entries should contain valid arguments', () => {
             for (const eventSig of events) {
                 const event = EventFragment.from(eventSig);
-                expect(eventSig, `${eventSig} may contain uint|int|byte`).to.be.equal(
-                    event.format()
-                );
-                expect(
-                    event.inputs.every(isValidType(_paramType => false)),
-                    `${eventSig}:${inspect(
-                        event.inputs
-                    )} does not seem to be a valid event signature`
-                ).to.be.true;
+                expect(eventSig, eventSig).to.be.equal(event.format());
+                expect(event.inputs.every(isValidType(_paramType => false)), eventSig).to.be.true;
             }
         });
     });
