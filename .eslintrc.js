@@ -15,6 +15,16 @@ module.exports = {
     rules: {
         semi: ['error', 'always'],
 
+        /**
+         * https://eslint.org/docs/latest/rules/new-parens
+         *
+         * Enforce or disallow parentheses when invoking a constructor with no arguments
+         *
+         * JavaScript allows the omission of parentheses when invoking a function via the `new` keyword and the constructor has no arguments.
+         * However, some coders believe that omitting the parentheses is inconsistent with the rest of the language and thus makes code less clear.
+         */
+        'new-parens': 'error',
+
         '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
         '@typescript-eslint/restrict-template-expressions': ['off'],
         '@typescript-eslint/no-non-null-assertion': 'off',

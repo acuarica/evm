@@ -6,7 +6,6 @@ import { providers } from 'ethers';
 
 import { Contract } from '../src';
 import type { Throw } from '../src/evm/expr';
-import type { Metadata } from '../src/metadata';
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -42,17 +41,6 @@ const provider = {
     },
 };
 
-class SelectorStats {
-    readonly hitSelectors = new Set<string>();
-    readonly missedSelectors = new Set<string>();
-
-    append(functions: Contract['functions']) {
-        for (const fn of Object.values(functions)) {
-            (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(fn.selector);
-        }
-    }
-}
-
 describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
     this.bail(true);
 
@@ -71,22 +59,33 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     }
 
     const errorsByContract = new Map<string, Throw[]>();
-    const metadataStats = {
-        noMetadata: 0,
-        protocols: new Set<string>(),
-        solcs: new Set<string>(),
-    };
+    const metadataStats = new (class {
+        noMetadata = 0;
+        readonly protocols = new Set<string>();
+        readonly solcs = new Set<string>();
 
-    function addMetadata(metadata: Metadata | undefined) {
-        if (metadata) {
-            metadataStats.protocols.add(metadata.protocol);
-            metadataStats.solcs.add(metadata.solc);
-        } else {
-            metadataStats.noMetadata++;
+        append(metadata: Contract['metadata']) {
+            if (metadata) {
+                this.protocols.add(metadata.protocol);
+                this.solcs.add(metadata.solc);
+            } else {
+                this.noMetadata++;
+            }
         }
-    }
+    })();
 
-    const selectorStats = new SelectorStats();
+    const selectorStats = new (class {
+        readonly hitSelectors = new Set<string>();
+        readonly missedSelectors = new Set<string>();
+
+        append(functions: Contract['functions']) {
+            for (const fn of Object.values(functions)) {
+                (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(
+                    fn.selector
+                );
+            }
+        }
+    })();
 
     csv.toString()
         .trimEnd()
@@ -127,7 +126,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 }
 
                 const contract = new Contract(bytecode).patch();
-                addMetadata(contract.metadata);
+                metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
 
                 if (contract.evm.errors.length > 0) {
