@@ -3,8 +3,10 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { expect } from 'chai';
 import c = require('ansi-colors');
 import { providers } from 'ethers';
+
 import { Contract } from '../src';
 import type { Throw } from '../src/evm/expr';
+import type { Metadata } from '../src/metadata';
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -23,6 +25,7 @@ const CONTRACT = process.env['CONTRACT'];
 const addr = c.cyan;
 const error = c.red;
 const warn = c.yellow;
+const info = c.blue;
 
 const provider = {
     providers: [
@@ -57,6 +60,20 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     }
 
     const errorsByContract = new Map<string, Throw[]>();
+    const metadataStats = {
+        noMetadata: 0,
+        protocols: new Set<string>(),
+        solcs: new Set<string>(),
+    };
+
+    function addMetadata(metadata: Metadata | undefined) {
+        if (metadata) {
+            metadataStats.protocols.add(metadata.protocol);
+            metadataStats.solcs.add(metadata.solc);
+        } else {
+            metadataStats.noMetadata++;
+        }
+    }
 
     csv.toString()
         .trimEnd()
@@ -97,6 +114,8 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 }
 
                 const contract = new Contract(bytecode).patch();
+                addMetadata(contract.metadata);
+
                 if (contract.evm.errors.length > 0) {
                     errorsByContract.set(`${name}-${address}`, contract.evm.errors);
                 }
@@ -114,6 +133,12 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         });
 
     after(() => {
+        console.info('\n  Metadata Stats');
+        console.info(
+            `    • ${info('Contracts with no metadata')} ${metadataStats.noMetadata.toString()}`
+        );
+        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
+        console.info(`    • ${info('SOLC Versions')} ${[...metadataStats.solcs].join('|')}`);
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));
