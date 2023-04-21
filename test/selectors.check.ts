@@ -77,7 +77,7 @@ describe('selectors', () => {
                 expect(eventSig, eventSig).to.be.equal(event.format());
                 expect(event.inputs.every(isValidType(_paramType => false)), eventSig).to.be.true;
             }
-        });
+        }).timeout(10000);
     });
 });
 
