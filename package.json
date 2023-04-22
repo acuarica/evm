@@ -83,7 +83,7 @@
         "test:smoke": "yarn compile && mocha 'dist/test/*.smoke.js'",
         "coverage": "yarn compile && nyc mocha 'dist/test/**/*.{test,check}.js'",
         "bundle": "webpack --mode production",
-        "make:selectors": "node selectors/make.js",
+        "make:selectors": "node selectors/make.mjs",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",

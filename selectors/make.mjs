@@ -1,8 +1,15 @@
-const { writeFileSync } = require('fs');
-const { utils } = require('ethers');
+import { readFileSync, writeFileSync } from 'fs';
+import { utils } from 'ethers';
 
-const functions = require('./functions.json');
-const events = require('./events.json');
+/**
+ *
+ * @param {string} f
+ * @returns {string[]}
+ */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+const json = f => JSON.parse(readFileSync(`./selectors/${f}.json`, 'utf-8'));
+const functions = json('functions');
+const events = json('events');
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
@@ -27,4 +34,5 @@ writeFileSync('./selectors/eventHashes.json', JSON.stringify(eventHashes, null, 
 writeFileSync('./src/selector/functionHashes.min.json', JSON.stringify(functionHashes));
 writeFileSync('./src/selector/eventHashes.min.json', JSON.stringify(eventHashes));
 
+// eslint-disable-next-line no-undef
 console.log('Updated hashes successfully');
