@@ -13,6 +13,34 @@ const events = json('events');
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
+// const BITS = [...Array(32).keys()].map(n => (n + 1) * 8) ;
+// const BYTES = [...Array(32).keys()].map(n => n + 1);
+// const TYPES = [
+//     'address payable',
+//     'address',
+//     'bool',
+//     ...BITS.map(n => `uint${n}`).reverse(),
+//     'uint',
+//     ...BITS.map(n => `int${n}` ).reverse(),
+//     'int',
+//     ...BYTES.map(n => `bytes${n}`).reverse(),
+//     'bytes',
+//     'string',
+//     'function'
+// ];
+// const TABLE = TYPES.map((t, i) => /** @type {const} */([t, String.fromCharCode(i+33)]) );
+
+// /**
+//  *
+//  * @param {string} entry
+//  */
+// function encodeEntry(entry) {
+//     for (const [t, c] of TABLE) {
+//         entry = entry.replaceAll(t, c);
+//     }
+//     return entry;
+// }
+
 /**
  *
  * @param {string[]} entries
