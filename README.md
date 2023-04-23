@@ -1,8 +1,8 @@
 # EVM Bytecode Decompiler
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=for-the-badge)](https://github.com/acuarica/evm/actions)
-[![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=for-the-badge)](https://www.npmjs.com/package/@acuarica/evm)
-[![GitHub](https://img.shields.io/github/license/acuarica/evm?style=for-the-badge)](https://github.com/acuarica/evm/blob/master/LICENSE)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions)
+[![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm)
+[![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/master/LICENSE)
 
 An Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
