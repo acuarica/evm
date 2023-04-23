@@ -7,7 +7,7 @@
 
 An [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
-> Forked from [MrLuit/evm](https://github.com/MrLuit/evm)
+> Forked from [MrLuit/evm](https://github.com/MrLuit/evm). For more info, see [Detached Fork](#detached-fork).
 
 ## Usage
 
@@ -140,3 +140,18 @@ web3.eth.getTransaction(
   }
 );
 ```
+
+## Detached Fork
+
+This GitHub repo was originally a fork of <https://github.com/MrLuit/evm>.
+It served as a great starting point for this project.
+The fact that it is lightweight and written in TypeScript,
+make it ideal for embedding in other applications.
+
+However, as we started to support and decompile newer contracts, we realize it was quite outdated.
+Besides not being able to process newer smart contracts, for some, the bytecode analysis algorithm didnt't terminate.
+That's the reason we forked that repo.
+
+We did a major overhaul of the codebase, adding new features, refactoring the whole project and adding both testing and documentation.
+As we add changes we realized it didn't make sense to keep it a forked repo.
+Therefore, as of _Apr 17, 2023_, this project is no longer a fork of [MrLuit/evm](https://github.com/MrLuit/evm).
