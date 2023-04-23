@@ -153,5 +153,7 @@ Besides not being able to process newer smart contracts, for some, the bytecode 
 That's the reason we forked that repo.
 
 We did a major overhaul of the codebase, adding new features, refactoring the whole project and adding both testing and documentation.
-As we add changes we realized it didn't make sense to keep it a forked repo.
-Therefore, as of _Apr 17, 2023_, this project is no longer a fork of [MrLuit/evm](https://github.com/MrLuit/evm).
+As we added changes, we realized it didn't make sense to keep it a forked repo.
+Moreover, when sending new PRs, the default `base` repo is the upstream repo, which is not what we want in our case.
+This behavior is both error prone and annoying.
+That's why, as of _Apr 17, 2023_, this project is no longer a fork of [MrLuit/evm](https://github.com/MrLuit/evm).
