@@ -51,23 +51,41 @@ contracts('empty', (compile, _fallback, version) => {
                 evm = contract.evm;
             });
 
-            if (index === 0) {
+            it(`should get metadata hash for minimal contract definition`, () => {
                 const HASHES = {
-                    '0.5.5':
-                        'bzzr://096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
-                    '0.5.17':
-                        'bzzr://b3196c0c582734d74810ef2241e728f6b83b6aa79d5f53732f29849c4bb4a25a',
-                    '0.6.12':
-                        'ipfs://12205823235d39a19a144ca0a76bbdf1e6ee8280514a68113e2c59bf79dd6000b767',
-                    '0.7.6':
-                        'ipfs://12206f1628c622f5b88ce2fc0b4eb82036ef4a13488b80241c68fb8cd209fc59f641',
-                    '0.8.16':
-                        'ipfs://122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
-                };
-                it(`should get metadata hash for minimal contract definition`, () => {
-                    expect(evm.metadata!.url).to.be.equal(HASHES[version]);
-                });
-            }
+                    '0.5.5': [
+                        'bzzr',
+                        '096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
+                    ],
+                    '0.5.17': [
+                        'bzzr',
+                        'b3196c0c582734d74810ef2241e728f6b83b6aa79d5f53732f29849c4bb4a25a',
+                    ],
+                    '0.6.12': [
+                        'ipfs',
+                        '12205823235d39a19a144ca0a76bbdf1e6ee8280514a68113e2c59bf79dd6000b767',
+                    ],
+                    '0.7.6': [
+                        'ipfs',
+                        '12206f1628c622f5b88ce2fc0b4eb82036ef4a13488b80241c68fb8cd209fc59f641',
+                    ],
+                    '0.8.16': [
+                        'ipfs',
+                        '122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
+                    ],
+                } as const;
+
+                expect(evm.metadata).to.be.not.undefined;
+
+                const hash = HASHES[version];
+                expect(evm.metadata!.protocol).to.be.equal(hash[0]);
+                expect(evm.metadata!.solc).to.be.equal(version === '0.5.5' ? '<0.5.9' : version);
+
+                if (index === 0) {
+                    expect(evm.metadata!.hash).to.be.equal(hash[1]);
+                    expect(evm.metadata!.url).to.be.equal(`${hash[0]}://${hash[1]}`);
+                }
+            });
 
             it('should not contain `LOG1` nor `LOG2` given metadata has been stripped', () => {
                 expect(evm.opcodes).to.have.length(7);
