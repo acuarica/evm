@@ -185,7 +185,7 @@ export const MNEMONICS = Object.fromEntries(
  * Represents all unary opcodes defined by the EVM.
  * Essentially, all but `PUSHn` opcodes are unary opcodes.
  */
-export interface Unary {
+interface Unary {
     /**
      * Represents a valid opcode.
      *
@@ -205,7 +205,7 @@ export interface Unary {
 /**
  * Represents a `PUSHn` mnemonic augmented with its `pushData`.
  */
-export interface Push {
+interface Push {
     /**
      * A `PUSHn` opcode only permits a `PUSHn` opcode.
      */
