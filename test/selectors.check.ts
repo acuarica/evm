@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect } from 'chai';
 import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
+import c = require('ansi-colors');
 
 import { isElemType } from '../src/type';
 
@@ -9,6 +10,11 @@ const functions = json('functions');
 const events = json('events');
 
 describe('selectors', () => {
+    const stats = {
+        lengthyFunctionSigs: [] as string[],
+        lengthyEventSigs: [] as string[],
+    };
+
     describe('functions.json', () => {
         it('should not contain duplicates', () => {
             expect(functions).to.be.deep.equal([...new Set(functions)]);
@@ -34,6 +40,10 @@ describe('selectors', () => {
 
         it('entries should contain valid arguments', () => {
             for (let functionSig of functions) {
+                if (functionSig.length >= 256) {
+                    stats.lengthyFunctionSigs.push(functionSig);
+                }
+
                 functionSig = functionSig.replace(/ storage/g, '');
 
                 const func = FunctionFragment.from(functionSig);
@@ -73,11 +83,26 @@ describe('selectors', () => {
 
         it('entries should contain valid arguments', () => {
             for (const eventSig of events) {
+                if (eventSig.length >= 256) {
+                    stats.lengthyEventSigs.push(eventSig);
+                }
+
                 const event = EventFragment.from(eventSig);
                 expect(eventSig, eventSig).to.be.equal(event.format());
                 expect(event.inputs.every(isValidType(_paramType => false)), eventSig).to.be.true;
             }
         }).timeout(10000);
+    });
+
+    after(() => {
+        const info = c.blue;
+        const warn = c.yellow;
+        const statsinfo = (title: string, sigs: string[]) =>
+            console.info(`    • ${info('Lengthy ' + title)} ${warn(sigs.length.toString())}`);
+
+        console.info('\n  Signature Stats');
+        statsinfo('Functions', stats.lengthyFunctionSigs);
+        statsinfo('Events', stats.lengthyEventSigs);
     });
 });
 
