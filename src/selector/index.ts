@@ -1,3 +1,15 @@
+/**
+ * This module provides a fair database of selectors for both functions and events.
+ *
+ * Given the size of the database,
+ * this module is completely decoupled from the rest of the package.
+ * This allows the user to provide their own set of selectors.
+ *
+ * This module does not `export` any functions nor classes.
+ * Instead, it appends the `patch` method to the `Contract` class.
+ *
+ * @packageDocumentation
+ */
 import type { IEvents } from '../evm/log';
 import { Contract } from '..';
 
