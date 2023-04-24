@@ -2,6 +2,7 @@
 /.nyc_output/
 /coverage/
 /dist/
+/docs/tsdoc/
 /selectors/*.json
 /src/selector/eventHashes.min.json
 /src/selector/functionHashes.min.json
