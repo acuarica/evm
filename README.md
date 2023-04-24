@@ -8,6 +8,9 @@ An Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-eth
 
 > Forked from [MrLuit/evm](https://github.com/MrLuit/evm). For more info, see [Detached Fork](#detached-fork).
 
+[![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
+[![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
+
 ## Usage
 
 > npm i evm
