@@ -4,6 +4,14 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>EVM Bytecode Decompiler</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&family=Roboto:wght@400&display=swap"
+            rel="stylesheet"
+        />
+
         <link rel="icon" type="image/svg+xml" href="favicon.drawio.svg" />
         <style>
             :root {
@@ -44,15 +52,19 @@
             }
 
             html {
-                color: var(--neutral-content);
-                background-color: var(--neutral);
+                /* color: var(--primary-content); */
+                /* background-color: var(--base-content); */
 
                 /* --tw-bg-opacity: 1; */
 
                 /* background-color: hsl(var(--base-100) / var(--tw-bg-opacity)); */
-                /* background-color: hsl(var(--b1) ); */
+                background-color: hsl(var(--nc));
                 /* background-color: var(--base-100) ; */
-                background-color: black;
+                /* background-color: black; */
+                /* font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji"; */
+                font-family: 'Open Sans', sans-serif;
+                /* font-family: 'Open Sans', sans-serif; */
+                font-family: 'Roboto', sans-serif;
             }
 
             .code,
