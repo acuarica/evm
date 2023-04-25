@@ -5,6 +5,9 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: [main]
+    # But do not trigger them when only `md` files were modified.
+    paths-ignore:
+      - '**.md'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
