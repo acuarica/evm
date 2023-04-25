@@ -6,7 +6,6 @@
 ![npm](https://img.shields.io/npm/dt/@acuarica/evm)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/master/LICENSE)
 [![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
-[![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
 An Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
@@ -32,7 +31,7 @@ yarn add @acuarica/evm
 - **Checking whether an opcode exists and is reachable within bytecode**
 - **Detecting whether contracts are compliant to certain ERCs**
 
-## API [![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
+## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
 ### Methods
 
