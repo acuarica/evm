@@ -33,20 +33,17 @@ yarn add @acuarica/evm
 
 ## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/full%20reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
-### Methods
+### Main Methods and Properties
 
-- **`getBytecode()`** - _Get raw bytecode (not really useful; same as input)_
-- **`getOpcodes()`** - _Returns opcodes including pc and pushData (if included)_
-- [**`getFunctions()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#getFunctions)
-  _Parse functions from their signatures in bytecode_
-- **getEvents()** - _Parse events from their signatures in bytecode_
-- **containsOpcode(opcode)** - _Check whether an opcode exists and is reachable within bytecode_
-- **getJumpDestinations()** - _Get array of program counters from JUMPDEST opcodes_
-- **`readonly metadata`** - _Get [Swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) for [contract metadata](https://solidity.readthedocs.io/en/v0.5.2/metadata.html)_
-- **reset()** - _Reset the EVM state (stack, memory, etc.)_
-- **parse()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
-- **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
-- **isERC165()** - _Detect whether contract is [ERC165](https://eips.ethereum.org/EIPS/eip-165)-compliant_
+- [**`bytecode`**](asdf) - Get raw bytecode (not really useful; same as input)
+- [**`metadata`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#metadata) - Get [IPFS](https://docs.ipfs.tech/concepts/content-addressing/#cid-versions) or [Swarm](https://github.com/ethereum/wiki/wiki/Swarm-Hash) hash (if present) for [contract metadata](https://docs.soliditylang.org/en/latest/metadata.html)
+- [**`evm.opcodes`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#opcodes) - Returns opcodes including pc and pushData (if included)
+- [**`evm.jumpdests`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#jumpdests) - Get map of program counters from JUMPDEST opcodes
+- [**`getFunctions()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#getFunctions) - Parse functions from their signatures in bytecode
+- [**`getEvents()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#decompile) - Parse events from their signatures in bytecode
+- [**`containsOpcode(opcode)`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#containsOpcode) - Check whether an opcode exists and is reachable within bytecode
+- [**`decompile()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#decompile) - Decompile bytecode into readable [Solidity](https://soliditylang.org/)-like pseudocode
+- [**`isERC165()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#isERC165) - Detect whether contract is [ERC165](https://eips.ethereum.org/EIPS/eip-165)-compliant
 
 ## Usage
 
