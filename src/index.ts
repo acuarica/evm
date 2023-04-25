@@ -36,7 +36,11 @@ export class Contract {
 
     readonly payable: boolean;
 
-    constructor(bytecode: string) {
+    /**
+     *
+     * @param bytecode the bytecode to analyze in hexadecimal format.
+     */
+    constructor(readonly bytecode: string) {
         this.evm = new EVM(bytecode);
         const main = new State<Inst, Expr>();
         this.evm.run(0, main);
