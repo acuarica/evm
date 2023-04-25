@@ -1,3 +1,6 @@
 {
-    "reporter": ["lcov", "text"]
+    "reporter": ["lcov", "text"],
+    "lines": "85",
+    "branches": "82",
+    "statements": "85"
 }

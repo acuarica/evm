@@ -1,6 +1,7 @@
 # EVM Bytecode Decompiler
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/main.yaml)
+![nycrc config on GitHub](https://img.shields.io/nycrc/@acuarica/evm)
 [![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm)
 ![npm](https://img.shields.io/npm/dt/@acuarica/evm)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/master/LICENSE)
