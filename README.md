@@ -3,26 +3,20 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions)
 [![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/master/LICENSE)
+[![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
+[![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
 An Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
 > Forked from [MrLuit/evm](https://github.com/MrLuit/evm). For more info, see [Detached Fork](#detached-fork).
 
-[![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
-[![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
-
 ## Install
-
-<div>
-<pre style="display: inline-block"><code>npm install @acuarica/evm</code></pre>
-<pre style="display: inline-block">yarn add @acuarica/evm</pre>
-</div>
-
-> npm i @acuarica/evm
 
 ```sh
 npm install @acuarica/evm
 ```
+
+or using Yarn instead
 
 ```sh
 yarn add @acuarica/evm
@@ -36,7 +30,7 @@ yarn add @acuarica/evm
 - **Checking whether an opcode exists and is reachable within bytecode**
 - **Detecting whether contracts are compliant to certain ERCs**
 
-## API
+## API [![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
 ### Methods
 
@@ -52,11 +46,11 @@ yarn add @acuarica/evm
 - **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
 - **isERC165()** - _Detect whether contract is [ERC165](https://eips.ethereum.org/EIPS/eip-165)-compliant_
 
-## Examples
+## Usage
 
-### Converting bytecode to opcodes
+### Converting Bytecode to Opcodes
 
-#### Node.js
+**Node.js.**
 
 ```javascript
 const { EVM } = require('evm');
@@ -70,7 +64,7 @@ web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
 });
 ```
 
-#### Browser
+**Browser.**
 
 ```javascript
 const { EVM } = window.EVM_Utils;
@@ -82,9 +76,9 @@ web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, co
 });
 ```
 
-### Decompiling a contract
+### Decompiling a Contract
 
-#### Node.js
+**Node.js.**
 
 ```javascript
 const { EVM } = require('evm');
@@ -104,7 +98,7 @@ web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
 });
 ```
 
-#### Browser
+**Browser.**
 
 ```javascript
 const { EVM } = window.EVM;
@@ -122,9 +116,9 @@ web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, co
 });
 ```
 
-### Extracting data from transaction
+### Extracting data from transaction **WIP**
 
-#### Node.js
+**Node.js.**
 
 ```javascript
 const { Transaction } = require('evm');
@@ -140,7 +134,7 @@ web3.eth
   });
 ```
 
-#### Browser
+**Browser.**
 
 ```javascript
 const { Transaction } = window.EVM;
