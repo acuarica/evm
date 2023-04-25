@@ -11,9 +11,22 @@ An Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-eth
 [![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
 [![TypeDoc](https://img.shields.io/badge/tsdoc-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
-## Usage
+## Install
 
-> npm i evm
+<div>
+<pre style="display: inline-block"><code>npm install @acuarica/evm</code></pre>
+<pre style="display: inline-block">yarn add @acuarica/evm</pre>
+</div>
+
+> npm i @acuarica/evm
+
+```sh
+npm install @acuarica/evm
+```
+
+```sh
+yarn add @acuarica/evm
+```
 
 ## Features
 
