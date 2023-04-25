@@ -31,17 +31,18 @@ yarn add @acuarica/evm
 - **Checking whether an opcode exists and is reachable within bytecode**
 - **Detecting whether contracts are compliant to certain ERCs**
 
-## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
+## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/full%20reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
 ### Methods
 
-- **getBytecode()** - _Get raw bytecode (not really useful; same as input)_
-- **getOpcodes()** - _Returns opcodes including pc and pushData (if included)_
-- **getFunctions()** - _Parse functions from their signatures in bytecode_
+- **`getBytecode()`** - _Get raw bytecode (not really useful; same as input)_
+- **`getOpcodes()`** - _Returns opcodes including pc and pushData (if included)_
+- [**`getFunctions()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#getFunctions)
+  _Parse functions from their signatures in bytecode_
 - **getEvents()** - _Parse events from their signatures in bytecode_
 - **containsOpcode(opcode)** - _Check whether an opcode exists and is reachable within bytecode_
 - **getJumpDestinations()** - _Get array of program counters from JUMPDEST opcodes_
-- **getSwarmHash()** - _Get [Swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) for [contract metadata](https://solidity.readthedocs.io/en/v0.5.2/metadata.html)_
+- **`readonly metadata`** - _Get [Swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) for [contract metadata](https://solidity.readthedocs.io/en/v0.5.2/metadata.html)_
 - **reset()** - _Reset the EVM state (stack, memory, etc.)_
 - **parse()** - _Interpret opcodes by looping over them, returns array of interpreted opcodes_
 - **decompile()** - _Decompile bytecode into readable [Solidity](https://en.wikipedia.org/wiki/Solidity)-like pseudocode_
@@ -159,11 +160,11 @@ The fact that it is lightweight and written in TypeScript,
 make it ideal for embedding in other applications.
 
 However, as we started to support and decompile newer contracts, we realize it was quite outdated.
-Besides not being able to process newer smart contracts, for some, the bytecode analysis algorithm didnt't terminate.
+Besides not being able to process newer smart contracts, for some, the bytecode analysis algorithm did not terminate.
 That's the reason we forked that repo.
 
 We did a major overhaul of the codebase, adding new features, refactoring the whole project and adding both testing and documentation.
-As we added changes, we realized it didn't make sense to keep it a forked repo.
+As we added changes, we realized it did not make sense to keep it a forked repo.
 Moreover, when sending new PRs, the default `base` repo is the upstream repo, which is not what we want in our case.
 This behavior is both error prone and annoying.
 That's why, as of _Apr 17, 2023_, this project is no longer a fork of [MrLuit/evm](https://github.com/MrLuit/evm).
