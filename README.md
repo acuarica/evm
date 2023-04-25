@@ -35,7 +35,7 @@ yarn add @acuarica/evm
 
 ### Main Methods and Properties
 
-- [**`bytecode`**](asdf) - Get raw bytecode (not really useful; same as input)
+- [**`bytecode`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#bytecode) - Get raw bytecode (not really useful; same as input)
 - [**`metadata`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#metadata) - Get [IPFS](https://docs.ipfs.tech/concepts/content-addressing/#cid-versions) or [Swarm](https://github.com/ethereum/wiki/wiki/Swarm-Hash) hash (if present) for [contract metadata](https://docs.soliditylang.org/en/latest/metadata.html)
 - [**`evm.opcodes`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#opcodes) - Returns opcodes including pc and pushData (if included)
 - [**`evm.jumpdests`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#jumpdests) - Get map of program counters from JUMPDEST opcodes
