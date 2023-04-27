@@ -52,7 +52,9 @@ export const INSTS = {
  * @param insts
  * @returns
  */
-function fill(insts: { [mnemonic in keyof typeof OPCODES]: typeof INSTS.INVALID }) {
+function fill(insts: { [mnemonic in keyof typeof OPCODES]: typeof INSTS.INVALID }): {
+    [opcode: number]: (opcode: Opcode, state: EVMState) => void;
+} {
     const entry = (k: number) => (MNEMONICS[k] === undefined ? INSTS.INVALID : insts[MNEMONICS[k]]);
     return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
 }
@@ -71,7 +73,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      *
      */
     private readonly insts: {
-        [opcode in string]: (opcode: Opcode, state: EVMState) => void;
+        [opcode: number]: (opcode: Opcode, state: EVMState) => void;
     };
 
     /**
