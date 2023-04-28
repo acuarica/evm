@@ -1,4 +1,16 @@
 /**
+ * This module is used to `decode` bytecode into `Opcode`.
+ *
+ * ## Example
+ *
+ * ```ts
+ * const { opcodes } = decode('0x6003600501');
+ * ```
+ *
+ * @packageDocumentation
+ */
+
+/**
  * Set of `PUSHn` opcodes.
  *
  * Keep track of `PUSH0` https://eips.ethereum.org/EIPS/eip-3855
@@ -244,9 +256,14 @@ export type Opcode = {
 } & (Unary | Push);
 
 /**
- * Represents the `Opcode`s found in `code`.
+ * Decodes the hexadecimal string `code` into `Opcode`s.
+ * `code` may or may not begin with hex prefix `0x`.
  *
- * Given `code` is a hexadecimal string, it may begin with hex prefix `0x`.
+ * ## Example
+ *
+ * ```ts
+ * const { opcodes } = decode('0x6003600501');
+ * ```
  *
  * @param code the hexadecimal string containing the bytecode to decode.
  * @returns
@@ -264,7 +281,7 @@ export function decode(code: string): {
      */
     jumpdests: { [jd: number]: number };
 } {
-    const opcodes = [];
+    const opcodes: Opcode[] = [];
     const jumpdests: { [jd: number]: number } = {};
 
     const buffer = fromHexString(code);

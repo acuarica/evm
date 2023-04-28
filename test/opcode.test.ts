@@ -165,6 +165,33 @@ describe('opcode', () => {
         });
     });
 
+    it('should `decode` example from hex string', () => {
+        const { opcodes } = decode('0x6003600501');
+
+        expect(opcodes).to.have.length(3);
+        expect(opcodes[0]).to.be.deep.equal({
+            offset: 0,
+            pc: 0,
+            opcode: OPCODES.PUSH1,
+            mnemonic: 'PUSH1',
+            pushData: Buffer.from([3]),
+        } as Opcode);
+        expect(opcodes[1]).to.be.deep.equal({
+            offset: 2,
+            pc: 1,
+            opcode: OPCODES.PUSH1,
+            mnemonic: 'PUSH1',
+            pushData: Buffer.from([5]),
+        } as Opcode);
+        expect(opcodes[2]).to.be.deep.equal({
+            offset: 4,
+            pc: 2,
+            opcode: OPCODES.ADD,
+            mnemonic: 'ADD',
+            pushData: null,
+        } as Opcode);
+    });
+
     it('should `decode` all `INVALID` opcodes', () => {
         const { opcodes } = decode('0c0d0e0ffc');
         expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('INVALID'));
