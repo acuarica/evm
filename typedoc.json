@@ -1,6 +1,14 @@
 {
     "searchInComments": true,
+    "includeVersion": true,
+    "plugin": ["typedoc-plugin-extras"],
     "navigationLinks": {
         "GitHub": "http://github.com/acuarica/evm"
-    }
+    },
+
+    // https://www.npmjs.com/package/typedoc-plugin-extras
+    "footerTypedocVersion": true,
+    "footerLastModified": true,
+    "customTitle": "EVM Bytecode Analyzer & Decompiler",
+    "customDescription": "A Symbolic Ethereum Virtual Machine (EVM) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode"
 }
