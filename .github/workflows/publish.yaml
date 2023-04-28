@@ -39,11 +39,9 @@ jobs:
         run: |
           yarn compile
           yarn lint
-      - name: Test
-      - run: |
-          yarn test
-          yarn test:check
-          yarn test:smoke
+      - run: yarn test
+      - run: yarn test:check
+      - run: yarn test:smoke
       - name: 'Set up git user to be able to commit, tag and push'
         run: |
           git config --global user.name 'acuarica'
