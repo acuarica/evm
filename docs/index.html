@@ -1,186 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>EVM Bytecode Decompiler</title>
-
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&family=Roboto:wght@400&display=swap"
-            rel="stylesheet"
-        />
-
-        <link rel="icon" type="image/svg+xml" href="favicon.drawio.svg" />
-        <style>
-            :root {
-                --primary: #661ae6;
-                --primary-content: #ffffff;
-                --secondary: #d926aa;
-                --secondary-content: #ffffff;
-                --accent: #1fb2a5;
-                --accent-content: #ffffff;
-                --neutral: #191d24;
-                --neutral-focus: #111318;
-                --neutral-content: #a6adbb;
-                --base-100: #2a303c;
-                --base-200: #242933;
-                --base-300: #20252e;
-                --base-content: #a6adbb;
-
-                --info: #3abff8;
-                --success: #36d399;
-                --warning: #fbbd23;
-                --error: #f87272;
-
-                --tw-bg-opacity: 1;
-
-                --p: 262.35 80.315% 50.196%;
-                --pc: 0 0% 100%;
-                --s: 315.75 70.196% 50%;
-                --sc: 0 0% 100%;
-                --a: 174.69 70.335% 40.98%;
-                --ac: 0 0% 100%;
-                --n: 218.18 18.033% 11.961%;
-                --nf: 222.86 17.073% 8.0392%;
-                --nc: 220 13.376% 69.216%;
-                --b1: 220 17.647% 20%;
-                --b2: 220 17.241% 17.059%;
-                --b3: 218.57 17.949% 15.294%;
-                --bc: 220 13.376% 69.216%;
-            }
-
-            html {
-                /* color: var(--primary-content); */
-                /* background-color: var(--base-content); */
-
-                /* --tw-bg-opacity: 1; */
-
-                /* background-color: hsl(var(--base-100) / var(--tw-bg-opacity)); */
-                background-color: hsl(var(--nc));
-                /* background-color: var(--base-100) ; */
-                /* background-color: black; */
-                /* font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji"; */
-                font-family: 'Open Sans', sans-serif;
-                /* font-family: 'Open Sans', sans-serif; */
-                font-family: 'Roboto', sans-serif;
-            }
-
-            .code,
-            #contract,
-            #loading {
-                display: none;
-            }
-        </style>
-
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"
-            type="text/css"
-        />
-        <link
-            rel="stylesheet"
-            href="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism_okaidia.css"
-        />
+        <meta charset="UTF-8" />
+        <title>Document</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="description" content="Description" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
     </head>
-
     <body>
-        <header style="display: flex; align-items: baseline; gap: 1rem">
-            <a href="./"
-                ><img src="favicon.drawio.svg" height="24rem" alt="EVM Bytecode Decompiler Logo"
-            /></a>
-            <h1>EVM Bytecode Decompiler</h1>
-            <a href="./tsdoc/">See the docs</a>
-        </header>
-
-        <main>
-            <section id="examples">
-                <h2>Examples</h2>
-                <ul>
-                    <li><a href="#0x3FDA67f7583380E67ef93072294a7fAc882FD7E7">Compound</a></li>
-                    <li><a href="#0x06012c8cf97BEaD5deAe237070F9587f8E7A266d">CryptoKitties</a></li>
-                    <li><a href="#0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359">DAI</a></li>
-                    <li><a href="#0x314159265dD8dbb310642f98f50C066173C1259b">ENS</a></li>
-                    <li>
-                        <a href="#0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-                            >Wrapped Ether (WETH)</a
-                        >
-                    </li>
-                </ul>
-                <footer>Or put any contract address in the address bar</footer>
-            </section>
-
-            <section id="contract">
-                <h2>Contract</h2>
-                <div id="loading">
-                    <p>Loading...</p>
-                </div>
-                <div class="code" style="width: 90vw">
-                    <pre
-                        style="overflow: auto"
-                    ><code id="code" class="language-solidity"></code></pre>
-                </div>
-            </section>
-        </main>
-
-        <script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
-            typea="application/javascript"
-        ></script>
-        <script src="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism.js"></script>
-        <script src="https://prismjs.com/components/prism-solidity.js"></script>
-
+        <div id="app">Loading...</div>
         <script>
-            const provider = new ethers.providers.EtherscanProvider();
-            console.debug('Ethers provider', provider);
+            window.$docsify = {
+                name: 'EVM Bytecode Decompiler',
+                repo: 'acuarica/evm',
+                coverpage: true,
+                onlyCover: false,
+                hideSidebar: true,
+                homepage: 'home.md',
 
-            function getCode() {
-                const address = location.hash.replace('#', '');
-
-                if (!address) {
-                    return;
-                }
-
-                console.debug('Getting code for address', address);
-
-                $('#examples').fadeOut(function () {
-                    $('#contract').fadeIn();
-                    $('#loading').fadeIn();
-
-                    provider
-                        .getCode(address)
-                        .then(code => {
-                            try {
-                                const evm = new EVM(code, {}, {});
-                                $('#code').html(evm.decompile());
-                                Prism.highlightAll();
-                                $('#loading').fadeOut(function () {
-                                    $('.code').fadeIn();
-                                });
-                            } catch (err) {
-                                console.error(err);
-                                alert(err.message);
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            alert(err.message);
-                        });
-                });
-            }
-
-            $(window).on('hashchange', getCode);
-
-            if (location.hash) {
-                getCode();
-            }
+                // loadSidebar: true,
+                // mergeNavbar: true, // https://docsify.js.org/#/configuration?id=mergenavbar
+                // subMaxLevel: 3, // https://docsify.js.org/#/configuration?id=submaxlevel
+            };
         </script>
+        <!-- Docsify v4 -->
+        <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     </body>
 </html>
