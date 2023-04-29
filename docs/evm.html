@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>EVM Bytecode Decompiler</title>
+        <link rel="icon" type="image/svg+xml" href="favicon.drawio.svg" />
+        <link
+            rel="stylesheet"
+            href="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism_okaidia.css"
+        />
+    </head>
+
+    <body>
+        <pre><code id="code" class="language-solidity">Loading decompiled contract...</code></pre>
+
+        <script src="https://tutsplus.github.io/syntax-highlighter-demos/highlighters/Prism/prism.js"></script>
+        <script src="https://prismjs.com/components/prism-solidity.js"></script>
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
+        <script>
+            const address = location.search.replace('?c=', '');
+
+            if (address.length === 42 && address.startsWith('0x')) {
+                console.info('Fetching code for address', address);
+                new ethers.providers.EtherscanProvider()
+                    .getCode(address)
+                    .then(code => {
+                        const contract = new EVM(code, {}, {});
+                        document.getElementById('code').innerHTML = contract.decompile();
+                        Prism.highlightAll();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert(err.message);
+                    });
+            } else {
+                console.warn('Invalid address found in search string `c`');
+            }
+        </script>
+    </body>
+</html>

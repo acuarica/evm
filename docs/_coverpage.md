@@ -10,5 +10,5 @@
 - ...and TX input data <small>Coming Soon</small>
 
 [GitHub](https://github.com/acuarica/evm)
-[Demo](#demo)
+[See Examples](examples.md)
 [TS Docs](https://acuarica.github.io/evm/tsdoc/)

@@ -2,11 +2,17 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Document</title>
+        <title>EVM.js</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-        <meta name="description" content="Description" />
+        <meta
+            name="description"
+            content="A Symbolic Ethereum Virtual Machine (EVM) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+        <link
+            rel="stylesheet"
+            href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
+        />
     </head>
     <body>
         <div id="app">Loading...</div>
@@ -15,16 +21,15 @@
                 name: 'EVM Bytecode Decompiler',
                 repo: 'acuarica/evm',
                 coverpage: true,
-                onlyCover: false,
-                hideSidebar: true,
-                homepage: 'home.md',
+                loadSidebar: true,
 
-                // loadSidebar: true,
-                // mergeNavbar: true, // https://docsify.js.org/#/configuration?id=mergenavbar
-                // subMaxLevel: 3, // https://docsify.js.org/#/configuration?id=submaxlevel
+                mergeNavbar: true, // https://docsify.js.org/#/configuration?id=mergenavbar
+                subMaxLevel: 3, // https://docsify.js.org/#/configuration?id=submaxlevel
             };
         </script>
         <!-- Docsify v4 -->
         <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+        <!-- docsify-themeable -->
+        <script src="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
     </body>
 </html>
