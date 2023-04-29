@@ -1,4 +1,4 @@
-<!-- markdownlint-disable-next-line first-line-heading -->
+<!-- markdownlint-disable first-line-heading -->
 
 - [Home](README)
 - [Examples](examples)

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable no-inline-html -->
+
 # EVM.js <small>BETA</small>
 
 > A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler.
