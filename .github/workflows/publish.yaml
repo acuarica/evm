@@ -20,6 +20,9 @@ on:
         required: true
         type: string
 
+env:
+  FORCE_COLOR: 3
+
 jobs:
   publish:
     if: inputs.confirm == 'yes'
