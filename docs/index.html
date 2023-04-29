@@ -17,6 +17,7 @@
         <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/dark.css" /> -->
         <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" /> -->
     </head>
+
     <body>
         <div id="app">Loading...</div>
         <script>
@@ -35,6 +36,17 @@
                 search: {
                     placeholder: 'Search...',
                 },
+                plugins: [
+                    function (hook, vm) {
+                        hook.beforeEach(function (html) {
+                            return (
+                                html +
+                                '\n----\n' +
+                                '<small>Designed &amp; developed in Switzerland. Powered by <a href="https://docsify.js.org" target="_blank">docsify.js</a> and <a href="https://jhildenbiddle.github.io/docsify-themeable" target="_blank">docsify-themeable</a></small>'
+                            );
+                        });
+                    },
+                ],
             };
         </script>
         <!-- Docsify v4 -->
