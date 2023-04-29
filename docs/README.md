@@ -13,15 +13,23 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 
 ## Install
 
-```sh
-npm install @acuarica/evm
-```
+Install using your package manager
 
-or using Yarn instead
+<!-- tabs:start -->
+
+### **yarn**
 
 ```sh
 yarn add @acuarica/evm
 ```
+
+### **npm**
+
+```sh
+npm install @acuarica/evm
+```
+
+<!-- tabs:end -->
 
 ## Features
 
