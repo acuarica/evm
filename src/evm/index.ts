@@ -72,7 +72,7 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
     /**
      *
      */
-    private readonly insts: {
+    readonly insts: {
         [opcode: number]: (opcode: Opcode, state: EVMState) => void;
     };
 
