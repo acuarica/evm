@@ -1,3 +1,5 @@
+<!-- markdownlint-disable no-inline-html -->
+
 # EVM Bytecode Decompiler
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/main.yaml)
@@ -13,7 +15,7 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 
 ## Install
 
-Install using your package manager
+Install using your package manager or Browser's `script` tag
 
 <!-- tabs:start -->
 
@@ -27,6 +29,12 @@ yarn add @acuarica/evm
 
 ```sh
 npm install @acuarica/evm
+```
+
+### **Browser <span class="tab-badge">WIP</span>**
+
+```javascript
+<script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
 ```
 
 <!-- tabs:end -->
@@ -57,7 +65,9 @@ npm install @acuarica/evm
 
 ### Converting Bytecode to Opcodes
 
-**Node.js.**
+<!-- tabs:start -->
+
+#### **Node.js**
 
 ```javascript
 const { EVM } = require('evm');
@@ -71,7 +81,7 @@ web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
 });
 ```
 
-**Browser.**
+#### **Browser**
 
 ```javascript
 const { EVM } = window.EVM_Utils;
@@ -83,9 +93,13 @@ web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, co
 });
 ```
 
+<!-- tabs:end -->
+
 ### Decompiling a Contract
 
-**Node.js.**
+<!-- tabs:start -->
+
+#### **Node.js**
 
 ```javascript
 const { EVM } = require('evm');
@@ -105,7 +119,7 @@ web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
 });
 ```
 
-**Browser.**
+#### **Browser**
 
 ```javascript
 const { EVM } = window.EVM;
@@ -123,9 +137,13 @@ web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, co
 });
 ```
 
+<!-- tabs:end -->
+
 ### Extracting data from transaction **WIP**
 
-**Node.js.**
+<!-- tabs:start -->
+
+#### **Node.js**
 
 ```javascript
 const { Transaction } = require('evm');
@@ -141,7 +159,7 @@ web3.eth
   });
 ```
 
-**Browser.**
+#### **Browser**
 
 ```javascript
 const { Transaction } = window.EVM;
@@ -156,6 +174,8 @@ web3.eth.getTransaction(
   }
 );
 ```
+
+<!-- tabs:end -->
 
 ## Detached Fork
 
