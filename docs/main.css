@@ -16,3 +16,18 @@ a[target='_blank']:not([class='github-corner']):after {
     background-size: contain;
     display: inline-block;
 }
+
+/* https://jhildenbiddle.github.io/docsify-tabs/#/?id=custom-styles */
+.tab-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(35%, -45%);
+    padding: 0.25em 0.35em;
+    border-radius: 3px;
+    background: #f000b8;
+    color: white;
+    font-family: sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+}
