@@ -1,7 +1,8 @@
 <!-- markdownlint-disable first-line-heading -->
 
-- [Home](README)
+- [Getting Started](README)
 - [Examples](examples)
+- [Guide](guide)
   <!-- - **TypeScript Reference WIP 2** -->
   <!-- - [Modules](tsdoc/modules) -->
   <!-- - **TypeScript Reference WIP** -->
