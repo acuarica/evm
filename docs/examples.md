@@ -1,5 +1,7 @@
 # Decompilation Examples <!-- {docsify-ignore-all} -->
 
+?> **Info.** This is a decompilation live demo. Bytecode for the following contracts is being fetched from `mainnet` using [ethers.js'](https://docs.ethers.org/) `EtherscanProvider.getCode`.
+
 <!-- tabs:start -->
 
 ## **Compound**
