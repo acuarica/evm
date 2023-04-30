@@ -1,9 +1,9 @@
 /**
  * This module is used to `decode` bytecode into `Opcode`.
  *
- * ## Example
+ * ### Example
  *
- * ```ts
+ * ```typescript
  * const { opcodes } = decode('0x6003600501');
  * ```
  *
@@ -259,9 +259,9 @@ export type Opcode = {
  * Decodes the hexadecimal string `code` into `Opcode`s.
  * `code` may or may not begin with hex prefix `0x`.
  *
- * ## Example
+ * ### Example
  *
- * ```ts
+ * ```typescript
  * const { opcodes } = decode('0x6003600501');
  * ```
  *
