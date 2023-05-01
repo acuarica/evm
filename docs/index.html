@@ -14,6 +14,24 @@
             href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
         />
         <link rel="stylesheet" href="main.css" />
+
+        <!--
+            Unable to docsify's plugin https://docsify.js.org/#/plugins?id=google-analytics
+            with Brave Browsers, GA script is unable to load
+            
+            GET https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/ga.min.js net::ERR_BLOCKED_BY_CLIENT
+            
+            Switch to manually setup Global site tag (gtag.js) - Google Analytics
+        -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-161877768-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', 'UA-161877768-1');
+        </script>
     </head>
 
     <body>
@@ -26,9 +44,6 @@
                 loadSidebar: true,
                 mergeNavbar: true, // https://docsify.js.org/#/configuration?id=mergenavbar
                 subMaxLevel: 3, // https://docsify.js.org/#/configuration?id=submaxlevel
-
-                // https://docsify.js.org/#/plugins?id=google-analytics
-                ga: 'UA-161877768-1',
 
                 // https://docsify.js.org/#/plugins?id=full-text-search
                 search: {
@@ -49,9 +64,6 @@
         </script>
         <!-- Docsify v4 -->
         <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-
-        <!-- https://docsify.js.org/#/plugins?id=google-analytics -->
-        <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/ga.min.js"></script>
 
         <!-- https://docsify.js.org/#/plugins?id=copy-to-clipboard -->
         <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
