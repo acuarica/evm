@@ -41,11 +41,11 @@ npm install @acuarica/evm
 
 ## Features
 
-- **Converting bytecode to opcodes**
-- **Reading information like events or functions from either bytecode or tx data**
-- **Extracting the [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (if any) from bytecode**
-- **Checking whether an opcode exists and is reachable within bytecode**
-- **Detecting whether contracts are compliant to certain ERCs**
+- **Convert bytecode to opcodes**
+- **Read information like events or functions from either bytecode or TX data**
+- **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
+- **Check whether an opcode exists and is reachable within bytecode execution**
+- **Detect whether contracts are compliant to certain ERCs**
 
 ## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/full%20reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
