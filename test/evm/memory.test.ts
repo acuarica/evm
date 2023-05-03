@@ -4,8 +4,8 @@ import { type Expr, Val, type Inst } from '../../src/evm/expr';
 import { Block } from '../../src/evm/special';
 import { MEMORY } from '../../src/evm/memory';
 
-describe('evm::memory', () => {
-    it('should load values into stack', () => {
+describe('evm::memory', function () {
+    it('should load values into stack', function () {
         const state = new State<Inst, Expr>();
 
         state.memory[4] = new Val(1n);
@@ -15,7 +15,7 @@ describe('evm::memory', () => {
         expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
     });
 
-    it('should store values into memory', () => {
+    it('should store values into memory', function () {
         const state = new State<Inst, Expr>();
 
         state.stack.push(Block.coinbase);

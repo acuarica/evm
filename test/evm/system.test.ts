@@ -9,8 +9,8 @@ import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 
-describe('evm::system', () => {
-    it('should exec `SHA3`', () => {
+describe('evm::system', function () {
+    it('should exec `SHA3`', function () {
         const state = new State<never, Expr>();
         state.stack.push(new Val(4n));
         state.stack.push(new Val(0x10n));
@@ -20,7 +20,7 @@ describe('evm::system', () => {
         expect(`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
     });
 
-    it('should exec `CREATE`', () => {
+    it('should exec `CREATE`', function () {
         const state = new State<Inst, Expr>();
         state.stack.push(new Val(0x20n));
         state.stack.push(new Val(0x10n));
@@ -35,7 +35,7 @@ describe('evm::system', () => {
         );
     });
 
-    it('should halt with STOP', () => {
+    it('should halt with STOP', function () {
         const state = new State<Inst, Expr>();
         SYSTEM.STOP(state);
         expect(state.halted).to.be.true;
@@ -43,7 +43,7 @@ describe('evm::system', () => {
         expect(`${state.stmts[0]}`).to.be.equal('return;');
     });
 
-    it('should halt with SELFDESTRUCT', () => {
+    it('should halt with SELFDESTRUCT', function () {
         const state = new State<Inst, Expr>();
         SPECIAL.ADDRESS(state);
         SYSTEM.SELFDESTRUCT(state);
@@ -52,8 +52,8 @@ describe('evm::system', () => {
         expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
     });
 
-    describe('RETURN', () => {
-        it('should return with no arguments', () => {
+    describe('RETURN', function () {
+        it('should return with no arguments', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x0n));
             state.stack.push(new Val(0x0n));
@@ -63,7 +63,7 @@ describe('evm::system', () => {
             expect(`${state.stmts[0]}`).to.be.equal('return;');
         });
 
-        it('should return with a single argument', () => {
+        it('should return with a single argument', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x4n));
@@ -73,7 +73,7 @@ describe('evm::system', () => {
             expect(`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
         });
 
-        it('should return more than one argument', () => {
+        it('should return more than one argument', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x30n));
             state.stack.push(new Val(0x4n));

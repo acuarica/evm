@@ -9,7 +9,7 @@ import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('internal', compile => {
-    describe('with `internal` method with no arguments', () => {
+    describe('with `internal` method with no arguments', function () {
         let contract: Contract;
 
         before(function () {
@@ -34,7 +34,7 @@ contracts('internal', compile => {
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
 
-            it.skip(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, () => {
+            it.skip(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
                 const fn = contract.functions[selector];
 
                 expect(fn).to.not.be.undefined;
@@ -50,12 +50,12 @@ contracts('internal', compile => {
             });
         });
 
-        it('should not have `mappings` nor `variables`', () => {
+        it('should not have `mappings` nor `variables`', function () {
             expect(Object.keys(contract.evm.mappings)).to.have.length(1);
             expect(Object.keys(contract.evm.variables)).to.have.length(0);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it.skip('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.not.match(/return msg.sender;/);
             expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 3\)/);
@@ -63,7 +63,7 @@ contracts('internal', compile => {
         });
     });
 
-    describe('with `internal` method with different arguments', () => {
+    describe('with `internal` method with different arguments', function () {
         let contract: Contract;
 
         before(function () {
@@ -88,7 +88,7 @@ contracts('internal', compile => {
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
 
-            it.skip('should find `SLoad`s in blocks', () => {
+            it.skip('should find `SLoad`s in blocks', function () {
                 const stmts = contract.functions[selector].stmts;
                 expect(stmts.length).to.be.at.least(1);
 
@@ -100,19 +100,19 @@ contracts('internal', compile => {
             });
         });
 
-        it('should not have `mappings` nor `variables`', () => {
+        it('should not have `mappings` nor `variables`', function () {
             expect(Object.keys(contract.evm.mappings)).to.have.length(1);
             expect(Object.keys(contract.evm.variables)).to.have.length(0);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it.skip('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/return storage\[keccak256\(msg.sender, 0\)\];$/m);
             expect(text, text).to.match(/return storage\[keccak256\(_arg0, 0\)\];$/m);
         });
     });
 
-    describe('with `internal` method without inlining function', () => {
+    describe('with `internal` method without inlining function', function () {
         let contract: Contract;
 
         before(function () {
@@ -135,7 +135,7 @@ contracts('internal', compile => {
             contract = new Contract(compile(sol, this).bytecode);
         });
 
-        it.skip('should `decompile` bytecode', () => {
+        it.skip('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
         });

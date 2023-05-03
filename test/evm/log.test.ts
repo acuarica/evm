@@ -8,7 +8,7 @@ import { eventSelector } from '../utils/selector';
 import { compile } from '../utils/solc';
 import { eventSelectors } from '../../src/selector';
 
-describe('evm::log', () => {
+describe('evm::log', function () {
     const knownEventSig = 'Deposit(uint256)';
     const unknownEventSig = 'UnknownEvent(uint256, uint256, uint256)';
     const sol = `contract C {
@@ -26,7 +26,7 @@ describe('evm::log', () => {
         evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
     });
 
-    it('should get it from compiled code', () => {
+    it('should get it from compiled code', function () {
         const state = new State<Inst, Expr>();
         evm.exec(0, state);
         eventSelectors(evm);

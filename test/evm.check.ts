@@ -13,7 +13,7 @@ import { Block } from '../src/evm/special';
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
 
-describe('evm', () => {
+describe('evm', function () {
     it('`PUSH4` method selector to invoke external contract', function () {
         const sig = 'balanceOf(uint256)';
         const sol = `interface IERC20 {

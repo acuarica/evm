@@ -4,13 +4,13 @@ import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/expr';
 import { Block, SPECIAL } from '../../src/evm/special';
 
-describe('evm::math', () => {
-    it('should test `isVal`', () => {
+describe('evm::math', function () {
+    it('should test `isVal`', function () {
         expect(new Val(0n).isVal()).to.be.true;
         expect(new Add(new Val(1n), new Val(2n)).isVal()).to.be.false;
     });
 
-    it('should test `isZero`', () => {
+    it('should test `isZero`', function () {
         expect(new Val(0n).isZero()).to.be.true;
         expect(new Val(1n).isZero()).to.be.false;
     });
@@ -102,7 +102,7 @@ describe('evm::math', () => {
             val: Expr;
             str: string;
         }) => {
-            it(`should \`eval+str\` \`${str}\``, () => {
+            it(`should \`eval+str\` \`${str}\``, function () {
                 const stack = new Stack<Expr>();
                 for (const inst of insts) {
                     if (typeof inst === 'number') {

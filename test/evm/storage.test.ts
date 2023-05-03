@@ -8,7 +8,7 @@ import { Stop } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
 
-describe('evm::storage', () => {
+describe('evm::storage', function () {
     it('should store variable', function () {
         const store = { variables: {}, mappings: {} };
         const evm = STORAGE(store);
@@ -80,7 +80,7 @@ describe('evm::storage', () => {
         expect(evm.mappings).to.be.deep.equal({});
     });
 
-    describe('mappings', () => {
+    describe('mappings', function () {
         it('should find mapping loads and stores', function () {
             const sol = `contract C {
                 mapping (address => uint256) map1;

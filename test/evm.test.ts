@@ -7,8 +7,8 @@ import { Invalid } from '../src/evm/system';
 
 import { compile } from './utils/solc';
 
-describe('evm', () => {
-    it('should halt with `INVALID`', () => {
+describe('evm', function () {
+    it('should halt with `INVALID`', function () {
         const state = new State<Inst, Expr>();
         INSTS.INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
         expect(state.halted).to.be.true;
@@ -16,7 +16,7 @@ describe('evm', () => {
         expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
     });
 
-    describe('conditional', () => {
+    describe('conditional', function () {
         it('if ', function () {
             const sol = `contract C {
                 uint256 value = 0;
@@ -86,7 +86,7 @@ describe('evm', () => {
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
-    describe('recursive', () => {
+    describe('recursive', function () {
         it.skip('should for infinite', function () {
             const sol = `contract C {
                 event Transfer(uint256);

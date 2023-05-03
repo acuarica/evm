@@ -6,10 +6,10 @@ import { compile } from '../utils/solc';
 
 const includesFF = (hash: string) => Buffer.from(hash, 'hex').includes(OPCODES.SELFDESTRUCT);
 
-describe('contracts metadata', () => {
+describe('contracts metadata', function () {
     let contract: Contract;
 
-    before(() => {
+    before(function () {
         const sol = 'contract C { bytes32 constant data = "605ed3230cfe24897f703fb05af4bdfd"; }';
         // const solTemplate = `contract C { bytes32 constant data = "[rd]"; }`;
         // let sol;
@@ -22,11 +22,11 @@ describe('contracts metadata', () => {
         // console.log(contract.metadata!.hash);
     });
 
-    it('should include false positive selfdestruct (`ff`) in metadata hash', () => {
+    it('should include false positive selfdestruct (`ff`) in metadata hash', function () {
         expect(includesFF(contract.metadata!.hash)).to.be.true;
     });
 
-    it('should not detect selfdestruct', () => {
+    it('should not detect selfdestruct', function () {
         expect(contract.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
         expect(contract.containsOpcode('SELFDESTRUCT')).to.be.false;
     });

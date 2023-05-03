@@ -3,30 +3,30 @@ import { decode, formatOpcode, type Opcode, OPCODES, toHex } from '../src/opcode
 
 const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
-describe('opcode', () => {
+describe('opcode', function () {
     ['', '0x'].forEach(p => {
-        it(`should \`decode\` empty buffer with prefix \`${p}\``, () => {
+        it(`should \`decode\` empty buffer with prefix \`${p}\``, function () {
             const { opcodes, jumpdests } = decode(p + '');
 
             expect(opcodes).to.be.empty;
             expect(jumpdests).to.be.empty;
         });
 
-        it(`should \`decode\` opcodes with prefix \`${p}\``, () => {
+        it(`should \`decode\` opcodes with prefix \`${p}\``, function () {
             const { opcodes } = decode(p + '00010203');
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
         });
 
-        it(`should throw when input is not even with prefix \`${p}\``, () => {
+        it(`should throw when input is not even with prefix \`${p}\``, function () {
             expect(() => decode(p + '1')).to.throw('input should have even length');
         });
 
-        it(`should throw when input has an invalid number with prefix \`${p}\``, () => {
+        it(`should throw when input has an invalid number with prefix \`${p}\``, function () {
             expect(() => decode(p + '010x')).to.throw(`invalid value at ${p.length + 2}`);
         });
     });
 
-    it('should `decode` unary opcodes', () => {
+    it('should `decode` unary opcodes', function () {
         const { opcodes, jumpdests } = decodeFromArray(
             OPCODES.ADDRESS,
             OPCODES.ADDRESS,
@@ -66,7 +66,7 @@ describe('opcode', () => {
         expect(jumpdests).to.be.deep.equal({ '2': 2 });
     });
 
-    it('should `decode` `PUSH`n opcodes', () => {
+    it('should `decode` `PUSH`n opcodes', function () {
         const { opcodes, jumpdests } = decodeFromArray(
             OPCODES.PUSH4,
             ...[1, 2, 3, 4],
@@ -116,7 +116,7 @@ describe('opcode', () => {
         expect(jumpdests).to.be.deep.equal({ '5': 1, '11': 3 });
     });
 
-    it('should not fail `PUSH`n does not have enough data', () => {
+    it('should not fail `PUSH`n does not have enough data', function () {
         expect(decodeFromArray(OPCODES.PUSH32).opcodes).to.be.deep.equal([
             {
                 offset: 0,
@@ -138,7 +138,7 @@ describe('opcode', () => {
         ]);
     });
 
-    it('should `decode` with `INVALID` opcodes', () => {
+    it('should `decode` with `INVALID` opcodes', function () {
         const { opcodes } = decodeFromArray(0xb0, OPCODES.ADD, 0xb1);
 
         expect(opcodes).to.have.length(3);
@@ -165,7 +165,7 @@ describe('opcode', () => {
         });
     });
 
-    it('should `decode` example from hex string', () => {
+    it('should `decode` example from hex string', function () {
         const { opcodes } = decode('0x6003600501');
 
         expect(opcodes).to.have.length(3);
@@ -192,12 +192,12 @@ describe('opcode', () => {
         } as Opcode);
     });
 
-    it('should `decode` all `INVALID` opcodes', () => {
+    it('should `decode` all `INVALID` opcodes', function () {
         const { opcodes } = decode('0c0d0e0ffc');
         expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('INVALID'));
     });
 
-    it('should `decode` format `INVALID` opcodes', () => {
+    it('should `decode` format `INVALID` opcodes', function () {
         expect(
             formatOpcode({
                 offset: 10,
@@ -229,7 +229,7 @@ describe('opcode', () => {
         ).to.be.equal('   0:   0    INVALID');
     });
 
-    it('should convert buffer `toHex`', () => {
+    it('should convert buffer `toHex`', function () {
         const output = toHex(Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]));
         expect(output).to.be.equal('010203040c0d0e0ffeff00');
     });

@@ -9,28 +9,28 @@ const json = (f: string) => JSON.parse(readFileSync(`./selectors/${f}.json`, 'ut
 const functions = json('functions');
 const events = json('events');
 
-describe('selectors', () => {
+describe('selectors', function () {
     const stats = {
         lengthyFunctionSigs: [] as string[],
         lengthyEventSigs: [] as string[],
     };
 
-    describe('functions.json', () => {
-        it('should not contain duplicates', () => {
+    describe('functions.json', function () {
+        it('should not contain duplicates', function () {
             expect(functions).to.be.deep.equal([...new Set(functions)]);
         });
 
-        it('entries should not contain spaces (`storage` being an exception)', () => {
+        it('entries should not contain spaces (`storage` being an exception)', function () {
             expect(
                 functions.filter(functionSig => functionSig.replace(/ storage/g, '').includes(' '))
             ).to.be.deep.equal([]);
         });
 
-        it('entries should not contain semicolons', () => {
+        it('entries should not contain semicolons', function () {
             expect(functions.filter(functionSig => functionSig.includes(';'))).to.be.deep.equal([]);
         });
 
-        it('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', () => {
+        it('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', function () {
             expect(
                 functions.filter(
                     functionSig => !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)
@@ -38,7 +38,7 @@ describe('selectors', () => {
             ).to.be.deep.equal([]);
         });
 
-        it('entries should contain valid arguments', () => {
+        it('entries should contain valid arguments', function () {
             for (let functionSig of functions) {
                 if (functionSig.length >= 256) {
                     stats.lengthyFunctionSigs.push(functionSig);
@@ -62,26 +62,26 @@ describe('selectors', () => {
         }).timeout(20000);
     });
 
-    describe('events.json', () => {
-        it('should not contain duplicates', () => {
+    describe('events.json', function () {
+        it('should not contain duplicates', function () {
             expect(events).to.deep.equal([...new Set(events)]);
         });
 
-        it('entries should not contain spaces', () => {
+        it('entries should not contain spaces', function () {
             expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
         });
 
-        it('entries should not contain semicolons', () => {
+        it('entries should not contain semicolons', function () {
             expect(events.filter(eventSig => eventSig.includes(';'))).to.be.deep.equal([]);
         });
 
-        it('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', () => {
+        it('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', function () {
             expect(
                 events.filter(eventSig => !eventSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/))
             ).to.be.deep.equal([]);
         });
 
-        it('entries should contain valid arguments', () => {
+        it('entries should contain valid arguments', function () {
             for (const eventSig of events) {
                 if (eventSig.length >= 256) {
                     stats.lengthyEventSigs.push(eventSig);
@@ -94,7 +94,7 @@ describe('selectors', () => {
         }).timeout(10000);
     });
 
-    after(() => {
+    after(function () {
         const info = c.blue;
         const warn = c.yellow;
         const statsinfo = (title: string, sigs: string[]) =>

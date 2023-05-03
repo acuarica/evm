@@ -42,7 +42,7 @@ contracts('empty', (compile, _fallback, version) => {
     ] as const;
 
     CONTRACTS.forEach(([name, sol], index) => {
-        describe(name, () => {
+        describe(name, function () {
             let contract: Contract;
             let evm: EVM;
 
@@ -51,7 +51,7 @@ contracts('empty', (compile, _fallback, version) => {
                 evm = contract.evm;
             });
 
-            it(`should get metadata hash for minimal contract definition`, () => {
+            it(`should get metadata hash for minimal contract definition`, function () {
                 const HASHES = {
                     '0.5.5': [
                         'bzzr',
@@ -87,7 +87,7 @@ contracts('empty', (compile, _fallback, version) => {
                 }
             });
 
-            it('should not contain `LOG1` nor `LOG2` given metadata has been stripped', () => {
+            it('should not contain `LOG1` nor `LOG2` given metadata has been stripped', function () {
                 expect(evm.opcodes.map(op => op.mnemonic)).to.be.deep.equal([
                     'PUSH1',
                     'PUSH1',
@@ -99,13 +99,13 @@ contracts('empty', (compile, _fallback, version) => {
                 ]);
             });
 
-            it('should not have functions nor events', () => {
+            it('should not have functions nor events', function () {
                 expect(contract.functions).to.be.empty;
                 expect(evm.functionBranches).to.be.empty;
                 expect(evm.events).to.be.empty;
             });
 
-            it('should have 1 block & 1 `revert`', () => {
+            it('should have 1 block & 1 `revert`', function () {
                 expect(contract.evm.chunks).to.be.of.length(1);
                 const chunk = contract.evm.chunks.get(0)!;
                 expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
@@ -117,7 +117,7 @@ contracts('empty', (compile, _fallback, version) => {
                 expect(contract.main.at(-1)).to.be.deep.equal(new Revert([]));
             });
 
-            it('should `decompile` bytecode', () => {
+            it('should `decompile` bytecode', function () {
                 expect(contract.decompile()).to.be.equal('revert();\n');
             });
         });

@@ -86,7 +86,7 @@ describe('examples', function () {
             ],
         },
     ].forEach(({ name, count, lines }) => {
-        describe(`${name}`, () => {
+        describe(`${name}`, function () {
             const defs = lines.map(line =>
                 line.source
                     .replace(/\\/g, '')
@@ -119,30 +119,30 @@ describe('examples', function () {
             let contract: Contract;
             let text: string;
 
-            before(async () => {
+            before(async function () {
                 const path = await fetchBytecode(name);
                 const bytecode = readFileSync(path, 'utf8');
                 contract = new Contract(bytecode).patch();
                 text = contract.decompile();
             });
 
-            it(`should decode bytecode`, () => {
+            it(`should decode bytecode`, function () {
                 expect(contract.evm.opcodes).to.be.of.length(count);
             });
 
-            it(`should detect functions`, () => {
+            it(`should detect functions`, function () {
                 expect(contract.getFunctions()).to.include.members(functions);
             });
 
-            it(`should detect variables`, () => {
+            it(`should detect variables`, function () {
                 expect(contract.getFunctions()).to.include.members(variables);
             });
 
-            it(`should detect mappings`, () => {
+            it(`should detect mappings`, function () {
                 expect(contract.getFunctions()).to.include.members(mappings);
             });
 
-            it('functions, variables & mappings should cover `getFunctions`', () => {
+            it('functions, variables & mappings should cover `getFunctions`', function () {
                 if (lines.length > 0) {
                     const expected = [...functions, ...variables, ...mappings];
                     expect(
@@ -155,7 +155,7 @@ describe('examples', function () {
             });
 
             lines.forEach(line => {
-                it(`should match decompiled bytecode to '${truncate(line.source)}'`, () => {
+                it(`should match decompiled bytecode to '${truncate(line.source)}'`, function () {
                     expect(text).to.match(line);
                 });
             });

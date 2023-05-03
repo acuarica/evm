@@ -8,7 +8,7 @@ import { contracts } from '../utils/solc';
 import { CallDataLoad } from '../../src/evm/special';
 
 contracts('variables', (compile, _fallback, version) => {
-    describe('with private variables in different locations', () => {
+    describe('with private variables in different locations', function () {
         let contract: Contract;
 
         before(function () {
@@ -27,7 +27,7 @@ contracts('variables', (compile, _fallback, version) => {
             { sig: 'setValue0(bytes32)', value: 1n },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
-            it(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, () => {
+            it(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
                 const stmts = contract.functions[selector].stmts;
                 expect(stmts.length).to.be.of.greaterThanOrEqual(3);
                 expect(stmts.at(-3)).to.be.instanceOf(Require);
@@ -43,7 +43,7 @@ contracts('variables', (compile, _fallback, version) => {
             });
         });
 
-        it('should get variables of different types', () => {
+        it('should get variables of different types', function () {
             const vars = Object.values(contract.evm.variables);
             expect(vars).to.be.of.length(2);
             const isPush = version !== '0.8.16';
@@ -55,7 +55,7 @@ contracts('variables', (compile, _fallback, version) => {
             );
         });
 
-        it('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown var1;/m);
             expect(text, text).to.match(/^unknown var2;/m);
@@ -64,7 +64,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with private variables of different types', () => {
+    describe('with private variables of different types', function () {
         let contract: Contract;
 
         before(function () {
@@ -84,11 +84,11 @@ contracts('variables', (compile, _fallback, version) => {
             contract = new Contract(compile(sol, this).bytecode);
         });
 
-        it.skip('should detect variables', () => {
+        it.skip('should detect variables', function () {
             expect(Object.values(contract.evm.variables)).to.be.of.length(4);
         });
 
-        it('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown var1;/m);
             expect(text, text).to.match(/^unknown var2;/m);
@@ -99,7 +99,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
     });
 
-    describe('with a hashed public variable and no usages', () => {
+    describe('with a hashed public variable and no usages', function () {
         let contract: Contract;
 
         before(function () {
@@ -109,17 +109,17 @@ contracts('variables', (compile, _fallback, version) => {
             contract = new Contract(compile(sol, this).bytecode).patch();
         });
 
-        it('should `getFunctions` but not `getEvents`', () => {
+        it('should `getFunctions` but not `getEvents`', function () {
             expect(contract.getFunctions()).to.be.deep.equal(['value()']);
         });
 
-        it('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });
     });
 
-    describe('with an unreachable setter hashed public variable', () => {
+    describe('with an unreachable setter hashed public variable', function () {
         let contract: Contract;
 
         before(function () {
@@ -132,17 +132,17 @@ contracts('variables', (compile, _fallback, version) => {
             contract = new Contract(compile(sol, this).bytecode).patch();
         });
 
-        it('should `getFunctions` but not `getEvents`', () => {
+        it('should `getFunctions` but not `getEvents`', function () {
             expect(contract.getFunctions()).to.be.deep.equal(['value()']);
         });
 
-        it('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.match(/^unknown public value;/m);
         });
     });
 
-    it.skip('with a public `address` variable', () => {
+    it.skip('with a public `address` variable', function () {
         const sol = `contract C { address public owner; }`;
         const contract = new Contract(compile(sol, this).bytecode).patch();
 

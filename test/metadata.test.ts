@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import { Metadata, stripMetadataHash } from '../src/metadata';
 import { forVersion } from './utils/solc';
 
-describe('metadata', () => {
-    it(`should return original bytecode when no metadata`, () => {
+describe('metadata', function () {
+    it(`should return original bytecode when no metadata`, function () {
         const originalCode = '01020304';
         const [code, metadata] = stripMetadataHash(originalCode);
 
@@ -30,7 +30,7 @@ describe('metadata', () => {
             output = compile('contract C {}', this);
         });
 
-        it('should get metadata for deployed bytecode', () => {
+        it('should get metadata for deployed bytecode', function () {
             const [, metadata] = stripMetadataHash(output.bytecode);
 
             const [protocol, hash, expectedVersion] = HASHES[version];

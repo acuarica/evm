@@ -3,7 +3,7 @@ import { Contract } from '../../src';
 import { contracts } from '../utils/solc';
 
 contracts('modifiers', (compile, _fallback, version) => {
-    describe('with a `modifier` calling an `internal` function', () => {
+    describe('with a `modifier` calling an `internal` function', function () {
         let contract: Contract;
 
         before(function () {
@@ -31,7 +31,7 @@ contracts('modifiers', (compile, _fallback, version) => {
             contract = new Contract(compile(sol, this).bytecode);
         });
 
-        it('should `decompile` bytecode', () => {
+        it('should `decompile` bytecode', function () {
             const text = contract.decompile();
             expect(text, text).to.not.match(/return msg.sender;/);
             expect(text, text).to.match(/storage\[0x1\] == msg.sender/m);

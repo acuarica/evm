@@ -9,10 +9,10 @@ import { Stack, State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 
-describe('evm::logic', () => {
+describe('evm::logic', function () {
     [[0n, '0x' + 'ff'.repeat(32)] as const, [1n, '0x' + 'ff'.repeat(31) + 'fe'] as const].forEach(
         ([value, expected]) => {
-            it(`should calculate \`~${value}\``, () => {
+            it(`should calculate \`~${value}\``, function () {
                 const stack = new Stack<Expr>();
                 stack.push(new Val(value));
                 LOGIC.NOT(stack);
@@ -23,7 +23,7 @@ describe('evm::logic', () => {
         }
     );
 
-    it('should stringify `~block.number`', () => {
+    it('should stringify `~block.number`', function () {
         const stack = new Stack<Expr>();
         stack.push(Block.number);
         expect(stack.values).to.be.deep.equal([Block.number]);
@@ -35,8 +35,8 @@ describe('evm::logic', () => {
         expect(stack.values[0].str()).to.be.equal('~block.number');
     });
 
-    describe('EQ', () => {
-        it('should calculate `1 == 1`', () => {
+    describe('EQ', function () {
+        it('should calculate `1 == 1`', function () {
             const stack = new Stack<Expr>();
             stack.push(new Val(1n));
             stack.push(new Val(1n));
@@ -44,7 +44,7 @@ describe('evm::logic', () => {
             expect(stack.values).to.deep.equal([new Val(1n)]);
         });
 
-        it('should calculate `1 == 2`', () => {
+        it('should calculate `1 == 2`', function () {
             const stack = new Stack<Expr>();
             stack.push(new Val(1n));
             stack.push(new Val(2n));
@@ -52,7 +52,7 @@ describe('evm::logic', () => {
             expect(stack.values).to.be.deep.equal([new Val(0n)]);
         });
 
-        it('should stringify `block.number == 1`', () => {
+        it('should stringify `block.number == 1`', function () {
             const stack = new Stack<Expr>();
             stack.push(new Val(1n));
             stack.push(Block.number);
@@ -65,8 +65,8 @@ describe('evm::logic', () => {
         });
 
         ['06fdde03', '12345678', '00000001'].forEach(selector => {
-            describe(`EQ detect msg.sig for hash ${selector}`, () => {
-                it('should stringify signature `msg.sig` from RHS DIV&EXP', () => {
+            describe(`EQ detect msg.sig for hash ${selector}`, function () {
+                it('should stringify signature `msg.sig` from RHS DIV&EXP', function () {
                     const stack = new Stack<Expr>();
                     stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
                     stack.push(new Val(BigInt('0x' + selector)));
@@ -76,7 +76,7 @@ describe('evm::logic', () => {
                     expect(stack.values[0].str()).to.equal(`msg.sig == ${selector}`);
                 });
 
-                it('should stringify signature `msg.sig` from LHS DIV&EXP', () => {
+                it('should stringify signature `msg.sig` from LHS DIV&EXP', function () {
                     const stack = new Stack<Expr>();
                     stack.push(new Val(BigInt('0x' + selector)));
                     stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
@@ -86,7 +86,7 @@ describe('evm::logic', () => {
                     expect(stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
                 });
 
-                it('should stringify signature `msg.sig` from RHS SHR', () => {
+                it('should stringify signature `msg.sig` from RHS SHR', function () {
                     const stack = new Stack<Expr>();
                     stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
                     stack.push(new Val(BigInt('0x' + selector)));
@@ -96,7 +96,7 @@ describe('evm::logic', () => {
                     expect(stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
                 });
 
-                it('should stringify signature `msg.sig` from LHS SHR', () => {
+                it('should stringify signature `msg.sig` from LHS SHR', function () {
                     const stack = new Stack<Expr>();
                     stack.push(new Val(BigInt('0x' + selector)));
                     stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));

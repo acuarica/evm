@@ -7,8 +7,8 @@ import { compile } from '../utils/solc';
 import type { Log } from '../../src/evm/log';
 import { Add } from '../../src/evm/math';
 
-describe('evm::sym', () => {
-    it(`should stringify Block's props`, () => {
+describe('evm::sym', function () {
+    it(`should stringify Block's props`, function () {
         expect(`${Block.basefee}`).to.be.equal('block.basefee');
         expect(`${Block.chainid}`).to.be.equal('block.chainid');
         expect(`${Block.coinbase}`).to.be.equal('block.coinbase');
@@ -18,17 +18,17 @@ describe('evm::sym', () => {
         expect(`${Block.timestamp}`).to.be.equal('block.timestamp');
     });
 
-    it(`should stringify Msg's props`, () => {
+    it(`should stringify Msg's props`, function () {
         expect(`${Msg.sender}`).to.be.equal('msg.sender');
         expect(`${Msg['data.length']}`).to.be.equal('msg.data.length');
     });
 
-    it(`should stringify Tx's props`, () => {
+    it(`should stringify Tx's props`, function () {
         expect(`${Tx.origin}`).to.be.equal('tx.origin');
         expect(`${Tx.gasprice}`).to.be.equal('tx.gasprice');
     });
 
-    it(`should push \`CallValue\``, () => {
+    it(`should push \`CallValue\``, function () {
         const state = new State<never, Expr>();
         SPECIAL.CALLVALUE(state);
 
@@ -36,7 +36,7 @@ describe('evm::sym', () => {
         expect(state.stack.values[0].toString()).to.equal('msg.value');
     });
 
-    describe('CallDataLoad', () => {
+    describe('CallDataLoad', function () {
         [
             [new Val(0n), 'msg.data'] as const,
             [new Val(4n), '_arg0'] as const,
@@ -46,7 +46,7 @@ describe('evm::sym', () => {
             [new Val(32n), 'msg.data[0x20]'] as const,
             [new Add(new Val(1n), new Val(2n)), 'msg.data[0x1 + 0x2]'] as const,
         ].forEach(([location, str]) => {
-            it(`should push \`CallDataLoad\` at :${location} stringified to \`${str}\``, () => {
+            it(`should push \`CallDataLoad\` at :${location} stringified to \`${str}\``, function () {
                 const state = new State<never, Expr>();
                 state.stack.push(location);
                 SPECIAL.CALLDATALOAD(state);
@@ -58,12 +58,12 @@ describe('evm::sym', () => {
     });
 
     for (const [mnemonic, sym] of Object.entries(Info)) {
-        describe(`\`${sym.value}\` prop pushed from \`${mnemonic}\``, () => {
-            it('should be well-formed', () => {
+        describe(`\`${sym.value}\` prop pushed from \`${mnemonic}\``, function () {
+            it('should be well-formed', function () {
                 expect(`${sym}`).to.be.equal(sym.value);
             });
 
-            it('should get expr from stack', () => {
+            it('should get expr from stack', function () {
                 const state = new State<never, Expr>();
                 SPECIAL[mnemonic](state);
 
