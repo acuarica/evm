@@ -61,7 +61,7 @@ export class Stack<in out E> {
             throw new Error('Invalid duplication operation, position was not found');
         }
 
-        this.push(this.values[position]);
+        this.push(this.values[position]!);
     }
 
     /**
@@ -77,8 +77,8 @@ export class Stack<in out E> {
             throw new Error('Invalid swap operation, position was not found');
         }
 
-        const firstValue = this.values[0];
-        const secondValue = this.values[secondPosition];
+        const firstValue = this.values[0]!;
+        const secondValue = this.values[secondPosition]!;
         this.values[0] = secondValue;
         this.values[secondPosition] = firstValue;
     }

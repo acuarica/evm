@@ -39,7 +39,7 @@ contracts('empty', (compile, _fallback, version) => {
                 }
             }`,
         ],
-    ];
+    ] as const;
 
     CONTRACTS.forEach(([name, sol], index) => {
         describe(name, () => {
@@ -88,14 +88,15 @@ contracts('empty', (compile, _fallback, version) => {
             });
 
             it('should not contain `LOG1` nor `LOG2` given metadata has been stripped', () => {
-                expect(evm.opcodes).to.have.length(7);
-                expect(evm.opcodes[0].mnemonic).to.be.equal('PUSH1');
-                expect(evm.opcodes[1].mnemonic).to.be.equal('PUSH1');
-                expect(evm.opcodes[2].mnemonic).to.be.equal('MSTORE');
-                expect(evm.opcodes[3].mnemonic).to.be.equal('PUSH1');
-                expect(evm.opcodes[4].mnemonic).to.be.equal('DUP1');
-                expect(evm.opcodes[5].mnemonic).to.be.equal('REVERT');
-                expect(evm.opcodes[6].mnemonic).to.be.equal('INVALID');
+                expect(evm.opcodes.map(op => op.mnemonic)).to.be.deep.equal([
+                    'PUSH1',
+                    'PUSH1',
+                    'MSTORE',
+                    'PUSH1',
+                    'DUP1',
+                    'REVERT',
+                    'INVALID',
+                ]);
             });
 
             it('should not have functions nor events', () => {
@@ -107,9 +108,9 @@ contracts('empty', (compile, _fallback, version) => {
             it('should have 1 block & 1 `revert`', () => {
                 expect(contract.evm.chunks).to.be.of.length(1);
                 const chunk = contract.evm.chunks.get(0)!;
-                expect(evm.opcodes[chunk.pcend - 1].mnemonic).to.be.equal('REVERT');
+                expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
                 expect(chunk.states).to.be.of.length(1);
-                const state = chunk.states[0];
+                const state = chunk.states[0]!;
                 expect(state.last).to.be.deep.equal(new Revert([]));
 
                 expect(contract.main.length).to.be.at.least(1);
