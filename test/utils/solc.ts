@@ -1,3 +1,5 @@
+/* eslint-disable mocha/no-exports */
+
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import type { Runnable, Suite } from 'mocha';
@@ -191,7 +193,7 @@ export function forVersion(
         if (version.startsWith(process.env['SOLC'] ?? '')) {
             const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
 
-            describe(`solc-v${version}`, () => {
+            describe(`solc-v${version}`, function () {
                 fn(
                     (content, context) =>
                         compile(content, version, {
@@ -206,7 +208,7 @@ export function forVersion(
 }
 
 export function contracts(title: string, fn: Parameters<typeof forVersion>[0]) {
-    describe(`contracts::${title}`, () => {
+    describe(`contracts::${title}`, function () {
         forVersion(fn);
     });
 }

@@ -54,6 +54,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
          */
         csv = readFileSync(csvPath);
     } catch {
+        // eslint-disable-next-line mocha/no-skipped-tests, mocha/no-mocha-arrows
         it.skip(`Addresses CSV \`${csvPath}\` not found, skipping`, () => {});
         return;
     }
@@ -145,7 +146,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
             });
         });
 
-    after(() => {
+    after(function () {
         console.info('\n  Metadata Stats');
         console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
         console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);

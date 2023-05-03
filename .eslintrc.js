@@ -6,11 +6,12 @@ module.exports = {
     parserOptions: {
         project: ['./tsconfig.json'],
     },
-    plugins: ['@typescript-eslint', 'import'],
+    plugins: ['@typescript-eslint', 'import', 'mocha'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
+        'plugin:mocha/recommended',
     ],
     rules: {
         semi: ['error', 'always'],
@@ -51,6 +52,8 @@ module.exports = {
 
         'import/order': 'warn',
         'import/no-useless-path-segments': 'warn',
+
+        'mocha/no-setup-in-describe': 'off',
     },
     overrides: [
         {

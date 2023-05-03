@@ -7,6 +7,7 @@ contracts('symbols', compile => {
     let contract: Contract;
     let text: string;
 
+    // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
         const sol = `contract C {
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
@@ -17,7 +18,7 @@ contracts('symbols', compile => {
         text = contract.decompile();
     });
 
-    it('should find symbol opcodes', () => {
+    it('should find symbol opcodes', function () {
         const opcodes = contract.evm.opcodes;
         expect(opcodes.filter(op => op.mnemonic === 'BLOCKHASH')).to.be.of.length(1);
         expect(opcodes.filter(op => op.mnemonic === 'BALANCE')).to.be.of.length(1);
@@ -29,22 +30,22 @@ contracts('symbols', compile => {
         { sig: 'getBalance(address)', value: 'return _arg0.balance;' },
         { sig: 'getThis()', value: 'return address(this);' },
     ].forEach(({ sig, value }) => {
-        it(`should find symbol block for \`${sig}\``, () => {
+        it(`should find symbol block for \`${sig}\``, function () {
             const selector = fnselector(sig);
             const last = contract.functions[selector].stmts.at(-1)!.toString();
             expect(last).to.be.equal(value);
         });
     });
 
-    it('should find `BLOCKHASH` symbol', () => {
+    it('should find `BLOCKHASH` symbol', function () {
         expect(text, `decompiled bytecode\n${text}`).to.match(/return blockhash\(0x7\);$/m);
     });
 
-    it('should find `BALANCE` symbol', () => {
+    it('should find `BALANCE` symbol', function () {
         expect(text, `decompiled bytecode\n${text}`).to.match(/return _arg0.balance;$/m);
     });
 
-    it('should find `ADDRESS` symbol', () => {
+    it('should find `ADDRESS` symbol', function () {
         expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
     });
 });
