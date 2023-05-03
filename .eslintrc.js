@@ -6,12 +6,13 @@ module.exports = {
     parserOptions: {
         project: ['./tsconfig.json'],
     },
-    plugins: ['@typescript-eslint', 'import', 'mocha'],
+    plugins: ['@typescript-eslint', 'import', 'mocha', 'chai-expect'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         'plugin:mocha/recommended',
+        'plugin:chai-expect/recommended',
     ],
     rules: {
         semi: ['error', 'always'],
