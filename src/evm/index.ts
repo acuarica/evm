@@ -22,6 +22,7 @@ import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './fl
 export type EVMState = State<Inst, Expr>;
 
 export { Branch };
+export * from '../state';
 
 function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
     return mapValues(table, fn => (_: Opcode, state: EVMState) => fn(state.stack));
