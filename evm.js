@@ -56,7 +56,7 @@ const pathArg = (argv) =>
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 void yargs
-    .scriptName('evm')
+    .scriptName('evmjs')
     .usage('$0 <cmd> [path]')
 
     .command(
