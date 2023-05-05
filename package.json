@@ -19,7 +19,7 @@
     "typescript": "^5.0.4"
   },
   "scripts": {
-    "check": "tsc",
+    "typecheck": "tsc",
     "readme": "node evm.js 2>&1 | MARKER=--help node scripts/marker.js README.md"
   }
 }
