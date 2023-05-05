@@ -1,8 +1,15 @@
 const { readFileSync, writeFileSync } = require("fs");
+const c = require('ansi-colors');
+
+const MARKER = process.env['MARKER'];
 
 function main() {
-    const BEGIN_MARKER = '<!-- BEGIN:--help -->';
-    const END_MARKER = '<!-- END:--help -->';
+    if (!MARKER) {
+        throw new Error('Missing `MARKER` env variable');
+    }
+
+    const BEGIN_MARKER = `<!-- BEGIN:${MARKER} -->`;
+    const END_MARKER = `<!-- END:${MARKER} -->`;
 
     const args = process.argv.slice(2);
     if (args.length !== 1) {
@@ -11,15 +18,18 @@ function main() {
 
     const readme = readFileSync(args[0], 'utf8');
 
-    let isOpen = false;
+    /**
+     * @type {'NOT_SEEN' | 'OPEN' | 'CLOSED'}
+     */
+    let marker = 'NOT_SEEN';
     let output = '';
     const write = (/** @type string */line) => output += line + '\n';
 
     for (let line of readme.split('\n')) {
         line = line.trim();
-        if (line === BEGIN_MARKER) {
-            isOpen = true;
-        } else if (line === END_MARKER && isOpen) {
+        if (line === BEGIN_MARKER && marker === 'NOT_SEEN') {
+            marker = 'OPEN';
+        } else if (line === END_MARKER && marker === 'OPEN') {
             write(BEGIN_MARKER);
             write('```sh');
 
@@ -29,10 +39,14 @@ function main() {
             write('```');
             write(END_MARKER);
 
-            isOpen = false;
-        } else if (!isOpen) {
+            marker = 'CLOSED';
+        } else if (marker !== 'OPEN') {
             write(line);
         }
+    }
+
+    if (marker === 'NOT_SEEN') {
+        throw new Error(`Could not find marker \`${MARKER}\``);
     }
 
     writeFileSync(args[0], output.trimEnd() + '\n');
@@ -41,5 +55,6 @@ function main() {
 try {
     main();
 } catch (err) {
-    console.warn((/** @type Error */(err)).message);
+    const warn = c.yellow;
+    console.warn(warn((/** @type Error */(err)).message));
 }
