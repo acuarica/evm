@@ -1,5 +1,9 @@
 # EVM-cli
 
+[![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm-cli?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm-cli)
+![npm](https://img.shields.io/npm/dt/@acuarica/evm-cli)
+[![GitHub](https://img.shields.io/github/license/acuarica/evm-cli?style=flat-square)](https://github.com/acuarica/evm-cli/blob/main/LICENSE)
+
 ## `--help`
 
 <!-- BEGIN:--help -->
