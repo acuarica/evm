@@ -37,13 +37,21 @@
     },
     "homepage": "https://github.com/acuarica/evm#readme",
     "keywords": [
+        "4byte",
+        "blockchain",
+        "bytecode",
+        "control-flow-graph",
+        "decoder",
+        "decompiler",
+        "disassembler",
         "ethereum",
         "evm",
-        "utils",
-        "decompiler",
+        "parser",
+        "signatures",
+        "solidity",
         "typescript",
-        "bytecode",
-        "solidity"
+        "utils",
+        "web3"
     ],
     "devDependencies": {
         "@noble/hashes": "^1.3.0",
