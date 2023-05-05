@@ -1,6 +1,6 @@
 {
   "name": "@acuarica/evm-cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A CLI for the Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
   "bin": {
     "evmjs": "evm.js"
@@ -8,7 +8,9 @@
   "license": "MIT",
   "repository": "acuarica/evm-cli",
   "author": "Luis Mastrangelo (https://acuarica.github.io)",
-  "files": ["evm.js"],
+  "files": [
+    "evm.js"
+  ],
   "keywords": [
     "4byte",
     "blockchain",
