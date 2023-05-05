@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "acuarica/evm-cli",
   "author": "Luis Mastrangelo (https://acuarica.github.io)",
+  "files": ["evm.js"],
   "keywords": [
     "4byte",
     "blockchain",
