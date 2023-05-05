@@ -8,8 +8,8 @@
   "license": "MIT",
   "dependencies": {
     "@acuarica/evm": "^0.0.7",
+    "ansi-colors": "^4.1.3",
     "blessed": "^0.1.81",
-    "chalk": "4.1.0",
     "yargs": "^17.7.1"
   },
   "devDependencies": {

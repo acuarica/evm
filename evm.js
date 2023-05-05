@@ -2,7 +2,7 @@
 
 const { readFileSync } = require('fs');
 const yargs = require('yargs');
-const chalk = require('chalk');
+const c = require('ansi-colors');
 const blessed = require('blessed');
 const assert = require('assert');
 
@@ -12,11 +12,11 @@ require('@acuarica/evm/selector');
 const { formatOpcode, toHex } = require('@acuarica/evm/opcode');
 const { EVM, Branch } = require('@acuarica/evm/evm');
 
-const underline = chalk.underline;
-const blue = chalk.blue;
-const dim = chalk.dim;
-const magenta = chalk.magenta;
-const red = chalk.red;
+const underline = c.underline;
+const blue = c.blue;
+const dim = c.dim;
+const magenta = c.magenta;
+const red = c.red;
 
 /**
  * 
