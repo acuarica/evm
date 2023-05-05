@@ -6,6 +6,25 @@
     "evmjs": "evm.js"
   },
   "license": "MIT",
+  "repository": "acuarica/evm-cli",
+  "keywords": [
+    "4byte",
+    "blockchain",
+    "bytecode",
+    "cli",
+    "control-flow-graph",
+    "decoder",
+    "decompiler",
+    "disassembler",
+    "ethereum",
+    "evm",
+    "parser",
+    "signatures",
+    "solidity",
+    "typescript",
+    "utils",
+    "web3"
+  ],
   "dependencies": {
     "@acuarica/evm": "^0.0.7",
     "ansi-colors": "^4.1.3",
