@@ -23,19 +23,12 @@
     "files": [
         "dist/src/"
     ],
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/acuarica/evm.git"
-    },
+    "repository": "acuarica/evm",
     "author": "Luis Mastrangelo (https://acuarica.github.io)",
     "contributors": [
         "Luit Hollander <luit@hollander.email> (https://luit.me)"
     ],
     "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/acuarica/evm/issues"
-    },
-    "homepage": "https://github.com/acuarica/evm#readme",
     "keywords": [
         "4byte",
         "blockchain",
