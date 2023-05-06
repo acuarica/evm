@@ -5,6 +5,7 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm-cli?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm-cli)
 ![npm](https://img.shields.io/npm/dt/@acuarica/evm-cli)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm-cli?style=flat-square)](https://github.com/acuarica/evm-cli/blob/main/LICENSE)
+[![install size](https://packagephobia.com/badge?p=@acuarica/evm-cli)](https://packagephobia.com/result?p=@acuarica/evm-cli)
 
 ## Install
 
@@ -22,12 +23,6 @@ yarn add --dev @acuarica/evm
 
 ```sh
 npm install --global @acuarica/evm
-```
-
-### **Browser <span class="tab-badge">WIP</span>**
-
-```javascript
-<script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></sc    ript> 
 ```
 
 <!-- tabs:end -->
