@@ -7,11 +7,22 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm)
 ![npm](https://img.shields.io/npm/dt/@acuarica/evm)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/main/LICENSE)
+[![install size](https://packagephobia.com/badge?p=@acuarica/evm)](https://packagephobia.com/result?p=@acuarica/evm)
 [![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
 
 A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
 
 > Forked from [MrLuit/evm](https://github.com/MrLuit/evm). For more info, see [Detached Fork](#detached-fork).
+
+## Features
+
+- **Lightweight with no dependencies**
+- **Embedded signature database** <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">WIP</small>
+- **Convert bytecode to opcodes**
+- **Read information like events or functions from either bytecode or TX data**
+- **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
+- **Check whether an opcode exists and is reachable within bytecode execution**
+- **Detect whether contracts are compliant to certain ERCs**
 
 ## Install
 
@@ -38,14 +49,6 @@ npm install @acuarica/evm
 ```
 
 <!-- tabs:end -->
-
-## Features
-
-- **Convert bytecode to opcodes**
-- **Read information like events or functions from either bytecode or TX data**
-- **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
-- **Check whether an opcode exists and is reachable within bytecode execution**
-- **Detect whether contracts are compliant to certain ERCs**
 
 ## API &nbsp;&nbsp; [![TypeDoc](https://img.shields.io/badge/full%20reference-acuarica.github.io%2Fevm%2Ftsdoc-blueviolet?style=flat-square)](https://acuarica.github.io/evm/tsdoc)
 
