@@ -2,7 +2,7 @@
 
 # EVM CLI <small>BETA</small>
 
-> A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler.
+> A CLI tool for the Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler.
 
 - Simple and lightweight
 - Use it in your JavaScript/TypeScript apps
