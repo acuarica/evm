@@ -92,7 +92,7 @@ async function getBytecode(pathOrAddress) {
             const provider = new EtherscanProvider();
             const bytecode = await provider.getCode(pathOrAddress);
             if (!existsSync(cacheFolder)) {
-                mkdirSync(cacheFolder);
+                mkdirSync(cacheFolder, { recursive: true });
             }
             writeFileSync(cachePath, bytecode, 'utf8');
             return bytecode;
