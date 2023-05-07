@@ -149,6 +149,8 @@ void yargs(process.argv.slice(2))
     })
     .demandCommand(1, 'At least one command must be specified')
     .recommendCommands()
+    .example('$0 abi 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', 'shows the ABI of the ENS registry contract')
+    .example('$0 decompile 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', 'decompiles the ENS registry contract')
     .epilog('See https://docs.soliditylang.org/en/latest/abi-spec.html#abi-json for more information on the ABI specification.')
     .help().argv;
 
