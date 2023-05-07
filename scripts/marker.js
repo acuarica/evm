@@ -1,5 +1,5 @@
-const { readFileSync, writeFileSync } = require("fs");
-const c = require('ansi-colors');
+import { readFileSync, writeFileSync } from 'fs';
+import c from 'ansi-colors';
 
 const MARKER = process.env['MARKER'];
 
