@@ -33,6 +33,8 @@
     "@acuarica/evm": "^0.0.7",
     "ansi-colors": "^4.1.3",
     "blessed": "^0.1.81",
+    "env-paths": "^3.0.0",
+    "ethers": "^6.3.0",
     "yargs": "^17.7.1"
   },
   "devDependencies": {
