@@ -4,6 +4,7 @@
         "moduleResolution": "node16",
         "target": "es2015",
         "checkJs": true,
+        "esModuleInterop": true,
         "strict": true,
         "noEmit": true,
         "exactOptionalPropertyTypes": true,

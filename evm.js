@@ -1,38 +1,31 @@
 #!/usr/bin/env node
 
-const { readFileSync } = require('fs');
-const yargs = require('yargs');
-const c = require('ansi-colors');
-const blessed = require('blessed');
-const assert = require('assert');
+import { existsSync, mkdirSync, promises, writeFileSync } from 'fs';
+import yargs from 'yargs';
+import c from 'ansi-colors';
+import blessed from 'blessed';
+import assert from 'assert';
 
-const { Contract, stringify } = require('@acuarica/evm');
-require('@acuarica/evm/selector');
+import { Contract, stringify } from '@acuarica/evm';
+import '@acuarica/evm/selector';
 
-const { formatOpcode, toHex } = require('@acuarica/evm/opcode');
-const { EVM, Branch } = require('@acuarica/evm/evm');
+import { formatOpcode, toHex } from '@acuarica/evm/opcode';
+import { EVM, Branch } from '@acuarica/evm/evm';
+import { EtherscanProvider } from 'ethers';
+import envPaths from 'env-paths';
+import path from 'path';
+
+const paths = envPaths('evmjs');
 
 const underline = c.underline;
 const blue = c.blue;
 const dim = c.dim;
 const magenta = c.magenta;
 const red = c.red;
+const info = c.cyan;
+const warn = c.yellow;
 
-/**
- * 
- * @param {string} path 
- * @returns 
- */
-function getContract(path) {
-    const bytecode = readFileSync(path, 'utf8');
-    return new Contract(bytecode).patch();
-}
-
-/**
- * 
- * @param {import('@acuarica/evm/opcode').Opcode} opcode 
- * @returns 
- */
+/** @param {import('@acuarica/evm/opcode').Opcode} opcode */
 function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = ('0x' + opcode.offset.toString(16)).padStart(8);
@@ -42,146 +35,128 @@ function ansiOpcode(opcode) {
     return `${dim(pc)} ${blue(offset)}  ${magenta(opcode.mnemonic)}    ${pushData}`;
 }
 
-/**
- * 
- * @param {import('yargs').Argv} argv 
- * @returns 
- */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-const pathArg = (argv) =>
+/** @param {Contract} contract */
+function abi(contract) {
+    console.info(underline('Function Selectors'));
+    contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
+
+    console.info();
+    console.info(underline('Events'));
+    contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
+}
+
+/** @param {Contract} contract */
+function dis(contract) {
+    console.info(
+        `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
+            'mnemonic'
+        )}  ${'push data (PUSHx)'}`
+    );
+
+    for (const chunk of contract.chunks()) {
+        console.info(
+            chunk.pcstart,
+            ':',
+            chunk.states === undefined ? red('unreachable') : ''
+        );
+
+        for (let i = chunk.pcstart; i < chunk.pcend; i++) {
+            const opcode = contract.evm.opcodes[i];
+            console.info(ansiOpcode(opcode));
+        }
+
+        if (chunk.states !== undefined) {
+            for (const state of chunk.states) {
+                console.info('state');
+                console.info('    〒 ', state.stack.values.join(' | '));
+                state.stmts.forEach(stmt => console.info('  ', stmt.toString()));
+            }
+        }
+    }
+}
+
+/** @param {Contract} contract */
+function decompile(contract) {
+    console.info(contract.decompile());
+}
+
+/** @param {string} pathOrAddress */
+async function getBytecode(pathOrAddress) {
+    const cacheFolder = path.join(paths.cache, 'mainnet');
+    const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
+
+    const tries = [
+        () => promises.readFile(pathOrAddress, 'utf8'),
+        () => promises.readFile(cachePath, 'utf8'),
+        async () => {
+            const provider = new EtherscanProvider();
+            const bytecode = await provider.getCode(pathOrAddress);
+            if (!existsSync(cacheFolder)) {
+                mkdirSync(cacheFolder);
+            }
+            writeFileSync(cachePath, bytecode, 'utf8');
+            return bytecode;
+        },
+    ];
+
+    for (const fn of tries) {
+        try {
+            return await fn();
+        } catch (_err) {
+            // console.log(_err);
+        }
+    }
+    return null;
+}
+
+/** @param {(contract: Contract) => void} handler */
+function make(handler) {
+    /** @param {import('yargs').ArgumentsCamelCase} argv */
+    return async (argv) => {
+        const path = /** @type {string} */(argv['path']);
+        const bytecode = await getBytecode(path);
+        if (bytecode !== null) {
+            const contract = new Contract(bytecode).patch();
+            handler(contract);
+        } else {
+            console.info(warn(`Cannot find bytecode for ${info(path)}`));
+        }
+    }
+}
+
+/** @param {import('yargs').Argv} argv */
+const pos = (argv) =>
     argv.positional('path', {
         type: 'string',
-        describe: 'path to the bytecode file',
+        describe: 'path or address where to locate the bytecode of the contract',
     });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-void yargs
+void yargs(process.argv.slice(2))
     .scriptName('evmjs')
-    .usage('$0 <cmd> [path]')
-
-    .command(
-        'abi [path]',
-        'Shows the ABI of the contract',
-        /**
-         * 
-         * @param {import('yargs').Argv} yargs 
-         */
-        (yargs) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            const contract = getContract(/** @type {string} */(argv['path']));
-
-            console.info(underline('Function Selectors'));
-            contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
-
-            console.info();
-            console.info(underline('Events'));
-            contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
-        }
-    )
-
-    .command(
-        'dis [path]',
-        'Disassemble the bytecode into Opcodes',
-        /**
-         * 
-         * @param {import('yargs').Argv} yargs 
-         */
-        (yargs) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            console.info(
-                `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
-                    'mnemonic'
-                )}  ${'push data (PUSHx)'}`
-            );
-            const contract = getContract(/** @type {string} */(argv['path']));
-
-            for (const chunk of contract.chunks()) {
-                console.info(
-                    chunk.pcstart,
-                    ':',
-                    chunk.states === undefined ? red('unreachable') : ''
-                );
-
-                for (let i = chunk.pcstart; i < chunk.pcend; i++) {
-                    const opcode = contract.evm.opcodes[i];
-                    console.info(ansiOpcode(opcode));
-                }
-
-                if (chunk.states !== undefined) {
-                    for (const state of chunk.states) {
-                        console.info('state');
-                        console.info('    〒 ', state.stack.values.join(' | '));
-                        state.stmts.forEach(stmt => console.info('  ', stmt.toString()));
-                    }
-                }
-            }
-        }
-    )
-
-    .command(
-        'cfg [path]',
-        'Writes the cfg of the selected function in `dot` format into standard output',
-        /**
-         * @param {import('yargs').Argv} yargs 
-         */
-        (yargs) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            const contract = getContract(/** @type {string} */(argv['path']));
-            writeDot(contract.evm);
-        }
-    )
-
-    .command(
-        'decompile [path]',
-        'Decompile',
-        /**
-         * @param {import('yargs').Argv} yargs 
-         */
-        (yargs) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            const contract = getContract(/** @type {string} */(argv['path']));
-            console.info(contract.decompile());
-        }
-    )
-
-    .command(
-        'console [path]',
-        'Console',
-        /**
-         * @param {import('yargs').Argv} yargs 
-         */
-        (yargs) => {
-            pathArg(yargs);
-        },
-        function (argv) {
-            const contract = getContract(/** @type {string} */(argv['path']));
-            showConsole(contract);
-        }
-    )
-
+    .usage('$0 <cmd> <path|address>')
+    .command('abi <path|address>', 'Shows the ABI of the contract', pos, make(abi))
+    .command('dis <path>', 'Disassemble the bytecode into Opcodes', pos, make(dis))
+    .command('cfg <path>', 'Writes the cfg of the selected function in `dot` format into standard output', pos, make(cfg))
+    .command('decompile <path>', 'Decompile', pos, make(decompile))
+    .command('console <path>', 'Console', pos, make(show))
+    .command('config', 'Outputs cache path used to store downloaded bytecode', {}, () => console.info(paths.cache))
     .option('selector', {
         alias: 's',
         type: 'string',
         description:
             'Function signature, e.g., `balanceOf(address)` or selector hash to choose a specific function',
     })
-
     .demandCommand(1, 'At least one command must be specified')
+    .recommendCommands()
+    .epilog('See https://docs.soliditylang.org/en/latest/abi-spec.html#abi-json for more information on the ABI specification.')
     .help().argv;
 
 /**
- * 
- * @param {EVM} evm 
+ * @param {Contract} contract 
  */
-function writeDot(evm) {
+function cfg(contract) {
+    const evm = contract.evm;
     const write = console.log;
     write(`digraph G {    
     color="#efefef";
@@ -210,7 +185,6 @@ function writeDot(evm) {
     write('}');
 
     /**
-     * 
      * @param {EVM} evm
      */
     function dot(evm) {
@@ -313,7 +287,7 @@ function writeDot(evm) {
  * 
  * @param {Contract} contract 
  */
-function showConsole(contract) {
+function show(contract) {
     const screen = blessed.screen({ smartCSR: true });
     screen.title = 'my window title';
 
@@ -426,7 +400,7 @@ function showConsole(contract) {
     });
 
     const entries = [
-        /** @type {const} */(['main', { decompile: () => stringify(contract.main) } ]) ,
+        /** @type {const} */(['main', { decompile: () => stringify(contract.main) }]),
         ...Object.entries(contract.functions).map(([selector, fn]) => /**@type{const}*/([fn.label ?? selector, fn]))
     ];
     const fns = Object.fromEntries(entries);
