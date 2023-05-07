@@ -113,20 +113,21 @@ async function getBytecode(pathOrAddress) {
 function make(handler) {
     /** @param {import('yargs').ArgumentsCamelCase} argv */
     return async (argv) => {
-        const path = /** @type {string} */(argv['path']);
-        const bytecode = await getBytecode(path);
+        const pathOrAddress = /** @type {string} */(argv['contract']);
+        const bytecode = await getBytecode(pathOrAddress);
         if (bytecode !== null) {
             const contract = new Contract(bytecode).patch();
             handler(contract);
         } else {
-            console.info(warn(`Cannot find bytecode for ${info(path)}`));
+            console.info(warn(`Cannot find bytecode for ${info(pathOrAddress)}`));
+            process.exit(1);
         }
     }
 }
 
 /** @param {import('yargs').Argv} argv */
 const pos = (argv) =>
-    argv.positional('path', {
+    argv.positional('contract', {
         type: 'string',
         describe: 'path or address where to locate the bytecode of the contract',
     });
@@ -134,13 +135,13 @@ const pos = (argv) =>
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 void yargs(process.argv.slice(2))
     .scriptName('evmjs')
-    .usage('$0 <cmd> <path|address>')
-    .command('abi <path|address>', 'Shows the ABI of the contract', pos, make(abi))
-    .command('dis <path>', 'Disassemble the bytecode into Opcodes', pos, make(dis))
-    .command('cfg <path>', 'Writes the cfg of the selected function in `dot` format into standard output', pos, make(cfg))
-    .command('decompile <path>', 'Decompile', pos, make(decompile))
-    .command('console <path>', 'Console', pos, make(show))
-    .command('config', 'Outputs cache path used to store downloaded bytecode', {}, () => console.info(paths.cache))
+    .usage('$0 <cmd> <contract>')
+    .command('abi <contract>', 'Shows the ABI of the contract', pos, make(abi))
+    .command('dis <contract>', 'Disassemble the bytecode into Opcodes', pos, make(dis))
+    .command('cfg <contract>', 'Writes the cfg of the selected function in `dot` format into standard output', pos, make(cfg))
+    .command('decompile <contract>', 'Decompile the bytecode into Solidity-like source code', pos, make(decompile))
+    .command('console <contract>', 'Opens the interactive viewer to inspect bytecode', pos, make(show))
+    .command('config', 'Shows cache path used to store downloaded bytecode', {}, () => console.info(paths.cache))
     .option('selector', {
         alias: 's',
         type: 'string',
@@ -151,7 +152,7 @@ void yargs(process.argv.slice(2))
     .recommendCommands()
     .example('$0 abi 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', 'shows the ABI of the ENS registry contract')
     .example('$0 decompile 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', 'decompiles the ENS registry contract')
-    .epilog('See https://docs.soliditylang.org/en/latest/abi-spec.html#abi-json for more information on the ABI specification.')
+    .epilog('See https://docs.soliditylang.org/en/latest/abi-spec.html#abi-json for more information regarding the ABI specification.')
     .help().argv;
 
 /**
