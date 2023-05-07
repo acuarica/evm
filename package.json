@@ -46,6 +46,6 @@
   },
   "scripts": {
     "typecheck": "tsc",
-    "readme": "node evm.js 2>&1 | MARKER=--help node scripts/marker.js README.md"
+    "readme": "node evm.js 2>&1 | MARKER='evmjs --help' node scripts/marker.js README.md"
   }
 }

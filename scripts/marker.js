@@ -31,7 +31,8 @@ function main() {
         } else if (line === END_MARKER && marker === 'OPEN') {
             write(BEGIN_MARKER);
             write(AUTOGEN_COMMENT);
-            write('```sh');
+            write('```console');
+            write(`$ ${MARKER}`);
 
             const help = readFileSync(0, 'utf8');
             write(help);
