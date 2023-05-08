@@ -16,6 +16,8 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 
 ## Features
 
+> :construction: Under heavy development. Feel free to open an [issue](https://github.com/acuarica/evm/issues) if something is not right. :construction:
+
 - **Lightweight with no dependencies**
 - **Embedded signature database** <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">WIP</small>
 - **Convert bytecode to opcodes**
