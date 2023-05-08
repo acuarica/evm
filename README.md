@@ -7,6 +7,8 @@
 [![GitHub](https://img.shields.io/github/license/acuarica/evm-cli?style=flat-square)](https://github.com/acuarica/evm-cli/blob/main/LICENSE)
 [![install size](https://packagephobia.com/badge?p=@acuarica/evm-cli)](https://packagephobia.com/result?p=@acuarica/evm-cli)
 
+> :construction: Under heavy development. Feel free to open an [issue](https://github.com/acuarica/evm-cli/issues) if something is not right. :construction:
+
 ## Install
 
 Install using your package manager
