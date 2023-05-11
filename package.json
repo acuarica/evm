@@ -89,6 +89,7 @@
         "coverage": "yarn compile && nyc mocha 'dist/test/**/*.{test,check}.js'",
         "bundle": "webpack --mode production",
         "make:selectors": "node selectors/make.mjs",
+        "make:ercs": " node selectors/ercs.mjs > src/ercs.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",

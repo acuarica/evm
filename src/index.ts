@@ -14,6 +14,7 @@ import {
     type MappingLoad,
 } from './evm/storage';
 import { OPCODES } from './opcode';
+import ERCs from './ercs';
 
 /**
  *
@@ -116,15 +117,15 @@ export class Contract {
 
     /**
      * https://eips.ethereum.org/EIPS/eip-165
+     * https://eips.ethereum.org/EIPS/eip-20
+     * https://eips.ethereum.org/EIPS/eip-20
+     * https://eips.ethereum.org/EIPS/eip-721
      *
+     * @param erc
      * @returns
      */
-    isERC165(): boolean {
-        /**
-         * `bytes4(keccak256('supportsInterface(bytes4)'))`
-         */
-        const selector = '01ffc9a7';
-        return this.evm.functionBranches.has(selector);
+    isERC(erc: keyof typeof ERCs): boolean {
+        return ERCs[erc].includes.every(s => this.evm.functionBranches.has(s));
     }
 
     /**

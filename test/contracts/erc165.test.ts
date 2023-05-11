@@ -9,7 +9,7 @@ contracts('erc165', compile => {
                     return (interfaceID == 0xffffffff);
                 } }`;
         const contract = new Contract(compile(sol, this).bytecode);
-        expect(contract.isERC165()).to.be.true;
+        expect(contract.isERC('ERC165')).to.be.true;
     });
 
     it('should detect not-ERC165', function () {
@@ -18,6 +18,6 @@ contracts('erc165', compile => {
                     return (interfaceID == 0xffffffff);
                 } }`;
         const contract = new Contract(compile(sol, this).bytecode);
-        expect(contract.isERC165()).to.be.false;
+        expect(contract.isERC('ERC165')).to.be.false;
     });
 });
