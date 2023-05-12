@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import c = require('ansi-colors');
 import { providers } from 'ethers';
 
-import { Contract } from '../src';
+import { Contract, type ERCNo, SupportedERCs } from '../src';
 import type { Throw } from '../src/evm/expr';
 
 /**
@@ -88,6 +88,19 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         }
     })();
 
+    const ercsStats = new (class {
+        readonly counts = new Map<ERCNo, number>();
+
+        append(contract: Contract) {
+            for (const erc of SupportedERCs) {
+                if (contract.isERC(erc)) {
+                    const count = this.counts.get(erc) ?? 0;
+                    this.counts.set(erc, count + 1);
+                }
+            }
+        }
+    })();
+
     csv.toString()
         .trimEnd()
         .split('\n')
@@ -129,6 +142,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 const contract = new Contract(bytecode).patch();
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
+                ercsStats.append(contract);
 
                 if (contract.evm.errors.length > 0) {
                     errorsByContract.set(`${name}-${address}`, contract.evm.errors);
@@ -151,9 +165,16 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
         console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
         console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].join('|')}`);
+
         console.info('\n  Selector Stats');
         console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
         console.info(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
+
+        console.info('\n  ERCs Stats');
+        for (const [erc, count] of ercsStats.counts) {
+            console.info(`    • ${info(erc)} ${count}`);
+        }
+
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));

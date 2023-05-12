@@ -16,6 +16,10 @@ import {
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 
+export type ERCNo = keyof typeof ERCs;
+
+export const SupportedERCs = Object.keys(ERCs);
+
 /**
  *
  */
@@ -124,7 +128,7 @@ export class Contract {
      * @param erc
      * @returns
      */
-    isERC(erc: keyof typeof ERCs): boolean {
+    isERC(erc: ERCNo): boolean {
         return ERCs[erc].includes.every(s => this.evm.functionBranches.has(s));
     }
 
