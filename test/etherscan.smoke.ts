@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import c = require('ansi-colors');
 import { providers } from 'ethers';
 
-import { Contract, type ERCNo, SupportedERCs } from '../src';
+import { Contract, ERCIds } from '../src';
 import type { Throw } from '../src/evm/expr';
 
 /**
@@ -89,10 +89,10 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     })();
 
     const ercsStats = new (class {
-        readonly counts = new Map<ERCNo, number>();
+        readonly counts = new Map<(typeof ERCIds)[number], number>();
 
         append(contract: Contract) {
-            for (const erc of SupportedERCs) {
+            for (const erc of ERCIds) {
                 if (contract.isERC(erc)) {
                     const count = this.counts.get(erc) ?? 0;
                     this.counts.set(erc, count + 1);

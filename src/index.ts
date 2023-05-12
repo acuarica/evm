@@ -16,9 +16,10 @@ import {
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 
-export type ERCNo = keyof typeof ERCs;
-
-export const SupportedERCs = Object.keys(ERCs);
+/**
+ *
+ */
+export const ERCIds = Object.keys(ERCs);
 
 /**
  *
@@ -125,11 +126,11 @@ export class Contract {
      * https://eips.ethereum.org/EIPS/eip-20
      * https://eips.ethereum.org/EIPS/eip-721
      *
-     * @param erc
+     * @param ercid
      * @returns
      */
-    isERC(erc: ERCNo): boolean {
-        return ERCs[erc].includes.every(s => this.evm.functionBranches.has(s));
+    isERC(ercid: (typeof ERCIds)[number]): boolean {
+        return ERCs[ercid].includes.every(s => this.evm.functionBranches.has(s));
     }
 
     /**
