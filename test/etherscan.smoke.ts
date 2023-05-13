@@ -7,6 +7,8 @@ import { providers } from 'ethers';
 
 import { Contract, ERCIds } from '../src';
 import type { Throw } from '../src/evm/expr';
+import { type EVMState, INSTS } from '../src/evm';
+import type { StaticCall } from '../src/evm/system';
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -116,6 +118,15 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         }
     })();
 
+    const precompiledStats = new (class {
+        readonly counts = new Map<string, number>();
+
+        append(address: string) {
+            const count = this.counts.get(address) ?? 0;
+            this.counts.set(address, count + 1);
+        }
+    })();
+
     csv.toString()
         .trimEnd()
         .split('\n')
@@ -154,8 +165,16 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     return;
                 }
 
+                const STATICCALL = (state: EVMState) => {
+                    INSTS.STATICCALL(state);
+                    const call = state.stack.top as StaticCall;
+                    const address = call.address.eval();
+                    if (address.tag === 'Val' && address.val <= 9n) {
+                        precompiledStats.append(address.toString());
+                    }
+                };
                 const t0 = hrtime.bigint();
-                let contract = new Contract(bytecode);
+                let contract = new Contract(bytecode, { ...INSTS, STATICCALL });
                 const t1 = hrtime.bigint();
                 benchStats.append(t1 - t0);
 
@@ -215,5 +234,10 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         console.info('\n  Bench Stats');
         console.info(`    • ${info('Total')} ${warn(`${benchStats.total / 1_000_000n} ms`)}`);
         console.info(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
+
+        console.info('\n  Precompiled Contract Stats');
+        for (const [address, count] of precompiledStats.counts) {
+            console.info(`    • ${info(address)} ${count}`);
+        }
     });
 });
