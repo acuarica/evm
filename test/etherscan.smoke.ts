@@ -112,7 +112,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         }
 
         get average() {
-            return this.total / BigInt(this.count);
+            return Number(this.total / BigInt(this.count));
         }
     })();
 
@@ -181,20 +181,6 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         });
 
     after(function () {
-        console.info('\n  Metadata Stats');
-        console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
-        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].join('|')}`);
-
-        console.info('\n  Selector Stats');
-        console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
-        console.info(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
-
-        console.info('\n  ERCs Stats');
-        for (const [erc, count] of ercsStats.counts) {
-            console.info(`    • ${info(erc)} ${count}`);
-        }
-
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));
@@ -212,10 +198,22 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
             }
         }
 
+        console.info('\n  Metadata Stats');
+        console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
+        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
+        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].join('|')}`);
+
+        console.info('\n  Selector Stats');
+        console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
+        console.info(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
+
+        console.info('\n  ERCs Stats');
+        for (const [erc, count] of ercsStats.counts) {
+            console.info(`    • ${info(erc)} ${count}`);
+        }
+
         console.info('\n  Bench Stats');
-        console.info(`    • ${info('Total')} ${warn(`${benchStats.total / (1000n * 1000n)} ms`)}`);
-        console.info(
-            `    • ${info('Average')} ${warn(`${Number(benchStats.average) / (1000 * 1000)} ms`)}`
-        );
+        console.info(`    • ${info('Total')} ${warn(`${benchStats.total / 1_000_000n} ms`)}`);
+        console.info(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
     });
 });
