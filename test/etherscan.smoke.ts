@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { hrtime } from 'process';
 
 import { expect } from 'chai';
 import c = require('ansi-colors');
@@ -101,6 +102,20 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         }
     })();
 
+    const benchStats = new (class {
+        count = 0;
+        total = 0n;
+
+        append(diff: bigint) {
+            this.count++;
+            this.total += diff;
+        }
+
+        get average() {
+            return this.total / BigInt(this.count);
+        }
+    })();
+
     csv.toString()
         .trimEnd()
         .split('\n')
@@ -139,7 +154,12 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     return;
                 }
 
-                const contract = new Contract(bytecode).patch();
+                const t0 = hrtime.bigint();
+                let contract = new Contract(bytecode);
+                const t1 = hrtime.bigint();
+                benchStats.append(t1 - t0);
+
+                contract = contract.patch();
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
                 ercsStats.append(contract);
@@ -191,5 +211,11 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 );
             }
         }
+
+        console.info('\n  Bench Stats');
+        console.info(`    • ${info('Total')} ${warn(`${benchStats.total / (1000n * 1000n)} ms`)}`);
+        console.info(
+            `    • ${info('Average')} ${warn(`${Number(benchStats.average) / (1000 * 1000)} ms`)}`
+        );
     });
 });
