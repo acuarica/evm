@@ -29,19 +29,15 @@ function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr
     return mapValues(table, fn => (state: EVMState) => fn(state.stack));
 }
 
-function mapState<K extends string>(table: { [mnemonic in K]: (state: EVMState) => void }) {
-    return mapValues(table, fn => (state: EVMState) => fn(state));
-}
-
 export const INSTS = {
     ...mapStack(MATH),
     ...mapStack(LOGIC),
-    ...mapState(SPECIAL),
-    ...mapState(MEMORY),
+    ...SPECIAL,
+    ...MEMORY,
     JUMPDEST: (_state: EVMState) => {},
     ...mapValues(PUSHES, fn => (state: EVMState, op: Opcode) => fn(op.pushData!, state.stack)),
     ...mapStack(STACK<Expr>()),
-    ...mapState(SYSTEM),
+    ...SYSTEM,
     PC: ({ stack }: EVMState, op: Opcode) => stack.push(new Val(BigInt(op.offset))),
     INVALID: (state: EVMState, op: Opcode): void => state.halt(new Invalid(op.opcode)),
 } as const;
@@ -123,8 +119,8 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         this.insts = fill({
             ...insts,
             ...FLOW({ opcodes, jumpdests }, this),
-            ...mapState(STORAGE(this)),
-            ...mapState(LOGS(this)),
+            ...STORAGE(this),
+            ...LOGS(this),
         });
     }
 

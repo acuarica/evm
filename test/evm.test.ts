@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { EVM, INSTS } from '../src/evm';
-import { State } from '../src/state';
+import { type Ram, State } from '../src/state';
 import type { Expr, Inst } from '../src/evm/expr';
 import { Invalid } from '../src/evm/system';
 import { Tx } from '../src/evm/special';
@@ -28,11 +28,11 @@ describe('evm', function () {
         }`;
         let count = 0;
         let top = undefined;
-        const NUMBER = (state: State<Inst, Expr>) => {
+        const NUMBER = (state: Ram<Expr>) => {
             count++;
             INSTS.NUMBER(state);
         };
-        const GASPRICE = (state: State<Inst, Expr>) => {
+        const GASPRICE = (state: Ram<Expr>) => {
             INSTS.GASPRICE(state);
             top = state.stack.top;
         };
