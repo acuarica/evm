@@ -108,14 +108,14 @@ export function FLOW(
     { functionBranches }: ISelectorBranches
 ) {
     return {
-        JUMP: (opcode: Opcode, state: State<Inst, Expr>): void => {
+        JUMP: (state: State<Inst, Expr>, opcode: Opcode): void => {
             const offset = state.stack.pop();
             const destpc = getDest(offset, opcode);
             const destBranch = makeBranch(destpc, state);
             state.halt(new Jump(offset, destBranch));
         },
 
-        JUMPI: (opcode: Opcode, state: State<Inst, Expr>): void => {
+        JUMPI: (state: State<Inst, Expr>, opcode: Opcode): void => {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
             const destpc = getDest(offset, opcode);

@@ -4,16 +4,47 @@ import { EVM, INSTS } from '../src/evm';
 import { State } from '../src/state';
 import type { Expr, Inst } from '../src/evm/expr';
 import { Invalid } from '../src/evm/system';
+import { Tx } from '../src/evm/special';
 
 import { compile } from './utils/solc';
 
 describe('evm', function () {
     it('should halt with `INVALID`', function () {
         const state = new State<Inst, Expr>();
-        INSTS.INVALID({ offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null }, state);
+        INSTS.INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
         expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
+    });
+
+    it('should attach `INSTS` hooks', function () {
+        const sol = `contract C {
+            event Deposit(uint256);
+            fallback () external payable {
+                emit Deposit(block.number);
+                emit Deposit(block.number);
+                emit Deposit(tx.gasprice);
+            }
+        }`;
+        let count = 0;
+        let top = undefined;
+        const NUMBER = (state: State<Inst, Expr>) => {
+            count++;
+            INSTS.NUMBER(state);
+        };
+        const GASPRICE = (state: State<Inst, Expr>) => {
+            INSTS.GASPRICE(state);
+            top = state.stack.top;
+        };
+        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode, {
+            ...INSTS,
+            NUMBER,
+            GASPRICE,
+        });
+        evm.start();
+        expect(count).to.be.equal(2);
+        expect(top).to.be.not.undefined;
+        expect(top).to.be.deep.equal(Tx.gasprice);
     });
 
     describe('conditional', function () {

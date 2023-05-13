@@ -16,6 +16,13 @@ export class Stack<in out E> {
     readonly values: E[] = [];
 
     /**
+     * Returns the element at the top of the stack without removing it.
+     */
+    get top(): E | undefined {
+        return this.values[0];
+    }
+
+    /**
      * Inserts the element `elem` at the top of the stack.
      *
      * @param elem the element to be inserted.
