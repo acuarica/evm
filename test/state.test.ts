@@ -3,41 +3,43 @@ import { Stack, State } from '../src/state';
 
 describe('state', function () {
     describe('Stack', function () {
-        it('should create an instance with an empty stack', function () {
+        it('should create a `new` instance with an empty stack', function () {
             const stack = new Stack<never>();
             expect(stack.values).to.deep.equal([]);
         });
 
-        it('should push successfully', function () {
+        it('should `push` and get `top` successfully', function () {
             const stack = new Stack<string>();
             stack.push('1');
-            expect(stack.values).to.deep.equal(['1']);
+            expect(stack.top).to.be.equal('1');
+            expect(stack.values).to.be.deep.equal(['1']);
             stack.push('0');
-            expect(stack.values).to.deep.equal(['0', '1']);
+            expect(stack.top).to.be.equal('0');
+            expect(stack.values).to.be.deep.equal(['0', '1']);
         });
 
-        it('should pop successfully', function () {
+        it('should `pop` successfully', function () {
             const stack = new Stack<number>();
             stack.push(1);
             stack.push(2);
-            expect(stack.values).to.deep.equal([2, 1]);
-            expect(stack.pop()).to.deep.equal(2);
-            expect(stack.values).to.deep.equal([1]);
-            expect(stack.pop()).to.deep.equal(1);
-            expect(stack.values).to.deep.equal([]);
+            expect(stack.values).to.be.deep.equal([2, 1]);
+            expect(stack.pop()).to.be.equal(2);
+            expect(stack.values).to.be.deep.equal([1]);
+            expect(stack.pop()).to.be.equal(1);
+            expect(stack.values).to.be.deep.equal([]);
             expect(() => stack.pop()).to.throw(Error, 'POP with empty stack');
         });
 
-        it('should duplicate successfully', function () {
+        it('should `dup`licate successfully', function () {
             const stack = new Stack<string>();
             stack.push('x');
             stack.push('y');
             stack.push('z');
-            expect(stack.values).to.deep.equal(['z', 'y', 'x']);
+            expect(stack.values).to.be.deep.equal(['z', 'y', 'x']);
             stack.dup(0);
-            expect(stack.values).to.deep.equal(['z', 'z', 'y', 'x']);
+            expect(stack.values).to.be.deep.equal(['z', 'z', 'y', 'x']);
             stack.dup(3);
-            expect(stack.values).to.deep.equal(['x', 'z', 'z', 'y', 'x']);
+            expect(stack.values).to.be.deep.equal(['x', 'z', 'z', 'y', 'x']);
             expect(() => stack.dup(-1)).to.throw(
                 Error,
                 'Unsupported position for duplication operation'
@@ -52,16 +54,16 @@ describe('state', function () {
             );
         });
 
-        it('should swap successfully', function () {
+        it('should `swap` successfully', function () {
             const stack = new Stack<string>();
             stack.push('a');
             stack.push('b');
             stack.push('c');
-            expect(stack.values).to.deep.equal(['c', 'b', 'a']);
+            expect(stack.values).to.be.deep.equal(['c', 'b', 'a']);
             stack.swap(1);
-            expect(stack.values).to.deep.equal(['b', 'c', 'a']);
+            expect(stack.values).to.be.deep.equal(['b', 'c', 'a']);
             stack.swap(2);
-            expect(stack.values).to.deep.equal(['a', 'c', 'b']);
+            expect(stack.values).to.be.deep.equal(['a', 'c', 'b']);
             expect(() => stack.swap(0)).to.throw(Error, 'Unsupported position for swap operation');
             expect(() => stack.swap(17)).to.throw(Error, 'Unsupported position for swap operation');
             expect(() => stack.swap(3)).to.throw(
@@ -70,15 +72,15 @@ describe('state', function () {
             );
         });
 
-        it('should clone successfully', function () {
+        it('should `clone` successfully', function () {
             const stack1 = new Stack<number>();
             stack1.push(3);
-            expect(stack1.values).to.deep.equal([3]);
+            expect(stack1.values).to.be.deep.equal([3]);
             const stack2 = stack1.clone();
-            expect(stack2.values).to.deep.equal([3]);
+            expect(stack2.values).to.be.deep.equal([3]);
             stack1.pop();
-            expect(stack1.values).to.deep.equal([]);
-            expect(stack2.values).to.deep.equal([3]);
+            expect(stack1.values).to.be.deep.equal([]);
+            expect(stack2.values).to.be.deep.equal([3]);
         });
 
         it('should `throw` when stack is too deep', function () {
@@ -92,7 +94,7 @@ describe('state', function () {
     });
 
     describe('State', function () {
-        it('should clone a state without aliasing with its source', function () {
+        it('should `clone` a state without aliasing with its source', function () {
             const state = new State<number, number>();
             expect(state.halted).to.be.false;
             expect(state.stmts).to.be.empty;
@@ -107,7 +109,7 @@ describe('state', function () {
             expect(clone.memory).to.have.keys([0]);
         });
 
-        it('should clone a state while aliasing its contents', function () {
+        it('should `clone` a state while aliasing its contents', function () {
             const expr = { x: 'a' as 'a' | 'b' };
 
             const state = new State<never, { x: 'a' | 'b' }>();
