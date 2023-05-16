@@ -43,8 +43,11 @@ function push(pushData: Uint8Array, stack: Stack<Expr>): void {
 }
 
 export function STACK<E>() {
+    const dup = (position: number) => (stack: Stack<E>) => stack.dup(position);
+    const swap = (position: number) => (stack: Stack<E>) => stack.swap(position);
+
     return {
-        POP: (stack: Stack<Expr>): void => void stack.pop(),
+        POP: (stack: Stack<E>): void => void stack.pop(),
         DUP1: dup(0),
         DUP2: dup(1),
         DUP3: dup(2),
@@ -78,12 +81,4 @@ export function STACK<E>() {
         SWAP15: swap(15),
         SWAP16: swap(16),
     };
-
-    function dup(position: number) {
-        return (stack: Stack<E>): void => stack.dup(position);
-    }
-
-    function swap(position: number) {
-        return (stack: Stack<E>): void => stack.swap(position);
-    }
 }
