@@ -52,10 +52,10 @@ export class Call extends Tag('Call') {
         readonly gas: Expr,
         readonly address: Expr,
         readonly value: Expr,
-        readonly memoryStart: Expr,
-        readonly memoryLength: Expr,
-        readonly outputStart: Expr,
-        readonly outputLength: Expr
+        readonly argsStart: Expr,
+        readonly argsLen: Expr,
+        readonly retStart: Expr,
+        readonly retLen: Expr
     ) {
         super();
     }
@@ -65,24 +65,16 @@ export class Call extends Tag('Call') {
     }
 
     str(): string {
-        if (this.memoryLength.isZero() && this.outputLength.isZero()) {
-            if (
-                this.gas.tag === 'Mul' &&
-                this.gas.left.isZero() &&
-                this.gas.right.isVal() &&
-                this.gas.right.val === 2300n
-            ) {
-                if (this.throwOnFail) {
-                    return `address(${this.address}).transfer(${this.value})`;
-                } else {
-                    return `address(${this.address}).send(${this.value})`;
-                }
-            } else {
-                return `address(${this.address}).call.gas(${this.gas}).value(${this.value})`;
-            }
-        } else {
-            return `call(${this.gas},${this.address},${this.value},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
-        }
+        return this.argsLen.isZero() && this.retLen.isZero()
+            ? this.gas.tag === 'Mul' &&
+              this.gas.left.isZero() &&
+              this.gas.right.isVal() &&
+              this.gas.right.val === 2300n
+                ? this.throwOnFail
+                    ? `address(${this.address}).transfer(${this.value})`
+                    : `address(${this.address}).send(${this.value})`
+                : `address(${this.address}).call.gas(${this.gas}).value(${this.value})`
+            : `call(${this.gas},${this.address},${this.value},${this.argsStart},${this.argsLen},${this.retStart},${this.retLen})`;
     }
 }
 
@@ -210,17 +202,15 @@ export class Return implements IInst {
     }
 
     toString(): string {
-        if (this.offset && this.size) {
-            return `return memory[${this.offset}:(${this.offset}+${this.size})];`;
-        } else if (this.args.length === 0) {
-            return 'return;';
-        } else if (isStringReturn(this.args) && this.args[0].val === 32n) {
-            return `return '${hex2a(this.args[2].val.toString(16))}';`;
-        } else {
-            return this.args.length === 1
-                ? `return ${this.args[0]};`
-                : `return (${this.args.join(', ')});`;
-        }
+        return this.offset && this.size
+            ? `return memory[${this.offset}:(${this.offset}+${this.size})];`
+            : this.args.length === 0
+            ? 'return;'
+            : isStringReturn(this.args) && this.args[0].val === 32n
+            ? `return '${hex2a(this.args[2].val.toString(16))}';`
+            : this.args.length === 1
+            ? `return ${this.args[0]};`
+            : `return (${this.args.join(', ')});`;
     }
 }
 
@@ -311,81 +301,61 @@ export function memArgs<T>(
 export const SYSTEM = {
     SHA3: (state: State<Inst, Expr>): void => state.stack.push(memArgs(state, Sha3)),
     STOP: (state: State<Inst, Expr>): void => state.halt(new Stop()),
-
     CREATE: ({ stack }: State<Inst, Expr>): void => {
         const value = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
         stack.push(new Create(value, offset, size));
     },
-
     CALL: ({ stack, memory }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
-        const memoryStart = stack.pop();
-        const memoryLength = stack.pop();
-        const outputStart = stack.pop();
-        const outputLength = stack.pop();
-        stack.push(
-            new Call(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
-        );
-
-        if (!outputStart.isVal()) {
-            throw new Error('WARN:CALL output start should be number');
+        const argsStart = stack.pop();
+        const argsLen = stack.pop();
+        const retStart = stack.pop();
+        const retLen = stack.pop();
+        stack.push(new Call(gas, address, value, argsStart, argsLen, retStart, retLen));
+        if (retStart.isVal()) {
+            memory[Number(retStart.val)] = new ReturnData(retStart, retLen);
         }
-
-        memory[Number(outputStart.val)] = new ReturnData(outputStart, outputLength);
     },
     CALLCODE: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
-        const memoryStart = stack.pop();
-        const memoryLength = stack.pop();
-        const outputStart = stack.pop();
-        const outputLength = stack.pop();
-
-        stack.push(
-            new CallCode(gas, address, value, memoryStart, memoryLength, outputStart, outputLength)
-        );
+        const argsStart = stack.pop();
+        const argsLen = stack.pop();
+        const retStart = stack.pop();
+        const retLen = stack.pop();
+        stack.push(new CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
     },
-
     RETURN: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Return)),
-
     DELEGATECALL: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
-        const memoryStart = stack.pop();
-        const memoryLength = stack.pop();
-        const outputStart = stack.pop();
-        const outputLength = stack.pop();
-        stack.push(
-            new DelegateCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
-        );
+        const argsStart = stack.pop();
+        const argsLen = stack.pop();
+        const retStart = stack.pop();
+        const retLen = stack.pop();
+        stack.push(new DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
     },
-
     CREATE2: ({ stack }: State<Inst, Expr>): void => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new Create2(memoryStart, memoryLength, value));
     },
-
     STATICCALL: ({ stack }: State<Inst, Expr>): void => {
         const gas = stack.pop();
         const address = stack.pop();
-        const memoryStart = stack.pop();
-        const memoryLength = stack.pop();
-        const outputStart = stack.pop();
-        const outputLength = stack.pop();
-        stack.push(
-            new StaticCall(gas, address, memoryStart, memoryLength, outputStart, outputLength)
-        );
+        const argsStart = stack.pop();
+        const argsLen = stack.pop();
+        const retStart = stack.pop();
+        const retLen = stack.pop();
+        stack.push(new StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
     },
-
     REVERT: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Revert)),
-
     SELFDESTRUCT: (state: State<Inst, Expr>): void => {
         const address = state.stack.pop();
         state.halt(new SelfDestruct(address));
