@@ -48,14 +48,16 @@ describe('evm::storage', function () {
             uint128 val2 = 7;
             uint128 val3 = 11;
             fallback() external payable {
-                val1 = 5;
-                val2 = 7;
-                val3 = 11;
+                val1 = block.number + 5;
+                val2 = uint128(block.number) + 7;
+                val3 = uint128(block.number) + 11;
             }
         }`;
         const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
+
+        // state.stmts.forEach((stmt) => console.log(`${stmt.eval()}`));
 
         expect(Object.keys(evm.variables)).to.be.have.length(3);
     });
