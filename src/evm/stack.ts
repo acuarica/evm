@@ -3,43 +3,43 @@ import { type Stack } from '../state';
 
 import { type Expr, Val } from './expr';
 
-export const PUSHES = {
-    PUSH1: push,
-    PUSH2: push,
-    PUSH3: push,
-    PUSH4: push,
-    PUSH5: push,
-    PUSH6: push,
-    PUSH7: push,
-    PUSH8: push,
-    PUSH9: push,
-    PUSH10: push,
-    PUSH11: push,
-    PUSH12: push,
-    PUSH13: push,
-    PUSH14: push,
-    PUSH15: push,
-    PUSH16: push,
-    PUSH17: push,
-    PUSH18: push,
-    PUSH19: push,
-    PUSH20: push,
-    PUSH21: push,
-    PUSH22: push,
-    PUSH23: push,
-    PUSH24: push,
-    PUSH25: push,
-    PUSH26: push,
-    PUSH27: push,
-    PUSH28: push,
-    PUSH29: push,
-    PUSH30: push,
-    PUSH31: push,
-    PUSH32: push,
-};
+export function PUSHES() {
+    const push = (d: Uint8Array, s: Stack<Expr>) => s.push(new Val(BigInt('0x' + toHex(d)), true));
 
-function push(pushData: Uint8Array, stack: Stack<Expr>): void {
-    stack.push(new Val(BigInt('0x' + toHex(pushData)), true));
+    return {
+        PUSH1: push,
+        PUSH2: push,
+        PUSH3: push,
+        PUSH4: push,
+        PUSH5: push,
+        PUSH6: push,
+        PUSH7: push,
+        PUSH8: push,
+        PUSH9: push,
+        PUSH10: push,
+        PUSH11: push,
+        PUSH12: push,
+        PUSH13: push,
+        PUSH14: push,
+        PUSH15: push,
+        PUSH16: push,
+        PUSH17: push,
+        PUSH18: push,
+        PUSH19: push,
+        PUSH20: push,
+        PUSH21: push,
+        PUSH22: push,
+        PUSH23: push,
+        PUSH24: push,
+        PUSH25: push,
+        PUSH26: push,
+        PUSH27: push,
+        PUSH28: push,
+        PUSH29: push,
+        PUSH30: push,
+        PUSH31: push,
+        PUSH32: push,
+    };
 }
 
 export function STACK<E>() {

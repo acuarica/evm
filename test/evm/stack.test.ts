@@ -11,7 +11,7 @@ describe('evm::stack', function () {
             const one = new Uint8Array(1);
             one[0] = 1;
             const stack = new Stack<Expr>();
-            PUSHES.PUSH1(Buffer.from([1]), stack);
+            PUSHES().PUSH1(Buffer.from([1]), stack);
             expect(stack.values).to.deep.equal([new Val(1n, true)]);
         });
     });

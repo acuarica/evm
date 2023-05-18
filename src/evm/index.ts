@@ -35,7 +35,7 @@ export const INSTS = {
     ...SPECIAL,
     ...MEMORY,
     JUMPDEST: (_state: EVMState) => {},
-    ...mapValues(PUSHES, fn => (state: EVMState, op: Opcode) => fn(op.pushData!, state.stack)),
+    ...mapValues(PUSHES(), fn => (state: EVMState, op: Opcode) => fn(op.pushData!, state.stack)),
     ...mapStack(STACK<Expr>()),
     ...SYSTEM,
     PC: ({ stack }: EVMState, op: Opcode) => stack.push(new Val(BigInt(op.offset))),
