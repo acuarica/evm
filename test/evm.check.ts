@@ -51,7 +51,7 @@ describe('evm', function () {
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         assert(state.stmts[0].name === 'Log');
-        expect(state.stmts[0].args[0]).to.be.deep.equal(
+        expect(state.stmts[0].args![0]).to.be.deep.equal(
             new And(new Val(BigInt('0x' + 'ff'.repeat(16)), true), new Not(Block.number))
         );
     });

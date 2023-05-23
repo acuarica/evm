@@ -94,7 +94,7 @@ describe('evm::sym', function () {
 
                 const stmt = state.stmts[0];
                 expect(stmt.name, `Expected 'Log' but got '${stmt}'`).to.be.equal('Log');
-                expect((<Log>stmt).args[0].eval()).to.be.deep.equal(sym);
+                expect((<Log>stmt).args![0].eval()).to.be.deep.equal(sym);
             });
         });
     }

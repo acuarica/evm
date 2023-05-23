@@ -60,14 +60,19 @@ export function stringifyEvents(events: IEvents['events']) {
     return text;
 }
 
+/**
+ * Represents a `LOGn` instruction, or in Solidity terms, an `emit` statement.
+ *
+ * https://docs.soliditylang.org/en/latest/contracts.html#events
+ */
 export class Log implements IInst {
     readonly name = 'Log';
 
     constructor(
         readonly event: IEvents['events'][string] | undefined,
         readonly topics: Expr[],
-        readonly args: Expr[],
-        readonly mem?: { offset: Expr; size: Expr }
+        readonly mem: { offset: Expr; size: Expr },
+        readonly args?: Expr[]
     ) {}
 
     get eventName(): string | undefined {
@@ -81,16 +86,16 @@ export class Log implements IInst {
         return new Log(
             this.event,
             this.topics.map(e => e.eval()),
-            this.args.map(e => e.eval()),
-            this.mem ? { offset: this.mem.offset.eval(), size: this.mem.size.eval() } : undefined
+            { offset: this.mem.offset.eval(), size: this.mem.size.eval() },
+            this.args?.map(e => e.eval())
         );
     }
 
     toString() {
         return this.eventName
-            ? `emit ${this.eventName}(${[...this.topics.slice(1), ...this.args].join(', ')});`
+            ? `emit ${this.eventName}(${[...this.topics.slice(1), ...this.args!].join(', ')});`
             : 'log(' +
-                  (this.mem
+                  (this.args === undefined
                       ? [...this.topics, `memory[${this.mem.offset}:${this.mem.size} ]`].join(
                             ', '
                         ) + 'ii'
@@ -132,15 +137,24 @@ function log(topicsCount: number, { events }: IEvents) {
         offset = offset.eval();
         size = size.eval();
         stmts.push(
-            offset.isVal() && size.isVal()
-                ? (() => {
-                      const args = [];
-                      for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-                          args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
-                      }
-                      return new Log(event, topics, args);
-                  })()
-                : new Log(event, topics, [], { offset, size })
+            new Log(
+                event,
+                topics,
+                { offset, size },
+                offset.isVal() && size.isVal()
+                    ? (() => {
+                          const args = [];
+                          for (
+                              let i = Number(offset.val);
+                              i < Number(offset.val + size.val);
+                              i += 32
+                          ) {
+                              args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+                          }
+                          return args;
+                      })()
+                    : undefined
+            )
         );
     };
 }
