@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { inspect } from 'util';
 import { expect } from 'chai';
 import c = require('ansi-colors');
-import { providers, utils } from 'ethers';
+import { EtherscanProvider, Fragment } from 'ethers';
 import { Contract } from '../src';
 import '../src/selector';
 
@@ -101,7 +101,7 @@ describe('examples', function () {
             );
             const functions = defs
                 .filter(line => line.startsWith('function '))
-                .map(line => utils.Fragment.from(line).format());
+                .map(line => Fragment.from(line).format());
             const variables = defs
                 .filter(line => line.includes(' public ') && !line.includes('('))
                 .map(line => line.split(' ').pop()! + '()');
@@ -178,7 +178,7 @@ describe('examples', function () {
 async function fetchBytecode(contract: string): Promise<string> {
     const BASE_PATH = './test/examples/';
     const addr = c.blue;
-    const provider = new providers.EtherscanProvider();
+    const provider = new EtherscanProvider();
     const path = `${BASE_PATH}${contract}.bytecode`;
 
     if (!existsSync(path)) {

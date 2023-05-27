@@ -3,7 +3,7 @@ import { hrtime } from 'process';
 
 import { expect } from 'chai';
 import c = require('ansi-colors');
-import { providers } from 'ethers';
+import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
 import { Contract, ERCIds } from '../src';
 import type { Throw } from '../src/evm/expr';
@@ -31,10 +31,10 @@ const info = c.blue;
 
 const provider = {
     providers: [
-        new providers.InfuraProvider(),
-        new providers.EtherscanProvider(),
-        new providers.CloudflareProvider(),
-        new providers.PocketProvider(),
+        new InfuraProvider(),
+        new EtherscanProvider(),
+        new CloudflareProvider(),
+        new PocketProvider(),
     ],
     current: 0,
     getCode: async function (address: string) {

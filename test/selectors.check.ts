@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { expect } from 'chai';
-import { EventFragment, FunctionFragment, type ParamType } from 'ethers/lib/utils';
+import { EventFragment, FunctionFragment, type ParamType } from 'ethers';
 import c = require('ansi-colors');
 
 import { isElemType } from '../src/type';
@@ -111,8 +111,8 @@ function isValidType(pred: (paramType: string) => boolean): (param: ParamType) =
         return (
             isElemType(param.type) ||
             pred(param.type) ||
-            (param.type === 'tuple' && param.components.every(_isValidType)) ||
-            (param.baseType === 'array' && _isValidType(param.arrayChildren))
+            (param.type === 'tuple' && param.components!.every(_isValidType)) ||
+            (param.baseType === 'array' && _isValidType(param.arrayChildren!))
         );
     };
 }

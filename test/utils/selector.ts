@@ -1,9 +1,9 @@
-import { EventFragment, FunctionFragment, Interface } from 'ethers/lib/utils';
+import { EventFragment, FunctionFragment } from 'ethers';
 
 export function fnselector(sig: string): string {
-    return Interface.getSighash(FunctionFragment.from(sig)).substring(2);
+    return FunctionFragment.from(sig).selector.substring(2);
 }
 
 export function eventSelector(sig: string): string {
-    return Interface.getEventTopic(EventFragment.from(sig)).substring(2);
+    return EventFragment.from(sig).topicHash.substring(2);
 }
