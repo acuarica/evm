@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { inspect } from 'util';
 import { expect } from 'chai';
 import c = require('ansi-colors');
-import { EtherscanProvider, Fragment } from 'ethers';
+import { EtherscanProvider, FunctionFragment } from 'ethers';
 import { Contract } from '../src';
 import '../src/selector';
 
@@ -101,7 +101,7 @@ describe('examples', function () {
             );
             const functions = defs
                 .filter(line => line.startsWith('function '))
-                .map(line => Fragment.from(line).format());
+                .map(line => FunctionFragment.from(line.trim()).format());
             const variables = defs
                 .filter(line => line.includes(' public ') && !line.includes('('))
                 .map(line => line.split(' ').pop()! + '()');

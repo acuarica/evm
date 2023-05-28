@@ -45,24 +45,18 @@ describe('selectors', function () {
                 }
 
                 functionSig = functionSig.replace(/ storage/g, '');
-
-                try {
-                    const func = FunctionFragment.from(functionSig);
-                    expect(functionSig, functionSig).to.be.equal(func.format());
-                    expect(
-                        func.inputs.every(
-                            isValidType(
-                                paramType =>
-                                    paramType.includes('.') ||
-                                    paramType.charAt(0).toUpperCase() === paramType.charAt(0)
-                            )
-                        ),
-                        functionSig
-                    ).to.be.true;
-                } catch (e) {
-                    // console.log(functionSig, (e as Error).message);
-                    //
+                if (functionSig.includes('.')) {
+                    continue;
                 }
+
+                let func;
+                try {
+                    func = FunctionFragment.from(functionSig);
+                } catch (e) {
+                    continue;
+                }
+                expect(functionSig, functionSig).to.be.equal(func.format());
+                expect(func.inputs.every(isValidType), functionSig).to.be.true;
             }
         }).timeout(20000);
     });
@@ -92,14 +86,14 @@ describe('selectors', function () {
                     stats.lengthyEventSigs.push(eventSig);
                 }
 
+                let event;
                 try {
-                    const event = EventFragment.from(eventSig);
-                    expect(eventSig, eventSig).to.be.equal(event.format());
-                    expect(event.inputs.every(isValidType(_paramType => false)), eventSig).to.be
-                        .true;
+                    event = EventFragment.from(eventSig);
                 } catch (e) {
-                    //
+                    continue;
                 }
+                expect(eventSig, eventSig).to.be.equal(event.format());
+                expect(event.inputs.every(isValidType), eventSig).to.be.true;
             }
         }).timeout(10000);
     });
@@ -116,13 +110,10 @@ describe('selectors', function () {
     });
 });
 
-function isValidType(pred: (paramType: string) => boolean): (param: ParamType) => boolean {
-    return function _isValidType(param: ParamType): boolean {
-        return (
-            isElemType(param.type) ||
-            pred(param.type) ||
-            (param.type === 'tuple' && param.components!.every(_isValidType)) ||
-            (param.baseType === 'array' && _isValidType(param.arrayChildren!))
-        );
-    };
+function isValidType(param: ParamType): boolean {
+    return (
+        isElemType(param.type) ||
+        (param.baseType === 'tuple' && param.components!.every(isValidType)) ||
+        (param.baseType === 'array' && isValidType(param.arrayChildren!))
+    );
 }
