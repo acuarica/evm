@@ -21,12 +21,8 @@
         }
     },
     "files": [
-        "dist/src/",
-        "bin/"
+        "dist/src/"
     ],
-    "bin": {
-        "sevm": "./bin/sevm.mjs"
-    },
     "repository": "acuarica/evm",
     "author": "Luis Mastrangelo (https://acuarica.github.io)",
     "contributors": [
