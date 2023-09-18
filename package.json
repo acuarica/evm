@@ -48,20 +48,14 @@
         "yul"
     ],
     "dependencies": {
-        "ansi-colors": "^4.1.3",
-        "blessed": "^0.1.81",
-        "env-paths": "^3.0.0",
-        "ethers": "^6.4.0",
-        "yargs": "^17.7.2"
+        "ethers": "^6.4.0"
     },
     "devDependencies": {
         "@noble/hashes": "^1.3.0",
-        "@types/blessed": "^0.1.22",
         "@types/chai": "^4.3.3",
         "@types/mocha": "^10.0.1",
         "@types/node": "^18.7.2",
         "@types/semver": "^7.3.12",
-        "@types/yargs": "^17.0.24",
         "@typescript-eslint/eslint-plugin": "^5.56.0",
         "@typescript-eslint/parser": "^5.56.0",
         "chai": "^4.3.6",
