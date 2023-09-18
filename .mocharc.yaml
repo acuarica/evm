@@ -5,3 +5,6 @@
 
 # https://mochajs.org/#-enable-source-maps
 enable-source-maps: true
+
+# https://mochajs.org/#global-setup-fixtures
+require: dist/test/utils/setup.js

@@ -2,7 +2,11 @@
 
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import * as path from 'path';
 import type { Runnable, Suite } from 'mocha';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { setupMethods } = require('solc');
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
 
@@ -127,9 +131,7 @@ export function compile(
 
     versionsLoaded.add(version);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const solc = require(`solc-${version}`) as {
-        // Not used
-        version: () => string;
+    const solc = setupMethods(require(path.resolve('.solc', `${version}.js`))) as {
         compile: (input: string) => string;
     };
     const output = JSON.parse(solc.compile(JSON.stringify(input))) as SolcOutput;
