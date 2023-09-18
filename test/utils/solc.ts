@@ -3,7 +3,6 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import type { Runnable, Suite } from 'mocha';
-import * as semver from 'semver';
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
 
@@ -191,7 +190,9 @@ export function forVersion(
 ) {
     VERSIONS.forEach(version => {
         if (version.startsWith(process.env['SOLC'] ?? '')) {
-            const fallback = semver.gte(version, '0.6.0') ? 'fallback' : 'function';
+            // https://docs.soliditylang.org/en/latest/060-breaking-changes.html#semantic-and-syntactic-changes
+            // https://docs.soliditylang.org/en/latest/060-breaking-changes.html#how-to-update-your-code
+            const fallback = version.startsWith('0.5') ? 'function' : 'fallback';
 
             describe(`solc-v${version}`, function () {
                 fn(
