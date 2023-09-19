@@ -2,5 +2,6 @@
     "reporter": ["lcov", "text"],
     "lines": "85",
     "branches": "82",
-    "statements": "85"
+    "statements": "85",
+    "exclude": [".solc/*.js"]
 }
