@@ -1,7 +1,7 @@
 const { providers } = require('ethers');
 
-const { Contract } = require('@acuarica/evm');
-require('@acuarica/evm/selector');
+const { Contract } = require('sevm');
+require('sevm/selector');
 
 const provider = new providers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
 

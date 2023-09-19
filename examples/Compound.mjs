@@ -1,7 +1,7 @@
 import { providers } from 'ethers';
 
-import { Contract } from '@acuarica/evm';
-import '@acuarica/evm/selector';
+import { Contract } from 'sevm';
+import 'sevm/selector';
 
 const provider = new providers.EtherscanProvider();
 
