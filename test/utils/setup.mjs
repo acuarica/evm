@@ -27,7 +27,7 @@ export async function mochaGlobalSetup() {
     for (const version of VERSIONS) {
         // const file = (releases as { [k: string]: string})[version];
         const file = releases[version];
-        await download(file, `${version}.js`);
+        await download(file, `soljson-v${version}.js`);
     }
 
     console.info();

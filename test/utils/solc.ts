@@ -73,7 +73,7 @@ export function compile(
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (opts.context !== undefined) {
-        const basePath = './.artifacts';
+        const basePath = `.solc/v${version}`;
         const fileName = title(opts.context.test)
             .replace(/^../, '')
             .replace('solc-', '')
@@ -131,7 +131,7 @@ export function compile(
 
     versionsLoaded.add(version);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const solc = setupMethods(require(path.resolve('.solc', `${version}.js`))) as {
+    const solc = setupMethods(require(path.resolve('.solc', `soljson-v${version}.js`))) as {
         compile: (input: string) => string;
     };
     const output = JSON.parse(solc.compile(JSON.stringify(input))) as SolcOutput;
