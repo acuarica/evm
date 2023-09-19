@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import * as c from 'ansi-colors';
+import c from 'ansi-colors';
 
-const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
+const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'];
 
 export async function mochaGlobalSetup() {
     mkdirSync('.solc', { recursive: true });
@@ -12,6 +12,7 @@ export async function mochaGlobalSetup() {
     const { releases } = JSON.parse(readFileSync('./.solc/list.json', 'utf-8'));
 
     for (const version of VERSIONS) {
+        // const file = (releases as { [k: string]: string})[version];
         const file = releases[version];
         await download(file, `${version}.js`);
     }
@@ -19,7 +20,11 @@ export async function mochaGlobalSetup() {
     console.info();
 }
 
-async function download(file: string, dst: string = file) {
+/**
+ * @param {string} file
+ * @param {string} dst
+ */
+async function download(file, dst = file) {
     process.stdout.write(`${c.cyan(dst)}`);
     const path = `./.solc/${dst}`;
 
