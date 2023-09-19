@@ -7,4 +7,4 @@
 enable-source-maps: true
 
 # https://mochajs.org/#global-setup-fixtures
-require: test/utils/setup.mjs
+require: dist/test/utils/solc.js

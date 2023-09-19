@@ -3,6 +3,7 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
+import * as c from 'ansi-colors';
 import type { Runnable, Suite } from 'mocha';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -214,4 +215,63 @@ export function contracts(title: string, fn: Parameters<typeof forVersion>[0]) {
     describe(`contracts::${title}`, function () {
         forVersion(fn);
     });
+}
+
+/**
+ *
+ */
+export async function mochaGlobalSetup() {
+    type Releases = { [key: string]: string };
+
+    mkdirSync('.solc', { recursive: true });
+
+    process.stdout.write('solc setup ');
+
+    const releases = await (async function () {
+        const path = './.solc/releases.json';
+        try {
+            return JSON.parse(readFileSync(path, 'utf-8')) as Releases;
+        } catch (_err) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const resp = await fetch('https://binaries.soliditylang.org/bin/list.json');
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (resp.ok) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const releases = (await resp.json()).releases as Releases;
+                writeFileSync(path, JSON.stringify(releases, null, 2));
+                return releases;
+            } else {
+                throw new Error('cannot fetch `list.json`');
+            }
+        }
+    })();
+
+    for (const version of VERSIONS) {
+        await download(releases[version], version);
+    }
+
+    console.info();
+
+    async function download(file: string, version: Version) {
+        process.stdout.write(`${c.cyan('v' + version)}`);
+        const path = `./.solc/soljson-v${version}.js`;
+
+        if (existsSync(path)) {
+            process.stdout.write(c.green('\u2713 '));
+        } else {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const resp = await fetch(`https://binaries.soliditylang.org/bin/${file}`);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            if (resp.ok) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                writeFileSync(path, await resp.text());
+                process.stdout.write(c.yellow('\u2913 '));
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                console.info(c.red(`${resp.status}  ${resp.statusText}`));
+            }
+        }
+    }
 }
