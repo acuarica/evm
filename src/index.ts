@@ -16,6 +16,8 @@ import {
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 
+export * from './type';
+
 /**
  *
  */
