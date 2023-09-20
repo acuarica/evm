@@ -2,7 +2,7 @@
 export default {
     target: 'web',
     entry: {
-        EVM: './dist/src/index.js',
+        SEVM: './dist/src/index.js',
     },
     output: {
         libraryTarget: 'umd',
