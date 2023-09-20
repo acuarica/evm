@@ -1,1 +1,11 @@
 /node_modules/
+
+# Non-minimized generated lookup tables
+/data/functionHashes.json
+/data/eventHashes.json
+
+# Downloaded Etherscan bytecode cache
+/.etherscan/
+
+# Currently omitted data for stress testing
+/test/export-verified-contractaddress-opensource-license.csv
