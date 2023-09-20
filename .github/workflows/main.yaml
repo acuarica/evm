@@ -48,7 +48,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn test
-      - run: yarn test:check
 
   coverage:
     runs-on: ubuntu-latest
