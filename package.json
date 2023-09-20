@@ -77,12 +77,11 @@
         "test:check": "yarn compile && mocha 'dist/test/*.check.js'",
         "coverage": "yarn compile && nyc mocha 'dist/test/**/*.{test,check}.js'",
         "bundle": "webpack --mode production",
-        "make:selectors": "node selectors/make.mjs",
         "make:ercs": " node selectors/ercs.mjs > src/ercs.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
-        "tsdoc": "typedoc --out docs/tsdoc src/index.ts src/opcode.ts src/evm/index.ts src/selector/index.ts",
+        "tsdoc": "typedoc --out docs/tsdoc src/index.ts src/opcode.ts src/evm/index.ts",
         "clean": "rm -r .solc/"
     }
 }
