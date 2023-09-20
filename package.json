@@ -1,6 +1,16 @@
 {
     "name": "sevm-4byte",
-    "version": "0.1.0",
-    "main": "index.js",
-    "license": "MIT"
+    "version": "0.2.0",
+    "type": "module",
+    "main": "src/index.js",
+    "license": "MIT",
+    "peerDependencies": {
+        "sevm": "^0.2.0"
+    },
+    "devDependencies": {
+        "ethers": "^6.7.1"
+    },
+    "scripts": {
+        "make": "scripts/make.js"
+    }
 }
