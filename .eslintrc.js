@@ -6,7 +6,7 @@ module.exports = {
     parserOptions: {
         project: ['./tsconfig.json'],
     },
-    plugins: ['@typescript-eslint', 'import', 'mocha', 'chai-expect'],
+    plugins: ['@typescript-eslint', 'mocha', 'chai-expect'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
@@ -51,9 +51,6 @@ module.exports = {
          */
         '@typescript-eslint/consistent-type-imports': 'warn',
 
-        'import/order': 'warn',
-        'import/no-useless-path-segments': 'warn',
-
         'mocha/no-setup-in-describe': 'off',
     },
     overrides: [
@@ -62,7 +59,6 @@ module.exports = {
             rules: {
                 'no-restricted-globals': ['error', 'Buffer'],
                 'no-console': 'error',
-                'import/no-nodejs-modules': 'error',
             },
         },
     ],
