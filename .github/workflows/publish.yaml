@@ -38,12 +38,9 @@ jobs:
           CONFIRM: ${{ inputs.confirm }}
 
       - run: yarn install --frozen-lockfile
-      - name: Compile
-        run: |
-          yarn compile
-          yarn lint
+      - run: yarn compile
+      - run: yarn lint
       - run: yarn test
-      - run: yarn test:check
       - name: 'Set up git user to be able to commit, tag and push'
         run: |
           git config --global user.name 'acuarica'
