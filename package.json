@@ -76,7 +76,6 @@
         "lint": "eslint .",
         "test": "yarn compile && mocha 'dist/test/**/*.test.js'",
         "test:check": "yarn compile && mocha 'dist/test/*.check.js'",
-        "test:smoke": "yarn compile && mocha 'dist/test/*.smoke.js'",
         "coverage": "yarn compile && nyc mocha 'dist/test/**/*.{test,check}.js'",
         "bundle": "webpack --mode production",
         "make:selectors": "node selectors/make.mjs",
