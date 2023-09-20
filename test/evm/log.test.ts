@@ -6,7 +6,6 @@ import { stringifyEvents } from '../../src/evm/log';
 import { State } from '../../src/state';
 import { eventSelector } from '../utils/selector';
 import { compile } from '../utils/solc';
-import { eventSelectors } from '../../src/selector';
 
 describe('evm::log', function () {
     const knownEventSig = 'Deposit(uint256)';
@@ -29,7 +28,8 @@ describe('evm::log', function () {
     it('should get it from compiled code', function () {
         const state = new State<Inst, Expr>();
         evm.exec(0, state);
-        eventSelectors(evm);
+        const ev = knownEventSig;
+        evm.events[eventSelector(ev)].sig = ev;
 
         expect(evm.events).to.have.keys(
             eventSelector(knownEventSig),

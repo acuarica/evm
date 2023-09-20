@@ -4,14 +4,13 @@ import { Return } from '../../src/evm/system';
 import { toHex } from '../../src/opcode';
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
-import '../../src/selector';
 
 contracts('dispatch', compile => {
     it("should decompile function's return type and non-payable", function () {
         const sol = `contract C {
             function get() external pure returns (uint256) { return 5; }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchfns('get()');
         const text = contract.decompile();
         expect(text, `decompiled text\n${text}`).to.match(
             /^function get\(\) public view returns \(uint256\) {$/m
@@ -23,7 +22,7 @@ contracts('dispatch', compile => {
             function set() external payable { }
             function get() external pure returns (uint256) { return 5; }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchfns('get()');
         const text = contract.decompile();
         expect(text, `decompiled text\n${text}`).to.match(
             /^function get\(\) public view returns \(uint256\) {$/m
@@ -36,7 +35,11 @@ contracts('dispatch', compile => {
             function symbol() external pure returns (uint256) { return 3; }
             function thisAddress() external view returns (address) { return address(this); }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchfns(
+            'balanceOf(uint256)',
+            'symbol()',
+            'thisAddress()'
+        );
         expect(contract.getFunctions()).to.include.members([
             'balanceOf(uint256)',
             'symbol()',
@@ -65,7 +68,7 @@ contracts('dispatch', compile => {
                 return addr.balanceOf(7);
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode);
 
         const selector = fnselector(sig);
         const push4 = contract.evm.opcodes.find(

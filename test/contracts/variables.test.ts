@@ -106,7 +106,7 @@ contracts('variables', (compile, _fallback, version) => {
             const sol = `contract C {
                 uint256 public value;
             }`;
-            contract = new Contract(compile(sol, this).bytecode).patch();
+            contract = new Contract(compile(sol, this).bytecode).patchfns('value()');
         });
 
         it('should `getFunctions` but not `getEvents`', function () {
@@ -129,7 +129,7 @@ contracts('variables', (compile, _fallback, version) => {
                     value = newValue;
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode).patch();
+            contract = new Contract(compile(sol, this).bytecode).patchfns('value()');
         });
 
         it('should `getFunctions` but not `getEvents`', function () {
@@ -144,7 +144,7 @@ contracts('variables', (compile, _fallback, version) => {
 
     it.skip('with a public `address` variable', function () {
         const sol = `contract C { address public owner; }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchfns('owner()');
 
         expect(contract.getFunctions()).to.be.deep.equal(['owner()']);
 

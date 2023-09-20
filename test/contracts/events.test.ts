@@ -27,7 +27,9 @@ contracts('events', (compile, fallback) => {
                 emit Transfer(newValue, address(this));
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchevs(
+            'Transfer(uint256,address)'
+        );
         expect(contract.getEvents()).to.be.deep.equal(['Transfer(uint256,address)']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Transfer\(uint256 _arg0, address _arg1\);$/m);
@@ -41,7 +43,9 @@ contracts('events', (compile, fallback) => {
                 emit Send(123, address(this));
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchevs(
+            'Send(uint256,address)'
+        );
         expect(contract.getEvents()).to.be.deep.equal(['Send(uint256,address)']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Send\(uint256 indexed _arg0, address _arg1\);$/m);
@@ -55,7 +59,7 @@ contracts('events', (compile, fallback) => {
                 emit Transfer();
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patch();
+        const contract = new Contract(compile(sol, this).bytecode).patchevs('Transfer()');
         expect(contract.getEvents()).to.be.deep.equal(['Transfer()']);
         const text = contract.decompile();
         expect(text, text).to.match(/event Transfer\(\);$/m);
@@ -69,7 +73,7 @@ contracts('events', (compile, fallback) => {
                 emit Transfer(123, address(this));
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode).patch();
+        const evm = new Contract(compile(sol, this).bytecode);
         expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
@@ -83,7 +87,7 @@ contracts('events', (compile, fallback) => {
                 emit Transfer();
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode).patch();
+        const evm = new Contract(compile(sol, this).bytecode);
         expect(evm.getEvents()).to.be.deep.equal([]);
         const text = evm.decompile();
         expect(text, text).to.not.match(/event/);
@@ -99,7 +103,7 @@ contracts('events', (compile, fallback) => {
                 emit Send(123, 124);
             }
         }`;
-        const evm = new Contract(compile(sol, this).bytecode).patch();
+        const evm = new Contract(compile(sol, this).bytecode);
         expect(evm.getEvents()).to.be.deep.equal([]);
 
         const text = evm.decompile();
