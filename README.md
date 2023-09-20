@@ -4,10 +4,10 @@
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/main.yaml)
 ![nycrc config on GitHub](https://img.shields.io/nycrc/acuarica/evm?style=flat-square)
-[![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm)
-![npm](https://img.shields.io/npm/dt/@acuarica/evm)
+[![npm](https://img.shields.io/npm/v/sevm?style=flat-square)](https://www.npmjs.com/package/sevm)
+![npm](https://img.shields.io/npm/dt/sevm?style=flat-square)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/main/LICENSE)
-[![install size](https://packagephobia.com/badge?p=@acuarica/evm)](https://packagephobia.com/result?p=@acuarica/evm)
+[![install size](https://packagephobia.com/badge?p=sevm)](https://packagephobia.com/result?p=sevm)
 [![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
 
 A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler, along with several other utils for programmatically extracting information from bytecode.
@@ -35,13 +35,13 @@ Install using your package manager or Browser's `script` tag
 ### **yarn**
 
 ```sh
-yarn add @acuarica/evm
+yarn add sevm
 ```
 
 ### **npm**
 
 ```sh
-npm install @acuarica/evm
+npm install sevm
 ```
 
 ### **Browser <span class="tab-badge">WIP</span>**
