@@ -8,3 +8,7 @@ enable-source-maps: true
 
 # https://mochajs.org/#global-setup-fixtures
 require: dist/test/utils/solc.js
+
+# https://github.com/mochajs/mocha/blob/master/example/config/.mocharc.yml
+spec:
+  - dist/test/**/*.{test,check}.js
