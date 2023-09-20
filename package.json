@@ -90,6 +90,6 @@
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
         "tsdoc": "typedoc --out docs/tsdoc src/index.ts src/opcode.ts src/evm/index.ts src/selector/index.ts",
-        "clean": "rm -r .artifacts/"
+        "clean": "rm -r .solc/"
     }
 }

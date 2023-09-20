@@ -1,4 +1,4 @@
-/.artifacts/
+/.solc/
 /.nyc_output/
 /coverage/
 /dist/
