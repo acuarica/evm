@@ -1,7 +1,7 @@
 {
-  "name": "@acuarica/evm-cli",
-  "version": "0.0.6",
-  "description": "A CLI for the Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
+  "name": "sevm-cli",
+  "version": "0.1.0",
+  "description": "A CLI for the Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
   "type": "module",
   "bin": {
     "evmjs": "evm.js"
