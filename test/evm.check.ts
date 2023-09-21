@@ -1,4 +1,4 @@
-import assert = require('assert');
+import { strict as assert } from 'assert';
 
 import { expect } from 'chai';
 import { keccak_256 } from '@noble/hashes/sha3';

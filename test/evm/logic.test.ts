@@ -1,4 +1,4 @@
-import assert = require('assert');
+import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
