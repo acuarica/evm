@@ -6,6 +6,9 @@
     "exports": {
         ".": "./src/index.js"
     },
+    "files": [
+        "src/"
+    ],
     "license": "MIT",
     "peerDependencies": {},
     "devDependencies": {
