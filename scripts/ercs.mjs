@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 import { basename } from 'path';
-import { utils } from 'ethers';
+import { keccak256, toUtf8Bytes } from 'ethers';
 
 const interfaces = {};
 
@@ -36,7 +38,7 @@ function main() {
         for (const sig of erc) {
             const name = sig.replace(/\(/, '_').replace(/\)/g, '_').replace(/,/g, '_');
 
-            selectors[name] = utils.keccak256(utils.toUtf8Bytes(sig)).substring(2, 10);
+            selectors[name] = keccak256(toUtf8Bytes(sig)).substring(2, 10);
         }
         src[name] = {
             includes: Object.values(selectors),
