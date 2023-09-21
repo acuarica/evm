@@ -7,14 +7,13 @@
         ".": "./src/index.js"
     },
     "license": "MIT",
-    "peerDependencies": {
-        "sevm": "^0.2.1"
-    },
+    "peerDependencies": {},
     "devDependencies": {
+        "ansi-colors": "4.1.1",
         "chai": "^4.3.8",
         "ethers": "^6.7.1",
         "mocha": "^10.2.0",
-        "sevm": "^0.2.1"
+        "sevm": "^0.2.2"
     },
     "scripts": {
         "test": "mocha 'test/*.{check,smoke}.js'",
