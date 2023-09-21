@@ -20,8 +20,8 @@ on:
         required: true
         type: string
 
-# env:
-  # FORCE_COLOR: 3
+env:
+  FORCE_COLOR: 3
 
 jobs:
   publish:
@@ -33,11 +33,6 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           CONFIRM: ${{ inputs.confirm }}
-      # - name: Display input values
-      #   run: |
-      #     echo "Version: $VERSION"
-      #     echo "Confirm: $CONFIRM"
-
       - run: yarn install --frozen-lockfile
       - run: yarn make
       - run: yarn test
