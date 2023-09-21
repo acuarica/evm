@@ -17,8 +17,8 @@
         }
     },
     "files": [
-        "dist/src/**/*.js",
-        "dist/src/**/*.d.ts"
+        "src/",
+        "dist/src/"
     ],
     "repository": "acuarica/evm",
     "author": "Luis Mastrangelo (https://acuarica.github.io)",
