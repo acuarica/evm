@@ -1,8 +1,12 @@
 /node_modules/
 
-# Non-minimized generated lookup tables
+# Non-minified generated JSON lookup tables
 /data/functionHashes.json
 /data/eventHashes.json
+
+# Minified generated JS lookup tables
+/src/functionHashes.min.js
+/src/eventHashes.min.js
 
 # Downloaded Etherscan bytecode cache
 /.etherscan/

@@ -13,16 +13,10 @@
 // import type { IEvents } from '../evm/log';
 import { Contract } from 'sevm';
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-// const data = require("./data.json");
-
 export * from 'sevm';
 
-// import * as functionHashes from './functionHashes.min.json';
-const functionHashes = require('./functionHashes.min.json');
-// import * as eventHashes from './eventHashes.min.json';
-const eventHashes = require('./eventHashes.min.json');
+import functionHashes from './functionHashes.min.js';
+import eventHashes from './eventHashes.min.js';
 
 /**
  * 

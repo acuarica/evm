@@ -3,6 +3,8 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { keccak256, toUtf8Bytes } from 'ethers';
 
+/** @typedef {{ [hash: string]: string }} Hashes */
+
 /**
  * @param {'functions'|'events'} name
  * @returns {string[]}
@@ -10,13 +12,18 @@ import { keccak256, toUtf8Bytes } from 'ethers';
 const json = name => (console.info('Reading', name), JSON.parse(readFileSync(`./data/${name}.json`, 'utf-8')));
 
 /**
- * @param {string} file 
- * @param {string} data 
+ * @param {string} name 
+ * @param {Hashes} data 
  * @returns 
  */
-const writeFile = (file, data) => (console.info('Writing', file), writeFileSync(file, data));
+const writeJson = (name, data) => (console.info('Writing JSON', name), writeFileSync(`./data/${name}.json`, JSON.stringify(data, null, 4)));
 
-/** @typedef {{ [hash: string]: string }} Hashes */
+/**
+ * @param {string} name 
+ * @param {Hashes} data 
+ * @returns 
+ */
+const writeJs = (name, data) => (console.info('Writing JS', name), writeFileSync(`./src/${name}.min.js`, 'export default ' + JSON.stringify(data) + ';'));
 
 /**
  * @param {string[]} entries
@@ -36,11 +43,11 @@ function main() {
     const functionHashes = reduce(functions, s => s.substring(2, 10));
     const eventHashes = reduce(events, s => s.substring(2));
 
-    writeFile('./data/functionHashes.json', JSON.stringify(functionHashes, null, 4));
-    writeFile('./data/eventHashes.json', JSON.stringify(eventHashes, null, 4));
+    writeJson('functionHashes', functionHashes);
+    writeJson('eventHashes', eventHashes);
 
-    writeFile('./src/functionHashes.min.json', JSON.stringify(functionHashes));
-    writeFile('./src/eventHashes.min.json', JSON.stringify(eventHashes));
+    writeJs('functionHashes', functionHashes);
+    writeJs('eventHashes', eventHashes);
 
     console.info('Updated hashes successfully');
 }
