@@ -27,12 +27,12 @@ function writeJson(name, data) {
 
 /**
  * @param {string} name 
- * @param {Hashes} data 
+ * @param {Hashes} hashes 
  * @returns 
  */
-function writeJs(name, data) {
+function writeJs(name, hashes) {
     console.info('Writing JS', c.magenta(name));
-    writeFileSync(`./src/${name}.min.js`, 'export default ' + JSON.stringify(data) + ';');
+    writeFileSync(`./src/${name}.min.js`, `/** @type {{ [hash: string]: string }} */\nexport default ${JSON.stringify(hashes)};`);
 }
 
 /**
