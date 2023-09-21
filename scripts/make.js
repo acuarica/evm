@@ -2,6 +2,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { keccak256, toUtf8Bytes } from 'ethers';
+import c from 'ansi-colors'
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
@@ -9,21 +10,30 @@ import { keccak256, toUtf8Bytes } from 'ethers';
  * @param {'functions'|'events'} name
  * @returns {string[]}
  */
-const json = name => (console.info('Reading', name), JSON.parse(readFileSync(`./data/${name}.json`, 'utf-8')));
+function json(name) {
+    console.info('Reading', c.cyan(name));
+    return JSON.parse(readFileSync(`./data/${name}.json`, 'utf-8'));
+}
 
 /**
  * @param {string} name 
  * @param {Hashes} data 
  * @returns 
  */
-const writeJson = (name, data) => (console.info('Writing JSON', name), writeFileSync(`./data/${name}.json`, JSON.stringify(data, null, 4)));
+function writeJson(name, data) {
+    console.info('Writing JSON', c.magenta(name));
+    writeFileSync(`./data/${name}.json`, JSON.stringify(data, null, 4));
+}
 
 /**
  * @param {string} name 
  * @param {Hashes} data 
  * @returns 
  */
-const writeJs = (name, data) => (console.info('Writing JS', name), writeFileSync(`./src/${name}.min.js`, 'export default ' + JSON.stringify(data) + ';'));
+function writeJs(name, data) {
+    console.info('Writing JS', c.magenta(name));
+    writeFileSync(`./src/${name}.min.js`, 'export default ' + JSON.stringify(data) + ';');
+}
 
 /**
  * @param {string[]} entries
