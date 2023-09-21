@@ -39,6 +39,7 @@ jobs:
       #     echo "Confirm: $CONFIRM"
 
       - run: yarn install --frozen-lockfile
+      - run: yarn make
       - run: yarn test
       - name: 'Set up git user to be able to commit, tag and push'
         run: |
