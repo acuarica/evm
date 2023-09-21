@@ -3,14 +3,21 @@
     "version": "0.2.0",
     "type": "module",
     "main": "src/index.js",
+    "exports": {
+        ".": "./src/index.js"
+    },
     "license": "MIT",
     "peerDependencies": {
-        "sevm": "^0.2.0"
+        "sevm": "^0.2.1"
     },
     "devDependencies": {
-        "ethers": "^6.7.1"
+        "chai": "^4.3.8",
+        "ethers": "^6.7.1",
+        "mocha": "^10.2.0",
+        "sevm": "^0.2.1"
     },
     "scripts": {
+        "test": "mocha 'test/*.{check,smoke}.js'",
         "make": "scripts/make.js"
     }
 }
