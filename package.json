@@ -16,7 +16,7 @@
         "sevm": "^0.2.2"
     },
     "scripts": {
-        "test": "mocha 'test/*.{check,smoke}.js'",
+        "test": "mocha 'test/*.{test,check,smoke}.js'",
         "make": "scripts/make.js"
     }
 }
