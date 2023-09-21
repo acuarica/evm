@@ -6,11 +6,11 @@ import c from 'ansi-colors';
 import blessed from 'blessed';
 import assert from 'assert';
 
-import { Contract, stringify } from '@acuarica/evm';
-import '@acuarica/evm/selector';
+import { Contract, stringify } from 'sevm';
+import 'sevm/selector';
 
-import { formatOpcode, toHex } from '@acuarica/evm/opcode';
-import { EVM, Branch } from '@acuarica/evm/evm';
+import { formatOpcode, toHex } from 'sevm/opcode';
+import { EVM, Branch } from 'sevm/evm';
 import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
@@ -54,11 +54,7 @@ function dis(contract) {
     );
 
     for (const chunk of contract.chunks()) {
-        console.info(
-            chunk.pcstart,
-            ':',
-            chunk.states === undefined ? red('unreachable') : ''
-        );
+        console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
 
         for (let i = chunk.pcstart; i < chunk.pcend; i++) {
             const opcode = contract.evm.opcodes[i];
@@ -112,8 +108,8 @@ async function getBytecode(pathOrAddress) {
 /** @param {(contract: Contract) => void} handler */
 function make(handler) {
     /** @param {import('yargs').ArgumentsCamelCase} argv */
-    return async (argv) => {
-        const pathOrAddress = /** @type {string} */(argv['contract']);
+    return async argv => {
+        const pathOrAddress = /** @type {string} */ (argv['contract']);
         const bytecode = await getBytecode(pathOrAddress);
         if (bytecode !== null) {
             const contract = new Contract(bytecode).patch();
@@ -122,11 +118,11 @@ function make(handler) {
             console.info(warn(`Cannot find bytecode for ${info(pathOrAddress)}`));
             process.exit(1);
         }
-    }
+    };
 }
 
 /** @param {import('yargs').Argv} argv */
-const pos = (argv) =>
+const pos = argv =>
     argv.positional('contract', {
         type: 'string',
         describe: 'path or address where to locate the bytecode of the contract',
@@ -156,7 +152,7 @@ void yargs(process.argv.slice(2))
     .help().argv;
 
 /**
- * @param {Contract} contract 
+ * @param {Contract} contract
  */
 function cfg(contract) {
     const evm = contract.evm;
@@ -229,9 +225,9 @@ function cfg(contract) {
         write(edges);
 
         /**
-         * 
-         * @param {number} pc 
-         * @param {import('@acuarica/evm/evm').EVMState} state 
+         *
+         * @param {number} pc
+         * @param {import('@acuarica/evm/evm').EVMState} state
          */
         function writeNode(pc, state) {
             const id = ids.get(state);
@@ -259,9 +255,9 @@ function cfg(contract) {
         }
 
         /**
-         * 
-         * @param {import('@acuarica/evm/evm').EVMState} src 
-         * @param {Branch} branch 
+         *
+         * @param {import('@acuarica/evm/evm').EVMState} src
+         * @param {Branch} branch
          */
         function writeEdge(src, branch) {
             // write(`"${src}" -> "${branch.state.id}";`);
@@ -287,8 +283,8 @@ function cfg(contract) {
 // }
 
 /**
- * 
- * @param {Contract} contract 
+ *
+ * @param {Contract} contract
  */
 function show(contract) {
     const screen = blessed.screen({ smartCSR: true });
@@ -304,18 +300,18 @@ function show(contract) {
         content: 'Hello {bold}world{/bold}!',
         tags: true,
         border: {
-            type: 'line'
+            type: 'line',
         },
         style: {
             fg: 'white',
             // bg: 'magenta',
             border: {
-                fg: '#f0f0f0'
+                fg: '#f0f0f0',
             },
             // hover: {
             //     bg: 'green'
             // }
-        }
+        },
     });
 
     // Append our box to the screen.
@@ -348,14 +344,14 @@ function show(contract) {
         content: getMetadata(contract.metadata),
         tags: true,
         border: {
-            type: 'line'
+            type: 'line',
         },
         style: {
             fg: 'white',
             border: {
-                fg: '#f0f0f0'
+                fg: '#f0f0f0',
             },
-        }
+        },
     });
 
     const functionList = blessed.list({
@@ -372,22 +368,22 @@ function show(contract) {
         scrollbar: {
             ch: ' ',
             track: {
-                bg: 'cyan'
+                bg: 'cyan',
             },
             style: {
-                inverse: true
-            }
+                inverse: true,
+            },
         },
         style: {
             item: {
                 hover: {
-                    bg: 'blue'
-                }
+                    bg: 'blue',
+                },
             },
             selected: {
                 bg: 'blue',
-                bold: true
-            }
+                bold: true,
+            },
         },
         search: function (_callback) {
             // prompt.input('Search:', '', function (err, value) {
@@ -404,7 +400,7 @@ function show(contract) {
 
     const entries = [
         /** @type {const} */(['main', { decompile: () => stringify(contract.main) }]),
-        ...Object.entries(contract.functions).map(([selector, fn]) => /**@type{const}*/([fn.label ?? selector, fn]))
+        ...Object.entries(contract.functions).map(([selector, fn]) => /**@type{const}*/([fn.label ?? selector, fn])),
     ];
     const fns = Object.fromEntries(entries);
     functionList.setItems(Object.keys(fns));
@@ -427,8 +423,8 @@ function show(contract) {
 }
 
 /**
- * 
- * @param {EVM['metadata']} metadata 
+ *
+ * @param {EVM['metadata']} metadata
  */
 function getMetadata(metadata) {
     return metadata ? `solc ${metadata.solc} ${metadata.url}` : '--';

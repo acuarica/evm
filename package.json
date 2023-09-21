@@ -4,13 +4,13 @@
   "description": "A CLI for the Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
   "type": "module",
   "bin": {
-    "evmjs": "evm.js"
+    "sevm": "sevm.js"
   },
   "license": "MIT",
   "repository": "acuarica/evm-cli",
   "author": "Luis Mastrangelo (https://acuarica.github.io)",
   "files": [
-    "evm.js"
+    "sevm.js"
   ],
   "keywords": [
     "4byte",
