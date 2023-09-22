@@ -93,7 +93,9 @@ export class Log implements IInst {
 
     toString() {
         return this.eventName
-            ? `emit ${this.eventName}(${[...this.topics.slice(1), ...this.args!].join(', ')});`
+            ? `emit ${this.eventName}(${[...this.topics.slice(1), ...(this.args ?? [])].join(
+                  ', '
+              )});`
             : 'log(' +
                   (this.args === undefined
                       ? [...this.topics, `memory[${this.mem.offset}:${this.mem.size} ]`].join(
