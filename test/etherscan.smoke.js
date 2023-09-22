@@ -38,7 +38,7 @@ const provider = {
     current: 0,
     /**
      * @param {string} address
-     * @returns {string}
+     * @returns {Promise<string>}
      */
     getCode: async function (address) {
         this.current = (this.current + 1) % this.providers.length;
@@ -181,11 +181,11 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
 
                 /**
                  *
-                 * @param {EVMState} state
+                 * @param {import('sevm/evm').EVMState} state
                  */
                 const STATICCALL = state => {
                     INSTS.STATICCALL(state);
-                    /** @type {StaticCall} */
+                    /** @type {import('sevm/evm').StaticCall} */
                     const call = state.stack.top;
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {

@@ -7,7 +7,6 @@ import c from 'ansi-colors';
 import { isElemType } from 'sevm';
 
 /**
- * 
  * @param {'functions'|'events'} file 
  * @returns {string[]}
  */
@@ -130,7 +129,7 @@ describe('selectors', function () {
 function isValidType(param){
     return (
         isElemType(param.type) ||
-        (param.baseType === 'tuple' && param.components.every(isValidType)) ||
-        (param.baseType === 'array' && isValidType(param.arrayChildren))
+        (param.baseType === 'tuple' && /**@type{import('ethers').ParamType[]}*/(param.components).every(isValidType)) ||
+        (param.baseType === 'array' && isValidType(/**@type{import('ethers').ParamType}*/(param.arrayChildren)))
     );
 }

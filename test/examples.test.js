@@ -17,13 +17,13 @@ describe('examples', function () {
             name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
             count: 8098,
             lines: [],
-            ercs: ['ERC165'],
+            ercs: /** @type {const} */(['ERC165']),
         },
         {
             name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
             count: 2118,
             lines: [],
-            ercs: ['ERC20'],
+            ercs: /** @type {const} */(['ERC20']),
         },
         {
             name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
@@ -52,7 +52,7 @@ describe('examples', function () {
                 /^function freezeAccount\(address _arg0, bool _arg1\) public payable {$/m,
                 /^function transferOwnership\(address _arg0\) public payable {$/m,
             ],
-            ercs: ['ERC20'],
+            ercs: /** @type {const} */(['ERC20']),
         },
         {
             /**
@@ -87,7 +87,7 @@ describe('examples', function () {
                 /^function transfer\(address _arg0, uint256 _arg1\)/m,
                 /^function deposit\(\)/m,
             ],
-            ercs: ['ERC20'],
+            ercs: /** @type {const} */(['ERC20']),
         },
     ].forEach(({ name, count, lines, ercs }) => {
         describe(`${name}`, function () {
