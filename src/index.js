@@ -12,6 +12,7 @@
  */
 import { Contract } from 'sevm';
 
+// @ts-ignore to avoid `has no default export` due to module's size
 import functionHashes from './functionHashes.min.js';
 import eventHashes from './eventHashes.min.js';
 
@@ -34,12 +35,6 @@ export function patch(contract) {
 
     return contract;
 }
-
-// declare module '../' {
-//     interface Contract {
-//         patch(): this;
-//     }
-// }
 
 Contract.prototype.patch = function () {
     return patch(this);
