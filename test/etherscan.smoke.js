@@ -198,7 +198,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 benchStats.append(t1 - t0);
 
                 contract = contract.patch();
-                //contract.decompile();
+                contract.decompile();
 
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
