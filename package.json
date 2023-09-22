@@ -46,7 +46,7 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "typecheck": "tsc",
+    "tc": "tsc",
     "readme": "node evm.js 2>&1 | MARKER='evmjs --help' node scripts/marker.js README.md"
   }
 }
