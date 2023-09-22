@@ -1,8 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { inspect } from 'util';
 import { expect } from 'chai';
-import c from 'ansi-colors';
-import { EtherscanProvider, FunctionFragment } from 'ethers';
+import { FunctionFragment } from 'ethers';
 import { Contract } from 'sevm';
 import 'sevm-4byte'
 
@@ -125,9 +124,8 @@ describe('examples', function () {
             /** @type {string} */
             let text;
 
-            before(async function () {
-                const path = await fetchBytecode(name);
-                const bytecode = readFileSync(path, 'utf8');
+            before(function () {
+                const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patch();
                 text = contract.decompile();
             });
@@ -176,31 +174,6 @@ describe('examples', function () {
         });
     });
 });
-
-/**
- * 
- * @param {string} contract 
- * @returns {Promise<string>}
- */
-async function fetchBytecode(contract) {
-    const BASE_PATH = './test/examples/';
-    const addr = c.blue;
-    const provider = new EtherscanProvider();
-    const path = `${BASE_PATH}${contract}.bytecode`;
-
-    if (!existsSync(path)) {
-        const [name, address] = contract.split('-');
-        console.info(`Fetching code for ${name} at ${addr(address)} into ${BASE_PATH}`);
-        const code = await provider.getCode(address);
-
-        if (!existsSync(BASE_PATH)) {
-            mkdirSync(BASE_PATH);
-        }
-        writeFileSync(path, code);
-    }
-
-    return path;
-}
 
 /**
  * @param {string} str 
