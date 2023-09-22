@@ -25,6 +25,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn make
+      # TODO enable type check and resolve how to provide bundle for browser
       # - run: yarn tc
       # - run: yarn bundle
 
@@ -50,3 +51,17 @@ jobs:
       - run: yarn make
       - run: yarn test
       - run: yarn test:smoke
+
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: yarn make
+      - run: node examples/Compound.js
+      - run: node examples/USDC.js
