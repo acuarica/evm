@@ -516,10 +516,10 @@ serialize-javascript@6.0.0:
   dependencies:
     randombytes "^2.1.0"
 
-sevm@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.2.2.tgz#82d8c2a996b88bd4eedb51081949c53a59899f48"
-  integrity sha512-sIhj2q41UCMcCQSFjG7S78lArR6wqz/n7AOnqxlTvtv0tBack+5mG5SSdfE8BjJwuXeq1ZQFqbs/+GUeMTNL1A==
+sevm@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.2.3.tgz#cfedf9c7219ee9e550e4c9d15eae31484d98e505"
+  integrity sha512-a+kG3aK2+aF+/13Vc4ejOWn44p8e6h/anl0ZbEWxLbtFOlq9ftk/QipY2BPlUsLxDNAxRfE6Zm3bGvM3qz7Kyg==
 
 string-width@^4.1.0, string-width@^4.2.0:
   version "4.2.3"
