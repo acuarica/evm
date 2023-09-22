@@ -142,10 +142,10 @@ require-directory@^2.1.1:
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==
 
-sevm-4byte@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/sevm-4byte/-/sevm-4byte-0.1.3.tgz#95949f45a3f833de63cab12e85f957bca67a07c8"
-  integrity sha512-YOXGWvyvMM+2tw2V3BXd7chiz3Pjbe/Q6GxoOTBY5cCnjVkIhWDdXWsIgGhUfpgw+OyosJDM93xTPKg2jN8+mg==
+sevm-4byte@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/sevm-4byte/-/sevm-4byte-0.1.4.tgz#f9592d349e1ddeafd783059046173e06269cb4c4"
+  integrity sha512-JZliFFLA8xm68ZzLw8kdLtEW6T4TuQgm+lXBp4c0b2m2MfQiYzrkwLiS5FvaGuKHcoeWYlIlBi6Hq/VY3bgpWw==
 
 sevm@^0.2.2:
   version "0.2.2"

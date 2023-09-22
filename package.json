@@ -36,7 +36,7 @@
     "env-paths": "^3.0.0",
     "ethers": "^6.7.1",
     "sevm": "^0.2.2",
-    "sevm-4byte": "^0.1.3",
+    "sevm-4byte": "^0.1.4",
     "yargs": "^17.7.1"
   },
   "devDependencies": {
