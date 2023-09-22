@@ -7,7 +7,7 @@ import blessed from 'blessed';
 import assert from 'assert';
 
 import { Contract, stringify } from 'sevm';
-import 'sevm/selector';
+import 'sevm-4byte';
 
 import { formatOpcode, toHex } from 'sevm/opcode';
 import { EVM, Branch } from 'sevm/evm';
@@ -25,7 +25,7 @@ const red = c.red;
 const info = c.cyan;
 const warn = c.yellow;
 
-/** @param {import('@acuarica/evm/opcode').Opcode} opcode */
+/** @param {import('sevm/opcode').Opcode} opcode */
 function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = ('0x' + opcode.offset.toString(16)).padStart(8);
@@ -165,7 +165,7 @@ function cfg(contract) {
     node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
     `);
 
-    /** @type {WeakMap<import('@acuarica/evm/evm').EVMState, string>} */
+    /** @type {WeakMap<import('sevm/evm').EVMState, string>} */
     const ids = new WeakMap();
     let id = 0;
     for (const [, chunk] of evm.chunks) {
@@ -227,7 +227,7 @@ function cfg(contract) {
         /**
          *
          * @param {number} pc
-         * @param {import('@acuarica/evm/evm').EVMState} state
+         * @param {import('sevm/evm').EVMState} state
          */
         function writeNode(pc, state) {
             const id = ids.get(state);
@@ -256,7 +256,7 @@ function cfg(contract) {
 
         /**
          *
-         * @param {import('@acuarica/evm/evm').EVMState} src
+         * @param {import('sevm/evm').EVMState} src
          * @param {Branch} branch
          */
         function writeEdge(src, branch) {
