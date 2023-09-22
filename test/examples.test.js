@@ -3,7 +3,8 @@ import { inspect } from 'util';
 import { expect } from 'chai';
 import c from 'ansi-colors';
 import { EtherscanProvider, FunctionFragment } from 'ethers';
-import { Contract } from 'sevm-4byte';
+import { Contract } from 'sevm';
+import 'sevm-4byte'
 
 describe('examples', function () {
     [
