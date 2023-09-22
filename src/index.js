@@ -12,8 +12,6 @@
  */
 import { Contract } from 'sevm';
 
-export * from 'sevm';
-
 import functionHashes from './functionHashes.min.js';
 import eventHashes from './eventHashes.min.js';
 
