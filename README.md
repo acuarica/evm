@@ -2,10 +2,10 @@
 
 # EVM-cli
 
-[![npm (scoped)](https://img.shields.io/npm/v/@acuarica/evm-cli?style=flat-square)](https://www.npmjs.com/package/@acuarica/evm-cli)
-![npm](https://img.shields.io/npm/dt/@acuarica/evm-cli)
+[![npm](https://img.shields.io/npm/v/sevm-cli?style=flat-square)](https://www.npmjs.com/package/sevm-cli)
+![npm](https://img.shields.io/npm/dt/sevm-cli)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm-cli?style=flat-square)](https://github.com/acuarica/evm-cli/blob/main/LICENSE)
-[![install size](https://packagephobia.com/badge?p=@acuarica/evm-cli)](https://packagephobia.com/result?p=@acuarica/evm-cli)
+[![install size](https://packagephobia.com/badge?p=sevm-cli)](https://packagephobia.com/result?p=sevm-cli)
 
 > :construction: Under heavy development. Feel free to open an [issue](https://github.com/acuarica/evm-cli/issues) if something is not right. :construction:
 
