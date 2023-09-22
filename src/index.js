@@ -10,7 +10,6 @@
  *
  * @packageDocumentation
  */
-// import type { IEvents } from '../evm/log';
 import { Contract } from 'sevm';
 
 export * from 'sevm';
@@ -19,30 +18,19 @@ import functionHashes from './functionHashes.min.js';
 import eventHashes from './eventHashes.min.js';
 
 /**
- * 
- * @param {IEvents} param0 
- */
-export function eventSelectors({ events }) {
-    for (const [topic, event] of Object.entries(events)) {
-        if (topic in eventHashes) {
-            // event.sig = (eventHashes as { [key: string]: string })[topic];
-            event.sig = (eventHashes)[topic];
-        }
-    }
-}
-
-/**
- * 
  * @param {Contract} contract 
  * @returns {Contract}
  */
-function patch(contract) {
-    eventSelectors(contract.evm);
+export function patch(contract) {
+    for (const [topic, event] of Object.entries(contract.evm.events)) {
+        if (topic in eventHashes) {
+            event.sig = eventHashes[topic];
+        }
+    }
 
     for (const [selector, fn] of Object.entries(contract.functions)) {
         if (selector in functionHashes) {
-            // fn.label = (functionHashes as { [selector: string]: string })[selector];
-            fn.label = (functionHashes)[selector];
+            fn.label = functionHashes[selector];
         }
     }
 
