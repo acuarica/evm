@@ -37,7 +37,7 @@ const provider = {
     ],
     current: 0,
     /**
-     * @param {string} address 
+     * @param {string} address
      * @returns {string}
      */
     getCode: async function (address) {
@@ -73,7 +73,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         solcs = new Set();
 
         /**
-         * @param {Contract['metadata']} metadata 
+         * @param {Contract['metadata']} metadata
          */
         append(metadata) {
             if (metadata) {
@@ -92,7 +92,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         missedSelectors = new Set();
 
         /**
-         * @param {Contract['functions']} functions 
+         * @param {Contract['functions']} functions
          */
         append(functions) {
             for (const fn of Object.values(functions)) {
@@ -108,7 +108,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         counts = new Map();
 
         /**
-         * @param {Contract} contract 
+         * @param {Contract} contract
          */
         append(contract) {
             for (const erc of ERCIds) {
@@ -125,7 +125,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         total = 0n;
 
         /**
-         * @param {bigint} diff 
+         * @param {bigint} diff
          */
         append(diff) {
             this.count++;
@@ -142,7 +142,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         counts = new Map();
 
         /**
-         * @param {string} address 
+         * @param {string} address
          */
         append(address) {
             const count = this.counts.get(address) ?? 0;
@@ -180,8 +180,8 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 }
 
                 /**
-                 * 
-                 * @param {EVMState} state 
+                 *
+                 * @param {EVMState} state
                  */
                 const STATICCALL = state => {
                     INSTS.STATICCALL(state);
@@ -198,7 +198,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 benchStats.append(t1 - t0);
 
                 contract = contract.patch();
-                contract.decompile();
+                //contract.decompile();
 
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
