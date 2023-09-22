@@ -7,7 +7,7 @@ declare module 'sevm' {
          * It looks up in the signature and events database for matching hashes.
          * 
          * When a matching `function` or `event` is found,
-         * it patches the `function` or `event` with the corresponding signature. 
+         * it patches the `function` or `event` with the corresponding signature.
          */
         patch(): this;
     }
