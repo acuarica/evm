@@ -16,6 +16,9 @@ import { LOGS, type IEvents } from './log';
 import { type IStore, STORAGE } from './storage';
 import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
 
+export * from './expr';
+export * from './system';
+
 /**
  * An alias `type` for the `State` used in the `EVM`.
  */
