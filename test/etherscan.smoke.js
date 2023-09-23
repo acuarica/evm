@@ -64,7 +64,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         return;
     }
 
-    /** @type {Map<string, Throw[]>} */
+    /** @type {Map<string, import('sevm/evm').Throw[]>} */
     const errorsByContract = new Map();
     const metadataStats = new (class {
         noMetadata = 0;
@@ -72,9 +72,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         protocols = new Set();
         solcs = new Set();
 
-        /**
-         * @param {Contract['metadata']} metadata
-         */
+        /** @param {Contract['metadata']} metadata */
         append(metadata) {
             if (metadata) {
                 this.protocols.add(metadata.protocol);
@@ -179,14 +177,10 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     return;
                 }
 
-                /**
-                 *
-                 * @param {import('sevm/evm').EVMState} state
-                 */
+                /** @param {import('sevm/evm').EVMState} state */
                 const STATICCALL = state => {
                     INSTS.STATICCALL(state);
-                    /** @type {import('sevm/evm').StaticCall} */
-                    const call = state.stack.top;
+                    const call = /** @type {import('sevm/evm').StaticCall}*/ (state.stack.top);
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {
                         precompiledStats.append(address.toString());
