@@ -8,12 +8,21 @@ import { Tx } from '../src/evm/special';
 import { compile } from './utils/solc';
 
 describe('evm', function () {
-    it('should halt with `INVALID`', function () {
+    it('should halt when `INVALID` step', function () {
         const state = new State<Inst, Expr>();
         STEP().INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
         expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
+    });
+
+    it('should halt when `exec` invalid opcode', function () {
+        const state = new State<Inst, Expr>();
+        const evm = new EVM('0xd0');
+        evm.exec(0, state);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
+        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
     });
 
     it('should attach `INSTS` hooks', function () {

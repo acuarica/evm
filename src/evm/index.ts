@@ -10,15 +10,7 @@ import { STEP, type Step } from '../step';
 export * from './expr';
 export * from './system';
 
-/**
- * An alias `type` for the `State` used in the `EVM`.
- */
-export type EVMState = State<Inst, Expr>;
-
 export { Branch };
-export * from '../state';
-
-export type { Metadata } from '../metadata';
 
 /**
  * Maps `mnemonic` keys of `insts` to their corresponding `opcode` in the byte range, _i.e._, `0-255`.
@@ -29,9 +21,9 @@ export type { Metadata } from '../metadata';
  * @returns
  */
 function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
-    [opcode: number]: (state: EVMState, opcode: Opcode) => void;
+    [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
 } {
-    const entry = (k: number) => (MNEMONICS[k] === undefined ? insts.INVALID : insts[MNEMONICS[k]]);
+    const entry = (k: number) => insts[MNEMONICS[k] ?? 'INVALID'];
     return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
 }
 
@@ -49,13 +41,13 @@ export class EVM {
      *
      */
     readonly insts: {
-        [opcode: number]: (state: EVMState, opcode: Opcode) => void;
+        [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
     };
 
     /**
      *
      */
-    readonly chunks = new Map<number, { pcend: number; states: EVMState[] }>();
+    readonly chunks = new Map<number, { pcend: number; states: State<Inst, Expr>[] }>();
 
     /**
      *
@@ -126,7 +118,7 @@ export class EVM {
         }
     }
 
-    run(pc0: number, state: EVMState) {
+    run(pc0: number, state: State<Inst, Expr>) {
         const branches: Branch[] = [new Branch(pc0, state)];
         while (branches.length > 0) {
             // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
@@ -154,7 +146,7 @@ export class EVM {
         }
     }
 
-    exec(pc0: number, state: EVMState) {
+    exec(pc0: number, state: State<Inst, Expr>) {
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
         let pc = pc0;
@@ -209,7 +201,7 @@ export function gc(b: Branch, chunks: EVM['chunks']) {
     return undefined;
 }
 
-function cmp({ stack: lhs }: EVMState, { stack: rhs }: EVMState) {
+function cmp({ stack: lhs }: State<Inst, Expr>, { stack: rhs }: State<Inst, Expr>) {
     if (lhs.values.length !== rhs.values.length) {
         return false;
     }
