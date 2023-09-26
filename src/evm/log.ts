@@ -1,6 +1,4 @@
-import type { State } from '../state';
-import { type Expr, type Inst, Val, type IInst } from './expr';
-import { MLoad } from './memory';
+import { type Expr, type IInst } from './expr';
 
 /**
  *
@@ -104,59 +102,4 @@ export class Log implements IInst {
                       : [...this.topics, ...this.args].join(', ')) +
                   ');';
     }
-}
-
-export const LOGS = (events: IEvents) => {
-    return {
-        LOG0: log(0, events),
-        LOG1: log(1, events),
-        LOG2: log(2, events),
-        LOG3: log(3, events),
-        LOG4: log(4, events),
-    };
-};
-
-function log(topicsCount: number, { events }: IEvents) {
-    return ({ stack, memory, stmts }: State<Inst, Expr>): void => {
-        let offset = stack.pop();
-        let size = stack.pop();
-
-        const topics = [];
-        for (let i = 0; i < topicsCount; i++) {
-            topics.push(stack.pop());
-        }
-
-        let event: IEvents['events'][string] | undefined = undefined;
-        if (topics.length > 0 && topics[0].isVal()) {
-            const eventTopic = topics[0].val.toString(16).padStart(64, '0');
-            event = events[eventTopic];
-            if (event === undefined) {
-                event = { indexedCount: topics.length - 1 };
-                events[eventTopic] = event;
-            }
-        }
-
-        offset = offset.eval();
-        size = size.eval();
-        stmts.push(
-            new Log(
-                event,
-                topics,
-                { offset, size },
-                offset.isVal() && size.isVal()
-                    ? (() => {
-                          const args = [];
-                          for (
-                              let i = Number(offset.val);
-                              i < Number(offset.val + size.val);
-                              i += 32
-                          ) {
-                              args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
-                          }
-                          return args;
-                      })()
-                    : undefined
-            )
-        );
-    };
 }

@@ -2,108 +2,109 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
-import { LOGIC, Not, Shr, Sig } from '../../src/evm/logic';
+import { Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
 import { Block, CallDataLoad } from '../../src/evm/special';
-import { Stack, State } from '../../src/state';
+import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
+import { STEP } from '../../src/step';
 
 describe('evm::logic', function () {
     [[0n, '0x' + 'ff'.repeat(32)] as const, [1n, '0x' + 'ff'.repeat(31) + 'fe'] as const].forEach(
         ([value, expected]) => {
             it(`should calculate \`~${value}\``, function () {
-                const stack = new Stack<Expr>();
-                stack.push(new Val(value));
-                LOGIC.NOT(stack);
-                expect(stack.values).to.deep.equal([new Not(new Val(value))]);
-                expect(stack.values[0].eval()).to.be.deep.equal(new Val(BigInt(expected)));
-                expect(`${stack.values[0].eval()}`).to.be.equal(expected);
+                const state = new State<never, Expr>();
+                state.stack.push(new Val(value));
+                STEP().NOT(state);
+                expect(state.stack.values).to.deep.equal([new Not(new Val(value))]);
+                expect(state.stack.values[0].eval()).to.be.deep.equal(new Val(BigInt(expected)));
+                expect(`${state.stack.values[0].eval()}`).to.be.equal(expected);
             });
         }
     );
 
     it('should stringify `~block.number`', function () {
-        const stack = new Stack<Expr>();
-        stack.push(Block.number);
-        expect(stack.values).to.be.deep.equal([Block.number]);
+        const state = new State<never, Expr>();
+        state.stack.push(Block.number);
+        expect(state.stack.values).to.be.deep.equal([Block.number]);
 
-        LOGIC.NOT(stack);
+        STEP().NOT(state);
 
-        expect(stack.values).has.length(1);
-        expect(stack.values[0]).to.be.deep.equal(new Not(Block.number));
-        expect(stack.values[0].str()).to.be.equal('~block.number');
+        expect(state.stack.values).has.length(1);
+        expect(state.stack.values[0]).to.be.deep.equal(new Not(Block.number));
+        expect(state.stack.values[0].str()).to.be.equal('~block.number');
     });
 
     describe('EQ', function () {
         it('should calculate `1 == 1`', function () {
-            const stack = new Stack<Expr>();
-            stack.push(new Val(1n));
-            stack.push(new Val(1n));
-            LOGIC.EQ(stack);
-            expect(stack.values).to.deep.equal([new Val(1n)]);
+            const state = new State<never, Expr>();
+            state.stack.push(new Val(1n));
+            state.stack.push(new Val(1n));
+            STEP().EQ(state);
+            expect(state.stack.values).to.deep.equal([new Val(1n)]);
         });
 
         it('should calculate `1 == 2`', function () {
-            const stack = new Stack<Expr>();
-            stack.push(new Val(1n));
-            stack.push(new Val(2n));
-            LOGIC.EQ(stack);
-            expect(stack.values).to.be.deep.equal([new Val(0n)]);
+            const state = new State<never, Expr>();
+            state.stack.push(new Val(1n));
+            state.stack.push(new Val(2n));
+            STEP().EQ(state);
+            expect(state.stack.values).to.be.deep.equal([new Val(0n)]);
         });
 
         it('should stringify `block.number == 1`', function () {
-            const stack = new Stack<Expr>();
-            stack.push(new Val(1n));
-            stack.push(Block.number);
-            expect(stack.values).to.be.deep.equal([Block.number, new Val(1n)]);
+            const state = new State<never, Expr>();
+            state.stack.push(new Val(1n));
+            state.stack.push(Block.number);
+            expect(state.stack.values).to.be.deep.equal([Block.number, new Val(1n)]);
 
-            LOGIC.EQ(stack);
+            STEP().EQ(state);
 
-            expect(stack.values).has.length(1);
-            expect(stack.values[0].str()).to.be.equal('block.number == 0x1');
+            expect(state.stack.values).has.length(1);
+            expect(state.stack.values[0].str()).to.be.equal('block.number == 0x1');
         });
 
         ['06fdde03', '12345678', '00000001'].forEach(selector => {
             describe(`EQ detect msg.sig for hash ${selector}`, function () {
                 it('should stringify signature `msg.sig` from RHS DIV&EXP', function () {
-                    const stack = new Stack<Expr>();
-                    stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
-                    stack.push(new Val(BigInt('0x' + selector)));
-                    LOGIC.EQ(stack);
+                    const state = new State<never, Expr>();
+                    state.stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
+                    state.stack.push(new Val(BigInt('0x' + selector)));
+                    STEP().EQ(state);
 
-                    expect(stack.values).has.length(1);
-                    expect(stack.values[0].str()).to.equal(`msg.sig == ${selector}`);
+                    expect(state.stack.values).has.length(1);
+                    expect(state.stack.values[0].str()).to.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from LHS DIV&EXP', function () {
-                    const stack = new Stack<Expr>();
-                    stack.push(new Val(BigInt('0x' + selector)));
-                    stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
-                    LOGIC.EQ(stack);
+                    const state = new State<never, Expr>();
+                    state.stack.push(new Val(BigInt('0x' + selector)));
+                    state.stack.push(new Div(new CallDataLoad(new Val(0n)), new Val(2n ** 0xe0n)));
+                    STEP().EQ(state);
 
-                    expect(stack.values).has.length(1);
-                    expect(stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(state.stack.values).has.length(1);
+                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from RHS SHR', function () {
-                    const stack = new Stack<Expr>();
-                    stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
-                    stack.push(new Val(BigInt('0x' + selector)));
-                    LOGIC.EQ(stack);
+                    const state = new State<never, Expr>();
+                    state.stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
+                    state.stack.push(new Val(BigInt('0x' + selector)));
+                    STEP().EQ(state);
 
-                    expect(stack.values).has.length(1);
-                    expect(stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(state.stack.values).has.length(1);
+                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from LHS SHR', function () {
-                    const stack = new Stack<Expr>();
-                    stack.push(new Val(BigInt('0x' + selector)));
-                    stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
-                    LOGIC.EQ(stack);
+                    const state = new State<never, Expr>();
+                    state.stack.push(new Val(BigInt('0x' + selector)));
+                    state.stack.push(new Shr(new CallDataLoad(new Val(0n)), new Val(0xe0n)));
+                    STEP().EQ(state);
 
-                    expect(stack.values).has.length(1);
-                    expect(stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(state.stack.values).has.length(1);
+                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
                 });
             });
         });

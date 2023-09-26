@@ -1,5 +1,4 @@
-import { mapKeys, mapValues } from '../object';
-import type { Ram } from '../state';
+import { mapValues } from '../object';
 import { type Expr, Tag, Val } from './expr';
 
 const BLOCK = {
@@ -77,7 +76,7 @@ export const Tx = Object.fromEntries(
     Object.entries(TX).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
 );
 
-const FNS = {
+export const FNS = {
     BALANCE: [(address: string) => `${address}.balance`, 'uint256'],
     EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256'],
     EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32'],
@@ -145,37 +144,4 @@ export class CallDataLoad extends Tag('CallDataLoad') {
             ? `_arg${(this.location.val - 4n) / 32n}`
             : `msg.data[${this.location}]`;
     }
-}
-
-export const SPECIAL = {
-    ...mapValues(Info, sym => (state: Ram<Expr>) => state.stack.push(sym)),
-    ...mapKeys(FNS, mnemonic => ({ stack }: Ram<Expr>) => {
-        const value = stack.pop();
-        stack.push(new Fn(mnemonic, value));
-    }),
-    CALLVALUE: ({ stack }: Ram<Expr>): void => stack.push(new CallValue()),
-    CALLDATALOAD: ({ stack }: Ram<Expr>): void => {
-        const location = stack.pop();
-        stack.push(new CallDataLoad(location));
-    },
-    CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
-    CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
-    EXTCODECOPY: ({ stack }: Ram<Expr>): void => {
-        const address = stack.pop();
-        datacopy((offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`);
-    },
-    RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
-};
-
-export function datacopy(fn: (offset: string, size: string) => string) {
-    return ({ stack, memory }: Ram<Expr>): void => {
-        const dest = stack.pop();
-        const offset = stack.pop();
-        const size = stack.pop();
-        if (!dest.isVal()) {
-            // throw new Error('expected number in returndatacopy');
-        } else {
-            memory[Number(dest.val)] = new DataCopy(fn, offset, size);
-        }
-    };
 }

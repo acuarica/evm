@@ -3,18 +3,19 @@ import { build, stringify } from '../../src';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';
-import { Info, SPECIAL } from '../../src/evm/special';
-import { Create, Return, SelfDestruct, Sha3, Stop, SYSTEM } from '../../src/evm/system';
+import { Info } from '../../src/evm/special';
+import { Create, Return, SelfDestruct, Sha3, Stop } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
+import { STEP } from '../../src/step';
 
 describe('evm::system', function () {
     it('should exec `SHA3`', function () {
         const state = new State<never, Expr>();
         state.stack.push(new Val(4n));
         state.stack.push(new Val(0x10n));
-        SYSTEM.SHA3(state);
+        STEP().SHA3(state);
         expect(state.halted).to.be.false;
         expect(state.stack.values).to.be.deep.equal([new Sha3([new MLoad(new Val(0x10n))])]);
         expect(`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
@@ -25,7 +26,7 @@ describe('evm::system', function () {
         state.stack.push(new Val(0x20n));
         state.stack.push(new Val(0x10n));
         state.stack.push(new Val(0x1000n));
-        SYSTEM.CREATE(state);
+        STEP().CREATE(state);
         expect(state.halted).to.be.false;
         expect(state.stack.values).to.be.deep.equal([
             new Create(new Val(0x1000n), new Val(16n), new Val(32n)),
@@ -37,7 +38,7 @@ describe('evm::system', function () {
 
     it('should halt with STOP', function () {
         const state = new State<Inst, Expr>();
-        SYSTEM.STOP(state);
+        STEP().STOP(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Stop()]);
         expect(`${state.stmts[0]}`).to.be.equal('return;');
@@ -45,8 +46,8 @@ describe('evm::system', function () {
 
     it('should halt with SELFDESTRUCT', function () {
         const state = new State<Inst, Expr>();
-        SPECIAL.ADDRESS(state);
-        SYSTEM.SELFDESTRUCT(state);
+        STEP().ADDRESS(state);
+        STEP().SELFDESTRUCT(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new SelfDestruct(Info.ADDRESS)]);
         expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
@@ -57,7 +58,7 @@ describe('evm::system', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x0n));
             state.stack.push(new Val(0x0n));
-            SYSTEM.RETURN(state);
+            STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Return([])]);
             expect(`${state.stmts[0]}`).to.be.equal('return;');
@@ -67,7 +68,7 @@ describe('evm::system', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x4n));
-            SYSTEM.RETURN(state);
+            STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Return([new MLoad(new Val(0x4n))])]);
             expect(`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
@@ -77,7 +78,7 @@ describe('evm::system', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x30n));
             state.stack.push(new Val(0x4n));
-            SYSTEM.RETURN(state);
+            STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
                 new Return([new MLoad(new Val(0x4n)), new MLoad(new Val(0x24n))]),

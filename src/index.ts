@@ -3,7 +3,7 @@ import type { Type } from './type';
 import { Not } from './evm/logic';
 import type { Return, Revert } from './evm/system';
 import { State } from './state';
-import { EVM, INSTS } from './evm';
+import { EVM } from './evm';
 import { stringifyEvents } from './evm/log';
 import {
     type SLoad,
@@ -15,6 +15,7 @@ import {
 } from './evm/storage';
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
+import type { Step } from './step';
 
 export * from './type';
 
@@ -48,7 +49,7 @@ export class Contract {
      *
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
-    constructor(readonly bytecode: string, insts: typeof INSTS = INSTS) {
+    constructor(readonly bytecode: string, insts: Partial<Step> = {}) {
         this.evm = new EVM(bytecode, insts);
         const main = new State<Inst, Expr>();
         this.evm.run(0, main);

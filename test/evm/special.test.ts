@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
-import { Block, CallDataLoad, CallValue, Info, Msg, SPECIAL, Tx } from '../../src/evm/special';
+import { Block, CallDataLoad, CallValue, Info, Msg, Tx } from '../../src/evm/special';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
 import type { Log } from '../../src/evm/log';
 import { Add } from '../../src/evm/math';
+import { STEP } from '../../src/step';
 
 describe('evm::sym', function () {
     it(`should stringify Block's props`, function () {
@@ -30,7 +31,7 @@ describe('evm::sym', function () {
 
     it(`should push \`CallValue\``, function () {
         const state = new State<never, Expr>();
-        SPECIAL.CALLVALUE(state);
+        STEP().CALLVALUE(state);
 
         expect(state.stack.values).to.deep.equal([new CallValue()]);
         expect(state.stack.values[0].toString()).to.equal('msg.value');
@@ -49,7 +50,7 @@ describe('evm::sym', function () {
             it(`should push \`CallDataLoad\` at :${location} stringified to \`${str}\``, function () {
                 const state = new State<never, Expr>();
                 state.stack.push(location);
-                SPECIAL.CALLDATALOAD(state);
+                STEP().CALLDATALOAD(state);
 
                 expect(state.stack.values).to.deep.equal([new CallDataLoad(location)]);
                 expect(state.stack.values[0].toString()).to.equal(str);
@@ -65,7 +66,7 @@ describe('evm::sym', function () {
 
             it('should get expr from stack', function () {
                 const state = new State<never, Expr>();
-                SPECIAL[mnemonic](state);
+                STEP()[mnemonic](state);
 
                 expect(state.stack.values).to.be.deep.equal([sym]);
             });

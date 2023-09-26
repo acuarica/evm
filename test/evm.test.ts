@@ -1,17 +1,17 @@
 import { expect } from 'chai';
 
-import { EVM, INSTS } from '../src/evm';
+import { EVM } from '../src/evm';
 import { type Ram, State } from '../src/state';
 import type { Expr, Inst } from '../src/evm/expr';
 import { Invalid } from '../src/evm/system';
 import { Tx } from '../src/evm/special';
-
 import { compile } from './utils/solc';
+import { STEP } from '../src/step';
 
 describe('evm', function () {
     it('should halt with `INVALID`', function () {
         const state = new State<Inst, Expr>();
-        INSTS.INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
+        STEP().INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
         expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
@@ -30,14 +30,14 @@ describe('evm', function () {
         let top = undefined;
         const NUMBER = (state: Ram<Expr>) => {
             count++;
-            INSTS.NUMBER(state);
+            STEP().NUMBER(state);
         };
         const GASPRICE = (state: Ram<Expr>) => {
-            INSTS.GASPRICE(state);
+            STEP().GASPRICE(state);
             top = state.stack.top;
         };
         const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode, {
-            ...INSTS,
+            ...STEP(),
             NUMBER,
             GASPRICE,
         });

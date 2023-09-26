@@ -1,20 +1,11 @@
 import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
-import { type Stack, State } from '../state';
+import { State } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
-
-import { mapValues } from '../object';
-
-import { type Expr, type IInst, type Inst, Throw, Val } from './expr';
-
-import { PUSHES, STACK } from './stack';
-import { LOGIC } from './logic';
-import { MATH } from './math';
-import { SPECIAL } from './special';
-import { MEMORY } from './memory';
-import { Invalid, SYSTEM } from './system';
-import { LOGS, type IEvents } from './log';
-import { type IStore, STORAGE } from './storage';
-import { Branch, FLOW, type ISelectorBranches, JumpDest, makeBranch } from './flow';
+import { type Expr, type IInst, type Inst, Throw } from './expr';
+import { type IEvents } from './log';
+import { type IStore } from './storage';
+import { Branch, type ISelectorBranches, JumpDest, makeBranch } from './flow';
+import { STEP, type Step } from '../step';
 
 export * from './expr';
 export * from './system';
@@ -26,24 +17,8 @@ export type EVMState = State<Inst, Expr>;
 
 export { Branch };
 export * from '../state';
+
 export type { Metadata } from '../metadata';
-
-function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
-    return mapValues(table, fn => (state: EVMState) => fn(state.stack));
-}
-
-export const INSTS = {
-    ...mapStack(MATH),
-    ...mapStack(LOGIC),
-    ...SPECIAL,
-    ...MEMORY,
-    JUMPDEST: (_state: EVMState) => {},
-    ...mapValues(PUSHES(), fn => (state: EVMState, op: Opcode) => fn(op.pushData!, state.stack)),
-    ...mapStack(STACK<Expr>()),
-    ...SYSTEM,
-    PC: ({ stack }: EVMState, op: Opcode) => stack.push(new Val(BigInt(op.offset))),
-    INVALID: (state: EVMState, op: Opcode): void => state.halt(new Invalid(op.opcode)),
-} as const;
 
 /**
  * Maps `mnemonic` keys of `insts` to their corresponding `opcode` in the byte range, _i.e._, `0-255`.
@@ -53,10 +28,10 @@ export const INSTS = {
  * @param insts
  * @returns
  */
-function fill(insts: { [mnemonic in keyof typeof OPCODES]: typeof INSTS.INVALID }): {
+function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
     [opcode: number]: (state: EVMState, opcode: Opcode) => void;
 } {
-    const entry = (k: number) => (MNEMONICS[k] === undefined ? INSTS.INVALID : insts[MNEMONICS[k]]);
+    const entry = (k: number) => (MNEMONICS[k] === undefined ? insts.INVALID : insts[MNEMONICS[k]]);
     return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
 }
 
@@ -87,10 +62,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      */
     readonly errors: Throw[] = [];
 
-    readonly events: IEvents['events'] = {};
-    readonly variables: IStore['variables'] = {};
-    readonly mappings: IStore['mappings'] = {};
-    readonly functionBranches: ISelectorBranches['functionBranches'] = new Map<
+    events: IEvents['events'] = {};
+    variables: IStore['variables'] = {};
+    mappings: IStore['mappings'] = {};
+    functionBranches: ISelectorBranches['functionBranches'] = new Map<
         string,
         { pc: number; state: EVMState }
     >();
@@ -106,7 +81,8 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      */
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
 
-    constructor(bytecode: string, insts: typeof INSTS = INSTS) {
+    // readonly step:
+    constructor(bytecode: string, insts: Partial<Step> = {}) {
         /**
          * The `code` part from the `bytecode`.
          * That is, the `bytecode` without its metadata hash, if any.
@@ -119,13 +95,29 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
 
-        this.insts = fill({
-            ...insts,
-            ...FLOW({ opcodes, jumpdests }, this),
-            ...STORAGE(this),
-            ...LOGS(this),
-        });
+        // this.insts = fill({
+        //     ...insts,
+        //     ...FLOW({ opcodes, jumpdests }, this),
+        //     ...STORAGE(this),
+        //     ...LOGS(this),
+        // });
+        const s = STEP({ opcodes, jumpdests });
+        this.events = s.events.events;
+        this.functionBranches = s.functionBranches;
+        this.mappings = s.mappings;
+        this.variables = s.variables;
+        this.insts = fill({ ...s, ...insts });
     }
+
+    // get eventsi(): IEvents['events'] {
+
+    // }
+    // readonly variables: IStore['variables'] = {};
+    // readonly mappings: IStore['mappings'] = {};
+    // readonly functionBranches: ISelectorBranches['functionBranches'] = new Map<
+    // string,
+    // { pc: number; state: EVMState }
+    // >();
 
     /**
      *

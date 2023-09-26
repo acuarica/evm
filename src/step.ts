@@ -1,0 +1,658 @@
+import { type Opcode, type decode, formatOpcode, toHex } from './opcode';
+import type { Ram, Stack, State } from './state';
+
+import { type Expr, Val, type Inst } from './evm/expr';
+import { Add, Div, Exp, Mod, Mul, Sub } from './evm/math';
+import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './evm/logic';
+import { mapKeys, mapValues } from './object';
+import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Info } from './evm/special';
+import { MLoad, MStore } from './evm/memory';
+import {
+    Call,
+    CallCode,
+    Create,
+    Create2,
+    DelegateCall,
+    Invalid,
+    Return,
+    ReturnData,
+    Revert,
+    SelfDestruct,
+    Sha3,
+    StaticCall,
+    Stop,
+} from './evm';
+import { type ISelectorBranches, Jump, Jumpi, SigCase, makeBranch } from './evm/flow';
+import { type IEvents, Log } from './evm/log';
+import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './evm/storage';
+
+export type Step = Omit<
+    ReturnType<typeof STEP>,
+    'events' | 'functionBranches' | 'variables' | 'mappings'
+>;
+
+export function STEP(
+    { opcodes, jumpdests }: ReturnType<typeof decode> = { opcodes: [], jumpdests: {} }
+) {
+    function mapStack<K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) {
+        return mapValues(table, fn => (state: State<Inst, Expr>) => fn(state.stack));
+    }
+    return {
+        ...mapStack(MATH()),
+        ...mapStack(LOGIC()),
+        ...SPECIAL(),
+        ...MEMORY(),
+        JUMPDEST: (_state: State<Inst, Expr>) => {},
+        ...mapValues(PUSHES(), fn => (s: State<Inst, Expr>, o: Opcode) => fn(o.pushData!, s.stack)),
+        ...mapStack(STACK<Expr>()),
+        ...SYSTEM(),
+        PC: ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.offset))),
+        INVALID: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
+
+        ...FLOW({ opcodes, jumpdests }),
+        ...STORAGE(),
+        ...LOGS(),
+    } as const;
+}
+
+function PUSHES() {
+    const push = (d: Uint8Array, s: Stack<Expr>) => s.push(new Val(BigInt('0x' + toHex(d)), true));
+    return {
+        PUSH1: push,
+        PUSH2: push,
+        PUSH3: push,
+        PUSH4: push,
+        PUSH5: push,
+        PUSH6: push,
+        PUSH7: push,
+        PUSH8: push,
+        PUSH9: push,
+        PUSH10: push,
+        PUSH11: push,
+        PUSH12: push,
+        PUSH13: push,
+        PUSH14: push,
+        PUSH15: push,
+        PUSH16: push,
+        PUSH17: push,
+        PUSH18: push,
+        PUSH19: push,
+        PUSH20: push,
+        PUSH21: push,
+        PUSH22: push,
+        PUSH23: push,
+        PUSH24: push,
+        PUSH25: push,
+        PUSH26: push,
+        PUSH27: push,
+        PUSH28: push,
+        PUSH29: push,
+        PUSH30: push,
+        PUSH31: push,
+        PUSH32: push,
+    } as const;
+}
+
+function STACK<E>() {
+    const dup = (position: number) => (stack: Stack<E>) => stack.dup(position);
+    const swap = (position: number) => (stack: Stack<E>) => stack.swap(position);
+    return {
+        POP: (stack: Stack<E>): void => void stack.pop(),
+        DUP1: dup(0),
+        DUP2: dup(1),
+        DUP3: dup(2),
+        DUP4: dup(3),
+        DUP5: dup(4),
+        DUP6: dup(5),
+        DUP7: dup(6),
+        DUP8: dup(7),
+        DUP9: dup(8),
+        DUP10: dup(9),
+        DUP11: dup(10),
+        DUP12: dup(11),
+        DUP13: dup(12),
+        DUP14: dup(13),
+        DUP15: dup(14),
+        DUP16: dup(15),
+        SWAP1: swap(1),
+        SWAP2: swap(2),
+        SWAP3: swap(3),
+        SWAP4: swap(4),
+        SWAP5: swap(5),
+        SWAP6: swap(6),
+        SWAP7: swap(7),
+        SWAP8: swap(8),
+        SWAP9: swap(9),
+        SWAP10: swap(10),
+        SWAP11: swap(11),
+        SWAP12: swap(12),
+        SWAP13: swap(13),
+        SWAP14: swap(14),
+        SWAP15: swap(15),
+        SWAP16: swap(16),
+    } as const;
+}
+
+function MATH() {
+    return {
+        ADD: bin(Add),
+        MUL: bin(Mul),
+        SUB: bin(Sub),
+        DIV: bin(Div),
+        SDIV: bin(Div),
+        MOD: bin(Mod),
+        SMOD: bin(Mod),
+        ADDMOD: (stack: Stack<Expr>): void => {
+            const left = stack.pop();
+            const right = stack.pop();
+            const mod = stack.pop();
+            stack.push(
+                left.isVal() && right.isVal() && mod.isVal()
+                    ? new Val((left.val + right.val) % mod.val)
+                    : left.isVal() && right.isVal()
+                    ? new Mod(new Val(left.val + right.val), mod)
+                    : new Mod(new Add(left, right), mod)
+            );
+        },
+        MULMOD: (stack: Stack<Expr>): void => {
+            const left = stack.pop();
+            const right = stack.pop();
+            const mod = stack.pop();
+            stack.push(
+                left.isVal() && right.isVal() && mod.isVal()
+                    ? new Val((left.val * right.val) % mod.val)
+                    : left.isVal() && right.isVal()
+                    ? new Mod(new Val(left.val * right.val), mod)
+                    : new Mod(new Mul(left, right), mod)
+            );
+        },
+        EXP: bin(Exp),
+        SIGNEXTEND: (stack: Stack<Expr>): void => {
+            const left = stack.pop();
+            const right = stack.pop();
+            stack.push(
+                left.isVal() && right.isVal()
+                    ? new Val((right.val << (32n - left.val)) >> (32n - left.val))
+                    : left.isVal()
+                    ? new Sar(new Shl(right, new Val(32n - left.val)), new Val(32n - left.val))
+                    : new Sar(
+                          new Shl(right, new Sub(new Val(32n), left)),
+                          new Sub(new Val(32n), left)
+                      )
+            );
+        },
+    } as const;
+}
+
+function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): (stack: Stack<Expr>) => void {
+    return function (stack: Stack<Expr>) {
+        const lhs = stack.pop();
+        const rhs = stack.pop();
+        stack.push(new Cons(lhs, rhs));
+    };
+}
+
+function LOGIC() {
+    return {
+        LT: bin(Lt),
+        GT: bin(Gt),
+        SLT: bin(Lt),
+        SGT: bin(Gt),
+        EQ: (stack: Stack<Expr>): void => {
+            const DIVEXPsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) => {
+                left = left.eval();
+                right = right.eval();
+
+                if (left.isVal() && right.tag === 'Div' && right.right.isVal()) {
+                    const selector = left.val * right.right.val;
+                    right = right.left;
+
+                    if (
+                        selector % (1n << 0xe0n) === 0n &&
+                        right.tag === 'CallDataLoad' &&
+                        right.location.isZero()
+                    ) {
+                        return new Sig(
+                            selector
+                                .toString(16)
+                                .substring(0, 8 - (64 - selector.toString(16).length))
+                                .padStart(8, '0')
+                        );
+                    }
+                }
+
+                return orElse();
+            };
+
+            const SHRsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) =>
+                left.isVal() &&
+                right.tag === 'Shr' &&
+                right.shift.isVal() &&
+                right.shift.val === 0xe0n &&
+                right.value.tag === 'CallDataLoad' &&
+                right.value.location.isZero()
+                    ? new Sig(left.val.toString(16).padStart(8, '0'))
+                    : orElse();
+
+            const left = stack.pop();
+            const right = stack.pop();
+
+            stack.push(
+                left.isVal() && right.isVal()
+                    ? left.val === right.val
+                        ? new Val(1n)
+                        : new Val(0n)
+                    : DIVEXPsig(left, right, () =>
+                          DIVEXPsig(right, left, () =>
+                              SHRsig(left, right, () =>
+                                  SHRsig(right, left, () => new Eq(left, right))
+                              )
+                          )
+                      )
+            );
+        },
+
+        ISZERO: (stack: Stack<Expr>): void => {
+            const value = stack.pop();
+            stack.push(new IsZero(value));
+        },
+        AND: bin(And),
+        OR: bin(Or),
+        XOR: bin(Xor),
+        NOT: (stack: Stack<Expr>): void => {
+            const value = stack.pop();
+            stack.push(new Not(value));
+        },
+        BYTE: (stack: Stack<Expr>): void => {
+            const position = stack.pop();
+            const data = stack.pop();
+            stack.push(new Byte(position, data));
+        },
+        SHL: shift(Shl),
+        SHR: shift(Shr),
+        SAR: shift(Sar),
+    } as const;
+
+    function shift(Cons: new (value: Expr, shift: Expr) => Expr): (stack: Stack<Expr>) => void {
+        return function (stack: Stack<Expr>) {
+            const shift = stack.pop();
+            const value = stack.pop();
+            stack.push(new Cons(value, shift));
+        };
+    }
+}
+
+function SPECIAL() {
+    return {
+        ...mapValues(Info, sym => (state: Ram<Expr>) => state.stack.push(sym)),
+        ...mapKeys(FNS, mnemonic => ({ stack }: Ram<Expr>) => {
+            const value = stack.pop();
+            stack.push(new Fn(mnemonic, value));
+        }),
+        CALLVALUE: ({ stack }: Ram<Expr>): void => stack.push(new CallValue()),
+        CALLDATALOAD: ({ stack }: Ram<Expr>): void => {
+            const location = stack.pop();
+            stack.push(new CallDataLoad(location));
+        },
+        CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
+        CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
+        EXTCODECOPY: ({ stack }: Ram<Expr>): void => {
+            const address = stack.pop();
+            datacopy(
+                (offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`
+            );
+        },
+        RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
+    } as const;
+
+    function datacopy(fn: (offset: string, size: string) => string) {
+        return ({ stack, memory }: Ram<Expr>): void => {
+            const dest = stack.pop();
+            const offset = stack.pop();
+            const size = stack.pop();
+            if (!dest.isVal()) {
+                // throw new Error('expected number in returndatacopy');
+            } else {
+                memory[Number(dest.val)] = new DataCopy(fn, offset, size);
+            }
+        };
+    }
+}
+
+function MEMORY() {
+    return {
+        MLOAD: ({ stack, memory }: State<Inst, Expr>): void => {
+            let loc = stack.pop();
+            loc = loc.eval();
+            stack.push(
+                loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new MLoad(loc)
+            );
+        },
+        MSTORE: mstore,
+        MSTORE8: mstore,
+    } as const;
+
+    function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
+        let loc = stack.pop();
+        const data = stack.pop();
+
+        loc = loc.eval();
+        if (loc.isVal()) {
+            memory[Number(loc.val)] = data;
+        } else {
+            stmts.push(new MStore(loc, data));
+        }
+    }
+}
+
+function SYSTEM() {
+    return {
+        SHA3: (state: State<Inst, Expr>): void => state.stack.push(memArgs(state, Sha3)),
+        STOP: (state: State<Inst, Expr>): void => state.halt(new Stop()),
+        CREATE: ({ stack }: State<Inst, Expr>): void => {
+            const value = stack.pop();
+            const offset = stack.pop();
+            const size = stack.pop();
+            stack.push(new Create(value, offset, size));
+        },
+        CALL: ({ stack, memory }: State<Inst, Expr>): void => {
+            const gas = stack.pop();
+            const address = stack.pop();
+            const value = stack.pop();
+            const argsStart = stack.pop();
+            const argsLen = stack.pop();
+            const retStart = stack.pop();
+            const retLen = stack.pop();
+            stack.push(new Call(gas, address, value, argsStart, argsLen, retStart, retLen));
+            if (retStart.isVal()) {
+                memory[Number(retStart.val)] = new ReturnData(retStart, retLen);
+            }
+        },
+        CALLCODE: ({ stack }: State<Inst, Expr>): void => {
+            const gas = stack.pop();
+            const address = stack.pop();
+            const value = stack.pop();
+            const argsStart = stack.pop();
+            const argsLen = stack.pop();
+            const retStart = stack.pop();
+            const retLen = stack.pop();
+            stack.push(new CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
+        },
+        RETURN: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Return)),
+        DELEGATECALL: ({ stack }: State<Inst, Expr>): void => {
+            const gas = stack.pop();
+            const address = stack.pop();
+            const argsStart = stack.pop();
+            const argsLen = stack.pop();
+            const retStart = stack.pop();
+            const retLen = stack.pop();
+            stack.push(new DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
+        },
+        CREATE2: ({ stack }: State<Inst, Expr>): void => {
+            const value = stack.pop();
+            const memoryStart = stack.pop();
+            const memoryLength = stack.pop();
+            stack.push(new Create2(memoryStart, memoryLength, value));
+        },
+        STATICCALL: ({ stack }: State<Inst, Expr>): void => {
+            const gas = stack.pop();
+            const address = stack.pop();
+            const argsStart = stack.pop();
+            const argsLen = stack.pop();
+            const retStart = stack.pop();
+            const retLen = stack.pop();
+            stack.push(new StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
+        },
+        REVERT: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Revert)),
+        SELFDESTRUCT: (state: State<Inst, Expr>): void => {
+            const address = state.stack.pop();
+            state.halt(new SelfDestruct(address));
+        },
+    } as const;
+
+    function memArgs<T>(
+        { stack, memory }: State<Inst, Expr>,
+        Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
+    ): T {
+        const MAXSIZE = 1024;
+
+        let offset = stack.pop();
+        let size = stack.pop();
+
+        offset = offset.eval();
+        size = size.eval();
+
+        if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
+            const args = [];
+            for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+                args.push(i in memory ? memory[i].eval() : new MLoad(new Val(BigInt(i))));
+            }
+
+            return new Klass(args);
+        } else {
+            if (size.isVal() && size.val > MAXSIZE * 32) {
+                throw new Error(`memargs size ${Klass.name} ${size.val}`);
+            }
+
+            return new Klass([], offset, size);
+        }
+    }
+}
+
+export function FLOW({ opcodes, jumpdests }: ReturnType<typeof decode>) {
+    // { functionBranches }: ISelectorBranches
+    const functionBranches: ISelectorBranches['functionBranches'] = new Map<
+        string,
+        { pc: number; state: State<Inst, Expr> }
+    >();
+    return {
+        functionBranches,
+        JUMP: (state: State<Inst, Expr>, opcode: Opcode): void => {
+            const offset = state.stack.pop();
+            const destpc = getDest(offset, opcode);
+            const destBranch = makeBranch(destpc, state);
+            state.halt(new Jump(offset, destBranch));
+        },
+
+        JUMPI: (state: State<Inst, Expr>, opcode: Opcode): void => {
+            const offset = state.stack.pop();
+            const cond = state.stack.pop();
+            const destpc = getDest(offset, opcode);
+
+            const fallBranch = makeBranch(opcode.pc + 1, state);
+
+            let last: SigCase | Jumpi;
+            if (cond.tag === 'Sig') {
+                functionBranches.set(cond.selector, {
+                    pc: destpc,
+                    state: state.clone(),
+                });
+                last = new SigCase(cond, offset, fallBranch);
+            } else {
+                last = new Jumpi(cond, offset, fallBranch, makeBranch(destpc, state));
+            }
+            state.halt(last);
+        },
+    } as const;
+
+    /**
+     * @param offset
+     * @param opcode Only used for error reporting.
+     */
+    function getDest(offset: Expr, opcode: Opcode): number {
+        const offset2 = offset.eval();
+        if (!offset2.isVal()) {
+            throw new Error(
+                `Expected numeric offset in top of stack, found ${offset} at ${formatOpcode(
+                    opcode
+                )}`
+            );
+        }
+        const destpc = jumpdests[Number(offset2.val)];
+        if (destpc !== undefined) {
+            (offset as Val).jumpDest = destpc;
+            return destpc;
+        } else {
+            const dest = opcodes.find(o => o.offset === Number(offset2.val));
+            if (!dest) {
+                throw new Error(
+                    `Expected JUMPDEST in ${
+                        opcode.mnemonic
+                    } destination, ${offset2} , but none was found at '${formatOpcode(opcode)}'`
+                );
+            }
+            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
+        }
+    }
+}
+
+export function LOGS() {
+    const events = { events: {} };
+    return {
+        events,
+        LOG0: log(0, events),
+        LOG1: log(1, events),
+        LOG2: log(2, events),
+        LOG3: log(3, events),
+        LOG4: log(4, events),
+    } as const;
+
+    function log(topicsCount: number, { events }: IEvents) {
+        return ({ stack, memory, stmts }: State<Inst, Expr>): void => {
+            let offset = stack.pop();
+            let size = stack.pop();
+
+            const topics = [];
+            for (let i = 0; i < topicsCount; i++) {
+                topics.push(stack.pop());
+            }
+
+            let event: IEvents['events'][string] | undefined = undefined;
+            if (topics.length > 0 && topics[0].isVal()) {
+                const eventTopic = topics[0].val.toString(16).padStart(64, '0');
+                event = events[eventTopic];
+                if (event === undefined) {
+                    event = { indexedCount: topics.length - 1 };
+                    events[eventTopic] = event;
+                }
+            }
+
+            offset = offset.eval();
+            size = size.eval();
+            const args =
+                offset.isVal() && size.isVal()
+                    ? (function () {
+                          const args = [];
+                          for (
+                              let i = Number(offset.val);
+                              i < Number(offset.val + size.val);
+                              i += 32
+                          ) {
+                              args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+                          }
+                          return args;
+                      })()
+                    : undefined;
+            stmts.push(new Log(event, topics, { offset, size }, args));
+        };
+    }
+}
+
+export function STORAGE() {
+    const { variables, mappings }: IStore = { variables: {}, mappings: {} };
+    return {
+        variables,
+        mappings,
+        SLOAD: ({ stack }: State<Inst, Expr>): void => {
+            const loc = stack.pop();
+
+            if (loc.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts));
+                } else {
+                    stack.push(new SLoad(loc, variables));
+                }
+            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
+                const [base, parts] = parseSha3(loc.left);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts, loc.right.val));
+                } else {
+                    stack.push(new SLoad(loc, variables));
+                }
+            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc.right);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(mappings, base, parts, loc.left.val));
+                } else {
+                    stack.push(new SLoad(loc, variables));
+                }
+            } else {
+                stack.push(new SLoad(loc, variables));
+            }
+        },
+
+        SSTORE: ({ stack, stmts }: State<Inst, Expr>): void => {
+            const loc = stack.pop();
+            const data = stack.pop();
+
+            if (loc.isVal()) {
+                sstoreVariable();
+            } else if (loc.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data));
+                } else {
+                    sstoreVariable();
+                }
+            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
+                const [base, parts] = parseSha3(loc.left);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data, loc.right.val));
+                } else {
+                    sstoreVariable();
+                }
+            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc.right);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(mappings, base, parts, data, loc.left.val));
+                } else {
+                    sstoreVariable();
+                }
+            } else {
+                sstoreVariable();
+            }
+
+            function sstoreVariable() {
+                if (loc.isVal()) {
+                    const key = loc.val.toString();
+                    if (key in variables) {
+                        variables[key].types.push(data);
+                    } else {
+                        variables[key] = new Variable(undefined, [data]);
+                    }
+                }
+                stmts.push(new SStore(loc, data, variables));
+            }
+        },
+    };
+
+    function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
+        const shas = [sha];
+        const mappings = [];
+        let base = undefined;
+        while (shas.length > 0) {
+            const sha = shas.shift()!;
+            for (const arg of sha.args) {
+                if (arg.tag === 'Sha3' && arg.args) {
+                    shas.unshift(arg);
+                } else if (base === undefined && arg.tag === 'Val') {
+                    base = Number(arg.val);
+                } else {
+                    mappings.unshift(arg);
+                }
+            }
+        }
+        return [base, mappings];
+    }
+}

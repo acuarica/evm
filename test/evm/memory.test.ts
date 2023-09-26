@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { State } from '../../src/state';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
 import { Block } from '../../src/evm/special';
-import { MEMORY } from '../../src/evm/memory';
+import { STEP } from '../../src/step';
 
 describe('evm::memory', function () {
     it('should load values into stack', function () {
@@ -10,7 +10,7 @@ describe('evm::memory', function () {
 
         state.memory[4] = new Val(1n);
         state.stack.push(new Val(4n));
-        MEMORY.MLOAD(state);
+        STEP().MLOAD(state);
 
         expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
     });
@@ -20,7 +20,7 @@ describe('evm::memory', function () {
 
         state.stack.push(Block.coinbase);
         state.stack.push(new Val(4n));
-        MEMORY.MSTORE(state);
+        STEP().MSTORE(state);
 
         expect(state.memory).to.be.deep.equal({ '4': Block.coinbase });
     });

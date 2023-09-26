@@ -1,7 +1,6 @@
 import type { State } from '../state';
-import { type decode, formatOpcode, type Opcode } from '../opcode';
 
-import type { Inst, Expr, IInst, Val } from './expr';
+import type { Inst, Expr, IInst } from './expr';
 import type { Sig } from './logic';
 
 /**
@@ -101,70 +100,4 @@ export interface ISelectorBranches {
      * store selectors starting point.
      */
     readonly functionBranches: Map<string, { pc: number; state: State<Inst, Expr> }>;
-}
-
-export function FLOW(
-    { opcodes, jumpdests }: ReturnType<typeof decode>,
-    { functionBranches }: ISelectorBranches
-) {
-    return {
-        JUMP: (state: State<Inst, Expr>, opcode: Opcode): void => {
-            const offset = state.stack.pop();
-            const destpc = getDest(offset, opcode);
-            const destBranch = makeBranch(destpc, state);
-            state.halt(new Jump(offset, destBranch));
-        },
-
-        JUMPI: (state: State<Inst, Expr>, opcode: Opcode): void => {
-            const offset = state.stack.pop();
-            const cond = state.stack.pop();
-            const destpc = getDest(offset, opcode);
-
-            const fallBranch = makeBranch(opcode.pc + 1, state);
-
-            let last: SigCase | Jumpi;
-            if (cond.tag === 'Sig') {
-                functionBranches.set(cond.selector, {
-                    pc: destpc,
-                    state: state.clone(),
-                });
-                last = new SigCase(cond, offset, fallBranch);
-            } else {
-                last = new Jumpi(cond, offset, fallBranch, makeBranch(destpc, state));
-            }
-            state.halt(last);
-        },
-    };
-
-    /**
-     *
-     * @param offset
-     * @param opcode Only used for error reporting.
-     * @returns
-     */
-    function getDest(offset: Expr, opcode: Opcode): number {
-        const offset2 = offset.eval();
-        if (!offset2.isVal()) {
-            throw new Error(
-                `Expected numeric offset in top of stack, found ${offset} at ${formatOpcode(
-                    opcode
-                )}`
-            );
-        }
-        const destpc = jumpdests[Number(offset2.val)];
-        if (destpc !== undefined) {
-            (offset as Val).jumpDest = destpc;
-            return destpc;
-        } else {
-            const dest = opcodes.find(o => o.offset === Number(offset2.val));
-            if (!dest) {
-                throw new Error(
-                    `Expected JUMPDEST in ${
-                        opcode.mnemonic
-                    } destination, ${offset2} , but none was found at '${formatOpcode(opcode)}'`
-                );
-            }
-            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
-        }
-    }
 }

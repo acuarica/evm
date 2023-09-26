@@ -1,8 +1,9 @@
 import { expect } from 'chai';
-import { Stack } from '../../src/state';
-import { Add, Div, Exp, MATH, Mul, Sub } from '../../src/evm/math';
+import { State } from '../../src/state';
+import { Add, Div, Exp, Mul, Sub } from '../../src/evm/math';
 import { type Expr, Val } from '../../src/evm/expr';
-import { Block, SPECIAL } from '../../src/evm/special';
+import { Block } from '../../src/evm/special';
+import { STEP } from '../../src/step';
 
 describe('evm::math', function () {
     it('should test `isVal`', function () {
@@ -90,36 +91,36 @@ describe('evm::math', function () {
             val: new Val(16n),
             str: '0x2 ** (0x1 + 0x3)',
         },
-    ].forEach(
-        ({
-            insts,
-            expr,
-            val,
-            str,
-        }: {
-            insts: readonly (keyof typeof MATH | keyof typeof SPECIAL | number)[];
-            expr: Expr;
-            val: Expr;
-            str: string;
-        }) => {
+    ].forEach(({ insts, expr, val, str }) =>
+        // : {
+        //     insts: readonly (keyof Step | number)[];
+        //     expr: Expr;
+        //     val: Expr;
+        //     str: string;
+        // }
+        {
             it(`should \`eval+str\` \`${str}\``, function () {
-                const stack = new Stack<Expr>();
+                const state = new State<never, Expr>();
                 for (const inst of insts) {
                     if (typeof inst === 'number') {
-                        stack.push(new Val(BigInt(inst)));
+                        state.stack.push(new Val(BigInt(inst)));
                     } else {
-                        const sym = Object.fromEntries(
-                            Object.entries(SPECIAL).map(([k, fn]) => [
-                                k,
-                                (stack: Stack<Expr>) => fn({ stack, memory: {} }),
-                            ])
-                        ) as { [key in keyof typeof SPECIAL]: (stack: Stack<Expr>) => void };
-                        const evm = { ...MATH, ...sym };
-                        evm[inst](stack);
+                        // const a = inst;
+                        // const sym = Object.fromEntries(
+                        //     Object.entries(SPECIAL).map(([k, fn]) => [
+                        //         k,
+                        //         (stack: Stack<Expr>) => fn({ stack, memory: {} }),
+                        //     ])
+                        // ) as { [key in keyof typeof SPECIAL]: (stack: Stack<Expr>) => void };
+                        // const evm = { ...MATH, ...sym };
+                        // evm[inst](stack);
+                        // const step = STEP()[inst];
+                        // step()
+                        STEP()[inst](state);
                     }
                 }
 
-                expect(stack.values).to.be.deep.equal([expr]);
+                expect(state.stack.values).to.be.deep.equal([expr]);
                 expect(expr.eval()).to.be.deep.equal(val);
                 expect(expr.str()).to.be.equal(str);
             });

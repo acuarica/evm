@@ -2,23 +2,25 @@ import { expect } from 'chai';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { Add, Sub } from '../../src/evm/math';
-import { MappingLoad, MappingStore, STORAGE } from '../../src/evm/storage';
+import { MappingLoad, MappingStore } from '../../src/evm/storage';
 import { Info, Msg } from '../../src/evm/special';
 import { Stop } from '../../src/evm/system';
 import { State } from '../../src/state';
 import { compile } from '../utils/solc';
+import { STEP } from '../../src/step';
 
 describe('evm::storage', function () {
     it('should store variable', function () {
-        const store = { variables: {}, mappings: {} };
-        const evm = STORAGE(store);
+        // const store = { events: {}, variables: {}, mappings: {},  };
+        // const evm = STORAGE(store);
+        const step = STEP();
 
         const state = new State<Inst, Expr>();
         state.stack.push(new Val(1n));
         state.stack.push(new Val(2n));
-        evm.SSTORE(state);
+        step.SSTORE(state);
 
-        expect(store.variables).to.have.keys('2');
+        expect(step.variables).to.have.keys('2');
     });
 
     it('should detect storage variable', function () {
