@@ -38,7 +38,7 @@ function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
  */
-export class EVM implements IEvents, IStore, ISelectorBranches {
+export class EVM {
     /**
      * The `metadataHash` part from the `bytecode`.
      * That is, if present, the `bytecode` without its `code`.
@@ -62,13 +62,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
      */
     readonly errors: Throw[] = [];
 
-    events: IEvents['events'] = {};
-    variables: IStore['variables'] = {};
-    mappings: IStore['mappings'] = {};
-    functionBranches: ISelectorBranches['functionBranches'] = new Map<
-        string,
-        { pc: number; state: EVMState }
-    >();
+    readonly events: IEvents['events'];
+    readonly variables: IStore['variables'];
+    readonly mappings: IStore['mappings'];
+    readonly functionBranches: ISelectorBranches['functionBranches'];
 
     /**
      * The `Opcode[]` decoded from `bytecode`.
@@ -102,10 +99,10 @@ export class EVM implements IEvents, IStore, ISelectorBranches {
         //     ...LOGS(this),
         // });
         const s = STEP({ opcodes, jumpdests });
-        this.events = s.events.events;
-        this.functionBranches = s.functionBranches;
+        this.events = s.events;
         this.mappings = s.mappings;
         this.variables = s.variables;
+        this.functionBranches = s.functionBranches;
         this.insts = fill({ ...s, ...insts });
     }
 

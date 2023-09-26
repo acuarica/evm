@@ -17,6 +17,9 @@ import { OPCODES } from './opcode';
 import ERCs from './ercs';
 import type { Step } from './step';
 
+export * from './metadata';
+export * from './opcode';
+export * from './state';
 export * from './type';
 
 /**
