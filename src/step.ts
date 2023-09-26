@@ -258,7 +258,6 @@ const LOGIC = {
                   )
         );
     },
-
     ISZERO: (stack: Stack<Expr>): void => {
         const value = stack.pop();
         stack.push(new IsZero(value));
@@ -284,24 +283,18 @@ const mapKeys = <K extends string, U>(o: { [k in K]: unknown }, fn: (k: K) => U)
     Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
 
 const SPECIAL = {
-    ...mapValues(Info, sym => (state: Ram<Expr>) => state.stack.push(sym)),
-    ...mapKeys(FNS, mnemonic => ({ stack }: Ram<Expr>) => {
-        const value = stack.pop();
-        stack.push(new Fn(mnemonic, value));
-    }),
-    CALLVALUE: ({ stack }: Ram<Expr>): void => stack.push(new CallValue()),
-    CALLDATALOAD: ({ stack }: Ram<Expr>): void => {
-        const location = stack.pop();
-        stack.push(new CallDataLoad(location));
-    },
+    ...mapValues(Info, sym => state => state.stack.push(sym)),
+    ...mapKeys(FNS, n => state => state.stack.push(new Fn(n, state.stack.pop()))),
+    CALLVALUE: ({ stack }) => stack.push(new CallValue()),
+    CALLDATALOAD: ({ stack }) => stack.push(new CallDataLoad(stack.pop())),
     CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
-    EXTCODECOPY: ({ stack }: Ram<Expr>): void => {
+    EXTCODECOPY: ({ stack }) => {
         const address = stack.pop();
         datacopy((offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`);
     },
     RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
-} as const;
+} as const satisfies { [mnemonic: string]: (state: Ram<Expr>) => void };
 
 function datacopy(fn: (offset: string, size: string) => string) {
     return ({ stack, memory }: Ram<Expr>): void => {
