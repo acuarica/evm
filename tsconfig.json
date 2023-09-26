@@ -1,8 +1,9 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "node16",
         "target": "es2020",
         "lib": ["es2020"],
+        "rootDir": ".",
         "outDir": "dist",
         "incremental": true,
         "sourceMap": true,

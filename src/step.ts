@@ -527,20 +527,14 @@ function LOGS(events: IEvents['events']) {
 
             offset = offset.eval();
             size = size.eval();
-            const args =
-                offset.isVal() && size.isVal()
-                    ? (function () {
-                          const args = [];
-                          for (
-                              let i = Number(offset.val);
-                              i < Number(offset.val + size.val);
-                              i += 32
-                          ) {
-                              args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
-                          }
-                          return args;
-                      })()
-                    : undefined;
+            const getArgs = (offset: Val, size: Val) => {
+                const args = [];
+                for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+                    args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+                }
+                return args;
+            };
+            const args = offset.isVal() && size.isVal() ? getArgs(offset, size) : undefined;
             stmts.push(new Log(event, topics, { offset, size }, args));
         };
     }

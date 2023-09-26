@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Contract } from '../../src';
+import { Contract } from 'sevm';
 import { Return } from '../../src/evm/system';
 import { toHex } from '../../src/opcode';
 import { fnselector } from '../utils/selector';

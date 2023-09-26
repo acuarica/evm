@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Metadata, stripMetadataHash } from '../src/metadata';
+import { Metadata, stripMetadataHash } from 'sevm';
 import { forVersion } from './utils/solc';
 
 describe('metadata', function () {

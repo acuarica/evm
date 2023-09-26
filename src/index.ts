@@ -20,6 +20,7 @@ import type { Step } from './step';
 export * from './metadata';
 export * from './opcode';
 export * from './state';
+export * from './step';
 export * from './type';
 
 /**

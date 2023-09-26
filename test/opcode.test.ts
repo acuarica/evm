@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { decode, formatOpcode, type Opcode, OPCODES, toHex } from '../src/opcode';
+import { decode, formatOpcode, type Opcode, OPCODES, toHex } from 'sevm';
 
 const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
