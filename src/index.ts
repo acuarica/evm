@@ -137,7 +137,7 @@ export class Contract {
      * @returns
      */
     isERC(ercid: (typeof ERCIds)[number]): boolean {
-        return ERCs[ercid].includes.every(s => this.evm.functionBranches.has(s));
+        return ERCs[ercid].selectors.every(s => this.evm.functionBranches.has(s));
     }
 
     /**

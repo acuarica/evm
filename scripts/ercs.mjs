@@ -5,7 +5,7 @@
 /* eslint-disable no-undef */
 
 import { basename } from 'path';
-import { FunctionFragment, keccak256, toUtf8Bytes } from 'ethers';
+import { EventFragment, FunctionFragment, keccak256, toUtf8Bytes } from 'ethers';
 import { readFileSync } from 'fs';
 import solc from 'solc';
 
@@ -26,17 +26,24 @@ function main() {
 
     const src = {};
     for (const [name, { abi }] of Object.entries(contracts['SOURCE'])) {
-        const selectors = {};
+        const functions = {};
+        const events = {};
         for (const member of abi) {
             if (member.type === 'function') {
                 const sig = FunctionFragment.from(member).format('sighash');
                 const name = sig.replace(/\(/, '_').replace(/\)/g, '_').replace(/,/g, '_');
-                selectors[name] = keccak256(toUtf8Bytes(sig)).substring(2, 10);
+                functions[name] = keccak256(toUtf8Bytes(sig)).substring(2, 10);
+                // } else if (member.type === 'event') {
+                //     const sig = EventFragment.from(member).format('sighash');
+                //     const name = sig.replace(/\(/, '_').replace(/\)/g, '_').replace(/,/g, '_');
+                //     events[name] = keccak256(toUtf8Bytes(sig)).substring(2);
             }
         }
         src[name] = {
-            includes: Object.values(selectors),
-            selectors,
+            selectors: Object.values(functions),
+            // topics: Object.values(events),
+            functions,
+            // events,
         };
     }
 
