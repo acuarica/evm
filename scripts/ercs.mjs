@@ -1,44 +1,38 @@
 #!/usr/bin/env node
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable no-undef */
+
 import { basename } from 'path';
-import { keccak256, toUtf8Bytes } from 'ethers';
-
-const interfaces = {};
-
-interfaces.ERC165 = ['supportsInterface(bytes4)'];
-
-interfaces.ERC20 = [
-    'totalSupply()',
-    'balanceOf(address)',
-    'transfer(address,uint256)',
-    'transferFrom(address,address,uint256)',
-    'approve(address,uint256)',
-    'allowance(address,address)',
-];
-
-interfaces.ERC20Metadata = ['name()', 'symbol()', 'decimals()', ...interfaces.ERC20];
-
-interfaces.ERC721 = [
-    'balanceOf(address)',
-    'ownerOf(uint256)',
-    'safeTransferFrom(address,address,uint256,bytes)',
-    'safeTransferFrom(address,address,uint256)',
-    'transferFrom(address,address,uint256)',
-    'approve(address,uint256)',
-    'setApprovalForAll(address,bool)',
-    'getApproved(uint256)',
-    'isApprovedForAll(address,address)',
-    ...interfaces.ERC165,
-];
+import { FunctionFragment, keccak256, toUtf8Bytes } from 'ethers';
+import { readFileSync } from 'fs';
+import solc from 'solc';
 
 function main() {
-    const src = {};
-    for (const [name, erc] of Object.entries(interfaces)) {
-        const selectors = {};
-        for (const sig of erc) {
-            const name = sig.replace(/\(/, '_').replace(/\)/g, '_').replace(/,/g, '_');
+    const content = readFileSync('./scripts/ercs.sol', 'utf-8');
+    const input = {
+        language: 'Solidity',
+        sources: { SOURCE: { content } },
+        settings: { outputSelection: { '*': { '*': ['abi'] } } },
+    };
+    const output = solc.compile(JSON.stringify(input));
+    /** @type {import('./solc').SolcOutput} */
+    const { errors, contracts } = JSON.parse(output);
+    if (errors) {
+        console.error(errors);
+        process.exit(1);
+    }
 
-            selectors[name] = keccak256(toUtf8Bytes(sig)).substring(2, 10);
+    const src = {};
+    for (const [name, { abi }] of Object.entries(contracts['SOURCE'])) {
+        const selectors = {};
+        for (const member of abi) {
+            if (member.type === 'function') {
+                const sig = FunctionFragment.from(member).format('sighash');
+                const name = sig.replace(/\(/, '_').replace(/\)/g, '_').replace(/,/g, '_');
+                selectors[name] = keccak256(toUtf8Bytes(sig)).substring(2, 10);
+            }
         }
         src[name] = {
             includes: Object.values(selectors),
