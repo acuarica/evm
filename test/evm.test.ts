@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 
+import { type Ram, State, STEP } from 'sevm';
 import { EVM } from '../src/evm';
-import { type Ram, State } from '../src/state';
 import type { Expr, Inst } from '../src/evm/expr';
 import { Invalid } from '../src/evm/system';
 import { Tx } from '../src/evm/special';
 import { compile } from './utils/solc';
-import { STEP } from '../src/step';
 
 describe('evm', function () {
     it('should halt with `INVALID`', function () {

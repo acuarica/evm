@@ -1,14 +1,12 @@
 import { expect } from 'chai';
-import { build, stringify } from '../../src';
+import { State, STEP, build, stringify } from 'sevm';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { MLoad } from '../../src/evm/memory';
 import { Info } from '../../src/evm/special';
 import { Create, Return, SelfDestruct, Sha3, Stop } from '../../src/evm/system';
-import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
-import { STEP } from '../../src/step';
 
 describe('evm::system', function () {
     it('should exec `SHA3`', function () {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Contract } from '../../src';
+import { Contract } from 'sevm';
 import { eventSelector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 

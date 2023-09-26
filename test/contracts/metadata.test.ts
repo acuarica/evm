@@ -1,7 +1,6 @@
 // import * as crypto from 'crypto';
 import { expect } from 'chai';
-import { OPCODES } from '../../src/opcode';
-import { Contract } from '../../src';
+import { Contract, OPCODES } from 'sevm';
 import { compile } from '../utils/solc';
 
 const includesFF = (hash: string) => Buffer.from(hash, 'hex').includes(OPCODES.SELFDESTRUCT);

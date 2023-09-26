@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Contract } from '../../src';
+import { Contract } from 'sevm';
 import type { EVM } from '../../src/evm';
 import { Revert } from '../../src/evm/system';
 import { contracts } from '../utils/solc';

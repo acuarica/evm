@@ -1,5 +1,5 @@
 import { EventFragment, FunctionFragment } from 'ethers';
-import { Contract } from '../../src';
+import { Contract } from 'sevm';
 
 export function fnselector(sig: string): string {
     return FunctionFragment.from(sig).selector.substring(2);
@@ -9,7 +9,7 @@ export function eventSelector(sig: string): string {
     return EventFragment.from(sig).topicHash.substring(2);
 }
 
-declare module '../../src' {
+declare module 'sevm' {
     interface Contract {
         patchfns(...fns: string[]): this;
         patchevs(...fns: string[]): this;

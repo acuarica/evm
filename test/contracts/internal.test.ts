@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Contract, Require } from '../../src';
+import { Contract, Require } from 'sevm';
 import { Val } from '../../src/evm/expr';
 import { Add } from '../../src/evm/math';
 import { SLoad, SStore } from '../../src/evm/storage';

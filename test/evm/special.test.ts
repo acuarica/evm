@@ -1,12 +1,11 @@
 import { expect } from 'chai';
+import { State, STEP } from 'sevm';
 import { EVM } from '../../src/evm';
 import { type Expr, type Inst, Val } from '../../src/evm/expr';
 import { Block, CallDataLoad, CallValue, Info, Msg, Tx } from '../../src/evm/special';
-import { State } from '../../src/state';
 import { compile } from '../utils/solc';
 import type { Log } from '../../src/evm/log';
 import { Add } from '../../src/evm/math';
-import { STEP } from '../../src/step';
 
 describe('evm::sym', function () {
     it(`should stringify Block's props`, function () {

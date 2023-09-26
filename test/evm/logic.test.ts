@@ -1,14 +1,13 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
+import { State, STEP } from 'sevm';
 import { EVM } from '../../src/evm';
 import { type Expr, Val, type Inst } from '../../src/evm/expr';
 import { Not, Shr, Sig } from '../../src/evm/logic';
 import { Div } from '../../src/evm/math';
 import { Block, CallDataLoad } from '../../src/evm/special';
-import { State } from '../../src/state';
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
-import { STEP } from '../../src/step';
 
 describe('evm::logic', function () {
     [[0n, '0x' + 'ff'.repeat(32)] as const, [1n, '0x' + 'ff'.repeat(31) + 'fe'] as const].forEach(

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Contract } from '../../src';
+import { Contract } from 'sevm';
 import { contracts } from '../utils/solc';
 
 contracts('require', compile => {

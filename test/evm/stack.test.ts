@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { type Expr, Val } from '../../src/evm/expr';
 import { State, STEP } from 'sevm';
+import { type Expr, Val } from '../../src/evm/expr';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 

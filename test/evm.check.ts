@@ -3,9 +3,8 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import { keccak_256 } from '@noble/hashes/sha3';
 
+import { toHex, State } from 'sevm';
 import { EVM } from '../src/evm';
-import { toHex } from '../src/opcode';
-import { State } from '../src/state';
 import { type Expr, type Inst, Val } from '../src/evm/expr';
 import { And, Not } from '../src/evm/logic';
 import { Block } from '../src/evm/special';
