@@ -1,31 +1,17 @@
 import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
 import { State } from '../state';
 import { type Metadata, stripMetadataHash } from '../metadata';
+import { STEP, type Step } from '../step';
+
 import { type Expr, type IInst, type Inst, Throw } from './expr';
 import { type IEvents } from './log';
 import { type IStore } from './storage';
 import { Branch, type ISelectorBranches, JumpDest, makeBranch } from './flow';
-import { STEP, type Step } from '../step';
 
 export * from './expr';
 export * from './system';
 
 export { Branch };
-
-/**
- * Maps `mnemonic` keys of `insts` to their corresponding `opcode` in the byte range, _i.e._, `0-255`.
- * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
- * `INVALID` is used instead.
- *
- * @param insts
- * @returns
- */
-function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
-    [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
-} {
-    const entry = (k: number) => insts[MNEMONICS[k] ?? 'INVALID'];
-    return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
-}
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -38,7 +24,14 @@ export class EVM {
     readonly metadata?: Metadata | undefined;
 
     /**
+     * The `STEP` function that updates the `State`
+     * after executing the opcode pointed by `pc`.
      *
+     * Maps `mnemonic` keys of `STEP` to their corresponding `opcode`
+     * in the byte range, _i.e._, `0-255`.
+     *
+     * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
+     * `INVALID` is used instead.
      */
     readonly insts: {
         [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
@@ -70,12 +63,7 @@ export class EVM {
      */
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
 
-    // readonly step:
     constructor(bytecode: string, insts: Partial<Step> = {}) {
-        /**
-         * The `code` part from the `bytecode`.
-         * That is, the `bytecode` without its metadata hash, if any.
-         */
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
@@ -84,29 +72,21 @@ export class EVM {
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
 
-        // this.insts = fill({
-        //     ...insts,
-        //     ...FLOW({ opcodes, jumpdests }, this),
-        //     ...STORAGE(this),
-        //     ...LOGS(this),
-        // });
         const s = STEP({ opcodes, jumpdests });
         this.events = s.events;
         this.mappings = s.mappings;
         this.variables = s.variables;
         this.functionBranches = s.functionBranches;
+
         this.insts = fill({ ...s, ...insts });
+
+        function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
+            [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
+        } {
+            const entry = (k: number) => insts[MNEMONICS[k] ?? 'INVALID'];
+            return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
+        }
     }
-
-    // get eventsi(): IEvents['events'] {
-
-    // }
-    // readonly variables: IStore['variables'] = {};
-    // readonly mappings: IStore['mappings'] = {};
-    // readonly functionBranches: ISelectorBranches['functionBranches'] = new Map<
-    // string,
-    // { pc: number; state: EVMState }
-    // >();
 
     /**
      *
