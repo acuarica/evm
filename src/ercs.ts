@@ -2,18 +2,29 @@
 export default {
     ERC165: {
         selectors: ['01ffc9a7'],
+        topics: [],
         functions: { supportsInterface_bytes4_: '01ffc9a7' },
+        events: {},
     },
     ERC173: {
         selectors: ['8da5cb5b', '01ffc9a7', 'f2fde38b'],
+        topics: ['8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0'],
         functions: {
             owner__: '8da5cb5b',
             supportsInterface_bytes4_: '01ffc9a7',
             transferOwnership_address_: 'f2fde38b',
         },
+        events: {
+            OwnershipTransferred_address_address_:
+                '8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0',
+        },
     },
     ERC20: {
         selectors: ['dd62ed3e', '095ea7b3', '70a08231', '18160ddd', 'a9059cbb', '23b872dd'],
+        topics: [
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+        ],
         functions: {
             allowance_address_address_: 'dd62ed3e',
             approve_address_uint256_: '095ea7b3',
@@ -21,6 +32,12 @@ export default {
             totalSupply__: '18160ddd',
             transfer_address_uint256_: 'a9059cbb',
             transferFrom_address_address_uint256_: '23b872dd',
+        },
+        events: {
+            Approval_address_address_uint256_:
+                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            Transfer_address_address_uint256_:
+                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         },
     },
     ERC20Metadata: {
@@ -35,6 +52,10 @@ export default {
             'a9059cbb',
             '23b872dd',
         ],
+        topics: [
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+        ],
         functions: {
             allowance_address_address_: 'dd62ed3e',
             approve_address_uint256_: '095ea7b3',
@@ -45,6 +66,12 @@ export default {
             totalSupply__: '18160ddd',
             transfer_address_uint256_: 'a9059cbb',
             transferFrom_address_address_uint256_: '23b872dd',
+        },
+        events: {
+            Approval_address_address_uint256_:
+                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            Transfer_address_address_uint256_:
+                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         },
     },
     ERC721: {
@@ -60,6 +87,11 @@ export default {
             '01ffc9a7',
             '23b872dd',
         ],
+        topics: [
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            '17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31',
+            'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+        ],
         functions: {
             approve_address_uint256_: '095ea7b3',
             balanceOf_address_: '70a08231',
@@ -71,6 +103,14 @@ export default {
             setApprovalForAll_address_bool_: 'a22cb465',
             supportsInterface_bytes4_: '01ffc9a7',
             transferFrom_address_address_uint256_: '23b872dd',
+        },
+        events: {
+            Approval_address_address_uint256_:
+                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+            ApprovalForAll_address_address_bool_:
+                '17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31',
+            Transfer_address_address_uint256_:
+                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         },
     },
 };

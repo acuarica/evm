@@ -12,8 +12,11 @@ export interface SolcOutput {
     }[];
 }
 
+/**
+ * https://docs.soliditylang.org/en/latest/abi-spec.html#json
+ */
 export interface Member {
-    type: 'function' | 'event';
+    type: 'function' | 'event' | 'constructor' | 'receive' | 'fallback';
     name: string;
     inputs: {
         name: string;
