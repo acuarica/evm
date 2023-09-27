@@ -5,7 +5,7 @@ import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';
 import { type SLoad, Variable, type MappingLoad } from './ast/storage';
-import { stringifyEvents, stringifyMappings, stringifyStructs, stringifyVariables } from './sol';
+import { solEvents, solMappings, solStructs, solVars } from './sol';
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 import type { Step } from './step';
@@ -145,10 +145,10 @@ export class Contract {
     decompile(): string {
         let text = '';
 
-        text += stringifyEvents(this.evm.events);
-        text += stringifyStructs(this.evm.mappings);
-        text += stringifyMappings(this.evm.mappings);
-        text += stringifyVariables(this.evm.variables);
+        text += solEvents(this.evm.events);
+        text += solStructs(this.evm.mappings);
+        text += solMappings(this.evm.mappings);
+        text += solVars(this.evm.variables);
         text += stringify(this.main);
         for (const [, fn] of Object.entries(this.functions)) {
             text += fn.decompile();

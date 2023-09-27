@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, stringifyEvents } from 'sevm';
+import { EVM, State, solEvents } from 'sevm';
 import { Val, type Expr, type Inst } from 'sevm/ast';
 
 import { eventSelector } from '../utils/selector';
@@ -40,7 +40,7 @@ describe('evm::log', function () {
             indexedCount: 0,
         });
 
-        expect(stringifyEvents(evm.events)).to.be.equal(`event Deposit(uint256 _arg0);
+        expect(solEvents(evm.events)).to.be.equal(`event Deposit(uint256 _arg0);
 event ${eventSelector(unknownEventSig)};
 `);
 

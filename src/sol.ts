@@ -6,7 +6,7 @@ import type { IStore } from './ast/storage';
  * @param events
  * @returns
  */
-export function stringifyEvents(events: IEvents) {
+export function solEvents(events: IEvents) {
     let text = '';
 
     for (const [topic, event] of Object.entries(events)) {
@@ -40,7 +40,7 @@ export function stringifyEvents(events: IEvents) {
  * @param variables
  * @returns
  */
-export function stringifyVariables(variables: IStore['variables']) {
+export function solVars(variables: IStore['variables']) {
     let output = '';
     Object.entries(variables).forEach(([hash, variable], index) => {
         const types: string[] = variable.types
@@ -67,7 +67,7 @@ export function stringifyVariables(variables: IStore['variables']) {
  * @param mappings
  * @returns
  */
-export function stringifyStructs(mappings: IStore['mappings']) {
+export function solStructs(mappings: IStore['mappings']) {
     let text = '';
 
     Object.keys(mappings)
@@ -89,15 +89,15 @@ export function stringifyStructs(mappings: IStore['mappings']) {
  * @param mappings
  * @returns
  */
-export function stringifyMappings(mappings: IStore['mappings']) {
+export function solMappings(mappings: IStore['mappings']) {
     let output = '';
 
     Object.keys(mappings).forEach((key: string, index: number) => {
         const mapping = mappings[key];
         if (mapping.name) {
-            output += stringifyMapping(mapping) + ' public ' + mapping.name + ';';
+            output += solMapping(mapping) + ' public ' + mapping.name + ';';
         } else {
-            output += stringifyMapping(mapping) + ` mapping${index + 1};`;
+            output += solMapping(mapping) + ` mapping${index + 1};`;
         }
         output += '\n';
     });
@@ -108,7 +108,7 @@ export function stringifyMappings(mappings: IStore['mappings']) {
 
     return output;
 
-    function stringifyMapping(mapping: IStore['mappings'][keyof IStore['mappings']]) {
+    function solMapping(mapping: IStore['mappings'][keyof IStore['mappings']]) {
         const mappingKey: string[] = [];
         const mappingValue: string[] = [];
         let deepMapping = false;
@@ -126,7 +126,7 @@ export function stringifyMappings(mappings: IStore['mappings']) {
                 if (mappingChild.length > 1 && !deepMapping) {
                     deepMapping = true;
                     mappingValue.push(
-                        stringifyMapping({
+                        solMapping({
                             name: mapping.name,
                             structs: mapping.structs,
                             keys: mapping.keys.map(items => {
