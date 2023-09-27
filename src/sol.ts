@@ -1,5 +1,33 @@
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
+import { If, type Stmt } from './stmt';
+
+/**
+ *
+ * @param stmts
+ * @param indentation
+ * @returns
+ */
+export function solStmts(stmts: Stmt[], indentation = 0): string {
+    let text = '';
+    for (const stmt of stmts) {
+        if (stmt instanceof If) {
+            const condition = stmt.toString();
+            text += ' '.repeat(indentation) + 'if ' + condition + ' {\n';
+            text += solStmts(stmt.trueBlock!, indentation + 4);
+            if (stmt.falseBlock) {
+                text += ' '.repeat(indentation) + '} else {\n';
+                text += solStmts(stmt.falseBlock, indentation + 4);
+            }
+            text += ' '.repeat(indentation) + '}\n';
+            // }
+        } else {
+            text += ' '.repeat(indentation) + stmt.toString() + '\n';
+        }
+    }
+
+    return text;
+}
 
 /**
  *

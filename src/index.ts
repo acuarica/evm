@@ -5,10 +5,11 @@ import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';
 import { type SLoad, Variable, type MappingLoad } from './ast/storage';
-import { solEvents, solMappings, solStructs, solVars } from './sol';
+import { solEvents, solMappings, solStructs, solVars, solStmts } from './sol';
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 import type { Step } from './step';
+import { CallSite, If, Require, type Stmt } from './stmt';
 
 export * from './metadata';
 export * from './opcode';
@@ -16,6 +17,7 @@ export * from './state';
 export * from './step';
 export * from './type';
 export * from './evm';
+export * from './stmt';
 export * from './sol';
 
 /**
@@ -149,7 +151,7 @@ export class Contract {
         text += solStructs(this.evm.mappings);
         text += solMappings(this.evm.mappings);
         text += solVars(this.evm.variables);
-        text += stringify(this.main);
+        text += solStmts(this.main);
         for (const [, fn] of Object.entries(this.functions)) {
             text += fn.decompile();
         }
@@ -192,41 +194,8 @@ export class Contract {
     }
 }
 
-export class If {
-    readonly name = 'If';
-    constructor(
-        readonly condition: Expr,
-        readonly trueBlock?: Stmt[],
-        readonly falseBlock?: Stmt[]
-    ) {}
-
-    toString() {
-        return `(${this.condition})`;
-    }
-}
-
-export class CallSite {
-    readonly name = 'CallSite';
-
-    constructor(readonly selector: string) {}
-
-    toString() {
-        return `$${this.selector}();`;
-    }
-}
-
 export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
     return falseBlock.length === 1 && falseBlock[0].name === 'Revert';
-}
-
-export class Require {
-    readonly name = 'Require';
-
-    constructor(readonly condition: Expr, readonly args: Expr[]) {}
-
-    toString() {
-        return `require(${[this.condition, ...this.args].join(', ')});`;
-    }
 }
 
 export class PublicFunction {
@@ -415,24 +384,11 @@ export class PublicFunction {
             output += ` returns (${this.returns.join(', ')})`;
         }
         output += ' {\n';
-        output += stringify(this.stmts, 4);
+        output += solStmts(this.stmts, 4);
         output += '}\n\n';
         return output;
     }
 }
-
-// export class Assign {
-//     readonly name = 'Asign';
-//     constructor(readonly i: number, readonly phi: Phi) {}
-//     eval() {
-//         return this;
-//     }
-//     toString() {
-//         return `local${this.i} = ${this.phi.toString()};`;
-//     }
-// }
-
-export type Stmt = Inst | If | CallSite | Require;
 
 export function build(state: State<Inst, Expr>): Stmt[] {
     const visited = new WeakSet();
@@ -492,33 +448,6 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                 return state.stmts;
         }
     }
-}
-
-/**
- *
- * @param stmts
- * @param indentation
- * @returns
- */
-export function stringify(stmts: Stmt[], indentation = 0): string {
-    let text = '';
-    for (const stmt of stmts) {
-        if (stmt instanceof If) {
-            const condition = stmt.toString();
-            text += ' '.repeat(indentation) + 'if ' + condition + ' {\n';
-            text += stringify(stmt.trueBlock!, indentation + 4);
-            if (stmt.falseBlock) {
-                text += ' '.repeat(indentation) + '} else {\n';
-                text += stringify(stmt.falseBlock, indentation + 4);
-            }
-            text += ' '.repeat(indentation) + '}\n';
-            // }
-        } else {
-            text += ' '.repeat(indentation) + stmt.toString() + '\n';
-        }
-    }
-
-    return text;
 }
 
 function requiresNoValue(stmts: Stmt[]): boolean {

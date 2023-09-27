@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, build, stringify } from 'sevm';
+import { EVM, STEP, State, build, solStmts } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 import { Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop, Val } from 'sevm/ast';
 
@@ -100,17 +100,17 @@ describe('evm::system', function () {
 
             {
                 const branch = evm.functionBranches.get(selector)!;
-                const ast = stringify(build(branch.state));
+                const ast = solStmts(build(branch.state));
                 expect(ast).to.be.deep.equal('return 0x7;\n');
             }
             {
                 const branch = evm.functionBranches.get(symbolSelector)!;
-                const ast = stringify(build(branch.state));
+                const ast = solStmts(build(branch.state));
                 expect(ast).to.be.deep.equal('return 0xb;\n');
             }
             {
                 const branch = evm.functionBranches.get(hola)!;
-                const ast = stringify(build(branch.state));
+                const ast = solStmts(build(branch.state));
                 expect(ast).to.be.deep.equal("return '12345';\n");
             }
         });
