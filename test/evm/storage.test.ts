@@ -1,11 +1,9 @@
 import { expect } from 'chai';
-import { State, STEP } from 'sevm';
-import { EVM } from '../../src/evm';
-import { type Expr, type Inst, Val } from '../../src/evm/expr';
-import { Add, Sub } from '../../src/evm/math';
-import { MappingLoad, MappingStore } from '../../src/evm/storage';
-import { Info, Msg } from '../../src/evm/special';
-import { Stop } from '../../src/evm/system';
+
+import { EVM, STEP, State } from 'sevm';
+import type { Expr, Inst } from 'sevm/ast';
+import { Add, Info, MappingLoad, MappingStore, Msg, Stop, Sub, Val } from 'sevm/ast';
+
 import { compile } from '../utils/solc';
 
 describe('evm::storage', function () {

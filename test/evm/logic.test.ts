@@ -1,11 +1,10 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
-import { State, STEP } from 'sevm';
-import { EVM } from '../../src/evm';
-import { type Expr, Val, type Inst } from '../../src/evm/expr';
-import { Not, Shr, Sig } from '../../src/evm/logic';
-import { Div } from '../../src/evm/math';
-import { Block, CallDataLoad } from '../../src/evm/special';
+
+import { EVM, STEP, State } from 'sevm';
+import type { Expr, Inst } from 'sevm/ast';
+import { Block, CallDataLoad, Div, Not, Shr, Sig, Val } from 'sevm/ast';
+
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 

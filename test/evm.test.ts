@@ -1,10 +1,8 @@
 import { expect } from 'chai';
 
-import { type Ram, State, STEP } from 'sevm';
-import { EVM } from '../src/evm';
-import type { Expr, Inst } from '../src/evm/expr';
-import { Invalid } from '../src/evm/system';
-import { Tx } from '../src/evm/special';
+import { EVM, STEP, State, type Ram } from 'sevm';
+import { Invalid, Tx, type Expr, type Inst } from 'sevm/ast';
+
 import { compile } from './utils/solc';
 
 describe('evm', function () {

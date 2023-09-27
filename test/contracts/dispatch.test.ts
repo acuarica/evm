@@ -1,6 +1,8 @@
 import { expect } from 'chai';
+
 import { Contract, toHex } from 'sevm';
-import { Return } from '../../src/evm/system';
+import { Return } from 'sevm/ast';
+
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 

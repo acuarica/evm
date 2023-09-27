@@ -1,7 +1,7 @@
 import { expect } from 'chai';
+
 import { State, STEP } from 'sevm';
-import { type Expr, Val, type Inst } from '../../src/evm/expr';
-import { Block } from '../../src/evm/special';
+import { Block, Val, type Expr, type Inst } from 'sevm/ast';
 
 describe('evm::memory', function () {
     it('should load values into stack', function () {

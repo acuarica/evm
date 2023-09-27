@@ -1,11 +1,10 @@
 import { expect } from 'chai';
+
 import { Contract, Require } from 'sevm';
-import { Val } from '../../src/evm/expr';
-import { SStore, Variable } from '../../src/evm/storage';
-import { Stop } from '../../src/evm/system';
+import { CallDataLoad, SStore, Stop, Val, Variable } from 'sevm/ast';
+
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
-import { CallDataLoad } from '../../src/evm/special';
 
 contracts('variables', (compile, _fallback, version) => {
     describe('with private variables in different locations', function () {

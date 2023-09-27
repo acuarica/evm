@@ -1,7 +1,8 @@
 import { expect } from 'chai';
-import { Contract } from 'sevm';
-import type { EVM } from '../../src/evm';
-import { Revert } from '../../src/evm/system';
+
+import { Contract, type EVM } from 'sevm';
+import { Revert } from 'sevm/ast';
+
 import { contracts } from '../utils/solc';
 
 contracts('empty', (compile, _fallback, version) => {

@@ -1,13 +1,9 @@
-import { strict as assert } from 'assert';
-
-import { expect } from 'chai';
 import { keccak_256 } from '@noble/hashes/sha3';
+import { strict as assert } from 'assert';
+import { expect } from 'chai';
 
-import { toHex, State } from 'sevm';
-import { EVM } from '../src/evm';
-import { type Expr, type Inst, Val } from '../src/evm/expr';
-import { And, Not } from '../src/evm/logic';
-import { Block } from '../src/evm/special';
+import { EVM, State, toHex } from 'sevm';
+import { And, Block, Not, Val, type Expr, type Inst } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';

@@ -1,10 +1,9 @@
 import { expect } from 'chai';
-import { State, STEP, build, stringify } from 'sevm';
-import { EVM } from '../../src/evm';
-import { type Expr, type Inst, Val } from '../../src/evm/expr';
-import { MLoad } from '../../src/evm/memory';
-import { Info } from '../../src/evm/special';
-import { Create, Return, SelfDestruct, Sha3, Stop } from '../../src/evm/system';
+
+import { EVM, STEP, State, build, stringify } from 'sevm';
+import type { Expr, Inst } from 'sevm/ast';
+import { Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop, Val } from 'sevm/ast';
+
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
 

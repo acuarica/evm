@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
 import { FunctionFragment } from 'ethers';
+
 import { compile } from './utils/solc';
 
 describe('abi', function () {

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+
 import { Stack, State } from 'sevm';
 
 describe('state', function () {

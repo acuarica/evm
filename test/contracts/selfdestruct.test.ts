@@ -1,5 +1,7 @@
 import { expect } from 'chai';
+
 import { Contract, OPCODES } from 'sevm';
+
 import { contracts } from '../utils/solc';
 
 contracts('selfdestruct', (compile, fallback, version) => {

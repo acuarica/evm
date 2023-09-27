@@ -1,8 +1,6 @@
 import { expect } from 'chai';
-import { Val } from '../src/evm/expr';
-import { Log } from '../src/evm/log';
-import { IsZero } from '../src/evm/logic';
-import { Add, Mul } from '../src/evm/math';
+
+import { Add, IsZero, Log, Mul, Val } from 'sevm/ast';
 
 import '../src/yul';
 

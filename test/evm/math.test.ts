@@ -1,8 +1,7 @@
 import { expect } from 'chai';
+
 import { State, STEP } from 'sevm';
-import { Add, Div, Exp, Mul, Sub } from '../../src/evm/math';
-import { type Expr, Val } from '../../src/evm/expr';
-import { Block } from '../../src/evm/special';
+import { Add, Block, Div, Exp, Mul, Sub, Val, type Expr } from 'sevm/ast';
 
 describe('evm::math', function () {
     it('should test `isVal`', function () {

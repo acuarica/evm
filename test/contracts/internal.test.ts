@@ -1,10 +1,8 @@
 import { expect } from 'chai';
+
 import { Contract, Require } from 'sevm';
-import { Val } from '../../src/evm/expr';
-import { Add } from '../../src/evm/math';
-import { SLoad, SStore } from '../../src/evm/storage';
-import { Msg, CallDataLoad } from '../../src/evm/special';
-import { Return, Sha3, Stop } from '../../src/evm/system';
+import { Add, CallDataLoad, Msg, Return, SLoad, SStore, Sha3, Stop, Val } from 'sevm/ast';
+
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
