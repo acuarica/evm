@@ -1,10 +1,10 @@
-import { type Expr, type Inst, Throw, type Val } from './evm/expr';
+import { type Expr, type Inst, Throw, type Val } from './ast/expr';
 import type { Type } from './type';
-import { Not } from './evm/logic';
-import type { Return, Revert } from './evm/system';
+import { Not } from './ast/logic';
+import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';
-import { stringifyEvents } from './evm/log';
+import { stringifyEvents } from './ast/log';
 import {
     type SLoad,
     stringifyMappings,
@@ -12,7 +12,7 @@ import {
     stringifyVariables,
     Variable,
     type MappingLoad,
-} from './evm/storage';
+} from './ast/storage';
 import { OPCODES } from './opcode';
 import ERCs from './ercs';
 import type { Step } from './step';
@@ -22,8 +22,7 @@ export * from './opcode';
 export * from './state';
 export * from './step';
 export * from './type';
-
-export { EVM } from './evm';
+export * from './evm';
 
 /**
  *

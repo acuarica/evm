@@ -1,17 +1,12 @@
-import { decode, OPCODES, type Opcode, MNEMONICS } from '../opcode';
-import { State } from '../state';
-import { type Metadata, stripMetadataHash } from '../metadata';
-import { STEP, type Step } from '../step';
+import { decode, OPCODES, type Opcode, MNEMONICS } from './opcode';
+import { State } from './state';
+import { type Metadata, stripMetadataHash } from './metadata';
+import { STEP, type Step } from './step';
 
-import { type Expr, type IInst, type Inst, Throw } from './expr';
-import { type IEvents } from './log';
-import { type IStore } from './storage';
-import { Branch, type ISelectorBranches, JumpDest, makeBranch } from './flow';
-
-export * from './expr';
-export * from './system';
-
-export { Branch };
+import { type Expr, type IInst, type Inst, Throw } from './ast/expr';
+import { type IEvents } from './ast/log';
+import { type IStore } from './ast/storage';
+import { Branch, type ISelectorBranches, JumpDest, makeBranch } from './ast/flow';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html

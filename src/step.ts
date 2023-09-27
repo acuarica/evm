@@ -1,12 +1,12 @@
 import { type Opcode, type decode, formatOpcode, toHex } from './opcode';
 import type { Ram, Stack, State } from './state';
 
-import { type Expr, Val, type Inst } from './evm/expr';
-import { Add, Div, Exp, Mod, Mul, Sub } from './evm/math';
-import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './evm/logic';
+import { type Expr, Val, type Inst } from './ast/expr';
+import { Add, Div, Exp, Mod, Mul, Sub } from './ast/math';
+import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/logic';
 import { mapValues } from './object';
-import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Info } from './evm/special';
-import { MLoad, MStore } from './evm/memory';
+import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Info } from './ast/special';
+import { MLoad, MStore } from './ast/memory';
 import {
     Call,
     CallCode,
@@ -21,10 +21,10 @@ import {
     Sha3,
     StaticCall,
     Stop,
-} from './evm';
-import { type ISelectorBranches, Jump, Jumpi, SigCase, makeBranch } from './evm/flow';
-import { type IEvents, Log } from './evm/log';
-import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './evm/storage';
+} from './ast/system';
+import { type ISelectorBranches, Jump, Jumpi, SigCase, makeBranch } from './ast/flow';
+import { type IEvents, Log } from './ast/log';
+import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './ast/storage';
 
 export type Step = Omit<
     ReturnType<typeof STEP>,

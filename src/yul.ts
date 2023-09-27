@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 // import type { Stmt } from '.';
-import { type Expr, type Inst } from './evm/expr';
+import { type Expr, type Inst } from './ast/expr';
 // import { Log } from './evm/log';
 // import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Xor } from './evm/logic';
 // import { Add, Div, Exp, Mod, Mul, Sub } from './evm/math';
