@@ -3,20 +3,22 @@ export default {
     ERC165: {
         selectors: ['01ffc9a7'],
         topics: [],
-        functions: { supportsInterface_bytes4_: '01ffc9a7' },
+        functions: {
+            '01ffc9a7': 'function supportsInterface(bytes4 interfaceID) view returns (bool)',
+        },
         events: {},
     },
     ERC173: {
         selectors: ['8da5cb5b', '01ffc9a7', 'f2fde38b'],
         topics: ['8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0'],
         functions: {
-            owner__: '8da5cb5b',
-            supportsInterface_bytes4_: '01ffc9a7',
-            transferOwnership_address_: 'f2fde38b',
+            '8da5cb5b': 'function owner() view returns (address)',
+            '01ffc9a7': 'function supportsInterface(bytes4 interfaceID) view returns (bool)',
+            f2fde38b: 'function transferOwnership(address _newOwner)',
         },
         events: {
-            OwnershipTransferred_address_address_:
-                '8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0',
+            '8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0':
+                'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
         },
     },
     ERC20: {
@@ -26,18 +28,20 @@ export default {
             'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         ],
         functions: {
-            allowance_address_address_: 'dd62ed3e',
-            approve_address_uint256_: '095ea7b3',
-            balanceOf_address_: '70a08231',
-            totalSupply__: '18160ddd',
-            transfer_address_uint256_: 'a9059cbb',
-            transferFrom_address_address_uint256_: '23b872dd',
+            dd62ed3e:
+                'function allowance(address _owner, address _spender) view returns (uint256 remaining)',
+            '095ea7b3': 'function approve(address _spender, uint256 _value) returns (bool success)',
+            '70a08231': 'function balanceOf(address _owner) view returns (uint256 balance)',
+            '18160ddd': 'function totalSupply() view returns (uint256)',
+            a9059cbb: 'function transfer(address _to, uint256 _value) returns (bool success)',
+            '23b872dd':
+                'function transferFrom(address _from, address _to, uint256 _value) returns (bool success)',
         },
         events: {
-            Approval_address_address_uint256_:
-                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
-            Transfer_address_address_uint256_:
-                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925':
+                'event Approval(address indexed _owner, address indexed _spender, uint256 _value)',
+            ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef:
+                'event Transfer(address indexed _from, address indexed _to, uint256 _value)',
         },
     },
     ERC20Metadata: {
@@ -57,21 +61,23 @@ export default {
             'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         ],
         functions: {
-            allowance_address_address_: 'dd62ed3e',
-            approve_address_uint256_: '095ea7b3',
-            balanceOf_address_: '70a08231',
-            decimals__: '313ce567',
-            name__: '06fdde03',
-            symbol__: '95d89b41',
-            totalSupply__: '18160ddd',
-            transfer_address_uint256_: 'a9059cbb',
-            transferFrom_address_address_uint256_: '23b872dd',
+            dd62ed3e:
+                'function allowance(address _owner, address _spender) view returns (uint256 remaining)',
+            '095ea7b3': 'function approve(address _spender, uint256 _value) returns (bool success)',
+            '70a08231': 'function balanceOf(address _owner) view returns (uint256 balance)',
+            '313ce567': 'function decimals() view returns (uint8)',
+            '06fdde03': 'function name() view returns (string)',
+            '95d89b41': 'function symbol() view returns (string)',
+            '18160ddd': 'function totalSupply() view returns (uint256)',
+            a9059cbb: 'function transfer(address _to, uint256 _value) returns (bool success)',
+            '23b872dd':
+                'function transferFrom(address _from, address _to, uint256 _value) returns (bool success)',
         },
         events: {
-            Approval_address_address_uint256_:
-                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
-            Transfer_address_address_uint256_:
-                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925':
+                'event Approval(address indexed _owner, address indexed _spender, uint256 _value)',
+            ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef:
+                'event Transfer(address indexed _from, address indexed _to, uint256 _value)',
         },
     },
     ERC721: {
@@ -93,24 +99,28 @@ export default {
             'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
         ],
         functions: {
-            approve_address_uint256_: '095ea7b3',
-            balanceOf_address_: '70a08231',
-            getApproved_uint256_: '081812fc',
-            isApprovedForAll_address_address_: 'e985e9c5',
-            ownerOf_uint256_: '6352211e',
-            safeTransferFrom_address_address_uint256_: '42842e0e',
-            safeTransferFrom_address_address_uint256_bytes_: 'b88d4fde',
-            setApprovalForAll_address_bool_: 'a22cb465',
-            supportsInterface_bytes4_: '01ffc9a7',
-            transferFrom_address_address_uint256_: '23b872dd',
+            '095ea7b3': 'function approve(address _approved, uint256 _tokenId) payable',
+            '70a08231': 'function balanceOf(address _owner) view returns (uint256)',
+            '081812fc': 'function getApproved(uint256 _tokenId) view returns (address)',
+            e985e9c5:
+                'function isApprovedForAll(address _owner, address _operator) view returns (bool)',
+            '6352211e': 'function ownerOf(uint256 _tokenId) view returns (address)',
+            '42842e0e':
+                'function safeTransferFrom(address _from, address _to, uint256 _tokenId) payable',
+            b88d4fde:
+                'function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) payable',
+            a22cb465: 'function setApprovalForAll(address _operator, bool _approved)',
+            '01ffc9a7': 'function supportsInterface(bytes4 interfaceID) view returns (bool)',
+            '23b872dd':
+                'function transferFrom(address _from, address _to, uint256 _tokenId) payable',
         },
         events: {
-            Approval_address_address_uint256_:
-                '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
-            ApprovalForAll_address_address_bool_:
-                '17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31',
-            Transfer_address_address_uint256_:
-                'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+            '8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925':
+                'event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId)',
+            '17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31':
+                'event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved)',
+            ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef:
+                'event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId)',
         },
     },
 };
