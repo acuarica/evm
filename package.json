@@ -7,13 +7,9 @@
             "types": "./dist/src/index.d.ts",
             "default": "./dist/src/index.js"
         },
-        "./opcode": {
-            "types": "./dist/src/opcode.d.ts",
-            "default": "./dist/src/opcode.js"
-        },
-        "./evm": {
-            "types": "./dist/src/evm/index.d.ts",
-            "default": "./dist/src/evm/index.js"
+        "./ast": {
+            "types": "./dist/src/ast/index.d.ts",
+            "default": "./dist/src/ast/index.js"
         }
     },
     "files": [

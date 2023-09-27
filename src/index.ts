@@ -23,6 +23,8 @@ export * from './state';
 export * from './step';
 export * from './type';
 
+export { EVM } from './evm';
+
 /**
  *
  */
