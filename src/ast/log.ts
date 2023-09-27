@@ -1,61 +1,22 @@
 import { type Expr, type IInst } from './expr';
 
 /**
+ * Events found through `LOG` instructions.
  *
+ * The `topic` is represented as a hex string.
  */
 export interface IEvents {
-    /**
-     * Events found through `LOG` instructions.
-     *
-     * The `topic` is represented as a hex string.
-     */
-    readonly events: {
-        [topic: string]: {
-            /**
-             * The signature of the event when the `topic` selector is found.
-             *
-             * For instance, if the topic is
-             * `4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426`,
-             * then `sig` will be `Deposit(uint256)`.
-             */
-            sig?: string;
-            indexedCount: number;
-        };
+    [topic: string]: {
+        /**
+         * The signature of the event when the `topic` selector is found.
+         *
+         * For instance, if the topic is
+         * `4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426`,
+         * then `sig` will be `Deposit(uint256)`.
+         */
+        sig?: string;
+        indexedCount: number;
     };
-}
-
-/**
- *
- * @param events
- * @returns
- */
-export function stringifyEvents(events: IEvents['events']) {
-    let text = '';
-
-    for (const [topic, event] of Object.entries(events)) {
-        text += 'event ';
-        if (event.sig === undefined) {
-            text += topic;
-        } else {
-            const eventName = event.sig.split('(')[0];
-            const params = event.sig.replace(eventName, '').substring(1).slice(0, -1);
-            if (params) {
-                text += eventName + '(';
-                text += params
-                    .split(',')
-                    .map((param, i) =>
-                        i < event.indexedCount ? `${param} indexed _arg${i}` : `${param} _arg${i}`
-                    )
-                    .join(', ');
-                text += ')';
-            } else {
-                text += event.sig;
-            }
-        }
-        text += ';\n';
-    }
-
-    return text;
 }
 
 /**
@@ -67,7 +28,7 @@ export class Log implements IInst {
     readonly name = 'Log';
 
     constructor(
-        readonly event: IEvents['events'][string] | undefined,
+        readonly event: IEvents[string] | undefined,
         readonly topics: Expr[],
         readonly mem: { offset: Expr; size: Expr },
         readonly args?: Expr[]

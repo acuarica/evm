@@ -1,8 +1,8 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State } from 'sevm';
-import { Val, stringifyEvents, type Expr, type Inst } from 'sevm/ast';
+import { EVM, State, stringifyEvents } from 'sevm';
+import { Val, type Expr, type Inst } from 'sevm/ast';
 
 import { eventSelector } from '../utils/selector';
 import { compile } from '../utils/solc';

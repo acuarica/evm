@@ -12,6 +12,10 @@ export class Branch {
     get key() {
         return this.pc;
     }
+
+    static make(pc: number, state: State<Inst, Expr>) {
+        return new Branch(pc, state.clone());
+    }
 }
 
 export class Jump implements IInst {
@@ -89,15 +93,4 @@ export class SigCase implements IInst {
     next(): Branch[] {
         return [this.fallBranch];
     }
-}
-
-export function makeBranch(pc: number, state: State<Inst, Expr>) {
-    return new Branch(pc, state.clone());
-}
-
-export interface ISelectorBranches {
-    /**
-     * store selectors starting point.
-     */
-    readonly functionBranches: Map<string, { pc: number; state: State<Inst, Expr> }>;
 }

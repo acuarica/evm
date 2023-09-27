@@ -1,12 +1,12 @@
 import { decode, OPCODES, type Opcode, MNEMONICS } from './opcode';
 import { State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
-import { STEP, type Step } from './step';
+import { STEP, type Step, type ISelectorBranches } from './step';
 
 import { type Expr, type IInst, type Inst, Throw } from './ast/expr';
 import { type IEvents } from './ast/log';
 import { type IStore } from './ast/storage';
-import { Branch, type ISelectorBranches, JumpDest, makeBranch } from './ast/flow';
+import { Branch, JumpDest } from './ast/flow';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -42,10 +42,10 @@ export class EVM {
      */
     readonly errors: Throw[] = [];
 
-    readonly events: IEvents['events'];
+    readonly events: IEvents;
     readonly variables: IStore['variables'];
     readonly mappings: IStore['mappings'];
-    readonly functionBranches: ISelectorBranches['functionBranches'];
+    readonly functionBranches: ISelectorBranches;
 
     /**
      * The `Opcode[]` decoded from `bytecode`.
@@ -135,7 +135,7 @@ export class EVM {
                     pc < oplen + 1 &&
                     this.opcodes[pc + 1].opcode === OPCODES.JUMPDEST
                 ) {
-                    const fallBranch = makeBranch(opcode.pc + 1, state);
+                    const fallBranch = Branch.make(opcode.pc + 1, state);
                     state.halt(new JumpDest(fallBranch));
                 }
             } catch (err) {

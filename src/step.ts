@@ -22,7 +22,7 @@ import {
     StaticCall,
     Stop,
 } from './ast/system';
-import { type ISelectorBranches, Jump, Jumpi, SigCase, makeBranch } from './ast/flow';
+import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
 import { type IEvents, Log } from './ast/log';
 import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './ast/storage';
 
@@ -31,15 +31,20 @@ export type Step = Omit<
     'events' | 'functionBranches' | 'variables' | 'mappings'
 >;
 
+/**
+ * Store selectors starting point.
+ */
+export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
+
 export function STEP(
     { opcodes, jumpdests }: ReturnType<typeof decode> = { opcodes: [], jumpdests: {} }
 ) {
     const mapStack = <K extends string>(table: { [mnemonic in K]: (stack: Stack<Expr>) => void }) =>
         mapValues(table, fn => (state: State<Inst, Expr>) => fn(state.stack));
 
-    const events: IEvents['events'] = {};
+    const events: IEvents = {};
     const { variables, mappings }: IStore = { variables: {}, mappings: {} };
-    const functionBranches: ISelectorBranches['functionBranches'] = new Map<
+    const functionBranches: ISelectorBranches = new Map<
         string,
         { pc: number; state: State<Inst, Expr> }
     >();
@@ -427,13 +432,13 @@ function memArgs<T>(
 
 function FLOW(
     { opcodes, jumpdests }: ReturnType<typeof decode>,
-    functionBranches: ISelectorBranches['functionBranches']
+    functionBranches: ISelectorBranches
 ) {
     return {
         JUMP: (state: State<Inst, Expr>, opcode: Opcode): void => {
             const offset = state.stack.pop();
             const destpc = getDest(offset, opcode);
-            const destBranch = makeBranch(destpc, state);
+            const destBranch = Branch.make(destpc, state);
             state.halt(new Jump(offset, destBranch));
         },
 
@@ -442,7 +447,7 @@ function FLOW(
             const cond = state.stack.pop();
             const destpc = getDest(offset, opcode);
 
-            const fallBranch = makeBranch(opcode.pc + 1, state);
+            const fallBranch = Branch.make(opcode.pc + 1, state);
 
             let last: SigCase | Jumpi;
             if (cond.tag === 'Sig') {
@@ -452,7 +457,7 @@ function FLOW(
                 });
                 last = new SigCase(cond, offset, fallBranch);
             } else {
-                last = new Jumpi(cond, offset, fallBranch, makeBranch(destpc, state));
+                last = new Jumpi(cond, offset, fallBranch, Branch.make(destpc, state));
             }
             state.halt(last);
         },
@@ -489,7 +494,7 @@ function FLOW(
     }
 }
 
-function LOGS(events: IEvents['events']) {
+function LOGS(events: IEvents) {
     return {
         LOG0: log(0, events),
         LOG1: log(1, events),
@@ -498,7 +503,7 @@ function LOGS(events: IEvents['events']) {
         LOG4: log(4, events),
     } as const;
 
-    function log(topicsCount: number, events: IEvents['events']) {
+    function log(topicsCount: number, events: IEvents) {
         return ({ stack, memory, stmts }: State<Inst, Expr>): void => {
             let offset = stack.pop();
             let size = stack.pop();
@@ -508,7 +513,7 @@ function LOGS(events: IEvents['events']) {
                 topics.push(stack.pop());
             }
 
-            let event: IEvents['events'][string] | undefined = undefined;
+            let event: IEvents[string] | undefined = undefined;
             if (topics.length > 0 && topics[0].isVal()) {
                 const eventTopic = topics[0].val.toString(16).padStart(64, '0');
                 event = events[eventTopic];
