@@ -11,10 +11,9 @@ import { readFileSync } from 'fs';
 import solc from 'solc';
 
 function main() {
-    const content = readFileSync('./scripts/ercs.sol', 'utf-8');
     const input = {
         language: 'Solidity',
-        sources: { SOURCE: { content } },
+        sources: { SOURCE: { content: readFileSync('./scripts/ercs.sol', 'utf-8') } },
         settings: { outputSelection: { '*': { '*': ['abi'] } } },
     };
     const output = solc.compile(JSON.stringify(input));
