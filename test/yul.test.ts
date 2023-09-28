@@ -1,17 +1,32 @@
 import { expect } from 'chai';
 
-import { Add, IsZero, Log, Mul, Val } from 'sevm/ast';
-
-import '../src/yul';
+import { yul } from 'sevm';
+import { Add, Block, IsZero, Log, Mul, Val } from 'sevm/ast';
 
 describe('yul', function () {
-    it.skip('should run', function () {
-        const expr = new IsZero(new Add(new Val(1n), new Mul(new Val(3n), new Val(2n))));
-        expect(expr).to.be.null;
+    [
+        {
+            expr: new IsZero(new Add(new Val(1n), new Mul(new Val(3n), new Val(2n)))),
+            str: 'iszero(add(1, mul(3, 2)))',
+        },
+        {
+            expr: Block.coinbase,
+            str: 'block.coinbase',
+        },
+    ].forEach(({ expr, str }) => {
+        it(`should convert expression to Yul \`${str}\``, function () {
+            expect(yul`${expr}`).to.be.equal(str);
+        });
     });
 
-    it.skip('should runi', function () {
-        const inst = new Log(undefined, [new Val(3n)], { offset: new Val(0n), size: new Val(32n) });
-        expect(inst).to.be.null;
+    [
+        {
+            inst: new Log(undefined, [new Val(3n)], { offset: new Val(0n), size: new Val(32n) }),
+            str: 'log1(0x0, 3);',
+        },
+    ].forEach(({ inst, str }) => {
+        it(`should convert instruction to Yul \`${str}\``, function () {
+            expect(yul`${inst}`).to.be.equal(str);
+        });
     });
 });
