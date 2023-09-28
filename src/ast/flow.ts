@@ -20,15 +20,12 @@ export class Branch {
 
 export class Jump implements IInst {
     readonly name = 'Jump';
-
     constructor(readonly offset: Expr, readonly destBranch: Branch) {}
 
     eval() {
         return this;
     }
-    toString() {
-        return `goto :${this.offset} branch:${this.destBranch.key}`;
-    }
+
     next() {
         return [this.destBranch];
     }
@@ -52,10 +49,6 @@ export class Jumpi implements IInst {
         return new Jumpi(this.cond.eval(), this.offset, this.fallBranch, this.destBranch);
     }
 
-    toString() {
-        return `when ${this.cond} goto ${this.destBranch.key} or fall ${this.fallBranch.key}`;
-    }
-
     next() {
         return this.evalCond.isVal()
             ? this.evalCond.val === 0n
@@ -71,9 +64,6 @@ export class JumpDest implements IInst {
     eval() {
         return this;
     }
-    toString() {
-        return `fall: ${this.fallBranch.key}:`;
-    }
 
     next() {
         return [this.fallBranch];
@@ -85,9 +75,6 @@ export class SigCase implements IInst {
     constructor(readonly condition: Sig, readonly offset: Expr, readonly fallBranch: Branch) {}
     eval() {
         return this;
-    }
-    toString() {
-        return `case when ${this.condition} goto ${this.offset} or fall ${this.fallBranch.key}`;
     }
 
     next(): Branch[] {

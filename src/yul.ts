@@ -1,16 +1,12 @@
-import { type Expr, type Inst } from './ast/expr';
-
-const isExpr = (expr: unknown): expr is Expr =>
-    expr !== null && typeof expr === 'object' && 'tag' in expr;
-const isInst = (inst: unknown): inst is Inst =>
-    inst !== null && typeof inst === 'object' && 'name' in inst;
+import { isExpr, type Expr, type Inst, isInst } from './ast/expr';
 
 /**
- * Returns the Yul string representation of `this` `Expr`ession.
+ * Returns the Yul `string` representation of `nodes` that are either
+ * `Expr`essions or `Inst`ructions.
  *
  * https://docs.soliditylang.org/en/latest/yul.html
  */
-export function yul(strings: TemplateStringsArray, ...nodes: unknown[]) {
+export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
         const str = isExpr(node) ? yulExpr(node) : isInst(node) ? yulInst(node) : `${node}`;

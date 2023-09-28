@@ -65,6 +65,12 @@ export type Expr =
     | SLoad
     | MappingLoad;
 
+export const isExpr = (expr: unknown): expr is Expr =>
+    expr !== null && typeof expr === 'object' && 'tag' in expr;
+
+export const isInst = (inst: unknown): inst is Inst =>
+    inst !== null && typeof inst === 'object' && 'name' in inst;
+
 /**
  * Base definition for any type that is `Stmt`.
  */

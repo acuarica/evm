@@ -23,28 +23,14 @@ export class If {
         readonly trueBlock?: Stmt[],
         readonly falseBlock?: Stmt[]
     ) {}
-
-    toString() {
-        return `(${this.condition})`;
-    }
 }
 
 export class CallSite {
     readonly name = 'CallSite';
-
     constructor(readonly selector: string) {}
-
-    toString() {
-        return `$${this.selector}();`;
-    }
 }
 
 export class Require {
     readonly name = 'Require';
-
     constructor(readonly condition: Expr, readonly args: Expr[]) {}
-
-    toString() {
-        return `require(${[this.condition, ...this.args].join(', ')});`;
-    }
 }

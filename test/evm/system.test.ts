@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, build, solStmts } from 'sevm';
+import { EVM, STEP, State, build, sol, solStmts } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 import { Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop, Val } from 'sevm/ast';
 
@@ -38,7 +38,7 @@ describe('evm::system', function () {
         STEP().STOP(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Stop()]);
-        expect(`${state.stmts[0]}`).to.be.equal('return;');
+        expect(sol`${state.stmts[0]}`).to.be.equal('return;');
     });
 
     it('should halt with SELFDESTRUCT', function () {
@@ -47,7 +47,7 @@ describe('evm::system', function () {
         STEP().SELFDESTRUCT(state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new SelfDestruct(Info.ADDRESS)]);
-        expect(`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
+        expect(sol`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
     });
 
     describe('RETURN', function () {
@@ -58,7 +58,7 @@ describe('evm::system', function () {
             STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Return([])]);
-            expect(`${state.stmts[0]}`).to.be.equal('return;');
+            expect(sol`${state.stmts[0]}`).to.be.equal('return;');
         });
 
         it('should return with a single argument', function () {
@@ -68,7 +68,7 @@ describe('evm::system', function () {
             STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Return([new MLoad(new Val(0x4n))])]);
-            expect(`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
+            expect(sol`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
         });
 
         it('should return more than one argument', function () {
@@ -80,7 +80,7 @@ describe('evm::system', function () {
             expect(state.stmts).to.be.deep.equal([
                 new Return([new MLoad(new Val(0x4n)), new MLoad(new Val(0x24n))]),
             ]);
-            expect(`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
+            expect(sol`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
         });
 
         it('should find `return`s in compiled code', function () {

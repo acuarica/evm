@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State } from 'sevm';
+import { EVM, STEP, State, sol } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 import { Add, Info, MappingLoad, MappingStore, Msg, Stop, Sub, Val } from 'sevm/ast';
 
@@ -21,7 +21,7 @@ describe('evm::storage', function () {
     });
 
     it('should detect storage variable', function () {
-        const sol = `contract C {
+        const src = `contract C {
             uint256 val1 = 5;
             uint256 val2 = 7;
             fallback() external payable {
@@ -29,16 +29,16 @@ describe('evm::storage', function () {
                 val2 += 11;
             }
         }`;
-        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', { context: this }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
         expect(evm.variables).to.be.have.keys('0', '1');
         expect(state.stmts).to.be.have.length(3);
 
-        expect(`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
-        expect(`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
-        expect(`${state.last}`).to.be.equal('return;');
+        expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
+        expect(sol`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
+        expect(sol`${state.last}`).to.be.equal('return;');
     });
 
     it.skip('should detect packed storage variable', function () {
@@ -83,7 +83,7 @@ describe('evm::storage', function () {
 
     describe('mappings', function () {
         it('should find mapping loads and stores', function () {
-            const sol = `contract C {
+            const src = `contract C {
                 mapping (address => uint256) map1;
                 mapping (address => uint256) map2;
                 mapping (address => mapping (address => uint256)) allowance;
@@ -94,7 +94,7 @@ describe('evm::storage', function () {
                     allowance[address(this)][msg.sender] -= 11;
                 }
             }`;
-            const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', { context: this }).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 
@@ -108,7 +108,7 @@ describe('evm::storage', function () {
                     new Add(new MappingLoad(evm.mappings, 0, [Msg.sender]), new Val(3n, true))
                 )
             );
-            expect(`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
+            expect(sol`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
 
             expect(state.stmts[1]).to.be.deep.equal(
                 new MappingStore(
@@ -118,7 +118,7 @@ describe('evm::storage', function () {
                     new Add(new MappingLoad(evm.mappings, 1, [Msg.sender]), new Val(5n, true))
                 )
             );
-            expect(`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
+            expect(sol`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
 
             expect(state.stmts[2]).to.be.deep.equal(
                 new MappingStore(
@@ -131,7 +131,9 @@ describe('evm::storage', function () {
                     )
                 )
             );
-            expect(`${state.stmts[2]}`).to.be.equal('mapping3[address(this)][msg.sender] -= 0xb;');
+            expect(sol`${state.stmts[2]}`).to.be.equal(
+                'mapping3[address(this)][msg.sender] -= 0xb;'
+            );
 
             expect(state.last).to.be.deep.equal(new Stop());
 

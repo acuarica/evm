@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, type Ram } from 'sevm';
+import { EVM, STEP, State, type Ram, sol } from 'sevm';
 import { Invalid, Tx, type Expr, type Inst } from 'sevm/ast';
 
 import { compile } from './utils/solc';
@@ -11,7 +11,7 @@ describe('evm', function () {
         STEP().INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
-        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
+        expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
     });
 
     it('should halt when `exec` invalid opcode', function () {
@@ -20,11 +20,11 @@ describe('evm', function () {
         evm.exec(0, state);
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
-        expect(`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
+        expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
     });
 
     it('should attach `INSTS` hooks', function () {
-        const sol = `contract C {
+        const src = `contract C {
             event Deposit(uint256);
             fallback () external payable {
                 emit Deposit(block.number);
@@ -42,7 +42,7 @@ describe('evm', function () {
             STEP().GASPRICE(state);
             top = state.stack.top;
         };
-        const evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode, {
+        const evm = new EVM(compile(src, '0.7.6', { context: this }).bytecode, {
             ...STEP(),
             NUMBER,
             GASPRICE,

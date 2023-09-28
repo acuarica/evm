@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, solEvents } from 'sevm';
+import { EVM, State, sol, solEvents } from 'sevm';
 import { Val, type Expr, type Inst } from 'sevm/ast';
 
 import { eventSelector } from '../utils/selector';
@@ -10,7 +10,7 @@ import { compile } from '../utils/solc';
 describe('evm::log', function () {
     const knownEventSig = 'Deposit(uint256)';
     const unknownEventSig = 'UnknownEvent(uint256, uint256, uint256)';
-    const sol = `contract C {
+    const src = `contract C {
         event ${knownEventSig};
         event ${unknownEventSig};
         fallback() external payable {
@@ -22,7 +22,7 @@ describe('evm::log', function () {
     let evm: EVM;
 
     before(function () {
-        evm = new EVM(compile(sol, '0.7.6', { context: this }).bytecode);
+        evm = new EVM(compile(src, '0.7.6', { context: this }).bytecode);
     });
 
     it('should get it from compiled code', function () {
@@ -49,7 +49,7 @@ event ${eventSelector(unknownEventSig)};
             assert(stmt.name === 'Log');
             expect(stmt.args).to.be.deep.equal([new Val(1n, true)]);
             expect(stmt.eventName).to.be.deep.equal('Deposit');
-            expect(`${stmt}`).to.be.deep.equal(`emit Deposit(0x1);`);
+            expect(sol`${stmt}`).to.be.deep.equal(`emit Deposit(0x1);`);
         }
 
         {
@@ -62,7 +62,7 @@ event ${eventSelector(unknownEventSig)};
             ]);
 
             const topic = eventSelector(unknownEventSig);
-            expect(`${stmt}`).to.be.deep.equal(`log(0x${topic}, 0x2, 0x3, 0x4);`);
+            expect(sol`${stmt}`).to.be.deep.equal(`log(0x${topic}, 0x2, 0x3, 0x4);`);
         }
     });
 });

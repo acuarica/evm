@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Contract } from 'sevm';
+import { Contract, sol } from 'sevm';
 
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
@@ -34,8 +34,7 @@ contracts('symbols', compile => {
     ].forEach(({ sig, value }) => {
         it(`should find symbol block for \`${sig}\``, function () {
             const selector = fnselector(sig);
-            const last = contract.functions[selector].stmts.at(-1)!.toString();
-            expect(last).to.be.equal(value);
+            expect(sol`${contract.functions[selector].stmts.at(-1)!}`).to.be.equal(value);
         });
     });
 

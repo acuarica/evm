@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { State, STEP } from 'sevm';
+import { sol, State, STEP } from 'sevm';
 import { Add, Block, Div, Exp, Mul, Sub, Val, type Expr } from 'sevm/ast';
 
 describe('evm::math', function () {
@@ -89,39 +89,21 @@ describe('evm::math', function () {
             val: new Val(16n),
             str: '0x2 ** (0x1 + 0x3)',
         },
-    ].forEach(({ insts, expr, val, str }) =>
-        // : {
-        //     insts: readonly (keyof Step | number)[];
-        //     expr: Expr;
-        //     val: Expr;
-        //     str: string;
-        // }
-        {
-            it(`should \`eval+str\` \`${str}\``, function () {
-                const state = new State<never, Expr>();
-                for (const inst of insts) {
-                    if (typeof inst === 'number') {
-                        state.stack.push(new Val(BigInt(inst)));
-                    } else {
-                        // const a = inst;
-                        // const sym = Object.fromEntries(
-                        //     Object.entries(SPECIAL).map(([k, fn]) => [
-                        //         k,
-                        //         (stack: Stack<Expr>) => fn({ stack, memory: {} }),
-                        //     ])
-                        // ) as { [key in keyof typeof SPECIAL]: (stack: Stack<Expr>) => void };
-                        // const evm = { ...MATH, ...sym };
-                        // evm[inst](stack);
-                        // const step = STEP()[inst];
-                        // step()
-                        STEP()[inst](state);
-                    }
+    ].forEach(({ insts, expr, val, str }) => {
+        it(`should \`eval+str\` \`${str}\``, function () {
+            const state = new State<never, Expr>();
+            for (const inst of insts) {
+                if (typeof inst === 'number') {
+                    state.stack.push(new Val(BigInt(inst)));
+                } else {
+                    STEP()[inst](state);
                 }
+            }
 
-                expect(state.stack.values).to.be.deep.equal([expr]);
-                expect(expr.eval()).to.be.deep.equal(val);
-                expect(expr.str()).to.be.equal(str);
-            });
-        }
-    );
+            expect(state.stack.values).to.be.deep.equal([expr]);
+            expect(expr.eval()).to.be.deep.equal(val);
+            expect(expr.str()).to.be.equal(str);
+            expect(sol`${expr}`).to.be.equal(str);
+        });
+    });
 });

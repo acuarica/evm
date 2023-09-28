@@ -21,14 +21,9 @@ export class MLoad extends Tag('MLoad') {
 
 export class MStore implements IInst {
     readonly name = 'MStore';
-
     constructor(readonly location: Expr, readonly data: Expr) {}
 
     eval() {
         return new MStore(this.location.eval(), this.data.eval());
-    }
-
-    toString(): string {
-        return `memory[${this.location}] = ${this.data};`;
     }
 }

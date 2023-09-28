@@ -1,4 +1,4 @@
-import { type IInst, Tag, type Val, type Expr } from './expr';
+import { type IInst, Tag, type Expr } from './expr';
 
 export class Sha3 extends Tag('Sha3') {
     constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
@@ -173,13 +173,8 @@ export class DelegateCall extends Tag('DelegateCall') {
 
 export class Stop implements IInst {
     readonly name = 'Stop';
-
     eval() {
         return this;
-    }
-
-    toString() {
-        return 'return;';
     }
 }
 
@@ -198,72 +193,31 @@ export class Return implements IInst {
     eval() {
         return this;
     }
-
-    toString(): string {
-        return this.offset && this.size
-            ? `return memory[${this.offset}:(${this.offset}+${this.size})];`
-            : this.args.length === 0
-            ? 'return;'
-            : isStringReturn(this.args) && this.args[0].val === 32n
-            ? `return '${hex2a(this.args[2].val.toString(16))}';`
-            : this.args.length === 1
-            ? `return ${this.args[0]};`
-            : `return (${this.args.join(', ')});`;
-    }
-}
-
-function isStringReturn(args: Expr[]): args is [Val, Val, Val] {
-    return args.length === 3 && args.every(arg => arg.isVal());
-}
-
-function hex2a(hexstr: string) {
-    let str = '';
-    for (let i = 0; i < hexstr.length && hexstr.slice(i, i + 2) !== '00'; i += 2) {
-        str += String.fromCharCode(parseInt(hexstr.substring(i, i + 2), 16));
-    }
-    return str;
 }
 
 export class Revert implements IInst {
     readonly name = 'Revert';
-
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
 
     eval() {
         return this;
     }
-
-    toString() {
-        return this.offset && this.size
-            ? `revert(memory[${this.offset}:(${this.offset}+${this.size})]);`
-            : `revert(${this.args.join(', ')});`;
-    }
 }
 
 export class Invalid implements IInst {
     readonly name = 'Invalid';
-
     constructor(readonly opcode: number) {}
 
     eval() {
         return this;
     }
-
-    toString() {
-        return `revert('Invalid instruction (0x${this.opcode.toString(16)})');`;
-    }
 }
 
 export class SelfDestruct implements IInst {
     readonly name = 'SelfDestruct';
-
     constructor(readonly address: Expr) {}
 
     eval() {
         return this;
-    }
-
-    toString() {
-        return `selfdestruct(${this.address});`;
     }
 }

@@ -49,59 +49,6 @@ export class MappingStore implements IInst {
     eval() {
         return this;
     }
-
-    toString() {
-        let mappingName = `mapping${this.location + 1}`;
-        if (this.location in this.mappings && this.mappings[this.location].name) {
-            mappingName = this.mappings[this.location].name!;
-        }
-
-        if (
-            this.data.tag === 'Add' &&
-            this.data.right.tag === 'MappingLoad' &&
-            this.data.right.location === this.location
-        ) {
-            return (
-                mappingName +
-                this.items.map(item => '[' + item.str() + ']').join('') +
-                ' += ' +
-                this.data.left.str() +
-                ';'
-            );
-        } else if (
-            this.data.tag === 'Add' &&
-            this.data.left.tag === 'MappingLoad' &&
-            this.data.left.location === this.location
-        ) {
-            return (
-                mappingName +
-                this.items.map(item => '[' + item.str() + ']').join('') +
-                ' += ' +
-                this.data.right.str() +
-                ';'
-            );
-        } else if (
-            this.data.tag === 'Sub' &&
-            this.data.left.tag === 'MappingLoad' &&
-            this.data.left.location === this.location
-        ) {
-            return (
-                mappingName +
-                this.items.map(item => '[' + item.str() + ']').join('') +
-                ' -= ' +
-                this.data.right.str() +
-                ';'
-            );
-        } else {
-            return (
-                mappingName +
-                this.items.map(item => `[${item.str()}]`).join('') +
-                ' = ' +
-                this.data.str() +
-                ';'
-            );
-        }
-    }
 }
 
 export class SStore {
@@ -124,34 +71,6 @@ export class SStore {
 
     eval() {
         return new SStore(this.location.eval(), this.data.eval(), this.variables);
-    }
-
-    toString() {
-        let variableName = 'storage[' + this.location.str() + ']';
-        if (this.location.isVal() && this.location.val.toString() in this.variables) {
-            const loc = this.location.val.toString();
-            const label = this.variables[loc].label;
-            if (label) {
-                variableName = label;
-            } else {
-                variableName = `var${Object.keys(this.variables).indexOf(loc) + 1}`;
-            }
-        }
-        if (
-            this.data.tag === 'Add' &&
-            this.data.left.tag === 'SLoad' &&
-            this.data.left.location.str() === this.location.str()
-        ) {
-            return variableName + ' += ' + this.data.right.str() + ';';
-        } else if (
-            this.data.tag === 'Sub' &&
-            this.data.left.tag === 'SLoad' &&
-            this.data.left.location.str() === this.location.str()
-        ) {
-            return variableName + ' -= ' + this.data.right.str() + ';';
-        } else {
-            return variableName + ' = ' + this.data.str() + ';';
-        }
     }
 }
 
