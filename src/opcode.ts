@@ -232,7 +232,13 @@ interface Push {
 }
 
 /**
+ * Represents an opcode found in the bytecode augmented with
+ * bytecode information.
  *
+ * It can be an unary opcode defined by the EVM.
+ * Essentially, all but `PUSHn` opcodes are unary opcodes.
+ *
+ * Or either represents a `PUSHn` mnemonic augmented with its `pushData`.
  */
 export type Opcode = {
     /**
