@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { OPCODES, decode, formatOpcode, toHex, type Opcode } from 'sevm';
+import { OPCODES, decode, formatOpcode, toHex, type Opcode, DecodeError } from 'sevm';
 
 const decodeFromArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
@@ -19,11 +19,11 @@ describe('opcode', function () {
         });
 
         it(`should throw when input is not even with prefix \`${p}\``, function () {
-            expect(() => decode(p + '1')).to.throw('input should have even length');
+            expect(() => decode(p + '1')).to.throw(DecodeError, 'input should have even length');
         });
 
         it(`should throw when input has an invalid number with prefix \`${p}\``, function () {
-            expect(() => decode(p + '010x')).to.throw(`invalid value at ${p.length + 2}`);
+            expect(() => decode(p + 'gg')).to.throw(DecodeError, `invalid value at ${p.length}`);
         });
     });
 
@@ -118,25 +118,8 @@ describe('opcode', function () {
     });
 
     it('should not fail `PUSH`n does not have enough data', function () {
-        expect(decodeFromArray(OPCODES.PUSH32).opcodes).to.be.deep.equal([
-            {
-                offset: 0,
-                pc: 0,
-                opcode: OPCODES.PUSH32,
-                mnemonic: 'PUSH32',
-                pushData: Buffer.from([]),
-            } satisfies Opcode,
-        ]);
-
-        expect(decodeFromArray(OPCODES.PUSH32, ...[1, 2, 3, 4]).opcodes).to.deep.equal([
-            {
-                offset: 0,
-                pc: 0,
-                opcode: OPCODES.PUSH32,
-                mnemonic: 'PUSH32',
-                pushData: Buffer.from([1, 2, 3, 4]),
-            } satisfies Opcode,
-        ]);
+        expect(() => decodeFromArray(OPCODES.PUSH32)).to.throw(DecodeError, 'not enough data');
+        expect(() => decodeFromArray(OPCODES.PUSH32, 1)).to.throw(DecodeError, 'not enough data');
     });
 
     it('should `decode` with `INVALID` opcodes', function () {

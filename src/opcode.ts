@@ -256,6 +256,20 @@ export type Opcode = {
 } & (Unary | Push);
 
 /**
+ * Represents an `Error` that occurs during decoding.
+ */
+export class DecodeError extends Error {
+    /**
+     * @param message The error message.
+     * @param position The position in the bytecode where the error occurred.
+     */
+    constructor(message: string, readonly position: number = 0) {
+        super(message);
+        this.name = 'DecodeError';
+    }
+}
+
+/**
  * Decodes the hexadecimal string `code` into `Opcode`s.
  * `code` may or may not begin with hex prefix `0x`.
  *
@@ -284,7 +298,12 @@ export function decode(code: string): {
     const opcodes: Opcode[] = [];
     const jumpdests: { [jd: number]: number } = {};
 
-    const buffer = fromHexString(code);
+    if (code.length % 2 !== 0) {
+        throw new DecodeError('Unable to decode, input should have even length');
+    }
+
+    const start = code.slice(0, 2) === '0x' ? 2 : 0;
+    const buffer = fromHexString(code, start);
     for (let i = 0; i < buffer.length; i++) {
         const opcode = buffer[i];
         const mnemonic = MNEMONICS[opcode] ?? 'INVALID';
@@ -301,6 +320,9 @@ export function decode(code: string): {
                       pushData: (() => {
                           const pushSize = opcode - OPCODES.PUSH1 + 0x01;
                           const data = buffer.subarray(i + 1, i + pushSize + 1);
+                          if (data.length !== pushSize) {
+                              throw new DecodeError('Unable to decode, not enough data', start + i);
+                          }
                           i += pushSize;
                           return data;
                       })(),
@@ -315,22 +337,18 @@ export function decode(code: string): {
     return { opcodes, jumpdests };
 
     /**
-     *
      * @param hexstr the hexadecimal string to convert to `Uint8Array`
+     * @param start the index in `hexstr` where to start decoding.
      * @returns the `Uint8Array` representation of `hexstr`
      */
-    function fromHexString(hexstr: string): Uint8Array {
-        if (hexstr.length % 2 !== 0) {
-            throw new Error('Unable to decode, input should have even length');
-        }
-        const start = hexstr.slice(0, 2) === '0x' ? 2 : 0;
+    function fromHexString(hexstr: string, start: number): Uint8Array {
         const buffer = new Uint8Array((hexstr.length - start) / 2);
         for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
             const value = parseInt(hexstr.slice(i, i + 2), 16);
             if (value >= 0) {
                 buffer[j] = value;
             } else {
-                throw new Error(`Unable to decode, invalid value at ${i}`);
+                throw new DecodeError(`Unable to decode, invalid value at ${i}`, i);
             }
         }
         return buffer;
