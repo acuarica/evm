@@ -110,10 +110,6 @@ export class DataCopy extends Tag('DataCopy') {
     eval(): this {
         return this;
     }
-
-    str(): string {
-        return this.fn(this.offset.str(), this.size.str());
-    }
 }
 
 /**
@@ -122,10 +118,6 @@ export class DataCopy extends Tag('DataCopy') {
 export class CallValue extends Tag('CallValue') {
     eval(): Expr {
         return this;
-    }
-
-    str(): string {
-        return 'msg.value';
     }
 }
 
@@ -136,12 +128,5 @@ export class CallDataLoad extends Tag('CallDataLoad') {
     eval(): Expr {
         this.location = this.location.eval();
         return this;
-    }
-    str(): string {
-        return this.location.isVal() && this.location.val === 0n
-            ? 'msg.data'
-            : this.location.isVal() && (this.location.val - 4n) % 32n === 0n
-            ? `_arg${(this.location.val - 4n) / 32n}`
-            : `msg.data[${this.location}]`;
     }
 }

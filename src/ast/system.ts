@@ -12,12 +12,6 @@ export class Sha3 extends Tag('Sha3') {
             this.memoryLength
         );
     }
-
-    str(): string {
-        return this.memoryStart && this.memoryLength
-            ? `keccak256(memory[${this.memoryStart}:(${this.memoryStart}+${this.memoryLength})])`
-            : `keccak256(${this.args.join(', ')})`;
-    }
 }
 
 export class Create extends Tag('Create') {
@@ -36,10 +30,6 @@ export class Create extends Tag('Create') {
 
     eval(): Expr {
         return this;
-    }
-
-    str(): string {
-        return `new Contract(memory[${this.offset}..${this.offset}+${this.size}]).value(${this.value}).address`;
     }
 }
 
@@ -61,19 +51,6 @@ export class Call extends Tag('Call') {
     eval(): Expr {
         return this;
     }
-
-    str(): string {
-        return this.argsLen.isZero() && this.retLen.isZero()
-            ? this.gas.tag === 'Mul' &&
-              this.gas.left.isZero() &&
-              this.gas.right.isVal() &&
-              this.gas.right.val === 2300n
-                ? this.throwOnFail
-                    ? `address(${this.address}).transfer(${this.value})`
-                    : `address(${this.address}).send(${this.value})`
-                : `address(${this.address}).call.gas(${this.gas}).value(${this.value})`
-            : `call(${this.gas},${this.address},${this.value},${this.argsStart},${this.argsLen},${this.retStart},${this.retLen})`;
-    }
 }
 
 export class ReturnData extends Tag('ReturnData') {
@@ -87,9 +64,6 @@ export class ReturnData extends Tag('ReturnData') {
 
     eval(): Expr {
         return this;
-    }
-    str(): string {
-        return `output:ReturnData:${this.retOffset}:${this.retSize}`;
     }
 }
 
@@ -109,10 +83,6 @@ export class CallCode extends Tag('CallCode') {
     eval(): Expr {
         return this;
     }
-
-    str(): string {
-        return `callcode(${this.gas},${this.address},${this.value},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
-    }
 }
 
 export class Create2 extends Tag('Create2') {
@@ -122,10 +92,6 @@ export class Create2 extends Tag('Create2') {
 
     eval(): Expr {
         return this;
-    }
-
-    str(): string {
-        return `new Contract(memory[${this.offset}:(${this.offset}+${this.size})]).value(${this.value}).address`;
     }
 }
 
@@ -144,10 +110,6 @@ export class StaticCall extends Tag('StaticCall') {
     eval(): Expr {
         return this;
     }
-
-    str(): string {
-        return `staticcall(${this.gas},${this.address},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
-    }
 }
 
 export class DelegateCall extends Tag('DelegateCall') {
@@ -164,10 +126,6 @@ export class DelegateCall extends Tag('DelegateCall') {
 
     eval(): Expr {
         return this;
-    }
-
-    str(): string {
-        return `delegatecall(${this.gas},${this.address},${this.memoryStart},${this.memoryLength},${this.outputStart},${this.outputLength})`;
     }
 }
 

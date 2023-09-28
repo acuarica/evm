@@ -102,7 +102,6 @@ describe('evm::math', function () {
 
             expect(state.stack.values).to.be.deep.equal([expr]);
             expect(expr.eval()).to.be.deep.equal(val);
-            expect(expr.str()).to.be.equal(str);
             expect(sol`${expr}`).to.be.equal(str);
         });
     });

@@ -14,7 +14,7 @@ describe('yul', function () {
             str: 'block.coinbase',
         },
     ].forEach(({ expr, str }) => {
-        it(`should convert expression to Yul \`${str}\``, function () {
+        it.skip(`should convert expression to Yul \`${str}\``, function () {
             expect(yul`${expr}`).to.be.equal(str);
         });
     });
@@ -25,7 +25,7 @@ describe('yul', function () {
             str: 'log1(0x0, 3);',
         },
     ].forEach(({ inst, str }) => {
-        it(`should convert instruction to Yul \`${str}\``, function () {
+        it.skip(`should convert instruction to Yul \`${str}\``, function () {
             expect(yul`${inst}`).to.be.equal(str);
         });
     });

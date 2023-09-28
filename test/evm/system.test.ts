@@ -15,7 +15,7 @@ describe('evm::system', function () {
         STEP().SHA3(state);
         expect(state.halted).to.be.false;
         expect(state.stack.values).to.be.deep.equal([new Sha3([new MLoad(new Val(0x10n))])]);
-        expect(`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
+        expect(sol`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
     });
 
     it('should exec `CREATE`', function () {
@@ -28,7 +28,7 @@ describe('evm::system', function () {
         expect(state.stack.values).to.be.deep.equal([
             new Create(new Val(0x1000n), new Val(16n), new Val(32n)),
         ]);
-        expect(`${state.stack.values[0]}`).to.be.equal(
+        expect(sol`${state.stack.values[0]}`).to.be.equal(
             'new Contract(memory[0x10..0x10+0x20]).value(0x1000).address'
         );
     });

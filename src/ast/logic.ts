@@ -1,15 +1,9 @@
 import { type Expr, Tag, Bin, Val } from './expr';
 
-function Cmp<N extends string>(tag: N, op: string) {
+function Cmp<N extends string>(tag: N, _op: string) {
     abstract class Cmp extends Tag(tag, 9) {
         constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
             super();
-        }
-
-        str() {
-            return `${this.left._str(Cmp.prec)} ${
-                this.equal ? `${op}=` : `${op}`
-            } ${this.right._str(Cmp.prec)}`;
         }
     }
 
@@ -30,14 +24,10 @@ function Unary<N extends string>(tag: N, op: string, prec: number) {
     return Unary;
 }
 
-function Shift<N extends string>(tag: N, op: string) {
+function Shift<N extends string>(tag: N, _op: string) {
     abstract class Shift extends Tag(tag, Byte.prec) {
         constructor(readonly value: Expr, readonly shift: Expr) {
             super();
-        }
-
-        str() {
-            return `${this.value._str(Shift.prec)} ${op} ${this.shift._str(Shift.prec)}`;
         }
     }
 
@@ -83,11 +73,6 @@ export class IsZero extends Tag('IsZero', Eq.prec) {
             : val.tag === 'IsZero'
             ? val.value
             : new IsZero(val);
-    }
-    str(): string {
-        return this.value.tag === 'Eq'
-            ? this.value.left._str(IsZero.prec) + ' != ' + this.value.right._str(IsZero.prec)
-            : this.value._str(IsZero.prec) + ' == 0';
     }
 }
 
@@ -153,9 +138,6 @@ export class Byte extends Tag('Byte', 10) {
             ? new Val((data.val >> pos.val) & 1n)
             : new Byte(pos, data);
     }
-    str(): string {
-        return `(${this.data._str(Byte.prec)} >> ${this.pos._str(Byte.prec)}) & 1`;
-    }
 }
 
 export class Shl extends Shift('Shl', '<<') {
@@ -188,8 +170,5 @@ export class Sig extends Tag('Sig', Eq.prec) {
     }
     eval(): Expr {
         return this;
-    }
-    str(): string {
-        return `msg.sig == ${this.selector}`;
     }
 }

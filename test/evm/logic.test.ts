@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, STEP, State } from 'sevm';
+import { EVM, STEP, State, sol } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 import { Block, CallDataLoad, Div, Not, Shr, Sig, Val } from 'sevm/ast';
 
@@ -17,7 +17,7 @@ describe('evm::logic', function () {
                 STEP().NOT(state);
                 expect(state.stack.values).to.deep.equal([new Not(new Val(value))]);
                 expect(state.stack.values[0].eval()).to.be.deep.equal(new Val(BigInt(expected)));
-                expect(`${state.stack.values[0].eval()}`).to.be.equal(expected);
+                expect(sol`${state.stack.values[0].eval()}`).to.be.equal(expected);
             });
         }
     );
@@ -31,7 +31,7 @@ describe('evm::logic', function () {
 
         expect(state.stack.values).has.length(1);
         expect(state.stack.values[0]).to.be.deep.equal(new Not(Block.number));
-        expect(state.stack.values[0].str()).to.be.equal('~block.number');
+        expect(sol`${state.stack.values[0]}`).to.be.equal('~block.number');
     });
 
     describe('EQ', function () {
@@ -60,7 +60,7 @@ describe('evm::logic', function () {
             STEP().EQ(state);
 
             expect(state.stack.values).has.length(1);
-            expect(state.stack.values[0].str()).to.be.equal('block.number == 0x1');
+            expect(sol`${state.stack.values[0]}`).to.be.equal('block.number == 0x1');
         });
 
         ['06fdde03', '12345678', '00000001'].forEach(selector => {
@@ -72,7 +72,7 @@ describe('evm::logic', function () {
                     STEP().EQ(state);
 
                     expect(state.stack.values).has.length(1);
-                    expect(state.stack.values[0].str()).to.equal(`msg.sig == ${selector}`);
+                    expect(sol`${state.stack.values[0]}`).to.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from LHS DIV&EXP', function () {
@@ -82,7 +82,7 @@ describe('evm::logic', function () {
                     STEP().EQ(state);
 
                     expect(state.stack.values).has.length(1);
-                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(sol`${state.stack.values[0]}`).to.be.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from RHS SHR', function () {
@@ -92,7 +92,7 @@ describe('evm::logic', function () {
                     STEP().EQ(state);
 
                     expect(state.stack.values).has.length(1);
-                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(sol`${state.stack.values[0]}`).to.be.equal(`msg.sig == ${selector}`);
                 });
 
                 it('should stringify signature `msg.sig` from LHS SHR', function () {
@@ -102,7 +102,7 @@ describe('evm::logic', function () {
                     STEP().EQ(state);
 
                     expect(state.stack.values).has.length(1);
-                    expect(state.stack.values[0].str()).to.be.equal(`msg.sig == ${selector}`);
+                    expect(sol`${state.stack.values[0]}`).to.be.equal(`msg.sig == ${selector}`);
                 });
             });
         });

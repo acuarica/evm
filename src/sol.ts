@@ -32,6 +32,11 @@ const OPS = {
     And: ['&', 4],
     Or: ['|', 3],
     Xor: ['^', 6],
+    Not: ['not', 14],
+    Byte: ['byte', 10],
+    Shl: ['<<', 10],
+    Shr: ['>>>', 10],
+    Sar: ['>>', 10],
 } as const;
 
 const prec = (expr: Expr): number => {
@@ -44,7 +49,7 @@ const prec = (expr: Expr): number => {
 };
 
 function paren(expr: Expr, exprc: Expr): string {
-    return prec(expr) < prec(exprc) ? `(${expr})` : `${expr}`;
+    return prec(expr) < prec(exprc) ? sol`(${expr})` : sol`${expr}`;
 }
 
 // prettier-ignore
@@ -57,37 +62,92 @@ function solExpr(expr: Expr): string {
         case 'Div':
         case 'Mod':
         case 'Exp':
-        case 'Lt':
-        case 'Gt':
         case 'Eq':
         case 'And':
         case 'Or':
-        case 'Xor': return `${paren(expr.left, expr)} ${OPS[expr.tag][0]} ${paren(expr.right, expr)}`;
-        case 'IsZero': return '';
-        case 'Not': return '';
-        case 'Byte': return '';
-        case 'Shl': return '';
-        case 'Shr': return '';
-        case 'Sar': return '';
-        case 'Sig': return '';
-        case 'CallValue': return '';
-        case 'CallDataLoad': return '';
+        case 'Xor':
+            return `${paren(expr.left, expr)} ${OPS[expr.tag][0]} ${paren(expr.right, expr)}`;
+        case 'Lt':
+        case 'Gt':
+            return `${paren(expr.left, expr)} ${OPS[expr.tag][0]}${expr.equal ? '=' : ''} ${paren(expr.right, expr)}`;
+        case 'IsZero': 
+        return expr.value.tag === 'Eq'
+            ? paren(expr.value.left, expr) + ' != ' + paren(expr.value.right, expr)
+            : paren(expr.value, expr) + ' == 0';
+        case 'Not': 
+            return `~${paren(expr.value, expr)}`;
+        case 'Byte': 
+        return `(${paren(expr.data, expr)} >> ${paren(expr.pos, expr)}) & 1`;
+        case 'Shl': 
+        case 'Shr': 
+        case 'Sar': 
+            return `${paren(expr.value, expr)} ${OPS[expr.tag][0]} ${paren(expr.shift, expr)}`;
+        case 'Sig': 
+        return `msg.sig == ${expr.selector}`;
+        case 'CallValue': 
+        return 'msg.value';
+        case 'CallDataLoad': 
+        return expr.location.isVal() && expr.location.val === 0n
+            ? 'msg.data'
+            : expr.location.isVal() && (expr.location.val - 4n) % 32n === 0n
+            ? `_arg${(expr.location.val - 4n) / 32n}`
+            : sol`msg.data[${expr.location}]`;
         case 'Prop': return expr.value;
         case 'Fn': return FNS[expr.mnemonic][0](solExpr(expr.value));
-        case "DataCopy": return '';
-        case "MLoad": return '';
+        case 'DataCopy': 
+        return expr.fn(solExpr(expr.offset), solExpr(expr.size));
+        case 'MLoad': 
+        return sol`memory[${expr.loc}]`;
         case 'Sha3': return expr.memoryStart && expr.memoryLength
-            ? `keccak256(memory[${expr.memoryStart}:(${expr.memoryStart}+${expr.memoryLength})])`
-            : `keccak256(${expr.args.join(', ')})`;
-        case 'Create': return '';
-        case 'Call': return '';
-        case 'ReturnData': return '';
-        case 'CallCode': return '';
-        case 'Create2': return '';
-        case 'StaticCall': return '';
-        case 'DelegateCall': return '';
-        case 'SLoad': return '';
-        case 'MappingLoad': return '';
+            ? sol`keccak256(memory[${expr.memoryStart}:(${expr.memoryStart}+${expr.memoryLength})])`
+            : sol`keccak256(${expr.args.map(solExpr).join(', ')})`;
+        case 'Create': return sol`new Contract(memory[${expr.offset}..${expr.offset}+${expr.size}]).value(${expr.value}).address`;
+        case 'Call': return expr.argsLen.isZero() && expr.retLen.isZero()
+            ? expr.gas.tag === 'Mul' &&
+                expr.gas.left.isZero() &&
+                expr.gas.right.isVal() &&
+                expr.gas.right.val === 2300n
+                ? expr.throwOnFail
+                    ? sol`address(${expr.address}).transfer(${expr.value})`
+                    : sol`address(${expr.address}).send(${expr.value})`
+                : sol`address(${expr.address}).call.gas(${expr.gas}).value(${expr.value})`
+            : sol`call(${expr.gas},${expr.address},${expr.value},${expr.argsStart},${expr.argsLen},${expr.retStart},${expr.retLen})`;
+        case 'ReturnData': return `output:ReturnData:${expr.retOffset}:${expr.retSize}`;
+        case 'CallCode': return `callcode(${expr.gas},${expr.address},${expr.value},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'Create2': return sol`new Contract(memory[${expr.offset}:(${expr.offset}+${expr.size})]).value(${expr.value}).address`;
+        case 'StaticCall': return `staticcall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'DelegateCall': return `delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'SLoad': {
+            if (expr.location.isVal() && expr.location.val.toString() in expr.variables) {
+                const loc = expr.location.val.toString();
+                const label = expr.variables[loc].label;
+                if (label) {
+                    return label;
+                } else {
+                    return `var${Object.keys(expr.variables).indexOf(loc) + 1}`;
+                }
+            } else {
+                return sol`storage[${expr.location}]`;
+            }
+        }
+        case 'MappingLoad': {
+            let mappingName = `mapping${expr.location + 1}`;
+            const maybeName = expr.mappings[expr.location].name;
+            if (expr.location in expr.mappings && maybeName) {
+                mappingName = maybeName;
+            }
+            if (expr.structlocation) {
+                return (
+                    mappingName +
+                    expr.items.map(item => sol`[${item}]`).join('') +
+                    '[' +
+                    expr.structlocation.toString() +
+                    ']'
+                );
+            } else {
+                return mappingName + expr.items.map(item => '[' + solExpr(item) + ']').join('');
+            }
+        }
     }
 }
 
@@ -99,33 +159,33 @@ function solInst(inst: Inst): string {
             return 'return;';
         case 'Return':
             return inst.offset && inst.size
-                ? `return memory[${inst.offset}:(${inst.offset}+${inst.size})];`
+                ? sol`return memory[${inst.offset}:(${inst.offset}+${inst.size})];`
                 : inst.args.length === 0
                 ? 'return;'
                 : isStringReturn(inst.args) && inst.args[0].val === 32n
                 ? `return '${hex2a(inst.args[2].val.toString(16))}';`
                 : inst.args.length === 1
-                ? `return ${inst.args[0]};`
-                : `return (${inst.args.join(', ')});`;
+                ? sol`return ${inst.args[0]};`
+                : sol`return (${inst.args.map(solExpr).join(', ')});`;
         case 'Revert':
             return inst.offset && inst.size
                 ? `revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
                 : `revert(${inst.args.join(', ')});`;
         case 'SelfDestruct':
-            return `selfdestruct(${inst.address});`;
+            return sol`selfdestruct(${inst.address});`;
         case 'Invalid':
             return `revert('Invalid instruction (0x${inst.opcode.toString(16)})');`;
         case 'Log':
             return inst.eventName
-                ? `emit ${inst.eventName}(${[...inst.topics.slice(1), ...(inst.args ?? [])].join(
-                      ', '
-                  )});`
+                ? `emit ${inst.eventName}(${[...inst.topics.slice(1), ...(inst.args ?? [])]
+                      .map(solExpr)
+                      .join(', ')});`
                 : 'log(' +
                       (inst.args === undefined
                           ? [...inst.topics, `memory[${inst.mem.offset}:${inst.mem.size} ]`].join(
                                 ', '
                             ) + 'ii'
-                          : [...inst.topics, ...inst.args].join(', ')) +
+                          : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
                       ');';
         case 'Jump':
             return `goto :${inst.offset} branch:${inst.destBranch.key}`;
@@ -136,7 +196,7 @@ function solInst(inst: Inst): string {
         case 'SigCase':
             return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.key}`;
         case 'SStore': {
-            let variableName = 'storage[' + inst.location.str() + ']';
+            let variableName = sol`storage[${inst.location}]`;
             if (inst.location.isVal() && inst.location.val.toString() in inst.variables) {
                 const loc = inst.location.val.toString();
                 const label = inst.variables[loc].label;
@@ -149,17 +209,17 @@ function solInst(inst: Inst): string {
             if (
                 inst.data.tag === 'Add' &&
                 inst.data.left.tag === 'SLoad' &&
-                inst.data.left.location.str() === inst.location.str()
+                solExpr(inst.data.left.location) === solExpr(inst.location)
             ) {
-                return variableName + ' += ' + inst.data.right.str() + ';';
+                return sol`${variableName} += ${inst.data.right};`;
             } else if (
                 inst.data.tag === 'Sub' &&
                 inst.data.left.tag === 'SLoad' &&
-                inst.data.left.location.str() === inst.location.str()
+                solExpr(inst.data.left.location) === solExpr(inst.location)
             ) {
-                return variableName + ' -= ' + inst.data.right.str() + ';';
+                return sol`${variableName} -= ${inst.data.right};`;
             } else {
-                return variableName + ' = ' + inst.data.str() + ';';
+                return sol`${variableName} = ${inst.data};`;
             }
         }
         case 'MappingStore': {
@@ -175,9 +235,9 @@ function solInst(inst: Inst): string {
             ) {
                 return (
                     mappingName +
-                    inst.items.map(item => '[' + item.str() + ']').join('') +
+                    inst.items.map(item => '[' + solExpr(item) + ']').join('') +
                     ' += ' +
-                    inst.data.left.str() +
+                    solExpr(inst.data.left) +
                     ';'
                 );
             } else if (
@@ -187,9 +247,9 @@ function solInst(inst: Inst): string {
             ) {
                 return (
                     mappingName +
-                    inst.items.map(item => '[' + item.str() + ']').join('') +
+                    inst.items.map(item => sol`[${item}]`).join('') +
                     ' += ' +
-                    inst.data.right.str() +
+                    solExpr(inst.data.right) +
                     ';'
                 );
             } else if (
@@ -199,17 +259,17 @@ function solInst(inst: Inst): string {
             ) {
                 return (
                     mappingName +
-                    inst.items.map(item => '[' + item.str() + ']').join('') +
+                    inst.items.map(item => sol`[${item}]`).join('') +
                     ' -= ' +
-                    inst.data.right.str() +
+                    solExpr(inst.data.right) +
                     ';'
                 );
             } else {
                 return (
                     mappingName +
-                    inst.items.map(item => `[${item.str()}]`).join('') +
+                    inst.items.map(item => sol`[${item}]`).join('') +
                     ' = ' +
-                    inst.data.str() +
+                    solExpr(inst.data) +
                     ';'
                 );
             }
@@ -235,11 +295,11 @@ function hex2a(hexstr: string) {
 function solStmt(stmt: Stmt): string {
     switch (stmt.name) {
         case 'If':
-            return `(${stmt.condition})`;
+            return sol`(${stmt.condition})`;
         case 'CallSite':
-            return `$${stmt.selector}();`;
+            return sol`$${stmt.selector}();`;
         case 'Require':
-            return `require(${[stmt.condition, ...stmt.args].join(', ')});`;
+            return `require(${[stmt.condition, ...stmt.args].map(solExpr).join(', ')});`;
         default:
             return solInst(stmt);
     }

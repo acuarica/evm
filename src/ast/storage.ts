@@ -96,25 +96,6 @@ export class MappingLoad extends Tag('MappingLoad') {
     eval() {
         return this;
     }
-
-    str(): string {
-        let mappingName = `mapping${this.location + 1}`;
-        const maybeName = this.mappings[this.location].name;
-        if (this.location in this.mappings && maybeName) {
-            mappingName = maybeName;
-        }
-        if (this.structlocation) {
-            return (
-                mappingName +
-                this.items.map(item => `[${item.str()}]`).join('') +
-                '[' +
-                this.structlocation.toString() +
-                ']'
-            );
-        } else {
-            return mappingName + this.items.map(item => '[' + item.str() + ']').join('');
-        }
-    }
 }
 
 export class SLoad extends Tag('SLoad') {
@@ -124,19 +105,5 @@ export class SLoad extends Tag('SLoad') {
 
     eval(): Expr {
         return new SLoad(this.location.eval(), this.variables);
-    }
-
-    str(): string {
-        if (this.location.isVal() && this.location.val.toString() in this.variables) {
-            const loc = this.location.val.toString();
-            const label = this.variables[loc].label;
-            if (label) {
-                return label;
-            } else {
-                return `var${Object.keys(this.variables).indexOf(loc) + 1}`;
-            }
-        } else {
-            return 'storage[' + this.location.str() + ']';
-        }
     }
 }

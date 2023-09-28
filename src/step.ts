@@ -296,7 +296,7 @@ const SPECIAL = {
     CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
     EXTCODECOPY: ({ stack }) => {
         const address = stack.pop();
-        datacopy((offset, size) => `address(${address.str()}).code[${offset}:(${offset}+${size})]`);
+        datacopy((offset, size) => `address(${address}).code[${offset}:(${offset}+${size})]`);
     },
     RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
 } as const satisfies { [mnemonic: string]: (state: Ram<Expr>) => void };

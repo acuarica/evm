@@ -13,10 +13,6 @@ export class MLoad extends Tag('MLoad') {
     eval(): Expr {
         return new MLoad(this.loc.eval());
     }
-
-    str(): string {
-        return `memory[${this.loc}]`;
-    }
 }
 
 export class MStore implements IInst {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State } from 'sevm';
+import { EVM, STEP, State, sol } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
 import { Add, Block, CallDataLoad, CallValue, Info, Msg, Tx, Val } from 'sevm/ast';
 
@@ -8,23 +8,23 @@ import { compile } from '../utils/solc';
 
 describe('evm::sym', function () {
     it(`should stringify Block's props`, function () {
-        expect(`${Block.basefee}`).to.be.equal('block.basefee');
-        expect(`${Block.chainid}`).to.be.equal('block.chainid');
-        expect(`${Block.coinbase}`).to.be.equal('block.coinbase');
-        expect(`${Block.difficulty}`).to.be.equal('block.difficulty');
-        expect(`${Block.gaslimit}`).to.be.equal('block.gaslimit');
-        expect(`${Block.number}`).to.be.equal('block.number');
-        expect(`${Block.timestamp}`).to.be.equal('block.timestamp');
+        expect(sol`${Block.basefee}`).to.be.equal('block.basefee');
+        expect(sol`${Block.chainid}`).to.be.equal('block.chainid');
+        expect(sol`${Block.coinbase}`).to.be.equal('block.coinbase');
+        expect(sol`${Block.difficulty}`).to.be.equal('block.difficulty');
+        expect(sol`${Block.gaslimit}`).to.be.equal('block.gaslimit');
+        expect(sol`${Block.number}`).to.be.equal('block.number');
+        expect(sol`${Block.timestamp}`).to.be.equal('block.timestamp');
     });
 
     it(`should stringify Msg's props`, function () {
-        expect(`${Msg.sender}`).to.be.equal('msg.sender');
-        expect(`${Msg['data.length']}`).to.be.equal('msg.data.length');
+        expect(sol`${Msg.sender}`).to.be.equal('msg.sender');
+        expect(sol`${Msg['data.length']}`).to.be.equal('msg.data.length');
     });
 
     it(`should stringify Tx's props`, function () {
-        expect(`${Tx.origin}`).to.be.equal('tx.origin');
-        expect(`${Tx.gasprice}`).to.be.equal('tx.gasprice');
+        expect(sol`${Tx.origin}`).to.be.equal('tx.origin');
+        expect(sol`${Tx.gasprice}`).to.be.equal('tx.gasprice');
     });
 
     it(`should push \`CallValue\``, function () {
@@ -32,7 +32,7 @@ describe('evm::sym', function () {
         STEP().CALLVALUE(state);
 
         expect(state.stack.values).to.deep.equal([new CallValue()]);
-        expect(state.stack.values[0].toString()).to.equal('msg.value');
+        expect(sol`${state.stack.values[0]}`).to.equal('msg.value');
     });
 
     describe('CallDataLoad', function () {
@@ -51,7 +51,7 @@ describe('evm::sym', function () {
                 STEP().CALLDATALOAD(state);
 
                 expect(state.stack.values).to.deep.equal([new CallDataLoad(location)]);
-                expect(state.stack.values[0].toString()).to.equal(str);
+                expect(sol`${state.stack.values[0]}`).to.equal(str);
             });
         });
     });
@@ -59,7 +59,7 @@ describe('evm::sym', function () {
     for (const [mnemonic, sym] of Object.entries(Info)) {
         describe(`\`${sym.value}\` prop pushed from \`${mnemonic}\``, function () {
             it('should be well-formed', function () {
-                expect(`${sym}`).to.be.equal(sym.value);
+                expect(sol`${sym}`).to.be.equal(sym.value);
             });
 
             it('should get expr from stack', function () {
