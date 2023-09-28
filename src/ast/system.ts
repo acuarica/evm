@@ -1,6 +1,7 @@
 import { type IInst, Tag, type Expr } from './expr';
 
-export class Sha3 extends Tag('Sha3') {
+export class Sha3 extends Tag {
+    readonly tag = 'Sha3';
     constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
         super();
     }
@@ -14,7 +15,8 @@ export class Sha3 extends Tag('Sha3') {
     }
 }
 
-export class Create extends Tag('Create') {
+export class Create extends Tag {
+    readonly tag = 'Create';
     override readonly type = 'address';
 
     /**
@@ -33,7 +35,8 @@ export class Create extends Tag('Create') {
     }
 }
 
-export class Call extends Tag('Call') {
+export class Call extends Tag {
+    readonly tag = 'Call';
     throwOnFail = false;
 
     constructor(
@@ -53,8 +56,8 @@ export class Call extends Tag('Call') {
     }
 }
 
-export class ReturnData extends Tag('ReturnData') {
-    readonly name = 'ReturnData';
+export class ReturnData extends Tag {
+    readonly tag = 'ReturnData';
     override readonly type = 'bytes';
     readonly wrapped = false;
 
@@ -67,7 +70,8 @@ export class ReturnData extends Tag('ReturnData') {
     }
 }
 
-export class CallCode extends Tag('CallCode') {
+export class CallCode extends Tag {
+    readonly tag = 'CallCode';
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -85,7 +89,8 @@ export class CallCode extends Tag('CallCode') {
     }
 }
 
-export class Create2 extends Tag('Create2') {
+export class Create2 extends Tag {
+    readonly tag = 'Create2';
     constructor(readonly offset: Expr, readonly size: Expr, readonly value: Expr) {
         super();
     }
@@ -95,7 +100,8 @@ export class Create2 extends Tag('Create2') {
     }
 }
 
-export class StaticCall extends Tag('StaticCall') {
+export class StaticCall extends Tag {
+    readonly tag = 'StaticCall';
     constructor(
         readonly gas: Expr,
         readonly address: Expr,
@@ -112,7 +118,8 @@ export class StaticCall extends Tag('StaticCall') {
     }
 }
 
-export class DelegateCall extends Tag('DelegateCall') {
+export class DelegateCall extends Tag {
+    readonly tag = 'DelegateCall';
     constructor(
         readonly gas: Expr,
         readonly address: Expr,

@@ -122,65 +122,38 @@ export class Throw implements IInst {
     }
 }
 
-export function Tag<N extends string>(tag: N, prec: number = Val.prec) {
-    abstract class Tag {
-        readonly tag: N = tag;
+export abstract class Tag {
+    abstract readonly tag: string;
 
-        static readonly prec = prec;
+    type?: Type;
 
-        type?: Type;
-
-        isVal(): this is Val {
-            return this.tag === 'Val';
-        }
-
-        isZero(): this is Val {
-            return this.isVal() && this.val === 0n;
-        }
-
-        isJumpDest() {
-            return this.isVal() && this.jumpDest !== null;
-        }
-
-        /**
-         * hghghg
-         */
-        abstract eval(): Expr;
-
-        /**
-         *
-         */
-        // abstract str(): string;
-
-        _str(_prec: number): string {
-            // const text = this.str();
-            // return Tag.prec < prec ? `(${text})` : text;
-            return '';
-        }
-
-        // toString() {
-        // return this.str();
-        // }
+    isVal(): this is Val {
+        return this.tag === 'Val';
     }
 
-    return Tag;
-}
-
-export function Bin<N extends string>(tag: N, op: string, prec: number) {
-    abstract class Bin extends Tag(tag, prec) {
-        constructor(readonly left: Expr, readonly right: Expr) {
-            super();
-        }
-
-        str() {
-            return `${this.left._str(prec)} ${op} ${this.right._str(prec)}`;
-        }
+    isZero(): this is Val {
+        return this.isVal() && this.val === 0n;
     }
 
-    return Bin;
+    isJumpDest() {
+        return this.isVal() && this.jumpDest !== null;
+    }
+
+    /**
+     * Reduce `this` expression.
+     */
+    abstract eval(): Expr;
 }
 
-export class Val extends Tag('Val', 16) {
+export abstract class Bin extends Tag {
+    constructor(readonly left: Expr, readonly right: Expr) {
+        super();
+    }
+}
+
+export class Val extends Tag {
+    readonly tag = 'Val';
+
     jumpDest: number | null = null;
 
     constructor(readonly val: bigint, readonly isPush = false) {
@@ -189,9 +162,5 @@ export class Val extends Tag('Val', 16) {
 
     eval(): Expr {
         return this;
-    }
-
-    str(): string {
-        return `${this.isJumpDest() ? '[J]' : ''}0x${this.val.toString(16)}`;
     }
 }

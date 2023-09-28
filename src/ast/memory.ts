@@ -1,6 +1,7 @@
 import { Tag, type Expr, type IInst } from './expr';
 
-export class MLoad extends Tag('MLoad') {
+export class MLoad extends Tag {
+    readonly tag = 'MLoad';
     /**
      * Loads word from memory.
      *

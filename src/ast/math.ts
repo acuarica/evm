@@ -1,6 +1,7 @@
 import { Bin, type Expr, Val } from './expr';
 
-export class Add extends Bin('Add', '+', 11) {
+export class Add extends Bin {
+    readonly tag = 'Add';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
@@ -14,7 +15,8 @@ export class Add extends Bin('Add', '+', 11) {
     }
 }
 
-export class Mul extends Bin('Mul', '*', 12) {
+export class Mul extends Bin {
+    readonly tag = 'Mul';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -26,7 +28,8 @@ export class Mul extends Bin('Mul', '*', 12) {
     }
 }
 
-export class Sub extends Bin('Sub', '-', Add.prec) {
+export class Sub extends Bin {
+    readonly tag = 'Sub';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
@@ -38,7 +41,8 @@ export class Sub extends Bin('Sub', '-', Add.prec) {
     }
 }
 
-export class Div extends Bin('Div', '/', Mul.prec) {
+export class Div extends Bin {
+    readonly tag = 'Div';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
@@ -52,7 +56,8 @@ export class Div extends Bin('Div', '/', Mul.prec) {
     }
 }
 
-export class Mod extends Bin('Mod', '%', Mul.prec) {
+export class Mod extends Bin {
+    readonly tag = 'Mod';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -60,7 +65,8 @@ export class Mod extends Bin('Mod', '%', Mul.prec) {
     }
 }
 
-export class Exp extends Bin('Exp', '**', 14) {
+export class Exp extends Bin {
+    readonly tag = 'Exp';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();

@@ -74,7 +74,8 @@ export class SStore {
     }
 }
 
-export class MappingLoad extends Tag('MappingLoad') {
+export class MappingLoad extends Tag {
+    readonly tag = 'MappingLoad';
     constructor(
         readonly mappings: IStore['mappings'],
         readonly location: number,
@@ -98,7 +99,8 @@ export class MappingLoad extends Tag('MappingLoad') {
     }
 }
 
-export class SLoad extends Tag('SLoad') {
+export class SLoad extends Tag {
+    readonly tag = 'SLoad';
     constructor(readonly location: Expr, readonly variables: IStore['variables']) {
         super();
     }

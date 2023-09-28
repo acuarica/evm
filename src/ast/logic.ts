@@ -1,40 +1,25 @@
 import { type Expr, Tag, Bin, Val } from './expr';
 
-function Cmp<N extends string>(tag: N, _op: string) {
-    abstract class Cmp extends Tag(tag, 9) {
-        constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
-            super();
-        }
+abstract class Cmp extends Tag {
+    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
+        super();
     }
-
-    return Cmp;
 }
 
-function Unary<N extends string>(tag: N, op: string, prec: number) {
-    abstract class Unary extends Tag(tag, prec) {
-        constructor(readonly value: Expr) {
-            super();
-        }
-
-        str() {
-            return `${op}${this.value._str(prec)}`;
-        }
+abstract class Unary extends Tag {
+    constructor(readonly value: Expr) {
+        super();
     }
-
-    return Unary;
 }
 
-function Shift<N extends string>(tag: N, _op: string) {
-    abstract class Shift extends Tag(tag, Byte.prec) {
-        constructor(readonly value: Expr, readonly shift: Expr) {
-            super();
-        }
+abstract class Shift extends Tag {
+    constructor(readonly value: Expr, readonly shift: Expr) {
+        super();
     }
-
-    return Shift;
 }
 
-export class Lt extends Cmp('Lt', '<') {
+export class Lt extends Cmp {
+    readonly tag = 'Lt';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -42,7 +27,8 @@ export class Lt extends Cmp('Lt', '<') {
     }
 }
 
-export class Gt extends Cmp('Gt', '>') {
+export class Gt extends Cmp {
+    readonly tag = 'Gt';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -50,13 +36,15 @@ export class Gt extends Cmp('Gt', '>') {
     }
 }
 
-export class Eq extends Bin('Eq', '==', 8) {
+export class Eq extends Bin {
+    readonly tag = 'Eq';
     eval(): Expr {
         return new Eq(this.left.eval(), this.right.eval());
     }
 }
 
-export class IsZero extends Tag('IsZero', Eq.prec) {
+export class IsZero extends Tag {
+    readonly tag = 'IsZero';
     constructor(readonly value: Expr) {
         super();
     }
@@ -76,7 +64,8 @@ export class IsZero extends Tag('IsZero', Eq.prec) {
     }
 }
 
-export class And extends Bin('And', '&', 4) {
+export class And extends Bin {
+    readonly tag = 'And';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -92,7 +81,8 @@ export class And extends Bin('And', '&', 4) {
     }
 }
 
-export class Or extends Bin('Or', '|', 3) {
+export class Or extends Bin {
+    readonly tag = 'Or';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -100,7 +90,8 @@ export class Or extends Bin('Or', '|', 3) {
     }
 }
 
-export class Xor extends Bin('Xor', '^', 6) {
+export class Xor extends Bin {
+    readonly tag = 'Xor';
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
@@ -120,14 +111,16 @@ export class Xor extends Bin('Xor', '^', 6) {
 const X = 1n << 0x100n;
 const mod = (n: bigint) => ((n % X) + X) % X;
 
-export class Not extends Unary('Not', '~', 14) {
+export class Not extends Unary {
+    readonly tag = 'Not';
     eval(): Expr {
         const val = this.value.eval();
         return val.isVal() ? new Val(mod(~val.val)) : new Not(val);
     }
 }
 
-export class Byte extends Tag('Byte', 10) {
+export class Byte extends Tag {
+    readonly tag = 'Byte';
     constructor(readonly pos: Expr, readonly data: Expr) {
         super();
     }
@@ -140,7 +133,8 @@ export class Byte extends Tag('Byte', 10) {
     }
 }
 
-export class Shl extends Shift('Shl', '<<') {
+export class Shl extends Shift {
+    readonly tag = 'Shl';
     eval(): Expr {
         const val = this.value.eval();
         const shift = this.shift.eval();
@@ -148,7 +142,8 @@ export class Shl extends Shift('Shl', '<<') {
     }
 }
 
-export class Shr extends Shift('Shr', '>>>') {
+export class Shr extends Shift {
+    readonly tag = 'Shr';
     eval(): Expr {
         const val = this.value.eval();
         const shift = this.shift.eval();
@@ -156,7 +151,8 @@ export class Shr extends Shift('Shr', '>>>') {
     }
 }
 
-export class Sar extends Shift('Sar', '>>') {
+export class Sar extends Shift {
+    readonly tag = 'Sar';
     eval(): Expr {
         const val = this.value.eval();
         const shift = this.shift.eval();
@@ -164,7 +160,8 @@ export class Sar extends Shift('Sar', '>>') {
     }
 }
 
-export class Sig extends Tag('Sig', Eq.prec) {
+export class Sig extends Tag {
+    readonly tag = 'Sig';
     constructor(readonly selector: string) {
         super();
     }

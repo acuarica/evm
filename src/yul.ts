@@ -18,7 +18,7 @@ export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string 
 // prettier-ignore
 function yulExpr(expr: Expr): string {
     switch (expr.tag) {
-        case 'Val': return `${expr.val}`;
+        case 'Val': return `0x${expr.val.toString(16)}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -60,9 +60,7 @@ function yulExpr(expr: Expr): string {
 // prettier-ignore
 function yulInst(inst: Inst): string {
     switch (inst.name) {
-        case 'Log': return `log${inst.topics.length}(${inst.mem.offset}, ${inst.topics
-            .map(yulExpr)
-            .join(', ')});`;
+        case 'Log': return yul`log${inst.topics.length}(${inst.mem.offset}, ${inst.topics.map(yulExpr).join(', ')});`;
         case 'MStore': throw new Error('Not implemented yet: "MStore" case');
         case 'Stop': return `stop()`;
         case 'Return': throw new Error('Not implemented yet: "Return" case');

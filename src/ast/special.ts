@@ -1,5 +1,5 @@
 import { mapValues } from '../object';
-import { type Expr, Tag, Val } from './expr';
+import { type Expr, Tag } from './expr';
 
 const BLOCK = {
     BASEFEE: ['basefee', 'uint'],
@@ -44,7 +44,8 @@ const PROPS = {
 /**
  * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
-export class Prop extends Tag('Prop') {
+export class Prop extends Tag {
+    readonly tag = 'Prop';
     readonly value: (typeof PROPS)[keyof typeof PROPS][0];
 
     constructor([value, type]: (typeof PROPS)[keyof typeof PROPS]) {
@@ -83,7 +84,8 @@ export const FNS = {
     BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32'],
 } as const;
 
-export class Fn extends Tag('Fn') {
+export class Fn extends Tag {
+    readonly tag = 'Fn';
     constructor(readonly mnemonic: keyof typeof FNS, readonly value: Expr) {
         super();
         this.type = FNS[mnemonic][1];
@@ -92,13 +94,10 @@ export class Fn extends Tag('Fn') {
     eval(): Expr {
         return new Fn(this.mnemonic, this.value.eval());
     }
-
-    str(): string {
-        return FNS[this.mnemonic][0](this.value._str(Val.prec));
-    }
 }
 
-export class DataCopy extends Tag('DataCopy') {
+export class DataCopy extends Tag {
+    readonly tag = 'DataCopy';
     constructor(
         readonly fn: (offset: string, size: string) => string,
         readonly offset: Expr,
@@ -115,13 +114,15 @@ export class DataCopy extends Tag('DataCopy') {
 /**
  * Get deposited value by the instruction/transaction responsible for this execution.
  */
-export class CallValue extends Tag('CallValue') {
+export class CallValue extends Tag {
+    readonly tag = 'CallValue';
     eval(): Expr {
         return this;
     }
 }
 
-export class CallDataLoad extends Tag('CallDataLoad') {
+export class CallDataLoad extends Tag {
+    readonly tag = 'CallDataLoad';
     constructor(public location: Expr) {
         super();
     }
