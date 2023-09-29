@@ -6,7 +6,7 @@ import { Add, Block, CallDataLoad, CallValue, Info, Msg, Tx, Val } from 'sevm/as
 
 import { compile } from '../utils/solc';
 
-describe('evm::sym', function () {
+describe('evm::special', function () {
     it(`should stringify Block's props`, function () {
         expect(sol`${Block.basefee}`).to.be.equal('block.basefee');
         expect(sol`${Block.chainid}`).to.be.equal('block.chainid');
@@ -45,7 +45,7 @@ describe('evm::sym', function () {
             [new Val(32n), 'msg.data[0x20]'] as const,
             [new Add(new Val(1n), new Val(2n)), 'msg.data[0x1 + 0x2]'] as const,
         ].forEach(([location, str]) => {
-            it(`should push \`CallDataLoad\` at :${location} stringified to \`${str}\``, function () {
+            it(`should push CallDataLoad \`${str}\` at \`:${sol`${location}`}\``, function () {
                 const state = new State<never, Expr>();
                 state.stack.push(location);
                 STEP().CALLDATALOAD(state);
