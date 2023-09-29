@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { EVM, STEP, State, type Ram, sol } from 'sevm';
-import { Invalid, Tx, type Expr, type Inst } from 'sevm/ast';
+import { Invalid, Tx, type Expr, type Inst, Throw, Stop } from 'sevm/ast';
 
 import { compile } from './utils/solc';
 
@@ -21,6 +21,32 @@ describe('evm', function () {
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
         expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
+    });
+
+    it('should throw when `exec` `halted` state', function () {
+        const state = new State<Inst, Expr>();
+        const evm = new EVM('0x');
+        state.halt(new Stop());
+        expect(() => evm.exec(0, state)).to.throw('State at 0 must be non-halted to be `exec`');
+    });
+
+    it('should throw when after-`exec` non-`halted` state', function () {
+        const state = new State<Inst, Expr>();
+        const evm = new EVM('0x6001600201');
+        expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:3');
+    });
+
+    it('should halt when `exec` invalid opcode & state', function () {
+        const state = new State<Inst, Expr>();
+        const evm = new EVM('0x01');
+        evm.exec(0, state);
+
+        const err = new Throw('POP with empty stack', evm.opcodes[0], state);
+
+        expect(evm.errors).to.be.deep.equal([err]);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([err]);
+        expect(sol`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
     });
 
     it('should attach `INSTS` hooks', function () {

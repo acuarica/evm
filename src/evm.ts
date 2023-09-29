@@ -125,14 +125,13 @@ export class EVM {
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
         let pc = pc0;
-        const oplen = this.opcodes.length;
-        for (; !state.halted && pc < oplen; pc++) {
+        for (; !state.halted && pc < this.opcodes.length; pc++) {
             const opcode = this.opcodes[pc];
             try {
                 this.insts[opcode.opcode](state, opcode);
                 if (
                     !state.halted &&
-                    pc < oplen + 1 &&
+                    pc + 1 < this.opcodes.length &&
                     this.opcodes[pc + 1].opcode === OPCODES.JUMPDEST
                 ) {
                     const fallBranch = Branch.make(opcode.pc + 1, state);
@@ -141,15 +140,12 @@ export class EVM {
             } catch (err) {
                 const message = (err as Error).message;
                 const inv = new Throw(message, opcode, state);
-                // `\`${message}\` at [${opcode.offset}] ${opcode.mnemonic} =| ${state.stack.values
-                // .slice(0, -1)
-                // .join(' | ')}`
                 state.halt(inv);
                 this.errors.push(inv);
             }
         }
 
-        if (!state.halted) throw new Error(`State must be halted after exec at ${pc0}:${pc}`);
+        if (!state.halted) throw new Error(`State must be halted after \`exec\` at ${pc0}:${pc}`);
 
         let chunk = this.chunks.get(pc0);
         if (chunk === undefined) {
