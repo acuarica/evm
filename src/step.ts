@@ -339,15 +339,15 @@ function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
 }
 
 const SYSTEM = {
-    SHA3: (state: State<Inst, Expr>): void => state.stack.push(memArgs(state, Sha3)),
-    STOP: (state: State<Inst, Expr>): void => state.halt(new Stop()),
-    CREATE: ({ stack }: State<Inst, Expr>): void => {
+    SHA3: state => state.stack.push(memArgs(state, Sha3)),
+    STOP: state => state.halt(new Stop()),
+    CREATE: ({ stack }) => {
         const value = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
         stack.push(new Create(value, offset, size));
     },
-    CALL: ({ stack, memory }: State<Inst, Expr>): void => {
+    CALL: ({ stack, memory }) => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -360,7 +360,7 @@ const SYSTEM = {
             memory[Number(retStart.val)] = new ReturnData(retStart, retLen);
         }
     },
-    CALLCODE: ({ stack }: State<Inst, Expr>): void => {
+    CALLCODE: ({ stack }) => {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -370,8 +370,8 @@ const SYSTEM = {
         const retLen = stack.pop();
         stack.push(new CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
     },
-    RETURN: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Return)),
-    DELEGATECALL: ({ stack }: State<Inst, Expr>): void => {
+    RETURN: state => state.halt(memArgs(state, Return)),
+    DELEGATECALL: ({ stack }) => {
         const gas = stack.pop();
         const address = stack.pop();
         const argsStart = stack.pop();
@@ -380,13 +380,13 @@ const SYSTEM = {
         const retLen = stack.pop();
         stack.push(new DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
     },
-    CREATE2: ({ stack }: State<Inst, Expr>): void => {
+    CREATE2: ({ stack }) => {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
         stack.push(new Create2(memoryStart, memoryLength, value));
     },
-    STATICCALL: ({ stack }: State<Inst, Expr>): void => {
+    STATICCALL: ({ stack }) => {
         const gas = stack.pop();
         const address = stack.pop();
         const argsStart = stack.pop();
@@ -395,12 +395,12 @@ const SYSTEM = {
         const retLen = stack.pop();
         stack.push(new StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
     },
-    REVERT: (state: State<Inst, Expr>): void => state.halt(memArgs(state, Revert)),
-    SELFDESTRUCT: (state: State<Inst, Expr>): void => {
+    REVERT: state => state.halt(memArgs(state, Revert)),
+    SELFDESTRUCT: state => {
         const address = state.stack.pop();
         state.halt(new SelfDestruct(address));
     },
-} as const;
+} as const satisfies { [mnemonic: string]: (state: State<Inst, Expr>) => void };
 
 function memArgs<T>(
     { stack, memory }: State<Inst, Expr>,

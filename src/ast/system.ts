@@ -163,7 +163,6 @@ export class Return implements IInst {
 export class Revert implements IInst {
     readonly name = 'Revert';
     constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
-
     eval() {
         return this;
     }
@@ -172,7 +171,6 @@ export class Revert implements IInst {
 export class Invalid implements IInst {
     readonly name = 'Invalid';
     constructor(readonly opcode: number) {}
-
     eval() {
         return this;
     }
@@ -181,7 +179,6 @@ export class Invalid implements IInst {
 export class SelfDestruct implements IInst {
     readonly name = 'SelfDestruct';
     constructor(readonly address: Expr) {}
-
     eval() {
         return this;
     }

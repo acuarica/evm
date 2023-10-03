@@ -116,10 +116,6 @@ export class Throw implements IInst {
     eval() {
         return this;
     }
-
-    toString() {
-        return `throw('${this.reason}');`;
-    }
 }
 
 export abstract class Tag {
@@ -135,7 +131,7 @@ export abstract class Tag {
         return this.isVal() && this.val === 0n;
     }
 
-    isJumpDest() {
+    isJumpDest(): this is Val {
         return this.isVal() && this.jumpDest !== null;
     }
 
