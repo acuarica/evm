@@ -4,7 +4,7 @@ import { isExpr, type Expr, type Inst, isInst } from './ast/expr';
  * Returns the Yul `string` representation of `nodes` that are either
  * `Expr`essions or `Inst`ructions.
  *
- * https://docs.soliditylang.org/en/latest/yul.html
+ * https://docs.soliditylang.org/en/v0.8.21/yul.html
  */
 export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
@@ -15,10 +15,10 @@ export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string 
     return result.join('');
 }
 
-// prettier-ignore
 function yulExpr(expr: Expr): string {
     switch (expr.tag) {
-        case 'Val': return `0x${expr.val.toString(16)}`;
+        case 'Val':
+            return `0x${expr.val.toString(16)}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -30,30 +30,53 @@ function yulExpr(expr: Expr): string {
         case 'Eq':
         case 'And':
         case 'Or':
-        case 'Xor': return yul`${expr.tag.toLowerCase()}(${expr.left}, ${expr.right})`;
+        case 'Xor':
+            return yul`${expr.tag.toLowerCase()}(${expr.left}, ${expr.right})`;
         case 'IsZero':
-        case 'Not': return yul`${expr.tag.toLowerCase()}(${expr.value})`;
-        case 'Byte': return yul`byte(${expr.pos}, ${expr.data})`;
+        case 'Not':
+            return yul`${expr.tag.toLowerCase()}(${expr.value})`;
+        case 'Byte':
+            return yul`byte(${expr.pos}, ${expr.data})`;
         case 'Shl':
         case 'Shr':
-        case 'Sar': return yul`${expr.tag.toLowerCase()}(${expr.value}, ${expr.shift})`;
-        case 'Sig': throw new Error('Not implemented yet: "Sig" case');
-        case 'CallValue': return `callvalue()`;
-        case 'CallDataLoad': return `calldataload(${expr.location})`;
-        case 'Prop': return expr.value;
-        case 'Fn': throw new Error('');
-        case 'DataCopy': throw new Error('Not implemented yet: "DataCopy" case');
-        case 'MLoad': throw new Error('Not implemented yet: "MLoad" case');
-        case 'Sha3': throw new Error('Not implemented yet: "Sha3" case');
-        case 'Create': throw new Error('Not implemented yet: "Create" case');
-        case 'Call': throw new Error('Not implemented yet: "Call" case');
-        case 'ReturnData': throw new Error('Not implemented yet: "ReturnData" case');
-        case 'CallCode': throw new Error('Not implemented yet: "CallCode" case');
-        case 'Create2': throw new Error('Not implemented yet: "Create2" case');
-        case 'StaticCall': throw new Error('Not implemented yet: "StaticCall" case');
-        case 'DelegateCall': throw new Error('Not implemented yet: "DelegateCall" case');
-        case 'SLoad': throw new Error('Not implemented yet: "SLoad" case');
-        case 'MappingLoad': throw new Error('Not implemented yet: "MappingLoad" case');
+        case 'Sar':
+            return yul`${expr.tag.toLowerCase()}(${expr.value}, ${expr.shift})`;
+        case 'Sig':
+            return `eq(msg.sig, ${expr.selector})`;
+        case 'CallValue':
+            return 'callvalue()';
+        case 'CallDataLoad':
+            return yul`calldataload(${expr.location})`;
+        case 'Prop':
+            return expr.value;
+        case 'Fn':
+            throw new Error('');
+        case 'DataCopy':
+            throw new Error('Not implemented yet: "DataCopy" case');
+        case 'MLoad':
+            return yul`mload(${expr.loc})`;
+        case 'Sha3':
+            return yul`keccak256(${expr.memoryStart}, ${expr.memoryLength})`;
+        case 'Create': // create(v, p, n) | F | create new contract with code mem[p…(p+n)) and send v wei and return the new address; returns 0 on error
+            return yul`create(${expr.value}, ${expr.offset}, ${expr.size})`;
+        case 'Call': // call(g, a, v, in, insize, out, outsize) | F | call contract at address a with input mem[in…(in+insize)) providing g gas and v wei and output area mem[out…(out+outsize)) returning 0 on error (eg. out of gas) and 1 on success See more
+            throw new Error('Not implemented yet: "Call" case');
+        case 'ReturnData':
+            throw new Error('Not implemented yet: "ReturnData" case');
+        case 'CallCode':
+            throw new Error('Not implemented yet: "CallCode" case');
+        case 'Create2': // create2(v, p, n, s) | C | create new contract with code mem[p…(p+n)) at address keccak256(0xff . this . s . keccak256(mem[p…(p+n))) and
+            // send v wei and return the new address, where 0xff is a 1 byte value,
+            // this is the current contract’s address as a 20 byte value and s is a big-endian 256-bit value; returns 0 on error
+            return yul`create2(${expr.value}, ${expr.offset}, ${expr.size})`;
+        case 'StaticCall': // staticcall(g, a, in, insize, out, outsize)
+            return yul`staticcall(${expr.gas}, ${expr.address}, ${expr.memoryStart}, ${expr.memoryLength}, ${expr.outputStart}, ${expr.outputLength})`;
+        case 'DelegateCall':
+            throw new Error('Not implemented yet: "DelegateCall" case');
+        case 'SLoad':
+            throw new Error('Not implemented yet: "SLoad" case');
+        case 'MappingLoad':
+            throw new Error('Not implemented yet: "MappingLoad" case');
     }
 }
 
@@ -62,11 +85,11 @@ function yulInst(inst: Inst): string {
     switch (inst.name) {
         case 'Log': return yul`log${inst.topics.length}(${inst.mem.offset}, ${inst.topics.map(yulExpr).join(', ')});`;
         case 'MStore': throw new Error('Not implemented yet: "MStore" case');
-        case 'Stop': return `stop()`;
-        case 'Return': throw new Error('Not implemented yet: "Return" case');
-        case 'Revert': throw new Error('Not implemented yet: "Revert" case');
+        case 'Stop': return 'stop()';
+        case 'Return': return `return(${inst.offset}, ${inst.size});`;
+        case 'Revert': return `revert(${inst.offset}, ${inst.size});`;
         case 'SelfDestruct': return yul`selfdestruct(${inst.address})`;
-        case 'Invalid': throw new Error('Not implemented yet: "Invalid" case');
+        case 'Invalid': return 'invalid();';
         case 'Jump': throw new Error('Not implemented yet: "Jump" case');
         case 'Jumpi': throw new Error('Not implemented yet: "Jumpi" case');
         case 'JumpDest': throw new Error('Not implemented yet: "JumpDest" case');
