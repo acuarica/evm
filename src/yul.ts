@@ -74,28 +74,43 @@ function yulExpr(expr: Expr): string {
         case 'DelegateCall':
             throw new Error('Not implemented yet: "DelegateCall" case');
         case 'SLoad':
-            throw new Error('Not implemented yet: "SLoad" case');
+            return yul`sload(${expr.location})`;
         case 'MappingLoad':
             throw new Error('Not implemented yet: "MappingLoad" case');
     }
 }
 
-// prettier-ignore
 function yulInst(inst: Inst): string {
     switch (inst.name) {
-        case 'Log': return yul`log${inst.topics.length}(${inst.mem.offset}, ${inst.topics.map(yulExpr).join(', ')});`;
-        case 'MStore': throw new Error('Not implemented yet: "MStore" case');
-        case 'Stop': return 'stop()';
-        case 'Return': return `return(${inst.offset}, ${inst.size});`;
-        case 'Revert': return `revert(${inst.offset}, ${inst.size});`;
-        case 'SelfDestruct': return yul`selfdestruct(${inst.address})`;
-        case 'Invalid': return 'invalid();';
-        case 'Jump': throw new Error('Not implemented yet: "Jump" case');
-        case 'Jumpi': throw new Error('Not implemented yet: "Jumpi" case');
-        case 'JumpDest': throw new Error('Not implemented yet: "JumpDest" case');
-        case 'SigCase': throw new Error('Not implemented yet: "SigCase" case');
-        case 'SStore': throw new Error('Not implemented yet: "SStore" case');
-        case 'MappingStore': throw new Error('Not implemented yet: "MappingStore" case');
-        case 'Throw': throw new Error('Not implemented yet: "Throw" case');
+        case 'Log':
+            return yul`log${inst.topics.length}(${inst.mem.offset}, ${inst.topics
+                .map(yulExpr)
+                .join(', ')});`;
+        case 'MStore':
+            throw new Error('Not implemented yet: "MStore" case');
+        case 'Stop':
+            return 'stop()';
+        case 'Return':
+            return `return(${inst.offset}, ${inst.size});`;
+        case 'Revert':
+            return `revert(${inst.offset}, ${inst.size});`;
+        case 'SelfDestruct':
+            return yul`selfdestruct(${inst.address})`;
+        case 'Invalid':
+            return 'invalid();';
+        case 'Jump':
+            throw new Error('Not implemented yet: "Jump" case');
+        case 'Jumpi':
+            throw new Error('Not implemented yet: "Jumpi" case');
+        case 'JumpDest':
+            throw new Error('Not implemented yet: "JumpDest" case');
+        case 'SigCase':
+            throw new Error('Not implemented yet: "SigCase" case');
+        case 'SStore':
+            return yul`sstore(${inst.location}, ${inst.data})`;
+        case 'MappingStore':
+            throw new Error('Not implemented yet: "MappingStore" case');
+        case 'Throw':
+            throw new Error('Not implemented yet: "Throw" case');
     }
 }
