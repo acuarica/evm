@@ -13,7 +13,7 @@ import solc from 'solc';
 function main() {
     const input = {
         language: 'Solidity',
-        sources: { SOURCE: { content: readFileSync('./scripts/ercs.sol', 'utf-8') } },
+        sources: { 'ercs.sol': { content: readFileSync('./scripts/ercs.sol', 'utf-8') } },
         settings: { outputSelection: { '*': { '*': ['abi'] } } },
     };
     const output = solc.compile(JSON.stringify(input));
@@ -25,7 +25,7 @@ function main() {
     }
 
     const src = {};
-    for (const [name, { abi }] of Object.entries(contracts['SOURCE'])) {
+    for (const [name, { abi }] of Object.entries(contracts['ercs.sol'])) {
         const functions = {};
         const events = {};
         for (const member of abi) {
