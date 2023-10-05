@@ -16,13 +16,13 @@ describe('metadata', function () {
     const HASHES = {
         '0.5.5': [
             'bzzr',
-            '760b7e60f3ed5bd6e3aa987ceb719e6f969d34cd9f5a7998528738ff7f1b061a',
+            'c81d1e127b6ca0e81697eb851bb9788832691c0884dbf0d63c01558ab2b46cba',
             '<0.5.9',
         ],
-        '0.5.17': ['bzzr', 'a8069697346c7e74a85a870bebf9590429864e888d46f6bcc091bf3b402309a6'],
-        '0.6.12': ['ipfs', '12201f5f012878155213dffca1b7edc8362e12f3b3fc92086c5f67d6a5d0cf2ca98b'],
-        '0.7.6': ['ipfs', '12201997d77004cc732ef3f48d11e9d17be4c5f58b103d4a44285fdf0c772b2cef25'],
-        '0.8.16': ['ipfs', '12208ebe81467a9118d8a0387f22cc7713981d4c8f85aea00cbf07fa8848b20ca85b'],
+        '0.5.17': ['bzzr', '67b389a47e87003a2d242f84839b8cd6fa6e69172703b3dd6f1f4aee27324e4a'],
+        '0.6.12': ['ipfs', '122006087ea86c8b3d38c23f3d42f78d448db46feb342f2f3210c9d7cf882903da0f'],
+        '0.7.6': ['ipfs', '12208354e669af375d574e2cfa78c5eb0ddc3a1fed8b12c2152e131ee5dd4aee7c34'],
+        '0.8.16': ['ipfs', '12202ab104c0a9d46b10aa1dfa3aeb3df1e911396f6855ff98940e1724eb477a459f'],
     } as const;
 
     forVersion((compile, _fallback, version) => {

@@ -11,12 +11,12 @@ describe('contracts metadata', function () {
     let contract: Contract;
 
     before(function () {
-        const sol = 'contract C { bytes32 constant data = "605ed3230cfe24897f703fb05af4bdfd"; }';
+        const sol = 'contract C { bytes32 constant data = "c4fbd955063067b19422684fc2e52142"; }';
         // const solTemplate = `contract C { bytes32 constant data = "[rd]"; }`;
         // let sol;
         // do {
-        //     const randomData = crypto.randomBytes(16).toString('hex');
-        //     sol = solTemplate.replace('[rd]', randomData);
+        // const randomData = crypto.randomBytes(16).toString('hex');
+        // sol = solTemplate.replace('[rd]', randomData);
         contract = new Contract(compile(sol, '0.5.5').bytecode);
         // } while (contract.metadata && !includesFF(contract.metadata.hash));
         // console.log(sol);

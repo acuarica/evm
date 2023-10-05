@@ -56,23 +56,23 @@ contracts('empty', (compile, _fallback, version) => {
                 const HASHES = {
                     '0.5.5': [
                         'bzzr',
-                        '096a513e029cd483d2b09f7149099a6290d4ad077ecc811a012c5e7fc25514cd',
+                        '7e3073410730b2cd71eac5640978c7422e85ded020b64ccb92ee6206e65de3bf',
                     ],
                     '0.5.17': [
                         'bzzr',
-                        'b3196c0c582734d74810ef2241e728f6b83b6aa79d5f53732f29849c4bb4a25a',
+                        '5265bc663fcc158fefb6c68337005c5573444d95c65fd54340b3e8d49da0096f',
                     ],
                     '0.6.12': [
                         'ipfs',
-                        '12205823235d39a19a144ca0a76bbdf1e6ee8280514a68113e2c59bf79dd6000b767',
+                        '1220c67e9ef697533dc059c1189497c213374602a18778dace5f181af54029a137c1',
                     ],
                     '0.7.6': [
                         'ipfs',
-                        '12206f1628c622f5b88ce2fc0b4eb82036ef4a13488b80241c68fb8cd209fc59f641',
+                        '1220deb4ae4ab871ec5cfe3304c5b0495e81f60d657182d526a695610446e69323ac',
                     ],
                     '0.8.16': [
                         'ipfs',
-                        '122097ffe1485d914b655bdfa0b69dd73c107ff8a82b6e5dd22b6b11dbaac16b428a',
+                        '1220ab6d312183fd3151b5c599ff692e3fe622281770888e2e1133ac33add9d0285b',
                     ],
                 } as const;
 

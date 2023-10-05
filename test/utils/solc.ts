@@ -30,16 +30,15 @@ type ABI = {
 
 type SolcOutput = {
     contracts: {
-        SOURCE: {
+        'source.sol': {
             [contractName: string]: {
                 abi: ABI;
                 evm: { bytecode: Bytecode; deployedBytecode: Bytecode };
             };
         };
     };
-    sources: { SOURCE: { id: 0 } }; // Not currently used
     errors?: {
-        severity: string;
+        severity: keyof typeof SEVERITY;
         formattedMessage: string;
     }[];
 };
@@ -70,11 +69,35 @@ export function compile(
         context?: Mocha.Context;
     } = {}
 ): { bytecode: string; abi: ABI } {
-    content = `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`;
+    const input = JSON.stringify({
+        language: 'Solidity',
+        sources: {
+            'source.sol': {
+                content: `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`,
+            },
+        },
+        settings: {
+            // optimizer: {
+            // enabled:true,
+            // details: {
+            // deduplicate: true,
+            // cse: true,
+            // constantOptimizer: true,
+            // yul: true,
+            // }
+            // },
+            outputSelection: {
+                '*': {
+                    '*': ['abi', 'evm.deployedBytecode'],
+                },
+            },
+        },
+    });
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (opts.context !== undefined) {
-        const basePath = `.solc/v${version}`;
+        const title = (test: Runnable | Suite | undefined): string =>
+            test ? title(test.parent) + '.' + test.title : '';
         const fileName = title(opts.context.test)
             .replace(/^../, '')
             .replace('solc-', '')
@@ -83,11 +106,13 @@ export function compile(
             .replace(/ /g, '-')
             .replace(/[:^'()]/g, '_')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
+
+        const basePath = `.solc/v${version}`;
         if (!existsSync(basePath)) {
             mkdirSync(basePath);
         }
 
-        const hash = createHash('md5').update(content).digest('hex').substring(0, 6);
+        const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
         const path = `${basePath}/${fileName}-${hash}`;
 
         try {
@@ -105,59 +130,26 @@ export function compile(
         writeCacheFn = _output => {};
     }
 
-    const input = {
-        language: 'Solidity',
-        sources: {
-            SOURCE: {
-                content,
-            },
-        },
-        settings: {
-            // optimizer: {
-            //     enabled:true,
-            //     details: {
-            //         deduplicate: true,
-            //         cse: true,
-            //         constantOptimizer: true,
-            //         yul: true,
-            //     }
-            // },
-            outputSelection: {
-                '*': {
-                    '*': ['abi', 'evm.deployedBytecode'],
-                },
-            },
-        },
-    };
-
     versionsLoaded.add(version);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const solc = setupMethods(require(path.resolve('.solc', `soljson-v${version}.js`))) as {
         compile: (input: string) => string;
     };
-    const output = JSON.parse(solc.compile(JSON.stringify(input))) as SolcOutput;
+    const output = JSON.parse(solc.compile(input)) as SolcOutput;
 
-    if (!valid(output)) {
-        const errors = (output.errors || []).map(error => error.formattedMessage);
-        throw new Error(errors.join('\n'));
+    const sev = opts.severity ?? 'error';
+    if ('errors' in output && output.errors.some(err => SEVERITY[err.severity] >= SEVERITY[sev])) {
+        throw new Error(output.errors.map(err => err.formattedMessage).join('\n'));
     }
 
-    const { contracts } = output;
-    const contract = contracts['SOURCE'];
+    const contract = output.contracts['source.sol'];
 
     let selectedContract;
     if (opts.contractName) {
         if (!(opts.contractName in contract)) {
-            throw new Error(
-                `Contract '${
-                    opts.contractName
-                }' is not a valid contract. Valid contracts are: ${Object.keys(contract).join(
-                    ', '
-                )}.`
-            );
-        } else {
-            selectedContract = contract[opts.contractName];
+            throw new Error(`${opts.contractName} not found in ${Object.keys(contract).join(',')}`);
         }
+        selectedContract = contract[opts.contractName];
     } else {
         selectedContract = Object.values(contract)[0];
     }
@@ -167,21 +159,6 @@ export function compile(
     writeCacheFn({ bytecode, abi });
 
     return { bytecode, abi };
-
-    function valid(output: SolcOutput): boolean {
-        const sev = opts.severity ?? 'error';
-        return (
-            'contracts' in output &&
-            (!('errors' in output) ||
-                output.errors.filter(
-                    err => SEVERITY[err.severity as keyof typeof SEVERITY] >= SEVERITY[sev]
-                ).length === 0)
-        );
-    }
-
-    function title(test: Runnable | Suite | undefined): string {
-        return test ? title(test.parent) + '.' + test.title : '';
-    }
 }
 
 export function forVersion(
