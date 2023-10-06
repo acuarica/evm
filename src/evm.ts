@@ -129,17 +129,12 @@ export class EVM {
             const opcode = this.opcodes[pc];
             try {
                 this.insts[opcode.opcode](state, opcode);
-                if (
-                    !state.halted &&
-                    pc + 1 < this.opcodes.length &&
-                    this.opcodes[pc + 1].opcode === OPCODES.JUMPDEST
-                ) {
+                if (!state.halted && this.opcodes[pc + 1]?.opcode === OPCODES.JUMPDEST) {
                     const fallBranch = Branch.make(opcode.pc + 1, state);
                     state.halt(new JumpDest(fallBranch));
                 }
             } catch (err) {
-                const message = (err as Error).message;
-                const inv = new Throw(message, opcode, state);
+                const inv = new Throw((err as Error).message, opcode, state);
                 state.halt(inv);
                 this.errors.push(inv);
             }
