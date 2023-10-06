@@ -28,6 +28,46 @@ type ABI = {
     }[];
 }[];
 
+interface SolcInput {
+    /**
+     * Optional
+     */
+    settings?: {
+        /**
+         * Optional: Optimizer settings
+         */
+        optimizer?: {
+            /**
+             * Disabled by default.
+             * NOTE: enabled=false still leaves some optimizations on. See comments below.
+             * WARNING: Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
+             * it to false and would actually disable all the optimizations.
+             */
+            enabled?: boolean;
+            /**
+             * Switch optimizer components on or off in detail.
+             * The "enabled" switch above provides two defaults which can be tweaked here.
+             * If "details" is given, "enabled" can be omitted.
+             */
+            details?: {
+                /**
+                 * Removes duplicate code blocks
+                 */
+                deduplicate?: boolean;
+                /**
+                 * Common subexpression elimination, this is the most complicated step but
+                 * can also provide the largest gain.
+                 */
+                cse?: boolean;
+                /**
+                 * Optimize representation of literal numbers and strings in code.
+                 */
+                constantOptimizer?: boolean;
+            };
+        };
+    };
+}
+
 type SolcOutput = {
     contracts: {
         'source.sol': {
@@ -67,6 +107,7 @@ export function compile(
         severity?: keyof typeof SEVERITY;
         contractName?: string;
         context?: Mocha.Context;
+        optimizer?: Required<SolcInput>['settings']['optimizer'];
     } = {}
 ): { bytecode: string; abi: ABI } {
     const input = JSON.stringify({
@@ -77,15 +118,7 @@ export function compile(
             },
         },
         settings: {
-            // optimizer: {
-            // enabled:true,
-            // details: {
-            // deduplicate: true,
-            // cse: true,
-            // constantOptimizer: true,
-            // yul: true,
-            // }
-            // },
+            optimizer: opts.optimizer,
             outputSelection: {
                 '*': {
                     '*': ['abi', 'evm.deployedBytecode'],
