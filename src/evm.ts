@@ -147,13 +147,9 @@ export class EVM {
 
         if (!state.halted) throw new Error(`State must be halted after \`exec\` at ${pc0}:${pc}`);
 
-        let chunk = this.chunks.get(pc0);
+        const chunk = this.chunks.get(pc0);
         if (chunk === undefined) {
-            chunk = {
-                pcend: pc,
-                states: [state],
-            };
-            this.chunks.set(pc0, chunk);
+            this.chunks.set(pc0, { pcend: pc, states: [state] });
         } else {
             chunk.states.push(state);
         }

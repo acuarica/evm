@@ -470,11 +470,7 @@ function FLOW(
     function getDest(offset: Expr, opcode: Opcode): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
-            throw new Error(
-                `Expected numeric offset in top of stack, found ${offset} at ${formatOpcode(
-                    opcode
-                )}`
-            );
+            throw new Error(`Numeric offset ${offset} not found on stack @${formatOpcode(opcode)}`);
         }
         const destpc = jumpdests[Number(offset2.val)];
         if (destpc !== undefined) {
@@ -483,13 +479,9 @@ function FLOW(
         } else {
             const dest = opcodes.find(o => o.offset === Number(offset2.val));
             if (!dest) {
-                throw new Error(
-                    `Expected JUMPDEST in ${
-                        opcode.mnemonic
-                    } destination, ${offset2} , but none was found at '${formatOpcode(opcode)}'`
-                );
+                throw new Error(`Expected JUMPDEST, but found ${offset2} @${formatOpcode(opcode)}`);
             }
-            throw new Error('JUMP destination should be JUMPDEST but found' + formatOpcode(dest));
+            throw new Error(`JUMP destination should be JUMPDEST but found @${formatOpcode(dest)}`);
         }
     }
 }
