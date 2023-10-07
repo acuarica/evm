@@ -20,7 +20,7 @@ describe('contracts metadata', function () {
         try {
             const randomData = readFileSync(randomDataPath, 'utf8');
             const sol = solTemplate.replace('[randomData]', randomData);
-            contract = new Contract(compile(sol, version).bytecode);
+            contract = new Contract(compile(sol, version, this).bytecode);
         } catch {
             let sol: string, randomData: string;
             do {

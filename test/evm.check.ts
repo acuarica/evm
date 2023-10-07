@@ -21,7 +21,7 @@ describe('evm', function () {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = new EVM(compile(sol, '0.7.6', { context: this }).bytecode).opcodes;
+        const opcodes = new EVM(compile(sol, '0.7.6', this).bytecode).opcodes;
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);
@@ -42,7 +42,7 @@ describe('evm', function () {
                 emit Deposit(a);
             }
         }`;
-        const evm = new EVM(compile(sol, '0.7.6', { context: this, severity: 'info' }).bytecode);
+        const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         assert(state.stmts[0].name === 'Log');

@@ -23,7 +23,7 @@ describe('abi', function () {
             struct T { uint x; uint y; }
             function f(S memory, T memory, uint) public pure {}
         }`;
-        const abi = compile(sol, '0.8.16', { context: this, severity: 'info' }).abi;
+        const abi = compile(sol, '0.8.16', this).abi;
         expect(FunctionFragment.from(abi[0]).format()).to.be.equal(
             'f((uint256,uint256[],(uint256,uint256)[]),(uint256,uint256),uint256)'
         );

@@ -28,42 +28,37 @@ type ABI = {
     }[];
 }[];
 
-interface SolcInput {
+interface SolcInputSettings {
     /**
-     * Optional
+     * Optional: Optimizer settings
      */
-    settings?: {
+    optimizer?: {
         /**
-         * Optional: Optimizer settings
+         * Disabled by default.
+         * NOTE: enabled=false still leaves some optimizations on. See comments below.
+         * WARNING: Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
+         * it to false and would actually disable all the optimizations.
          */
-        optimizer?: {
+        enabled?: boolean;
+        /**
+         * Switch optimizer components on or off in detail.
+         * The "enabled" switch above provides two defaults which can be tweaked here.
+         * If "details" is given, "enabled" can be omitted.
+         */
+        details?: {
             /**
-             * Disabled by default.
-             * NOTE: enabled=false still leaves some optimizations on. See comments below.
-             * WARNING: Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
-             * it to false and would actually disable all the optimizations.
+             * Removes duplicate code blocks
              */
-            enabled?: boolean;
+            deduplicate?: boolean;
             /**
-             * Switch optimizer components on or off in detail.
-             * The "enabled" switch above provides two defaults which can be tweaked here.
-             * If "details" is given, "enabled" can be omitted.
+             * Common subexpression elimination, this is the most complicated step but
+             * can also provide the largest gain.
              */
-            details?: {
-                /**
-                 * Removes duplicate code blocks
-                 */
-                deduplicate?: boolean;
-                /**
-                 * Common subexpression elimination, this is the most complicated step but
-                 * can also provide the largest gain.
-                 */
-                cse?: boolean;
-                /**
-                 * Optimize representation of literal numbers and strings in code.
-                 */
-                constantOptimizer?: boolean;
-            };
+            cse?: boolean;
+            /**
+             * Optimize representation of literal numbers and strings in code.
+             */
+            constantOptimizer?: boolean;
         };
     };
 }
@@ -78,22 +73,22 @@ type SolcOutput = {
         };
     };
     errors?: {
-        severity: keyof typeof SEVERITY;
+        /**
+         * Mandatory ("error", "warning" or "info", but please note that this may be extended in the future)
+         */
+        severity: 'error' | 'warning' | 'info';
+        /**
+         * Optional: the message formatted with source location
+         */
         formattedMessage: string;
     }[];
-};
-
-const SEVERITY = {
-    error: 1,
-    warning: 2,
-    info: 3,
 };
 
 const versionsLoaded = new Set<Version>();
 
 /**
  *
- * https://docs.soliditylang.org/en/v0.8.16/using-the-compiler.html#compiler-input-and-output-json-description
+ * https://docs.soliditylang.org/en/latest/using-the-compiler.html#compiler-input-and-output-json-description
  *
  * @param contractName
  * @param content
@@ -103,12 +98,8 @@ const versionsLoaded = new Set<Version>();
 export function compile(
     content: string,
     version: Version,
-    opts: {
-        severity?: keyof typeof SEVERITY;
-        contractName?: string;
-        context?: Mocha.Context;
-        optimizer?: Required<SolcInput>['settings']['optimizer'];
-    } = {}
+    context?: Mocha.Context,
+    optimizer?: SolcInputSettings['optimizer']
 ): { bytecode: string; abi: ABI } {
     const input = JSON.stringify({
         language: 'Solidity',
@@ -118,7 +109,7 @@ export function compile(
             },
         },
         settings: {
-            optimizer: opts.optimizer,
+            optimizer,
             outputSelection: {
                 '*': {
                     '*': ['abi', 'evm.deployedBytecode'],
@@ -128,10 +119,10 @@ export function compile(
     });
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
-    if (opts.context !== undefined) {
+    if (context !== undefined) {
         const title = (test: Runnable | Suite | undefined): string =>
             test ? title(test.parent) + '.' + test.title : '';
-        const fileName = title(opts.context.test)
+        const fileName = title(context.test)
             .replace(/^../, '')
             .replace('solc-', '')
             .replace(/`/g, '')
@@ -152,9 +143,9 @@ export function compile(
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
             if (!versionsLoaded.has(version)) {
-                opts.context.timeout(opts.context.timeout() + 5000);
-                if (opts.context.test) {
-                    opts.context.test.title += `--loads \`solc-${version}\``;
+                context.timeout(context.timeout() + 5000);
+                if (context.test) {
+                    context.test.title += `--loads \`solc-${version}\``;
                 }
             }
             writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
@@ -168,27 +159,16 @@ export function compile(
     const solc = setupMethods(require(path.resolve('.solc', `soljson-v${version}.js`))) as {
         compile: (input: string) => string;
     };
-    const output = JSON.parse(solc.compile(input)) as SolcOutput;
+    const { errors, contracts } = JSON.parse(solc.compile(input)) as SolcOutput;
 
-    const sev = opts.severity ?? 'error';
-    if ('errors' in output && output.errors.some(err => SEVERITY[err.severity] >= SEVERITY[sev])) {
-        throw new Error(output.errors.map(err => err.formattedMessage).join('\n'));
+    if (errors !== undefined) {
+        throw new Error(errors.map(err => err.formattedMessage).join('\n'));
     }
 
-    const contract = output.contracts['source.sol'];
+    const contract = Object.values(contracts['source.sol'])[0];
 
-    let selectedContract;
-    if (opts.contractName) {
-        if (!(opts.contractName in contract)) {
-            throw new Error(`${opts.contractName} not found in ${Object.keys(contract).join(',')}`);
-        }
-        selectedContract = contract[opts.contractName];
-    } else {
-        selectedContract = Object.values(contract)[0];
-    }
-
-    const bytecode = selectedContract.evm.deployedBytecode.object;
-    const abi = selectedContract.abi;
+    const bytecode = contract.evm.deployedBytecode.object;
+    const abi = contract.abi;
     writeCacheFn({ bytecode, abi });
 
     return { bytecode, abi };
@@ -196,7 +176,7 @@ export function compile(
 
 export function forVersion(
     fn: (
-        compile_: (content: string, context?: Mocha.Context) => ReturnType<typeof compile>,
+        compile_: (content: string, context: Mocha.Context) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
     ) => void
@@ -208,14 +188,7 @@ export function forVersion(
             const fallback = version.startsWith('0.5') ? 'function' : 'fallback';
 
             describe(`solc-v${version}`, function () {
-                fn(
-                    (content, context) =>
-                        compile(content, version, {
-                            ...(context ? { context } : {}),
-                        }),
-                    fallback,
-                    version
-                );
+                fn((content, context) => compile(content, version, context), fallback, version);
             });
         }
     });

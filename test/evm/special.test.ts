@@ -83,7 +83,7 @@ describe('evm::special', function () {
                         fallback() external payable { emit Deposit(${sym.value}); }
                     }`;
 
-                const evm = new EVM(compile(sol, '0.8.16', { context: this }).bytecode);
+                const evm = new EVM(compile(sol, '0.8.16', this).bytecode);
                 let state = new State<Inst, Expr>();
                 evm.run(0, state);
 
