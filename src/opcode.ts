@@ -301,6 +301,9 @@ export function decode(code: string): {
      */
     jumpdests: { [jd: number]: number };
 } {
+    const isPush = (mnemonic: keyof typeof OPCODES): mnemonic is keyof typeof PUSHES =>
+        mnemonic in PUSHES;
+
     const opcodes: Opcode[] = [];
     const jumpdests: { [jd: number]: number } = {};
 
@@ -358,17 +361,6 @@ export function decode(code: string): {
             }
         }
         return buffer;
-    }
-
-    /**
-     * Checks whether `mnemonic` is a `PUSHn` opcode.
-     *
-     * @param mnemonic the `mnemonic` to check.
-     * @returns `true` when `mnemonic` is a `PUSHn` opcode.
-     * `false` otherwise.
-     */
-    function isPush(mnemonic: keyof typeof OPCODES): mnemonic is keyof typeof PUSHES {
-        return mnemonic in PUSHES;
     }
 }
 
