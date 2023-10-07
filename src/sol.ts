@@ -196,14 +196,14 @@ function solInst(inst: Inst): string {
         case 'SigCase':
             return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.key}`;
         case 'SStore': {
-            let variableName = sol`storage[${inst.location}]`;
+            let varName = sol`storage[${inst.location}]`;
             if (inst.location.isVal() && inst.location.val.toString() in inst.variables) {
                 const loc = inst.location.val.toString();
                 const label = inst.variables[loc].label;
                 if (label) {
-                    variableName = label;
+                    varName = label;
                 } else {
-                    variableName = `var${Object.keys(inst.variables).indexOf(loc) + 1}`;
+                    varName = `var${Object.keys(inst.variables).indexOf(loc) + 1}`;
                 }
             }
             if (
@@ -211,15 +211,15 @@ function solInst(inst: Inst): string {
                 inst.data.left.tag === 'SLoad' &&
                 solExpr(inst.data.left.location) === solExpr(inst.location)
             ) {
-                return sol`${variableName} += ${inst.data.right};`;
+                return sol`${varName} += ${inst.data.right};`;
             } else if (
                 inst.data.tag === 'Sub' &&
                 inst.data.left.tag === 'SLoad' &&
                 solExpr(inst.data.left.location) === solExpr(inst.location)
             ) {
-                return sol`${variableName} -= ${inst.data.right};`;
+                return sol`${varName} -= ${inst.data.right};`;
             } else {
-                return sol`${variableName} = ${inst.data};`;
+                return sol`${varName} = ${inst.data};`;
             }
         }
         case 'MappingStore': {
