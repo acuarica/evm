@@ -196,6 +196,9 @@ function solInst(inst: Inst): string {
         case 'SigCase':
             return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.key}`;
         case 'SStore': {
+            const isLoad = (value: Expr) =>
+                value.tag === 'SLoad' && solExpr(value.location) === solExpr(inst.location);
+
             let varName = sol`storage[${inst.location}]`;
             if (inst.location.isVal() && inst.location.val.toString() in inst.variables) {
                 const loc = inst.location.val.toString();
@@ -206,17 +209,11 @@ function solInst(inst: Inst): string {
                     varName = `var${Object.keys(inst.variables).indexOf(loc) + 1}`;
                 }
             }
-            if (
-                inst.data.tag === 'Add' &&
-                inst.data.left.tag === 'SLoad' &&
-                solExpr(inst.data.left.location) === solExpr(inst.location)
-            ) {
+            if (inst.data.tag === 'Add' && isLoad(inst.data.left)) {
                 return sol`${varName} += ${inst.data.right};`;
-            } else if (
-                inst.data.tag === 'Sub' &&
-                inst.data.left.tag === 'SLoad' &&
-                solExpr(inst.data.left.location) === solExpr(inst.location)
-            ) {
+            } else if (inst.data.tag === 'Add' && isLoad(inst.data.right)) {
+                return sol`${varName} += ${inst.data.left};`;
+            } else if (inst.data.tag === 'Sub' && isLoad(inst.data.left)) {
                 return sol`${varName} -= ${inst.data.right};`;
             } else {
                 return sol`${varName} = ${inst.data};`;
