@@ -96,7 +96,20 @@ async function getBytecode(pathOrAddress) {
     const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
 
     const tries = [
-        () => promises.readFile(pathOrAddress, 'utf8'),
+        async () => {
+            const text = await promises.readFile(pathOrAddress, 'utf8');
+            if (pathOrAddress.endsWith('.json')) {
+                const { deployedBytecode, bytecode } = JSON.parse(text);
+                if (deployedBytecode !== undefined) {
+                    return deployedBytecode['object'] ?? deployedBytecode;
+                }
+                if (bytecode !== undefined) {
+                    return bytecode['object'] ?? bytecode;
+                }
+                throw new Error('Cannot find `deployedBytecode` in json file');
+            }
+            return text;
+        },
         () => promises.readFile(cachePath, 'utf8'),
         async () => {
             const provider = new EtherscanProvider();
