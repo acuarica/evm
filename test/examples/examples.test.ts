@@ -164,14 +164,12 @@ describe('examples', function () {
                 }
             });
 
-            lines.forEach(line => {
-                const truncate = (str: string): string =>
-                    str.length < 50 ? str : str.substring(0, 50) + '...';
-
-                it(`should match decompiled bytecode to '${truncate(line.source)}'`, function () {
+            const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
+            lines.forEach(line =>
+                it(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
                     expect(text).to.match(line);
-                });
-            });
+                })
+            );
 
             ercs.forEach(erc =>
                 it(`should detect \`${erc}\` interface`, function () {
