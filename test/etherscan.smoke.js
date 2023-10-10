@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import c from 'ansi-colors';
 import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
-import { Contract, ERCIds } from 'sevm';
+import { Contract, ERCIds, sol } from 'sevm';
 import { STEP } from 'sevm';
 import 'sevm-4byte'
 
@@ -184,7 +184,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     const call = /** @type {import('sevm/ast').StaticCall}*/ (state.stack.top);
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {
-                        precompiledStats.append(address.toString());
+                        precompiledStats.append(sol`${address}`);
                     }
                 };
                 const t0 = hrtime.bigint();
