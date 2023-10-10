@@ -23,7 +23,10 @@ describe('opcode', function () {
         });
 
         it(`should throw when input has an invalid number with prefix \`${p}\``, function () {
-            expect(() => decode(p + 'gg')).to.throw(DecodeError, `invalid value at ${p.length}`);
+            expect(() => decode(p + 'gg')).to.throw(
+                DecodeError,
+                `invalid value found at ${p.length}`
+            );
         });
     });
 
@@ -118,8 +121,30 @@ describe('opcode', function () {
     });
 
     it('should not fail `PUSH`n does not have enough data', function () {
-        expect(() => decodeFromArray(OPCODES.PUSH32)).to.throw(DecodeError, 'not enough data');
-        expect(() => decodeFromArray(OPCODES.PUSH32, 1)).to.throw(DecodeError, 'not enough data');
+        expect(decodeFromArray(OPCODES.PUSH32)).to.be.deep.equal({
+            opcodes: [
+                {
+                    offset: 0,
+                    pc: 0,
+                    opcode: OPCODES.PUSH32,
+                    mnemonic: 'PUSH32',
+                    pushData: Buffer.from([]),
+                },
+            ],
+            jumpdests: {},
+        });
+        expect(decodeFromArray(OPCODES.PUSH32, 1)).to.be.deep.equal({
+            opcodes: [
+                {
+                    offset: 0,
+                    pc: 0,
+                    opcode: OPCODES.PUSH32,
+                    mnemonic: 'PUSH32',
+                    pushData: Buffer.from([1]),
+                },
+            ],
+            jumpdests: {},
+        });
     });
 
     it('should `decode` with `INVALID` opcodes', function () {

@@ -269,8 +269,8 @@ export class DecodeError extends Error {
      * @param message The error message.
      * @param position The position in the bytecode where the error occurred.
      */
-    constructor(message: string, readonly position: number = 0) {
-        super(message);
+    constructor(message: string, readonly position?: number) {
+        super(message + (position !== undefined ? ` at ${position}` : ''));
         this.name = 'DecodeError';
     }
 }
@@ -329,9 +329,6 @@ export function decode(code: string): {
                       pushData: (() => {
                           const pushSize = opcode - OPCODES.PUSH1 + 0x01;
                           const data = buffer.subarray(i + 1, i + pushSize + 1);
-                          if (data.length !== pushSize) {
-                              throw new DecodeError('Unable to decode, not enough data', start + i);
-                          }
                           i += pushSize;
                           return data;
                       })(),
@@ -357,7 +354,7 @@ export function decode(code: string): {
             if (value >= 0) {
                 buffer[j] = value;
             } else {
-                throw new DecodeError(`Unable to decode, invalid value at ${i}`, i);
+                throw new DecodeError(`Unable to decode, invalid value found`, i);
             }
         }
         return buffer;
