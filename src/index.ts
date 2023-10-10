@@ -134,10 +134,10 @@ export class Contract {
      * @param ercid
      * @returns
      */
-    isERC(ercid: (typeof ERCIds)[number]): boolean {
+    isERC(ercid: (typeof ERCIds)[number], checkEvents = true): boolean {
         return (
             ERCs[ercid].selectors.every(s => this.evm.functionBranches.has(s)) &&
-            ERCs[ercid].topics.every(t => t in this.evm.events)
+            (!checkEvents || ERCs[ercid].topics.every(t => t in this.evm.events))
         );
     }
 
