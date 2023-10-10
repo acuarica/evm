@@ -57,10 +57,6 @@ export class Prop extends Tag {
     eval(): Expr {
         return this;
     }
-
-    str(): string {
-        return this.value;
-    }
 }
 
 export const Info = mapValues(PROPS, info => new Prop(info));
