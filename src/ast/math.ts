@@ -61,7 +61,9 @@ export class Mod extends Bin {
     eval(): Expr {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
-        return lhs.isVal() && rhs.isVal() ? new Val(lhs.val % rhs.val) : new Mod(lhs, rhs);
+        return lhs.isVal() && rhs.isVal() && rhs.val !== 0n
+            ? new Val(lhs.val % rhs.val)
+            : new Mod(lhs, rhs);
     }
 }
 
