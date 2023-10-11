@@ -13,7 +13,11 @@ describe('examples', function () {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7' as const,
             count: 13208,
             lines: [],
-            ercs: [] as const,
+        },
+        {
+            name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467' as const,
+            count: 6514,
+            lines: [],
         },
         {
             name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d' as const,
@@ -32,7 +36,6 @@ describe('examples', function () {
             name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b' as const,
             count: 284,
             lines: [],
-            ercs: [] as const,
         },
         {
             name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7' as const,
@@ -75,7 +78,6 @@ describe('examples', function () {
                 /^function upgradeToAndCall\(address _arg0, bytes _arg1\) public payable {$/m,
                 /^function changeAdmin\(address _arg0\) public {$/m,
             ],
-            ercs: [] as const,
         },
         {
             name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as const,
@@ -130,7 +132,7 @@ describe('examples', function () {
             let text: string;
 
             before(function () {
-                const { events, functions } = abis[name];
+                const { events, functions } = abis[name] ?? { events: [], functions: [] };
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patchevs(...events).patchfns(...functions);
                 text = contract.decompile();
@@ -165,13 +167,13 @@ describe('examples', function () {
             });
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
-            lines.forEach(line =>
+            lines?.forEach(line =>
                 it(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
                     expect(text).to.match(line);
                 })
             );
 
-            ercs.forEach(erc =>
+            ercs?.forEach(erc =>
                 it(`should detect \`${erc}\` interface`, function () {
                     expect(contract.isERC(erc, checkEvents)).to.be.true;
                 })

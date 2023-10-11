@@ -143,11 +143,6 @@ export default {
         ],
     },
 
-    'ENS-0x314159265dD8dbb310642f98f50C066173C1259b': {
-        events: [],
-        functions: [],
-    },
-
     'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7': {
         events: ['Transfer(address,address,uint256)', 'FrozenFunds(address,bool)'],
         functions: [
@@ -200,4 +195,4 @@ export default {
             'allowance(address,address)',
         ],
     },
-};
+} as { [name: string]: { events: string[]; functions: string[] } };
