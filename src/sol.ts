@@ -188,13 +188,13 @@ function solInst(inst: Inst): string {
                           : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
                       ');';
         case 'Jump':
-            return `goto :${inst.offset} branch:${inst.destBranch.key}`;
+            return `goto :${inst.offset} branch:${inst.destBranch.pc}`;
         case 'Jumpi':
-            return `when ${inst.cond} goto ${inst.destBranch.key} or fall ${inst.fallBranch.key}`;
+            return `when ${inst.cond} goto ${inst.destBranch.pc} or fall ${inst.fallBranch.pc}`;
         case 'JumpDest':
-            return `fall: ${inst.fallBranch.key}:`;
+            return `fall: ${inst.fallBranch.pc}:`;
         case 'SigCase':
-            return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.key}`;
+            return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore': {
             const isLoad = (value: Expr) =>
                 value.tag === 'SLoad' && solExpr(value.location) === solExpr(inst.location);

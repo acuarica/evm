@@ -9,10 +9,6 @@ import type { Sig } from './logic';
 export class Branch {
     constructor(readonly pc: number, readonly state: State<Inst, Expr>) {}
 
-    get key() {
-        return this.pc;
-    }
-
     static make(pc: number, state: State<Inst, Expr>) {
         return new Branch(pc, state.clone());
     }
