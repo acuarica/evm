@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { sol, State, STEP } from 'sevm';
-import { Add, Block, Div, Exp, Mul, Sub, Val, type Expr } from 'sevm/ast';
+import { Add, Block, Div, Exp, Mul, Sub, Val, type Expr, Mod } from 'sevm/ast';
 
 describe('evm::math', function () {
     it('should test `isVal`', function () {
@@ -78,6 +78,12 @@ describe('evm::math', function () {
             str: '0x2 + 0x5 / 0x3',
         },
         {
+            insts: [0, 3, 'DIV'] as const,
+            expr: new Div(new Val(3n), new Val(0n)),
+            val: new Div(new Val(3n), new Val(0n)),
+            str: '0x3 / 0x0',
+        },
+        {
             insts: [2, 3, 'EXP', 1, 'ADD'] as const,
             expr: new Add(new Val(1n), new Exp(new Val(3n), new Val(2n))),
             val: new Val(10n),
@@ -88,6 +94,12 @@ describe('evm::math', function () {
             expr: new Exp(new Val(2n), new Add(new Val(1n), new Val(3n))),
             val: new Val(16n),
             str: '0x2 ** (0x1 + 0x3)',
+        },
+        {
+            insts: [2, 5, 'MOD'] as const,
+            expr: new Mod(new Val(5n), new Val(2n)),
+            val: new Val(1n),
+            str: '0x5 % 0x2',
         },
     ].forEach(({ insts, expr, val, str }) => {
         it(`should \`eval+str\` \`${str}\``, function () {
