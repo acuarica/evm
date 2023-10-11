@@ -12,7 +12,7 @@ export function eventSelector(sig: string): string {
 declare module 'sevm' {
     interface Contract {
         patchfns(...fns: string[]): this;
-        patchevs(...fns: string[]): this;
+        patchevs(...evs: string[]): this;
     }
 }
 
