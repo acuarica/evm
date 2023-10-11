@@ -147,10 +147,10 @@ sevm-4byte@^0.5.1:
   resolved "https://registry.yarnpkg.com/sevm-4byte/-/sevm-4byte-0.5.1.tgz#0e86e1f66ebe5839ce3c30ca0e201e47b741577a"
   integrity sha512-VqQp7goYm7LSqWRqBp6LLZSE1hEQNg+R3LJZ1BQ02qCeZfMQx3hkJATnaso1LE4AHpasP10LOh50LqZaSdzeCg==
 
-sevm@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.5.2.tgz#26dd9711f63dd44b5cdcb3ec34718d6d889c94fc"
-  integrity sha512-/4askK8vUW8J3dz87jSoSOv4UeG26AIJVReSm/RaLPaTMuOmhlZVbbdLpgYFxLPUkpxt2BKf3aE6lQhyYffECw==
+sevm@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.5.3.tgz#0bb4b1349f196a960fe8443feb3e1380b628323a"
+  integrity sha512-KA9kmu70EHaWCyZBTTEuCWJsAC1kuJb1BfpP6dWYgcYzc1wOK/IdW/t1M2dFxFPbeqj2hcGUFS/2Z7qIlbAIKg==
 
 string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"

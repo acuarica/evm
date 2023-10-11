@@ -10,7 +10,6 @@ import envPaths from 'env-paths';
 import path from 'path';
 
 import { Contract, EVM, formatOpcode, solStmts, toHex } from 'sevm';
-// import { EVM, Branch } from 'sevm/evm';
 import 'sevm-4byte';
 
 const paths = envPaths('sevm');
