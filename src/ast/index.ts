@@ -1,4 +1,5 @@
 export * from './expr';
+export * from './flow';
 export * from './log';
 export * from './logic';
 export * from './math';
