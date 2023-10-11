@@ -52,10 +52,10 @@ function paren(expr: Expr, exprc: Expr): string {
     return prec(expr) < prec(exprc) ? sol`(${expr})` : sol`${expr}`;
 }
 
-// prettier-ignore
 function solExpr(expr: Expr): string {
     switch (expr.tag) {
-        case 'Val': return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
+        case 'Val':
+            return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -69,54 +69,67 @@ function solExpr(expr: Expr): string {
             return `${paren(expr.left, expr)} ${OPS[expr.tag][0]} ${paren(expr.right, expr)}`;
         case 'Lt':
         case 'Gt':
-            return `${paren(expr.left, expr)} ${OPS[expr.tag][0]}${expr.equal ? '=' : ''} ${paren(expr.right, expr)}`;
-        case 'IsZero': 
-        return expr.value.tag === 'Eq'
-            ? paren(expr.value.left, expr) + ' != ' + paren(expr.value.right, expr)
-            : paren(expr.value, expr) + ' == 0';
-        case 'Not': 
+            return `${paren(expr.left, expr)} ${OPS[expr.tag][0]}${expr.equal ? '=' : ''} ${paren(
+                expr.right,
+                expr
+            )}`;
+        case 'IsZero':
+            return expr.value.tag === 'Eq'
+                ? paren(expr.value.left, expr) + ' != ' + paren(expr.value.right, expr)
+                : paren(expr.value, expr) + ' == 0';
+        case 'Not':
             return `~${paren(expr.value, expr)}`;
-        case 'Byte': 
-        return `(${paren(expr.data, expr)} >> ${paren(expr.pos, expr)}) & 1`;
-        case 'Shl': 
-        case 'Shr': 
-        case 'Sar': 
+        case 'Byte':
+            return `(${paren(expr.data, expr)} >> ${paren(expr.pos, expr)}) & 1`;
+        case 'Shl':
+        case 'Shr':
+        case 'Sar':
             return `${paren(expr.value, expr)} ${OPS[expr.tag][0]} ${paren(expr.shift, expr)}`;
-        case 'Sig': 
-        return `msg.sig == ${expr.selector}`;
-        case 'CallValue': 
-        return 'msg.value';
-        case 'CallDataLoad': 
-        return expr.location.isVal() && expr.location.val === 0n
-            ? 'msg.data'
-            : expr.location.isVal() && (expr.location.val - 4n) % 32n === 0n
-            ? `_arg${(expr.location.val - 4n) / 32n}`
-            : sol`msg.data[${expr.location}]`;
-        case 'Prop': return expr.value;
-        case 'Fn': return FNS[expr.mnemonic][0](solExpr(expr.value));
-        case 'DataCopy': 
-        return expr.fn(solExpr(expr.offset), solExpr(expr.size));
-        case 'MLoad': 
-        return sol`memory[${expr.loc}]`;
-        case 'Sha3': return expr.memoryStart && expr.memoryLength
-            ? sol`keccak256(memory[${expr.memoryStart}:(${expr.memoryStart}+${expr.memoryLength})])`
-            : sol`keccak256(${expr.args.map(solExpr).join(', ')})`;
-        case 'Create': return sol`new Contract(memory[${expr.offset}..${expr.offset}+${expr.size}]).value(${expr.value}).address`;
-        case 'Call': return expr.argsLen.isZero() && expr.retLen.isZero()
-            ? expr.gas.tag === 'Mul' &&
-                expr.gas.left.isZero() &&
-                expr.gas.right.isVal() &&
-                expr.gas.right.val === 2300n
-                ? expr.throwOnFail
-                    ? sol`address(${expr.address}).transfer(${expr.value})`
-                    : sol`address(${expr.address}).send(${expr.value})`
-                : sol`address(${expr.address}).call.gas(${expr.gas}).value(${expr.value})`
-            : sol`call(${expr.gas},${expr.address},${expr.value},${expr.argsStart},${expr.argsLen},${expr.retStart},${expr.retLen})`;
-        case 'ReturnData': return `output:ReturnData:${expr.retOffset}:${expr.retSize}`;
-        case 'CallCode': return `callcode(${expr.gas},${expr.address},${expr.value},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
-        case 'Create2': return sol`new Contract(memory[${expr.offset}:(${expr.offset}+${expr.size})]).value(${expr.value}).address`;
-        case 'StaticCall': return `staticcall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
-        case 'DelegateCall': return `delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'Sig':
+            return `msg.sig == ${expr.selector}`;
+        case 'CallValue':
+            return 'msg.value';
+        case 'CallDataLoad':
+            return expr.location.isVal() && expr.location.val === 0n
+                ? 'msg.data'
+                : expr.location.isVal() && (expr.location.val - 4n) % 32n === 0n
+                ? `_arg${(expr.location.val - 4n) / 32n}`
+                : sol`msg.data[${expr.location}]`;
+        case 'Prop':
+            return expr.value;
+        case 'Fn':
+            return FNS[expr.mnemonic][0](solExpr(expr.value));
+        case 'DataCopy':
+            return expr.fn(solExpr(expr.offset), solExpr(expr.size));
+        case 'MLoad':
+            return sol`memory[${expr.loc}]`;
+        case 'Sha3':
+            return expr.memoryStart && expr.memoryLength
+                ? sol`keccak256(memory[${expr.memoryStart}:(${expr.memoryStart}+${expr.memoryLength})])`
+                : sol`keccak256(${expr.args.map(solExpr).join(', ')})`;
+        case 'Create':
+            return sol`new Contract(memory[${expr.offset}..${expr.offset}+${expr.size}]).value(${expr.value}).address`;
+        case 'Call':
+            return expr.argsLen.isZero() && expr.retLen.isZero()
+                ? expr.gas.tag === 'Mul' &&
+                  expr.gas.left.isZero() &&
+                  expr.gas.right.isVal() &&
+                  expr.gas.right.val === 2300n
+                    ? expr.throwOnFail
+                        ? sol`address(${expr.address}).transfer(${expr.value})`
+                        : sol`address(${expr.address}).send(${expr.value})`
+                    : sol`address(${expr.address}).call.gas(${expr.gas}).value(${expr.value})`
+                : sol`call(${expr.gas},${expr.address},${expr.value},${expr.argsStart},${expr.argsLen},${expr.retStart},${expr.retLen})`;
+        case 'ReturnData':
+            return `output:ReturnData:${expr.retOffset}:${expr.retSize}`;
+        case 'CallCode':
+            return `callcode(${expr.gas},${expr.address},${expr.value},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'Create2':
+            return sol`new Contract(memory[${expr.offset}:(${expr.offset}+${expr.size})]).value(${expr.value}).address`;
+        case 'StaticCall':
+            return `staticcall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+        case 'DelegateCall':
+            return `delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'SLoad': {
             if (expr.location.isVal() && expr.location.val.toString() in expr.variables) {
                 const loc = expr.location.val.toString();
