@@ -6,7 +6,6 @@ import { State } from './state';
 import { EVM } from './evm';
 import { type SLoad, Variable, type MappingLoad } from './ast/storage';
 import { solEvents, solMappings, solStructs, solVars, solStmts } from './sol';
-import { OPCODES } from './opcode';
 import ERCs from './ercs';
 import type { Step } from './step';
 import { CallSite, If, Require, type Stmt } from './stmt';
@@ -158,40 +157,6 @@ export class Contract {
         }
 
         return text;
-    }
-
-    /**
-     * Migrated from old codebase.
-     * Evaluate if it makes sense to keep it.
-     *
-     * @param opcode
-     * @returns
-     */
-    containsOpcode(opcode: number | string): boolean {
-        const HALTS: number[] = [
-            OPCODES.STOP,
-            OPCODES.RETURN,
-            OPCODES.REVERT,
-            OPCODES.INVALID,
-            OPCODES.SELFDESTRUCT,
-        ];
-        let halted = false;
-        if (typeof opcode === 'string' && opcode in OPCODES) {
-            opcode = OPCODES[opcode as keyof typeof OPCODES];
-        } else if (typeof opcode === 'string') {
-            throw new Error('Invalid opcode provided');
-        }
-        for (let index = 0; index < this.evm.opcodes.length; index++) {
-            const currentOpcode = this.evm.opcodes[index].opcode;
-            if (currentOpcode === opcode && !halted) {
-                return true;
-            } else if (currentOpcode === OPCODES.JUMPDEST) {
-                halted = false;
-            } else if (HALTS.includes(currentOpcode)) {
-                halted = true;
-            }
-        }
-        return false;
     }
 }
 

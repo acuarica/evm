@@ -149,6 +149,40 @@ export class EVM {
             chunk.states.push(state);
         }
     }
+
+    /**
+     * Migrated from old codebase.
+     * Evaluate if it makes sense to keep it.
+     *
+     * @param opcode The opcode to look for.
+     * @returns Whether the contract contains the given `opcode`.
+     */
+    containsOpcode(opcode: number | keyof typeof OPCODES): boolean {
+        const HALTS: (keyof typeof OPCODES)[] = [
+            'STOP',
+            'RETURN',
+            'REVERT',
+            'INVALID',
+            'SELFDESTRUCT',
+        ];
+        let halted = false;
+        if (typeof opcode === 'string' && opcode in OPCODES) {
+            opcode = OPCODES[opcode];
+        } else if (typeof opcode === 'string') {
+            throw new Error(`Provided opcode '${opcode}' is not a valid opcode mnemonic'`);
+        }
+        for (let index = 0; index < this.opcodes.length; index++) {
+            const currentOpcode = this.opcodes[index].opcode;
+            if (currentOpcode === opcode && !halted) {
+                return true;
+            } else if (currentOpcode === OPCODES.JUMPDEST) {
+                halted = false;
+            } else if (HALTS.includes(MNEMONICS[currentOpcode] ?? 'INVALID')) {
+                halted = true;
+            }
+        }
+        return false;
+    }
 }
 
 export function gc(b: Branch, chunks: EVM['chunks']) {

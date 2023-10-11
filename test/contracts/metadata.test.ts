@@ -19,14 +19,14 @@ describe('contracts metadata', function () {
 
         try {
             const randomData = readFileSync(randomDataPath, 'utf8');
-            const sol = solTemplate.replace('[randomData]', randomData);
-            contract = new Contract(compile(sol, version, this).bytecode);
+            const src = solTemplate.replace('[randomData]', randomData);
+            contract = new Contract(compile(src, version, this).bytecode);
         } catch {
-            let sol: string, randomData: string;
+            let src: string, randomData: string;
             do {
                 randomData = randomBytes(16).toString('hex');
-                sol = solTemplate.replace('[randomData]', randomData);
-                contract = new Contract(compile(sol, version).bytecode);
+                src = solTemplate.replace('[randomData]', randomData);
+                contract = new Contract(compile(src, version).bytecode);
             } while (contract.metadata && !includesFF(contract.metadata.hash));
             writeFileSync(randomDataPath, randomData);
             this.currentTest!.title += ` (random data ${randomData})`;
@@ -38,7 +38,7 @@ describe('contracts metadata', function () {
     });
 
     it('should not find `selfdestruct` reachable', function () {
-        expect(contract.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
-        expect(contract.containsOpcode('SELFDESTRUCT')).to.be.false;
+        expect(contract.evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.false;
+        expect(contract.evm.containsOpcode('SELFDESTRUCT')).to.be.false;
     });
 });
