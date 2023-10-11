@@ -101,6 +101,14 @@ describe('evm::math', function () {
             val: new Val(1n),
             str: '0x5 % 0x2',
         },
+        {
+            insts: [0, 5, 'MOD'] as const,
+            expr: new Mod(new Val(5n), new Val(0n)),
+            get val() {
+                return this.expr;
+            },
+            str: '0x5 % 0x0',
+        },
     ].forEach(({ insts, expr, val, str }) => {
         it(`should \`eval+str\` \`${str}\``, function () {
             const state = new State<never, Expr>();
