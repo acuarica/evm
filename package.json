@@ -1,6 +1,6 @@
 {
   "name": "sevm-cli",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "A CLI for the Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
   "type": "module",
   "bin": {
@@ -35,8 +35,8 @@
     "blessed": "^0.1.81",
     "env-paths": "^3.0.0",
     "ethers": "^6.7.1",
-    "sevm": "^0.2.2",
-    "sevm-4byte": "^0.1.4",
+    "sevm": "^0.5.2",
+    "sevm-4byte": "^0.5.1",
     "yargs": "^17.7.1"
   },
   "devDependencies": {

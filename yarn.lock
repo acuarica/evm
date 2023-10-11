@@ -142,15 +142,15 @@ require-directory@^2.1.1:
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==
 
-sevm-4byte@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/sevm-4byte/-/sevm-4byte-0.1.4.tgz#f9592d349e1ddeafd783059046173e06269cb4c4"
-  integrity sha512-JZliFFLA8xm68ZzLw8kdLtEW6T4TuQgm+lXBp4c0b2m2MfQiYzrkwLiS5FvaGuKHcoeWYlIlBi6Hq/VY3bgpWw==
+sevm-4byte@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/sevm-4byte/-/sevm-4byte-0.5.1.tgz#0e86e1f66ebe5839ce3c30ca0e201e47b741577a"
+  integrity sha512-VqQp7goYm7LSqWRqBp6LLZSE1hEQNg+R3LJZ1BQ02qCeZfMQx3hkJATnaso1LE4AHpasP10LOh50LqZaSdzeCg==
 
-sevm@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.2.2.tgz#82d8c2a996b88bd4eedb51081949c53a59899f48"
-  integrity sha512-sIhj2q41UCMcCQSFjG7S78lArR6wqz/n7AOnqxlTvtv0tBack+5mG5SSdfE8BjJwuXeq1ZQFqbs/+GUeMTNL1A==
+sevm@^0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/sevm/-/sevm-0.5.2.tgz#26dd9711f63dd44b5cdcb3ec34718d6d889c94fc"
+  integrity sha512-/4askK8vUW8J3dz87jSoSOv4UeG26AIJVReSm/RaLPaTMuOmhlZVbbdLpgYFxLPUkpxt2BKf3aE6lQhyYffECw==
 
 string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"

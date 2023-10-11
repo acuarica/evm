@@ -9,9 +9,8 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, stringify } from 'sevm';
-import { formatOpcode, toHex } from 'sevm/opcode';
-import { EVM, Branch } from 'sevm/evm';
+import { Contract, EVM, formatOpcode, solStmts, toHex } from 'sevm';
+// import { EVM, Branch } from 'sevm/evm';
 import 'sevm-4byte';
 
 const paths = envPaths('sevm');
@@ -24,7 +23,11 @@ const red = c.red;
 const info = c.cyan;
 const warn = c.yellow;
 
-/** @param {import('sevm/opcode').Opcode} opcode */
+/**
+ * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
+ */
+
+/** @param {import('sevm').Opcode} opcode */
 function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = `0x${opcode.offset.toString(16)}`.padStart(8);
@@ -198,7 +201,7 @@ function cfg(contract) {
     node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
     `);
 
-    /** @type {WeakMap<import('sevm/evm').EVMState, string>} */
+    /** @type {WeakMap<EVMState, string>} */
     const ids = new WeakMap();
     let id = 0;
     for (const [, chunk] of evm.chunks) {
@@ -260,7 +263,7 @@ function cfg(contract) {
         /**
          *
          * @param {number} pc
-         * @param {import('sevm/evm').EVMState} state
+         * @param {EVMState} state
          */
         function writeNode(pc, state) {
             const id = ids.get(state);
@@ -289,8 +292,8 @@ function cfg(contract) {
 
         /**
          *
-         * @param {import('sevm/evm').EVMState} src
-         * @param {Branch} branch
+         * @param {EVMState} src
+         * @param {import('sevm/ast').Branch} branch
          */
         function writeEdge(src, branch) {
             // write(`"${src}" -> "${branch.state.id}";`);
@@ -432,7 +435,7 @@ function show(contract) {
     });
 
     const entries = [
-        /** @type {const} */(['main', { decompile: () => stringify(contract.main) }]),
+        /** @type {const} */(['main', { decompile: () => solStmts(contract.main) }]),
         ...Object.entries(contract.functions).map(([selector, fn]) => /**@type{const}*/([fn.label ?? selector, fn])),
     ];
     const fns = Object.fromEntries(entries);
