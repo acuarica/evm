@@ -176,7 +176,11 @@ export function compile(
 
 export function forVersion(
     fn: (
-        compile_: (content: string, context: Mocha.Context) => ReturnType<typeof compile>,
+        compile_: (
+            content: string,
+            context: Mocha.Context,
+            optimizer?: SolcInputSettings['optimizer']
+        ) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
     ) => void
@@ -188,7 +192,11 @@ export function forVersion(
             const fallback = version.startsWith('0.5') ? 'function' : 'fallback';
 
             describe(`solc-v${version}`, function () {
-                fn((content, context) => compile(content, version, context), fallback, version);
+                fn(
+                    (content, context, optimizer) => compile(content, version, context, optimizer),
+                    fallback,
+                    version
+                );
             });
         }
     });
