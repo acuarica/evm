@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Contract, type EVM } from 'sevm';
-import { Revert } from 'sevm/ast';
+import { Revert, Val } from 'sevm/ast';
 
 import { contracts } from '../utils/solc';
 
@@ -112,10 +112,14 @@ contracts('empty', (compile, _fallback, version) => {
                 expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
                 expect(chunk.states).to.be.of.length(1);
                 const state = chunk.states[0]!;
-                expect(state.last).to.be.deep.equal(new Revert([]));
+                expect(state.last).to.be.deep.equal(
+                    new Revert(new Val(0n, true), new Val(0n, true), [])
+                );
 
                 expect(contract.main.length).to.be.at.least(1);
-                expect(contract.main.at(-1)).to.be.deep.equal(new Revert([]));
+                expect(contract.main.at(-1)).to.be.deep.equal(
+                    new Revert(new Val(0n, true), new Val(0n, true), [])
+                );
             });
 
             it('should `decompile` bytecode', function () {

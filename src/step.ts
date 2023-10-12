@@ -404,30 +404,32 @@ const SYSTEM = {
 
 function memArgs<T>(
     { stack, memory }: State<Inst, Expr>,
-    Klass: new (args: Expr[], offset?: Expr, size?: Expr) => T
+    Klass: new (offset: Expr, size: Expr, args?: Expr[]) => T
 ): T {
     const MAXSIZE = 1024;
 
-    let offset = stack.pop();
-    let size = stack.pop();
+    const offset = stack.pop();
+    const size = stack.pop();
 
-    offset = offset.eval();
-    size = size.eval();
+    return new Klass(
+        offset,
+        size,
+        (function (offset, size) {
+            if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
+                const args = [];
+                for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+                    args.push(i in memory ? memory[i].eval() : new MLoad(new Val(BigInt(i))));
+                }
+                return args;
+            } else {
+                if (size.isVal() && size.val > MAXSIZE * 32) {
+                    throw new Error(`memargs size ${Klass.name} ${size.val}`);
+                }
 
-    if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
-        const args = [];
-        for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-            args.push(i in memory ? memory[i].eval() : new MLoad(new Val(BigInt(i))));
-        }
-
-        return new Klass(args);
-    } else {
-        if (size.isVal() && size.val > MAXSIZE * 32) {
-            throw new Error(`memargs size ${Klass.name} ${size.val}`);
-        }
-
-        return new Klass([], offset, size);
-    }
+                return undefined;
+            }
+        })(offset.eval(), size.eval())
+    );
 }
 
 function FLOW(
@@ -612,7 +614,7 @@ function STORAGE({ variables, mappings }: IStore) {
         let base = undefined;
         while (shas.length > 0) {
             const sha = shas.shift()!;
-            for (const arg of sha.args) {
+            for (const arg of sha.args ?? []) {
                 if (arg.tag === 'Sha3' && arg.args) {
                     shas.unshift(arg);
                 } else if (base === undefined && arg.tag === 'Val') {

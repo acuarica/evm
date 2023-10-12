@@ -39,7 +39,7 @@ contracts('internal', compile => {
 
                 expect(fn.stmts.at(-2)).to.be.deep.equal(
                     new SStore(
-                        new Sha3([Msg.sender, new Val(0n)]),
+                        new Sha3(new Val(-1n), new Val(-1n), [Msg.sender, new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
                         contract.evm.variables
                     )
@@ -93,7 +93,12 @@ contracts('internal', compile => {
                 stmts.slice(0, -1).forEach(stmt => expect(stmt).to.be.instanceOf(Require));
 
                 expect(stmts.at(-1)).to.be.deep.equal(
-                    new Return([new SLoad(new Sha3([value, new Val(0n)]), contract.evm.variables)])
+                    new Return(new Val(-1n), new Val(-1n), [
+                        new SLoad(
+                            new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
+                            contract.evm.variables
+                        ),
+                    ])
                 );
             });
         });

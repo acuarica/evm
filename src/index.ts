@@ -259,6 +259,7 @@ export class PublicFunction {
         return (
             this.stmts.length === 1 &&
             exit.name === 'Return' &&
+            exit.args !== undefined &&
             exit.args.length === 1 &&
             exit.args[0].tag === 'SLoad' &&
             exit.args[0].location.isVal()
@@ -270,6 +271,7 @@ export class PublicFunction {
         return (
             this.stmts.length === 1 &&
             exit.name === 'Return' &&
+            exit.args !== undefined &&
             exit.args.every(arg => arg.tag === 'MappingLoad')
         );
     }
@@ -392,7 +394,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                         ? [
                               new Require(
                                   last.cond.eval(),
-                                  falseBlock[0].args.map(e => e.eval())
+                                  (falseBlock[0].args ?? []).map(e => e.eval())
                               ),
                               ...trueBlock,
                           ]

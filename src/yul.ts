@@ -56,7 +56,7 @@ function yulExpr(expr: Expr): string {
         case 'MLoad':
             return yul`mload(${expr.loc})`;
         case 'Sha3':
-            return yul`keccak256(${expr.memoryStart}, ${expr.memoryLength})`;
+            return yul`keccak256(${expr.offset}, ${expr.size})`;
         case 'Create': // create(v, p, n) | F | create new contract with code mem[p…(p+n)) and send v wei and return the new address; returns 0 on error
             return yul`create(${expr.value}, ${expr.offset}, ${expr.size})`;
         case 'Call': // call(g, a, v, in, insize, out, outsize) | F | call contract at address a with input mem[in…(in+insize)) providing g gas and v wei and output area mem[out…(out+outsize)) returning 0 on error (eg. out of gas) and 1 on success See more

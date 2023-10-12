@@ -33,7 +33,7 @@ describe('yul', function () {
         [new CallValue(), 'callvalue()'],
         [new CallDataLoad(new Add(new Val(4n), new Val(8n))), 'calldataload(add(0x4, 0x8))'],
         [new MLoad(new Add(new Val(4n), new Val(8n))), 'mload(add(0x4, 0x8))'],
-        [new Sha3([], new Val(4n), new Val(8n)), 'keccak256(0x4, 0x8)'],
+        [new Sha3(new Val(4n), new Val(8n)), 'keccak256(0x4, 0x8)'],
         [Block.coinbase, 'block.coinbase'],
     ].forEach(([expr, str]) => {
         it(`should convert \`Expr\` to Yul \`${str}\``, function () {

@@ -104,9 +104,9 @@ function solExpr(expr: Expr): string {
         case 'MLoad':
             return sol`memory[${expr.loc}]`;
         case 'Sha3':
-            return expr.memoryStart && expr.memoryLength
-                ? sol`keccak256(memory[${expr.memoryStart}:(${expr.memoryStart}+${expr.memoryLength})])`
-                : sol`keccak256(${expr.args.map(solExpr).join(', ')})`;
+            return expr.args === undefined
+                ? sol`keccak256(memory[${expr.offset}:(${expr.offset}+${expr.size})])`
+                : `keccak256(${expr.args.map(solExpr).join(', ')})`;
         case 'Create':
             return sol`new Contract(memory[${expr.offset}..${expr.offset}+${expr.size}]).value(${expr.value}).address`;
         case 'Call':
@@ -171,7 +171,7 @@ function solInst(inst: Inst): string {
         case 'Stop':
             return 'return;';
         case 'Return':
-            return inst.offset && inst.size
+            return inst.args === undefined
                 ? sol`return memory[${inst.offset}:(${inst.offset}+${inst.size})];`
                 : inst.args.length === 0
                 ? 'return;'
@@ -179,9 +179,9 @@ function solInst(inst: Inst): string {
                 ? `return '${hex2a(inst.args[2].val.toString(16))}';`
                 : inst.args.length === 1
                 ? sol`return ${inst.args[0]};`
-                : sol`return (${inst.args.map(solExpr).join(', ')});`;
+                : `return (${inst.args.map(solExpr).join(', ')});`;
         case 'Revert':
-            return inst.offset && inst.size
+            return inst.args === undefined
                 ? `revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
                 : `revert(${inst.args.join(', ')});`;
         case 'SelfDestruct':

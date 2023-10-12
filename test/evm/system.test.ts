@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { EVM, STEP, State, build, sol, solStmts } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
-import { Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop, Val } from 'sevm/ast';
+import { Add, Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop, Val } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
 import { compile } from '../utils/solc';
@@ -14,7 +14,9 @@ describe('evm::system', function () {
         state.stack.push(new Val(0x10n));
         STEP().SHA3(state);
         expect(state.halted).to.be.false;
-        expect(state.stack.values).to.be.deep.equal([new Sha3([new MLoad(new Val(0x10n))])]);
+        expect(state.stack.values).to.be.deep.equal([
+            new Sha3(new Val(0x10n), new Val(4n), [new MLoad(new Val(0x10n))]),
+        ]);
         expect(sol`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
     });
 
@@ -57,7 +59,7 @@ describe('evm::system', function () {
             state.stack.push(new Val(0x0n));
             STEP().RETURN(state);
             expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([new Return([])]);
+            expect(state.stmts).to.be.deep.equal([new Return(new Val(0n), new Val(0n), [])]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return;');
         });
 
@@ -67,18 +69,23 @@ describe('evm::system', function () {
             state.stack.push(new Val(0x4n));
             STEP().RETURN(state);
             expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([new Return([new MLoad(new Val(0x4n))])]);
+            expect(state.stmts).to.be.deep.equal([
+                new Return(new Val(0x4n), new Val(0x20n), [new MLoad(new Val(0x4n))]),
+            ]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
         });
 
         it('should return more than one argument', function () {
             const state = new State<Inst, Expr>();
-            state.stack.push(new Val(0x30n));
+            state.stack.push(new Add(new Val(0x20n), new Val(0x10n)));
             state.stack.push(new Val(0x4n));
             STEP().RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
-                new Return([new MLoad(new Val(0x4n)), new MLoad(new Val(0x24n))]),
+                new Return(new Val(0x4n), new Add(new Val(0x20n), new Val(0x10n)), [
+                    new MLoad(new Val(0x4n)),
+                    new MLoad(new Val(0x24n)),
+                ]),
             ]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
         });

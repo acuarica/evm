@@ -2,15 +2,15 @@ import { type IInst, Tag, type Expr } from './expr';
 
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';
-    constructor(readonly args: Expr[], readonly memoryStart?: Expr, readonly memoryLength?: Expr) {
+    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {
         super();
     }
 
     eval(): Expr {
         return new Sha3(
-            this.args.map(e => e.eval()),
-            this.memoryStart,
-            this.memoryLength
+            this.offset,
+            this.size,
+            this.args?.map(e => e.eval())
         );
     }
 }
@@ -149,11 +149,11 @@ export class Return implements IInst {
     /**
      * Exits the current context successfully.
      *
-     * @param args
      * @param offset Byte offset in the memory in bytes, to copy what will be the return data of this context.
      * @param size Byte size to copy (size of the return data).
+     * @param args
      */
-    constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
+    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
 
     eval() {
         return this;
@@ -162,7 +162,22 @@ export class Return implements IInst {
 
 export class Revert implements IInst {
     readonly name = 'Revert';
-    constructor(readonly args: Expr[], readonly offset?: Expr, readonly size?: Expr) {}
+
+    /**
+     * Stop the current context execution, revert the state changes (see `STATICCALL` for a list
+     * of state changing opcodes) and return the unused gas to the caller.
+     *
+     * It also reverts the gas refund to its value before the current context.
+     * If the execution is stopped with `REVERT`, the value 0 is put on the stack of the calling context,
+     * which continues to execute normally.
+     * The return data of the calling context is set as the given chunk of memory of this context.
+     *
+     * @param offset byte offset in the memory in bytes. The return data of the calling context.
+     * @param size byte size to copy (size of the return data).
+     * @param args
+     */
+    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
+
     eval() {
         return this;
     }
