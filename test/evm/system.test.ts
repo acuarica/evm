@@ -91,13 +91,13 @@ describe('evm::system', function () {
         });
 
         it('should find `return`s in compiled code', function () {
-            const sol = `contract C {
+            const src = `contract C {
                 function name() external pure returns (uint256) { return 7; }
                 function symbol() external pure returns (uint256) { return 11; }
                 function hola() external pure returns (string memory) { return "12345"; }
             }`;
 
-            const evm = new EVM(compile(sol, '0.8.16', this).bytecode);
+            const evm = new EVM(compile(src, '0.8.16', this).bytecode);
             evm.start();
 
             const selector = fnselector('name()');
