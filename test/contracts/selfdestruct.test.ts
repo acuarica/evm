@@ -12,15 +12,19 @@ contracts('selfdestruct', (compile, fallback, version) => {
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
         const src = `contract C {
-            ${fallback}() external {
+            ${fallback}() external payable {
                 selfdestruct(msg.sender);
             }
         }`;
-        contract = new Contract(compile(src, this).bytecode);
+        contract = new Contract(compile(src, this, { enabled: true }).bytecode);
     });
 
     it('should detect selfdestruct', function () {
         expect(contract.evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
         expect(contract.evm.containsOpcode('SELFDESTRUCT')).to.be.true;
+    });
+
+    it('should `decompile` bytecode', function () {
+        expect(contract.decompile()).to.be.equal('selfdestruct(msg.sender);\n');
     });
 });
