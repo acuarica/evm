@@ -165,7 +165,8 @@ export function compile(
         throw new Error(errors.map(err => err.formattedMessage).join('\n'));
     }
 
-    const contract = Object.values(contracts['source.sol'])[0];
+    const source = contracts['source.sol'];
+    const contract = source['Test'] ?? Object.values(source)[0];
 
     const bytecode = contract.evm.deployedBytecode.object;
     const abi = contract.abi;
