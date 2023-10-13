@@ -13,7 +13,7 @@ import { If, type Stmt } from './stmt';
 export function sol(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
-        const str = isExpr(node) ? solExpr(node) : isInst(node) ? solInst(node) : `${node}`;
+        const str = isExpr(node) ? solExpr(node) : isInst(node) ? solStmt(node) : `${node}`;
         result.push(str, strings[i + 1]);
     });
     return result.join('');
