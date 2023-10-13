@@ -91,7 +91,7 @@ describe('evm::system', function () {
         });
 
         it('should find `return`s in compiled code', function () {
-            const src = `contract C {
+            const src = `contract Test {
                 function name() external pure returns (uint256) { return 7; }
                 function symbol() external pure returns (uint256) { return 11; }
                 function hola() external pure returns (string memory) { return "12345"; }
@@ -121,5 +121,24 @@ describe('evm::system', function () {
                 expect(ast).to.be.deep.equal("return '12345';\n");
             }
         });
+    });
+
+    it('should stringify CREATE', function () {
+        const src = `
+            contract Token { }
+            contract Test {
+                fallback() external payable {
+                    new Token();
+                }
+            }`;
+
+        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode);
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
+        const stmts = build(state);
+        expect(sol`${stmts[0]}`).to.be.deep.equal(
+            'require(new Contract(memory[0x80..0x80+0x5c + 0x80 - 0x80]).value(0x0).address);'
+        );
+        expect(sol`${stmts[1]}`).to.be.deep.equal('return;');
     });
 });
