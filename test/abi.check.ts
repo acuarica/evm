@@ -18,7 +18,7 @@ describe('abi', function () {
 
     it('encode tuples types in public parameters', function () {
         // https://docs.soliditylang.org/en/develop/abi-spec.html#handling-tuple-types
-        const sol = `contract C {
+        const sol = `contract Test {
             struct S { uint a; uint[] b; T[] c; }
             struct T { uint x; uint y; }
             function f(S memory, T memory, uint) public pure {}

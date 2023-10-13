@@ -15,7 +15,7 @@ describe('evm', function () {
             function ${sig} external view returns (uint256);
         }
 
-        contract C {
+        contract Test {
             fallback() external payable {
                 IERC20 addr = IERC20 (0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359);
                 addr.balanceOf(7);
@@ -35,14 +35,14 @@ describe('evm', function () {
     });
 
     it('find type cast for `uint128` using `And`', function () {
-        const sol = `contract C {
+        const src = `contract Test {
             event Deposit(uint128); 
             fallback () external payable {
                 uint128 a = uint128(~block.number);
                 emit Deposit(a);
             }
         }`;
-        const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         assert(state.stmts[0].name === 'Log');

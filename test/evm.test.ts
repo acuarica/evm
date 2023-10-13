@@ -54,7 +54,7 @@ describe('evm', function () {
     });
 
     it('should attach `INSTS` hooks', function () {
-        const src = `contract C {
+        const src = `contract Test {
             event Deposit(uint256);
             fallback () external payable {
                 emit Deposit(block.number);
@@ -105,7 +105,7 @@ describe('evm', function () {
     });
 
     it('should create ', function () {
-        const sol = `contract C {
+        const sol = `contract Test {
                 modifier onlyOwner(uint256 m) {
                     // require(block.timestamp == 5);
                     // uint256 n = block.number;
