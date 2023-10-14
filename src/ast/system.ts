@@ -1,4 +1,4 @@
-import { type IInst, Tag, type Expr } from './expr';
+import { type IInst, Tag, type Expr, evalE } from './expr';
 
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';
@@ -7,11 +7,7 @@ export class Sha3 extends Tag {
     }
 
     eval(): Expr {
-        return new Sha3(
-            this.offset,
-            this.size,
-            this.args?.map(e => e.eval())
-        );
+        return new Sha3(this.offset, this.size, this.args?.map(evalE));
     }
 }
 

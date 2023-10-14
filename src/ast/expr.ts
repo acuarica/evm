@@ -71,6 +71,8 @@ export const isExpr = (expr: unknown): expr is Expr =>
 export const isInst = (inst: unknown): inst is Inst =>
     inst !== null && typeof inst === 'object' && 'name' in inst;
 
+export const evalE = (expr: Expr): Expr => expr.eval();
+
 /**
  * Base definition for any type that is `Stmt`.
  */
