@@ -1,3 +1,4 @@
+import type { MappingLoad, MappingStore } from './ast';
 import { isExpr, type Expr, type Inst, isInst } from './ast/expr';
 
 /**
@@ -76,7 +77,7 @@ function yulExpr(expr: Expr): string {
         case 'SLoad':
             return yul`sload(${expr.location})`;
         case 'MappingLoad':
-            throw new Error('Not implemented yet: "MappingLoad" case');
+            return yul`sload(${expr.location}/*${yulMapArgs(expr)}*/)`;
     }
 }
 
@@ -109,8 +110,12 @@ function yulInst(inst: Inst): string {
         case 'SStore':
             return yul`sstore(${inst.location}, ${inst.data})`;
         case 'MappingStore':
-            throw new Error('Not implemented yet: "MappingStore" case');
+            return yul`sstore(${inst.slot}, ${inst.data}) /*${inst.location}${yulMapArgs(inst)}*/`;
         case 'Throw':
             throw new Error('Not implemented yet: "Throw" case');
     }
+}
+
+function yulMapArgs(mapping: MappingLoad | MappingStore): string {
+    return mapping.items.map(e => yul`[${e}]`).join('');
 }

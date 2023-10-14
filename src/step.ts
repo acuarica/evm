@@ -540,21 +540,21 @@ function STORAGE({ variables, mappings }: IStore) {
             if (loc.tag === 'Sha3') {
                 const [base, parts] = parseSha3(loc);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(mappings, base, parts));
+                    stack.push(new MappingLoad(loc, mappings, base, parts));
                 } else {
                     stack.push(new SLoad(loc, variables));
                 }
             } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
                 const [base, parts] = parseSha3(loc.left);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(mappings, base, parts, loc.right.val));
+                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.right.val));
                 } else {
                     stack.push(new SLoad(loc, variables));
                 }
             } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
                 const [base, parts] = parseSha3(loc.right);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(mappings, base, parts, loc.left.val));
+                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.left.val));
                 } else {
                     stack.push(new SLoad(loc, variables));
                 }
@@ -564,29 +564,31 @@ function STORAGE({ variables, mappings }: IStore) {
         },
 
         SSTORE: ({ stack, stmts }: State<Inst, Expr>): void => {
-            const loc = stack.pop();
-            const data = stack.pop();
+            const slot = stack.pop();
+            const value = stack.pop();
 
-            if (loc.isVal()) {
+            if (slot.isVal()) {
                 sstoreVariable();
-            } else if (loc.tag === 'Sha3') {
-                const [base, parts] = parseSha3(loc);
+            } else if (slot.tag === 'Sha3') {
+                const [base, parts] = parseSha3(slot);
                 if (base !== undefined && parts.length > 0) {
-                    stmts.push(new MappingStore(mappings, base, parts, data));
+                    stmts.push(new MappingStore(slot, mappings, base, parts, value));
                 } else {
                     sstoreVariable();
                 }
-            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
-                const [base, parts] = parseSha3(loc.left);
+            } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal()) {
+                const [base, parts] = parseSha3(slot.left);
                 if (base !== undefined && parts.length > 0) {
-                    stmts.push(new MappingStore(mappings, base, parts, data, loc.right.val));
+                    stmts.push(
+                        new MappingStore(slot, mappings, base, parts, value, slot.right.val)
+                    );
                 } else {
                     sstoreVariable();
                 }
-            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
-                const [base, parts] = parseSha3(loc.right);
+            } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(slot.right);
                 if (base !== undefined && parts.length > 0) {
-                    stmts.push(new MappingStore(mappings, base, parts, data, loc.left.val));
+                    stmts.push(new MappingStore(slot, mappings, base, parts, value, slot.left.val));
                 } else {
                     sstoreVariable();
                 }
@@ -595,15 +597,15 @@ function STORAGE({ variables, mappings }: IStore) {
             }
 
             function sstoreVariable() {
-                if (loc.isVal()) {
-                    const key = loc.val.toString();
+                if (slot.isVal()) {
+                    const key = slot.val.toString();
                     if (key in variables) {
-                        variables[key].types.push(data);
+                        variables[key].types.push(value);
                     } else {
-                        variables[key] = new Variable(undefined, [data]);
+                        variables[key] = new Variable(undefined, [value]);
                     }
                 }
-                stmts.push(new SStore(loc, data, variables));
+                stmts.push(new SStore(slot, value, variables));
             }
         },
     };

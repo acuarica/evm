@@ -30,6 +30,7 @@ export class MappingStore implements IInst {
     readonly name = 'MappingStore';
 
     constructor(
+        readonly slot: Expr,
         readonly mappings: IStore['mappings'],
         readonly location: number,
         readonly items: Expr[],
@@ -77,6 +78,7 @@ export class SStore {
 export class MappingLoad extends Tag {
     readonly tag = 'MappingLoad';
     constructor(
+        readonly slot: Expr,
         readonly mappings: IStore['mappings'],
         readonly location: number,
         readonly items: Expr[],

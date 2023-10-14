@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { EVM, STEP, State, sol, yul } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
-import { Add, Info, MappingLoad, MappingStore, Msg, Stop, Sub, Val } from 'sevm/ast';
+import { Add, Info, MappingLoad, MappingStore, Msg, Sha3, Stop, Sub, Val } from 'sevm/ast';
 
 import { compile } from '../utils/solc';
 
@@ -37,6 +37,10 @@ describe('evm::storage', function () {
         expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
         expect(sol`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
         expect(sol`${state.last}`).to.be.equal('return;');
+
+        expect(yul`${state.stmts[0]}`).to.be.equal('sstore(0x0, add(sload(0x0), 0x3))');
+        expect(yul`${state.stmts[1]}`).to.be.equal('sstore(0x1, add(sload(0x1), 0xb))');
+        expect(yul`${state.last}`).to.be.equal('stop()');
     });
 
     it.skip('should detect packed storage variable', function () {
@@ -135,39 +139,82 @@ describe('evm::storage', function () {
 
             expect(state.stmts).to.be.have.length(4);
 
-            expect(state.stmts[0]).to.be.deep.equal(
-                new MappingStore(
-                    evm.mappings,
-                    0,
-                    [Msg.sender],
-                    new Add(new MappingLoad(evm.mappings, 0, [Msg.sender]), new Val(3n, true))
-                )
-            );
-            expect(sol`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
-
-            expect(state.stmts[1]).to.be.deep.equal(
-                new MappingStore(
-                    evm.mappings,
-                    1,
-                    [Info.CALLER],
-                    new Add(new MappingLoad(evm.mappings, 1, [Msg.sender]), new Val(5n, true))
-                )
-            );
-            expect(sol`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
-
-            expect(state.stmts[2]).to.be.deep.equal(
-                new MappingStore(
-                    evm.mappings,
-                    2,
-                    [Info.ADDRESS, Msg.sender],
-                    new Sub(
-                        new MappingLoad(evm.mappings, 2, [Info.ADDRESS, Msg.sender]),
-                        new Val(11n, true)
+            {
+                const size = new Add(
+                    new Val(32n, true),
+                    new Add(new Val(32n, true), new Val(0n, true))
+                );
+                const slot = new Sha3(new Val(0n, true), size, [Msg.sender, new Val(0n, true)]);
+                expect(state.stmts[0]).to.be.deep.equal(
+                    new MappingStore(
+                        slot,
+                        evm.mappings,
+                        0,
+                        [Msg.sender],
+                        new Add(
+                            new MappingLoad(slot, evm.mappings, 0, [Msg.sender]),
+                            new Val(3n, true)
+                        )
                     )
-                )
-            );
+                );
+                expect(sol`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
+                expect(yul`${state.stmts[0]}`).to.be.equal(
+                    'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(0/*[msg.sender]*/), 0x3)) /*0[msg.sender]*/'
+                );
+            }
+
+            {
+                const size = new Add(
+                    new Val(32n, true),
+                    new Add(new Val(32n, true), new Val(0n, true))
+                );
+                const slot = new Sha3(new Val(0n, true), size, [Msg.sender, new Val(1n, true)]);
+                expect(state.stmts[1]).to.be.deep.equal(
+                    new MappingStore(
+                        slot,
+                        evm.mappings,
+                        1,
+                        [Info.CALLER],
+                        new Add(
+                            new MappingLoad(slot, evm.mappings, 1, [Msg.sender]),
+                            new Val(5n, true)
+                        )
+                    )
+                );
+                expect(sol`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
+                expect(yul`${state.stmts[1]}`).to.be.equal(
+                    'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(1/*[msg.sender]*/), 0x5)) /*1[msg.sender]*/'
+                );
+            }
+
+            {
+                const size = new Add(
+                    new Val(32n, true),
+                    new Add(new Val(32n, true), new Val(0n, true))
+                );
+                const slot = new Sha3(new Val(0n, true), size, [
+                    Msg.sender,
+                    new Sha3(new Val(0n, true), size, [Info.ADDRESS, new Val(2n, true)]),
+                ]);
+                console.log(state.stmts[2]);
+                expect(state.stmts[2]).to.be.deep.equal(
+                    new MappingStore(
+                        slot,
+                        evm.mappings,
+                        2,
+                        [Info.ADDRESS, Msg.sender],
+                        new Sub(
+                            new MappingLoad(slot, evm.mappings, 2, [Info.ADDRESS, Msg.sender]),
+                            new Val(11n, true)
+                        )
+                    )
+                );
+            }
             expect(sol`${state.stmts[2]}`).to.be.equal(
                 'mapping3[address(this)][msg.sender] -= 0xb;'
+            );
+            expect(yul`${state.stmts[2]}`).to.be.equal(
+                'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), sub(sload(2/*[address(this)][msg.sender]*/), 0xb)) /*2[address(this)][msg.sender]*/'
             );
             expect(state.last).to.be.deep.equal(new Stop());
             expect(evm.variables).to.be.empty;
