@@ -196,7 +196,6 @@ describe('evm::storage', function () {
                     Msg.sender,
                     new Sha3(new Val(0n, true), size, [Info.ADDRESS, new Val(2n, true)]),
                 ]);
-                console.log(state.stmts[2]);
                 expect(state.stmts[2]).to.be.deep.equal(
                     new MappingStore(
                         slot,
