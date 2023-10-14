@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, type Ram, sol, type OPCODES } from 'sevm';
+import { EVM, STEP, State, type Ram, sol, type OPCODES, build, yul } from 'sevm';
 import { Invalid, Tx, type Expr, type Inst, Throw, Stop } from 'sevm/ast';
 
 import { compile } from './utils/solc';
@@ -15,13 +15,13 @@ describe('evm', function () {
     });
 
     it('should halt when `exec` invalid opcode', function () {
-        const state = new State<Inst, Expr>();
         const evm = new EVM('0xd001');
-        evm.exec(0, state);
+        const state = evm.start();
 
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
         expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
+        expect(yul`${state.stmts[0]}`).to.be.equal('invalid()');
         expect(evm.containsOpcode(0xd0)).to.be.true;
         expect(evm.containsOpcode('ADD')).to.be.false;
         expect(() => evm.containsOpcode('add' as keyof typeof OPCODES)).to.throw('Provided opcode');
@@ -130,14 +130,30 @@ describe('evm', function () {
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
-    it.skip('should for loop', function () {
+    it('should for loop', function () {
         const src = `contract Test { event Deposit(uint256);
             fallback() external payable {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
         const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const main = evm.start();
+        // require('util').inspect.defaultOptions.depth = null;
+        console.log(build(main));
+        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
+    });
+
+    it.skip('should for unbounded', function () {
+        const src = `contract Test { event Deposit(uint256);
+            fallback() external payable {
+                for (uint256 i = 0; i < block.number; i++) emit Deposit(i);
+            }
+        }`;
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        // const main = evm.start();
         evm.start();
+        // require('util').inspect.defaultOptions.depth = null;
+        // console.log(build(main));
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 

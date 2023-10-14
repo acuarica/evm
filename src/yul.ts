@@ -98,7 +98,7 @@ function yulInst(inst: Inst): string {
         case 'SelfDestruct':
             return yul`selfdestruct(${inst.address})`;
         case 'Invalid':
-            return 'invalid();';
+            return 'invalid()';
         case 'Jump':
             throw new Error('Not implemented yet: "Jump" case');
         case 'Jumpi':
