@@ -86,14 +86,16 @@ export class EVM {
     /**
      *
      */
-    start() {
-        this.run(0, new State());
+    start(): State<Inst, Expr> {
+        const state = new State<Inst, Expr>();
+        this.run(0, state);
         for (const [, branch] of this.functionBranches) {
             this.run(branch.pc, branch.state);
         }
+        return state;
     }
 
-    run(pc0: number, state: State<Inst, Expr>) {
+    run(pc0: number, state: State<Inst, Expr>): void {
         const branches: Branch[] = [new Branch(pc0, state)];
         while (branches.length > 0) {
             // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
@@ -121,7 +123,7 @@ export class EVM {
         }
     }
 
-    exec(pc0: number, state: State<Inst, Expr>) {
+    exec(pc0: number, state: State<Inst, Expr>): void {
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
         let pc = pc0;
