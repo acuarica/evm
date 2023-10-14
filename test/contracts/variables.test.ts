@@ -11,14 +11,14 @@ contracts('variables', (compile, _fallback, version) => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract Contract {
+            const src = `contract Test {
                 uint256 private value256;
                 function setValue0(uint256 newValue) public { value256 = newValue; }
 
                 bytes32 private value32;
                 function setValue0(bytes32 newValue) public { value32 = newValue; }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         [
@@ -67,7 +67,7 @@ contracts('variables', (compile, _fallback, version) => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 uint256 private value256;
                 function setValue0(uint256 newValue) public { value256 = newValue; }
 
@@ -80,7 +80,7 @@ contracts('variables', (compile, _fallback, version) => {
                 bytes8 private value8;
                 function setValue0(bytes8 newValue) public { value8 = newValue; }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         it.skip('should detect variables', function () {
@@ -102,10 +102,10 @@ contracts('variables', (compile, _fallback, version) => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 uint256 public value;
             }`;
-            contract = new Contract(compile(sol, this).bytecode).patchfns('value()');
+            contract = new Contract(compile(src, this).bytecode).patchfns('value()');
         });
 
         it('should `getFunctions` but not `getEvents`', function () {
@@ -122,13 +122,13 @@ contracts('variables', (compile, _fallback, version) => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 uint256 public value;
                 function setValue0(uint256 newValue) internal {
                     value = newValue;
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode).patchfns('value()');
+            contract = new Contract(compile(src, this).bytecode).patchfns('value()');
         });
 
         it('should `getFunctions` but not `getEvents`', function () {
@@ -142,8 +142,8 @@ contracts('variables', (compile, _fallback, version) => {
     });
 
     it.skip('with a public `address` variable', function () {
-        const sol = `contract C { address public owner; }`;
-        const contract = new Contract(compile(sol, this).bytecode).patchfns('owner()');
+        const src = `contract Test { address public owner; }`;
+        const contract = new Contract(compile(src, this).bytecode).patchfns('owner()');
 
         expect(contract.getFunctions()).to.be.deep.equal(['owner()']);
 

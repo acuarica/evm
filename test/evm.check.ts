@@ -11,7 +11,7 @@ import { compile } from './utils/solc';
 describe('evm', function () {
     it('`PUSH4` method selector to invoke external contract', function () {
         const sig = 'balanceOf(uint256)';
-        const sol = `interface IERC20 {
+        const src = `interface IERC20 {
             function ${sig} external view returns (uint256);
         }
 
@@ -21,7 +21,7 @@ describe('evm', function () {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = new EVM(compile(sol, '0.7.6', this).bytecode).opcodes;
+        const opcodes = new EVM(compile(src, '0.7.6', this).bytecode).opcodes;
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);

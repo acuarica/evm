@@ -10,7 +10,7 @@ import { compile } from '../utils/solc';
 describe('evm::log', function () {
     const knownEventSig = 'Deposit(uint256)';
     const unknownEventSig = 'UnknownEvent(uint256, uint256, uint256)';
-    const src = `contract C {
+    const src = `contract Test {
         event ${knownEventSig};
         event ${unknownEventSig};
         fallback() external payable {

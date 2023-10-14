@@ -53,7 +53,7 @@ describe('evm', function () {
         expect(sol`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
     });
 
-    it('should attach `INSTS` hooks', function () {
+    it('should attach `STEP` hooks', function () {
         const src = `contract Test {
             event Deposit(uint256);
             fallback () external payable {
@@ -84,8 +84,8 @@ describe('evm', function () {
     });
 
     describe('conditional', function () {
-        it('if ', function () {
-            const sol = `contract C {
+        it('if', function () {
+            const src = `contract Test {
                 uint256 value = 0;
                 event Deposit(uint256);
                 fallback () external payable {
@@ -97,15 +97,14 @@ describe('evm', function () {
                     emit Deposit(temp);
                 }
             }`;
-
-            const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
             evm.start();
             expect(evm.functionBranches).to.be.empty;
         });
     });
 
     it('should create ', function () {
-        const sol = `contract Test {
+        const src = `contract Test {
                 modifier onlyOwner(uint256 m) {
                     // require(block.timestamp == 5);
                     // uint256 n = block.number;
@@ -126,36 +125,36 @@ describe('evm', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
     it.skip('should for loop', function () {
-        const sol = `contract C { event Deposit(uint256);
+        const src = `contract Test { event Deposit(uint256);
             fallback() external payable {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
     it.skip('should for infinite', function () {
-        const sol = `contract C { event Deposit(uint256);
+        const src = `contract Test { event Deposit(uint256);
             fallback() external payable {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
     describe('recursive', function () {
         it.skip('should for infinite', function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 event Transfer(uint256);
                 function transfer(uint256 amount) public {
                     emit Transfer(amount);
@@ -172,7 +171,7 @@ describe('evm', function () {
         }`;
 
             // info compilation
-            const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
             evm.start();
             // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
         });

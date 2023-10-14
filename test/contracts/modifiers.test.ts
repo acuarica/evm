@@ -9,7 +9,7 @@ contracts('modifiers', (compile, _fallback, version) => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 uint256 private _value;
                 address private _owner;
                 constructor() ${['0.7.6', '0.8.16'].includes(version) ? '' : 'public '}{
@@ -30,7 +30,7 @@ contracts('modifiers', (compile, _fallback, version) => {
                     _value = value + 3;
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         it('should `decompile` bytecode', function () {

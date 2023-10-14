@@ -19,11 +19,11 @@ contracts('dispatch', compile => {
     });
 
     it('should `decompile` a contract with a single `external` method', function () {
-        const sol = `contract C {
+        const src = `contract Test {
             function set() external payable { }
             function get() external pure returns (uint256) { return 5; }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patchfns('get()');
+        const contract = new Contract(compile(src, this).bytecode).patchfns('get()');
         const text = contract.decompile();
         expect(text, `decompiled text\n${text}`).to.match(
             /^function get\(\) public view returns \(uint256\) {$/m
@@ -31,12 +31,12 @@ contracts('dispatch', compile => {
     });
 
     it('should `decompile` a contract with multiple `external` functions', function () {
-        const sol = `contract Contract {
+        const src = `contract Test {
             function balanceOf(uint256 from) external pure returns (uint256) { return from; }
             function symbol() external pure returns (uint256) { return 3; }
             function thisAddress() external view returns (address) { return address(this); }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode).patchfns(
+        const contract = new Contract(compile(src, this).bytecode).patchfns(
             'balanceOf(uint256)',
             'symbol()',
             'thisAddress()'
@@ -59,17 +59,17 @@ contracts('dispatch', compile => {
 
     it('should detect selectors only reachable functions', function () {
         const sig = 'balanceOf(uint256)';
-        const sol = `interface IERC20 {
+        const src = `interface IERC20 {
             function ${sig} external view returns (uint256);
         }
 
-        contract C {
+        contract Test {
             function get() external view returns (uint256) {
                 IERC20 addr = IERC20 (0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359);
                 return addr.balanceOf(7);
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode);
+        const contract = new Contract(compile(src, this).bytecode);
 
         const selector = fnselector(sig);
         const push4 = contract.evm.opcodes.find(

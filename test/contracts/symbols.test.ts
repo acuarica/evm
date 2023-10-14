@@ -11,12 +11,12 @@ contracts('symbols', compile => {
 
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
-        const sol = `contract C {
+        const src = `contract Test {
             function getBlockHash() public view returns (bytes32) { return blockhash(7); }
             function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
             function getThis() public view returns (address) { return address(this); }
         }`;
-        contract = new Contract(compile(sol, this).bytecode);
+        contract = new Contract(compile(src, this).bytecode);
         text = contract.decompile();
     });
 

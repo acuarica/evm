@@ -18,12 +18,12 @@ describe('abi', function () {
 
     it('encode tuples types in public parameters', function () {
         // https://docs.soliditylang.org/en/develop/abi-spec.html#handling-tuple-types
-        const sol = `contract Test {
+        const src = `contract Test {
             struct S { uint a; uint[] b; T[] c; }
             struct T { uint x; uint y; }
             function f(S memory, T memory, uint) public pure {}
         }`;
-        const abi = compile(sol, '0.8.16', this).abi;
+        const abi = compile(src, '0.8.16', this).abi;
         expect(FunctionFragment.from(abi[0]).format()).to.be.equal(
             'f((uint256,uint256[],(uint256,uint256)[]),(uint256,uint256),uint256)'
         );

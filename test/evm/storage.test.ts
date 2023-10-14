@@ -19,7 +19,7 @@ describe('evm::storage', function () {
     });
 
     it('should detect storage variable', function () {
-        const src = `contract C {
+        const src = `contract Test {
             uint256 val1 = 5;
             uint256 val2 = 7;
             fallback() external payable {
@@ -44,7 +44,7 @@ describe('evm::storage', function () {
     });
 
     it.skip('should detect packed storage variable', function () {
-        const src = `contract C {
+        const src = `contract Test {
             uint256 val1 = 0;
             uint128 val2 = 7;
             uint128 val3 = 11;
@@ -122,7 +122,7 @@ describe('evm::storage', function () {
 
     describe('mappings', function () {
         it('should find mapping loads and stores', function () {
-            const src = `contract C {
+            const src = `contract Test {
                 mapping (address => uint256) map1;
                 mapping (address => uint256) map2;
                 mapping (address => mapping (address => uint256)) allowance;

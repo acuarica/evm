@@ -16,20 +16,20 @@ describe('metadata', function () {
     const HASHES = {
         '0.5.5': [
             'bzzr',
-            'c81d1e127b6ca0e81697eb851bb9788832691c0884dbf0d63c01558ab2b46cba',
+            '5d2a7f7236dd33784730b31e6c9e23b977b5c78b67e6f3ae1e476d4bad674583',
             '<0.5.9',
         ],
-        '0.5.17': ['bzzr', '67b389a47e87003a2d242f84839b8cd6fa6e69172703b3dd6f1f4aee27324e4a'],
-        '0.6.12': ['ipfs', '122006087ea86c8b3d38c23f3d42f78d448db46feb342f2f3210c9d7cf882903da0f'],
-        '0.7.6': ['ipfs', '12208354e669af375d574e2cfa78c5eb0ddc3a1fed8b12c2152e131ee5dd4aee7c34'],
-        '0.8.16': ['ipfs', '12202ab104c0a9d46b10aa1dfa3aeb3df1e911396f6855ff98940e1724eb477a459f'],
+        '0.5.17': ['bzzr', 'bc000e08756c8a39ecf14e345b9b9cd73096befd4310ba9be5acd60f965e9117'],
+        '0.6.12': ['ipfs', '122022dc709c3afc7cabde0eb1cb8305f420c0cee343e32fef5905ba12a6c80275cc'],
+        '0.7.6': ['ipfs', '122097825c4aec6dd5baee935bb6c6efdfef43e6eccaf6e57b3c9776f4dc1fc98796'],
+        '0.8.16': ['ipfs', '1220d4c87f86f0fbd16c75f71f84f3fbae12b409812214fc9572eb31de27b071e944'],
     } as const;
 
     forVersion((compile, _fallback, version) => {
         let output: ReturnType<typeof compile>;
 
         before(function () {
-            output = compile('contract C {}', this);
+            output = compile('contract Test {}', this);
         });
 
         it('should get metadata for deployed bytecode', function () {

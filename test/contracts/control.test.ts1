@@ -9,7 +9,7 @@ contracts('control', (compile, fallback, version) => {
 
     describe('conditional', function () {
         it('should `decompile` contract with `if` no-else', function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 uint256 total = 7;
                 ${fallback}() external payable {
                     // uint256 val = 0;
@@ -19,7 +19,7 @@ contracts('control', (compile, fallback, version) => {
                     total += 5;
                 }
             }`;
-            const contract = new Contract(compile(sol, this).bytecode);
+            const contract = new Contract(compile(src, this).bytecode);
             const cfg = contract.contract.main.cfg;
 
             expect(cfg.functionBranches).to.have.length(0);
@@ -45,7 +45,7 @@ contracts('control', (compile, fallback, version) => {
         });
 
         it('should `decompile` contract with `if-else`', function () {
-            const CONTRACT = `contract C {
+            const src = `contract Test {
                 uint256 total = 7;
                 ${fallback}() external payable {
                     if (block.number == 8) {
@@ -56,7 +56,7 @@ contracts('control', (compile, fallback, version) => {
                     total += 5;
                 }
             }`;
-            const evm = new EVM(compile(CONTRACT, this).deployedBytecode);
+            const evm = new EVM(compile(src, this).deployedBytecode);
             const cfg = evm.contract.main.cfg;
 
             expect(cfg.functionBranches).to.have.length(0);
@@ -89,7 +89,7 @@ contracts('control', (compile, fallback, version) => {
         });
 
         it('should `decompile` contract with nested `if`', function () {
-            const CONTRACT = `contract C {
+            const CONTRACT = `contract Test {
                 uint256 total = 7;
                 ${fallback}() external payable {
                     if (block.number == 8) {
@@ -128,7 +128,7 @@ contracts('control', (compile, fallback, version) => {
 
     describe('loop', () => {
         it('should `decompile` contract with `for` loop', function () {
-            const CONTRACT = `contract Contract {
+            const CONTRACT = `contract Test {
                 uint256 total = 0;
                 ${fallback}() external payable {
                     uint256 sum = 0xa;
@@ -147,7 +147,7 @@ contracts('control', (compile, fallback, version) => {
         });
 
         it('should `decompile` contract with `while` loop', function () {
-            const CONTRACT = `contract Contract {
+            const CONTRACT = `contract Test {
                 function loop(uint256 n) external pure returns (uint256) {
                     uint256 sum = 0;
                     uint256 i = 0;
@@ -163,7 +163,7 @@ contracts('control', (compile, fallback, version) => {
         });
 
         it('non-terminating `while` loop', function () {
-            const CONTRACT = `contract Contract {
+            const CONTRACT = `contract Test {
                 function loop() external pure returns (uint256) {
                     uint256 sum = 0;
                     uint256 i = 0;
@@ -179,7 +179,7 @@ contracts('control', (compile, fallback, version) => {
         });
 
         it('`for` with if-else', function () {
-            const CONTRACT = `contract Contract {
+            const CONTRACT = `contract Test {
                 ${fallback}() external payable {
                     uint256 sum = 0;
                     for (uint256 i = 9; i < block.number; i++) {

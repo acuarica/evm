@@ -110,13 +110,13 @@ describe('evm::logic', function () {
         it('should detect EQ `balanceOf` function identifier ', function () {
             const balanceOf = 'balanceOf(address addr)';
             const selector = fnselector(balanceOf);
-            const sol = `contract C {
+            const src = `contract Test {
                 function ${balanceOf} external payable returns (address) {
                     return addr;
                 }
             }`;
 
-            const evm = new EVM(compile(sol, '0.7.6', this).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
 
             const state = new State<Inst, Expr>();
             evm.run(0, state);

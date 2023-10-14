@@ -15,7 +15,7 @@ describe('contracts metadata', function () {
     before(function () {
         const version = '0.5.5';
         const randomDataPath = join('.solc', `${this.test!.parent!.title}.${version}.data`);
-        const solTemplate = `contract C { bytes32 constant data = "[randomData]"; }`;
+        const solTemplate = `contract Test { bytes32 constant data = "[randomData]"; }`;
 
         try {
             const randomData = readFileSync(randomDataPath, 'utf8');

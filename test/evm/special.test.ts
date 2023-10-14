@@ -70,20 +70,20 @@ describe('evm::special', function () {
             });
 
             it('should get it from compiled code', function () {
-                const sol = ['msize()', 'codesize()', 'returndatasize()'].includes(sym.value)
-                    ? `contract C {
+                const src = ['msize()', 'codesize()', 'returndatasize()'].includes(sym.value)
+                    ? `contract Test {
                         event Deposit(${sym.type});
                         fallback() external payable {
                             uint256 value; assembly { value := ${sym.value} }
                             emit Deposit(value);
                         }
                     }`
-                    : `contract C {
+                    : `contract Test {
                         event Deposit(${sym.type});
                         fallback() external payable { emit Deposit(${sym.value}); }
                     }`;
 
-                const evm = new EVM(compile(sol, '0.8.16', this).bytecode);
+                const evm = new EVM(compile(src, '0.8.16', this).bytecode);
                 let state = new State<Inst, Expr>();
                 evm.run(0, state);
 

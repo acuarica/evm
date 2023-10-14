@@ -6,7 +6,7 @@ import { contracts } from '../utils/solc';
 
 contracts('require', compile => {
     it('should `decompile` contract with `require`s', function () {
-        const sol = `contract C {
+        const src = `contract Test {
             mapping (address => uint256) private _allowances;
             function approve(uint256 amount) external {
                 _approve(msg.sender, amount);
@@ -17,7 +17,7 @@ contracts('require', compile => {
                 _allowances[owner] = amount;
             }
         }`;
-        const contract = new Contract(compile(sol, this).bytecode);
+        const contract = new Contract(compile(src, this).bytecode);
         const text = contract.decompile();
         expect(text, text).to.match(/require(\()+msg.sender/);
         expect(text, text).to.match(/require\(_arg0 > 0x0, /);

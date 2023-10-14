@@ -11,7 +11,7 @@ contracts('selfdestruct', (compile, fallback, version) => {
 
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
-        const src = `contract C {
+        const src = `contract Test {
             ${fallback}() external payable {
                 selfdestruct(msg.sender);
             }

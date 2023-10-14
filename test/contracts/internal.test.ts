@@ -11,7 +11,7 @@ contracts('internal', compile => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 mapping(address => uint256) private _values;
                 function _msgSender() internal view returns (address) {
                     return msg.sender;
@@ -23,7 +23,7 @@ contracts('internal', compile => {
                     _values[_msgSender()] = value + 5;
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         [
@@ -65,7 +65,7 @@ contracts('internal', compile => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 mapping(address => uint256) private _values;
                 function _getValue(address from) internal view returns (uint256) {
                     return _values[from];
@@ -77,7 +77,7 @@ contracts('internal', compile => {
                     return _getValue(from);
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         [
@@ -119,7 +119,7 @@ contracts('internal', compile => {
         let contract: Contract;
 
         before(function () {
-            const sol = `contract C {
+            const src = `contract Test {
                 mapping(uint256 => uint256) private _values;
                 function _getValue(uint256 n) internal view returns (uint256) {
                     uint256 result = 0;
@@ -135,7 +135,7 @@ contracts('internal', compile => {
                     return _getValue(n);
                 }
             }`;
-            contract = new Contract(compile(sol, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode);
         });
 
         it.skip('should `decompile` bytecode', function () {
