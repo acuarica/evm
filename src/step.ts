@@ -292,25 +292,24 @@ const SPECIAL = {
     ...mapKeys(FNS, n => state => state.stack.push(new Fn(n, state.stack.pop()))),
     CALLVALUE: ({ stack }) => stack.push(new CallValue()),
     CALLDATALOAD: ({ stack }) => stack.push(new CallDataLoad(stack.pop())),
-    CALLDATACOPY: datacopy((offset, size) => `msg.data[${offset}:(${offset}+${size})];`),
-    CODECOPY: datacopy((offset, size) => `this.code[${offset}:(${offset}+${size})]`),
-    EXTCODECOPY: ({ stack }) => {
-        const address = stack.pop();
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        datacopy((offset, size) => `address(${address}).code[${offset}:(${offset}+${size})]`);
+    CALLDATACOPY: state => datacopy('calldatacopy')(state),
+    CODECOPY: state => datacopy('codecopy')(state),
+    EXTCODECOPY: state => {
+        const address = state.stack.pop();
+        datacopy('extcodecopy')(state, address);
     },
-    RETURNDATACOPY: datacopy((offset, size) => `output[${offset}:(${offset}+${size})]`),
+    RETURNDATACOPY: state => datacopy('returndatacopy')(state),
 } as const satisfies { [mnemonic: string]: (state: Ram<Expr>) => void };
 
-function datacopy(fn: (offset: string, size: string) => string) {
-    return ({ stack, memory }: Ram<Expr>): void => {
+function datacopy(kind: DataCopy['kind']) {
+    return ({ stack, memory }: Ram<Expr>, address?: Expr): void => {
         const dest = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
         if (!dest.isVal()) {
             // throw new Error('expected number in returndatacopy');
         } else {
-            memory[Number(dest.val)] = new DataCopy(fn, offset, size);
+            memory[Number(dest.val)] = new DataCopy(kind, offset, size, address);
         }
     };
 }

@@ -95,9 +95,10 @@ export class Fn extends Tag {
 export class DataCopy extends Tag {
     readonly tag = 'DataCopy';
     constructor(
-        readonly fn: (offset: string, size: string) => string,
+        readonly kind: 'calldatacopy' | 'codecopy' | 'extcodecopy' | 'returndatacopy',
         readonly offset: Expr,
-        readonly size: Expr
+        readonly size: Expr,
+        readonly address?: Expr
     ) {
         super();
     }

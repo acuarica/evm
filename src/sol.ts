@@ -100,7 +100,18 @@ function solExpr(expr: Expr): string {
         case 'Fn':
             return FNS[expr.mnemonic][0](solExpr(expr.value));
         case 'DataCopy':
-            return expr.fn(solExpr(expr.offset), solExpr(expr.size));
+            switch (expr.kind) {
+                case 'calldatacopy':
+                    return sol`msg.data[${expr.offset}:(${expr.offset}+${expr.size})]`;
+                case 'codecopy':
+                    return sol`this.code[${expr.offset}:(${expr.offset}+${expr.size})]`;
+                case 'extcodecopy':
+                    return sol`address(${expr.address}).code[${expr.offset}:(${expr.offset}+${expr.size})]`;
+                case 'returndatacopy':
+                    return sol`output[${expr.offset}:(${expr.offset}+${expr.size})]`;
+                default:
+                    throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
+            }
         case 'MLoad':
             return sol`memory[${expr.loc}]`;
         case 'Sha3':
