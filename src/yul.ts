@@ -92,9 +92,9 @@ function yulInst(inst: Inst): string {
         case 'Stop':
             return 'stop()';
         case 'Return':
-            return `return(${inst.offset}, ${inst.size});`;
+            return yul`return(${inst.offset}, ${inst.size});`;
         case 'Revert':
-            return `revert(${inst.offset}, ${inst.size});`;
+            return yul`revert(${inst.offset}, ${inst.size});`;
         case 'SelfDestruct':
             return yul`selfdestruct(${inst.address})`;
         case 'Invalid':

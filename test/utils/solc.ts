@@ -224,13 +224,9 @@ export async function mochaGlobalSetup() {
         try {
             return JSON.parse(readFileSync(path, 'utf-8')) as Releases;
         } catch (_err) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             const resp = await fetch('https://binaries.soliditylang.org/bin/list.json');
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (resp.ok) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                const releases = (await resp.json()).releases as Releases;
+                const { releases } = (await resp.json()) as { releases: Releases };
                 writeFileSync(path, JSON.stringify(releases, null, 2));
                 return releases;
             } else {
@@ -252,17 +248,12 @@ export async function mochaGlobalSetup() {
         if (existsSync(path)) {
             process.stdout.write(c.green('\u2713 '));
         } else {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             const resp = await fetch(`https://binaries.soliditylang.org/bin/${file}`);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (resp.ok) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
                 writeFileSync(path, await resp.text());
                 process.stdout.write(c.yellow('\u2913 '));
             } else {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                console.info(c.red(`${resp.status}  ${resp.statusText}`));
+                console.info(c.red(`${resp.status} ${resp.statusText}`));
             }
         }
     }

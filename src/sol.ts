@@ -121,15 +121,15 @@ function solExpr(expr: Expr): string {
                     : sol`address(${expr.address}).call.gas(${expr.gas}).value(${expr.value})`
                 : sol`call(${expr.gas},${expr.address},${expr.value},${expr.argsStart},${expr.argsLen},${expr.retStart},${expr.retLen})`;
         case 'ReturnData':
-            return `output:ReturnData:${expr.retOffset}:${expr.retSize}`;
+            return sol`output:ReturnData:${expr.retOffset}:${expr.retSize}`;
         case 'CallCode':
-            return `callcode(${expr.gas},${expr.address},${expr.value},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+            return sol`callcode(${expr.gas},${expr.address},${expr.value},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'Create2':
             return sol`new Contract(memory[${expr.offset}:(${expr.offset}+${expr.size})]).value(${expr.value}).address`;
         case 'StaticCall':
-            return `staticcall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+            return sol`staticcall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'DelegateCall':
-            return `delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
+            return sol`delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'SLoad': {
             if (expr.location.isVal() && expr.location.val.toString() in expr.variables) {
                 const loc = expr.location.val.toString();
@@ -167,7 +167,7 @@ function solExpr(expr: Expr): string {
 function solInst(inst: Inst): string {
     switch (inst.name) {
         case 'MStore':
-            return `memory[${inst.location}] = ${inst.data};`;
+            return sol`memory[${inst.location}] = ${inst.data};`;
         case 'Stop':
             return 'return;';
         case 'Return':
@@ -182,7 +182,7 @@ function solInst(inst: Inst): string {
                 : `return (${inst.args.map(solExpr).join(', ')});`;
         case 'Revert':
             return inst.args === undefined
-                ? `revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
+                ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
                 : `revert(${inst.args.join(', ')});`;
         case 'SelfDestruct':
             return sol`selfdestruct(${inst.address});`;
@@ -195,19 +195,20 @@ function solInst(inst: Inst): string {
                       .join(', ')});`
                 : 'log(' +
                       (inst.args === undefined
-                          ? [...inst.topics, `memory[${inst.mem.offset}:${inst.mem.size} ]`].join(
-                                ', '
-                            ) + 'ii'
+                          ? [
+                                ...inst.topics,
+                                sol`memory[${inst.mem.offset}:${inst.mem.size} ]`,
+                            ].join(', ') + 'ii'
                           : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
                       ');';
         case 'Jump':
-            return `goto :${inst.offset} branch:${inst.destBranch.pc}`;
+            return sol`goto :${inst.offset} branch:${inst.destBranch.pc}`;
         case 'Jumpi':
-            return `when ${inst.cond} goto ${inst.destBranch.pc} or fall ${inst.fallBranch.pc}`;
+            return sol`when ${inst.cond} goto ${inst.destBranch.pc} or fall ${inst.fallBranch.pc}`;
         case 'JumpDest':
             return `fall: ${inst.fallBranch.pc}:`;
         case 'SigCase':
-            return `case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
+            return sol`case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore': {
             const isLoad = (value: Expr) =>
                 value.tag === 'SLoad' && solExpr(value.location) === solExpr(inst.location);
