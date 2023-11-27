@@ -7,7 +7,6 @@ import { contracts } from '../utils/solc';
 
 contracts('symbols', compile => {
     let contract: Contract;
-    let text: string;
 
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
@@ -17,7 +16,6 @@ contracts('symbols', compile => {
             function getThis() public view returns (address) { return address(this); }
         }`;
         contract = new Contract(compile(src, this).bytecode);
-        text = contract.decompile();
     });
 
     it('should find symbol opcodes', function () {
@@ -38,15 +36,10 @@ contracts('symbols', compile => {
         });
     });
 
-    it('should find `BLOCKHASH` symbol', function () {
+    it('should find `BLOCKHASH`, `BALANCE` and `ADDRESS` symbols', function () {
+        const text = contract.decompile();
         expect(text, `decompiled bytecode\n${text}`).to.match(/return blockhash\(0x7\);$/m);
-    });
-
-    it('should find `BALANCE` symbol', function () {
         expect(text, `decompiled bytecode\n${text}`).to.match(/return _arg0.balance;$/m);
-    });
-
-    it('should find `ADDRESS` symbol', function () {
         expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
     });
 });
