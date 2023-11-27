@@ -14,7 +14,7 @@ contracts('erc165', compile => {
         expect(contract.isERC('ERC165')).to.be.true;
     });
 
-    it('should detect not-ERC165', function () {
+    it('should detect non-ERC165', function () {
         const src = `contract Test {
                 function supportsInterface2(bytes4 interfaceID) external pure returns (bool) {
                     return (interfaceID == 0xffffffff);
