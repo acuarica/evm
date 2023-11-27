@@ -115,9 +115,7 @@ describe('evm::logic', function () {
                     return addr;
                 }
             }`;
-
             const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 

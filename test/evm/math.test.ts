@@ -110,7 +110,7 @@ describe('evm::math', function () {
             str: '0x5 % 0x0',
         },
     ].forEach(({ insts, expr, val, str }) => {
-        it(`should \`eval+str\` \`${str}\``, function () {
+        it(`should \`eval+sol+yul\` \`${str}\``, function () {
             const state = new State<never, Expr>();
             for (const inst of insts) {
                 if (typeof inst === 'number') {
@@ -123,6 +123,7 @@ describe('evm::math', function () {
             expect(state.stack.values).to.be.deep.equal([expr]);
             expect(expr.eval()).to.be.deep.equal(val);
             expect(sol`${expr}`).to.be.equal(str);
+            // expect(yul`${expr}`).to.be.equal(str);
         });
     });
 });
