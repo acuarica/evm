@@ -77,5 +77,8 @@
         "docs": "http-server docs",
         "tsdoc": "typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "clean": "rm -r .solc/"
+    },
+    "engines": {
+        "node": ">=16.0.0"
     }
 }
