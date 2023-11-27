@@ -32,7 +32,7 @@ function main() {
     let id = 0;
     for (const [, chunk] of evm.chunks) {
         for (const state of chunk.states) {
-            assert(!ids.has(state));
+            // assert(!ids.has(state));
 
             if (!ids.has(state)) {
                 // state.id = `id-${id}`;
@@ -105,7 +105,7 @@ function main() {
             // label += '\\l';
             // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
             // label += '\\l';
-            label += state.stack.values.map(elem => sol`=| ${elem.eval()}`).join('');
+            label += state.stack.values.map(elem => sol`=| ${elem}`).join('');
             label += '\\l';
             // label += inspect(state.memory);
             // label += '\\l';
