@@ -169,6 +169,16 @@ void yargs(process.argv.slice(2))
     .command('yul <contract>', "Decompile the contract's bytecode into Yul-like source code[3]", pos, make(decompile))
     .command('console <contract>', 'Opens the interactive viewer to inspect bytecode', pos, make(show))
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () => console.info(paths.cache))
+    .middleware(argv => {
+        if (!argv['color']) {
+            c.enabled = false;
+        }
+    })
+    .option('color', {
+        type: 'boolean',
+        description: 'Display with colors, use `--no-color` to deactivate colors',
+        default: true,
+    })
     .option('selector', {
         alias: 's',
         type: 'string',
