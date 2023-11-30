@@ -1,0 +1,67 @@
+name: Main
+
+on:
+  # We want to trigger these jobs in every branch.
+  push:
+    # But do not trigger them when only `md` files were modified.
+    paths-ignore:
+      - '**.md'
+
+# `FORCE_COLOR` is used by `chalk`, which is used internally by `mocha`.
+# https://github.com/chalk/chalk#supportscolor
+# https://github.com/orgs/community/discussions/26944#discussioncomment-3254075
+env:
+  FORCE_COLOR: 3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: yarn make
+      # TODO enable type check and resolve how to provide bundle for browser
+      # - run: yarn tc
+      # - run: yarn bundle
+
+  test:
+    strategy:
+      # Runs all node versions using the same `os` in parallel
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # https://nodejs.dev/en/about/releases/
+        node: [18, 20]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: yarn make
+      - run: yarn test
+      - run: yarn test:smoke
+
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: yarn make
+      - run: node examples/Compound.js
+      - run: node examples/USDC.js

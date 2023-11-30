@@ -1,0 +1,32 @@
+{
+    "name": "sevm-4byte",
+    "version": "0.5.1",
+    "type": "module",
+    "main": "src/index.js",
+    "exports": {
+        ".": "./src/index.js"
+    },
+    "files": [
+        "src/"
+    ],
+    "license": "MIT",
+    "peerDependencies": {
+        "sevm": "^0.5.1"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.6",
+        "@types/mocha": "^10.0.1",
+        "ansi-colors": "4.1.1",
+        "chai": "^4.3.8",
+        "ethers": "^6.7.1",
+        "mocha": "^10.2.0",
+        "sevm": "^0.5.1",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "make": "scripts/make.js",
+        "tc": "tsc",
+        "test": "mocha 'test/*.{test,check}.js'",
+        "test:smoke": "mocha 'test/*.smoke.js'"
+    }
+}
