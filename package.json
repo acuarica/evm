@@ -92,10 +92,10 @@
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
         "make:4byte": "node scripts/4byte.mjs",
         "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/help.mjs README.md",
+        "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
-        "tsdoc": "typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "clean": "rm -r .solc/"
     },
     "engines": {
