@@ -207,7 +207,6 @@ Commands:
                              source code
   sevm yul <contract>       Decompile the contract's bytecode into Yul-like sour
                             ce code[3]
-  sevm console <contract>   Opens the interactive viewer to inspect bytecode
   sevm config               Shows cache path used to store downloaded bytecode
 
 Options:
