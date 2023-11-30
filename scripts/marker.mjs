@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 import { readFileSync, writeFileSync } from 'fs';
 import c from 'ansi-colors';
