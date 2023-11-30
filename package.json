@@ -90,7 +90,7 @@
         "coverage": "yarn compile && nyc mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
-        "make:4byte": "scripts/4byte.mjs",
+        "make:4byte": "node scripts/4byte.mjs",
         "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/help.mjs README.md",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
