@@ -34,6 +34,7 @@ function main() {
         } else if (trimmedLine === END_MARKER && marker === 'OPEN') {
             write(BEGIN_MARKER);
             write(AUTOGEN_COMMENT);
+            write('');
             write('```console');
             write(`$ ${MARKER}`);
 
@@ -41,6 +42,7 @@ function main() {
             write(help);
 
             write('```');
+            write('');
             write(END_MARKER);
 
             marker = 'CLOSED';
