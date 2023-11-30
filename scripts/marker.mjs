@@ -27,11 +27,11 @@ function main() {
     let output = '';
     const write = (/** @type string */ line) => (output += line + '\n');
 
-    for (let line of readme.split('\n')) {
-        line = line.trim();
-        if (line === BEGIN_MARKER && marker === 'NOT_SEEN') {
+    for (const line of readme.split('\n')) {
+        const trimmedLine = line.trim();
+        if (trimmedLine === BEGIN_MARKER && marker === 'NOT_SEEN') {
             marker = 'OPEN';
-        } else if (line === END_MARKER && marker === 'OPEN') {
+        } else if (trimmedLine === END_MARKER && marker === 'OPEN') {
             write(BEGIN_MARKER);
             write(AUTOGEN_COMMENT);
             write('```console');
