@@ -2,6 +2,8 @@
     "name": "sevm",
     "version": "0.5.3",
     "description": "A Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer library & CLI",
+    "main": "./dist/src/index.js",
+    "types": "./dist/src/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/src/index.d.ts",
@@ -10,6 +12,10 @@
         "./ast": {
             "types": "./dist/src/ast/index.d.ts",
             "default": "./dist/src/ast/index.js"
+        },
+        "./4byte": {
+            "types": "./4byte/index.d.ts",
+            "default": "./4byte/index.js"
         }
     },
     "bin": {
@@ -18,6 +24,7 @@
     "files": [
         "src/",
         "dist/src/",
+        "4byte/",
         "bin/"
     ],
     "repository": "acuarica/evm",
@@ -79,9 +86,11 @@
         "compile": "tsc",
         "lint": "eslint .",
         "test": "yarn compile && mocha",
+        "test:smoke": "mocha 'test/*.smoke.js'",
         "coverage": "yarn compile && nyc mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
+        "make:4byte": "scripts/4byte.mjs",
         "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/marker.mjs README.md",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",

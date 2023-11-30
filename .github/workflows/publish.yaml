@@ -35,6 +35,7 @@ jobs:
           CONFIRM: ${{ inputs.confirm }}
 
       - run: yarn install --frozen-lockfile
+      - run: yarn make:4byte
       - run: yarn compile
       - run: yarn lint
       - run: yarn test

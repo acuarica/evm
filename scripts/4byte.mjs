@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 import { readFileSync, writeFileSync } from 'fs';
 import { keccak256, toUtf8Bytes } from 'ethers';
@@ -33,8 +34,8 @@ function writeJson(name, data) {
 function writeJs(name, hashes) {
     console.info('Writing JS', c.magenta(name));
     writeFileSync(
-        `./src/${name}.min.js`,
-        `/** @type {{ [hash: string]: string }} */\nexport default ${JSON.stringify(hashes)};`
+        `./4byte/${name}.min.js`,
+        `/** @type {{ [hash: string]: string }} */\nmodule.exports = ${JSON.stringify(hashes)};`
     );
 }
 

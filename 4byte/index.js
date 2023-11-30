@@ -10,17 +10,17 @@
  *
  * @packageDocumentation
  */
-import { Contract } from 'sevm';
+const { Contract } = require('sevm');
 
 // @ts-ignore to avoid `has no default export` due to module's size
-import functionHashes from './functionHashes.min.js';
-import eventHashes from './eventHashes.min.js';
+const functionHashes = require('./functionHashes.min.js');
+const eventHashes = require('./eventHashes.min.js');
 
 /**
  * @param {Contract} contract
  * @returns {Contract}
  */
-export function patch(contract) {
+function patch(contract) {
     for (const [topic, event] of Object.entries(contract.evm.events)) {
         if (topic in eventHashes) {
             event.sig = eventHashes[topic];
