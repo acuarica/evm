@@ -13,7 +13,7 @@
         }
     },
     "bin": {
-        "sevm": "bin/sevm.js"
+        "sevm": "bin/sevm.mjs"
     },
     "files": [
         "src/",
@@ -82,7 +82,7 @@
         "coverage": "yarn compile && nyc mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
-        "make:help": "node evm.js 2>&1 | MARKER='evmjs --help' scripts/marker.mjs README.md",
+        "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/marker.mjs README.md",
         "prettier": "prettier --write .",
         "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
