@@ -22,7 +22,7 @@ function main() {
     /** @type {'NOT_SEEN' | 'OPEN' | 'CLOSED'} */
     let marker = 'NOT_SEEN';
     let output = '';
-    const write = (/** @type string */line) => output += line + '\n';
+    const write = (/** @type string */ line) => (output += line + '\n');
 
     for (let line of readme.split('\n')) {
         line = line.trim();
@@ -57,5 +57,5 @@ try {
     main();
 } catch (err) {
     const warn = c.yellow;
-    console.warn(warn((/** @type Error */(err)).message));
+    console.warn(warn(/** @type Error */ (err).message));
 }

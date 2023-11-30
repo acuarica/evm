@@ -9,6 +9,7 @@
         "sourceMap": true,
         "isolatedModules": true,
         "declaration": true,
+        "checkJs": true,
         "strict": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
