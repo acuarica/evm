@@ -1,0 +1,52 @@
+{
+  "name": "sevm-cli",
+  "version": "0.5.1",
+  "description": "A CLI for the Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer",
+  "type": "module",
+  "bin": {
+    "sevm": "sevm.js"
+  },
+  "license": "MIT",
+  "repository": "acuarica/evm-cli",
+  "author": "Luis Mastrangelo (https://acuarica.github.io)",
+  "files": [
+    "sevm.js"
+  ],
+  "keywords": [
+    "4byte",
+    "blockchain",
+    "bytecode",
+    "cli",
+    "control-flow-graph",
+    "decoder",
+    "decompiler",
+    "disassembler",
+    "ethereum",
+    "evm",
+    "parser",
+    "signatures",
+    "solidity",
+    "typescript",
+    "utils",
+    "web3"
+  ],
+  "dependencies": {
+    "ansi-colors": "^4.1.3",
+    "blessed": "^0.1.81",
+    "env-paths": "^3.0.0",
+    "ethers": "^6.7.1",
+    "sevm": "^0.5.3",
+    "sevm-4byte": "^0.5.1",
+    "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.21",
+    "@types/node": "^18.15.11",
+    "@types/yargs": "^17.0.24",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "tc": "tsc",
+    "readme": "node evm.js 2>&1 | MARKER='evmjs --help' node scripts/marker.js README.md"
+  }
+}
