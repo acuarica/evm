@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, EVM, formatOpcode, solStmts, toHex } from 'sevm';
+import { Contract, EVM, formatOpcode, toHex } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -182,12 +182,6 @@ void yargs(process.argv.slice(2))
         pos,
         make(decompile)
     )
-    .command(
-        'console <contract>',
-        'Opens the interactive viewer to inspect bytecode',
-        pos,
-        make(show)
-    )
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
     )
@@ -355,152 +349,13 @@ function cfg(contract) {
 //             }
 // }
 
-/**
- *
- * @param {Contract} contract
- */
-function show(contract) {
-    const screen = blessed.screen({ smartCSR: true });
-    screen.title = 'my window title';
+// const entries = [
+//     /** @type {const} */ (['main', { decompile: () => solStmts(contract.main) }]),
+//     ...Object.entries(contract.functions).map(
+//         ([selector, fn]) => /**@type{const}*/ ([fn.label ?? selector, fn])
+//     ),
+// ];
+// const fns = Object.fromEntries(entries);
+// functionList.setItems(Object.keys(fns));
 
-    const box = blessed.box({
-        parent: screen,
-        // top: 'center',
-        // left: 'center',
-        right: 0,
-        width: '80%',
-        // height: '50%',
-        content: 'Hello {bold}world{/bold}!',
-        tags: true,
-        border: {
-            type: 'line',
-        },
-        style: {
-            fg: 'white',
-            // bg: 'magenta',
-            border: {
-                fg: '#f0f0f0',
-            },
-            // hover: {
-            //     bg: 'green'
-            // }
-        },
-    });
-
-    // Append our box to the screen.
-    // screen.append(box);
-
-    // If our box is clicked, change the content.
-    // box.on('click', function (data) {
-    //     box.setContent('{center}Some different {red-fg}content{/red-fg}.{/center}');
-    //     screen.render();
-    // });
-
-    // If box is focused, handle `enter`/`return` and give us some more content.
-    // box.key('enter', function (ch, key) {
-    //     box.setContent('{right}Even different {black-fg}content{/black-fg}.{/right}\n');
-    //     box.setLine(1, 'bar');
-    //     box.insertLine(1, 'foo');
-    //     screen.render();
-    // });
-
-    // Quit on Escape, q, or Control-C.
-    screen.key(['escape', 'q', 'C-c'], function (_ch, _key) {
-        return process.exit(0);
-    });
-
-    blessed.box({
-        parent: screen,
-        label: ' {bold}{cyan-fg}Metadata{/cyan-fg}{/bold} ',
-        width: '20%',
-        height: '20%',
-        content: getMetadata(contract.metadata),
-        tags: true,
-        border: {
-            type: 'line',
-        },
-        style: {
-            fg: 'white',
-            border: {
-                fg: '#f0f0f0',
-            },
-        },
-    });
-
-    const functionList = blessed.list({
-        parent: screen,
-        label: ' {bold}{cyan-fg}Functions{/cyan-fg}{/bold} ',
-        tags: true,
-        top: '20%',
-        width: '20%',
-        height: '40%',
-        keys: true,
-        vi: true,
-        // mouse: true,
-        border: 'line',
-        scrollbar: {
-            ch: ' ',
-            track: {
-                bg: 'cyan',
-            },
-            style: {
-                inverse: true,
-            },
-        },
-        style: {
-            item: {
-                hover: {
-                    bg: 'blue',
-                },
-            },
-            selected: {
-                bg: 'blue',
-                bold: true,
-            },
-        },
-        search: function (_callback) {
-            // prompt.input('Search:', '', function (err, value) {
-            //     if (err) return;
-            //     return callback(null, value);
-            // });
-        },
-    });
-    functionList.on('select item', elem => {
-        const fn = fns[elem.getText()];
-        box.setContent(fn.decompile());
-        screen.render();
-    });
-
-    const entries = [
-        /** @type {const} */ (['main', { decompile: () => solStmts(contract.main) }]),
-        ...Object.entries(contract.functions).map(
-            ([selector, fn]) => /**@type{const}*/ ([fn.label ?? selector, fn])
-        ),
-    ];
-    const fns = Object.fromEntries(entries);
-    functionList.setItems(Object.keys(fns));
-
-    const eventList = blessed.list({
-        parent: screen,
-        label: ' {bold}{cyan-fg}Events{/cyan-fg}{/bold} ',
-        tags: true,
-        bottom: 0,
-        width: '20%',
-        height: '40%',
-        keys: true,
-        vi: true,
-        border: 'line',
-    });
-    eventList.setItems(contract.getEvents());
-
-    functionList.focus();
-    screen.render();
-}
-
-/**
- *
- * @param {EVM['metadata']} metadata
- */
-function getMetadata(metadata) {
-    return metadata ? `solc ${metadata.solc} ${metadata.url}` : '--';
-}
+// eventList.setItems(contract.getEvents());

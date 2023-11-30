@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * This module provides a fair database of selectors for both functions and events.
  *
@@ -10,8 +11,11 @@
  *
  * @packageDocumentation
  */
+/* eslint-env node */
+
 const { Contract } = require('sevm');
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore to avoid `has no default export` due to module's size
 const functionHashes = require('./functionHashes.min.js');
 const eventHashes = require('./eventHashes.min.js');
@@ -29,6 +33,8 @@ function patch(contract) {
 
     for (const [selector, fn] of Object.entries(contract.functions)) {
         if (selector in functionHashes) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             fn.label = functionHashes[selector];
         }
     }

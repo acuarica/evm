@@ -5,8 +5,8 @@ import { expect } from 'chai';
 import c from 'ansi-colors';
 import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
-import { Contract, ERCIds, sol } from 'sevm';
-import { STEP } from 'sevm';
+import { Contract, ERCIds, sol, type State, STEP } from 'sevm';
+import type { Expr, Inst, StaticCall, Throw } from 'sevm/ast';
 import 'sevm-4byte';
 
 /**
@@ -36,11 +36,7 @@ const provider = {
         new PocketProvider(),
     ],
     current: 0,
-    /**
-     * @param {string} address
-     * @returns {Promise<string>}
-     */
-    getCode: async function (address) {
+    getCode: async function (address: string): Promise<string> {
         this.current = (this.current + 1) % this.providers.length;
         const code = await this.providers[this.current].getCode(address);
         return code;
@@ -60,20 +56,19 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
          */
         csv = readFileSync(csvPath);
     } catch {
-        it.skip(`Addresses CSV \`${csvPath}\` not found, skipping`, () => {});
+        it.skip(`Addresses CSV \`${csvPath}\` not found, skipping`, function () {
+            /**/
+        });
         return;
     }
 
-    /** @type {Map<string, import('sevm/ast').Throw[]>} */
-    const errorsByContract = new Map();
+    const errorsByContract: Map<string, Throw[]> = new Map();
     const metadataStats = new (class {
         noMetadata = 0;
-        /** @type {Set<string>} */
-        protocols = new Set();
+        protocols: Set<string> = new Set();
         solcs = new Set();
 
-        /** @param {Contract['metadata']} metadata */
-        append(metadata) {
+        append(metadata: Contract['metadata']) {
             if (metadata) {
                 this.protocols.add(metadata.protocol);
                 this.solcs.add(metadata.solc);
@@ -84,15 +79,10 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     })();
 
     const selectorStats = new (class {
-        /** @type {Set<string>} */
-        hitSelectors = new Set();
-        /** @type {Set<string>} */
-        missedSelectors = new Set();
+        hitSelectors = new Set<string>();
+        missedSelectors = new Set<string>();
 
-        /**
-         * @param {Contract['functions']} functions
-         */
-        append(functions) {
+        append(functions: Contract['functions']) {
             for (const fn of Object.values(functions)) {
                 (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(
                     fn.selector
@@ -102,13 +92,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     })();
 
     const ercsStats = new (class {
-        /** @type {Map<(typeof ERCIds)[number], number>} */
-        counts = new Map();
+        counts = new Map<(typeof ERCIds)[number], number>();
 
-        /**
-         * @param {Contract} contract
-         */
-        append(contract) {
+        append(contract: Contract) {
             for (const erc of ERCIds) {
                 if (contract.isERC(erc)) {
                     const count = this.counts.get(erc) ?? 0;
@@ -122,10 +108,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         count = 0;
         total = 0n;
 
-        /**
-         * @param {bigint} diff
-         */
-        append(diff) {
+        append(diff: bigint) {
             this.count++;
             this.total += diff;
         }
@@ -136,13 +119,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     })();
 
     const precompiledStats = new (class {
-        /** @type {Map<string, number>} */
-        counts = new Map();
+        counts = new Map<string, number>();
 
-        /**
-         * @param {string} address
-         */
-        append(address) {
+        append(address: string) {
             const count = this.counts.get(address) ?? 0;
             this.counts.set(address, count + 1);
         }
@@ -168,7 +147,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                         writeFileSync(path, code);
                     } catch (err) {
                         console.info(
-                            error(/**@type{{ message: string }}*/ (err).message),
+                            error((err as { message: string }).message),
                             provider.providers[provider.current]
                         );
                     }
@@ -181,9 +160,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
 
                 const step = STEP();
                 /** @param {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} state */
-                const STATICCALL = state => {
+                const STATICCALL = (state: State<Inst, Expr>) => {
                     step['STATICCALL'](state);
-                    const call = /** @type {import('sevm/ast').StaticCall}*/ (state.stack.top);
+                    const call = state.stack.top as StaticCall;
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {
                         precompiledStats.append(sol`${address}`);

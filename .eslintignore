@@ -1,3 +1,5 @@
 /dist/
 /docs/tsdoc/
 /.eslintrc.js
+/4byte/functionHashes.min.js
+/4byte/eventHashes.min.js
