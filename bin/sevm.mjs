@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, EVM, formatOpcode, toHex } from 'sevm';
+import { Contract, EVM, formatOpcode, huffState, toHex } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -90,6 +90,14 @@ function dis(contract) {
 /** @param {Contract} contract */
 function decompile(contract) {
     console.info(contract.decompile());
+}
+
+/**
+ * @param {Contract} contract
+ */
+function decompileHuff(contract) {
+    const main = contract.evm.start();
+    console.info(huffState(main));
 }
 
 /** @param {string} pathOrAddress */
@@ -181,6 +189,12 @@ void yargs(process.argv.slice(2))
         "Decompile the contract's bytecode into Yul-like source code[3]",
         pos,
         make(decompile)
+    )
+    .command(
+        'huff <contract>',
+        "Decompile the contract's bytecode into Huff-like source code[?]",
+        pos,
+        make(decompileHuff)
     )
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
