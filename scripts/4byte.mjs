@@ -32,11 +32,8 @@ function writeJson(name, data) {
  * @returns
  */
 function writeJs(name, hashes) {
-    console.info('Writing JS', c.magenta(name));
-    writeFileSync(
-        `./4byte/${name}.min.js`,
-        `/** @type {{ [hash: string]: string }} */\nmodule.exports = ${JSON.stringify(hashes)};`
-    );
+    console.info('Writing minified JSON', c.magenta(name));
+    writeFileSync(`./4byte/${name}.min.json`, JSON.stringify(hashes));
 }
 
 /**
