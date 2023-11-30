@@ -7,7 +7,7 @@ import c from 'ansi-colors';
 import { isElemType } from 'sevm';
 
 /**
- * @param {'functions'|'events'} file 
+ * @param {'functions'|'events'} file
  * @returns {string[]}
  */
 const json = file => JSON.parse(readFileSync(`./data/${file}.json`, 'utf-8'));
@@ -17,8 +17,8 @@ const events = json('events');
 
 describe('selectors', function () {
     const stats = {
-        lengthyFunctionSigs: /**@type {string[]}*/([]),
-        lengthyEventSigs: /**@type {string[]}*/([]),
+        lengthyFunctionSigs: /**@type {string[]}*/ ([]),
+        lengthyEventSigs: /**@type {string[]}*/ ([]),
     };
 
     describe('functions.json', function () {
@@ -109,9 +109,9 @@ describe('selectors', function () {
         const warn = c.yellow;
 
         /**
-         * @param {string} title 
-         * @param {string[]} sigs 
-         * @returns 
+         * @param {string} title
+         * @param {string[]} sigs
+         * @returns
          */
         const statsinfo = (title, sigs) =>
             console.info(`    • ${info('Lengthy ' + title)} ${warn(sigs.length.toString())}`);
@@ -123,13 +123,15 @@ describe('selectors', function () {
 });
 
 /**
- * @param {import('ethers').ParamType} param 
+ * @param {import('ethers').ParamType} param
  * @returns {boolean}
  */
-function isValidType(param){
+function isValidType(param) {
     return (
         isElemType(param.type) ||
-        (param.baseType === 'tuple' && /**@type{import('ethers').ParamType[]}*/(param.components).every(isValidType)) ||
-        (param.baseType === 'array' && isValidType(/**@type{import('ethers').ParamType}*/(param.arrayChildren)))
+        (param.baseType === 'tuple' &&
+            /**@type{import('ethers').ParamType[]}*/ (param.components).every(isValidType)) ||
+        (param.baseType === 'array' &&
+            isValidType(/**@type{import('ethers').ParamType}*/ (param.arrayChildren)))
     );
 }

@@ -7,7 +7,7 @@ import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider }
 
 import { Contract, ERCIds, sol } from 'sevm';
 import { STEP } from 'sevm';
-import 'sevm-4byte'
+import 'sevm-4byte';
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -152,7 +152,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(','))
-        .filter(([_, name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT))
+        .filter(
+            ([_, name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT)
+        )
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
         .forEach(([_tx, address, name]) => {
             it(`should decode & decompile ${name} ${address}`, async function () {
@@ -166,7 +168,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                         writeFileSync(path, code);
                     } catch (err) {
                         console.info(
-                            error((/**@type{{ message: string }}*/(err)).message),
+                            error(/**@type{{ message: string }}*/ (err).message),
                             provider.providers[provider.current]
                         );
                     }

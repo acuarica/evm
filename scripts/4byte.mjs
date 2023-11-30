@@ -2,7 +2,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { keccak256, toUtf8Bytes } from 'ethers';
-import c from 'ansi-colors'
+import c from 'ansi-colors';
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
@@ -16,9 +16,9 @@ function json(name) {
 }
 
 /**
- * @param {string} name 
- * @param {Hashes} data 
- * @returns 
+ * @param {string} name
+ * @param {Hashes} data
+ * @returns
  */
 function writeJson(name, data) {
     console.info('Writing JSON', c.magenta(name));
@@ -26,13 +26,16 @@ function writeJson(name, data) {
 }
 
 /**
- * @param {string} name 
- * @param {Hashes} hashes 
- * @returns 
+ * @param {string} name
+ * @param {Hashes} hashes
+ * @returns
  */
 function writeJs(name, hashes) {
     console.info('Writing JS', c.magenta(name));
-    writeFileSync(`./src/${name}.min.js`, `/** @type {{ [hash: string]: string }} */\nexport default ${JSON.stringify(hashes)};`);
+    writeFileSync(
+        `./src/${name}.min.js`,
+        `/** @type {{ [hash: string]: string }} */\nexport default ${JSON.stringify(hashes)};`
+    );
 }
 
 /**

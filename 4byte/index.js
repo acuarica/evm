@@ -17,7 +17,7 @@ import functionHashes from './functionHashes.min.js';
 import eventHashes from './eventHashes.min.js';
 
 /**
- * @param {Contract} contract 
+ * @param {Contract} contract
  * @returns {Contract}
  */
 export function patch(contract) {
