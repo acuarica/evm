@@ -24,6 +24,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
+      - run: yarn make:4byte
       - run: yarn make:help
       - run: git --no-pager diff --exit-code README.md
 
@@ -37,6 +38,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
+      - run: yarn make:4byte
       - run: yarn compile
       - run: yarn lint
       - run: yarn bundle
@@ -60,6 +62,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
+      - run: yarn make:4byte
       - run: yarn test
       # - run: yarn test:smoke
 
