@@ -1,63 +1,67 @@
-/**
- * https://docs.soliditylang.org/en/latest/using-the-compiler.html#output-description
- */
-export interface SolcOutput {
+declare module 'solc' {
     /**
-     * This contains the contract-level outputs.
-     * It can be limited/filtered by the `outputSelection` settings.
+     * https://docs.soliditylang.org/en/latest/using-the-compiler.html#output-description
      */
-    contracts: {
-        [fileName: string]: {
-            /**
-             * If the language used has no contract names,
-             * this field should equal to an empty string.
-             */
-            [contractName: string]: {
+    export interface SolcOutput {
+        /**
+         * This contains the contract-level outputs.
+         * It can be limited/filtered by the `outputSelection` settings.
+         */
+        contracts: {
+            [fileName: string]: {
                 /**
-                 * The Ethereum Contract ABI. If empty, it is represented as an empty array.
-                 * See https://docs.soliditylang.org/en/develop/abi-spec.html
+                 * If the language used has no contract names,
+                 * this field should equal to an empty string.
                  */
-                abi: Member[];
+                [contractName: string]: {
+                    /**
+                     * The Ethereum Contract ABI. If empty, it is represented as an empty array.
+                     * See https://docs.soliditylang.org/en/develop/abi-spec.html
+                     */
+                    abi: Member[];
+                };
             };
         };
-    };
 
-    /**
-     * Optional: not present if no errors/warnings/infos were encountered
-     */
-    errors?: {
         /**
-         * Mandatory ("error", "warning" or "info", but please note that this may be extended in the future)
+         * Optional: not present if no errors/warnings/infos were encountered
          */
-        severity: string;
-        /**
-         * Optional: the message formatted with source location
-         */
-        formattedMessage: string;
-    }[];
-}
-
-/**
- * https://docs.soliditylang.org/en/latest/abi-spec.html#json
- */
-export interface Member {
-    type: 'function' | 'event' | 'constructor' | 'receive' | 'fallback';
+        errors?: {
+            /**
+             * Mandatory ("error", "warning" or "info", but please note that this may be extended in the future)
+             */
+            severity: string;
+            /**
+             * Optional: the message formatted with source location
+             */
+            formattedMessage: string;
+        }[];
+    }
 
     /**
-     * name: the name of the function or event;
+     * https://docs.soliditylang.org/en/latest/abi-spec.html#json
      */
-    name: string;
-    /**
-     * `inputs`: an array of objects, each of which contains:
-     */
-    inputs: {
+    export interface Member {
+        type: 'function' | 'event' | 'constructor' | 'receive' | 'fallback';
+
         /**
-         * `name`: the name of the parameter.
+         * name: the name of the function or event;
          */
         name: string;
         /**
-         * `type`: the canonical type of the parameter (more below).
+         * `inputs`: an array of objects, each of which contains:
          */
-        type: string;
-    }[];
+        inputs: {
+            /**
+             * `name`: the name of the parameter.
+             */
+            name: string;
+            /**
+             * `type`: the canonical type of the parameter (more below).
+             */
+            type: string;
+        }[];
+    }
+
+    export function compile(input: string): string;
 }

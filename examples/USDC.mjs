@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 import { JsonRpcProvider } from 'ethers';
 import { Contract } from 'sevm';

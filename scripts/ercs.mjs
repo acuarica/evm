@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable no-undef */
+/* eslint-env node */
 
 import { basename } from 'path';
 import { EventFragment, FunctionFragment } from 'ethers';
@@ -17,16 +14,20 @@ function main() {
         settings: { outputSelection: { '*': { '*': ['abi'] } } },
     };
     const output = solc.compile(JSON.stringify(input));
-    /** @type {import('./solc').SolcOutput} */
+    /** @type {import('solc').SolcOutput} */
     const { errors, contracts } = JSON.parse(output);
     if (errors) {
         console.error(errors);
         process.exit(1);
     }
 
+    /** @typedef {{[hash: string]: string}} Table */
+    /** @type {{[name: string]: {selectors: string[], topics: string[], functions: Table, events: Table}}} */
     const src = {};
     for (const [name, { abi }] of Object.entries(contracts['ercs.sol'])) {
+        /** @type {Table} */
         const functions = {};
+        /** @type {Table} */
         const events = {};
         for (const member of abi) {
             if (member.type === 'function') {

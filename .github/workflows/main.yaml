@@ -73,5 +73,5 @@ jobs:
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn make
-      - run: node examples/Compound.js
-      - run: node examples/USDC.js
+      - run: node examples/Compound.mjs
+      - run: node examples/USDC.mjs

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-/* eslint-disable no-undef */
+/* eslint-env node */
 
 import { readFileSync } from 'fs';
-import assert from 'assert';
 
 import { Contract, sol, formatOpcode } from 'sevm';
 
