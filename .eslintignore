@@ -1,5 +1,4 @@
 /dist/
-/docs/tsdoc/
+/docs/
+/coverage/
 /.eslintrc.js
-/4byte/functionHashes.min.js
-/4byte/eventHashes.min.js

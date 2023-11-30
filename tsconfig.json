@@ -5,6 +5,7 @@
         "lib": ["es2020"],
         "rootDir": ".",
         "outDir": "dist",
+        "checkJs": true,
         "incremental": true,
         "sourceMap": true,
         "isolatedModules": true,
@@ -19,5 +20,6 @@
         "noPropertyAccessFromIndexSignature": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true
-    }
+    },
+    "include": ["src", "4byte", "test", "bin", "scripts", "examples"]
 }
