@@ -3,7 +3,7 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
-import * as c from 'ansi-colors';
+import c from 'ansi-colors';
 import type { Runnable, Suite } from 'mocha';
 
 import wrapper from 'solc/wrapper';
@@ -143,7 +143,6 @@ export async function mochaGlobalSetup() {
     type Releases = { [key: string]: string };
 
     mkdirSync('.solc', { recursive: true });
-
     process.stdout.write('solc setup ');
 
     const releases = await (async function () {
@@ -163,19 +162,13 @@ export async function mochaGlobalSetup() {
     })();
 
     for (const version of VERSIONS) {
-        await download(releases[version], version);
-    }
-
-    console.info();
-
-    async function download(file: string, version: Version) {
         process.stdout.write(`${c.cyan('v' + version)}`);
         const path = `./.solc/soljson-v${version}.js`;
 
         if (existsSync(path)) {
             process.stdout.write(c.green('\u2713 '));
         } else {
-            const resp = await fetch(`https://binaries.soliditylang.org/bin/${file}`);
+            const resp = await fetch(`https://binaries.soliditylang.org/bin/${releases[version]}`);
             if (resp.ok) {
                 writeFileSync(path, await resp.text());
                 process.stdout.write(c.yellow('\u2913 '));
@@ -184,4 +177,6 @@ export async function mochaGlobalSetup() {
             }
         }
     }
+
+    // console.info();
 }
