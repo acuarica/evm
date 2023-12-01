@@ -2,8 +2,15 @@ import { expect } from 'chai';
 
 import { sol } from 'sevm';
 import { Add, Block, Mul, Val } from 'sevm/ast';
+import { mathExprs } from './ast.test';
 
-describe('sol', function () {
+describe('::sol', function () {
+    mathExprs.forEach(({ expr, str }) => {
+        it(`should \`sol\` \`${str}\``, function () {
+            expect(sol`${expr}`).to.be.equal(str);
+        });
+    });
+
     (
         [
             [new Add(new Val(1n), new Mul(new Val(3n), new Val(2n))), '0x1 + 0x3 * 0x2'],
