@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import util from 'util';
 
-import { Add, Byte, IsZero, Lt, MLoad, Not, Shl, Sig, Val } from 'sevm/ast';
+import { Add, Byte, IsZero, Lt, MLoad, Not, SLoad, Shl, Sig, Val } from 'sevm/ast';
+import { Block, CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
+import { Create, Create2, ReturnData, Sha3 } from 'sevm/ast';
 
 describe('::ast', function () {
     it('should test `isVal`', function () {
@@ -17,6 +19,8 @@ describe('::ast', function () {
     });
 
     describe('children', function () {
+        const truncate = (str: string) => (str.length <= 100 ? str : str.slice(0, 100) + '[...]');
+
         [
             { expr: new Val(1n), children: [] },
 
@@ -70,8 +74,90 @@ describe('::ast', function () {
                     return [this.expr.loc];
                 },
             },
+
+            {
+                expr: Block.basefee,
+                get children() {
+                    return [];
+                },
+            },
+            {
+                expr: new Fn('BLOCKHASH', new Val(1234n)),
+                get children() {
+                    return [this.expr.value];
+                },
+            },
+            {
+                expr: new DataCopy('calldatacopy', new Val(0n), new Val(32n)),
+                get children() {
+                    return [this.expr.offset, this.expr.size];
+                },
+            },
+            {
+                expr: new DataCopy('extcodecopy', new Val(0n), new Val(32n), new Val(0x1234n)),
+                get children() {
+                    return [this.expr.offset, this.expr.size, this.expr.address];
+                },
+            },
+            {
+                expr: new CallValue(),
+                get children() {
+                    return [];
+                },
+            },
+            {
+                expr: new CallDataLoad(new Val(24n)),
+                get children() {
+                    return [this.expr.location];
+                },
+            },
+
+            {
+                expr: new SLoad(new Val(32n), {}),
+                get children() {
+                    return [this.expr.location];
+                },
+            },
+
+            {
+                expr: new Sha3(new Val(32n), new Val(64n)),
+                get children() {
+                    return [this.expr.offset, this.expr.size];
+                },
+            },
+            {
+                // TODO: ?
+                expr: new Sha3(new Val(32n), new Val(64n), [new Val(1n), new Val(2n)]),
+                get children() {
+                    return [this.expr.offset, this.expr.size];
+                },
+            },
+            {
+                expr: new Create(new Val(100n), new Val(32n), new Val(128n)),
+                get children() {
+                    return [this.expr.value, this.expr.offset, this.expr.size];
+                },
+            },
+            {
+                expr: new Create(new Val(100n), new Val(32n), new Val(128n)),
+                get children() {
+                    return [this.expr.value, this.expr.offset, this.expr.size];
+                },
+            },
+            {
+                expr: new ReturnData(new Val(32n), new Val(128n)),
+                get children() {
+                    return [this.expr.retOffset, this.expr.retSize];
+                },
+            },
+            {
+                expr: new Create2(new Val(100n), new Val(32n), new Val(128n)),
+                get children() {
+                    return [this.expr.offset, this.expr.size, this.expr.value];
+                },
+            },
         ].forEach(({ expr, children }) => {
-            it(util.inspect(expr, { breakLength: Infinity }), function () {
+            it(truncate(util.inspect(expr, { breakLength: Infinity })), function () {
                 expect(expr.children()).to.have.ordered.members(children);
             });
         });
