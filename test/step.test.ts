@@ -1,31 +1,31 @@
 import { expect } from 'chai';
 
 import { State, STEP } from 'sevm';
-import { Val, type Expr } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Block } from 'sevm/ast';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+const sizes = [...Array(16).keys()].map(i => i + 1);
 
-describe('evm::stack', function () {
-    describe('PUSHES', function () {
-        it('should modify stack', function () {
-            const one = new Uint8Array(1);
-            one[0] = 1;
-            const state = new State<never, Expr>();
-            STEP().PUSH1(state, {
-                offset: 0,
-                pc: 0,
-                opcode: 1,
-                mnemonic: 'PUSH1',
-                pushData: Buffer.from([1]),
+describe('::step', function () {
+    describe('stack', function () {
+        describe('PUSHES', function () {
+            it('should modify stack', function () {
+                const one = new Uint8Array(1);
+                one[0] = 1;
+                const state = new State<never, Expr>();
+                STEP().PUSH1(state, {
+                    offset: 0,
+                    pc: 0,
+                    opcode: 1,
+                    mnemonic: 'PUSH1',
+                    pushData: Buffer.from([1]),
+                });
+                expect(state.stack.values).to.deep.equal([new Val(1n, true)]);
             });
-            expect(state.stack.values).to.deep.equal([new Val(1n, true)]);
         });
-    });
 
-    describe('DUPS', function () {
-        [...Array(16).keys()]
-            .map(i => i + 1)
-            .forEach(size => {
+        describe('DUPS', function () {
+            sizes.forEach(size => {
                 it(`should dup #${size - 1} element on the stack`, function () {
                     const state = new State<never, Expr>();
                     state.stack.push(new Val(2n));
@@ -38,11 +38,10 @@ describe('evm::stack', function () {
 
                     STEP()[`DUP${size as Size}`](state);
 
-                    expect(state.stack.values).to.deep.equal([
-                        new Val(2n),
-                        ...ignored,
-                        new Val(2n),
-                    ]);
+                    const local = new Local(0, new Val(2n));
+                    expect(state.nlocals).to.be.equal(1);
+                    expect(state.stmts).to.be.deep.equal([new Locali(local)]);
+                    expect(state.stack.values).to.deep.equal([local, ...ignored, local]);
                 });
 
                 it(`should throw when #${size} element is not present on the stack`, function () {
@@ -57,12 +56,10 @@ describe('evm::stack', function () {
                     );
                 });
             });
-    });
+        });
 
-    describe('SWAPS', function () {
-        [...Array(16).keys()]
-            .map(i => i + 1)
-            .forEach(size => {
+        describe('SWAPS', function () {
+            sizes.forEach(size => {
                 it(`should swap #${size} element on the stack`, function () {
                     const state = new State<never, Expr>();
                     state.stack.push(new Val(2n));
@@ -92,9 +89,32 @@ describe('evm::stack', function () {
                     }
 
                     expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
-                        'Invalid swap operation'
+                        'Position not found for swap operation'
                     );
                 });
             });
+        });
+    });
+
+    describe('memory', function () {
+        it('should load values into stack', function () {
+            const state = new State<Inst, Expr>();
+
+            state.memory[4] = new Val(1n);
+            state.stack.push(new Val(4n));
+            STEP().MLOAD(state);
+
+            expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
+        });
+
+        it('should store values into memory', function () {
+            const state = new State<Inst, Expr>();
+
+            state.stack.push(Block.coinbase);
+            state.stack.push(new Val(4n));
+            STEP().MSTORE(state);
+
+            expect(state.memory).to.be.deep.equal({ '4': Block.coinbase });
+        });
     });
 });
