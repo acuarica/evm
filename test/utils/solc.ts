@@ -7,7 +7,7 @@ import c from 'ansi-colors';
 import type { Runnable, Suite } from 'mocha';
 
 import wrapper from 'solc/wrapper';
-import type { ABI, SolcInputSettings, SolcOutput } from 'solc';
+import type { ABI, SolcInput, SolcOutput } from 'solc';
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
 
@@ -28,24 +28,24 @@ export function compile(
     content: string,
     version: Version,
     context?: Mocha.Context,
-    optimizer?: SolcInputSettings['optimizer']
-): { bytecode: string; abi: ABI } {
+    optimizer?: SolcInput['settings']['optimizer']
+): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
         language: 'Solidity',
         sources: {
             'source.sol': {
-                content: `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`,
+                content: `// SPDX-License-Identifier: UNLICENSED\npragma solidity ${version};\n${content}`,
             },
         },
         settings: {
             optimizer,
             outputSelection: {
                 '*': {
-                    '*': ['abi', 'evm.deployedBytecode'],
+                    '*': ['abi', 'metadata', 'evm.deployedBytecode'],
                 },
             },
         },
-    });
+    } satisfies SolcInput);
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (context !== undefined) {
@@ -53,8 +53,9 @@ export function compile(
             test ? title(test.parent) + '.' + test.title : '';
         const fileName = title(context.test)
             .replace(/^../, '')
-            .replace('solc-', '')
+            .replace(`solc-v${version}.`, '')
             .replace(/`/g, '')
+            .replace(/^::/, '')
             .replace(/::/g, '.')
             .replace(/ /g, '-')
             .replace(/[:^'()]/g, '_')
@@ -97,9 +98,10 @@ export function compile(
 
     const bytecode = contract.evm.deployedBytecode.object;
     const abi = contract.abi;
-    writeCacheFn({ bytecode, abi });
+    const metadata = contract.metadata;
+    writeCacheFn({ bytecode, abi, metadata });
 
-    return { bytecode, abi };
+    return { bytecode, abi, metadata };
 }
 
 export function forVersion(
@@ -107,7 +109,7 @@ export function forVersion(
         compile_: (
             content: string,
             context: Mocha.Context,
-            optimizer?: SolcInputSettings['optimizer']
+            optimizer?: SolcInput['settings']['optimizer']
         ) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
@@ -143,7 +145,7 @@ export async function mochaGlobalSetup() {
     type Releases = { [key: string]: string };
 
     mkdirSync('.solc', { recursive: true });
-    process.stdout.write('solc setup ');
+    process.stdout.write(c.magenta('> setup solc-js compilers '));
 
     const releases = await (async function () {
         const path = './.solc/releases.json';
@@ -177,6 +179,4 @@ export async function mochaGlobalSetup() {
             }
         }
     }
-
-    // console.info();
 }

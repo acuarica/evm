@@ -1,3 +1,5 @@
+import { fromHexString } from './opcode';
+
 const BZZR0 = '627a7a7230';
 const BZZR1 = '627a7a7231';
 const IPFS = '69706673';
@@ -33,6 +35,11 @@ export class Metadata {
     get url(): string {
         return `${this.protocol}://${this.hash}`;
     }
+
+    get minor(): number | undefined {
+        const field = /^0\.(\d+)\./.exec(this.solc)?.[1];
+        return field ? parseInt(field) : undefined;
+    }
 }
 
 /**
@@ -50,7 +57,11 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
         if (match && match[1]) {
             return [
                 bytecode.substring(0, match.index),
-                new Metadata(protocol, match[1], match[2] ? convertVersion(match[2]) : '<0.5.9'),
+                new Metadata(
+                    protocol,
+                    protocol === 'ipfs' ? bs58.toBase58(match[1]) : match[1],
+                    match[2] ? convertVersion(match[2]) : '<0.5.9'
+                ),
             ];
         }
     }
@@ -65,5 +76,69 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
     function convertVersion(solcVersion: string) {
         const slice = (pos: number) => parseInt(solcVersion.slice(pos, pos + 2), 16).toString();
         return `${slice(0)}.${slice(2)}.${slice(4)}`;
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace bs58 {
+    /**
+     * Base58 characters include numbers `123456789`, uppercase `ABCDEFGHJKLMNPQRSTUVWXYZ` and lowercase `abcdefghijkmnopqrstuvwxyz`.
+     */
+    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+    /**
+     * Generates a mapping between base58 and ascii.
+     * @returns {Array<Number>} mapping between ascii and base58.
+     */
+    const create_base58_map = (): number[] => {
+        const base58M = Array(256).fill(-1) as number[];
+        for (let i = 0; i < chars.length; ++i) {
+            base58M[chars.charCodeAt(i)] = i;
+        }
+
+        return base58M;
+    };
+
+    const base58Map = create_base58_map();
+
+    /**
+     * Converts a Uint8Array into a base58 string.
+     * @param uint8array Unsigned integer array.
+     * @returns { import("./base58_chars.mjs").base58_chars } base58 string representation of the binary array.
+     * @example <caption>Usage.</caption>
+     * ```js
+     * const str = binary_to_base58([15, 239, 64])
+     * console.log(str)
+     * ```
+     * Logged output will be 6MRy.
+     */
+    export function toBase58(uint8array2: string): string {
+        const uint8array: Uint8Array = fromHexString(uint8array2, 0);
+
+        const result = [];
+
+        for (const byte of uint8array) {
+            let carry = byte;
+            for (let j = 0; j < result.length; ++j) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                const x = (base58Map[result[j]] << 8) + carry;
+                result[j] = chars.charCodeAt(x % 58);
+                carry = (x / 58) | 0;
+            }
+            while (carry) {
+                result.push(chars.charCodeAt(carry % 58));
+                carry = (carry / 58) | 0;
+            }
+        }
+
+        for (const byte of uint8array) {
+            if (byte) break;
+            else result.push('1'.charCodeAt(0));
+        }
+
+        result.reverse();
+
+        return String.fromCharCode(...result);
     }
 }
