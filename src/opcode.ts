@@ -15,7 +15,7 @@
  *
  * Keep track of `PUSH0` https://eips.ethereum.org/EIPS/eip-3855
  */
-const PUSHES = {
+export const PUSHES = {
     PUSH1: 0x60,
     PUSH2: 0x61,
     PUSH3: 0x62,
@@ -194,51 +194,13 @@ export const MNEMONICS = Object.fromEntries(
 );
 
 /**
- * Represents all unary opcodes defined by the EVM.
- * Essentially, all but `PUSHn` opcodes are unary opcodes.
- */
-interface Unary {
-    /**
-     * Represents a valid opcode.
-     *
-     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
-     *
-     * If the `opcode` given is not a valid opcode,
-     * you can provide `INVALID` as `mnemonic`.
-     */
-    mnemonic: Exclude<keyof typeof OPCODES, keyof typeof PUSHES>;
-
-    /**
-     * A `Unary` opcode does not include any `pushData`.
-     */
-    pushData: null;
-}
-
-/**
- * Represents a `PUSHn` mnemonic augmented with its `pushData`.
- */
-interface Push {
-    /**
-     * A `PUSHn` opcode only permits a `PUSHn` opcode.
-     */
-    mnemonic: keyof typeof PUSHES;
-
-    /**
-     * If this `Opcode` is a `PUSHn` instruction,
-     * then `pushData` contains the data attached to this instruction.
-     * Otherwise, `null`.
-     */
-    pushData: Uint8Array;
-}
-
-/**
  * Represents an opcode found in the bytecode augmented with
- * bytecode information.
+ * offset and operand information as defined by the EVM.
  *
- * It can be an unary opcode defined by the EVM.
- * Essentially, all but `PUSHn` opcodes are unary opcodes.
+ * It can be either a unary opcode, _which does not take any operand data_,
+ * or either a `PUSHn` mnemonic augmented with its `pushData`.
+ * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
  *
- * Or either represents a `PUSHn` mnemonic augmented with its `pushData`.
  */
 export type Opcode = {
     /**
@@ -259,7 +221,37 @@ export type Opcode = {
      * The `opcode` may not be a valid opcode.
      */
     readonly opcode: number;
-} & (Unary | Push);
+} & (
+    | {
+          /**
+           * Represents a valid opcode.
+           *
+           * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+           *
+           * If the `opcode` given is not a valid opcode,
+           * you can provide `INVALID` as `mnemonic`.
+           */
+          mnemonic: Exclude<keyof typeof OPCODES, keyof typeof PUSHES>;
+
+          /**
+           * A `Unary` opcode does not include any `pushData`.
+           */
+          pushData: null;
+      }
+    | {
+          /**
+           * A `PUSHn` opcode only permits a `PUSHn` opcode.
+           */
+          mnemonic: keyof typeof PUSHES;
+
+          /**
+           * If this `Opcode` is a `PUSHn` instruction,
+           * then `pushData` contains the data attached to this instruction.
+           * Otherwise, `null`.
+           */
+          pushData: Uint8Array;
+      }
+);
 
 /**
  * Represents an `Error` that occurs during decoding.
@@ -341,24 +333,24 @@ export function decode(code: string): {
     }
 
     return { opcodes, jumpdests };
+}
 
-    /**
-     * @param hexstr the hexadecimal string to convert to `Uint8Array`
-     * @param start the index in `hexstr` where to start decoding.
-     * @returns the `Uint8Array` representation of `hexstr`
-     */
-    function fromHexString(hexstr: string, start: number): Uint8Array {
-        const buffer = new Uint8Array((hexstr.length - start) / 2);
-        for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
-            const value = parseInt(hexstr.slice(i, i + 2), 16);
-            if (value >= 0) {
-                buffer[j] = value;
-            } else {
-                throw new DecodeError(`Unable to decode, invalid value found`, i);
-            }
+/**
+ * @param hexstr the hexadecimal string to convert to `Uint8Array`
+ * @param start the index in `hexstr` where to start decoding.
+ * @returns the `Uint8Array` representation of `hexstr`
+ */
+export function fromHexString(hexstr: string, start: number): Uint8Array {
+    const buffer = new Uint8Array((hexstr.length - start) / 2);
+    for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
+        const value = parseInt(hexstr.slice(i, i + 2), 16);
+        if (value >= 0) {
+            buffer[j] = value;
+        } else {
+            throw new DecodeError(`Unable to decode, invalid value found`, i);
         }
-        return buffer;
     }
+    return buffer;
 }
 
 export function formatOpcode(op: Opcode): string {

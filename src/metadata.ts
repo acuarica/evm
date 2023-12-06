@@ -59,7 +59,7 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
                 bytecode.substring(0, match.index),
                 new Metadata(
                     protocol,
-                    protocol === 'ipfs' ? bs58.toBase58(match[1]) : match[1],
+                    protocol === 'ipfs' ? bs58(match[1]) : match[1],
                     match[2] ? convertVersion(match[2]) : '<0.5.9'
                 ),
             ];
@@ -79,66 +79,53 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace bs58 {
-    /**
-     * Base58 characters include numbers `123456789`, uppercase `ABCDEFGHJKLMNPQRSTUVWXYZ` and lowercase `abcdefghijkmnopqrstuvwxyz`.
-     */
+/**
+ * Converts a Uint8Array into a base58 string.
+ * @param uint8array Unsigned integer array.
+ * @returns { import("./base58_chars.mjs").base58_chars } base58 string representation of the binary array.
+ * @example <caption>Usage.</caption>
+ * ```js
+ * const str = binary_to_base58([15, 239, 64])
+ * console.log(str)
+ * ```
+ * Logged output will be 6MRy.
+ */
+function bs58(uint8array2: string): string {
+    /** Base58 characters include numbers `123456789`, uppercase `ABCDEFGHJKLMNPQRSTUVWXYZ` and lowercase `abcdefghijkmnopqrstuvwxyz` */
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-
-    /**
-     * Generates a mapping between base58 and ascii.
-     * @returns {Array<Number>} mapping between ascii and base58.
-     */
-    const create_base58_map = (): number[] => {
+    /** Mapping between base58 and ASCII */
+    const base58Map = (function (): number[] {
         const base58M = Array(256).fill(-1) as number[];
         for (let i = 0; i < chars.length; ++i) {
             base58M[chars.charCodeAt(i)] = i;
         }
 
         return base58M;
-    };
+    })();
 
-    const base58Map = create_base58_map();
+    const uint8array: Uint8Array = fromHexString(uint8array2, 0);
 
-    /**
-     * Converts a Uint8Array into a base58 string.
-     * @param uint8array Unsigned integer array.
-     * @returns { import("./base58_chars.mjs").base58_chars } base58 string representation of the binary array.
-     * @example <caption>Usage.</caption>
-     * ```js
-     * const str = binary_to_base58([15, 239, 64])
-     * console.log(str)
-     * ```
-     * Logged output will be 6MRy.
-     */
-    export function toBase58(uint8array2: string): string {
-        const uint8array: Uint8Array = fromHexString(uint8array2, 0);
+    const result = [];
 
-        const result = [];
-
-        for (const byte of uint8array) {
-            let carry = byte;
-            for (let j = 0; j < result.length; ++j) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                const x = (base58Map[result[j]] << 8) + carry;
-                result[j] = chars.charCodeAt(x % 58);
-                carry = (x / 58) | 0;
-            }
-            while (carry) {
-                result.push(chars.charCodeAt(carry % 58));
-                carry = (carry / 58) | 0;
-            }
+    for (const byte of uint8array) {
+        let carry = byte;
+        for (let j = 0; j < result.length; ++j) {
+            const x: number = (base58Map[result[j]] << 8) + carry;
+            result[j] = chars.charCodeAt(x % 58);
+            carry = (x / 58) | 0;
         }
-
-        for (const byte of uint8array) {
-            if (byte) break;
-            else result.push('1'.charCodeAt(0));
+        while (carry) {
+            result.push(chars.charCodeAt(carry % 58));
+            carry = (carry / 58) | 0;
         }
-
-        result.reverse();
-
-        return String.fromCharCode(...result);
     }
+
+    for (const byte of uint8array) {
+        if (byte) break;
+        else result.push('1'.charCodeAt(0));
+    }
+
+    result.reverse();
+
+    return String.fromCharCode(...result);
 }
