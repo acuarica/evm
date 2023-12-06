@@ -59,7 +59,7 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
                 bytecode.substring(0, match.index),
                 new Metadata(
                     protocol,
-                    protocol === 'ipfs' ? bs58(match[1]) : match[1],
+                    protocol === 'ipfs' ? bs58(fromHexString(match[1], 0)) : match[1],
                     match[2] ? convertVersion(match[2]) : '<0.5.9'
                 ),
             ];
@@ -81,33 +81,30 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
 
 /**
  * Converts a Uint8Array into a base58 string.
- * @param uint8array Unsigned integer array.
- * @returns { import("./base58_chars.mjs").base58_chars } base58 string representation of the binary array.
+ *
+ * @param buffer Unsigned integer array to encode.
+ * @returns base58 string representation of the binary array.
  * @example <caption>Usage.</caption>
+ *
  * ```js
- * const str = binary_to_base58([15, 239, 64])
+ * const str = bs58([15, 239, 64])
  * console.log(str)
  * ```
+ *
  * Logged output will be 6MRy.
  */
-function bs58(uint8array2: string): string {
+function bs58(buffer: Uint8Array): string {
     /** Base58 characters include numbers `123456789`, uppercase `ABCDEFGHJKLMNPQRSTUVWXYZ` and lowercase `abcdefghijkmnopqrstuvwxyz` */
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     /** Mapping between base58 and ASCII */
-    const base58Map = (function (): number[] {
-        const base58M = Array(256).fill(-1) as number[];
-        for (let i = 0; i < chars.length; ++i) {
-            base58M[chars.charCodeAt(i)] = i;
-        }
-
-        return base58M;
-    })();
-
-    const uint8array: Uint8Array = fromHexString(uint8array2, 0);
+    const base58Map = Array(256).fill(-1) as number[];
+    for (let i = 0; i < chars.length; ++i) {
+        base58Map[chars.charCodeAt(i)] = i;
+    }
 
     const result = [];
 
-    for (const byte of uint8array) {
+    for (const byte of buffer) {
         let carry = byte;
         for (let j = 0; j < result.length; ++j) {
             const x: number = (base58Map[result[j]] << 8) + carry;
@@ -120,7 +117,7 @@ function bs58(uint8array2: string): string {
         }
     }
 
-    for (const byte of uint8array) {
+    for (const byte of buffer) {
         if (byte) break;
         else result.push('1'.charCodeAt(0));
     }
