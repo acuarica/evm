@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, EVM, formatOpcode, huffState, toHex } from 'sevm';
+import { Contract, formatOpcode, huffState, sol, toHex } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -81,7 +81,7 @@ function dis(contract) {
             for (const state of chunk.states) {
                 console.info('state');
                 console.info('    〒 ', state.stack.values.join(' | '));
-                state.stmts.forEach(stmt => console.info('  ', stmt.toString()));
+                state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
             }
         }
     }
@@ -100,7 +100,11 @@ function decompileHuff(contract) {
     console.info(huffState(main));
 }
 
-/** @param {string} pathOrAddress */
+/**
+ *
+ * @param {string} pathOrAddress
+ * @returns {Promise<string | null>}
+ */
 async function getBytecode(pathOrAddress) {
     const cacheFolder = path.join(paths.cache, 'mainnet');
     const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
@@ -265,7 +269,7 @@ function cfg(contract) {
     write('}');
 
     /**
-     * @param {EVM} evm
+     * @param {import('sevm').EVM} evm
      */
     function dot(evm) {
         let edges = '';
@@ -324,12 +328,12 @@ function cfg(contract) {
             // label += '\\l';
             // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
             // label += '\\l';
-            label += state.stack.values.map(elem => `=| ${elem.eval().toString()}`).join('');
+            label += state.stack.values.map(elem => sol`=| ${elem.eval()}`).join('');
             label += '\\l';
             // label += inspect(state.memory);
             // label += '\\l';
-            Object.entries(state.memory).forEach(([k, v]) => (label += `${k}: ${v}\\l`));
-            label += state.stmts.map(stmt => stmt.toString()).join('\\l');
+            Object.entries(state.memory).forEach(([k, v]) => (label += sol`${k}: ${v}\\l`));
+            label += state.stmts.map(stmt => sol`${stmt}`).join('\\l');
             label += '\\l';
 
             write(`"${id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
