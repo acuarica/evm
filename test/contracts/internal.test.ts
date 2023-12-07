@@ -54,7 +54,7 @@ contracts('internal', compile => {
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.not.match(/return msg.sender;/);
             expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 3\)/);
             expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 5\)/);
@@ -109,7 +109,7 @@ contracts('internal', compile => {
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.match(/return storage\[keccak256\(msg.sender, 0\)\];$/m);
             expect(text, text).to.match(/return storage\[keccak256\(_arg0, 0\)\];$/m);
         });
@@ -139,7 +139,7 @@ contracts('internal', compile => {
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
         });
     });

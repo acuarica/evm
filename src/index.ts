@@ -5,7 +5,6 @@ import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';
 import { type SLoad, Variable, type MappingLoad } from './ast/storage';
-import { solEvents, solMappings, solStructs, solVars, solStmts } from './sol';
 import ERCs from './ercs';
 import type { Step } from './step';
 import { CallSite, If, Require, type Stmt } from './stmt';
@@ -17,8 +16,8 @@ export * from './step';
 export * from './type';
 export * from './evm';
 export * from './stmt';
-export * from './sol';
 export * from './yul';
+export * from './huff';
 
 /**
  *
@@ -139,29 +138,14 @@ export class Contract {
             (!checkEvents || ERCs[ercid].topics.every(t => t in this.evm.events))
         );
     }
-
-    /**
-     *
-     * @returns
-     */
-    decompile(): string {
-        let text = '';
-
-        text += solEvents(this.evm.events);
-        text += solStructs(this.evm.mappings);
-        text += solMappings(this.evm.mappings);
-        text += solVars(this.evm.variables);
-        text += solStmts(this.main);
-        for (const [, fn] of Object.entries(this.functions)) {
-            text += fn.decompile();
-        }
-
-        return text;
-    }
 }
 
-export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
-    return falseBlock.length === 1 && falseBlock[0].name === 'Revert';
+export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [...Inst[], Revert] {
+    return (
+        falseBlock.length >= 1 &&
+        falseBlock.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
+        falseBlock.at(-1)!.name === 'Revert'
+    );
 }
 
 export class PublicFunction {
@@ -313,54 +297,13 @@ export class PublicFunction {
             }
         }
     }
-
-    /**
-     *
-     * @returns the decompiled text for `this` function.
-     */
-    decompile(): string {
-        let output = '';
-        output += 'function ';
-        if (this.label !== undefined) {
-            const fullFunction = this.label;
-            const fullFunctionName = fullFunction.split('(')[0];
-            const fullFunctionArguments = fullFunction
-                .replace(fullFunctionName, '')
-                .substring(1)
-                .slice(0, -1);
-            if (fullFunctionArguments) {
-                output += fullFunctionName + '(';
-                output += fullFunctionArguments
-                    .split(',')
-                    .map((a: string, i: number) => `${a} _arg${i}`)
-                    .join(', ');
-                output += ')';
-            } else {
-                output += fullFunction;
-            }
-        } else {
-            output += this.selector + '()';
-        }
-        output += ' ' + this.visibility;
-        if (this.constant) {
-            output += ' view';
-        }
-        if (this.payable) {
-            output += ' payable';
-        }
-        if (this.returns.length > 0) {
-            output += ` returns (${this.returns.join(', ')})`;
-        }
-        output += ' {\n';
-        output += solStmts(this.stmts, 4);
-        output += '}\n\n';
-        return output;
-    }
 }
 
 export function build(state: State<Inst, Expr>): Stmt[] {
     const visited = new WeakSet();
-    return buildState(state);
+    const res = buildState(state);
+    // mem(res);
+    return res;
 
     function buildState(state: State<Inst, Expr>): Stmt[] {
         if (visited.has(state)) {
@@ -373,7 +316,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
         if (last === undefined) return [];
 
         for (let i = 0; i < state.stmts.length; i++) {
-            state.stmts[i] = state.stmts[i].eval();
+            // state.stmts[i] = state.stmts[i].eval();
         }
 
         switch (last.name) {
@@ -394,7 +337,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                         ? [
                               new Require(
                                   last.cond.eval(),
-                                  (falseBlock[0].args ?? []).map(e => e.eval())
+                                  ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
                               ),
                               ...trueBlock,
                           ]
@@ -418,6 +361,17 @@ export function build(state: State<Inst, Expr>): Stmt[] {
     }
 }
 
+export function reduce(stmts: Inst[]): Stmt[] {
+    const result = [];
+    for (const stmt of stmts) {
+        if (stmt.name !== 'Local' || stmt.local.nrefs > 0) {
+            result.push(stmt);
+        }
+    }
+
+    return result;
+}
+
 function requiresNoValue(stmts: Stmt[]): boolean {
     return (
         stmts.length > 0 &&
@@ -426,3 +380,5 @@ function requiresNoValue(stmts: Stmt[]): boolean {
         stmts[0].condition.value.tag === 'CallValue'
     );
 }
+
+export * from './sol';

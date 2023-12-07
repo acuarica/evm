@@ -89,7 +89,7 @@ function dis(contract) {
 
 /** @param {Contract} contract */
 function decompile(contract) {
-    console.info(contract.decompile());
+    console.info(contract.solidify());
 }
 
 /**

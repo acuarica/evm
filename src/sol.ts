@@ -3,6 +3,7 @@ import { isInst, type Expr, type Inst, type Val, isExpr } from './ast/expr';
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
 import { If, type Stmt } from './stmt';
+import { Contract, type PublicFunction } from '.';
 
 /**
  *
@@ -56,6 +57,8 @@ function solExpr(expr: Expr): string {
     switch (expr.tag) {
         case 'Val':
             return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
+        case 'Local':
+            return expr.nrefs > 0 ? `local${expr.index}` : sol`${expr.value}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -177,6 +180,8 @@ function solExpr(expr: Expr): string {
 
 function solInst(inst: Inst): string {
     switch (inst.name) {
+        case 'Local':
+            return sol`${inst.local.value.type} local${inst.local.index} = ${inst.local.value}; // #refs ${inst.local.nrefs}`;
         case 'MStore':
             return sol`memory[${inst.location}] = ${inst.data};`;
         case 'Stop':
@@ -194,7 +199,7 @@ function solInst(inst: Inst): string {
         case 'Revert':
             return inst.args === undefined
                 ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
-                : `revert(${inst.args.join(', ')});`;
+                : `revert(${inst.args.map(solExpr).join(', ')});`;
         case 'SelfDestruct':
             return sol`selfdestruct(${inst.address});`;
         case 'Invalid':
@@ -206,10 +211,8 @@ function solInst(inst: Inst): string {
                       .join(', ')});`
                 : 'log(' +
                       (inst.args === undefined
-                          ? [
-                                ...inst.topics,
-                                sol`memory[${inst.mem.offset}:${inst.mem.size} ]`,
-                            ].join(', ') + 'ii'
+                          ? [...inst.topics, sol`memory[${inst.offset}:${inst.size} ]`].join(', ') +
+                            'ii'
                           : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
                       ');';
         case 'Jump':
@@ -330,23 +333,29 @@ function solStmt(stmt: Stmt): string {
 /**
  *
  * @param stmts
- * @param indentation
+ * @param space
  * @returns
  */
-export function solStmts(stmts: Stmt[], indentation = 0): string {
+export function solStmts(stmts: Stmt[], space = 0): string {
     let text = '';
     for (const stmt of stmts) {
         if (stmt instanceof If) {
             const condition = solStmt(stmt);
-            text += ' '.repeat(indentation) + 'if ' + condition + ' {\n';
-            text += solStmts(stmt.trueBlock!, indentation + 4);
+            text += ' '.repeat(space) + 'if ' + condition + ' {\n';
+            text += solStmts(stmt.trueBlock!, space + 4);
             if (stmt.falseBlock) {
-                text += ' '.repeat(indentation) + '} else {\n';
-                text += solStmts(stmt.falseBlock, indentation + 4);
+                text += ' '.repeat(space) + '} else {\n';
+                text += solStmts(stmt.falseBlock, space + 4);
             }
-            text += ' '.repeat(indentation) + '}\n';
+            text += ' '.repeat(space) + '}\n';
         } else {
-            text += ' '.repeat(indentation) + solStmt(stmt) + '\n';
+            if (stmt.name === 'Local' && stmt.local.nrefs <= 0) {
+                continue;
+            }
+            if (stmt.name === 'MStore') {
+                continue;
+            }
+            text += ' '.repeat(space) + solStmt(stmt) + '\n';
         }
     }
 
@@ -506,4 +515,96 @@ export function solMappings(mappings: IStore['mappings']) {
         }
         return 'mapping (' + mappingKey.join('|') + ' => ' + mappingValue.join('|') + ')';
     }
+}
+
+/**
+ *
+ * @returns the decompiled text for `this` function.
+ */
+function solPublicFunction(self: PublicFunction): string {
+    let output = '';
+    output += 'function ';
+    if (self.label !== undefined) {
+        const fullFunction = self.label;
+        const fullFunctionName = fullFunction.split('(')[0];
+        const fullFunctionArguments = fullFunction
+            .replace(fullFunctionName, '')
+            .substring(1)
+            .slice(0, -1);
+        if (fullFunctionArguments) {
+            output += fullFunctionName + '(';
+            output += fullFunctionArguments
+                .split(',')
+                .map((a: string, i: number) => `${a} _arg${i}`)
+                .join(', ');
+            output += ')';
+        } else {
+            output += fullFunction;
+        }
+    } else {
+        output += self.selector + '()';
+    }
+    output += ' ' + self.visibility;
+    if (self.constant) {
+        output += ' view';
+    }
+    if (self.payable) {
+        output += ' payable';
+    }
+    if (self.returns.length > 0) {
+        output += ` returns (${self.returns.join(', ')})`;
+    }
+    output += ' {\n';
+    output += solStmts(self.stmts, 4);
+    output += '}\n\n';
+    return output;
+}
+
+declare module '.' {
+    interface Contract {
+        /**
+         * asdf
+         * @returns
+         */
+        solidify(...args: Parameters<typeof solContract>): string;
+    }
+}
+
+Contract.prototype.solidify = solContract;
+
+function solContract(
+    this: Contract,
+    options: { license?: string | null; pragma?: boolean; contractName?: string } = {}
+): string {
+    const { license = 'UNLICENSED', pragma = true, contractName = 'Contract' } = options;
+
+    let text = '';
+
+    if (license) {
+        text += `// SPDX-License-Identifier: ${license}\n`;
+    }
+    if (pragma && this.evm.metadata) {
+        text += `// Metadata ${this.evm.metadata.url}\n`;
+        text += `pragma solidity ${this.evm.metadata.solc};\n`;
+        text += '\n';
+    }
+
+    text += `contract ${contractName} {\n\n`;
+
+    text += solEvents(this.evm.events);
+    text += solStructs(this.evm.mappings);
+    text += solMappings(this.evm.mappings);
+    text += solVars(this.evm.variables);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const fallback = this.evm.metadata?.minor! >= 6 ? 'fallback' : 'function';
+    text += `${fallback}() external payable {\n`;
+    text += solStmts(this.main, 4);
+    text += '}\n\n';
+    for (const [, fn] of Object.entries(this.functions)) {
+        text += solPublicFunction(fn);
+    }
+    text += '}\n';
+
+    return text;
 }

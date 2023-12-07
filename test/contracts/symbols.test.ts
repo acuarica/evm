@@ -37,7 +37,7 @@ contracts('symbols', compile => {
     });
 
     it('should find `BLOCKHASH`, `BALANCE` and `ADDRESS` symbols', function () {
-        const text = contract.decompile();
+        const text = contract.solidify();
         expect(text, `decompiled bytecode\n${text}`).to.match(/return blockhash\(0x7\);$/m);
         expect(text, `decompiled bytecode\n${text}`).to.match(/return _arg0.balance;$/m);
         expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);

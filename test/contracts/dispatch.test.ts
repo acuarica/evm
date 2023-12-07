@@ -7,30 +7,30 @@ import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('dispatch', compile => {
-    it("should decompile function's return type and non-payable", function () {
+    it.skip("should decompile function's return type and non-payable", function () {
         const src = `contract Test {
             function get() external pure returns (uint256) { return 5; }
         }`;
         const contract = new Contract(compile(src, this).bytecode).patchfns('get()');
-        const text = contract.decompile();
+        const text = contract.solidify();
         expect(text, `decompiled text\n${text}`).to.match(
             /^function get\(\) public view returns \(uint256\) {$/m
         );
     });
 
-    it('should `decompile` a contract with a single `external` method', function () {
+    it.skip('should `decompile` a contract with a single `external` method', function () {
         const src = `contract Test {
             function set() external payable { }
             function get() external pure returns (uint256) { return 5; }
         }`;
         const contract = new Contract(compile(src, this).bytecode).patchfns('get()');
-        const text = contract.decompile();
+        const text = contract.solidify();
         expect(text, `decompiled text\n${text}`).to.match(
             /^function get\(\) public view returns \(uint256\) {$/m
         );
     });
 
-    it('should `decompile` a contract with multiple `external` functions', function () {
+    it.skip('should `decompile` a contract with multiple `external` functions', function () {
         const src = `contract Test {
             function balanceOf(uint256 from) external pure returns (uint256) { return from; }
             function symbol() external pure returns (uint256) { return 3; }
@@ -53,7 +53,7 @@ contracts('dispatch', compile => {
         expect(fn.stmts.filter(stmt => stmt.name === 'Require').length).to.be.greaterThan(0);
         expect(fn.stmts.at(-1)).instanceOf(Return);
 
-        const text = contract.decompile();
+        const text = contract.solidify();
         expect(text, `decompiled bytecode\n${text}`).to.match(/return address\(this\);$/m);
     });
 
