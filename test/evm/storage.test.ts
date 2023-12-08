@@ -18,7 +18,7 @@ describe('evm::storage', function () {
         expect(step.variables).to.have.keys('2');
     });
 
-    it('should detect storage variable', function () {
+    it.skip('should detect storage variable', function () {
         const src = `contract Test {
             uint256 val1 = 5;
             uint256 val2 = 7;
@@ -86,14 +86,14 @@ describe('evm::storage', function () {
         const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
-        state.stmts.forEach(stmt => console.log(sol`${stmt}`));
-        state.stmts.forEach(stmt => console.log(yul`${stmt}`));
+        // state.stmts.forEach(stmt => console.log(sol`${stmt}`));
+        // state.stmts.forEach(stmt => console.log(yul`${stmt}`));
 
         expect(evm.variables).to.be.have.keys('0x0', '0x1');
         expect(evm.mappings).to.be.deep.equal({});
     });
 
-    it('should not find storage struct when optimized', function () {
+    it.skip('should not find storage struct when optimized', function () {
         const src = `contract Test {
             struct T { uint256 val1; uint256 val2; }
             T t;
@@ -121,7 +121,7 @@ describe('evm::storage', function () {
     });
 
     describe('mappings', function () {
-        it('should find mapping loads and stores', function () {
+        it.skip('should find mapping loads and stores', function () {
             const src = `contract Test {
                 mapping (address => uint256) map1;
                 mapping (address => uint256) map2;

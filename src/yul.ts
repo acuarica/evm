@@ -1,5 +1,6 @@
 import type { MappingLoad, MappingStore } from './ast';
 import { isExpr, type Expr, type Inst, isInst } from './ast/expr';
+import type { Stmt } from './stmt';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either
@@ -20,6 +21,8 @@ function yulExpr(expr: Expr): string {
     switch (expr.tag) {
         case 'Val':
             return `0x${expr.val.toString(16)}`;
+        case 'Local':
+            return expr.nrefs > 0 ? `local${expr.index}` : yul`${expr.value}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -83,28 +86,30 @@ function yulExpr(expr: Expr): string {
 
 function yulInst(inst: Inst): string {
     switch (inst.name) {
+        case 'Local':
+            return yul`${inst.local.value.type} local${inst.local.index} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
         case 'Log':
-            return yul`log${inst.topics.length}(${inst.mem.offset}, ${inst.topics
+            return yul`log${inst.topics.length}(${inst.offset}, ${inst.size}, ${inst.topics
                 .map(yulExpr)
-                .join(', ')});`;
+                .join(', ')})`;
         case 'MStore':
-            throw new Error('Not implemented yet: "MStore" case');
+            return yul`mstore(${inst.location}, ${inst.data})`;
         case 'Stop':
             return 'stop()';
         case 'Return':
-            return yul`return(${inst.offset}, ${inst.size});`;
+            return yul`return(${inst.offset}, ${inst.size})`;
         case 'Revert':
-            return yul`revert(${inst.offset}, ${inst.size});`;
+            return yul`revert(${inst.offset}, ${inst.size})`;
         case 'SelfDestruct':
             return yul`selfdestruct(${inst.address})`;
         case 'Invalid':
             return 'invalid()';
         case 'Jump':
-            throw new Error('Not implemented yet: "Jump" case');
+            return yul`jump(${inst.offset}, ${inst.destBranch.pc})`;
         case 'Jumpi':
-            throw new Error('Not implemented yet: "Jumpi" case');
+            return yul`jumpi(${inst.cond}, ${inst.offset}})`;
         case 'JumpDest':
-            throw new Error('Not implemented yet: "JumpDest" case');
+            return `jumpdesp(${inst.fallBranch.pc})`;
         case 'SigCase':
             throw new Error('Not implemented yet: "SigCase" case');
         case 'SStore':
@@ -116,6 +121,26 @@ function yulInst(inst: Inst): string {
     }
 }
 
+function yulStmt(stmt: Stmt): string {
+    switch (stmt.name) {
+        case 'If':
+            return yul`(${stmt.condition})`;
+        case 'CallSite':
+            return yul`$${stmt.selector}();`;
+        case 'Require':
+            return `require(${[stmt.condition, ...stmt.args].map(yulExpr).join(', ')});`;
+        default:
+            return yulInst(stmt);
+    }
+}
+
 function yulMapArgs(mapping: MappingLoad | MappingStore): string {
     return mapping.items.map(e => yul`[${e}]`).join('');
+}
+
+export function yulStmts(stmts: Stmt[]): string {
+    return stmts
+        .filter(s => s.name !== 'Local' || s.local.nrefs > 0)
+        .map(yulStmt)
+        .join('\n');
 }

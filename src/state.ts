@@ -54,24 +54,6 @@ export class Stack<in out E> {
     }
 
     /**
-     * Duplicates the element at `position` by inserting it at the top of the stack.
-     *
-     * `position` must be in the range [0, 16) and the element at `position` must exist.
-     *
-     * @param position the position of the element to be duplicated.
-     * @throws `Error` when `position` is not in the range [0, 16) or the element at `position` does not exist in this `Stack`.
-     */
-    dup(position: number): void | never {
-        if (position < 0 || position > 15) {
-            throw new Error('Unsupported position for duplication operation');
-        } else if (!(position in this.values)) {
-            throw new Error('Invalid duplication operation, position was not found');
-        }
-
-        this.push(this.values[position]!);
-    }
-
-    /**
      * Swaps the element at `position` with the top element of the stack.
      *
      * @param secondPosition the position of the element to be swapped.
@@ -81,7 +63,7 @@ export class Stack<in out E> {
         if (secondPosition < 1 || secondPosition > 16) {
             throw new Error('Unsupported position for swap operation');
         } else if (!(secondPosition in this.values)) {
-            throw new Error('Invalid swap operation, position was not found');
+            throw new Error('Position not found for swap operation,');
         }
 
         const firstValue = this.values[0]!;
@@ -120,8 +102,13 @@ export class State<S, E> {
      *
      * @param stack
      * @param memory
+     * @param nlocals
      */
-    constructor(readonly stack = new Stack<E>(), readonly memory: { [location: number]: E } = {}) {}
+    constructor(
+        readonly stack = new Stack<E>(),
+        readonly memory: { [location: number]: E } = {},
+        public nlocals = 0
+    ) {}
 
     /**
      * Indicates whether this `State` has been halted.
@@ -163,7 +150,7 @@ export class State<S, E> {
      * @returns a new `State` detached from this one.
      */
     clone(): State<S, E> {
-        return new State(this.stack.clone(), { ...this.memory });
+        return new State(this.stack.clone(), { ...this.memory }, this.nlocals);
     }
 }
 

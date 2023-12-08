@@ -124,7 +124,8 @@ export class CallDataLoad extends Tag {
         super();
     }
     eval(): Expr {
-        this.location = this.location.eval();
-        return this;
+        return new CallDataLoad(this.location.eval());
+        // this.location = this.location.eval();
+        // return this;
     }
 }

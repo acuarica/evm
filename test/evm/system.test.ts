@@ -52,75 +52,78 @@ describe('evm::system', function () {
         expect(sol`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
     });
 
-    describe('RETURN', function () {
-        it('should return with no arguments', function () {
-            const state = new State<Inst, Expr>();
-            state.stack.push(new Val(0x0n));
-            state.stack.push(new Val(0x0n));
-            STEP().RETURN(state);
-            expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([new Return(new Val(0n), new Val(0n), [])]);
-            expect(sol`${state.stmts[0]}`).to.be.equal('return;');
-        });
+    it('should exec `RETURN` with no arguments', function () {
+        const state = new State<Inst, Expr>();
+        state.stack.push(new Val(0x0n));
+        state.stack.push(new Val(0x0n));
+        STEP().RETURN(state);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([new Return(new Val(0n), new Val(0n), [])]);
+        expect(sol`${state.stmts[0]}`).to.be.equal('return;');
+    });
 
-        it('should return with a single argument', function () {
-            const state = new State<Inst, Expr>();
-            state.stack.push(new Val(0x20n));
-            state.stack.push(new Val(0x4n));
-            STEP().RETURN(state);
-            expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([
-                new Return(new Val(0x4n), new Val(0x20n), [new MLoad(new Val(0x4n))]),
-            ]);
-            expect(sol`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
-        });
+    it('should exec `RETURN` with a single argument', function () {
+        const state = new State<Inst, Expr>();
+        state.stack.push(new Val(0x20n));
+        state.stack.push(new Val(0x4n));
+        STEP().RETURN(state);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([
+            new Return(new Val(0x4n), new Val(0x20n), [new MLoad(new Val(0x4n))]),
+        ]);
+        expect(sol`${state.stmts[0]}`).to.be.equal('return memory[0x4];');
+    });
 
-        it('should return more than one argument', function () {
-            const state = new State<Inst, Expr>();
-            state.stack.push(new Add(new Val(0x20n), new Val(0x10n)));
-            state.stack.push(new Val(0x4n));
-            STEP().RETURN(state);
-            expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([
-                new Return(new Val(0x4n), new Add(new Val(0x20n), new Val(0x10n)), [
-                    new MLoad(new Val(0x4n)),
-                    new MLoad(new Val(0x24n)),
-                ]),
-            ]);
-            expect(sol`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
-        });
+    it('should exec `RETURN` with more than one argument', function () {
+        const state = new State<Inst, Expr>();
+        state.stack.push(new Add(new Val(0x20n), new Val(0x10n)));
+        state.stack.push(new Val(0x4n));
+        STEP().RETURN(state);
+        expect(state.halted).to.be.true;
+        expect(state.stmts).to.be.deep.equal([
+            new Return(new Val(0x4n), new Add(new Val(0x20n), new Val(0x10n)), [
+                new MLoad(new Val(0x4n)),
+                new MLoad(new Val(0x24n)),
+            ]),
+        ]);
+        expect(sol`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
+    });
 
-        it('should find `return`s in compiled code', function () {
-            const src = `contract Test {
-                function name() external pure returns (uint256) { return 7; }
-                function symbol() external pure returns (uint256) { return 11; }
-                function hola() external pure returns (string memory) { return "12345"; }
-            }`;
+    it('should find `RETURN` in bytecode', function () {
+        const src = `contract Test { 
+            function name() external pure returns (uint256) { return 7; }
+            function symbol() external pure returns (uint256) { return 11; }
+            function hola() external pure returns (string memory) { return "12345"; }
+        }`;
 
-            const evm = new EVM(compile(src, '0.8.16', this).bytecode);
-            evm.start();
+        const evm = new EVM(
+            compile(src, '0.8.16', this, {
+                enabled: true,
+                details: { jumpdestRemover: true },
+            }).bytecode
+        );
+        evm.start();
 
-            const selector = fnselector('name()');
-            const symbolSelector = fnselector('symbol()');
-            const hola = fnselector('hola()');
-            expect(evm.functionBranches).to.have.keys(selector, symbolSelector, hola);
+        const selector = fnselector('name()');
+        const symbolSelector = fnselector('symbol()');
+        const hola = fnselector('hola()');
+        expect(evm.functionBranches).to.have.keys(selector, symbolSelector, hola);
 
-            {
-                const branch = evm.functionBranches.get(selector)!;
-                const ast = solStmts(build(branch.state));
-                expect(ast).to.be.deep.equal('return 0x7;\n');
-            }
-            {
-                const branch = evm.functionBranches.get(symbolSelector)!;
-                const ast = solStmts(build(branch.state));
-                expect(ast).to.be.deep.equal('return 0xb;\n');
-            }
-            {
-                const branch = evm.functionBranches.get(hola)!;
-                const ast = solStmts(build(branch.state));
-                expect(ast).to.be.deep.equal("return '12345';\n");
-            }
-        });
+        {
+            const branch = evm.functionBranches.get(selector)!;
+            const ast = build(branch.state);
+            expect(solStmts(ast)).to.be.deep.equal('return 0x7;\n');
+        }
+        {
+            const branch = evm.functionBranches.get(symbolSelector)!;
+            const ast = solStmts(build(branch.state));
+            expect(ast).to.be.deep.equal('return 0xb;\n');
+        }
+        {
+            const branch = evm.functionBranches.get(hola)!;
+            const ast = solStmts(build(branch.state));
+            expect(ast.trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
+        }
     });
 
     it('should stringify CREATE', function () {
@@ -136,9 +139,9 @@ describe('evm::system', function () {
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         const stmts = build(state);
-        expect(sol`${stmts[0]}`).to.be.deep.equal(
+        expect(sol`${stmts[6]}`).to.be.deep.equal(
             'require(new Contract(memory[0x80..0x80+0x5c + 0x80 - 0x80]).value(0x0).address);'
         );
-        expect(sol`${stmts[1]}`).to.be.deep.equal('return;');
+        expect(sol`${stmts[7]}`).to.be.deep.equal('return;');
     });
 });

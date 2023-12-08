@@ -17,6 +17,16 @@ contracts('selfdestruct', (compile, fallback, version) => {
         expect(contract.evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
         expect(contract.evm.containsOpcode('SELFDESTRUCT')).to.be.true;
 
-        expect(contract.decompile()).to.be.equal('selfdestruct(msg.sender);\n');
+        const text = contract.solidify({ license: null, pragma: false });
+        expect(text).to.be.equal(
+            `contract Contract {
+
+${fallback}() external payable {
+    selfdestruct(msg.sender);
+}
+
+}
+`
+        );
     });
 });

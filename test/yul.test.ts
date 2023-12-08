@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
 import { yul } from 'sevm';
-import type { Expr } from 'sevm/ast';
 import {
     Add,
     Block,
@@ -43,14 +42,12 @@ describe('yul', function () {
         });
     });
 
-    const mem = (offset: Expr, size: Expr) => ({ offset, size });
-
     (
         [
-            [new Log(undefined, [new Val(3n)], mem(new Val(0n), new Val(32n))), 'log1(0x0, 0x3);'],
+            [new Log(undefined, new Val(0n), new Val(32n), [new Val(3n)]), 'log1(0x0, 0x20, 0x3)'],
             [
-                new Log(undefined, [new Val(3n), new Val(1n)], mem(new Val(64n), new Val(32n))),
-                'log2(0x40, 0x3, 0x1);',
+                new Log(undefined, new Val(64n), new Val(32n), [new Val(3n), new Val(1n)]),
+                'log2(0x40, 0x20, 0x3, 0x1)',
             ],
         ] as const
     ).forEach(([inst, str]) => {

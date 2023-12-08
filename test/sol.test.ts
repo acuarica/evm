@@ -1,24 +1,24 @@
 import { expect } from 'chai';
 
 import { sol } from 'sevm';
-import { Add, Block, Mul, Val } from 'sevm/ast';
-import { mathExprs } from './ast.test';
+import { Val } from 'sevm/ast';
+
+import { $exprs, title } from './ast.test';
 
 describe('::sol', function () {
-    mathExprs.forEach(({ expr, str }) => {
-        it(`should \`sol\` \`${str}\``, function () {
-            expect(sol`${expr}`).to.be.equal(str);
+    ['0x' + 'ff'.repeat(32), '0x' + 'ff'.repeat(31) + 'fe'].forEach(expected => {
+        it(`should \`sol\` ${expected}`, function () {
+            expect(sol`${new Val(BigInt(expected))}`).to.be.equal(expected);
         });
     });
 
-    (
-        [
-            [new Add(new Val(1n), new Mul(new Val(3n), new Val(2n))), '0x1 + 0x3 * 0x2'],
-            [Block.coinbase, 'block.coinbase'],
-        ] as const
-    ).forEach(([expr, str]) => {
-        it(`should convert expression to Yul \`${str}\``, function () {
-            expect(sol`${expr}`).to.be.equal(str);
+    for (const [name, exprs] of Object.entries($exprs)) {
+        describe(name, function () {
+            exprs.forEach(({ expr, str }) => {
+                it(`should \`sol\` \`${title(expr)}\` into \`${str}\``, function () {
+                    expect(sol`${expr}`).to.be.equal(str);
+                });
+            });
         });
-    });
+    }
 });

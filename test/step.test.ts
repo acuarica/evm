@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import { State, STEP } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Block } from 'sevm/ast';
+import { $exprs } from './ast.test';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 const sizes = [...Array(16).keys()].map(i => i + 1);
@@ -9,7 +10,7 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 describe('::step', function () {
     describe('stack', function () {
         describe('PUSHES', function () {
-            it('should modify stack', function () {
+            it('should PUSH value onto stack', function () {
                 const one = new Uint8Array(1);
                 one[0] = 1;
                 const state = new State<never, Expr>();
@@ -26,7 +27,7 @@ describe('::step', function () {
 
         describe('DUPS', function () {
             sizes.forEach(size => {
-                it(`should dup #${size - 1} element on the stack`, function () {
+                it(`should DUP #${size - 1} element on the stack`, function () {
                     const state = new State<never, Expr>();
                     state.stack.push(new Val(2n));
 
@@ -60,7 +61,7 @@ describe('::step', function () {
 
         describe('SWAPS', function () {
             sizes.forEach(size => {
-                it(`should swap #${size} element on the stack`, function () {
+                it(`should SWAP #${size} element on the stack`, function () {
                     const state = new State<never, Expr>();
                     state.stack.push(new Val(2n));
 
@@ -96,8 +97,27 @@ describe('::step', function () {
         });
     });
 
+    for (const [name, exprs] of Object.entries($exprs)) {
+        describe(name, function () {
+            exprs.forEach(({ insts, expr, str }) => {
+                it(`should \`STEP\` \`[${insts.join('|')}]\` into \`${str}\``, function () {
+                    const state = new State<never, Expr>();
+                    for (const inst of insts) {
+                        if (typeof inst === 'bigint') {
+                            state.stack.push(new Val(inst));
+                        } else {
+                            STEP()[inst](state);
+                        }
+                    }
+
+                    expect(state.stack.values).to.be.deep.equal([expr]);
+                });
+            });
+        });
+    }
+
     describe('memory', function () {
-        it('should load values into stack', function () {
+        it('should MLOAD value onto stack', function () {
             const state = new State<Inst, Expr>();
 
             state.memory[4] = new Val(1n);
@@ -107,7 +127,7 @@ describe('::step', function () {
             expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
         });
 
-        it('should store values into memory', function () {
+        it('should MSTORE value into memory', function () {
             const state = new State<Inst, Expr>();
 
             state.stack.push(Block.coinbase);

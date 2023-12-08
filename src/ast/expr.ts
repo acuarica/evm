@@ -23,6 +23,7 @@ import type {
 import type { Log } from './log';
 import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
 import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
+import type { Stmt } from '../stmt';
 
 /**
  *
@@ -63,7 +64,8 @@ export type Expr =
     | StaticCall
     | DelegateCall
     | SLoad
-    | MappingLoad;
+    | MappingLoad
+    | Local;
 
 export const isExpr = (expr: unknown): expr is Expr =>
     expr !== null && typeof expr === 'object' && 'tag' in expr;
@@ -104,7 +106,8 @@ export type Inst =
     | SigCase
     | SStore
     | MappingStore
-    | Throw;
+    | Throw
+    | Locali;
 
 export class Throw implements IInst {
     readonly name = 'Throw';
@@ -141,6 +144,10 @@ export abstract class Tag {
      * Reduce `this` expression.
      */
     abstract eval(): Expr;
+
+    children(): Expr[] {
+        return Object.values(this).filter(value => value instanceof Tag) as Expr[];
+    }
 }
 
 export abstract class Bin extends Tag {
@@ -158,7 +165,76 @@ export class Val extends Tag {
         super();
     }
 
-    eval(): Expr {
+    override eval(): Expr {
         return this;
+    }
+}
+
+export class Local extends Tag {
+    readonly tag = 'Local';
+
+    nrefs = 0;
+
+    constructor(readonly index: number, readonly value: Expr) {
+        super();
+    }
+
+    override eval(): Expr {
+        return this.value.eval();
+    }
+}
+
+export class Locali implements IInst {
+    readonly name = 'Local';
+
+    constructor(readonly local: Local) {}
+
+    eval() {
+        return this;
+    }
+}
+
+export function inline0(stmts: Stmt[]): Stmt[] {
+    const reachable = new WeakSet<Expr>();
+    const result = [];
+    for (const stmt of stmts.reverse()) {
+        if (stmt.name === 'MStore') {
+            reach(stmt.location);
+            reach(stmt.data);
+        } else if (stmt.name === 'Local' && reachable.has(stmt.local)) {
+            continue;
+        }
+        result.unshift(stmt);
+    }
+
+    return result;
+
+    function reach(expr: Expr) {
+        reachable.add(expr);
+        expr.children().forEach(reach);
+    }
+}
+
+export function mem(stmts: Stmt[]): Stmt[] {
+    // const reachable = new WeakSet<Expr>();
+    const result = [];
+    for (const stmt of stmts.reverse()) {
+        if (stmt.name === 'MStore') {
+            reach(stmt.location);
+            reach(stmt.data);
+            // } else if (stmt.name === 'Local' && reachable.has(stmt.local)) {
+            // continue;
+        }
+        result.unshift(stmt);
+    }
+
+    return result;
+
+    function reach(expr: Expr) {
+        // reachable.add(expr);
+        if (expr.tag === 'Local') {
+            expr.nrefs--;
+        }
+        expr.children().forEach(reach);
     }
 }

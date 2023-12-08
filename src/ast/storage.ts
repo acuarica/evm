@@ -106,7 +106,6 @@ export class SLoad extends Tag {
     constructor(readonly location: Expr, readonly variables: IStore['variables']) {
         super();
     }
-
     eval(): Expr {
         return new SLoad(this.location.eval(), this.variables);
     }

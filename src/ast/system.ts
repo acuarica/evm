@@ -175,7 +175,7 @@ export class Revert implements IInst {
     constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
 
     eval() {
-        return this;
+        return new Revert(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
     }
 }
 

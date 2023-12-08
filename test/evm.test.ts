@@ -1,9 +1,11 @@
+import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, STEP, State, type Ram, sol, type OPCODES, build, yul } from 'sevm';
-import { Invalid, Tx, type Expr, type Inst, Throw, Stop } from 'sevm/ast';
+import { EVM, STEP, State, type Ram, sol, type OPCODES, yul, solStmts } from 'sevm';
+import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump } from 'sevm/ast';
 
 import { compile } from './utils/solc';
+import { eventSelector } from './utils/selector';
 
 describe('evm', function () {
     it('should halt when `INVALID` step', function () {
@@ -27,14 +29,14 @@ describe('evm', function () {
         expect(() => evm.containsOpcode('add' as keyof typeof OPCODES)).to.throw('Provided opcode');
     });
 
-    it('should throw when `exec` `halted` state', function () {
+    it('should throw when exec `halted` state', function () {
         const state = new State<Inst, Expr>();
         const evm = new EVM('0x');
         state.halt(new Stop());
         expect(() => evm.exec(0, state)).to.throw('State at 0 must be non-halted to be `exec`');
     });
 
-    it('should throw when after-`exec` non-`halted` state', function () {
+    it('should throw when finishing exec non-`halted` state', function () {
         const state = new State<Inst, Expr>();
         const evm = new EVM('0x6001600201');
         expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:3');
@@ -83,28 +85,56 @@ describe('evm', function () {
         expect(top).to.be.deep.equal(Tx.gasprice);
     });
 
-    describe('conditional', function () {
-        it('if', function () {
-            const src = `contract Test {
-                uint256 value = 0;
-                event Deposit(uint256);
-                fallback () external payable {
-                    uint256 temp = value;
-                    if (block.number % 2 == 0) {
-                        temp += block.number + gasleft();
-                    }
-                    value = temp;
-                    emit Deposit(temp);
+    it('should dedup locals when ref non-inlineable value', function () {
+        const src = `contract Test {
+            event Deposit(uint256);
+            fallback () external payable {
+                uint256 n = block.number;
+                emit Deposit(n);
+                emit Deposit(n * 3);
+            }
+        }`;
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const main = evm.start();
+        expect(evm.functionBranches).to.be.empty;
+        expect(evm.opcodes.filter(op => op.mnemonic === 'NUMBER')).to.have.length(1);
+        const local = 'local0';
+        const topic = eventSelector('Deposit(uint256)');
+        expect(solStmts(main.stmts).trim().split('\n')).to.be.deep.equal([
+            `uint ${local} = block.number; // #refs 1`,
+            `log(0x${topic}, ${local});`,
+            `log(0x${topic}, ${local} * 0x3);`,
+            'return;',
+        ]);
+    });
+
+    it('if0', function () {
+        const src = `contract Test {
+            uint256 value;
+            fallback () external payable {
+                uint256 temp;
+                if (block.number == 7) {
+                    temp = 3;
+                } else {
+                    temp = 5;
                 }
-            }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-            evm.start();
-            expect(evm.functionBranches).to.be.empty;
-        });
+                value = temp;
+            }
+        }`;
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        // const main =
+        // evm.start();
+        const state = new State<Inst, Expr>();
+        evm.exec(19, state);
+        console.log(state.stmts);
+        console.log(state.stack);
+        console.log(evm.errors);
+        expect(evm.functionBranches).to.be.empty;
     });
 
     it('should create ', function () {
         const src = `contract Test {
+            event Deposit(uint256);
                 modifier onlyOwner(uint256 m) {
                     // require(block.timestamp == 5);
                     // uint256 n = block.number;
@@ -116,48 +146,92 @@ describe('evm', function () {
                     _;
                  }
 
-                function name(uint256 n) external view onlyOwner(n) returns (uint256) {
-                    return 7;
+                function _get(uint256 n) internal view returns (uint256) {
+                    for (uint256 i = 0; i < block.number; i++) {
+                        n += block.number;
+                    }
+                    return n;
+                }
+
+                function name(uint256 n) external onlyOwner(n) {
+                    emit Deposit(_get(n));
                 }
 
                 function symbol(uint256 m) external view onlyOwner(m) returns (uint256) {
-                    return 11;
+                    return _get(m);
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
     it('should for loop', function () {
-        const src = `contract Test { event Deposit(uint256);
+        const src = `contract Test {
+            event Deposit(uint256);
             fallback() external payable {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
         const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-        const main = evm.start();
-        // require('util').inspect.defaultOptions.depth = null;
-        console.log(build(main));
-        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
-    });
-
-    it.skip('should for unbounded', function () {
-        const src = `contract Test { event Deposit(uint256);
-            fallback() external payable {
-                for (uint256 i = 0; i < block.number; i++) emit Deposit(i);
-            }
-        }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-        // const main = evm.start();
+        // const main =
         evm.start();
         // require('util').inspect.defaultOptions.depth = null;
         // console.log(build(main));
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
-    it.skip('should for infinite', function () {
+    it.skip('should detect unbounded loop', function () {
+        const src = `contract Test {
+            // event Deposit(uint256);
+            uint256 value;
+            
+
+            fallback() external payable {
+                // for (uint256 i = 0; i < block.number; i++) emit Deposit(i);
+                for (uint256 i = 0; i < block.number; i++) value = i;
+            }
+        }`;
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const main = evm.start();
+
+        // require('util').inspect.defaultOptions.depth = null;
+        // console.log(main);
+
+        // main.stmts.forEach(s => console.log(s));
+        // console.log(main.stmts);
+
+        // console.log(solStmts(build(main)));
+        expect(evm.functionBranches).to.be.empty;
+
+        assert(main.last instanceof JumpDest);
+        const head = main.last.fallBranch.state;
+        assert(head.last instanceof Jumpi);
+        const body = head.last.fallBranch.state;
+        // console.log(body.stmts);
+        // console.log(body.stack);
+        assert(body.last instanceof Jump);
+        const exit = head.last.destBranch.state;
+        assert(exit.last instanceof Stop);
+
+        expect(evm.chunks).to.have.lengthOf(4);
+        const pcs = [0, main.last.fallBranch.pc, head.last.fallBranch.pc, head.last.destBranch.pc];
+        expect(new Set(evm.chunks.keys())).to.be.deep.equal(new Set(pcs));
+
+        expect(evm.chunks.get(0)!.states).to.have.length(1);
+        expect(evm.chunks.get(0)!.states[0]).to.be.equal(main);
+        expect(evm.chunks.get(main.last.fallBranch.pc)!.states).to.have.length(1);
+        expect(evm.chunks.get(main.last.fallBranch.pc)!.states[0]).to.be.equal(head);
+        expect(evm.chunks.get(head.last.fallBranch.pc)!.states).to.have.length(1);
+        expect(evm.chunks.get(head.last.fallBranch.pc)!.states[0]).to.be.equal(body);
+        expect(evm.chunks.get(head.last.destBranch.pc)!.states).to.have.length(1);
+        expect(evm.chunks.get(head.last.destBranch.pc)!.states[0]).to.be.equal(exit);
+
+        expect(body.last.destBranch.state).to.be.equal(head);
+    });
+
+    it('should detect infinite for-loop', function () {
         const src = `contract Test { event Deposit(uint256);
             fallback() external payable {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
@@ -168,9 +242,8 @@ describe('evm', function () {
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
-    describe('recursive', function () {
-        it.skip('should for infinite', function () {
-            const src = `contract Test {
+    it('should detect recursive function', function () {
+        const src = `contract Test {
                 event Transfer(uint256);
                 function transfer(uint256 amount) public {
                     emit Transfer(amount);
@@ -185,11 +258,8 @@ describe('evm', function () {
                     return amount + 7;
                 }
         }`;
-
-            // info compilation
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-            evm.start();
-            // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
-        });
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        evm.start();
+        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 });

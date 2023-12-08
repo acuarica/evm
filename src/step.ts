@@ -1,7 +1,7 @@
 import { type Opcode, type decode, formatOpcode, toHex } from './opcode';
 import type { Ram, Stack, State } from './state';
 
-import { type Expr, Val, type Inst } from './ast/expr';
+import { type Expr, Val, type Inst, Local, Locali } from './ast/expr';
 import { Add, Div, Exp, Mod, Mul, Sub } from './ast/math';
 import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/logic';
 import { mapValues } from './object';
@@ -60,7 +60,9 @@ export function STEP(
         ...MEMORY,
         JUMPDEST: (_state: State<Inst, Expr>) => {},
         ...mapValues(PUSHES, fn => (s: State<Inst, Expr>, o: Opcode) => fn(o.pushData!, s.stack)),
-        ...mapStack(STACK),
+        ...mapStack(SWAPS),
+        ...DUPS,
+        POP,
         ...SYSTEM,
         PC: ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.offset))),
         INVALID: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
@@ -71,7 +73,23 @@ export function STEP(
 }
 
 const push = (d: Uint8Array, s: Stack<Expr>) => s.push(new Val(BigInt('0x' + toHex(d)), true));
-const dup = (position: number) => (stack: Stack<Expr>) => stack.dup(position);
+const dup = (position: number) =>
+    function (state: State<Inst, Expr>) {
+        if (position >= state.stack.values.length) {
+            throw new Error('Invalid duplication operation, position was not found');
+            // state.stack.values[position] = Block.coinbase;
+        }
+
+        const expr = state.stack.values[position];
+        if (expr.tag !== 'Local') {
+            const local = new Local(state.nlocals++, expr);
+            state.stack.values[position] = local;
+            state.stmts.push(new Locali(local));
+        } else {
+            expr.nrefs++;
+        }
+        state.stack.push(state.stack.values[position]);
+    };
 const swap = (position: number) => (stack: Stack<Expr>) => stack.swap(position);
 
 function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): (stack: Stack<Expr>) => void {
@@ -88,6 +106,15 @@ function shift(Cons: new (value: Expr, shift: Expr) => Expr): (stack: Stack<Expr
         const value = stack.pop();
         stack.push(new Cons(value, shift));
     };
+}
+
+function POP({ stack }: Ram<Expr>) {
+    const expr = stack.pop();
+    if (expr.tag === 'Local') {
+        // expr.nrefs--;
+        // console.log('POP: Local', expr);
+        // throw new Error('POP: Local');
+    }
 }
 
 const PUSHES = {
@@ -125,8 +152,7 @@ const PUSHES = {
     PUSH32: push,
 } as const;
 
-const STACK = {
-    POP: (stack: Stack<Expr>): void => void stack.pop(),
+const DUPS = {
     DUP1: dup(0),
     DUP2: dup(1),
     DUP3: dup(2),
@@ -143,6 +169,9 @@ const STACK = {
     DUP14: dup(13),
     DUP15: dup(14),
     DUP16: dup(15),
+} as const;
+
+const SWAPS = {
     SWAP1: swap(1),
     SWAP2: swap(2),
     SWAP3: swap(3),
@@ -213,7 +242,7 @@ const LOGIC = {
     SLT: bin(Lt),
     SGT: bin(Gt),
     EQ: (stack: Stack<Expr>): void => {
-        const DIVEXPsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) => {
+        const DIVEXPsig = (left: Expr, right: Expr): Sig | undefined => {
             left = left.eval();
             right = right.eval();
 
@@ -235,18 +264,21 @@ const LOGIC = {
                 }
             }
 
-            return orElse();
+            return undefined;
         };
 
-        const SHRsig = (left: Expr, right: Expr, orElse: () => Sig | Eq) =>
-            left.isVal() &&
-            right.tag === 'Shr' &&
-            right.shift.isVal() &&
-            right.shift.val === 0xe0n &&
-            right.value.tag === 'CallDataLoad' &&
-            right.value.location.isZero()
+        const SHRsig = (left: Expr, right: Expr): Sig | undefined => {
+            left = left.eval();
+            right = right.eval();
+            return left.isVal() &&
+                right.tag === 'Shr' &&
+                right.shift.isVal() &&
+                right.shift.val === 0xe0n &&
+                right.value.tag === 'CallDataLoad' &&
+                right.value.location.isZero()
                 ? new Sig(left.val.toString(16).padStart(8, '0'))
-                : orElse();
+                : undefined;
+        };
 
         const left = stack.pop();
         const right = stack.pop();
@@ -256,11 +288,11 @@ const LOGIC = {
                 ? left.val === right.val
                     ? new Val(1n)
                     : new Val(0n)
-                : DIVEXPsig(left, right, () =>
-                      DIVEXPsig(right, left, () =>
-                          SHRsig(left, right, () => SHRsig(right, left, () => new Eq(left, right)))
-                      )
-                  )
+                : DIVEXPsig(left, right) ??
+                      DIVEXPsig(right, left) ??
+                      SHRsig(left, right) ??
+                      SHRsig(right, left) ??
+                      new Eq(left, right)
         );
     },
     ISZERO: (stack: Stack<Expr>): void => {
@@ -311,6 +343,7 @@ function datacopy(kind: DataCopy['kind']) {
         } else {
             memory[Number(dest.val)] = new DataCopy(kind, offset, size, address);
         }
+        // stmts.push(new MStore(location, data));
     };
 }
 
@@ -321,20 +354,24 @@ const MEMORY = {
         stack.push(
             loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new MLoad(loc)
         );
+        // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
     },
     MSTORE: mstore,
     MSTORE8: mstore,
 } as const;
 
 function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
-    let loc = stack.pop();
+    let location = stack.pop();
     const data = stack.pop();
 
-    loc = loc.eval();
-    if (loc.isVal()) {
-        memory[Number(loc.val)] = data;
-    } else {
-        stmts.push(new MStore(loc, data));
+    if (location.tag === 'Local') location.nrefs--;
+    if (data.tag === 'Local') data.nrefs--;
+
+    stmts.push(new MStore(location, data));
+
+    location = location.eval();
+    if (location.isVal()) {
+        memory[Number(location.val)] = data;
     }
 }
 
@@ -499,8 +536,8 @@ function LOGS(events: IEvents) {
 
     function log(topicsCount: number, events: IEvents) {
         return ({ stack, memory, stmts }: State<Inst, Expr>): void => {
-            let offset = stack.pop();
-            let size = stack.pop();
+            const offset = stack.pop();
+            const size = stack.pop();
 
             const topics = [];
             for (let i = 0; i < topicsCount; i++) {
@@ -517,17 +554,29 @@ function LOGS(events: IEvents) {
                 }
             }
 
-            offset = offset.eval();
-            size = size.eval();
-            const getArgs = (offset: Val, size: Val) => {
-                const args = [];
-                for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-                    args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
-                }
-                return args;
-            };
-            const args = offset.isVal() && size.isVal() ? getArgs(offset, size) : undefined;
-            stmts.push(new Log(event, topics, { offset, size }, args));
+            stmts.push(
+                new Log(
+                    event,
+                    offset,
+                    size,
+                    topics,
+                    (function (offset, size) {
+                        if (offset.isVal() && size.isVal()) {
+                            const args = [];
+                            for (
+                                let i = Number(offset.val);
+                                i < Number(offset.val + size.val);
+                                i += 32
+                            ) {
+                                args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+                            }
+                            return args;
+                        } else {
+                            return undefined;
+                        }
+                    })(offset.eval(), size.eval())
+                )
+            );
         };
     }
 }

@@ -23,14 +23,23 @@ export class If {
         readonly trueBlock?: Stmt[],
         readonly falseBlock?: Stmt[]
     ) {}
+    eval() {
+        return this;
+    }
 }
 
 export class CallSite {
     readonly name = 'CallSite';
     constructor(readonly selector: string) {}
+    eval() {
+        return this;
+    }
 }
 
 export class Require {
     readonly name = 'Require';
     constructor(readonly condition: Expr, readonly args: Expr[]) {}
+    eval() {
+        return this;
+    }
 }
