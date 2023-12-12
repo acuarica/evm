@@ -13,8 +13,9 @@ import { expect } from 'chai';
  * @returns {string[]}
  */
 function json(fileName) {
-    console.info('Reading', c.cyan(fileName));
-    return JSON.parse(readFileSync(`./data/${fileName}.json`, 'utf-8'));
+    const path = `./scripts/4byte/${fileName}.json`;
+    console.info('Reading', c.cyan(fileName), 'from', c.magenta(path));
+    return JSON.parse(readFileSync(path, 'utf-8'));
 }
 
 /**
@@ -23,7 +24,7 @@ function json(fileName) {
  * @returns
  */
 function writeJson(fileName, data) {
-    const path = `./data/${fileName}.json`;
+    const path = `./scripts/4byte/${fileName}.json`;
     console.info('Writing JSON', c.magenta(path));
     writeFileSync(path, JSON.stringify(data, null, 4));
 }
