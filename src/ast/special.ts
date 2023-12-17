@@ -2,43 +2,43 @@ import { mapValues } from '../object';
 import { type Expr, Tag } from './expr';
 
 const BLOCK = {
-    BASEFEE: ['basefee', 'uint'],
-    COINBASE: ['coinbase', 'address payable'],
-    TIMESTAMP: ['timestamp', 'uint'],
-    NUMBER: ['number', 'uint'],
-    DIFFICULTY: ['difficulty', 'uint'],
+    BASEFEE: ['basefee', 'uint', 0x48],
+    COINBASE: ['coinbase', 'address payable', 0x41],
+    TIMESTAMP: ['timestamp', 'uint', 0x42],
+    NUMBER: ['number', 'uint', 0x43],
+    DIFFICULTY: ['difficulty', 'uint', 0x44],
     // prevrandao
-    GASLIMIT: ['gaslimit', 'uint'],
-    CHAINID: ['chainid', 'uint'],
+    GASLIMIT: ['gaslimit', 'uint', 0x45],
+    CHAINID: ['chainid', 'uint', 0x46],
 } as const;
 
 const MSG = {
-    CALLER: ['sender', 'address'],
-    CALLDATASIZE: ['data.length', 'uint'],
+    CALLER: ['sender', 'address', 0x33],
+    CALLDATASIZE: ['data.length', 'uint', 0x36],
 } as const;
 
 const TX = {
-    ORIGIN: ['origin', 'address'],
-    GASPRICE: ['gasprice', 'uint'],
+    ORIGIN: ['origin', 'address', 0x32],
+    GASPRICE: ['gasprice', 'uint', 0x3a],
 } as const;
 
-type Props<K extends string = string> = { [k in K]: readonly [string, string] };
+type Props<K extends string = string> = { [k in K]: readonly [string, string, number] };
 
 const applyPrefix = <P extends Props, O extends string>(props: P, obj: O) =>
-    mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as {
-        [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
+    mapValues(props, ([field, type, opcode]) => [`${obj}.${field}`, type, opcode]) as {
+        [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1], P[prop][2]];
     };
 
 const PROPS = {
-    ADDRESS: ['address(this)', 'address'],
-    CODESIZE: ['codesize()', 'uint'],
-    RETURNDATASIZE: ['returndatasize()', 'uint'],
+    ADDRESS: ['address(this)', 'address', 0x30],
+    CODESIZE: ['codesize()', 'uint', 0x38],
+    RETURNDATASIZE: ['returndatasize()', 'uint', 0x3d],
     ...applyPrefix(BLOCK, 'block'),
     ...applyPrefix(MSG, 'msg'),
     ...applyPrefix(TX, 'tx'),
-    SELFBALANCE: ['address(this).balance', 'uint'],
-    MSIZE: ['msize()', 'uint'],
-    GAS: ['gasleft()', 'uint'],
+    SELFBALANCE: ['address(this).balance', 'uint', 0x47],
+    MSIZE: ['msize()', 'uint', 0x59],
+    GAS: ['gasleft()', 'uint', 0x5a],
 } as const;
 
 /**
@@ -47,11 +47,13 @@ const PROPS = {
 export class Prop extends Tag {
     readonly tag = 'Prop';
     readonly value: (typeof PROPS)[keyof typeof PROPS][0];
+    readonly opcode: number;
 
-    constructor([value, type]: (typeof PROPS)[keyof typeof PROPS]) {
+    constructor([value, type, opcode]: (typeof PROPS)[keyof typeof PROPS]) {
         super();
         this.value = value;
         this.type = type;
+        this.opcode = opcode;
     }
 
     eval(): Expr {
@@ -74,10 +76,10 @@ export const Tx = Object.fromEntries(
 );
 
 export const FNS = {
-    BALANCE: [(address: string) => `${address}.balance`, 'uint256'],
-    EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256'],
-    EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32'],
-    BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32'],
+    BALANCE: [(address: string) => `${address}.balance`, 'uint256', 0x31],
+    EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256', 0x3b],
+    EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32', 0x3f],
+    BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32', 0x40],
 } as const;
 
 export class Fn extends Tag {
