@@ -8,6 +8,8 @@ declare global {
         entries<K extends string, V>(o: { [k in K]: V }): [K, V][];
 
         fromEntries<K extends string, V>(entries: Iterable<readonly [K, V]>): { [k in K]: V };
+
+        setPrototypeOf<T>(o: unknown, proto: T): T;
     }
 }
 
