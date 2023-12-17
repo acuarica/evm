@@ -10,11 +10,6 @@
  * @packageDocumentation
  */
 
-/**
- * Set of `PUSHn` opcodes.
- *
- * Keep track of `PUSH0` https://eips.ethereum.org/EIPS/eip-3855
- */
 export const PUSHES = {
     PUSH1: 0x60,
     PUSH2: 0x61,
@@ -111,9 +106,6 @@ export const OPCODES = {
     GASLIMIT: 0x45,
     CHAINID: 0x46, // https://www.evm.codes/#46
     SELFBALANCE: 0x47, // https://www.evm.codes/#47
-    /**
-     * https://eips.ethereum.org/EIPS/eip-3198
-     */
     BASEFEE: 0x48,
     POP: 0x50,
     MLOAD: 0x51,
@@ -127,9 +119,6 @@ export const OPCODES = {
     MSIZE: 0x59,
     GAS: 0x5a,
 
-    /**
-     * Keep track of https://eips.ethereum.org/EIPS/eip-4200
-     */
     JUMPDEST: 0x5b,
 
     ...PUSHES,
@@ -180,9 +169,6 @@ export const OPCODES = {
     REVERT: 0xfd,
     INVALID: 0xfe,
 
-    /**
-     * Keep track of https://eips.ethereum.org/EIPS/eip-6780
-     */
     SELFDESTRUCT: 0xff,
 } as const;
 
@@ -203,6 +189,7 @@ export const MNEMONICS = Object.fromEntries(
  *
  */
 export type Opcode = {
+    jumpdests?: ReturnType<typeof decode>['jumpdests'];
     /**
      * This is the offset in the bytecode where this `Opcode` was found.
      * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
