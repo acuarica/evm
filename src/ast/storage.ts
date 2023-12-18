@@ -1,4 +1,4 @@
-import { type Expr, type IInst, Tag } from './expr';
+import { type Expr, type IInst, Tag } from '.';
 
 export interface IStore {
     /**

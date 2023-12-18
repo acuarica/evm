@@ -1,6 +1,6 @@
 import type { State } from '../state';
 
-import type { Inst, Expr, IInst } from './expr';
+import type { Inst, Expr, IInst } from '.';
 import type { Sig } from './logic';
 
 /**

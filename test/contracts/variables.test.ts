@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { Contract, Require } from 'sevm';
-import { CallDataLoad, SStore, Stop, Val, Variable } from 'sevm/ast';
+import { Contract } from 'sevm';
+import { CallDataLoad, Require, SStore, Stop, Val, Variable } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';

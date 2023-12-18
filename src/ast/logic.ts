@@ -1,4 +1,4 @@
-import { type Expr, Tag, Bin, Val } from './expr';
+import { type Expr, Tag, Bin, Val } from '.';
 
 abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {

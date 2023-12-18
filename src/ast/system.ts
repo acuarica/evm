@@ -1,4 +1,4 @@
-import { type IInst, Tag, type Expr, evalE } from './expr';
+import { type IInst, Tag, type Expr, evalE } from '.';
 
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';

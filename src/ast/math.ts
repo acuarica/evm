@@ -1,4 +1,4 @@
-import { Bin, type Expr, Val } from './expr';
+import { Bin, type Expr, Val } from './index';
 
 export class Add extends Bin {
     readonly tag = 'Add';

@@ -1,6 +1,5 @@
 import type { MappingLoad, MappingStore } from './ast';
-import { isExpr, type Expr, type Inst, isInst } from './ast/expr';
-import type { Stmt } from './stmt';
+import { isExpr, type Expr, type Inst, isInst, type Stmt } from './ast';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either

@@ -1,8 +1,7 @@
 import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, type Val, isExpr } from './ast/expr';
+import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt } from './ast';
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
-import { If, type Stmt } from './stmt';
 import { Contract, type PublicFunction } from '.';
 
 /**

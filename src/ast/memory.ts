@@ -1,4 +1,4 @@
-import { Tag, type Expr, type IInst } from './expr';
+import { Tag, type Expr, type IInst } from '.';
 
 export class MLoad extends Tag {
     readonly tag = 'MLoad';

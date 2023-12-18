@@ -1,4 +1,5 @@
-import { type Expr, type Inst, Throw, type Val } from './ast/expr';
+import { type Expr, type Inst, Throw, type Val } from './ast';
+import { CallSite, If, Require, type Stmt } from './ast';
 import type { Type } from './type';
 import { Not } from './ast/logic';
 import type { Return, Revert } from './ast/system';
@@ -6,7 +7,6 @@ import { State } from './state';
 import { EVM } from './evm';
 import { type SLoad, Variable, type MappingLoad, type IStore } from './ast/storage';
 import ERCs from './ercs';
-import { CallSite, If, Require, type Stmt } from './stmt';
 import type { IEvents } from './ast';
 import { STEP, type ISelectorBranches } from './step';
 import type { Metadata } from './metadata';
@@ -17,7 +17,6 @@ export * from './state';
 export * from './step';
 export * from './type';
 export * from './evm';
-export * from './stmt';
 export * from './yul';
 
 /**

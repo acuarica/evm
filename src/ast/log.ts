@@ -1,4 +1,4 @@
-import { evalE, type Expr, type IInst } from './expr';
+import { evalE, type Expr, type IInst } from '.';
 
 /**
  * Events found through `LOG` instructions.

@@ -2,7 +2,7 @@ import { toHex, type Opcode, formatOpcode } from './opcode';
 import type { Ram, State } from './state';
 
 import { MLoad, MStore } from './ast/memory';
-import { type Expr, type Inst, Val, Locali, Local } from './ast/expr';
+import { type Expr, type Inst, Val, Locali, Local } from './ast';
 import { Invalid } from './ast/system';
 import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/logic';
 import { Add, Div, Exp, Mod, Mul, Sub } from './ast/math';

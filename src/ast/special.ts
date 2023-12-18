@@ -1,4 +1,4 @@
-import { type Expr, Tag } from './expr';
+import { type Expr, Tag } from '.';
 
 const BLOCK = {
     BASEFEE: ['basefee', 'uint', 0x48],

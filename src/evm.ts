@@ -2,7 +2,7 @@ import { decode, OPCODES, type Opcode, MNEMONICS, fromHexString } from './opcode
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 
-import { type Expr, type IInst, type Inst, Throw } from './ast/expr';
+import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
 import type { ISelectorBranches } from './step';
 
