@@ -108,20 +108,20 @@ describe('evm::system', function () {
         const selector = fnselector('name()');
         const symbolSelector = fnselector('symbol()');
         const hola = fnselector('hola()');
-        expect(evm.insts.functionBranches).to.have.keys(selector, symbolSelector, hola);
+        expect(evm.step.functionBranches).to.have.keys(selector, symbolSelector, hola);
 
         {
-            const branch = evm.insts.functionBranches.get(selector)!;
+            const branch = evm.step.functionBranches.get(selector)!;
             const ast = build(branch.state);
             expect(solStmts(ast)).to.be.deep.equal('return 0x7;\n');
         }
         {
-            const branch = evm.insts.functionBranches.get(symbolSelector)!;
+            const branch = evm.step.functionBranches.get(symbolSelector)!;
             const ast = solStmts(build(branch.state));
             expect(ast).to.be.deep.equal('return 0xb;\n');
         }
         {
-            const branch = evm.insts.functionBranches.get(hola)!;
+            const branch = evm.step.functionBranches.get(hola)!;
             const ast = solStmts(build(branch.state));
             expect(ast.trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
         }

@@ -12,12 +12,12 @@ type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => voi
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
  */
-export class EVM<T extends
+export class EVM<S extends
     {
-        [opcode: number]: [size: number, halts: boolean, mnemonic: Mnemonic<T>];
+        [opcode: number]: [size: number, halts: boolean, mnemonic: Mnemonic<S>];
         functionBranches: ISelectorBranches;
     } & {
-        [m in Mnemonic<T>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
+        [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
     }
 > {
     /**
@@ -27,32 +27,14 @@ export class EVM<T extends
     readonly metadata: Metadata | undefined;
 
     /**
-     * The `STEP` function that updates the `State`
-     * after executing the opcode pointed by `pc`.
-     *
-     * Maps `mnemonic` keys of `STEP` to their corresponding `opcode`
-     * in the byte range, _i.e._, `0-255`.
-     *
-     * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
-     * `INVALID` is used instead.
-     */
-    // readonly insts: (readonly [size: number, step: ((state: State<Inst, Expr>, opcode: Opcode) => void)])[];
-    // readonly insts: IStep;
-
-    /**
      *
      */
-    readonly chunks = new Map<number, { pcend: number; states: State<Inst, Expr>[] }>();
+    readonly blocks = new Map<number, { pcend: number; states: State<Inst, Expr>[] }>();
 
     /**
      *
      */
     readonly errors: Throw[] = [];
-
-    // readonly events: IEvents;
-    // readonly variables: IStore['variables'];
-    // readonly mappings: IStore['mappings'];
-    // readonly functionBranches: ISelectorBranches;
 
     /**
      * The `Opcode[]` decoded from `bytecode`.
@@ -63,22 +45,59 @@ export class EVM<T extends
      * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
      * This is used to speed up offset search.
      */
-    readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
-    readonly buffer: Uint8Array;
+    readonly bytecode: Uint8Array;
 
-    constructor(bytecode: string, readonly insts: T) {
+    constructor(
+        bytecode: string,
 
-    const start = bytecode.slice(0, 2) === '0x' ? 2 : 0;
-    this.buffer = fromHexString(bytecode, start);
+        /**
+         * The `STEP` function that updates the `State`
+         * after executing the opcode pointed by `pc`.
+         *
+         * Maps `mnemonic` keys of `STEP` to their corresponding `opcode`
+         * in the byte range, _i.e._, `0-255`.
+         *
+         * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
+         * `INVALID` is used instead.
+         */
+        readonly step: S
+    ) {
+        const start = bytecode.slice(0, 2) === '0x' ? 2 : 0;
+        this.bytecode = fromHexString(bytecode, start);
 
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
-        const { opcodes, jumpdests } = decode(code);
-        jumpdests[0] = 0;
+        this.opcodes = decode(code).opcodes;
+    }
 
-        this.opcodes = opcodes;
-        this.jumpdests = jumpdests;
+    /**
+     *
+     */
+    chunks(): {
+        pcstart: number;
+        pcend: number;
+        states?: State<Inst, Expr>[]
+    }[] {
+        let lastPc = 0;
+
+        const result: ReturnType<typeof this.chunks> = [];
+        const pcs = [...this.blocks.keys()];
+        pcs.sort((a, b) => a - b);
+        for (const pc of pcs) {
+            const block = this.blocks.get(pc)!;
+            if (lastPc !== pc) {
+                result.push({ pcstart: lastPc, pcend: pc });
+            }
+            lastPc = block.pcend;
+            result.push({ pcstart: pc, pcend: block.pcend, states: block.states });
+        }
+
+        if (lastPc !== this.bytecode.length) {
+            result.push({ pcstart: lastPc, pcend: this.bytecode.length });
+        }
+
+        return result;
     }
 
     /**
@@ -87,7 +106,7 @@ export class EVM<T extends
     start(): State<Inst, Expr> {
         const state = new State<Inst, Expr>();
         this.run(0, state);
-        for (const [, branch] of this.insts.functionBranches) {
+        for (const [, branch] of this.step.functionBranches) {
             this.run(branch.pc, branch.state);
         }
         return state;
@@ -100,7 +119,7 @@ export class EVM<T extends
             // See https://github.com/microsoft/TypeScript/issues/30406.
             const branch = branches.shift()!;
 
-            const chunk = this.chunks.get(branch.pc);
+            const chunk = this.blocks.get(branch.pc);
             if (chunk !== undefined && chunk.states.length > 10) {
                 continue;
             }
@@ -160,22 +179,23 @@ export class EVM<T extends
         // });
         let pc = pc0;
         // for (; !state.halted && pc < this.opcodes.length; pc++) {
-        for (; !state.halted && pc < this.buffer.length; pc++) {
+        for (; !state.halted && pc < this.bytecode.length; pc++) {
             // opcode = this.opcodes[pc];
-            const op = this.buffer[pc];
-            const [size, ,mnemonic] = this.insts[op];
-            const opcode= {opcode: op, pc, offset: pc, mnemonic: mnemonic as Opcode['mnemonic'], 
-        
-                      pushData: size === 0 ? null : (() => {
-                          const data = this.buffer.subarray(pc + 1, pc + size + 1);
-                          if (data.length !== size) throw new Error('asdfsadf');
-                          pc += size;
-                          return data;
-                      })(),
-        } as Opcode;
+            const op = this.bytecode[pc];
+            const [size, , mnemonic] = this.step[op];
+            const opcode = {
+                opcode: op, pc, mnemonic: mnemonic as Opcode['mnemonic'],
+
+                pushData: size === 0 ? null : (() => {
+                    const data = this.bytecode.subarray(pc + 1, pc + size + 1);
+                    if (data.length !== size) throw new Error('asdfsadf');
+                    pc += size;
+                    return data;
+                })(),
+            };
 
 
-            const step = this.insts[mnemonic];
+            const step = this.step[mnemonic];
             // opcode.jumpdests = this.jumpdests;
 
             // step[0];
@@ -190,7 +210,7 @@ export class EVM<T extends
                 continue;
             }
 
-            if (!state.halted && this.buffer[pc + 1] === OPCODES.JUMPDEST) {
+            if (!state.halted && this.bytecode[pc + 1] === OPCODES.JUMPDEST) {
                 const fallBranch = Branch.make(pc + 1, state);
                 state.halt(new JumpDest(fallBranch));
             }
@@ -198,9 +218,9 @@ export class EVM<T extends
 
         if (!state.halted) throw new Error(`State must be halted after \`exec\` at ${pc0}:${pc}`);
 
-        const chunk = this.chunks.get(pc0);
+        const chunk = this.blocks.get(pc0);
         if (chunk === undefined) {
-            this.chunks.set(pc0, { pcend: pc, states: [state] });
+            this.blocks.set(pc0, { pcend: pc, states: [state] });
         } else {
             chunk.states.push(state);
         }
@@ -241,7 +261,7 @@ export class EVM<T extends
     }
 
     gc(b: Branch) {
-        const chunk = this.chunks.get(b.pc);
+        const chunk = this.blocks.get(b.pc);
 
         if (chunk !== undefined) {
             for (const s of chunk.states) {

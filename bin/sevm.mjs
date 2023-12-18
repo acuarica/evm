@@ -18,7 +18,7 @@ const underline = c.underline;
 const blue = c.blue;
 const dim = c.dim;
 const magenta = c.magenta;
-const red = c.red;
+// const red = c.red;
 const info = c.cyan;
 const warn = c.yellow;
 
@@ -29,7 +29,7 @@ const warn = c.yellow;
 /** @param {import('sevm').Opcode} opcode */
 export function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
-    const offset = `0x${opcode.offset.toString(16)}`.padStart(8);
+    const offset = '?';//`0x${opcode.offset.toString(16)}`.padStart(8);
     const pushData = opcode.pushData
         ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${toHex(opcode.pushData)}`
         : '';
@@ -61,30 +61,30 @@ function abi(contract) {
     contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
 }
 
-/** @param {Contract} contract */
-function dis(contract) {
+/** @param {Contract} _contract */
+function dis(_contract) {
     console.info(
         `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
             'mnemonic'
         )}  ${'push data (PUSHx)'}`
     );
 
-    for (const chunk of contract.chunks()) {
-        console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
+    // for (const chunk of contract.chunks()) {
+        // console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
 
         // for (let i = chunk.pcstart; i < chunk.pcend; i++) {
         //     const opcode = contract.evm.opcodes[i];
         //     console.info(ansiOpcode(opcode));
         // }
 
-        if (chunk.states !== undefined) {
-            for (const state of chunk.states) {
-                console.info('state');
-                console.info('    〒 ', state.stack.values.join(' | '));
-                state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
-            }
-        }
-    }
+        // if (chunk.states !== undefined) {
+        //     for (const state of chunk.states) {
+        //         console.info('state');
+        //         console.info('    〒 ', state.stack.values.join(' | '));
+        //         state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
+        //     }
+        // }
+    // }
 }
 
 /** @param {Contract} contract */
@@ -260,7 +260,7 @@ function cfg(contract) {
      */
     function dot(evm) {
         let edges = '';
-        for (const [pc, chunk] of evm.chunks) {
+        for (const [pc, chunk] of evm.blocks) {
             write(`subgraph cluster_${pc} {`);
             write(`  style=filled;`);
             // write(`  node [style=filled,color=white];`);

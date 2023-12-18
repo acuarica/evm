@@ -71,7 +71,7 @@ export class Contract {
 
         this.payable = !requiresNoValue(this.main);
 
-        for (const [selector, branch] of evm.insts.functionBranches) {
+        for (const [selector, branch] of evm.step.functionBranches) {
             evm.run(branch.pc, branch.state);
             this.functions[selector] = new PublicFunction(this, build(branch.state), selector);
         }
@@ -80,30 +80,6 @@ export class Contract {
         this.errors = evm.errors;
     }
 
-    /**
-     *
-     */
-    chunks(): { pcstart: number; pcend: number; states?: State<Inst, Expr>[] }[] {
-        //     let lastPc = 0;
-
-        const result: { pcstart: number; pcend: number; states?: State<Inst, Expr>[]; }[] = [];
-        //     const pcs = [...this.evm.chunks.keys()];
-        //     pcs.sort((a, b) => a - b);
-        //     for (const pc of pcs) {
-        //         const chunk = this.evm.chunks.get(pc)!;
-        //         if (lastPc !== pc) {
-        //             result.push({ pcstart: lastPc, pcend: pc });
-        //         }
-        //         lastPc = chunk.pcend;
-        //         result.push({ pcstart: pc, pcend: chunk.pcend, states: chunk.states });
-        //     }
-
-        //     if (lastPc !== this.evm.opcodes.length) {
-        //         result.push({ pcstart: lastPc, pcend: this.evm.opcodes.length });
-        //     }
-
-        return result;
-    }
 
     /**
      *

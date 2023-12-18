@@ -27,18 +27,18 @@ describe('evm::log', function () {
         const state = new State<Inst, Expr>();
         evm.exec(0, state);
         const ev = knownEventSig;
-        evm.insts.events[eventSelector(ev)].sig = ev;
+        evm.step.events[eventSelector(ev)].sig = ev;
 
-        expect(evm.insts.events).to.have.keys(
+        expect(evm.step.events).to.have.keys(
             eventSelector(knownEventSig),
             eventSelector(unknownEventSig)
         );
-        expect(evm.insts.events[eventSelector(knownEventSig)]).to.be.deep.equal({
+        expect(evm.step.events[eventSelector(knownEventSig)]).to.be.deep.equal({
             sig: knownEventSig,
             indexedCount: 0,
         });
 
-        expect(solEvents(evm.insts.events)).to.be.equal(`event Deposit(uint256 _arg0);
+        expect(solEvents(evm.step.events)).to.be.equal(`event Deposit(uint256 _arg0);
 event ${eventSelector(unknownEventSig)};
 `);
 

@@ -71,7 +71,7 @@ export function STEP(
         MEMORY(),
         SYSTEM(),
         q({
-            PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.offset)))] as const,
+            PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.pc)))] as const,
             INVALID: [{ opcode: 0xfe, halts: true }, (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode))] as const,
         } as const),
         LOGS(events),

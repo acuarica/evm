@@ -188,14 +188,12 @@ export const MNEMONICS = Object.fromEntries(
  * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
  *
  */
-export type Opcode = {
-    jumpdests?: ReturnType<typeof decode>['jumpdests'];
+export interface Opcode {
     /**
      * This is the offset in the bytecode where this `Opcode` was found.
      * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
      * expects a stack operand referencing this `offset` in the bytecode.
      */
-    readonly offset: number;
 
     /**
      * The Program Counter of this `Opcode`.
@@ -208,37 +206,28 @@ export type Opcode = {
      * The `opcode` may not be a valid opcode.
      */
     readonly opcode: number;
-} & (
-    | {
-          /**
-           * Represents a valid opcode.
-           *
-           * In https://www.evm.codes/ you can find an overview of each EVM opcode.
-           *
-           * If the `opcode` given is not a valid opcode,
-           * you can provide `INVALID` as `mnemonic`.
-           */
-          mnemonic: Exclude<keyof typeof OPCODES, keyof typeof PUSHES>;
 
-          /**
-           * A `Unary` opcode does not include any `pushData`.
-           */
-          pushData: null;
-      }
-    | {
-          /**
-           * A `PUSHn` opcode only permits a `PUSHn` opcode.
-           */
-          mnemonic: keyof typeof PUSHES;
+    /**
+     * Represents a valid opcode.
+     *
+     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+     *
+     * If the `opcode` given is not a valid opcode,
+     * you can provide `INVALID` as `mnemonic`.
+     * 
+     * A `PUSHn` opcode only permits a `PUSHn` opcode.
+     */
+    readonly mnemonic: keyof typeof OPCODES;
 
-          /**
-           * If this `Opcode` is a `PUSHn` instruction,
-           * then `pushData` contains the data attached to this instruction.
-           * Otherwise, `null`.
-           */
-          pushData: Uint8Array;
-      }
-);
+    /**
+     * A `Unary` opcode does not include any `pushData`.
+     * 
+     * If this `Opcode` is a `PUSHn` instruction,
+     * then `pushData` contains the data attached to this instruction.
+     * Otherwise, `null`.
+     */
+    readonly pushData: null | Uint8Array;
+}
 
 /**
  * Represents an `Error` that occurs during decoding.
@@ -299,23 +288,22 @@ export function decode(code: string): {
             jumpdests[i] = opcodes.length;
         }
         opcodes.push({
-            offset: i,
-            pc: opcodes.length,
+            pc: i,
             opcode,
             ...(isPush(mnemonic)
                 ? {
-                      mnemonic,
-                      pushData: (() => {
-                          const pushSize = opcode - OPCODES.PUSH1 + 0x01;
-                          const data = buffer.subarray(i + 1, i + pushSize + 1);
-                          i += pushSize;
-                          return data;
-                      })(),
-                  }
+                    mnemonic,
+                    pushData: (() => {
+                        const pushSize = opcode - OPCODES.PUSH1 + 0x01;
+                        const data = buffer.subarray(i + 1, i + pushSize + 1);
+                        i += pushSize;
+                        return data;
+                    })(),
+                }
                 : {
-                      mnemonic,
-                      pushData: null,
-                  }),
+                    mnemonic,
+                    pushData: null,
+                }),
         });
     }
 
@@ -341,13 +329,12 @@ export function fromHexString(hexstr: string, start: number): Uint8Array {
 }
 
 export function formatOpcode(op: Opcode): string {
-    const offset = op.offset.toString().padStart(4, ' ').toUpperCase();
     const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
     const pushData = op.pushData
         ? ` 0x${toHex(op.pushData)} (${parseInt(toHex(op.pushData), 16)})`
         : '';
 
-    return `${pc}:${offset}    ${op.mnemonic}${pushData}`;
+    return `${pc}  ${op.mnemonic}${pushData}`;
 }
 
 /**
