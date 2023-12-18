@@ -2,12 +2,12 @@ import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
 
 chai.use(chaiExec);
-
 chaiExec.defaults = {
     command: 'bin/sevm.mjs',
 };
 
 describe('::bin', function () {
+
     it('should exit with a zero exit code using `--help`', function () {
         const cli = chaiExec('--help');
 
@@ -30,4 +30,5 @@ describe('::bin', function () {
         expect(cli).to.exit.with.not.code(0);
         expect(cli).stderr.to.contain('At least one command must be specified');
     });
+
 });
