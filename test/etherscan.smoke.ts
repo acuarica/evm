@@ -180,15 +180,15 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 selectorStats.append(contract.functions);
                 ercsStats.append(contract);
 
-                if (contract.evm.errors.length > 0) {
-                    errorsByContract.set(`${name}-${address}`, contract.evm.errors);
+                if (contract.errors.length > 0) {
+                    errorsByContract.set(`${name}-${address}`, contract.errors);
                 }
 
                 const externals = [
                     ...Object.values(contract.functions).flatMap(fn =>
                         fn.label !== undefined ? [fn.label] : []
                     ),
-                    ...Object.values(contract.evm.variables).flatMap(v =>
+                    ...Object.values(step.variables).flatMap(v =>
                         v.label !== undefined ? [v.label + '()'] : []
                     ),
                 ];
