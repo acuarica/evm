@@ -25,7 +25,7 @@ describe('evm', function () {
         const opcodes = new EVM(compile(src, '0.7.6', this).bytecode, STEP()).opcodes;
 
         const selector = fnselector(sig);
-        const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);
+        const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData!) === selector);
         expect(push4, `PUSH4 ${selector} not found`).to.be.not.undefined;
     });
 
