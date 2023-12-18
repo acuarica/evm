@@ -702,7 +702,7 @@ function FLOW(functionBranches: ISelectorBranches) {
         //     throw new Error(`Expected JUMPDEST, but found ${formatOpcode(opcode)}`);
         // }
         // throw new Error(`JUMP destination should be JUMPDEST but found @${formatOpcode(dest)}`);
-        throw new Error(`JUMP destination should be JUMPDEST but found @?`);
+        // throw new Error(`JUMP destination should be JUMPDEST but found @?`);
         // }
     }
 }
