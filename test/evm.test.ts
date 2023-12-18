@@ -1,13 +1,13 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, STEP, State, type Ram, sol, type OPCODES, yul, solStmts } from 'sevm';
+import { EVM, State, type Ram, sol, type OPCODES, yul, solStmts, STEP } from 'sevm';
 import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump } from 'sevm/ast';
 
 import { compile } from './utils/solc';
 import { eventSelector } from './utils/selector';
 
-describe('evm', function () {
+describe('::evm', function () {
     it('should halt when `INVALID` step', function () {
         const state = new State<Inst, Expr>();
         STEP().INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
@@ -17,7 +17,7 @@ describe('evm', function () {
     });
 
     it('should halt when `exec` invalid opcode', function () {
-        const evm = new EVM('0xd001');
+        const evm = new EVM('0xd001', STEP());
         const state = evm.start();
 
         expect(state.halted).to.be.true;
@@ -31,20 +31,20 @@ describe('evm', function () {
 
     it('should throw when exec `halted` state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x');
+        const evm = new EVM('0x', STEP());
         state.halt(new Stop());
         expect(() => evm.exec(0, state)).to.throw('State at 0 must be non-halted to be `exec`');
     });
 
     it('should throw when finishing exec non-`halted` state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x6001600201');
-        expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:3');
+        const evm = new EVM('0x6001600201', STEP());
+        expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:5');
     });
 
     it('should halt when `exec` invalid opcode & state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x01');
+        const evm = new EVM('0x01', STEP());
         evm.exec(0, state);
 
         const err = new Throw('POP with empty stack', evm.opcodes[0], state);
@@ -66,19 +66,18 @@ describe('evm', function () {
         }`;
         let count = 0;
         let top = undefined;
-        const NUMBER = (state: Ram<Expr>) => {
-            count++;
-            STEP().NUMBER(state);
-        };
-        const GASPRICE = (state: Ram<Expr>) => {
-            STEP().GASPRICE(state);
-            top = state.stack.top;
-        };
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode, {
-            ...STEP(),
-            NUMBER,
-            GASPRICE,
-        });
+
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, Object.setPrototypeOf({
+            NUMBER(state: Ram<Expr>) {
+                count++;
+                super.NUMBER(state);
+            },
+            GASPRICE(state: Ram<Expr>) {
+                super.GASPRICE(state);
+                top = state.stack.top;
+            },
+        }, STEP()));
+
         evm.start();
         expect(count).to.be.equal(2);
         expect(top).to.be.not.undefined;
@@ -94,9 +93,10 @@ describe('evm', function () {
                 emit Deposit(n * 3);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const step = STEP();
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, step);
         const main = evm.start();
-        expect(evm.functionBranches).to.be.empty;
+        expect(step.functionBranches).to.be.empty;
         expect(evm.opcodes.filter(op => op.mnemonic === 'NUMBER')).to.have.length(1);
         const local = 'local0';
         const topic = eventSelector('Deposit(uint256)');
@@ -121,15 +121,16 @@ describe('evm', function () {
                 value = temp;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const step = STEP();
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, step);
         // const main =
         // evm.start();
         const state = new State<Inst, Expr>();
         evm.exec(19, state);
-        console.log(state.stmts);
-        console.log(state.stack);
-        console.log(evm.errors);
-        expect(evm.functionBranches).to.be.empty;
+        // console.log(state.stmts);
+        // console.log(state.stack);
+        // console.log(evm.errors);
+        expect(step.functionBranches).to.be.empty;
     });
 
     it('should create ', function () {
@@ -162,7 +163,7 @@ describe('evm', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode, STEP());
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -174,7 +175,7 @@ describe('evm', function () {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
         // const main =
         evm.start();
         // require('util').inspect.defaultOptions.depth = null;
@@ -193,7 +194,8 @@ describe('evm', function () {
                 for (uint256 i = 0; i < block.number; i++) value = i;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const step = STEP();
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, step);
         const main = evm.start();
 
         // require('util').inspect.defaultOptions.depth = null;
@@ -203,7 +205,7 @@ describe('evm', function () {
         // console.log(main.stmts);
 
         // console.log(solStmts(build(main)));
-        expect(evm.functionBranches).to.be.empty;
+        expect(step.functionBranches).to.be.empty;
 
         assert(main.last instanceof JumpDest);
         const head = main.last.fallBranch.state;
@@ -237,7 +239,7 @@ describe('evm', function () {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -258,7 +260,7 @@ describe('evm', function () {
                     return amount + 7;
                 }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
