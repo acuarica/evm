@@ -50,21 +50,43 @@ function q<const T extends {
     return a;
 }
 
-function UNDEF(): {
+type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? (k & string) : never }[keyof T];
+type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => void>;
+
+function UNDEF<T extends object>(): {
+
     readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
+
+    /**
+     * 
+     */
     readonly UNDEF: (state: State<Inst, Expr>, op: Opcode) => void;
-    haltingInsts(): string[];
+
+    readonly functionBranches: ISelectorBranches;
+
+    /**
+     * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
+     */
+    haltingSteps(): Mnemonic<T>[];
+
+    opcodes(): { readonly [mnemonic: string]: number },
 } {
     return Object.assign(
         {
             UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
-            haltingInsts() {
+            haltingSteps() {
                 return [...Array(256).keys()]
-                    .map(i => this[i])
+                    .map(o => this[o])
                     .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
                     .map(([, , mnemonic]) => mnemonic);
+            },
+            opcodes() {
+                return Object.fromEntries([...Array(256).keys()]
+                    .map(o => [this[o][2], o] as const)
+                    .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
+                ) as { [k: string]: number };
             }
-        } as ReturnType<typeof UNDEF>,
+        } as ReturnType<typeof UNDEF<T>>,
         Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const)),
     );
 }
@@ -75,7 +97,12 @@ export function STEP(
     mappings: IStore['mappings'] = {},
     functionBranches: ISelectorBranches = new Map(),
 ) {
-    return Object.assign(UNDEF(),
+    // const a = { ...FLOW(functionBranches), };
+    // type T = typeof a;
+    // const b = UNDEF<T>();
+    // b.opcodes().
+
+    const a = Object.assign({},
         STACK(),
         MATH(),
         SPECIAL(),
@@ -90,6 +117,7 @@ export function STEP(
         FLOW(functionBranches),
         PUSH0(),
     );
+    return Object.assign(UNDEF<typeof a>(), a);
 }
 
 /**

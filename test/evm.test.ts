@@ -9,6 +9,13 @@ import { eventSelector } from './utils/selector';
 
 describe('::evm', function () {
 
+    it('should throw in `containsOpcode` when providing invalid opcode', function () {
+        const evm = new EVM('0x', STEP());
+        // TODO: Fix typings
+        expect(() => evm.containsOpcode('add' as keyof typeof OPCODES)).to.throw('Provided opcode `add` is not');
+        expect(() => evm.containsOpcode('haltingSteps')).to.throw('Provided opcode `haltingSteps` is not');
+    });
+
     it('should halt when `exec` invalid opcode', function () {
         const evm = new EVM('0xd001', STEP());
         const state = evm.start();
@@ -19,7 +26,6 @@ describe('::evm', function () {
         expect(yul`${state.stmts[0]}`).to.be.equal('invalid()');
         expect(evm.containsOpcode(0xd0)).to.be.true;
         expect(evm.containsOpcode('ADD')).to.be.false;
-        expect(() => evm.containsOpcode('add' as keyof typeof OPCODES)).to.throw('Provided opcode');
     });
 
     it('should throw when exec `halted` state', function () {

@@ -256,7 +256,8 @@ function cfg(contract) {
     write('}');
 
     /**
-     * @param {import('sevm').EVM<{functionBranches: import('sevm').ISelectorBranches}>} evm
+     * @parama {import('sevm').EVM<unknown>} evm
+     * @param {any} evm
      */
     function dot(evm) {
         let edges = '';

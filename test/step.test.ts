@@ -10,9 +10,17 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 describe('::step', function () {
 
     it('should retrieve halting insts', function () {
-        expect(STEP().haltingInsts()).to.be.deep.equal(
+        expect(STEP().haltingSteps()).to.be.deep.equal(
             ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT']
         );
+    });
+
+    it('should retrieve opcodes', function () {
+        const opcodes = STEP().opcodes();
+        expect(opcodes['STOP']).to.be.equal(0);
+        expect(opcodes['ADD']).to.be.equal(1);
+        expect(opcodes['PUSH32']).to.be.equal(0x60 + 32 -1);
+        expect(opcodes['SELFDESTRUCT']).to.be.equal(255);
     });
 
     it('should find decoder by opcode `number`', function () {

@@ -1,4 +1,4 @@
-import { decode, OPCODES, type Opcode, MNEMONICS, fromHexString } from './opcode';
+import { decode, OPCODES, type Opcode, fromHexString } from './opcode';
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 
@@ -14,10 +14,13 @@ type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => voi
  */
 export class EVM<S extends
     {
-        [opcode: number]: [size: number, halts: boolean, mnemonic: Mnemonic<S>];
-        functionBranches: ISelectorBranches;
+        readonly [opcode: number]: readonly [size: number, halts: boolean, mnemonic: Mnemonic<S>];
+        readonly functionBranches: ISelectorBranches;
+        haltingSteps(): Mnemonic<S>[];
+        opcodes(): { [mnemonic: string]: number },
+        // opcodes(): Record<Mnemonic<S>, number >,
     } & {
-        [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
+        readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
     }
 > {
     /**
@@ -233,19 +236,14 @@ export class EVM<S extends
      * @param opcode The opcode to look for.
      * @returns Whether the contract contains the given `opcode`.
      */
-    containsOpcode(opcode: number | keyof typeof OPCODES): boolean {
-        const HALTS: (keyof typeof OPCODES)[] = [
-            'STOP',
-            'RETURN',
-            'REVERT',
-            'INVALID',
-            'SELFDESTRUCT',
-        ];
+    containsOpcode(opcode: number | Mnemonic<S>): boolean {
+        const opcodes = this.step.opcodes();
+
         let halted = false;
-        if (typeof opcode === 'string' && opcode in OPCODES) {
-            opcode = OPCODES[opcode];
+        if (typeof opcode === 'string' && opcode in opcodes) {
+            opcode = opcodes[opcode];
         } else if (typeof opcode === 'string') {
-            throw new Error(`Provided opcode '${opcode}' is not a valid opcode mnemonic'`);
+            throw new Error(`Provided opcode \`${opcode}\` is not a valid opcode mnemonic'`);
         }
         for (let index = 0; index < this.opcodes.length; index++) {
             const currentOpcode = this.opcodes[index].opcode;
@@ -253,7 +251,7 @@ export class EVM<S extends
                 return true;
             } else if (currentOpcode === OPCODES.JUMPDEST) {
                 halted = false;
-            } else if (HALTS.includes(MNEMONICS[currentOpcode] ?? 'INVALID')) {
+            } else if (this.step[currentOpcode][1]) {
                 halted = true;
             }
         }
