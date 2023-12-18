@@ -1,7 +1,6 @@
 import { toHex, type Opcode, formatOpcode } from './opcode';
 import type { Ram, State } from './state';
 
-import { mapValues } from './object';
 import { MLoad, MStore } from './ast/memory';
 import { type Expr, type Inst, Val, Locali, Local } from './ast/expr';
 import { Invalid } from './ast/system';
@@ -26,6 +25,9 @@ export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Exp
 // type S<K extends string> = { [o: number]: [size: number, step: F] } & { [k in K]: F; };
 type F = (state: State<Inst, Expr>, opcode?: Opcode) => void;
 type O = number | { opcode: number, size?: number, halts?: true };
+
+const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
+    Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
 function q<const T extends {
     [k in keyof T]: T[keyof T] extends readonly [O, unknown] ? T[keyof T] : never

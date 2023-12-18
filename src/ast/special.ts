@@ -1,4 +1,3 @@
-import { mapValues } from '../object';
 import { type Expr, Tag } from './expr';
 
 const BLOCK = {
@@ -23,6 +22,9 @@ const TX = {
 } as const;
 
 type Props<K extends string = string> = { [k in K]: readonly [string, string, number] };
+
+const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
+    Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
 const applyPrefix = <const P extends Props, const O extends string>(props: P, obj: O) =>
     mapValues(props, ([field, type, opcode]) => [`${obj}.${field}`, type, opcode]) as {
