@@ -583,21 +583,21 @@ function solContract(
     if (license) {
         text += `// SPDX-License-Identifier: ${license}\n`;
     }
-    if (pragma && this.evm.metadata) {
-        text += `// Metadata ${this.evm.metadata.url}\n`;
-        text += `pragma solidity ${this.evm.metadata.solc};\n`;
+    if (pragma && this.metadata) {
+        text += `// Metadata ${this.metadata.url}\n`;
+        text += `pragma solidity ${this.metadata.solc};\n`;
         text += '\n';
     }
 
     text += `contract ${contractName} {\n\n`;
 
-    text += solEvents(this.evm.events);
-    text += solStructs(this.evm.mappings);
-    text += solMappings(this.evm.mappings);
-    text += solVars(this.evm.variables);
+    text += solEvents(this.events);
+    text += solStructs(this.mappings);
+    text += solMappings(this.mappings);
+    text += solVars(this.variables);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-    const fallback = this.evm.metadata?.minor! >= 6 ? 'fallback' : 'function';
+    const fallback = this.metadata?.minor! >= 6 ? 'fallback' : 'function';
     text += `${fallback}() external payable {\n`;
     text += solStmts(this.main, 4);
     text += '}\n\n';
