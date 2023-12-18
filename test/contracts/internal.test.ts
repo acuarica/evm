@@ -41,7 +41,7 @@ contracts('internal', compile => {
                     new SStore(
                         new Sha3(new Val(-1n), new Val(-1n), [Msg.sender, new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
-                        contract.evm.variables
+                        contract.variables
                     )
                 );
                 expect(fn.stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -49,8 +49,8 @@ contracts('internal', compile => {
         });
 
         it('should not have `mappings` nor `variables`', function () {
-            expect(Object.keys(contract.evm.mappings)).to.have.length(1);
-            expect(Object.keys(contract.evm.variables)).to.have.length(0);
+            expect(Object.keys(contract.mappings)).to.have.length(1);
+            expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
         it.skip('should `decompile` bytecode', function () {
@@ -96,7 +96,7 @@ contracts('internal', compile => {
                     new Return(new Val(-1n), new Val(-1n), [
                         new SLoad(
                             new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
-                            contract.evm.variables
+                            contract.variables
                         ),
                     ])
                 );
@@ -104,8 +104,8 @@ contracts('internal', compile => {
         });
 
         it('should not have `mappings` nor `variables`', function () {
-            expect(Object.keys(contract.evm.mappings)).to.have.length(1);
-            expect(Object.keys(contract.evm.variables)).to.have.length(0);
+            expect(Object.keys(contract.mappings)).to.have.length(1);
+            expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
         it.skip('should `decompile` bytecode', function () {

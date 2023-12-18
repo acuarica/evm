@@ -15,7 +15,7 @@ contracts('events', (compile, fallback) => {
         }`;
         const contract = new Contract(compile(src, this).bytecode);
         const Event0 = eventSelector('Event0(string)');
-        expect(contract.evm.events).to.have.keys(Event0);
+        expect(contract.events).to.have.keys(Event0);
         const text = contract.solidify();
         expect(text, text).to.match(/event /);
         expect(text, text).to.match(/log\(0x[a-fA-F\d]+(, 0x[a-fA-F\d]+)+\);/);

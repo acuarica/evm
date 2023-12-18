@@ -35,7 +35,7 @@ contracts('variables', (compile, _fallback, version) => {
                     new SStore(
                         new Val(value, true),
                         new CallDataLoad(new Val(4n, isPush)),
-                        contract.evm.variables
+                        contract.variables
                     )
                 );
                 expect(stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -43,7 +43,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
 
         it('should get variables of different types', function () {
-            const vars = Object.values(contract.evm.variables);
+            const vars = Object.values(contract.variables);
             expect(vars).to.be.of.length(2);
             const isPush = version !== '0.8.16';
             expect(vars[0]).to.be.deep.equal(
@@ -84,7 +84,7 @@ contracts('variables', (compile, _fallback, version) => {
         });
 
         it.skip('should detect variables', function () {
-            expect(Object.values(contract.evm.variables)).to.be.of.length(4);
+            expect(Object.values(contract.variables)).to.be.of.length(4);
         });
 
         it('should `decompile` bytecode', function () {
