@@ -23,31 +23,29 @@ export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Exp
 // > = U[keyof U]
 
 // type S<K extends string> = { [o: number]: [size: number, step: F] } & { [k in K]: F; };
-type F = (state: State<Inst, Expr>, opcode?: Opcode) => void;
-type O = number | { opcode: number, size?: number, halts?: true };
+// type F = (state: State<Inst, Expr>, opcode?: Opcode) => void;
+// type O = ;
 
 const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
     Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
-function q<const T extends {
-    [k in keyof T]: T[keyof T] extends readonly [O, unknown] ? T[keyof T] : never
-}>(step: T): {
-    readonly [k in keyof T]: T[k] extends readonly [O, infer U] ? U : never;
+function q<
+    const M extends keyof T & string,
+    const T extends {
+        readonly [k in M]: readonly [number | { opcode: number, size?: number, halts?: true }, unknown]
+    }
+>(step: T): {
+    readonly [k in M]: T[k][1];
 } & {
-    readonly [o: number]: readonly [size: number, halts: boolean, keyof T];
+    [o: number]: readonly [size: number, halts: boolean, keyof T];
 } {
-    const u = (Object.entries(step) as [string, [O, F]][])
+    const ms = mapValues(step, ([, f]) => f);
+    const os = Object.entries(step)
         .map(([m, [o,]]) => typeof o === 'number'
             ? [o, [0, false, m]] as const
             : [o.opcode, [o.size ?? 0, !!o.halts, m]] as const
         );
-
-    const p = mapValues(step as { [k in keyof T]: readonly [O, F] }, ([, f]) => f);
-    // Object.fromEntries(Object.entries(step).map(([key, value]) => [key, fn(value)]));
-    const a = { ...Object.fromEntries(u), ...p };// as ReturnType<typeof q>;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    return a;
+    return { ...ms, ...Object.fromEntries(os) };
 }
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? (k & string) : never }[keyof T];
@@ -97,11 +95,6 @@ export function STEP(
     mappings: IStore['mappings'] = {},
     functionBranches: ISelectorBranches = new Map(),
 ) {
-    // const a = { ...FLOW(functionBranches), };
-    // type T = typeof a;
-    // const b = UNDEF<T>();
-    // b.opcodes().
-
     const a = Object.assign({},
         STACK(),
         MATH(),
@@ -132,7 +125,7 @@ function STACK() {
                 // console.log('POP: Local', expr);
                 // throw new Error('POP: Local');
             }
-        }] as const,
+        }],
 
         PUSH1: push(1),
         PUSH2: push(2),
@@ -200,7 +193,7 @@ function STACK() {
         SWAP14: swap(14),
         SWAP15: swap(15),
         SWAP16: swap(16),
-    } as const);
+    });
 
     function push(size: number) {
         return [
@@ -543,7 +536,7 @@ function LOGS(events: IEvents) {
             LOG2: log(2, events),
             LOG3: log(3, events),
             LOG4: log(4, events),
-        } as const)
+        })
     } as const;
 
     function log(topicsCount: number, events: IEvents) {
@@ -690,14 +683,14 @@ function FLOW(functionBranches: ISelectorBranches) {
     return {
         functionBranches,
         ...q({
-            JUMPDEST: [0x5b, (_state: State<Inst, Expr>): void => { }] as const,
+            JUMPDEST: [0x5b, (_state: State<Inst, Expr>): void => { }],
 
             JUMP: [0x56, (state: State<Inst, Expr>, opcode: Opcode): void => {
                 const offset = state.stack.pop();
                 const destpc = getDest(offset, opcode);
                 const destBranch = Branch.make(destpc, state);
                 state.halt(new Jump(offset, destBranch));
-            }] as const,
+            }],
 
             JUMPI: [0x57, (state: State<Inst, Expr>, opcode: Opcode): void => {
                 const offset = state.stack.pop();
@@ -717,8 +710,8 @@ function FLOW(functionBranches: ISelectorBranches) {
                     last = new Jumpi(cond, offset, fallBranch, Branch.make(destpc, state));
                 }
                 state.halt(last);
-            }] as const,
-        } as const)
+            }],
+        })
     } as const;
 
     /**
