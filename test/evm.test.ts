@@ -8,13 +8,6 @@ import { compile } from './utils/solc';
 import { eventSelector } from './utils/selector';
 
 describe('::evm', function () {
-    it('should halt when `INVALID` step', function () {
-        const state = new State<Inst, Expr>();
-        STEP().INVALID(state, { offset: 0, pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
-        expect(state.halted).to.be.true;
-        expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
-        expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
-    });
 
     it('should halt when `exec` invalid opcode', function () {
         const evm = new EVM('0xd001', STEP());
@@ -70,9 +63,11 @@ describe('::evm', function () {
         const evm = new EVM(compile(src, '0.7.6', this).bytecode, Object.setPrototypeOf({
             NUMBER(state: Ram<Expr>) {
                 count++;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 super.NUMBER(state);
             },
             GASPRICE(state: Ram<Expr>) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 super.GASPRICE(state);
                 top = state.stack.top;
             },
@@ -217,18 +212,18 @@ describe('::evm', function () {
         const exit = head.last.destBranch.state;
         assert(exit.last instanceof Stop);
 
-        expect(evm.chunks).to.have.lengthOf(4);
+        expect(evm.blocks).to.have.lengthOf(4);
         const pcs = [0, main.last.fallBranch.pc, head.last.fallBranch.pc, head.last.destBranch.pc];
-        expect(new Set(evm.chunks.keys())).to.be.deep.equal(new Set(pcs));
+        expect(new Set(evm.blocks.keys())).to.be.deep.equal(new Set(pcs));
 
-        expect(evm.chunks.get(0)!.states).to.have.length(1);
-        expect(evm.chunks.get(0)!.states[0]).to.be.equal(main);
-        expect(evm.chunks.get(main.last.fallBranch.pc)!.states).to.have.length(1);
-        expect(evm.chunks.get(main.last.fallBranch.pc)!.states[0]).to.be.equal(head);
-        expect(evm.chunks.get(head.last.fallBranch.pc)!.states).to.have.length(1);
-        expect(evm.chunks.get(head.last.fallBranch.pc)!.states[0]).to.be.equal(body);
-        expect(evm.chunks.get(head.last.destBranch.pc)!.states).to.have.length(1);
-        expect(evm.chunks.get(head.last.destBranch.pc)!.states[0]).to.be.equal(exit);
+        expect(evm.blocks.get(0)!.states).to.have.length(1);
+        expect(evm.blocks.get(0)!.states[0]).to.be.equal(main);
+        expect(evm.blocks.get(main.last.fallBranch.pc)!.states).to.have.length(1);
+        expect(evm.blocks.get(main.last.fallBranch.pc)!.states[0]).to.be.equal(head);
+        expect(evm.blocks.get(head.last.fallBranch.pc)!.states).to.have.length(1);
+        expect(evm.blocks.get(head.last.fallBranch.pc)!.states[0]).to.be.equal(body);
+        expect(evm.blocks.get(head.last.destBranch.pc)!.states).to.have.length(1);
+        expect(evm.blocks.get(head.last.destBranch.pc)!.states[0]).to.be.equal(exit);
 
         expect(body.last.destBranch.state).to.be.equal(head);
     });

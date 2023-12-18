@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { State, STEP } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Block } from 'sevm/ast';
+import { sol, State, STEP } from 'sevm';
+import { Val, type Expr, Local, Locali, type Inst, Block, Invalid } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
@@ -21,11 +21,8 @@ describe('::step', function () {
     describe('stack', function () {
         describe('PUSHES', function () {
             it('should PUSH value onto stack', function () {
-                const one = new Uint8Array(1);
-                one[0] = 1;
                 const state = new State<never, Expr>();
                 STEP().PUSH1(state, {
-                    offset: 0,
                     pc: 0,
                     opcode: 1,
                     mnemonic: 'PUSH1',
@@ -126,7 +123,7 @@ describe('::step', function () {
         });
     }
 
-    describe('memory', function () {
+    describe('MEMORY', function () {
         it('should MLOAD value onto stack', function () {
             const state = new State<Inst, Expr>();
 
@@ -147,4 +144,15 @@ describe('::step', function () {
             expect(state.memory).to.be.deep.equal({ '4': Block.coinbase });
         });
     });
+
+    describe('SYSTEM', function () {
+        it('should halt when `INVALID` step', function () {
+            const state = new State<Inst, Expr>();
+            STEP().INVALID(state, { pc: 0, opcode: 1, mnemonic: 'INVALID', pushData: null });
+            expect(state.halted).to.be.true;
+            expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
+            expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
+        });
+    });
+
 });
