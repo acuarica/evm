@@ -2,12 +2,22 @@ import { expect } from 'chai';
 
 import { State, STEP } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Block } from 'sevm/ast';
-import { $exprs } from './ast.test';
+import { $exprs } from './$exprs';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 const sizes = [...Array(16).keys()].map(i => i + 1);
 
 describe('::step', function () {
+
+    it('should find decoder by opcode `number`', function () {
+        const step = STEP();
+
+        expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
+        expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
+        expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
+        expect(step[255]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+    });
+
     describe('stack', function () {
         describe('PUSHES', function () {
             it('should PUSH value onto stack', function () {
