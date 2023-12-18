@@ -24,7 +24,7 @@ const TX = {
 
 type Props<K extends string = string> = { [k in K]: readonly [string, string, number] };
 
-const applyPrefix = <P extends Props, O extends string>(props: P, obj: O) =>
+const applyPrefix = <const P extends Props, const O extends string>(props: P, obj: O) =>
     mapValues(props, ([field, type, opcode]) => [`${obj}.${field}`, type, opcode]) as {
         [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1], P[prop][2]];
     };
