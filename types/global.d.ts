@@ -15,7 +15,7 @@ declare global {
     interface ObjectConstructor {
         keys<K extends string>(o: { [k in K]: unknown }): K[];
 
-        entries<T extends { [k in keyof T? extends string ? k : never]: T[k] }>(
+        entries<K extends keyof T & string, T extends { [k in K]: T[k] }>(
             o: T
         ): [keyof T, T[keyof T]][];
 
