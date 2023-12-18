@@ -1,4 +1,12 @@
-type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+/**
+ * Converts a union to an intersection type.
+ * 
+ * It works by distributing the union's type[^1] and reconstrucing it
+ * by intersection the result parameter. 
+ * 
+ * [^1]: https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
+ */
+type UnionToIntersection<U> = (U extends unknown ? (_: U) => void : never) extends (_: infer I) => void ? I : never;
 
 /**
  * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/object.fromentries/index.d.ts
@@ -15,7 +23,7 @@ declare global {
 
         setPrototypeOf<T>(o: unknown, proto: T): T;
 
-        assign<T, U extends unknown[]>(_target: T, ..._sources: U): T & UnionToIntersection<U[number]>;
+        assign<T, U extends unknown[]>(target: T, ...sources: U): T & UnionToIntersection<U[number]>;
     }
 }
 
