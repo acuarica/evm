@@ -53,9 +53,18 @@ function q<const T extends {
 function UNDEF(): {
     readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
     readonly UNDEF: (state: State<Inst, Expr>, op: Opcode) => void;
+    haltingInsts(): string[];
 } {
     return Object.assign(
-        { UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)) },
+        {
+            UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
+            haltingInsts() {
+                return [...Array(256).keys()]
+                    .map(i => this[i])
+                    .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
+                    .map(([, , mnemonic]) => mnemonic);
+            }
+        } as ReturnType<typeof UNDEF>,
         Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const)),
     );
 }

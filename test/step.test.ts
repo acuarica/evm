@@ -9,6 +9,12 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 
 describe('::step', function () {
 
+    it('should retrieve halting insts', function () {
+        expect(STEP().haltingInsts()).to.be.deep.equal(
+            ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT']
+        );
+    });
+
     it('should find decoder by opcode `number`', function () {
         const step = STEP();
 
