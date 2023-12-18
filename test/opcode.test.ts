@@ -40,28 +40,24 @@ describe('opcode', function () {
 
         expect(opcodes).to.have.length(4);
         expect(opcodes[0]).to.be.deep.equal({
-            offset: 0,
             pc: 0,
             opcode: OPCODES.ADDRESS,
             mnemonic: 'ADDRESS',
             pushData: null,
         });
         expect(opcodes[1]).to.be.deep.equal({
-            offset: 1,
             pc: 1,
             opcode: OPCODES.ADDRESS,
             mnemonic: 'ADDRESS',
             pushData: null,
         });
         expect(opcodes[2]).to.be.deep.equal({
-            offset: 2,
             pc: 2,
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
         });
         expect(opcodes[3]).to.be.deep.equal({
-            offset: 3,
             pc: 3,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
@@ -83,36 +79,31 @@ describe('opcode', function () {
 
         expect(opcodes).to.have.length(5);
         expect(opcodes[0]).to.be.deep.equal({
-            offset: 0,
             pc: 0,
             opcode: OPCODES.PUSH4,
             mnemonic: 'PUSH4',
             pushData: Buffer.from([1, 2, 3, 4]),
         });
         expect(opcodes[1]).to.be.deep.equal({
-            offset: 5,
-            pc: 1,
+            pc: 5,
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
         });
         expect(opcodes[2]).to.be.deep.equal({
-            offset: 6,
-            pc: 2,
+            pc: 6,
             opcode: OPCODES.PUSH4,
             mnemonic: 'PUSH4',
             pushData: Buffer.from([5, 6, 7, 8]),
         });
         expect(opcodes[3]).to.be.deep.equal({
-            offset: 11,
-            pc: 3,
+            pc: 11,
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
         });
         expect(opcodes[4]).to.be.deep.equal({
-            offset: 12,
-            pc: 4,
+            pc: 12,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
@@ -124,7 +115,6 @@ describe('opcode', function () {
         expect(decodeFromArray(OPCODES.PUSH32)).to.be.deep.equal({
             opcodes: [
                 {
-                    offset: 0,
                     pc: 0,
                     opcode: OPCODES.PUSH32,
                     mnemonic: 'PUSH32',
@@ -136,7 +126,6 @@ describe('opcode', function () {
         expect(decodeFromArray(OPCODES.PUSH32, 1)).to.be.deep.equal({
             opcodes: [
                 {
-                    offset: 0,
                     pc: 0,
                     opcode: OPCODES.PUSH32,
                     mnemonic: 'PUSH32',
@@ -152,21 +141,18 @@ describe('opcode', function () {
 
         expect(opcodes).to.have.length(3);
         expect(opcodes[0]).to.be.deep.equal({
-            offset: 0,
             pc: 0,
             opcode: 0xb0,
             mnemonic: 'INVALID',
             pushData: null,
         });
         expect(opcodes[1]).to.be.deep.equal({
-            offset: 1,
             pc: 1,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
         });
         expect(opcodes[2]).to.be.deep.equal({
-            offset: 2,
             pc: 2,
             opcode: 0xb1,
             mnemonic: 'INVALID',
@@ -179,22 +165,19 @@ describe('opcode', function () {
 
         expect(opcodes).to.have.length(3);
         expect(opcodes[0]).to.be.deep.equal({
-            offset: 0,
             pc: 0,
             opcode: OPCODES.PUSH1,
             mnemonic: 'PUSH1',
             pushData: Buffer.from([3]),
         } as Opcode);
         expect(opcodes[1]).to.be.deep.equal({
-            offset: 2,
-            pc: 1,
+            pc: 2,
             opcode: OPCODES.PUSH1,
             mnemonic: 'PUSH1',
             pushData: Buffer.from([5]),
         } as Opcode);
         expect(opcodes[2]).to.be.deep.equal({
-            offset: 4,
-            pc: 2,
+            pc: 4,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
@@ -209,33 +192,30 @@ describe('opcode', function () {
     it('should `decode` format `INVALID` opcodes', function () {
         expect(
             formatOpcode({
-                offset: 10,
                 pc: 2,
                 opcode: OPCODES.ADD,
                 mnemonic: 'ADD',
                 pushData: null,
             })
-        ).to.be.equal('   2:  10    ADD');
+        ).to.be.equal('   2  ADD');
 
         expect(
             formatOpcode({
-                offset: 5,
                 pc: 1,
                 opcode: OPCODES.PUSH4,
                 mnemonic: 'PUSH4',
                 pushData: Buffer.from([1, 2, 3, 4]),
             })
-        ).to.be.equal('   1:   5    PUSH4 0x01020304 (16909060)');
+        ).to.be.equal('   1  PUSH4 0x01020304 (16909060)');
 
         expect(
             formatOpcode({
-                offset: 0,
                 pc: 0,
                 opcode: 0xb0,
                 mnemonic: 'INVALID',
                 pushData: null,
             })
-        ).to.be.equal('   0:   0    INVALID');
+        ).to.be.equal('   0  INVALID');
     });
 
     it('should convert buffer `toHex`', function () {
