@@ -29,7 +29,7 @@ const eventHashes = require('./eventHashes.min.json');
  * @returns {Contract}
  */
 function patch(contract) {
-    for (const [topic, event] of Object.entries(contract.evm.events)) {
+    for (const [topic, event] of Object.entries(contract.events)) {
         if (topic in eventHashes) {
             event.sig = eventHashes[topic];
         }
