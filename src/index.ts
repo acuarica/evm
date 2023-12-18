@@ -4,10 +4,12 @@ import { Not } from './ast/logic';
 import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';
-import { type SLoad, Variable, type MappingLoad } from './ast/storage';
+import { type SLoad, Variable, type MappingLoad, type IStore } from './ast/storage';
 import ERCs from './ercs';
-import type { Step } from './step';
 import { CallSite, If, Require, type Stmt } from './stmt';
+import type { IEvents } from './ast';
+import { STEP, type ISelectorBranches } from './step';
+import type { Metadata } from './metadata';
 
 export * from './metadata';
 export * from './opcode';
@@ -31,12 +33,20 @@ export class Contract {
     /**
      *
      */
-    readonly evm: EVM;
+    // readonly evm: EVM;
+
+    readonly metadata: Metadata | undefined;
 
     /**
      *
      */
     readonly main: Stmt[];
+
+    readonly events: IEvents = {};
+    readonly variables: IStore['variables'] = {};
+    readonly mappings: IStore['mappings'] = {};
+    readonly functionBranches: ISelectorBranches = new Map();
+    readonly errors: Throw[];
 
     /**
      *
@@ -49,45 +59,49 @@ export class Contract {
      *
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
-    constructor(readonly bytecode: string, insts: Partial<Step> = {}) {
-        this.evm = new EVM(bytecode, insts);
+    constructor(readonly bytecode: string, _insts = {}) {
+        const evm = new EVM(bytecode, STEP(
+            this.events,
+            this.variables,
+            this.mappings,
+            this.functionBranches
+        ));
         const main = new State<Inst, Expr>();
-        this.evm.run(0, main);
+        evm.run(0, main);
         this.main = build(main);
 
         this.payable = !requiresNoValue(this.main);
 
-        for (const [selector, branch] of this.evm.functionBranches) {
-            this.evm.run(branch.pc, branch.state);
+        for (const [selector, branch] of evm.insts.functionBranches) {
+            evm.run(branch.pc, branch.state);
             this.functions[selector] = new PublicFunction(this, build(branch.state), selector);
         }
-    }
 
-    get metadata(): EVM['metadata'] {
-        return this.evm.metadata;
+        this.metadata = evm.metadata;
+        this.errors = evm.errors;
     }
 
     /**
      *
      */
     chunks(): { pcstart: number; pcend: number; states?: State<Inst, Expr>[] }[] {
-        let lastPc = 0;
+        //     let lastPc = 0;
 
-        const result = [];
-        const pcs = [...this.evm.chunks.keys()];
-        pcs.sort((a, b) => a - b);
-        for (const pc of pcs) {
-            const chunk = this.evm.chunks.get(pc)!;
-            if (lastPc !== pc) {
-                result.push({ pcstart: lastPc, pcend: pc });
-            }
-            lastPc = chunk.pcend;
-            result.push({ pcstart: pc, pcend: chunk.pcend, states: chunk.states });
-        }
+        const result: { pcstart: number; pcend: number; states?: State<Inst, Expr>[]; }[] = [];
+        //     const pcs = [...this.evm.chunks.keys()];
+        //     pcs.sort((a, b) => a - b);
+        //     for (const pc of pcs) {
+        //         const chunk = this.evm.chunks.get(pc)!;
+        //         if (lastPc !== pc) {
+        //             result.push({ pcstart: lastPc, pcend: pc });
+        //         }
+        //         lastPc = chunk.pcend;
+        //         result.push({ pcstart: pc, pcend: chunk.pcend, states: chunk.states });
+        //     }
 
-        if (lastPc !== this.evm.opcodes.length) {
-            result.push({ pcstart: lastPc, pcend: this.evm.opcodes.length });
-        }
+        //     if (lastPc !== this.evm.opcodes.length) {
+        //         result.push({ pcstart: lastPc, pcend: this.evm.opcodes.length });
+        //     }
 
         return result;
     }
@@ -107,7 +121,7 @@ export class Contract {
      * @returns
      */
     getEvents(): string[] {
-        return Object.values(this.evm.events).flatMap(event =>
+        return Object.values(this.events).flatMap(event =>
             event.sig === undefined ? [] : [event.sig]
         );
     }
@@ -134,8 +148,8 @@ export class Contract {
      */
     isERC(ercid: (typeof ERCIds)[number], checkEvents = true): boolean {
         return (
-            ERCs[ercid].selectors.every(s => this.evm.functionBranches.has(s)) &&
-            (!checkEvents || ERCs[ercid].topics.every(t => t in this.evm.events))
+            ERCs[ercid].selectors.every(s => this.functionBranches.has(s)) &&
+            (!checkEvents || ERCs[ercid].topics.every(t => t in this.events))
         );
     }
 }
@@ -214,8 +228,8 @@ export class PublicFunction {
 
             if (this.isGetter()) {
                 const location = this.stmts[0].args[0].location.val.toString();
-                const variable = this.contract.evm.variables[location];
-                this.contract.evm.variables[this.selector] = new Variable(
+                const variable = this.contract.variables[location];
+                this.contract.variables[this.selector] = new Variable(
                     functionName,
                     variable ? variable.types : []
                 );
@@ -223,7 +237,7 @@ export class PublicFunction {
 
             if (this.isMappingGetter()) {
                 const location = this.stmts[0].args[0].location;
-                this.contract.evm.mappings[location].name = functionName;
+                this.contract.mappings[location].name = functionName;
             }
 
             const paramTypes = value.replace(functionName, '').slice(1, -1).split(',');
@@ -335,12 +349,12 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                     ...state.stmts.slice(0, -1),
                     ...(isRevertBlock(falseBlock)
                         ? [
-                              new Require(
-                                  last.cond.eval(),
-                                  ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
-                              ),
-                              ...trueBlock,
-                          ]
+                            new Require(
+                                last.cond.eval(),
+                                ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
+                            ),
+                            ...trueBlock,
+                        ]
                         : [new If(new Not(last.cond), falseBlock), ...trueBlock]),
                 ];
             }

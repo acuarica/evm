@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, solEvents, solStmts, yulStmts } from 'sevm';
+import { EVM, State, solEvents, solStmts, yulStmts, STEP } from 'sevm';
 import { Val, type Expr, type Inst, type Local } from 'sevm/ast';
 
 import { eventSelector } from '../utils/selector';
@@ -22,23 +22,23 @@ describe('evm::log', function () {
                 emit Deposit(n + 7);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
 
         const state = new State<Inst, Expr>();
         evm.exec(0, state);
         const ev = knownEventSig;
-        evm.events[eventSelector(ev)].sig = ev;
+        evm.insts.events[eventSelector(ev)].sig = ev;
 
-        expect(evm.events).to.have.keys(
+        expect(evm.insts.events).to.have.keys(
             eventSelector(knownEventSig),
             eventSelector(unknownEventSig)
         );
-        expect(evm.events[eventSelector(knownEventSig)]).to.be.deep.equal({
+        expect(evm.insts.events[eventSelector(knownEventSig)]).to.be.deep.equal({
             sig: knownEventSig,
             indexedCount: 0,
         });
 
-        expect(solEvents(evm.events)).to.be.equal(`event Deposit(uint256 _arg0);
+        expect(solEvents(evm.insts.events)).to.be.equal(`event Deposit(uint256 _arg0);
 event ${eventSelector(unknownEventSig)};
 `);
 

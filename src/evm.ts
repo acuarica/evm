@@ -1,22 +1,30 @@
-import { decode, OPCODES, type Opcode, MNEMONICS } from './opcode';
+import { decode, OPCODES, type Opcode, MNEMONICS, fromHexString } from './opcode';
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
-import { STEP, type Step, type ISelectorBranches } from './step';
 
 import { type Expr, type IInst, type Inst, Throw } from './ast/expr';
-import { type IEvents } from './ast/log';
-import { type IStore } from './ast/storage';
 import { Branch, JumpDest } from './ast/flow';
+import type { ISelectorBranches } from './step';
+
+type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
+type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => void>;
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
  */
-export class EVM {
+export class EVM<T extends
+    {
+        [opcode: number]: [size: number, halts: boolean, mnemonic: Mnemonic<T>];
+        functionBranches: ISelectorBranches;
+    } & {
+        [m in Mnemonic<T>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
+    }
+> {
     /**
      * The `metadataHash` part from the `bytecode`.
      * That is, if present, the `bytecode` without its `code`.
      */
-    readonly metadata?: Metadata | undefined;
+    readonly metadata: Metadata | undefined;
 
     /**
      * The `STEP` function that updates the `State`
@@ -28,9 +36,8 @@ export class EVM {
      * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
      * `INVALID` is used instead.
      */
-    readonly insts: {
-        [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
-    };
+    // readonly insts: (readonly [size: number, step: ((state: State<Inst, Expr>, opcode: Opcode) => void)])[];
+    // readonly insts: IStep;
 
     /**
      *
@@ -42,10 +49,10 @@ export class EVM {
      */
     readonly errors: Throw[] = [];
 
-    readonly events: IEvents;
-    readonly variables: IStore['variables'];
-    readonly mappings: IStore['mappings'];
-    readonly functionBranches: ISelectorBranches;
+    // readonly events: IEvents;
+    // readonly variables: IStore['variables'];
+    // readonly mappings: IStore['mappings'];
+    // readonly functionBranches: ISelectorBranches;
 
     /**
      * The `Opcode[]` decoded from `bytecode`.
@@ -57,30 +64,21 @@ export class EVM {
      * This is used to speed up offset search.
      */
     readonly jumpdests: ReturnType<typeof decode>['jumpdests'];
+    readonly buffer: Uint8Array;
 
-    constructor(bytecode: string, insts: Partial<Step> = {}) {
+    constructor(bytecode: string, readonly insts: T) {
+
+    const start = bytecode.slice(0, 2) === '0x' ? 2 : 0;
+    this.buffer = fromHexString(bytecode, start);
+
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
         const { opcodes, jumpdests } = decode(code);
+        jumpdests[0] = 0;
 
         this.opcodes = opcodes;
         this.jumpdests = jumpdests;
-
-        const s = STEP({ opcodes, jumpdests });
-        this.events = s.events;
-        this.mappings = s.mappings;
-        this.variables = s.variables;
-        this.functionBranches = s.functionBranches;
-
-        this.insts = fill({ ...s, ...insts });
-
-        function fill(insts: { [mnemonic in keyof typeof OPCODES]: Step['INVALID'] }): {
-            [opcode: number]: (state: State<Inst, Expr>, opcode: Opcode) => void;
-        } {
-            const entry = (k: number) => insts[MNEMONICS[k] ?? 'INVALID'];
-            return Object.fromEntries([...Array(256).keys()].map(k => [k, entry(k)]));
-        }
     }
 
     /**
@@ -89,7 +87,7 @@ export class EVM {
     start(): State<Inst, Expr> {
         const state = new State<Inst, Expr>();
         this.run(0, state);
-        for (const [, branch] of this.functionBranches) {
+        for (const [, branch] of this.insts.functionBranches) {
             this.run(branch.pc, branch.state);
         }
         return state;
@@ -133,49 +131,67 @@ export class EVM {
 
     exec(pc0: number, state: State<Inst, Expr>): void {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const self = this;
+        // const self = this;
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
-        let opcode: Opcode;
-        const t = new Proxy(state.stack, {
-            get(target, prop, receiver) {
-                if (prop === 'push') {
-                    const pushMethod = target[prop];
-                    return function (...args: [elem: Expr]) {
-                        const expr = args[0];
-                        self.sourceMap.set(expr, opcode);
-                        pushMethod.apply(target, args);
-                    };
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return Reflect.get(target, prop, receiver);
-            },
-        });
-        state = new Proxy(state, {
-            get(target, prop, receiver) {
-                if (prop === 'stack') {
-                    return t;
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return Reflect.get(target, prop, receiver);
-            },
-        });
+        // let opcode: Opcode;
+        // const t = new Proxy(state.stack, {
+        //     get(target, prop, receiver) {
+        //         if (prop === 'push') {
+        //             const pushMethod = target[prop];
+        //             return function (...args: [elem: Expr]) {
+        //                 const expr = args[0];
+        //                 self.sourceMap.set(expr, opcode);
+        //                 pushMethod.apply(target, args);
+        //             };
+        //         }
+        //         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        //         return Reflect.get(target, prop, receiver);
+        //     },
+        // });
+        // state = new Proxy(state, {
+        //     get(target, prop, receiver) {
+        //         if (prop === 'stack') {
+        //             return t;
+        //         }
+        //         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        //         return Reflect.get(target, prop, receiver);
+        //     },
+        // });
         let pc = pc0;
-        for (; !state.halted && pc < this.opcodes.length; pc++) {
-            opcode = this.opcodes[pc];
-            const step = this.insts[opcode.opcode];
+        // for (; !state.halted && pc < this.opcodes.length; pc++) {
+        for (; !state.halted && pc < this.buffer.length; pc++) {
+            // opcode = this.opcodes[pc];
+            const op = this.buffer[pc];
+            const [size, ,mnemonic] = this.insts[op];
+            const opcode= {opcode: op, pc, offset: pc, mnemonic: mnemonic as Opcode['mnemonic'], 
+        
+                      pushData: size === 0 ? null : (() => {
+                          const data = this.buffer.subarray(pc + 1, pc + size + 1);
+                          if (data.length !== size) throw new Error('asdfsadf');
+                          pc += size;
+                          return data;
+                      })(),
+        } as Opcode;
 
+
+            const step = this.insts[mnemonic];
+            // opcode.jumpdests = this.jumpdests;
+
+            // step[0];
             try {
                 step(state, opcode);
             } catch (err) {
+                // console.log(err);
                 const inv = new Throw((err as Error).message, opcode, state);
                 state.halt(inv);
                 this.errors.push(inv);
+                // console.log(this.errors[0].state);
                 continue;
             }
 
-            if (!state.halted && this.opcodes[pc + 1]?.opcode === OPCODES.JUMPDEST) {
-                const fallBranch = Branch.make(opcode.pc + 1, state);
+            if (!state.halted && this.buffer[pc + 1] === OPCODES.JUMPDEST) {
+                const fallBranch = Branch.make(pc + 1, state);
                 state.halt(new JumpDest(fallBranch));
             }
         }
@@ -223,19 +239,21 @@ export class EVM {
         }
         return false;
     }
-}
 
-export function gc(b: Branch, chunks: EVM['chunks']) {
-    const chunk = chunks.get(b.pc);
-    if (chunk !== undefined) {
-        for (const s of chunk.states) {
-            if (cmp(b.state, s)) {
-                return s;
+    gc(b: Branch) {
+        const chunk = this.chunks.get(b.pc);
+
+        if (chunk !== undefined) {
+            for (const s of chunk.states) {
+                if (cmp(b.state, s)) {
+                    return s;
+                }
             }
         }
+        return undefined;
     }
-    return undefined;
 }
+
 
 function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
     const cmpval = (lhs: Expr, rhs: Expr) =>

@@ -27,11 +27,11 @@ describe('evm::storage', function () {
                 val2 += 11;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
-        expect(evm.variables).to.be.have.keys('0', '1');
+        expect(evm.insts.variables).to.be.have.keys('0', '1');
         expect(state.stmts).to.be.have.length(3);
 
         expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
@@ -59,14 +59,14 @@ describe('evm::storage', function () {
                 // }
             }
         }`;
-        const evm = new EVM(compile(src, '0.5.5', this).bytecode);
+        const evm = new EVM(compile(src, '0.5.5', this).bytecode, STEP());
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
         // state.stmts.forEach(stmt => console.log(sol`${stmt.eval()}`));
         // state.stmts.forEach(stmt => console.log(yul`${stmt.eval()}`));
 
-        expect(Object.keys(evm.variables)).to.be.have.length(3);
+        expect(Object.keys(evm.insts.variables)).to.be.have.length(3);
     });
 
     it.skip('should find storage struct when no optimized', function () {
@@ -83,14 +83,14 @@ describe('evm::storage', function () {
                 val3 += 7;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode, STEP());
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         // state.stmts.forEach(stmt => console.log(sol`${stmt}`));
         // state.stmts.forEach(stmt => console.log(yul`${stmt}`));
 
-        expect(evm.variables).to.be.have.keys('0x0', '0x1');
-        expect(evm.mappings).to.be.deep.equal({});
+        expect(evm.insts.variables).to.be.have.keys('0x0', '0x1');
+        expect(evm.insts.mappings).to.be.deep.equal({});
     });
 
     it.skip('should not find storage struct when optimized', function () {
@@ -102,7 +102,7 @@ describe('evm::storage', function () {
                 t.val2 += 11;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode, STEP());
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
@@ -116,8 +116,8 @@ describe('evm::storage', function () {
         expect(yul`${state.stmts[1]}`).to.be.equal('sstore(0x1, add(0xb, sload(0x1)))');
         expect(yul`${state.stmts[2]}`).to.be.equal('stop()');
 
-        expect(evm.variables).to.be.have.keys('0', '1');
-        expect(evm.mappings).to.be.deep.equal({});
+        expect(evm.insts.variables).to.be.have.keys('0', '1');
+        expect(evm.insts.mappings).to.be.deep.equal({});
     });
 
     describe('mappings', function () {
@@ -133,7 +133,7 @@ describe('evm::storage', function () {
                     allowance[address(this)][msg.sender] -= 11;
                 }
             }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 
@@ -148,11 +148,11 @@ describe('evm::storage', function () {
                 expect(state.stmts[0]).to.be.deep.equal(
                     new MappingStore(
                         slot,
-                        evm.mappings,
+                        evm.insts.mappings,
                         0,
                         [Msg.sender],
                         new Add(
-                            new MappingLoad(slot, evm.mappings, 0, [Msg.sender]),
+                            new MappingLoad(slot, evm.insts.mappings, 0, [Msg.sender]),
                             new Val(3n, true)
                         )
                     )
@@ -172,11 +172,11 @@ describe('evm::storage', function () {
                 expect(state.stmts[1]).to.be.deep.equal(
                     new MappingStore(
                         slot,
-                        evm.mappings,
+                        evm.insts.mappings,
                         1,
                         [Info.CALLER],
                         new Add(
-                            new MappingLoad(slot, evm.mappings, 1, [Msg.sender]),
+                            new MappingLoad(slot, evm.insts.mappings, 1, [Msg.sender]),
                             new Val(5n, true)
                         )
                     )
@@ -199,11 +199,11 @@ describe('evm::storage', function () {
                 expect(state.stmts[2]).to.be.deep.equal(
                     new MappingStore(
                         slot,
-                        evm.mappings,
+                        evm.insts.mappings,
                         2,
                         [Info.ADDRESS, Msg.sender],
                         new Sub(
-                            new MappingLoad(slot, evm.mappings, 2, [Info.ADDRESS, Msg.sender]),
+                            new MappingLoad(slot, evm.insts.mappings, 2, [Info.ADDRESS, Msg.sender]),
                             new Val(11n, true)
                         )
                     )
@@ -216,7 +216,7 @@ describe('evm::storage', function () {
                 'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), sub(sload(2/*[address(this)][msg.sender]*/), 0xb)) /*2[address(this)][msg.sender]*/'
             );
             expect(state.last).to.be.deep.equal(new Stop());
-            expect(evm.variables).to.be.empty;
+            expect(evm.insts.variables).to.be.empty;
         });
     });
 });

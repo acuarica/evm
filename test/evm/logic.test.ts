@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State } from 'sevm';
+import { EVM, STEP, State } from 'sevm';
 import { type Expr, type Inst, Sig } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
@@ -17,7 +17,7 @@ describe('evm::logic', function () {
                     return addr;
                 }
             }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 

@@ -100,27 +100,28 @@ describe('evm::system', function () {
             compile(src, '0.8.16', this, {
                 enabled: true,
                 details: { jumpdestRemover: true },
-            }).bytecode
+            }).bytecode,
+            STEP()
         );
         evm.start();
 
         const selector = fnselector('name()');
         const symbolSelector = fnselector('symbol()');
         const hola = fnselector('hola()');
-        expect(evm.functionBranches).to.have.keys(selector, symbolSelector, hola);
+        expect(evm.insts.functionBranches).to.have.keys(selector, symbolSelector, hola);
 
         {
-            const branch = evm.functionBranches.get(selector)!;
+            const branch = evm.insts.functionBranches.get(selector)!;
             const ast = build(branch.state);
             expect(solStmts(ast)).to.be.deep.equal('return 0x7;\n');
         }
         {
-            const branch = evm.functionBranches.get(symbolSelector)!;
+            const branch = evm.insts.functionBranches.get(symbolSelector)!;
             const ast = solStmts(build(branch.state));
             expect(ast).to.be.deep.equal('return 0xb;\n');
         }
         {
-            const branch = evm.functionBranches.get(hola)!;
+            const branch = evm.insts.functionBranches.get(hola)!;
             const ast = solStmts(build(branch.state));
             expect(ast.trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
         }
@@ -135,7 +136,7 @@ describe('evm::system', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode, STEP());
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         const stmts = build(state);
