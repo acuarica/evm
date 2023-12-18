@@ -19,7 +19,6 @@ describe('::bin', function () {
         expect(cli).stdout.to.contain('sevm cfg');
         expect(cli).stdout.to.contain('sevm sol');
         expect(cli).stdout.to.contain('sevm yul');
-        expect(cli).stdout.to.contain('sevm huff');
         expect(cli).stdout.to.contain('sevm config');
         expect(cli).stderr.to.be.empty;
     });

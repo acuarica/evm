@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, formatOpcode, huffState, sol, toHex } from 'sevm';
+import { Contract, formatOpcode, sol, toHex } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -27,7 +27,7 @@ const warn = c.yellow;
  */
 
 /** @param {import('sevm').Opcode} opcode */
-function ansiOpcode(opcode) {
+export function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = `0x${opcode.offset.toString(16)}`.padStart(8);
     const pushData = opcode.pushData
@@ -72,10 +72,10 @@ function dis(contract) {
     for (const chunk of contract.chunks()) {
         console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
 
-        for (let i = chunk.pcstart; i < chunk.pcend; i++) {
-            const opcode = contract.evm.opcodes[i];
-            console.info(ansiOpcode(opcode));
-        }
+        // for (let i = chunk.pcstart; i < chunk.pcend; i++) {
+        //     const opcode = contract.evm.opcodes[i];
+        //     console.info(ansiOpcode(opcode));
+        // }
 
         if (chunk.states !== undefined) {
             for (const state of chunk.states) {
@@ -90,14 +90,6 @@ function dis(contract) {
 /** @param {Contract} contract */
 function decompile(contract) {
     console.info(contract.solidify());
-}
-
-/**
- * @param {Contract} contract
- */
-function decompileHuff(contract) {
-    const main = contract.evm.start();
-    console.info(huffState(main));
 }
 
 /**
@@ -194,12 +186,6 @@ void yargs(process.argv.slice(2))
         pos,
         make(decompile)
     )
-    .command(
-        'huff <contract>',
-        "Decompile the contract's bytecode into Huff-like source code[?]",
-        pos,
-        make(decompileHuff)
-    )
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
     )
@@ -240,6 +226,7 @@ void yargs(process.argv.slice(2))
  * @param {Contract} contract
  */
 function cfg(contract) {
+    //@ts-ignore
     const evm = contract.evm;
     const write = console.log;
     write(`digraph G {    
@@ -269,7 +256,7 @@ function cfg(contract) {
     write('}');
 
     /**
-     * @param {import('sevm').EVM} evm
+     * @param {import('sevm').EVM<{functionBranches: import('sevm').ISelectorBranches}>} evm
      */
     function dot(evm) {
         let edges = '';

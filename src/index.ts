@@ -19,7 +19,6 @@ export * from './type';
 export * from './evm';
 export * from './stmt';
 export * from './yul';
-export * from './huff';
 
 /**
  *
