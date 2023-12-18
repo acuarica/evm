@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { sol } from 'sevm';
 import { Val } from 'sevm/ast';
 
-import { $exprs, title } from './ast.test';
+import { $exprs, title } from './$exprs';
 
 describe('::sol', function () {
     ['0x' + 'ff'.repeat(32), '0x' + 'ff'.repeat(31) + 'fe'].forEach(expected => {
