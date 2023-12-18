@@ -2,11 +2,12 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, decode, stripMetadataHash, toHex } from 'sevm';
-import { And, Block, Not, Val, Local } from 'sevm/ast';
+import {  EVM, State, decode, stripMetadataHash, toHex } from 'sevm';
+import { And, Block, Not, Val, Local, type Inst, type Expr } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
+import { STEP } from '../src/step';
 
 describe('evm', function () {
     it('`PUSH4` method selector to invoke external contract', function () {
@@ -21,7 +22,7 @@ describe('evm', function () {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = new EVM(compile(src, '0.7.6', this).bytecode).opcodes;
+        const opcodes = new EVM(compile(src, '0.7.6', this).bytecode, STEP()).opcodes;
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData) === selector);
@@ -41,8 +42,9 @@ describe('evm', function () {
                 emit Deposit(uint128(~block.number));
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
-        const state = evm.start();
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
 
         const stmt = state.stmts.at(-2)!;
         assert(stmt.name === 'Log');
