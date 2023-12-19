@@ -22,18 +22,23 @@ export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Exp
 //   U = { [K in keyof T]: { key: K; value: T[K] } }
 // > = U[keyof U]
 
-type F = (state: State<Inst, Expr>, opcode: Opcode) => void;
-
 const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
     Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
-function q<
+type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
+
+/**
+ * 
+ */
+type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
+
+function Step<
     M extends Uppercase<string>,
-    G extends F
+    F extends StepFn
 >(step: {
-    readonly [k in M]: readonly [number | { opcode: number, size?: number, halts?: true }, G]
+    readonly [m in M]: readonly [number | { opcode: number, size?: number, halts?: true }, F]
 }): {
-    readonly [k in M]: G;
+    readonly [m in M]: F;
 } & {
     [o: number]: readonly [size: number, halts: boolean, M];
 } {
@@ -46,45 +51,14 @@ function q<
     return { ...ms, ...Object.fromEntries(os) };
 }
 
-type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? (k & string) : never }[keyof T];
-type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => void>;
+type IsUppercase<S> = S extends Uppercase<string> ? S : never;
 
-function UNDEF<T extends object>(): {
-
-    readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
-
-    /**
-     * 
-     */
-    readonly UNDEF: (state: State<Inst, Expr>, op: Opcode) => void;
-
-    readonly functionBranches: ISelectorBranches;
-
+interface Methods {
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
      */
-    haltingSteps(): Mnemonic<T>[];
-
-    opcodes(): { readonly [mnemonic: string]: number },
-} {
-    return Object.assign(
-        {
-            UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
-            haltingSteps() {
-                return [...Array(256).keys()]
-                    .map(o => this[o])
-                    .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
-                    .map(([, , mnemonic]) => mnemonic);
-            },
-            opcodes() {
-                return Object.fromEntries([...Array(256).keys()]
-                    .map(o => [this[o][2], o] as const)
-                    .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
-                ) as { [k: string]: number };
-            }
-        } as ReturnType<typeof UNDEF<T>>,
-        Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const)),
-    );
+    haltingSteps(): IsUppercase<Mnemonic<this>>[];
+    opcodes(): { readonly [m in IsUppercase<Mnemonic<this>>]: number },
 }
 
 export function STEP(
@@ -93,14 +67,16 @@ export function STEP(
     mappings: IStore['mappings'] = {},
     functionBranches: ISelectorBranches = new Map(),
 ) {
-    const a = Object.assign({},
+    return Object.assign(
+        Inspect(),
+        UNDEF(),
         PUSHES(),
         STACK(),
         MATH(),
         SPECIAL(),
         MEMORY(),
         SYSTEM(),
-        q({
+        Step({
             PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.pc)))],
             INVALID: [{ opcode: 0xfe, halts: true }, (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode))],
         }),
@@ -109,11 +85,36 @@ export function STEP(
         FLOW(functionBranches),
         PUSH0(),
     );
-    return Object.assign(UNDEF<typeof a>(), a);
+}
+
+function Inspect(): Methods {
+    return {
+        haltingSteps() {
+            return [...Array(256).keys()]
+                .map(o => (this as unknown as [unknown, boolean, never][])[o])
+                .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
+                .map(([, , mnemonic]) => mnemonic);
+        },
+        opcodes() {
+            return Object.fromEntries([...Array(256).keys()]
+                .map(o => [(this as unknown as [unknown, unknown, string][])[o][2], o] as const)
+                .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
+            );
+        }
+    };
+}
+
+function UNDEF() {
+    return Object.assign(
+        {
+            UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
+        } as const,
+        Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
+    );
 }
 
 function PUSHES() {
-    return q({
+    return Step({
         PUSH1: push(1),
         PUSH2: push(2),
         PUSH3: push(3),
@@ -160,7 +161,7 @@ function PUSHES() {
  * Set of stack related steps, `PUSHn`, `DUPn` and `SWAPn` opcodes.
  */
 function STACK() {
-    return q({
+    return Step({
         POP: [0x50, ({ stack }) => {
             const expr = stack.pop();
             if (expr.tag === 'Local') {
@@ -230,7 +231,7 @@ function STACK() {
 }
 
 function MATH() {
-    return q({
+    return Step({
         ADD: [0x01, bin(Add)],
         MUL: [0x02, bin(Mul)],
         SUB: [0x03, bin(Sub)],
@@ -376,7 +377,7 @@ function SPECIAL() {
     const mapKeys = <K extends string, U>(o: { [k in K]: unknown }, fn: (k: K) => U) =>
         Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
 
-    return q({
+    return Step({
         ...mapValues(Info, sym => [sym.opcode, state => state.stack.push(sym)]),
         ...mapKeys(FNS, n => [FNS[n][2], state => state.stack.push(new Fn(n, state.stack.pop()))]),
         CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
@@ -406,7 +407,7 @@ function SPECIAL() {
 }
 
 function MEMORY() {
-    return q({
+    return Step({
         MLOAD: [0x51, ({ stack, memory }) => {
             let loc = stack.pop();
             loc = loc.eval();
@@ -439,7 +440,7 @@ function MEMORY() {
  * Keep track of https://eips.ethereum.org/EIPS/eip-6780
  */
 function SYSTEM() {
-    return q({
+    return Step({
         SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
         STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
         CREATE: [0xf0, ({ stack }) => {
@@ -533,7 +534,7 @@ function SYSTEM() {
 function LOGS(events: IEvents) {
     return {
         events,
-        ...q({
+        ...Step({
             LOG0: log(0, events),
             LOG1: log(1, events),
             LOG2: log(2, events),
@@ -581,7 +582,7 @@ function STORAGE({ variables, mappings }: IStore) {
     return {
         variables,
         mappings,
-        ...q({
+        ...Step({
             SLOAD: [0x54, ({ stack }) => {
                 const loc = stack.pop();
 
@@ -685,7 +686,7 @@ function STORAGE({ variables, mappings }: IStore) {
 function FLOW(functionBranches: ISelectorBranches) {
     return {
         functionBranches,
-        ...q({
+        ...Step({
             JUMPDEST: [0x5b, _state => { }],
             JUMP: [0x56, (state, opcode): void => {
                 const offset = state.stack.pop();
@@ -744,7 +745,7 @@ function FLOW(functionBranches: ISelectorBranches) {
  * https://eips.ethereum.org/EIPS/eip-3855
  */
 function PUSH0() {
-    return q({
+    return Step({
         PUSH0: [0x5f, ({ stack }) => stack.push(new Val(0n))],
     });
 }
