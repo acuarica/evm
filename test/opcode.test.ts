@@ -44,7 +44,7 @@ describe('opcode', function () {
             opcode: OPCODES.ADDRESS,
             mnemonic: 'ADDRESS',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[1]).to.be.deep.equal({
             pc: 1,
             opcode: OPCODES.ADDRESS,
@@ -56,13 +56,13 @@ describe('opcode', function () {
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[3]).to.be.deep.equal({
             pc: 3,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(jumpdests).to.be.deep.equal({ '2': 2 });
     });
 
@@ -83,31 +83,31 @@ describe('opcode', function () {
             opcode: OPCODES.PUSH4,
             mnemonic: 'PUSH4',
             pushData: Buffer.from([1, 2, 3, 4]),
-        });
+        } satisfies Opcode);
         expect(opcodes[1]).to.be.deep.equal({
             pc: 5,
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[2]).to.be.deep.equal({
             pc: 6,
             opcode: OPCODES.PUSH4,
             mnemonic: 'PUSH4',
             pushData: Buffer.from([5, 6, 7, 8]),
-        });
+        } satisfies Opcode);
         expect(opcodes[3]).to.be.deep.equal({
             pc: 11,
             opcode: OPCODES.JUMPDEST,
             mnemonic: 'JUMPDEST',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[4]).to.be.deep.equal({
             pc: 12,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(jumpdests).to.be.deep.equal({ '5': 1, '11': 3 });
     });
 
@@ -145,19 +145,19 @@ describe('opcode', function () {
             opcode: 0xb0,
             mnemonic: 'INVALID',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[1]).to.be.deep.equal({
             pc: 1,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
-        });
+        } satisfies Opcode);
         expect(opcodes[2]).to.be.deep.equal({
             pc: 2,
             opcode: 0xb1,
             mnemonic: 'INVALID',
             pushData: null,
-        });
+        } satisfies Opcode);
     });
 
     it('should `decode` example from hex string', function () {
@@ -169,19 +169,19 @@ describe('opcode', function () {
             opcode: OPCODES.PUSH1,
             mnemonic: 'PUSH1',
             pushData: Buffer.from([3]),
-        } as Opcode);
+        } satisfies Opcode);
         expect(opcodes[1]).to.be.deep.equal({
             pc: 2,
             opcode: OPCODES.PUSH1,
             mnemonic: 'PUSH1',
             pushData: Buffer.from([5]),
-        } as Opcode);
+        } satisfies Opcode);
         expect(opcodes[2]).to.be.deep.equal({
             pc: 4,
             opcode: OPCODES.ADD,
             mnemonic: 'ADD',
             pushData: null,
-        } as Opcode);
+        } satisfies Opcode);
     });
 
     it('should `decode` all `INVALID` opcodes', function () {
