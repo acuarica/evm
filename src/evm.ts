@@ -1,4 +1,4 @@
-import { decode, OPCODES, type Opcode, fromHexString } from './opcode';
+import { decode, type Opcode, fromHexString } from './opcode';
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 
@@ -50,6 +50,8 @@ export class EVM<S extends
      */
     readonly bytecode: Uint8Array;
 
+    readonly JUMPDEST: number;
+
     constructor(
         bytecode: string,
 
@@ -65,6 +67,8 @@ export class EVM<S extends
          */
         readonly step: S
     ) {
+        this.JUMPDEST = this.step.opcodes()['JUMPDEST'];
+
         const start = bytecode.slice(0, 2) === '0x' ? 2 : 0;
         this.bytecode = fromHexString(bytecode, start);
 
@@ -213,7 +217,7 @@ export class EVM<S extends
                 continue;
             }
 
-            if (!state.halted && this.bytecode[pc + 1] === OPCODES.JUMPDEST) {
+            if (!state.halted && this.bytecode[pc + 1] === this.JUMPDEST) {
                 const fallBranch = Branch.make(pc + 1, state);
                 state.halt(new JumpDest(fallBranch));
             }
@@ -249,7 +253,7 @@ export class EVM<S extends
             const currentOpcode = this.opcodes[index].opcode;
             if (currentOpcode === opcode && !halted) {
                 return true;
-            } else if (currentOpcode === OPCODES.JUMPDEST) {
+            } else if (currentOpcode === this.JUMPDEST) {
                 halted = false;
             } else if (this.step[currentOpcode][1]) {
                 halted = true;

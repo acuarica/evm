@@ -27,10 +27,6 @@ const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) 
 
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
 
-/**
- * 
- */
-type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
 
 function Step<
     M extends Uppercase<string>,
@@ -76,6 +72,11 @@ export function STEP(
 }
 
 type IsUppercase<S> = S extends Uppercase<string> ? S : never;
+
+/**
+ * 
+ */
+type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
 
 class Undef {
     readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
