@@ -101,7 +101,6 @@ class Undef {
 
     /**
      * 
-     * @returns 
      */
     opcodes(): { readonly [m in IsUppercase<Mnemonic<this>>]: number } {
         return Object.fromEntries([...Array(256).keys()]
