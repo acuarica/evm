@@ -22,22 +22,20 @@ export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Exp
 //   U = { [K in keyof T]: { key: K; value: T[K] } }
 // > = U[keyof U]
 
-// type S<K extends string> = { [o: number]: [size: number, step: F] } & { [k in K]: F; };
-// type F = (state: State<Inst, Expr>, opcode?: Opcode) => void;
-// type O = ;
+type F = (state: State<Inst, Expr>, opcode: Opcode) => void;
 
 const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
     Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
 function q<
-    const M extends keyof T & string,
-    const T extends {
-        readonly [k in M]: readonly [number | { opcode: number, size?: number, halts?: true }, unknown]
-    }
->(step: T): {
-    readonly [k in M]: T[k][1];
+    M extends Uppercase<string>,
+    G extends F
+>(step: {
+    readonly [k in M]: readonly [number | { opcode: number, size?: number, halts?: true }, G]
+}): {
+    readonly [k in M]: G;
 } & {
-    [o: number]: readonly [size: number, halts: boolean, keyof T];
+    [o: number]: readonly [size: number, halts: boolean, M];
 } {
     const ms = mapValues(step, ([, f]) => f);
     const os = Object.entries(step)
@@ -96,15 +94,16 @@ export function STEP(
     functionBranches: ISelectorBranches = new Map(),
 ) {
     const a = Object.assign({},
+        PUSHES(),
         STACK(),
         MATH(),
         SPECIAL(),
         MEMORY(),
         SYSTEM(),
         q({
-            PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.pc)))] as const,
-            INVALID: [{ opcode: 0xfe, halts: true }, (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode))] as const,
-        } as const),
+            PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.pc)))],
+            INVALID: [{ opcode: 0xfe, halts: true }, (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode))],
+        }),
         LOGS(events),
         STORAGE({ variables, mappings }),
         FLOW(functionBranches),
@@ -113,20 +112,8 @@ export function STEP(
     return Object.assign(UNDEF<typeof a>(), a);
 }
 
-/**
- * Set of stack related steps, `PUSHn`, `DUPn` and `SWAPn` opcodes.
- */
-function STACK() {
+function PUSHES() {
     return q({
-        POP: [0x50, ({ stack }: State<Inst, Expr>) => {
-            const expr = stack.pop();
-            if (expr.tag === 'Local') {
-                // expr.nrefs--;
-                // console.log('POP: Local', expr);
-                // throw new Error('POP: Local');
-            }
-        }],
-
         PUSH1: push(1),
         PUSH2: push(2),
         PUSH3: push(3),
@@ -159,6 +146,29 @@ function STACK() {
         PUSH30: push(30),
         PUSH31: push(31),
         PUSH32: push(32),
+    });
+
+    function push(size: number) {
+        return [
+            { opcode: 0x60 - 1 + size, size },
+            ({ stack }: State<Inst, Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + toHex(opcode.pushData!)), true))
+        ] as const;
+    }
+}
+
+/**
+ * Set of stack related steps, `PUSHn`, `DUPn` and `SWAPn` opcodes.
+ */
+function STACK() {
+    return q({
+        POP: [0x50, ({ stack }) => {
+            const expr = stack.pop();
+            if (expr.tag === 'Local') {
+                // expr.nrefs--;
+                // console.log('POP: Local', expr);
+                // throw new Error('POP: Local');
+            }
+        }],
 
         DUP1: dup(0),
         DUP2: dup(1),
@@ -194,13 +204,6 @@ function STACK() {
         SWAP15: swap(15),
         SWAP16: swap(16),
     });
-
-    function push(size: number) {
-        return [
-            { opcode: 0x60 - 1 + size, size },
-            ({ stack }: State<Inst, Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + toHex(opcode.pushData!)), true))
-        ] as const;
-    }
 
     function dup(position: number) {
         return [0x80 + position, function (state: State<Inst, Expr>) {
@@ -347,7 +350,7 @@ function MATH() {
         SHL: [0x1b, shift(Shl)],
         SHR: [0x1c, shift(Shr)],
         SAR: [0x1d, shift(Sar)],
-    } as const satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>) => void]; });
+    });
 
     function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): ({ stack }: Ram<Expr>) => void {
         return function ({ stack }: Ram<Expr>) {
@@ -414,7 +417,7 @@ function MEMORY() {
         }],
         MSTORE: [0x52, mstore],
         MSTORE8: [0x53, mstore],
-    } as const satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>) => void]; });
+    });
 
     function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
         let location = stack.pop();
@@ -498,7 +501,7 @@ function SYSTEM() {
             const address = state.stack.pop();
             state.halt(new SelfDestruct(address));
         }],
-    } as const satisfies { [m: string]: readonly [decode: number | { opcode: number, halts: true }, (state: State<Inst, Expr>) => void]; });
+    });
 
     function memArgs<T>(
         { stack, memory }: State<Inst, Expr>,
@@ -653,7 +656,7 @@ function STORAGE({ variables, mappings }: IStore) {
                     stmts.push(new SStore(slot, value, variables));
                 }
             }],
-        } as const satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>) => void] })
+        })
     } as const;
 
     function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
@@ -683,16 +686,14 @@ function FLOW(functionBranches: ISelectorBranches) {
     return {
         functionBranches,
         ...q({
-            JUMPDEST: [0x5b, (_state: State<Inst, Expr>): void => { }],
-
-            JUMP: [0x56, (state: State<Inst, Expr>, opcode: Opcode): void => {
+            JUMPDEST: [0x5b, _state => { }],
+            JUMP: [0x56, (state, opcode): void => {
                 const offset = state.stack.pop();
                 const destpc = getDest(offset, opcode);
                 const destBranch = Branch.make(destpc, state);
                 state.halt(new Jump(offset, destBranch));
             }],
-
-            JUMPI: [0x57, (state: State<Inst, Expr>, opcode: Opcode): void => {
+            JUMPI: [0x57, (state, opcode): void => {
                 const offset = state.stack.pop();
                 const cond = state.stack.pop();
                 const destpc = getDest(offset, opcode);
@@ -744,10 +745,8 @@ function FLOW(functionBranches: ISelectorBranches) {
  */
 function PUSH0() {
     return q({
-        PUSH0: [0x5f, ({ stack }: Ram<Expr>) => {
-            stack.push(new Val(0n));
-        }] as const
-    } as const);
+        PUSH0: [0x5f, ({ stack }) => stack.push(new Val(0n))],
+    });
 }
 
 // Block.qw = new Prop(['asdf', 'uint']);
