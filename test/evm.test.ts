@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, type Ram, sol, type OPCODES, yul, solStmts, STEP } from 'sevm';
+import { EVM, State, type Ram, sol, yul, solStmts, STEP } from 'sevm';
 import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump } from 'sevm/ast';
 
 import { compile } from './utils/solc';
@@ -9,10 +9,18 @@ import { eventSelector } from './utils/selector';
 
 describe('::evm', function () {
 
+    it('should find opcodes when exec `containsOpcode`', function () {
+        const evm = new EVM('0x60016002ff', STEP());
+        expect(evm.containsOpcode('PUSH1')).to.be.true;
+        expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
+        expect(evm.containsOpcode('ADD')).to.be.false;
+        expect(evm.containsOpcode('SUB')).to.be.false;
+    });
+
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
-        const evm = new EVM('0x', STEP());
-        // TODO: Fix typings
-        expect(() => evm.containsOpcode('add' as keyof typeof OPCODES)).to.throw('Provided opcode `add` is not');
+        const step = STEP();
+        const evm = new EVM('0x', step);
+        expect(() => evm.containsOpcode('add' as keyof typeof step['opcodes'])).to.throw('Provided opcode `add` is not');
         expect(() => evm.containsOpcode('haltingSteps')).to.throw('Provided opcode `haltingSteps` is not');
     });
 

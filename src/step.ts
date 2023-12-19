@@ -51,25 +51,13 @@ function Step<
     return { ...ms, ...Object.fromEntries(os) };
 }
 
-type IsUppercase<S> = S extends Uppercase<string> ? S : never;
-
-interface Methods {
-    /**
-     * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
-     */
-    haltingSteps(): IsUppercase<Mnemonic<this>>[];
-    opcodes(): { readonly [m in IsUppercase<Mnemonic<this>>]: number },
-}
-
 export function STEP(
     events: IEvents = {},
     variables: IStore['variables'] = {},
     mappings: IStore['mappings'] = {},
     functionBranches: ISelectorBranches = new Map(),
 ) {
-    return Object.assign(
-        Inspect(),
-        UNDEF(),
+    return Object.assign(new Undef(),
         PUSHES(),
         STACK(),
         MATH(),
@@ -87,30 +75,40 @@ export function STEP(
     );
 }
 
-function Inspect(): Methods {
-    return {
-        haltingSteps() {
-            return [...Array(256).keys()]
-                .map(o => (this as unknown as [unknown, boolean, never][])[o])
-                .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
-                .map(([, , mnemonic]) => mnemonic);
-        },
-        opcodes() {
-            return Object.fromEntries([...Array(256).keys()]
-                .map(o => [(this as unknown as [unknown, unknown, string][])[o][2], o] as const)
-                .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
-            );
-        }
-    };
-}
+type IsUppercase<S> = S extends Uppercase<string> ? S : never;
 
-function UNDEF() {
-    return Object.assign(
-        {
-            UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
-        } as const,
-        Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
-    );
+class Undef {
+    readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
+
+    constructor() {
+        Object.assign(this,
+            {
+                UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
+            } as const,
+            Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
+        );
+    }
+
+    /**
+     * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
+     */
+    haltingSteps(): IsUppercase<Mnemonic<this>>[] {
+        return [...Array(256).keys()]
+            .map(o => (this as unknown as [unknown, boolean, never][])[o])
+            .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
+            .map(([, , mnemonic]) => mnemonic);
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    opcodes(): { readonly [m in IsUppercase<Mnemonic<this>>]: number } {
+        return Object.fromEntries([...Array(256).keys()]
+            .map(o => [(this as unknown as [unknown, unknown, Mnemonic<this>][])[o][2], o] as const)
+            .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
+        );
+    }
 }
 
 function PUSHES() {
