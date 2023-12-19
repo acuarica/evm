@@ -71,8 +71,6 @@ export function STEP(
     );
 }
 
-type IsUppercase<S> = S extends Uppercase<string> ? S : never;
-
 /**
  * 
  */
@@ -93,7 +91,7 @@ class Undef {
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
      */
-    haltingSteps(): IsUppercase<Mnemonic<this>>[] {
+    haltingSteps(): Mnemonic<this>[] {
         return [...Array(256).keys()]
             .map(o => (this as unknown as [unknown, boolean, never][])[o])
             .filter(([, halts, mnemonic]) => halts && mnemonic !== 'UNDEF')
@@ -103,7 +101,7 @@ class Undef {
     /**
      * 
      */
-    opcodes(): { readonly [m in IsUppercase<Mnemonic<this>>]: number } {
+    opcodes(): { readonly [m in Mnemonic<this>]: number } {
         return Object.fromEntries([...Array(256).keys()]
             .map(o => [(this as unknown as [unknown, unknown, Mnemonic<this>][])[o][2], o] as const)
             .filter(([mnemonic,]) => mnemonic !== 'UNDEF')

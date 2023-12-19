@@ -10,8 +10,9 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 describe('::step', function () {
 
     it('should retrieve halting insts', function () {
-        expect(STEP().haltingSteps()).to.be.deep.equal(
-            ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT']
+        const haltingSteps = STEP().haltingSteps();
+        expect(haltingSteps).to.be.deep.equal(
+            ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
         );
     });
 
@@ -25,11 +26,13 @@ describe('::step', function () {
 
     it('should find decoder by opcode `number`', function () {
         const step = STEP();
-
         expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
         expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
         expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
-        expect(step[255]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+        expect(step[0xfc]).to.be.deep.equal([0, true, 'UNDEF']);
+        expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
+        expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
+        expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
     });
 
     describe('stack', function () {
