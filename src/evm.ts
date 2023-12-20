@@ -3,8 +3,8 @@ import { type Metadata, stripMetadataHash } from './metadata';
 
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import type { Decoded, ISelectorBranches, Opcode } from './step';
-import { fromHexString } from './step';
+import type { Decoded, ISelectorBranches } from './step';
+import { Opcode, fromHexString } from './step';
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode<unknown>) => void>;
@@ -190,16 +190,14 @@ export class EVM<S extends
             // opcode = this.opcodes[pc];
             const op = this.bytecode[pc];
             const [size, , mnemonic] = this.step[op];
-            const opcode = {
-                opcode: op, pc, mnemonic,//: mnemonic as Opcode['mnemonic'],
-
-                pushData: size === 0 ? null : (() => {
+            const opcode = new Opcode( pc, op, mnemonic,
+                size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
                     if (data.length !== size) throw new Error('asdfsadf');
                     pc += size;
                     return data;
-                })(),
-            };
+                })()
+            );
 
 
             // const step = ;

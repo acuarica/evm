@@ -43,45 +43,60 @@ const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) 
  * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
  *
  */
-export interface Opcode<M = unknown> {
-    /**
-     * This is the offset in the bytecode where this `Opcode` was found.
-     * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
-     * expects a stack operand referencing this `offset` in the bytecode.
-     */
+export class Opcode<M = unknown> {
+
+    constructor(
+        /**
+         * This is the offset in the bytecode where this `Opcode` was found.
+         * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
+         * expects a stack operand referencing this `offset` in the bytecode.
+         */
+
+        /**
+         * The Program Counter of this `Opcode`.
+         * The index in the `Opcode[]` where this `Opcode` is inserted.
+         */
+        readonly pc: number,
+
+        /**
+         * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
+         * The `opcode` may not be a valid opcode.
+         */
+        readonly opcode: number,
+
+        /**
+         * Represents a valid opcode.
+         *
+         * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+         *
+         * If the `opcode` given is not a valid opcode,
+         * you can provide `INVALID` as `mnemonic`.
+         * 
+         * A `PUSHn` opcode only permits a `PUSHn` opcode.
+         */
+        readonly mnemonic: M,
+
+        /**
+         * A `Unary` opcode does not include any `pushData`.
+         * 
+         * If this `Opcode` is a `PUSHn` instruction,
+         * then `pushData` contains the data attached to this instruction.
+         * Otherwise, `null`.
+         */
+        readonly pushData: null | Uint8Array) {
+    }
 
     /**
-     * The Program Counter of this `Opcode`.
-     * The index in the `Opcode[]` where this `Opcode` is inserted.
+     * Returns a `string` representation of `this` `Opcode`.
      */
-    readonly pc: number;
+    format(): string {
+        const pushData = this.pushData
+            ? ` 0x${toHex(this.pushData)} (${parseInt(toHex(this.pushData), 16)})`
+            : '';
 
-    /**
-     * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
-     * The `opcode` may not be a valid opcode.
-     */
-    readonly opcode: number;
+        return `@${this.pc}:${this.mnemonic}(0x${this.opcode.toString(16)})${pushData}`;
+    }
 
-    /**
-     * Represents a valid opcode.
-     *
-     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
-     *
-     * If the `opcode` given is not a valid opcode,
-     * you can provide `INVALID` as `mnemonic`.
-     * 
-     * A `PUSHn` opcode only permits a `PUSHn` opcode.
-     */
-    readonly mnemonic: M;
-
-    /**
-     * A `Unary` opcode does not include any `pushData`.
-     * 
-     * If this `Opcode` is a `PUSHn` instruction,
-     * then `pushData` contains the data attached to this instruction.
-     * Otherwise, `null`.
-     */
-    readonly pushData: null | Uint8Array;
 }
 
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
@@ -222,7 +237,7 @@ class Undef {
      */
     decode(code: string): Decoded<Mnemonic<this>> {
         if (code.length % 2 !== 0) {
-            throw new DecodeError('Unable to decode, input should have even length');
+            throw new Error('Unable to decode, input should have even length');
         }
 
         const start = code.slice(0, 2) === '0x' ? 2 : 0;
@@ -237,16 +252,16 @@ class Undef {
             if (mnemonic as string === 'JUMPDEST') {
                 jumpdests[i] = opcodes.length;
             }
-            opcodes.push({
-                pc: i,
+            opcodes.push(new Opcode(
+                i,
                 opcode,
-                mnemonic: mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
-                pushData: size === 0 ? null : (() => {
+                mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
+                size === 0 ? null : (() => {
                     const data = bytecode.subarray(i + 1, i + size + 1);
                     i += size;
                     return data;
                 })(),
-            });
+            ));
         }
 
         return { opcodes: opcodes, jumpdests };
@@ -255,19 +270,7 @@ class Undef {
 
 /**
  * Represents an `Error` that occurs during decoding.
- */
-class DecodeError extends Error {
-    /**
-     * @param message The error message.
-     * @param position The position in the bytecode where the error occurred.
-     */
-    constructor(message: string, readonly position?: number) {
-        super(message + (position !== undefined ? ` at ${position}` : ''));
-        this.name = 'DecodeError';
-    }
-}
-
-/**
+     position The position in the bytecode where the error occurred.
  * @param hexstr the hexadecimal string to convert to `Uint8Array`
  * @param start the index in `hexstr` where to start decoding.
  * @returns the `Uint8Array` representation of `hexstr`
@@ -279,7 +282,7 @@ export function fromHexString(hexstr: string, start: number): Uint8Array {
         if (value >= 0) {
             buffer[j] = value;
         } else {
-            throw new DecodeError(`Unable to decode, invalid value found`, i);
+            throw new Error(`Unable to decode, invalid value found at ${i}`);
         }
     }
     return buffer;
@@ -897,7 +900,7 @@ function FLOW(functionBranches: ISelectorBranches) {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
             // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-            throw new Error(`Numeric offset not found on stack @${formatOpcode(opcode)}`);
+            throw new Error(`Numeric offset not found on stack @${opcode.format()}`);
         }
         return Number(offset2.val);
         // const destpc = opcode.jumpdests![Number(offset2.val)];
@@ -931,12 +934,3 @@ function PUSH0() {
 //     }],
 
 // };
-
-export function formatOpcode(op: Opcode): string {
-    const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
-    const pushData = op.pushData
-        ? ` 0x${toHex(op.pushData)} (${parseInt(toHex(op.pushData), 16)})`
-        : '';
-
-    return `${pc}  ${op.mnemonic}${pushData}`;
-}

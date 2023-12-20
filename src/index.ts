@@ -12,7 +12,6 @@ import { STEP, type ISelectorBranches } from './step';
 import type { Metadata } from './metadata';
 
 export * from './metadata';
-export * from './opcode';
 export * from './state';
 export * from './step';
 export * from './type';

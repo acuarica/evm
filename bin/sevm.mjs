@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, formatOpcode, sol, toHex } from 'sevm';
+import { Contract, sol, toHex } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -269,7 +269,7 @@ function cfg(contract) {
 
             for (let i = pc; i < chunk.pcend; i++) {
                 const opcode = evm.opcodes[i];
-                label += formatOpcode(opcode) + '\\l';
+                label += opcode.formatOpcode() + '\\l';
             }
             write(`  label = "${label}";`);
 
