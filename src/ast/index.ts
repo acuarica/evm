@@ -1,5 +1,5 @@
 import type { State } from '../state';
-import type { Opcode } from '../opcode';
+import type { Opcode } from '../step';
 import type { Type } from '../type';
 import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
@@ -113,7 +113,7 @@ export class Throw implements IInst {
 
     constructor(
         readonly reason: string,
-        readonly opcode: Opcode,
+        readonly opcode: Opcode<unknown>,
         readonly state: State<Inst, Expr>
     ) {}
 

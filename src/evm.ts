@@ -1,13 +1,13 @@
-import { decode, type Opcode, fromHexString } from './opcode';
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import type { ISelectorBranches } from './step';
+import type { Decoded, ISelectorBranches, Opcode } from './step';
+import { fromHexString } from './step';
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
-type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode) => void>;
+type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode<unknown>) => void>;
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -18,7 +18,7 @@ export class EVM<S extends
         readonly functionBranches: ISelectorBranches;
         haltingSteps(): Mnemonic<S>[];
         opcodes(): { [mnemonic: string]: number },
-        // opcodes(): Record<Mnemonic<S>, number >,
+    decode(code: string): Decoded<Mnemonic<S>>;
     } & {
         readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
     }
@@ -42,7 +42,7 @@ export class EVM<S extends
     /**
      * The `Opcode[]` decoded from `bytecode`.
      */
-    readonly opcodes: ReturnType<typeof decode>['opcodes'];
+    readonly opcodes: Decoded<Mnemonic<S>>['opcodes'];
 
     /**
      * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
@@ -75,7 +75,7 @@ export class EVM<S extends
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
-        this.opcodes = decode(code).opcodes;
+        this.opcodes = this.step.decode(code).opcodes;
     }
 
     /**
@@ -153,7 +153,7 @@ export class EVM<S extends
         }
     }
 
-    sourceMap = new Map<Expr, Opcode>();
+    // sourceMap = new Map<Expr, Opcode>();
 
     exec(pc0: number, state: State<Inst, Expr>): void {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -191,7 +191,7 @@ export class EVM<S extends
             const op = this.bytecode[pc];
             const [size, , mnemonic] = this.step[op];
             const opcode = {
-                opcode: op, pc, mnemonic: mnemonic as Opcode['mnemonic'],
+                opcode: op, pc, mnemonic,//: mnemonic as Opcode['mnemonic'],
 
                 pushData: size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
@@ -202,12 +202,12 @@ export class EVM<S extends
             };
 
 
-            const step = this.step[mnemonic];
+            // const step = ;
             // opcode.jumpdests = this.jumpdests;
 
             // step[0];
             try {
-                step(state, opcode);
+                this.step[mnemonic](state, opcode);
             } catch (err) {
                 // console.log(err);
                 const inv = new Throw((err as Error).message, opcode, state);

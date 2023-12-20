@@ -2,12 +2,11 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import {  EVM, State, decode, stripMetadataHash, toHex } from 'sevm';
+import { EVM, State, stripMetadataHash, toHex, STEP } from 'sevm';
 import { And, Block, Not, Val, Local, type Inst, type Expr } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
-import { STEP } from '../src/step';
 
 describe('evm', function () {
     it('`PUSH4` method selector to invoke external contract', function () {
@@ -97,11 +96,12 @@ describe('evm', function () {
             },
         ].forEach(({ title, src }) => {
             it(title, function () {
+                const step = STEP();
                 const bytecode = stripMetadataHash(compile(src, '0.7.6', this).bytecode)[0];
                 bytecodes.add(bytecode);
                 expect(bytecodes).to.have.length(1);
 
-                const { opcodes } = decode(bytecode);
+                const { opcodes } = step.decode(bytecode);
                 expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal([
                     'PUSH1',
                     'PUSH1',

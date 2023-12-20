@@ -1,4 +1,3 @@
-import { toHex, type Opcode, formatOpcode } from './opcode';
 import type { Ram, State } from './state';
 
 import { MLoad, MStore } from './ast/memory';
@@ -13,6 +12,15 @@ import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from 
 import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
 
 /**
+ *
+ * @param buffer
+ * @returns
+ */
+export function toHex(buffer: Uint8Array): string {
+    return buffer.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
+}
+
+/**
  * Store selectors starting point.
  */
 export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
@@ -25,9 +33,83 @@ export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Exp
 const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
     Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
 
+
+/**
+ * Represents an opcode found in the bytecode augmented with
+ * offset and operand information as defined by the EVM.
+ *
+ * It can be either a unary opcode, _which does not take any operand data_,
+ * or either a `PUSHn` mnemonic augmented with its `pushData`.
+ * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
+ *
+ */
+export interface Opcode<M = unknown> {
+    /**
+     * This is the offset in the bytecode where this `Opcode` was found.
+     * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
+     * expects a stack operand referencing this `offset` in the bytecode.
+     */
+
+    /**
+     * The Program Counter of this `Opcode`.
+     * The index in the `Opcode[]` where this `Opcode` is inserted.
+     */
+    readonly pc: number;
+
+    /**
+     * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
+     * The `opcode` may not be a valid opcode.
+     */
+    readonly opcode: number;
+
+    /**
+     * Represents a valid opcode.
+     *
+     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+     *
+     * If the `opcode` given is not a valid opcode,
+     * you can provide `INVALID` as `mnemonic`.
+     * 
+     * A `PUSHn` opcode only permits a `PUSHn` opcode.
+     */
+    readonly mnemonic: M;
+
+    /**
+     * A `Unary` opcode does not include any `pushData`.
+     * 
+     * If this `Opcode` is a `PUSHn` instruction,
+     * then `pushData` contains the data attached to this instruction.
+     * Otherwise, `null`.
+     */
+    readonly pushData: null | Uint8Array;
+}
+
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
 
-
+/**
+ * This module is used to `decode` bytecode into `Opcode`.
+ *
+ * ### Example
+ *
+ * ```typescript
+ * const { opcodes } = decode('0x6003600501');
+ * ```
+ *
+ * @packageDocumentation
+ */
+/**
+ * 
+ * A map from numeric opcodes to string mnemonics.
+ */
+/**
+ * Set of opcodes defined by the EVM.
+ *
+ * They are constructed from two kinds of opcodes.
+ * `Unary` opcodes which takes no-arguments and,
+ * `PUSHn` opcodes which takes an `n` byte argument from the bytecode.
+ *
+ * From these two different categories is easier to distinguish between the two.
+ */
 function Step<
     M extends Uppercase<string>,
     F extends StepFn
@@ -61,14 +143,30 @@ export function STEP(
         MEMORY(),
         SYSTEM(),
         Step({
-            PC: [0x58, ({ stack }: State<Inst, Expr>, op: Opcode) => stack.push(new Val(BigInt(op.pc)))],
-            INVALID: [{ opcode: 0xfe, halts: true }, (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode))],
+            PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
+            INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
         }),
         LOGS(events),
         STORAGE({ variables, mappings }),
         FLOW(functionBranches),
         PUSH0(),
     );
+}
+
+export interface Decoded<M> {
+
+    /**
+     * Represents the `Opcode`s found in `code`.
+     */
+    opcodes: Opcode<M>[];
+
+    /**
+     * Map between `JUMPDEST` instructions offset, _i.e._,
+     * as they appear in the `code` buffer and its index in the `opcodes` array.
+     *
+     * It allows to quickly find the `JUMPDEST` instruction.
+     */
+    jumpdests: { [jd: number]: number };
 }
 
 /**
@@ -88,6 +186,7 @@ class Undef {
         );
     }
 
+    hola = 'sddsdssdsddsdsds----';
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
      */
@@ -107,6 +206,83 @@ class Undef {
             .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
         );
     }
+
+    /**
+     * Decodes the hexadecimal string `code` into `Opcode`s.
+     * `code` may or may not begin with hex prefix `0x`.
+     *
+     * ### Example
+     *
+     * ```typescript
+     * const { opcodes } = decode('0x6003600501');
+     * ```
+     *
+     * @param code the hexadecimal string containing the bytecode to decode.
+     * @returns
+     */
+    decode(code: string): Decoded<Mnemonic<this>> {
+        if (code.length % 2 !== 0) {
+            throw new DecodeError('Unable to decode, input should have even length');
+        }
+
+        const start = code.slice(0, 2) === '0x' ? 2 : 0;
+        const bytecode = fromHexString(code, start);
+
+        const opcodes: Opcode<Mnemonic<this>>[] = [];
+        const jumpdests: { [jd: number]: number } = {};
+
+        for (let i = 0; i < bytecode.length; i++) {
+            const opcode = bytecode[i];
+            const [size, , mnemonic] = this[opcode];
+            if (mnemonic as string === 'JUMPDEST') {
+                jumpdests[i] = opcodes.length;
+            }
+            opcodes.push({
+                pc: i,
+                opcode,
+                mnemonic: mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
+                pushData: size === 0 ? null : (() => {
+                    const data = bytecode.subarray(i + 1, i + size + 1);
+                    i += size;
+                    return data;
+                })(),
+            });
+        }
+
+        return { opcodes: opcodes, jumpdests };
+    }
+}
+
+/**
+ * Represents an `Error` that occurs during decoding.
+ */
+class DecodeError extends Error {
+    /**
+     * @param message The error message.
+     * @param position The position in the bytecode where the error occurred.
+     */
+    constructor(message: string, readonly position?: number) {
+        super(message + (position !== undefined ? ` at ${position}` : ''));
+        this.name = 'DecodeError';
+    }
+}
+
+/**
+ * @param hexstr the hexadecimal string to convert to `Uint8Array`
+ * @param start the index in `hexstr` where to start decoding.
+ * @returns the `Uint8Array` representation of `hexstr`
+ */
+export function fromHexString(hexstr: string, start: number): Uint8Array {
+    const buffer = new Uint8Array((hexstr.length - start) / 2);
+    for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
+        const value = parseInt(hexstr.slice(i, i + 2), 16);
+        if (value >= 0) {
+            buffer[j] = value;
+        } else {
+            throw new DecodeError(`Unable to decode, invalid value found`, i);
+        }
+    }
+    return buffer;
 }
 
 function PUSHES() {
@@ -528,16 +704,13 @@ function SYSTEM() {
 }
 
 function LOGS(events: IEvents) {
-    return {
-        events,
-        ...Step({
-            LOG0: log(0, events),
-            LOG1: log(1, events),
-            LOG2: log(2, events),
-            LOG3: log(3, events),
-            LOG4: log(4, events),
-        })
-    } as const;
+    return Object.assign({ events }, Step({
+        LOG0: log(0, events),
+        LOG1: log(1, events),
+        LOG2: log(2, events),
+        LOG3: log(3, events),
+        LOG4: log(4, events),
+    }));
 
     function log(topicsCount: number, events: IEvents) {
         return [0xa0 + topicsCount, ({ stack, memory, stmts }: State<Inst, Expr>): void => {
@@ -684,13 +857,17 @@ function FLOW(functionBranches: ISelectorBranches) {
         functionBranches,
         ...Step({
             JUMPDEST: [0x5b, _state => { }],
-            JUMP: [0x56, (state, opcode): void => {
+            JUMP: [0x56, function JUMP(this: Undef, state, opcode) {
+                // console.log(this.hola, 'JUMP');
+
                 const offset = state.stack.pop();
                 const destpc = getDest(offset, opcode);
                 const destBranch = Branch.make(destpc, state);
                 state.halt(new Jump(offset, destBranch));
             }],
-            JUMPI: [0x57, (state, opcode): void => {
+            JUMPI: [0x57, function JUMPI(this: Undef, state, opcode) {
+                // console.log(this.hola, 'JUMPI');
+
                 const offset = state.stack.pop();
                 const cond = state.stack.pop();
                 const destpc = getDest(offset, opcode);
@@ -719,6 +896,7 @@ function FLOW(functionBranches: ISelectorBranches) {
     function getDest(offset: Expr, opcode: Opcode): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-imports
             throw new Error(`Numeric offset not found on stack @${formatOpcode(opcode)}`);
         }
         return Number(offset2.val);
@@ -753,3 +931,12 @@ function PUSH0() {
 //     }],
 
 // };
+
+export function formatOpcode(op: Opcode): string {
+    const pc = op.pc.toString().padStart(4, ' ').toUpperCase();
+    const pushData = op.pushData
+        ? ` 0x${toHex(op.pushData)} (${parseInt(toHex(op.pushData), 16)})`
+        : '';
+
+    return `${pc}  ${op.mnemonic}${pushData}`;
+}

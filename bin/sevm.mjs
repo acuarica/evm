@@ -26,7 +26,7 @@ const warn = c.yellow;
  * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
  */
 
-/** @param {import('sevm').Opcode} opcode */
+/** @param {import('sevm').Opcode<string>} opcode */
 export function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = '?';//`0x${opcode.offset.toString(16)}`.padStart(8);

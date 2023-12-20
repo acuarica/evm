@@ -1,4 +1,4 @@
-import { fromHexString } from './opcode';
+import { fromHexString } from './step';
 
 const BZZR0 = '627a7a7230';
 const BZZR1 = '627a7a7231';
