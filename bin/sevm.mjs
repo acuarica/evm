@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, sol, toHex } from 'sevm';
+import { Contract, sol } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -30,8 +30,8 @@ const warn = c.yellow;
 export function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
     const offset = '?';//`0x${opcode.offset.toString(16)}`.padStart(8);
-    const pushData = opcode.pushData
-        ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${toHex(opcode.pushData)}`
+    const pushData = opcode.data
+        ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
         : '';
     return `${dim(pc)} ${blue(offset)}  ${magenta(opcode.mnemonic)}    ${pushData}`;
 }

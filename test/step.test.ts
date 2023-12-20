@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, sol, State, STEP, toHex } from 'sevm';
+import { Opcode, sol, State, STEP } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Block, Invalid } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
@@ -9,30 +9,48 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 
 describe('::step', function () {
 
-    it('should retrieve halting insts', function () {
-        const haltingSteps = STEP().haltingSteps();
-        expect(haltingSteps).to.be.deep.equal(
-            ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
-        );
+    describe('Opcode', function () {
+        it('should convert `data` to hex format', function () {
+            const data = Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]);
+            expect(new Opcode(0, 0, '', data).hexData()).to.be.equal('010203040c0d0e0ffeff00');
+        });
+
+        it('should format opcodes', function () {
+            expect(new Opcode(2, 0x1, 'ADD', null).format())
+                .to.be.equal('@2:ADD(0x1)');
+            expect(new Opcode(1, 0x63, 'PUSH4', Buffer.from([1, 2, 3, 4])).format())
+                .to.be.equal('@1:PUSH4(0x63) 0x01020304 (16909060)');
+            expect(new Opcode(0, 0xb0, 'INVALID', null).format())
+                .to.be.equal('@0:INVALID(0xb0)');
+        });
     });
 
-    it('should retrieve `opcodes`', function () {
-        const opcodes = STEP().opcodes();
-        expect(opcodes.STOP).to.be.equal(0);
-        expect(opcodes.ADD).to.be.equal(1);
-        expect(opcodes.PUSH32).to.be.equal(0x60 + 32 - 1);
-        expect(opcodes.SELFDESTRUCT).to.be.equal(255);
-    });
+    describe('support methods', function () {
+        it('should retrieve halting insts', function () {
+            const haltingSteps = STEP().haltingSteps();
+            expect(haltingSteps).to.be.deep.equal(
+                ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
+            );
+        });
 
-    it('should find decoder by opcode `number`', function () {
-        const step = STEP();
-        expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
-        expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
-        expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
-        expect(step[0xfc]).to.be.deep.equal([0, true, 'UNDEF']);
-        expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
-        expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
-        expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+        it('should retrieve `opcodes`', function () {
+            const opcodes = STEP().opcodes();
+            expect(opcodes.STOP).to.be.equal(0);
+            expect(opcodes.ADD).to.be.equal(1);
+            expect(opcodes.PUSH32).to.be.equal(0x60 + 32 - 1);
+            expect(opcodes.SELFDESTRUCT).to.be.equal(255);
+        });
+
+        it('should find decoder by opcode `number`', function () {
+            const step = STEP();
+            expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
+            expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
+            expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
+            expect(step[0xfc]).to.be.deep.equal([0, true, 'UNDEF']);
+            expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
+            expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
+            expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+        });
     });
 
     describe('decode', function () {
@@ -134,19 +152,6 @@ describe('::step', function () {
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
         });
 
-        it('should `decode` format `INVALID` opcodes', function () {
-            expect(new Opcode(2, OPCODES.ADD, 'ADD', null).format())
-                .to.be.equal('@2:ADD(0x1)');
-            expect(new Opcode(1, OPCODES.PUSH4, 'PUSH4', Buffer.from([1, 2, 3, 4])).format())
-                .to.be.equal('@1:PUSH4(0x63) 0x01020304 (16909060)');
-            expect(new Opcode(0, 0xb0, 'INVALID', null).format())
-                .to.be.equal('@0:INVALID(0xb0)');
-        });
-
-        it('should convert buffer `toHex`', function () {
-            const output = toHex(Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]));
-            expect(output).to.be.equal('010203040c0d0e0ffeff00');
-        });
     });
 
     describe('PUSHES', function () {
@@ -229,7 +234,7 @@ describe('::step', function () {
     });
 
     for (const [name, exprs] of Object.entries($exprs)) {
-        describe(name, function () {
+        describe(name.toUpperCase(), function () {
             exprs.forEach(({ insts, expr, str }) => {
                 it(`should \`STEP\` \`[${insts.join('|')}]\` into \`${str}\``, function () {
                     const state = new State<never, Expr>();

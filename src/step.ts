@@ -12,15 +12,6 @@ import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from 
 import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
 
 /**
- *
- * @param buffer
- * @returns
- */
-export function toHex(buffer: Uint8Array): string {
-    return buffer.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
-}
-
-/**
  * Store selectors starting point.
  */
 export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
@@ -77,26 +68,31 @@ export class Opcode<M = unknown> {
         readonly mnemonic: M,
 
         /**
-         * A `Unary` opcode does not include any `pushData`.
+         * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
          * 
-         * If this `Opcode` is a `PUSHn` instruction,
-         * then `pushData` contains the data attached to this instruction.
-         * Otherwise, `null`.
+         * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
+         * then it contains the data attached to this instruction.
          */
-        readonly pushData: null | Uint8Array) {
+        readonly data: null | Uint8Array
+    ) { }
+
+    /**
+     * Returns the hexadecimal representation of `this` `data`.
+     */
+    hexData(): string {
+        return this.data!.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
     }
 
     /**
      * Returns a `string` representation of `this` `Opcode`.
      */
     format(): string {
-        const pushData = this.pushData
-            ? ` 0x${toHex(this.pushData)} (${parseInt(toHex(this.pushData), 16)})`
+        const pushData = this.data
+            ? ` 0x${this.hexData()} (${parseInt(this.hexData(), 16)})`
             : '';
 
         return `@${this.pc}:${this.mnemonic}(0x${this.opcode.toString(16)})${pushData}`;
     }
-
 }
 
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
@@ -217,7 +213,7 @@ class Undef {
      */
     opcodes(): { readonly [m in Mnemonic<this>]: number } {
         return Object.fromEntries([...Array(256).keys()]
-            .map(o => [(this as unknown as [unknown, unknown, Mnemonic<this>][])[o][2], o] as const)
+            .map(o => [this[o][2] as Mnemonic<this>, o] as const)
             .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
         );
     }
@@ -327,7 +323,7 @@ function PUSHES() {
     function push(size: number) {
         return [
             { opcode: 0x60 - 1 + size, size },
-            ({ stack }: State<Inst, Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + toHex(opcode.pushData!)), true))
+            ({ stack }: State<Inst, Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
         ] as const;
     }
 }

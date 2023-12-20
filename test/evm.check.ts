@@ -2,7 +2,7 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, stripMetadataHash, toHex, STEP } from 'sevm';
+import { EVM, State, stripMetadataHash, STEP } from 'sevm';
 import { And, Block, Not, Val, Local, type Inst, type Expr } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
@@ -24,13 +24,13 @@ describe('evm', function () {
         const opcodes = new EVM(compile(src, '0.7.6', this).bytecode, STEP()).opcodes;
 
         const selector = fnselector(sig);
-        const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && toHex(o.pushData!) === selector);
+        const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && o.hexData() === selector);
         expect(push4, `PUSH4 ${selector} not found`).to.be.not.undefined;
     });
 
     it('`keccak_256` hash selector for `supportsInterface(bytes4)`', function () {
         const sig = 'supportsInterface(bytes4)';
-        const hash = toHex(keccak_256(sig).slice(0, 4));
+        const hash = Buffer.from(keccak_256(sig).slice(0, 4)).toString('hex');
         expect(hash).to.be.equal('01ffc9a7');
     });
 
