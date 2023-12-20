@@ -149,83 +149,81 @@ describe('::step', function () {
         });
     });
 
-    describe('stack', function () {
-        describe('PUSHES', function () {
-            it('should PUSH value onto stack', function () {
+    describe('PUSHES', function () {
+        it('should PUSH value onto stack', function () {
+            const state = new State<never, Expr>();
+            STEP().PUSH1(state, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
+            expect(state.stack.values).to.deep.equal([new Val(1n, true)]);
+        });
+    });
+
+    describe('DUPS', function () {
+        sizes.forEach(size => {
+            it(`should DUP #${size - 1} element on the stack`, function () {
                 const state = new State<never, Expr>();
-                STEP().PUSH1(state, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
-                expect(state.stack.values).to.deep.equal([new Val(1n, true)]);
+                state.stack.push(new Val(2n));
+
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(new Val(1n));
+                    state.stack.push(new Val(1n));
+                }
+
+                STEP()[`DUP${size as Size}`](state);
+
+                const local = new Local(0, new Val(2n));
+                expect(state.nlocals).to.be.equal(1);
+                expect(state.stmts).to.be.deep.equal([new Locali(local)]);
+                expect(state.stack.values).to.deep.equal([local, ...ignored, local]);
+            });
+
+            it(`should throw when #${size} element is not present on the stack`, function () {
+                const state = new State<never, Expr>();
+
+                for (let i = 1; i < size; i++) {
+                    state.stack.push(new Val(1n));
+                }
+
+                expect(() => STEP()[`DUP${size as Size}`](state)).to.throw(
+                    'Invalid duplication operation'
+                );
             });
         });
+    });
 
-        describe('DUPS', function () {
-            sizes.forEach(size => {
-                it(`should DUP #${size - 1} element on the stack`, function () {
-                    const state = new State<never, Expr>();
-                    state.stack.push(new Val(2n));
+    describe('SWAPS', function () {
+        sizes.forEach(size => {
+            it(`should SWAP #${size} element on the stack`, function () {
+                const state = new State<never, Expr>();
+                state.stack.push(new Val(2n));
 
-                    const ignored = [];
-                    for (let i = 1; i < size; i++) {
-                        ignored.push(new Val(1n));
-                        state.stack.push(new Val(1n));
-                    }
+                const ignored = [];
+                for (let i = 1; i < size; i++) {
+                    ignored.push(new Val(1n));
+                    state.stack.push(new Val(1n));
+                }
 
-                    STEP()[`DUP${size as Size}`](state);
+                state.stack.push(new Val(3n));
 
-                    const local = new Local(0, new Val(2n));
-                    expect(state.nlocals).to.be.equal(1);
-                    expect(state.stmts).to.be.deep.equal([new Locali(local)]);
-                    expect(state.stack.values).to.deep.equal([local, ...ignored, local]);
-                });
+                STEP()[`SWAP${size as Size}`](state);
 
-                it(`should throw when #${size} element is not present on the stack`, function () {
-                    const state = new State<never, Expr>();
-
-                    for (let i = 1; i < size; i++) {
-                        state.stack.push(new Val(1n));
-                    }
-
-                    expect(() => STEP()[`DUP${size as Size}`](state)).to.throw(
-                        'Invalid duplication operation'
-                    );
-                });
+                expect(state.stack.values).to.deep.equal([
+                    new Val(2n),
+                    ...ignored,
+                    new Val(3n),
+                ]);
             });
-        });
 
-        describe('SWAPS', function () {
-            sizes.forEach(size => {
-                it(`should SWAP #${size} element on the stack`, function () {
-                    const state = new State<never, Expr>();
-                    state.stack.push(new Val(2n));
+            it(`should throw when #${size + 1} elem is not present on the stack`, function () {
+                const state = new State<never, Expr>();
 
-                    const ignored = [];
-                    for (let i = 1; i < size; i++) {
-                        ignored.push(new Val(1n));
-                        state.stack.push(new Val(1n));
-                    }
+                for (let i = 1; i <= size; i++) {
+                    state.stack.push(new Val(1n));
+                }
 
-                    state.stack.push(new Val(3n));
-
-                    STEP()[`SWAP${size as Size}`](state);
-
-                    expect(state.stack.values).to.deep.equal([
-                        new Val(2n),
-                        ...ignored,
-                        new Val(3n),
-                    ]);
-                });
-
-                it(`should throw when #${size + 1} elem is not present on the stack`, function () {
-                    const state = new State<never, Expr>();
-
-                    for (let i = 1; i <= size; i++) {
-                        state.stack.push(new Val(1n));
-                    }
-
-                    expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
-                        'Position not found for swap operation'
-                    );
-                });
+                expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
+                    'Position not found for swap operation'
+                );
             });
         });
     });
