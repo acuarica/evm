@@ -10,12 +10,16 @@ const sizes = [...Array(16).keys()].map(i => i + 1);
 describe('::step', function () {
 
     describe('Opcode', function () {
+        it('should convert null-`data` to hex format', function () {
+            expect(new Opcode(0, 0, '', null).hexData()).to.be.equal(undefined);
+        });
+
         it('should convert `data` to hex format', function () {
             const data = Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]);
             expect(new Opcode(0, 0, '', data).hexData()).to.be.equal('010203040c0d0e0ffeff00');
         });
 
-        it('should format opcodes', function () {
+        it('should `format` opcodes', function () {
             expect(new Opcode(2, 0x1, 'ADD', null).format())
                 .to.be.equal('@2:ADD(0x1)');
             expect(new Opcode(1, 0x63, 'PUSH4', Buffer.from([1, 2, 3, 4])).format())
@@ -26,7 +30,7 @@ describe('::step', function () {
     });
 
     describe('support methods', function () {
-        it('should retrieve halting insts', function () {
+        it('should retrieve `haltingInsts`', function () {
             const haltingSteps = STEP().haltingSteps();
             expect(haltingSteps).to.be.deep.equal(
                 ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
@@ -41,7 +45,7 @@ describe('::step', function () {
             expect(opcodes.SELFDESTRUCT).to.be.equal(255);
         });
 
-        it('should find decoder by opcode `number`', function () {
+        it('should find decoder table by opcode number', function () {
             const step = STEP();
             expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
             expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
