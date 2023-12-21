@@ -1,7 +1,7 @@
 import { type Expr, type Inst, Throw, type Val } from './ast';
 import { CallSite, If, Require, type Stmt } from './ast';
 import type { Type } from './type';
-import { Not } from './ast/logic';
+import { Not } from './ast/alu';
 import type { Return, Revert } from './ast/system';
 import { State } from './state';
 import { EVM } from './evm';

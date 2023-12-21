@@ -1,4 +1,93 @@
-import { type Expr, Tag, Bin, Val } from '.';
+import { type Expr, Tag, Val } from './index';
+
+abstract class Bin extends Tag {
+    constructor(readonly left: Expr, readonly right: Expr) {
+        super();
+    }
+}
+
+export class Add extends Bin {
+    readonly tag = 'Add';
+    eval(): Expr {
+        const left = this.left.eval();
+        const right = this.right.eval();
+        return left.isVal() && right.isVal()
+            ? new Val(left.val + right.val)
+            : left.isZero()
+                ? right
+                : right.isZero()
+                    ? left
+                    : new Add(left, right);
+    }
+}
+
+export class Mul extends Bin {
+    readonly tag = 'Mul';
+    eval(): Expr {
+        const lhs = this.left.eval();
+        const rhs = this.right.eval();
+        return lhs.isVal() && rhs.isVal()
+            ? new Val(lhs.val * rhs.val)
+            : lhs.isZero() || rhs.isZero()
+                ? new Val(0n)
+                : new Mul(lhs, rhs);
+    }
+}
+
+export class Sub extends Bin {
+    readonly tag = 'Sub';
+    eval(): Expr {
+        const left = this.left.eval();
+        const right = this.right.eval();
+        return left.isVal() && right.isVal()
+            ? new Val(left.val - right.val)
+            : right.isZero()
+                ? left
+                : new Sub(left, right);
+    }
+}
+
+export class Div extends Bin {
+    readonly tag = 'Div';
+    eval(): Expr {
+        const left = this.left.eval();
+        const right = this.right.eval();
+        return left.isVal() && right.isVal()
+            ? right.val === 0n
+                ? new Div(left, right)
+                : new Val(left.val / right.val)
+            : right.isVal() && right.val === 1n
+                ? left
+                : new Div(left, right);
+    }
+}
+
+export class Mod extends Bin {
+    readonly tag = 'Mod';
+    eval(): Expr {
+        const lhs = this.left.eval();
+        const rhs = this.right.eval();
+        return lhs.isVal() && rhs.isVal() && rhs.val !== 0n
+            ? new Val(lhs.val % rhs.val)
+            : new Mod(lhs, rhs);
+    }
+}
+
+export class Exp extends Bin {
+    readonly tag = 'Exp';
+    eval(): Expr {
+        const left = this.left.eval();
+        const right = this.right.eval();
+        return left.isVal() && right.isVal() && right.val >= 0
+            ? new Val(left.val ** right.val)
+            : new Exp(left, right);
+    }
+}
+
+
+
+
+
 
 abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
@@ -55,12 +144,12 @@ export class IsZero extends Tag {
                 ? new Val(1n)
                 : new Val(0n)
             : val.tag === 'Lt'
-            ? new Gt(val.left, val.right, !val.equal)
-            : val.tag === 'Gt'
-            ? new Lt(val.left, val.right, !val.equal)
-            : val.tag === 'IsZero'
-            ? val.value
-            : new IsZero(val);
+                ? new Gt(val.left, val.right, !val.equal)
+                : val.tag === 'Gt'
+                    ? new Lt(val.left, val.right, !val.equal)
+                    : val.tag === 'IsZero'
+                        ? val.value
+                        : new IsZero(val);
     }
 }
 
@@ -72,12 +161,12 @@ export class And extends Bin {
         return lhs.isVal() && rhs.isVal()
             ? new Val(lhs.val & rhs.val)
             : lhs.isVal() && /^[f]+$/.test(lhs.val.toString(16))
-            ? rhs
-            : rhs.isVal() && /^[f]+$/.test(rhs.val.toString(16))
-            ? lhs
-            : lhs.isVal() && rhs.tag === 'And' && rhs.left.isVal() && lhs.val === rhs.left.val
-            ? rhs.right
-            : new And(lhs, rhs);
+                ? rhs
+                : rhs.isVal() && /^[f]+$/.test(rhs.val.toString(16))
+                    ? lhs
+                    : lhs.isVal() && rhs.tag === 'And' && rhs.left.isVal() && lhs.val === rhs.left.val
+                        ? rhs.right
+                        : new And(lhs, rhs);
     }
 }
 

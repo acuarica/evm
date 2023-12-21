@@ -20,7 +20,7 @@ const truncate = (str: string) => (str.length <= 100 ? str : str.slice(0, 100) +
 export const title = (obj: unknown) => truncate(util.inspect(obj, { breakLength: Infinity }));
 
 export const $exprs = {
-    math: [
+    alu: [
         F(['NUMBER', 15n, 'ADD'], new Add(new Val(15n), Block.number), id, '0xf + block.number'),
         F([2n, 1n, 'ADD'], new Add(new Val(1n), new Val(2n)), new Val(3n), '0x1 + 0x2'),
         F([2n, 1n, 'SUB'], new Sub(new Val(1n), new Val(2n)), new Val(-1n), '0x1 - 0x2'),
@@ -36,8 +36,7 @@ export const $exprs = {
         F([3n, 1n, 'ADD', 2n, 'EXP'], new Exp(new Val(2n), new Add(new Val(1n), new Val(3n))), new Val(16n), '0x2 ** (0x1 + 0x3)'),
         F([2n, 5n, 'MOD'], new Mod(new Val(5n), new Val(2n)), new Val(1n), '0x5 % 0x2'),
         F([0n, 5n, 'MOD'], new Mod(new Val(5n), new Val(0n)), id, '0x5 % 0x0'),
-    ],
-    logic: [
+
         F([0n, 'NOT'], new Not(new Val(BigInt(0))), new Val(BigInt('0x' + 'ff'.repeat(32))), '~0x0'),
         F([1n, 'NOT'], new Not(new Val(BigInt(1))), new Val(BigInt('0x' + 'ff'.repeat(31) + 'fe')), '~0x1'),
         F(['NUMBER', 'NOT'], new Not(Block.number), id, '~block.number'),

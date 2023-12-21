@@ -1,8 +1,8 @@
 import type { State } from '../state';
 import type { Opcode } from '../step';
 import type { Type } from '../type';
-import type { Add, Div, Exp, Mod, Mul, Sub } from './math';
-import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './logic';
+import type { Add, Div, Exp, Mod, Mul, Sub } from './alu';
+import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './alu';
 import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
 import type { MLoad, MStore } from './memory';
 import type {
@@ -193,12 +193,6 @@ export abstract class Tag {
     }
 }
 
-export abstract class Bin extends Tag {
-    constructor(readonly left: Expr, readonly right: Expr) {
-        super();
-    }
-}
-
 export class Val extends Tag {
     readonly tag = 'Val';
 
@@ -282,10 +276,9 @@ export function mem(stmts: Stmt[]): Stmt[] {
     }
 }
 
+export * from './alu';
 export * from './flow';
 export * from './log';
-export * from './logic';
-export * from './math';
 export * from './memory';
 export * from './special';
 export * from './storage';

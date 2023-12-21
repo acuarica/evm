@@ -1,7 +1,7 @@
 import type { State } from '../state';
 
 import type { Inst, Expr, IInst } from '.';
-import type { Sig } from './logic';
+import type { Sig } from './alu';
 
 /**
  * Represents a jump from one `State` to another from the given `pc`.
