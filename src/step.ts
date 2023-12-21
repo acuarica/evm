@@ -355,7 +355,6 @@ function DUPS() {
         DUP14: dup(13),
         DUP15: dup(14),
         DUP16: dup(15),
-
     });
 
     function dup(position: number) {
@@ -754,86 +753,82 @@ function LOGS(events: IEvents) {
 }
 
 function STORAGE({ variables, mappings }: IStore) {
-    return {
-        variables,
-        mappings,
-        ...Step({
-            SLOAD: [0x54, ({ stack }) => {
-                const loc = stack.pop();
+    return Object.assign({ variables, mappings }, Step({
+        SLOAD: [0x54, ({ stack }) => {
+            const loc = stack.pop();
 
-                if (loc.tag === 'Sha3') {
-                    const [base, parts] = parseSha3(loc);
-                    if (base !== undefined && parts.length > 0) {
-                        stack.push(new MappingLoad(loc, mappings, base, parts));
-                    } else {
-                        stack.push(new SLoad(loc, variables));
-                    }
-                } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
-                    const [base, parts] = parseSha3(loc.left);
-                    if (base !== undefined && parts.length > 0) {
-                        stack.push(new MappingLoad(loc, mappings, base, parts, loc.right.val));
-                    } else {
-                        stack.push(new SLoad(loc, variables));
-                    }
-                } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
-                    const [base, parts] = parseSha3(loc.right);
-                    if (base !== undefined && parts.length > 0) {
-                        stack.push(new MappingLoad(loc, mappings, base, parts, loc.left.val));
-                    } else {
-                        stack.push(new SLoad(loc, variables));
-                    }
+            if (loc.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(loc, mappings, base, parts));
                 } else {
                     stack.push(new SLoad(loc, variables));
                 }
-            }],
+            } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
+                const [base, parts] = parseSha3(loc.left);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.right.val));
+                } else {
+                    stack.push(new SLoad(loc, variables));
+                }
+            } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(loc.right);
+                if (base !== undefined && parts.length > 0) {
+                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.left.val));
+                } else {
+                    stack.push(new SLoad(loc, variables));
+                }
+            } else {
+                stack.push(new SLoad(loc, variables));
+            }
+        }],
 
-            SSTORE: [0x55, ({ stack, stmts }) => {
-                const slot = stack.pop();
-                const value = stack.pop();
+        SSTORE: [0x55, ({ stack, stmts }) => {
+            const slot = stack.pop();
+            const value = stack.pop();
 
-                if (slot.isVal()) {
-                    sstoreVariable();
-                } else if (slot.tag === 'Sha3') {
-                    const [base, parts] = parseSha3(slot);
-                    if (base !== undefined && parts.length > 0) {
-                        stmts.push(new MappingStore(slot, mappings, base, parts, value));
-                    } else {
-                        sstoreVariable();
-                    }
-                } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal()) {
-                    const [base, parts] = parseSha3(slot.left);
-                    if (base !== undefined && parts.length > 0) {
-                        stmts.push(
-                            new MappingStore(slot, mappings, base, parts, value, slot.right.val)
-                        );
-                    } else {
-                        sstoreVariable();
-                    }
-                } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3') {
-                    const [base, parts] = parseSha3(slot.right);
-                    if (base !== undefined && parts.length > 0) {
-                        stmts.push(new MappingStore(slot, mappings, base, parts, value, slot.left.val));
-                    } else {
-                        sstoreVariable();
-                    }
+            if (slot.isVal()) {
+                sstoreVariable();
+            } else if (slot.tag === 'Sha3') {
+                const [base, parts] = parseSha3(slot);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(slot, mappings, base, parts, value));
                 } else {
                     sstoreVariable();
                 }
-
-                function sstoreVariable() {
-                    if (slot.isVal()) {
-                        const key = slot.val.toString();
-                        if (key in variables) {
-                            variables[key].types.push(value);
-                        } else {
-                            variables[key] = new Variable(undefined, [value]);
-                        }
-                    }
-                    stmts.push(new SStore(slot, value, variables));
+            } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal()) {
+                const [base, parts] = parseSha3(slot.left);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(
+                        new MappingStore(slot, mappings, base, parts, value, slot.right.val)
+                    );
+                } else {
+                    sstoreVariable();
                 }
-            }],
-        })
-    } as const;
+            } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3') {
+                const [base, parts] = parseSha3(slot.right);
+                if (base !== undefined && parts.length > 0) {
+                    stmts.push(new MappingStore(slot, mappings, base, parts, value, slot.left.val));
+                } else {
+                    sstoreVariable();
+                }
+            } else {
+                sstoreVariable();
+            }
+
+            function sstoreVariable() {
+                if (slot.isVal()) {
+                    const key = slot.val.toString();
+                    if (key in variables) {
+                        variables[key].types.push(value);
+                    } else {
+                        variables[key] = new Variable(undefined, [value]);
+                    }
+                }
+                stmts.push(new SStore(slot, value, variables));
+            }
+        }],
+    }));
 
     function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
         const shas = [sha];
@@ -859,41 +854,38 @@ function STORAGE({ variables, mappings }: IStore) {
  * Keep track of https://eips.ethereum.org/EIPS/eip-4200
  */
 function FLOW(functionBranches: ISelectorBranches) {
-    return {
-        functionBranches,
-        ...Step({
-            JUMPDEST: [0x5b, _state => { }],
-            JUMP: [0x56, function JUMP(this: Undef, state, opcode) {
-                // console.log(this.hola, 'JUMP');
+    return Object.assign({ functionBranches }, Step({
+        JUMPDEST: [0x5b, _state => { }],
+        JUMP: [0x56, function JUMP(this: Undef, state, opcode) {
+            // console.log(this.hola, 'JUMP');
 
-                const offset = state.stack.pop();
-                const destpc = getDest(offset, opcode);
-                const destBranch = Branch.make(destpc, state);
-                state.halt(new Jump(offset, destBranch));
-            }],
-            JUMPI: [0x57, function JUMPI(this: Undef, state, opcode) {
-                // console.log(this.hola, 'JUMPI');
+            const offset = state.stack.pop();
+            const destpc = getDest(offset, opcode);
+            const destBranch = Branch.make(destpc, state);
+            state.halt(new Jump(offset, destBranch));
+        }],
+        JUMPI: [0x57, function JUMPI(this: Undef, state, opcode) {
+            // console.log(this.hola, 'JUMPI');
 
-                const offset = state.stack.pop();
-                const cond = state.stack.pop();
-                const destpc = getDest(offset, opcode);
+            const offset = state.stack.pop();
+            const cond = state.stack.pop();
+            const destpc = getDest(offset, opcode);
 
-                const fallBranch = Branch.make(opcode.pc + 1, state);
+            const fallBranch = Branch.make(opcode.pc + 1, state);
 
-                let last: SigCase | Jumpi;
-                if (cond.tag === 'Sig') {
-                    functionBranches.set(cond.selector, {
-                        pc: destpc,
-                        state: state.clone(),
-                    });
-                    last = new SigCase(cond, offset, fallBranch);
-                } else {
-                    last = new Jumpi(cond, offset, fallBranch, Branch.make(destpc, state));
-                }
-                state.halt(last);
-            }],
-        })
-    } as const;
+            let last: SigCase | Jumpi;
+            if (cond.tag === 'Sig') {
+                functionBranches.set(cond.selector, {
+                    pc: destpc,
+                    state: state.clone(),
+                });
+                last = new SigCase(cond, offset, fallBranch);
+            } else {
+                last = new Jumpi(cond, offset, fallBranch, Branch.make(destpc, state));
+            }
+            state.halt(last);
+        }],
+    }));
 
     /**
      * @param offset
