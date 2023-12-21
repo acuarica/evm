@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, STEP } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Block, Invalid } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Block, Invalid, MStore } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
@@ -290,6 +290,7 @@ describe('::step', function () {
             STEP().MSTORE(state);
 
             expect(state.memory).to.be.deep.equal({ '4': Block.coinbase });
+            expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Block.coinbase)]);
         });
     });
 
