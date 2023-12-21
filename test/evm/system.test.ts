@@ -100,8 +100,7 @@ describe('evm::system', function () {
             compile(src, '0.8.16', this, {
                 enabled: true,
                 details: { jumpdestRemover: true },
-            }).bytecode,
-            STEP()
+            }).bytecode
         );
         evm.start();
 

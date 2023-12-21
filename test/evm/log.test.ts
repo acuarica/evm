@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, solEvents, solStmts, yulStmts, STEP } from 'sevm';
+import { EVM, State, solEvents, solStmts, yulStmts } from 'sevm';
 import { Val, type Expr, type Inst, type Local } from 'sevm/ast';
 
 import { eventSelector } from '../utils/selector';
@@ -22,7 +22,7 @@ describe('evm::log', function () {
                 emit Deposit(n + 7);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
 
         const state = new State<Inst, Expr>();
         evm.exec(0, state);

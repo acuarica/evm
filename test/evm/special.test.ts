@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, State, reduce, STEP } from 'sevm';
+import { EVM, State, reduce } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
 import { Info } from 'sevm/ast';
 
@@ -23,7 +23,7 @@ describe('evm::special', function () {
                         fallback() external payable { emit Deposit(${sym.value}); }
                     }`;
 
-                const evm = new EVM(compile(src, '0.8.16', this).bytecode, STEP());
+                const evm = new EVM(compile(src, '0.8.16', this).bytecode);
                 let state = new State<Inst, Expr>();
                 evm.run(0, state);
 

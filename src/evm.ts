@@ -1,10 +1,8 @@
 import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
-
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import type { Decoded, ISelectorBranches } from './step';
-import { Opcode, fromHexString } from './step';
+import { type Decoded, type ISelectorBranches, Opcode, fromHexString, STEP } from './step';
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode<unknown>) => void>;
@@ -18,10 +16,10 @@ export class EVM<S extends
         readonly functionBranches: ISelectorBranches;
         haltingSteps(): Mnemonic<S>[];
         opcodes(): { [mnemonic: string]: number },
-    decode(code: string): Decoded<Mnemonic<S>>;
+        decode(code: string): Decoded<Mnemonic<S>>;
     } & {
         readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
-    }
+    } = ReturnType<typeof STEP>
 > {
     /**
      * The `metadataHash` part from the `bytecode`.
@@ -65,7 +63,7 @@ export class EVM<S extends
          * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
          * `INVALID` is used instead.
          */
-        readonly step: S
+        readonly step: S = STEP() as unknown as S
     ) {
         this.JUMPDEST = this.step.opcodes()['JUMPDEST'];
 
@@ -190,7 +188,7 @@ export class EVM<S extends
             // opcode = this.opcodes[pc];
             const op = this.bytecode[pc];
             const [size, , mnemonic] = this.step[op];
-            const opcode = new Opcode( pc, op, mnemonic,
+            const opcode = new Opcode(pc, op, mnemonic,
                 size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
                     if (data.length !== size) throw new Error('asdfsadf');
@@ -199,13 +197,11 @@ export class EVM<S extends
                 })()
             );
 
-
-            // const step = ;
+            const step = this.step[mnemonic];
             // opcode.jumpdests = this.jumpdests;
 
-            // step[0];
             try {
-                this.step[mnemonic](state, opcode);
+                step(state, opcode);
             } catch (err) {
                 // console.log(err);
                 const inv = new Throw((err as Error).message, opcode, state);
