@@ -64,8 +64,7 @@ export class EVM<S extends
     ) {
         this.JUMPDEST = this.step.opcodes()['JUMPDEST'];
 
-        const start = bytecode.slice(0, 2) === '0x' ? 2 : 0;
-        this.bytecode = fromHexString(bytecode, start);
+        this.bytecode = fromHexString(bytecode);
 
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;

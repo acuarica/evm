@@ -79,28 +79,6 @@ describe('::step', function () {
 
         const decodeArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
 
-        ['', '0x'].forEach(p => {
-            it(`should \`decode\` empty buffer with prefix \`${p}\``, function () {
-                const opcodes = decode(p + '');
-                expect(opcodes).to.be.empty;
-            });
-
-            it(`should \`decode\` opcodes with prefix \`${p}\``, function () {
-                const opcodes = decode(p + '00010203');
-                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
-            });
-
-            it(`should throw when input is not even with prefix \`${p}\``, function () {
-                expect(() => decode(p + '1')).to.throw('input should have even length');
-            });
-
-            it(`should throw when input has an invalid number with prefix \`${p}\``, function () {
-                expect(() => decode(p + 'gg')).to.throw(
-                    `invalid value found at ${p.length}`
-                );
-            });
-        });
-
         it('should `decode` unary opcodes', function () {
             const opcodes = decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD);
 
@@ -165,6 +143,28 @@ describe('::step', function () {
             const opcodes = decode('0c0d0e0ffc');
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
         });
+
+        ['', '0x', '0X'].forEach(p => describe(`decode with prefix \`${p}\``, function () {
+            it(`should \`decode\` empty buffer`, function () {
+                const opcodes = decode(p + '');
+                expect(opcodes).to.be.empty;
+            });
+
+            it(`should \`decode\` opcodes`, function () {
+                const opcodes = decode(p + '00010203');
+                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
+            });
+
+            it(`should throw when input is not even`, function () {
+                expect(() => decode(p + '1')).to.throw('input should have even length');
+            });
+
+            it(`should throw when input has an invalid number`, function () {
+                expect(() => decode(p + 'gg')).to.throw(
+                    `invalid value found at ${p.length}`
+                );
+            });
+        }));
 
     });
 

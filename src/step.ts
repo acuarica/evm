@@ -217,13 +217,7 @@ class Undef {
      * @returns the decoded `Opcode`s found in `code`.
      */
     decode(code: string): Opcode<Mnemonic<this>>[] {
-        if (code.length % 2 !== 0) {
-            throw new Error('Unable to decode, input should have even length');
-        }
-
-        const start = code.slice(0, 2) === '0x' ? 2 : 0;
-        const bytecode = fromHexString(code, start);
-
+        const bytecode = fromHexString(code);
         const opcodes: Opcode<Mnemonic<this>>[] = [];
 
         for (let pc = 0; pc < bytecode.length; pc++) {
@@ -249,10 +243,14 @@ class Undef {
  * Represents an `Error` that occurs during decoding.
  * position The position in the bytecode where the error occurred.
  * @param hexstr the hexadecimal string to convert to `Uint8Array`
- * @param start the index in `hexstr` where to start decoding.
  * @returns the `Uint8Array` representation of `hexstr`
  */
-export function fromHexString(hexstr: string, start: number): Uint8Array {
+export function fromHexString(hexstr: string): Uint8Array {
+    if (hexstr.length % 2 !== 0) {
+        throw new Error('Unable to decode, input should have even length');
+    }
+
+    const start = hexstr.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
     const buffer = new Uint8Array((hexstr.length - start) / 2);
     for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
         const value = parseInt(hexstr.slice(i, i + 2), 16);
@@ -380,12 +378,12 @@ function SWAPS() {
 }
 
 function ALU() {
-    const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => function ({ stack }: Operand<Expr>) {
+    const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => ({ stack }: Operand<Expr>) => {
         const lhs = stack.pop();
         const rhs = stack.pop();
         stack.push(new Cons(lhs, rhs));
     };
-    const shift = (Cons: new (value: Expr, shift: Expr) => Expr) => function ({ stack }: Operand<Expr>) {
+    const shift = (Cons: new (value: Expr, shift: Expr) => Expr) => ({ stack }: Operand<Expr>) => {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(new Cons(value, shift));
