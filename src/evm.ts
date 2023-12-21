@@ -2,10 +2,7 @@ import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { type Decoded, type ISelectorBranches, Opcode, fromHexString, STEP } from './step';
-
-type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
-type Mnemonic<T> = FilterFn<T, (state: State<Inst, Expr>, opcode: Opcode<unknown>) => void>;
+import { type Decoded, type ISelectorBranches, Opcode, fromHexString, STEP, type Mnemonic } from './step';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -18,7 +15,7 @@ export class EVM<S extends
         opcodes(): { [mnemonic: string]: number },
         decode(code: string): Decoded<Mnemonic<S>>;
     } & {
-        readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode) => void;
+        readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
     } = ReturnType<typeof STEP>
 > {
     /**
@@ -201,7 +198,7 @@ export class EVM<S extends
             // opcode.jumpdests = this.jumpdests;
 
             try {
-                step(state, opcode);
+                step(state, opcode, this.bytecode);
             } catch (err) {
                 // console.log(err);
                 const inv = new Throw((err as Error).message, opcode, state);

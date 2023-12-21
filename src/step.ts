@@ -91,11 +91,11 @@ export class Opcode<M = unknown> {
             ? ` 0x${this.hexData()} (${parseInt(this.hexData()!, 16)})`
             : '';
 
-        return `@${this.pc}:${this.mnemonic}(0x${this.opcode.toString(16)})${pushData}`;
+        return `${this.mnemonic}(0x${this.opcode.toString(16)})@${this.pc}${pushData}`;
     }
 }
 
-type StepFn = (state: State<Inst, Expr>, opcode: Opcode) => void;
+type StepFn = (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
 
 /**
  * This module is used to `decode` bytecode into `Opcode`.
@@ -185,7 +185,7 @@ export interface Decoded<M> {
 /**
  * 
  */
-type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
+export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
 
 class Undef {
     readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
@@ -844,22 +844,19 @@ function STORAGE({ variables, mappings }: IStore) {
  * Keep track of https://eips.ethereum.org/EIPS/eip-4200
  */
 function FLOW(functionBranches: ISelectorBranches) {
+    const JUMPDEST = 0x5b;
     return Object.assign({ functionBranches }, Step({
-        JUMPDEST: [0x5b, _state => { }],
-        JUMP: [0x56, function JUMP(this: Undef, state, opcode) {
-            // console.log(this.hola, 'JUMP');
-
+        JUMPDEST: [JUMPDEST, _state => { }],
+        JUMP: [0x56, function JUMP(state, opcode, bytecode) {
             const offset = state.stack.pop();
-            const destpc = getDest(offset, opcode);
+            const destpc = getDest(offset, opcode, bytecode);
             const destBranch = Branch.make(destpc, state);
             state.halt(new Jump(offset, destBranch));
         }],
-        JUMPI: [0x57, function JUMPI(this: Undef, state, opcode) {
-            // console.log(this.hola, 'JUMPI');
-
+        JUMPI: [0x57, function JUMPI(state, opcode, bytecode) {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
-            const destpc = getDest(offset, opcode);
+            const destpc = getDest(offset, opcode, bytecode);
 
             const fallBranch = Branch.make(opcode.pc + 1, state);
 
@@ -881,25 +878,21 @@ function FLOW(functionBranches: ISelectorBranches) {
      * @param offset
      * @param opcode Only used for error reporting.
      */
-    function getDest(offset: Expr, opcode: Opcode): number {
+    function getDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-            throw new Error(`Numeric offset not found on stack @${opcode.format()}`);
+            throw new Error(`${opcode.format()} offset should be numeric but found '${offset.tag}'`);
         }
-        return Number(offset2.val);
-        // const destpc = opcode.jumpdests![Number(offset2.val)];
-        // if (destpc !== undefined) {
-        // (offset as Val).jumpDest = destpc;
-        // return destpc;
-        // } else {
-        // const dest = opcodes.find(o => o.offset === Number(offset2.val));
-        // if (!dest) {
-        //     throw new Error(`Expected JUMPDEST, but found ${formatOpcode(opcode)}`);
-        // }
-        // throw new Error(`JUMP destination should be JUMPDEST but found @${formatOpcode(dest)}`);
-        // throw new Error(`JUMP destination should be JUMPDEST but found @?`);
-        // }
+        const destpc = Number(offset2.val);
+        if (bytecode[destpc] === JUMPDEST) {
+            (offset as Val).jumpDest = destpc;
+            return destpc;
+        } else {
+            throw new Error(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
+                ? `'${destpc}' is out-of-bounds`
+                : `found '0x${bytecode[destpc]?.toString(16)}'`
+                }`);
+        }
     }
 }
 
