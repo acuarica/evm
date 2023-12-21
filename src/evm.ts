@@ -2,7 +2,7 @@ import { type Ram, State } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { type Decoded, type ISelectorBranches, Opcode, fromHexString, STEP, type Mnemonic } from './step';
+import { type ISelectorBranches, Opcode, fromHexString, STEP, type Mnemonic } from './step';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -13,7 +13,7 @@ export class EVM<S extends
         readonly functionBranches: ISelectorBranches;
         haltingSteps(): Mnemonic<S>[];
         opcodes(): { [mnemonic: string]: number },
-        decode(code: string): Decoded<Mnemonic<S>>;
+        decode(code: string): Opcode<Mnemonic<S>>[];
     } & {
         readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
     } = ReturnType<typeof STEP>
@@ -37,7 +37,7 @@ export class EVM<S extends
     /**
      * The `Opcode[]` decoded from `bytecode`.
      */
-    readonly opcodes: Decoded<Mnemonic<S>>['opcodes'];
+    readonly opcodes: Opcode<Mnemonic<S>>[];
 
     /**
      * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
@@ -70,7 +70,7 @@ export class EVM<S extends
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
-        this.opcodes = this.step.decode(code).opcodes;
+        this.opcodes = this.step.decode(code);
     }
 
     /**
@@ -182,7 +182,6 @@ export class EVM<S extends
         let pc = pc0;
         // for (; !state.halted && pc < this.opcodes.length; pc++) {
         for (; !state.halted && pc < this.bytecode.length; pc++) {
-            // opcode = this.opcodes[pc];
             const op = this.bytecode[pc];
             const [size, , mnemonic] = this.step[op];
             const opcode = new Opcode(pc, op, mnemonic,
@@ -195,7 +194,6 @@ export class EVM<S extends
             );
 
             const step = this.step[mnemonic];
-            // opcode.jumpdests = this.jumpdests;
 
             try {
                 step(state, opcode, this.bytecode);

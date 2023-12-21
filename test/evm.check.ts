@@ -96,20 +96,12 @@ describe('evm', function () {
             },
         ].forEach(({ title, src }) => {
             it(title, function () {
-                const step = STEP();
                 const bytecode = stripMetadataHash(compile(src, '0.7.6', this).bytecode)[0];
                 bytecodes.add(bytecode);
                 expect(bytecodes).to.have.length(1);
 
-                const { opcodes } = step.decode(bytecode);
-                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal([
-                    'PUSH1',
-                    'PUSH1',
-                    'MSTORE',
-                    'PUSH1',
-                    'DUP1',
-                    'REVERT',
-                    'INVALID',
+                expect(STEP().decode(bytecode).map(o => o.mnemonic)).to.be.deep.equal([
+                    'PUSH1', 'PUSH1', 'MSTORE', 'PUSH1', 'DUP1', 'REVERT', 'INVALID',
                 ]);
             });
         });

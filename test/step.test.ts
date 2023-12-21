@@ -81,13 +81,12 @@ describe('::step', function () {
 
         ['', '0x'].forEach(p => {
             it(`should \`decode\` empty buffer with prefix \`${p}\``, function () {
-                const { opcodes, jumpdests } = decode(p + '');
+                const opcodes = decode(p + '');
                 expect(opcodes).to.be.empty;
-                expect(jumpdests).to.be.empty;
             });
 
             it(`should \`decode\` opcodes with prefix \`${p}\``, function () {
-                const { opcodes } = decode(p + '00010203');
+                const opcodes = decode(p + '00010203');
                 expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
             });
 
@@ -103,7 +102,7 @@ describe('::step', function () {
         });
 
         it('should `decode` unary opcodes', function () {
-            const { opcodes, jumpdests } = decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD);
+            const opcodes = decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD);
 
             expect(opcodes).to.be.deep.equal([
                 new Opcode(0, OPCODES.ADDRESS, 'ADDRESS', null),
@@ -111,11 +110,10 @@ describe('::step', function () {
                 new Opcode(2, OPCODES.JUMPDEST, 'JUMPDEST', null),
                 new Opcode(3, OPCODES.ADD, 'ADD', null),
             ]);
-            expect(jumpdests).to.be.deep.equal({ '2': 2 });
         });
 
         it('should `decode` `PUSH`n opcodes', function () {
-            const { opcodes, jumpdests } = decodeArray(
+            const opcodes = decodeArray(
                 OPCODES.PUSH4,
                 ...[1, 2, 3, 4],
                 OPCODES.JUMPDEST,
@@ -132,22 +130,19 @@ describe('::step', function () {
                 new Opcode(11, OPCODES.JUMPDEST, 'JUMPDEST', null),
                 new Opcode(12, OPCODES.ADD, 'ADD', null),
             ]);
-            expect(jumpdests).to.be.deep.equal({ '5': 1, '11': 3 });
         });
 
         it('should not fail `PUSH`n does not have enough data', function () {
-            expect(decodeArray(OPCODES.PUSH32)).to.be.deep.equal({
-                opcodes: [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([]))],
-                jumpdests: {},
-            });
-            expect(decodeArray(OPCODES.PUSH32, 1)).to.be.deep.equal({
-                opcodes: [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([1]))],
-                jumpdests: {},
-            });
+            expect(decodeArray(OPCODES.PUSH32)).to.be.deep.equal(
+                [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([]))]
+            );
+            expect(decodeArray(OPCODES.PUSH32, 1)).to.be.deep.equal(
+                [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([1]))]
+            );
         });
 
         it('should `decode` with `INVALID` opcodes', function () {
-            const { opcodes } = decodeArray(0xb0, OPCODES.ADD, 0xb1);
+            const opcodes = decodeArray(0xb0, OPCODES.ADD, 0xb1);
 
             expect(opcodes).to.be.deep.equal([
                 new Opcode(0, 0xb0, 'UNDEF', null),
@@ -157,7 +152,7 @@ describe('::step', function () {
         });
 
         it('should `decode` example from hex string', function () {
-            const { opcodes } = decode('0x6003600501');
+            const opcodes = decode('0x6003600501');
 
             expect(opcodes).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH1, 'PUSH1', Buffer.from([3])),
@@ -167,7 +162,7 @@ describe('::step', function () {
         });
 
         it('should `decode` all `INVALID` opcodes', function () {
-            const { opcodes } = decode('0c0d0e0ffc');
+            const opcodes = decode('0c0d0e0ffc');
             expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
         });
 

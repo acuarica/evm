@@ -166,22 +166,6 @@ export function STEP(
     );
 }
 
-export interface Decoded<M> {
-
-    /**
-     * Represents the `Opcode`s found in `code`.
-     */
-    opcodes: Opcode<M>[];
-
-    /**
-     * Map between `JUMPDEST` instructions offset, _i.e._,
-     * as they appear in the `code` buffer and its index in the `opcodes` array.
-     *
-     * It allows to quickly find the `JUMPDEST` instruction.
-     */
-    jumpdests: { [jd: number]: number };
-}
-
 /**
  * 
  */
@@ -210,7 +194,7 @@ class Undef {
     }
 
     /**
-     * 
+     * Retrieves the opcodes by mnemonic.
      */
     opcodes(): { readonly [m in Mnemonic<this>]: number } {
         return Object.fromEntries([...Array(256).keys()]
@@ -226,13 +210,13 @@ class Undef {
      * ### Example
      *
      * ```typescript
-     * const { opcodes } = decode('0x6003600501');
+     * const opcodes = this.decode('0x6003600501');
      * ```
      *
      * @param code the hexadecimal string containing the bytecode to decode.
-     * @returns
+     * @returns the decoded `Opcode`s found in `code`.
      */
-    decode(code: string): Decoded<Mnemonic<this>> {
+    decode(code: string): Opcode<Mnemonic<this>>[] {
         if (code.length % 2 !== 0) {
             throw new Error('Unable to decode, input should have even length');
         }
@@ -241,14 +225,10 @@ class Undef {
         const bytecode = fromHexString(code, start);
 
         const opcodes: Opcode<Mnemonic<this>>[] = [];
-        const jumpdests: { [jd: number]: number } = {};
 
         for (let pc = 0; pc < bytecode.length; pc++) {
             const opcode = bytecode[pc];
             const [size, , mnemonic] = this[opcode];
-            if (mnemonic as string === 'JUMPDEST') {
-                jumpdests[pc] = opcodes.length;
-            }
             opcodes.push(new Opcode(
                 pc,
                 opcode,
@@ -261,7 +241,7 @@ class Undef {
             ));
         }
 
-        return { opcodes, jumpdests };
+        return opcodes;
     }
 }
 
@@ -849,14 +829,14 @@ function FLOW(functionBranches: ISelectorBranches) {
         JUMPDEST: [JUMPDEST, _state => { }],
         JUMP: [0x56, function JUMP(state, opcode, bytecode) {
             const offset = state.stack.pop();
-            const destpc = getDest(offset, opcode, bytecode);
+            const destpc = getJumpDest(offset, opcode, bytecode);
             const destBranch = Branch.make(destpc, state);
             state.halt(new Jump(offset, destBranch));
         }],
         JUMPI: [0x57, function JUMPI(state, opcode, bytecode) {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
-            const destpc = getDest(offset, opcode, bytecode);
+            const destpc = getJumpDest(offset, opcode, bytecode);
 
             const fallBranch = Branch.make(opcode.pc + 1, state);
 
@@ -874,11 +854,7 @@ function FLOW(functionBranches: ISelectorBranches) {
         }],
     }));
 
-    /**
-     * @param offset
-     * @param opcode Only used for error reporting.
-     */
-    function getDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
+    function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
             throw new Error(`${opcode.format()} offset should be numeric but found '${offset.tag}'`);
