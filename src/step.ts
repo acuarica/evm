@@ -286,6 +286,11 @@ export function fromHexString(hexstr: string, start: number): Uint8Array {
 }
 
 function PUSHES() {
+    const push = (size: number) => [
+        { opcode: 0x60 - 1 + size, size },
+        ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
+    ] as const;
+
     return Step({
         POP: [0x50, ({ stack }) => {
             const expr = stack.pop();
@@ -328,13 +333,6 @@ function PUSHES() {
         PUSH31: push(31),
         PUSH32: push(32),
     });
-
-    function push(size: number) {
-        return [
-            { opcode: 0x60 - 1 + size, size },
-            ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
-        ] as const;
-    }
 }
 
 function DUPS() {
@@ -378,6 +376,9 @@ function DUPS() {
 }
 
 function SWAPS() {
+    const swap = (position: number) =>
+        [0x90 - 1 + position, ({ stack }: Operand<Expr>) => stack.swap(position)] as const;
+
     return Step({
         SWAP1: swap(1),
         SWAP2: swap(2),
@@ -396,13 +397,20 @@ function SWAPS() {
         SWAP15: swap(15),
         SWAP16: swap(16),
     });
-
-    function swap(position: number) {
-        return [0x90 - 1 + position, ({ stack }: Operand<Expr>) => stack.swap(position)] as const;
-    }
 }
 
 function ALU() {
+    const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => function ({ stack }: Operand<Expr>) {
+        const lhs = stack.pop();
+        const rhs = stack.pop();
+        stack.push(new Cons(lhs, rhs));
+    };
+    const shift = (Cons: new (value: Expr, shift: Expr) => Expr) => function ({ stack }: Operand<Expr>) {
+        const shift = stack.pop();
+        const value = stack.pop();
+        stack.push(new Cons(value, shift));
+    };
+
     return Step({
         ADD: [0x01, bin(Add)],
         MUL: [0x02, bin(Mul)],
@@ -524,22 +532,6 @@ function ALU() {
         SHR: [0x1c, shift(Shr)],
         SAR: [0x1d, shift(Sar)],
     });
-
-    function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): ({ stack }: Operand<Expr>) => void {
-        return function ({ stack }: Operand<Expr>) {
-            const lhs = stack.pop();
-            const rhs = stack.pop();
-            stack.push(new Cons(lhs, rhs));
-        };
-    }
-
-    function shift(Cons: new (value: Expr, shift: Expr) => Expr): ({ stack }: Operand<Expr>) => void {
-        return function ({ stack }: Operand<Expr>) {
-            const shift = stack.pop();
-            const value = stack.pop();
-            stack.push(new Cons(value, shift));
-        };
-    }
 }
 
 /**
@@ -558,6 +550,18 @@ function SPECIAL() {
 }
 
 function DATACOPY() {
+    const datacopy = (kind: DataCopy['kind']) => ({ stack, memory }: Ram<Expr>, address?: Expr) => {
+        const dest = stack.pop();
+        const offset = stack.pop();
+        const size = stack.pop();
+        if (!dest.isVal()) {
+            // throw new Error('expected number in returndatacopy');
+        } else {
+            memory[Number(dest.val)] = new DataCopy(kind, offset, size, address);
+        }
+        // stmts.push(new MStore(location, data));
+    };
+
     return Step({
         CALLDATACOPY: [0x37, state => datacopy('calldatacopy')(state)],
         CODECOPY: [0x39, state => datacopy('codecopy')(state)],
@@ -567,37 +571,10 @@ function DATACOPY() {
         }],
         RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
     });
-
-    function datacopy(kind: DataCopy['kind']) {
-        return ({ stack, memory }: Ram<Expr>, address?: Expr): void => {
-            const dest = stack.pop();
-            const offset = stack.pop();
-            const size = stack.pop();
-            if (!dest.isVal()) {
-                // throw new Error('expected number in returndatacopy');
-            } else {
-                memory[Number(dest.val)] = new DataCopy(kind, offset, size, address);
-            }
-            // stmts.push(new MStore(location, data));
-        };
-    }
 }
 
 function MEMORY() {
-    return Step({
-        MLOAD: [0x51, ({ stack, memory }) => {
-            let loc = stack.pop();
-            loc = loc.eval();
-            stack.push(
-                loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new MLoad(loc)
-            );
-            // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
-        }],
-        MSTORE: [0x52, mstore],
-        MSTORE8: [0x53, mstore],
-    });
-
-    function mstore({ stack, memory, stmts }: State<Inst, Expr>): void {
+    const mstore = ({ stack, memory, stmts }: State<Inst, Expr>) => {
         let location = stack.pop();
         const data = stack.pop();
 
@@ -610,7 +587,20 @@ function MEMORY() {
         if (location.isVal()) {
             memory[Number(location.val)] = data;
         }
-    }
+    };
+
+    return Step({
+        MLOAD: [0x51, ({ stack, memory }) => {
+            let loc = stack.pop();
+            loc = loc.eval();
+            stack.push(
+                loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new MLoad(loc)
+            );
+            // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
+        }],
+        MSTORE: [0x52, mstore],
+        MSTORE8: [0x53, mstore],
+    });
 }
 
 /**
