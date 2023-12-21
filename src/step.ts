@@ -243,31 +243,31 @@ class Undef {
         const opcodes: Opcode<Mnemonic<this>>[] = [];
         const jumpdests: { [jd: number]: number } = {};
 
-        for (let i = 0; i < bytecode.length; i++) {
-            const opcode = bytecode[i];
+        for (let pc = 0; pc < bytecode.length; pc++) {
+            const opcode = bytecode[pc];
             const [size, , mnemonic] = this[opcode];
             if (mnemonic as string === 'JUMPDEST') {
-                jumpdests[i] = opcodes.length;
+                jumpdests[pc] = opcodes.length;
             }
             opcodes.push(new Opcode(
-                i,
+                pc,
                 opcode,
                 mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
                 size === 0 ? null : (() => {
-                    const data = bytecode.subarray(i + 1, i + size + 1);
-                    i += size;
+                    const data = bytecode.subarray(pc + 1, pc + size + 1);
+                    pc += size;
                     return data;
                 })(),
             ));
         }
 
-        return { opcodes: opcodes, jumpdests };
+        return { opcodes, jumpdests };
     }
 }
 
 /**
  * Represents an `Error` that occurs during decoding.
-     position The position in the bytecode where the error occurred.
+ * position The position in the bytecode where the error occurred.
  * @param hexstr the hexadecimal string to convert to `Uint8Array`
  * @param start the index in `hexstr` where to start decoding.
  * @returns the `Uint8Array` representation of `hexstr`
