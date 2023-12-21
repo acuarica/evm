@@ -1,14 +1,14 @@
 import util from 'util';
 
-import type { State, STEP } from 'sevm';
+import type { Operand, STEP } from 'sevm';
+import type { Expr } from 'sevm/ast';
 import { Add, Block, Mul, Sub, Val, Div, Exp, Mod, Not, Eq, Sig, Msg, Tx, CallValue, CallDataLoad } from 'sevm/ast';
-import type { Expr, Inst } from 'sevm/ast';
 
 const id = <E>(expr: E): E => expr;
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 
-type StackStep = bigint | FilterFn<ReturnType<typeof STEP>, (state: State<Inst, Expr>) => void>;
+type StackStep = bigint | FilterFn<ReturnType<typeof STEP>, (state: Operand<Expr>) => void>;
 const F = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), str: string) => ({
     insts,
     expr,

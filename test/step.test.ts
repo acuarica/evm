@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, sol, State, STEP } from 'sevm';
+import { Opcode, sol, Stack, State, STEP } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Block, Invalid } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
@@ -156,9 +156,9 @@ describe('::step', function () {
 
     describe('PUSHES', function () {
         it('should PUSH value onto stack', function () {
-            const state = new State<never, Expr>();
-            STEP().PUSH1(state, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
-            expect(state.stack.values).to.deep.equal([new Val(1n, true)]);
+            const stack = new Stack<Expr>();
+            STEP().PUSH1({ stack }, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
+            expect(stack.values).to.deep.equal([new Val(1n, true)]);
         });
     });
 
@@ -199,20 +199,20 @@ describe('::step', function () {
     describe('SWAPS', function () {
         sizes.forEach(size => {
             it(`should SWAP #${size} element on the stack`, function () {
-                const state = new State<never, Expr>();
-                state.stack.push(new Val(2n));
+                const stack = new Stack<Expr>();
+                stack.push(new Val(2n));
 
                 const ignored = [];
                 for (let i = 1; i < size; i++) {
                     ignored.push(new Val(1n));
-                    state.stack.push(new Val(1n));
+                    stack.push(new Val(1n));
                 }
 
-                state.stack.push(new Val(3n));
+                stack.push(new Val(3n));
 
-                STEP()[`SWAP${size as Size}`](state);
+                STEP()[`SWAP${size as Size}`]({ stack });
 
-                expect(state.stack.values).to.deep.equal([
+                expect(stack.values).to.deep.equal([
                     new Val(2n),
                     ...ignored,
                     new Val(3n),
@@ -220,13 +220,13 @@ describe('::step', function () {
             });
 
             it(`should throw when #${size + 1} elem is not present on the stack`, function () {
-                const state = new State<never, Expr>();
+                const stack = new Stack<Expr>();
 
                 for (let i = 1; i <= size; i++) {
-                    state.stack.push(new Val(1n));
+                    stack.push(new Val(1n));
                 }
 
-                expect(() => STEP()[`SWAP${size as Size}`](state)).to.throw(
+                expect(() => STEP()[`SWAP${size as Size}`]({ stack })).to.throw(
                     'Position not found for swap operation'
                 );
             });
@@ -237,16 +237,16 @@ describe('::step', function () {
         describe(name.toUpperCase(), function () {
             exprs.forEach(({ insts, expr, str }) => {
                 it(`should \`STEP\` \`[${insts.join('|')}]\` into \`${str}\``, function () {
-                    const state = new State<never, Expr>();
+                    const stack = new Stack<Expr>();
                     for (const inst of insts) {
                         if (typeof inst === 'bigint') {
-                            state.stack.push(new Val(inst));
+                            stack.push(new Val(inst));
                         } else {
-                            STEP()[inst](state);
+                            STEP()[inst]({ stack });
                         }
                     }
 
-                    expect(state.stack.values).to.be.deep.equal([expr]);
+                    expect(stack.values).to.be.deep.equal([expr]);
                 });
             });
         });

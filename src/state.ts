@@ -155,6 +155,11 @@ export class State<S, E> {
 }
 
 /**
- * Represents the volatile memory of `State`, _i.e._, its `stack` and `memory`.
+ * Represents the operand `stack` of the `State`.
+ */
+export type Operand<E> = Pick<State<never, E>, 'stack'>;
+
+/**
+ * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
  */
 export type Ram<E> = Pick<State<never, E>, 'stack' | 'memory'>;

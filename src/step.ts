@@ -1,4 +1,4 @@
-import type { Ram, State } from './state';
+import type { Operand, Ram, State } from './state';
 
 import { MLoad, MStore } from './ast/memory';
 import { type Expr, type Inst, Val, Locali, Local } from './ast';
@@ -79,8 +79,8 @@ export class Opcode<M = unknown> {
     /**
      * Returns the hexadecimal representation of `this` `data`.
      */
-    hexData(): string {
-        return this.data!.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
+    hexData(): string | undefined {
+        return this.data?.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
     }
 
     /**
@@ -88,7 +88,7 @@ export class Opcode<M = unknown> {
      */
     format(): string {
         const pushData = this.data
-            ? ` 0x${this.hexData()} (${parseInt(this.hexData(), 16)})`
+            ? ` 0x${this.hexData()} (${parseInt(this.hexData()!, 16)})`
             : '';
 
         return `@${this.pc}:${this.mnemonic}(0x${this.opcode.toString(16)})${pushData}`;
@@ -148,9 +148,11 @@ export function STEP(
 ) {
     return Object.assign(new Undef(),
         PUSHES(),
-        STACK(),
-        MATH(),
+        DUPS(),
+        SWAPS(),
+        ALU(),
         SPECIAL(),
+        DATACOPY(),
         MEMORY(),
         SYSTEM(),
         Step({
@@ -197,7 +199,6 @@ class Undef {
         );
     }
 
-    hola = 'sddsdssdsddsdsds----';
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
      */
@@ -286,6 +287,14 @@ export function fromHexString(hexstr: string, start: number): Uint8Array {
 
 function PUSHES() {
     return Step({
+        POP: [0x50, ({ stack }) => {
+            const expr = stack.pop();
+            if (expr.tag === 'Local') {
+                // expr.nrefs--;
+                // console.log('POP: Local', expr);
+                // throw new Error('POP: Local');
+            }
+        }],
         PUSH1: push(1),
         PUSH2: push(2),
         PUSH3: push(3),
@@ -323,25 +332,13 @@ function PUSHES() {
     function push(size: number) {
         return [
             { opcode: 0x60 - 1 + size, size },
-            ({ stack }: State<Inst, Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
+            ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
         ] as const;
     }
 }
 
-/**
- * Set of stack related steps, `PUSHn`, `DUPn` and `SWAPn` opcodes.
- */
-function STACK() {
+function DUPS() {
     return Step({
-        POP: [0x50, ({ stack }) => {
-            const expr = stack.pop();
-            if (expr.tag === 'Local') {
-                // expr.nrefs--;
-                // console.log('POP: Local', expr);
-                // throw new Error('POP: Local');
-            }
-        }],
-
         DUP1: dup(0),
         DUP2: dup(1),
         DUP3: dup(2),
@@ -359,22 +356,6 @@ function STACK() {
         DUP15: dup(14),
         DUP16: dup(15),
 
-        SWAP1: swap(1),
-        SWAP2: swap(2),
-        SWAP3: swap(3),
-        SWAP4: swap(4),
-        SWAP5: swap(5),
-        SWAP6: swap(6),
-        SWAP7: swap(7),
-        SWAP8: swap(8),
-        SWAP9: swap(9),
-        SWAP10: swap(10),
-        SWAP11: swap(11),
-        SWAP12: swap(12),
-        SWAP13: swap(13),
-        SWAP14: swap(14),
-        SWAP15: swap(15),
-        SWAP16: swap(16),
     });
 
     function dup(position: number) {
@@ -395,13 +376,34 @@ function STACK() {
             state.stack.push(state.stack.values[position]);
         }] as const;
     }
+}
+
+function SWAPS() {
+    return Step({
+        SWAP1: swap(1),
+        SWAP2: swap(2),
+        SWAP3: swap(3),
+        SWAP4: swap(4),
+        SWAP5: swap(5),
+        SWAP6: swap(6),
+        SWAP7: swap(7),
+        SWAP8: swap(8),
+        SWAP9: swap(9),
+        SWAP10: swap(10),
+        SWAP11: swap(11),
+        SWAP12: swap(12),
+        SWAP13: swap(13),
+        SWAP14: swap(14),
+        SWAP15: swap(15),
+        SWAP16: swap(16),
+    });
 
     function swap(position: number) {
-        return [0x90 - 1 + position, ({ stack }: State<Inst, Expr>) => stack.swap(position)] as const;
+        return [0x90 - 1 + position, ({ stack }: Operand<Expr>) => stack.swap(position)] as const;
     }
 }
 
-function MATH() {
+function ALU() {
     return Step({
         ADD: [0x01, bin(Add)],
         MUL: [0x02, bin(Mul)],
@@ -451,7 +453,7 @@ function MATH() {
         GT: [0x11, bin(Gt)],
         SLT: [0x12, bin(Lt)],
         SGT: [0x13, bin(Gt)],
-        EQ: [0x14, ({ stack }: Ram<Expr>): void => {
+        EQ: [0x14, ({ stack }) => {
             const DIVEXPsig = (left: Expr, right: Expr): Sig | undefined => {
                 left = left.eval();
                 right = right.eval();
@@ -503,7 +505,7 @@ function MATH() {
                     new Eq(left, right)
             );
         }],
-        ISZERO: [0x15, ({ stack }: Ram<Expr>): void => {
+        ISZERO: [0x15, ({ stack }) => {
             const value = stack.pop();
             stack.push(new IsZero(value));
         }],
@@ -524,16 +526,16 @@ function MATH() {
         SAR: [0x1d, shift(Sar)],
     });
 
-    function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): ({ stack }: Ram<Expr>) => void {
-        return function ({ stack }: Ram<Expr>) {
+    function bin(Cons: new (lhs: Expr, rhs: Expr) => Expr): ({ stack }: Operand<Expr>) => void {
+        return function ({ stack }: Operand<Expr>) {
             const lhs = stack.pop();
             const rhs = stack.pop();
             stack.push(new Cons(lhs, rhs));
         };
     }
 
-    function shift(Cons: new (value: Expr, shift: Expr) => Expr): ({ stack }: Ram<Expr>) => void {
-        return function ({ stack }: Ram<Expr>) {
+    function shift(Cons: new (value: Expr, shift: Expr) => Expr): ({ stack }: Operand<Expr>) => void {
+        return function ({ stack }: Operand<Expr>) {
             const shift = stack.pop();
             const value = stack.pop();
             stack.push(new Cons(value, shift));
@@ -549,10 +551,15 @@ function SPECIAL() {
         Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
 
     return Step({
-        ...mapValues(Info, sym => [sym.opcode, state => state.stack.push(sym)]),
-        ...mapKeys(FNS, n => [FNS[n][2], state => state.stack.push(new Fn(n, state.stack.pop()))]),
+        ...mapValues(Info, sym => [sym.opcode, ({ stack }) => stack.push(sym)]),
+        ...mapKeys(FNS, n => [FNS[n][2], ({ stack }) => stack.push(new Fn(n, stack.pop()))]),
         CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
         CALLDATALOAD: [0x35, ({ stack }) => stack.push(new CallDataLoad(stack.pop()))],
+    } as const satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void]; });
+}
+
+function DATACOPY() {
+    return Step({
         CALLDATACOPY: [0x37, state => datacopy('calldatacopy')(state)],
         CODECOPY: [0x39, state => datacopy('codecopy')(state)],
         EXTCODECOPY: [0x3c, state => {
@@ -560,7 +567,7 @@ function SPECIAL() {
             datacopy('extcodecopy')(state, address);
         }],
         RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
-    } as const satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>) => void]; });
+    });
 
     function datacopy(kind: DataCopy['kind']) {
         return ({ stack, memory }: Ram<Expr>, address?: Expr): void => {
