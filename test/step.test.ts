@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, sol, Stack, State, STEP } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, STEP } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Block, Invalid } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
@@ -54,6 +54,21 @@ describe('::step', function () {
             expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
             expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
             expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+        });
+
+        it('should override `NUMBER` step', function () {
+            const stack = new Stack<Expr>();
+            let numberWasCalled = false;
+            const step = Object.setPrototypeOf({
+                NUMBER(state: Operand<Expr>) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    super.NUMBER(state);
+                    numberWasCalled = true;
+                }
+            }, STEP());
+            step.NUMBER({ stack });
+            expect(stack.top).to.be.deep.equal(Block.number);
+            expect(numberWasCalled, '`NUMBER` step was not overriden').to.be.true;
         });
     });
 
