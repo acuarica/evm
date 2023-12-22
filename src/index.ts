@@ -1,22 +1,15 @@
 import { type Expr, type Inst, Throw, type Val } from './ast';
 import { CallSite, If, Require, type Stmt } from './ast';
-import type { Type } from './type';
 import { Not } from './ast/alu';
 import type { Return, Revert } from './ast/system';
+import type { IEvents } from './ast/log';
+import { type SLoad, Variable, type MappingLoad, type IStore } from './ast/storage';
+import type { Type } from './type';
 import { State } from './state';
 import { EVM } from './evm';
-import { type SLoad, Variable, type MappingLoad, type IStore } from './ast/storage';
 import ERCs from './ercs';
-import type { IEvents } from './ast';
 import { STEP, type ISelectorBranches } from './step';
 import type { Metadata } from './metadata';
-
-export * from './metadata';
-export * from './state';
-export * from './step';
-export * from './type';
-export * from './evm';
-export * from './yul';
 
 /**
  *
@@ -368,4 +361,10 @@ function requiresNoValue(stmts: Stmt[]): boolean {
     );
 }
 
+export * from './metadata';
+export * from './state';
+export * from './step';
+export * from './type';
+export * from './evm';
 export * from './sol';
+export * from './yul';
