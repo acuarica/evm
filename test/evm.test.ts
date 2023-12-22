@@ -2,7 +2,7 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
 import { EVM, State, type Ram, sol, yul, solStmts, STEP } from 'sevm';
-import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump } from 'sevm/ast';
+import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump, Block } from 'sevm/ast';
 
 import { compile } from './utils/solc';
 import { eventSelector } from './utils/selector';
@@ -66,31 +66,31 @@ describe('::evm', function () {
         const src = `contract Test {
             event Deposit(uint256);
             fallback () external payable {
-                emit Deposit(block.number);
-                emit Deposit(block.number);
+                emit Deposit(block.gaslimit);
+                emit Deposit(block.gaslimit);
                 emit Deposit(tx.gasprice);
             }
         }`;
-        let count = 0;
-        let top = undefined;
+        let count = 0, gasLimit = null, gasPrice = null;
 
         const evm = new EVM(compile(src, '0.7.6', this).bytecode, Object.setPrototypeOf({
-            NUMBER(state: Ram<Expr>) {
+            GASLIMIT(state: Ram<Expr>) {
                 count++;
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                super.NUMBER(state);
+                super.GASLIMIT(state);
+                gasLimit = state.stack.top;
             },
             GASPRICE(state: Ram<Expr>) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 super.GASPRICE(state);
-                top = state.stack.top;
+                gasPrice = state.stack.top;
             },
         }, STEP()));
 
         evm.start();
         expect(count).to.be.equal(2);
-        expect(top).to.be.not.undefined;
-        expect(top).to.be.deep.equal(Tx.gasprice);
+        expect(gasLimit).to.be.equal(Block.gaslimit);
+        expect(gasPrice).to.be.equal(Tx.gasprice);
     });
 
     it('should dedup locals when ref non-inlineable value', function () {
