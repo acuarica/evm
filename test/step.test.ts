@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, STEP } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Block, Invalid, MStore, Jump, Branch, Jumpi } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Block, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents } from 'sevm/ast';
 import { Add, Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
@@ -378,6 +378,38 @@ describe('::step', function () {
                 ]),
             ]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return (memory[0x4], memory[0x24]);');
+        });
+    });
+
+    describe('LOGS', function () {
+        it('should have empty `events` when emitting `LOG0` event', function () {
+            const step = STEP();
+            const state = new State<Inst, Expr>();
+            state.stack.push(new Val(1n));
+            state.stack.push(new Val(2n));
+            step.LOG0(state);
+
+            expect(step.events).to.be.deep.equal({});
+            expect(state.stmts).to.be.deep.equal([
+                new Log(undefined, new Val(2n), new Val(1n), [], [new MLoad(new Val(2n))])
+            ]);
+        });
+
+        it('should have `events` when emitting `LOG1` event', function () {
+            const step = STEP();
+            const state = new State<Inst, Expr>();
+            state.stack.push(new Val(5n));
+            state.stack.push(new Val(1n));
+            state.stack.push(new Val(2n));
+            step.LOG1(state);
+
+            const topic = 5n.toString(16).padStart(64, '0');
+            expect(step.events).to.be.deep.equal({
+                [topic]: { indexedCount: 0 },
+            } satisfies IEvents);
+            expect(state.stmts).to.be.deep.equal([
+                new Log(step.events[topic], new Val(2n), new Val(1n), [new Val(5n)], [new MLoad(new Val(2n))])
+            ]);
         });
     });
 
