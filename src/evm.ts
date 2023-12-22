@@ -116,8 +116,6 @@ export class EVM<S extends
     run(pc0: number, state: State<Inst, Expr>): void {
         const branches: Branch[] = [new Branch(pc0, state)];
         while (branches.length > 0) {
-            // The non-null assertion operator `!` is required because the guard does not track array's emptiness.
-            // See https://github.com/microsoft/TypeScript/issues/30406.
             const branch = branches.shift()!;
 
             const chunk = this.blocks.get(branch.pc);
