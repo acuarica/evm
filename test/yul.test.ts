@@ -20,7 +20,7 @@ import {
     Val,
 } from 'sevm/ast';
 
-describe('yul', function () {
+describe('::yul', function () {
     (
         [
             [new Val(4n), '0x4'],

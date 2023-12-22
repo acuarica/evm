@@ -98,21 +98,6 @@ export class Opcode<M = unknown> {
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
 
 /**
- * This module is used to `decode` bytecode into `Opcode`.
- *
- * ### Example
- *
- * ```typescript
- * const { opcodes } = decode('0x6003600501');
- * ```
- *
- * @packageDocumentation
- */
-/**
- * 
- * A map from numeric opcodes to string mnemonics.
- */
-/**
  * Set of opcodes defined by the EVM.
  *
  * They are constructed from two kinds of opcodes.
@@ -141,6 +126,8 @@ function Step<
 }
 
 /**
+ * This module is used to `decode` bytecode into `Opcode`.
+ *
  * https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
  * https://eips.ethereum.org/EIPS/eip-3855
  * 
@@ -181,6 +168,10 @@ export function STEP(
 export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
 
 class Undef {
+
+    /**
+     * A map from numeric opcodes to decode configuration and string mnemonics.
+     */
     readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
 
     constructor() {
@@ -701,7 +692,7 @@ function LOGS(events: IEvents) {
     }));
 
     function log(topicsCount: number, events: IEvents) {
-        return [0xa0 + topicsCount, ({ stack, memory, stmts }: State<Inst, Expr>): void => {
+        return [0xa0 + topicsCount, function log({ stack, memory, stmts }: State<Inst, Expr>) {
             const offset = stack.pop();
             const size = stack.pop();
 
