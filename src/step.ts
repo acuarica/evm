@@ -266,11 +266,13 @@ export function fromHexString(hexstr: string): Uint8Array {
 function PUSHES() {
     const push = (size: number) => [
         { opcode: 0x60 - 1 + size, size },
-        ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
+        function push({ stack }: Operand<Expr>, opcode: Opcode) {
+            stack.push(new Val(BigInt('0x' + opcode.hexData()), true));
+        }
     ] as const;
 
     return Step({
-        POP: [0x50, ({ stack }) => {
+        POP: [0x50, function pop({ stack }) {
             const expr = stack.pop();
             if (expr.tag === 'Local') {
                 // expr.nrefs--;
@@ -334,7 +336,7 @@ function DUPS() {
     });
 
     function dup(position: number) {
-        return [0x80 + position, function (state: State<Inst, Expr>) {
+        return [0x80 + position, function dup(state: State<Inst, Expr>) {
             if (position >= state.stack.values.length) {
                 throw new Error('Invalid duplication operation, position was not found');
                 // state.stack.values[position] = Block.coinbase;
@@ -354,8 +356,12 @@ function DUPS() {
 }
 
 function SWAPS() {
-    const swap = (position: number) =>
-        [0x90 - 1 + position, ({ stack }: Operand<Expr>) => stack.swap(position)] as const;
+    const swap = (position: number) => [
+        0x90 - 1 + position,
+        function swap({ stack }: Operand<Expr>) {
+            stack.swap(position);
+        }
+    ] as const;
 
     return Step({
         SWAP1: swap(1),
@@ -378,12 +384,12 @@ function SWAPS() {
 }
 
 function ALU() {
-    const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => ({ stack }: Operand<Expr>) => {
+    const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => function bin({ stack }: Operand<Expr>) {
         const lhs = stack.pop();
         const rhs = stack.pop();
         stack.push(new Cons(lhs, rhs));
     };
-    const shift = (Cons: new (value: Expr, shift: Expr) => Expr) => ({ stack }: Operand<Expr>) => {
+    const shift = (Cons: new (value: Expr, shift: Expr) => Expr) => function shift({ stack }: Operand<Expr>) {
         const shift = stack.pop();
         const value = stack.pop();
         stack.push(new Cons(value, shift));
@@ -528,7 +534,7 @@ function SPECIAL() {
 }
 
 function DATACOPY() {
-    const datacopy = (kind: DataCopy['kind']) => ({ stack, memory }: Ram<Expr>, address?: Expr) => {
+    const datacopy = (kind: DataCopy['kind']) => function datacopy({ stack, memory }: Ram<Expr>, address?: Expr) {
         const dest = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
@@ -588,13 +594,13 @@ function SYSTEM() {
     return Step({
         SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
         STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
-        CREATE: [0xf0, ({ stack }) => {
+        CREATE: [0xf0, function create({ stack }) {
             const value = stack.pop();
             const offset = stack.pop();
             const size = stack.pop();
             stack.push(new Create(value, offset, size));
         }],
-        CALL: [0xf1, ({ stack, memory }) => {
+        CALL: [0xf1, function call({ stack, memory }) {
             const gas = stack.pop();
             const address = stack.pop();
             const value = stack.pop();
@@ -607,7 +613,7 @@ function SYSTEM() {
                 memory[Number(retStart.val)] = new ReturnData(retStart, retLen);
             }
         }],
-        CALLCODE: [0xf2, ({ stack }) => {
+        CALLCODE: [0xf2, function callcode({ stack }) {
             const gas = stack.pop();
             const address = stack.pop();
             const value = stack.pop();
@@ -618,7 +624,7 @@ function SYSTEM() {
             stack.push(new CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
         }],
         RETURN: [{ opcode: 0xf3, halts: true }, state => state.halt(memArgs(state, Return))],
-        DELEGATECALL: [0xf4, ({ stack }) => {
+        DELEGATECALL: [0xf4, function delegatecall({ stack }) {
             const gas = stack.pop();
             const address = stack.pop();
             const argsStart = stack.pop();
@@ -627,13 +633,13 @@ function SYSTEM() {
             const retLen = stack.pop();
             stack.push(new DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
         }],
-        CREATE2: [0xf5, ({ stack }) => {
+        CREATE2: [0xf5, function create2({ stack }) {
             const value = stack.pop();
             const memoryStart = stack.pop();
             const memoryLength = stack.pop();
             stack.push(new Create2(memoryStart, memoryLength, value));
         }],
-        STATICCALL: [0xfa, ({ stack }) => {
+        STATICCALL: [0xfa, function staticcall({ stack }) {
             const gas = stack.pop();
             const address = stack.pop();
             const argsStart = stack.pop();
@@ -643,7 +649,7 @@ function SYSTEM() {
             stack.push(new StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
         }],
         REVERT: [{ opcode: 0xfd, halts: true }, state => state.halt(memArgs(state, Revert))],
-        SELFDESTRUCT: [{ opcode: 0xff, halts: true }, state => {
+        SELFDESTRUCT: [{ opcode: 0xff, halts: true }, function selfdestruct(state) {
             const address = state.stack.pop();
             state.halt(new SelfDestruct(address));
         }],
@@ -722,7 +728,7 @@ function LOGS(events: IEvents) {
 
 function STORAGE({ variables, mappings }: IStore) {
     return Object.assign({ variables, mappings }, Step({
-        SLOAD: [0x54, ({ stack }) => {
+        SLOAD: [0x54, function sload({ stack }) {
             const loc = stack.pop();
 
             if (loc.tag === 'Sha3') {
@@ -751,7 +757,7 @@ function STORAGE({ variables, mappings }: IStore) {
             }
         }],
 
-        SSTORE: [0x55, ({ stack, stmts }) => {
+        SSTORE: [0x55, function sstore({ stack, stmts }) {
             const slot = stack.pop();
             const value = stack.pop();
 
@@ -825,13 +831,13 @@ function FLOW(functionBranches: ISelectorBranches) {
     const JUMPDEST = 0x5b;
     return Object.assign({ functionBranches }, Step({
         JUMPDEST: [JUMPDEST, _state => { }],
-        JUMP: [0x56, function JUMP(state, opcode, bytecode) {
+        JUMP: [0x56, function jump(state, opcode, bytecode) {
             const offset = state.stack.pop();
             const destpc = getJumpDest(offset, opcode, bytecode);
             const destBranch = Branch.make(destpc, state);
             state.halt(new Jump(offset, destBranch));
         }],
-        JUMPI: [0x57, function JUMPI(state, opcode, bytecode) {
+        JUMPI: [0x57, function jumpi(state, opcode, bytecode) {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
             const destpc = getJumpDest(offset, opcode, bytecode);
