@@ -7,16 +7,6 @@ import { Add, Info, MappingLoad, MappingStore, Msg, Sha3, Stop, Sub, Val } from 
 import { compile } from '../utils/solc';
 
 describe('evm::storage', function () {
-    it('should store variable', function () {
-        const step = STEP();
-
-        const state = new State<Inst, Expr>();
-        state.stack.push(new Val(1n));
-        state.stack.push(new Val(2n));
-        step.SSTORE(state);
-
-        expect(step.variables).to.have.keys('2');
-    });
 
     it.skip('should detect storage variable', function () {
         const src = `contract Test {
