@@ -18,10 +18,11 @@ describe('::evm', function () {
     });
 
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
-        const step = STEP();
-        const evm = new EVM('0x', step);
-        expect(() => evm.containsOpcode('add' as keyof typeof step['opcodes'])).to.throw('Provided opcode `add` is not');
-        expect(() => evm.containsOpcode('haltingSteps')).to.throw('Provided opcode `haltingSteps` is not');
+        const evm = new EVM('0x');
+        expect(() => evm.containsOpcode('add' as keyof ReturnType<typeof STEP>['opcodes']))
+            .to.throw('Provided opcode `add` is not');
+        expect(() => evm.containsOpcode('haltingSteps'))
+            .to.throw('Provided opcode `haltingSteps` is not');
     });
 
     it('should halt when `exec` invalid opcode', function () {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, sol, yul } from 'sevm';
+import { EVM, State, sol, yul } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 import { Add, Info, MappingLoad, MappingStore, Msg, Sha3, Stop, Sub, Val } from 'sevm/ast';
 
@@ -49,7 +49,7 @@ describe('evm::storage', function () {
                 // }
             }
         }`;
-        const evm = new EVM(compile(src, '0.5.5', this).bytecode, STEP());
+        const evm = new EVM(compile(src, '0.5.5', this).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
@@ -73,7 +73,7 @@ describe('evm::storage', function () {
                 val3 += 7;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode, STEP());
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         // state.stmts.forEach(stmt => console.log(sol`${stmt}`));
@@ -92,7 +92,7 @@ describe('evm::storage', function () {
                 t.val2 += 11;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode, STEP());
+        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
@@ -123,7 +123,7 @@ describe('evm::storage', function () {
                     allowance[address(this)][msg.sender] -= 11;
                 }
             }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode, STEP());
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 

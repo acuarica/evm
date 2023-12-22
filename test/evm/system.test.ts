@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, STEP, State, build, sol, solStmts } from 'sevm';
+import { EVM, State, build, sol, solStmts } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
@@ -54,7 +54,7 @@ describe('evm::system', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode, STEP());
+        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         const stmts = build(state);
