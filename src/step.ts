@@ -140,6 +140,13 @@ function Step<
     return { ...ms, ...Object.fromEntries(os) };
 }
 
+/**
+ * https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
+ * https://eips.ethereum.org/EIPS/eip-3855
+ * 
+ * https://ethereum.github.io/execution-specs/diffs/gray_glacier_paris.html 
+ * https://eips.ethereum.org/EIPS/eip-4399
+ */
 export function STEP(
     events: IEvents = {},
     variables: IStore['variables'] = {},
@@ -162,7 +169,9 @@ export function STEP(
         LOGS(events),
         STORAGE({ variables, mappings }),
         FLOW(functionBranches),
-        PUSH0(),
+        Step({
+            PUSH0: [0x5f, ({ stack }) => stack.push(new Val(0n))]
+        })
     );
 }
 
@@ -875,20 +884,3 @@ function FLOW(functionBranches: ISelectorBranches) {
         }
     }
 }
-
-/**
- * https://eips.ethereum.org/EIPS/eip-3855
- */
-function PUSH0() {
-    return Step({
-        PUSH0: [0x5f, ({ stack }) => stack.push(new Val(0n))],
-    });
-}
-
-// Block.qw = new Prop(['asdf', 'uint']);
-// const STEP = {
-//     PREVRANDAO: [0x44, ({ stack }: { stack: Stack<Expr> }) => {
-//         stack.push(Block.basefee);
-//     }],
-
-// };

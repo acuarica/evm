@@ -6,7 +6,8 @@ const BLOCK = {
     TIMESTAMP: ['timestamp', 'uint', 0x42],
     NUMBER: ['number', 'uint', 0x43],
     DIFFICULTY: ['difficulty', 'uint', 0x44],
-    // prevrandao
+    // TODO: enable prevrandao
+    // PREVRANDAO: ['prevrandao', 'uint', 0x44],
     GASLIMIT: ['gaslimit', 'uint', 0x45],
     CHAINID: ['chainid', 'uint', 0x46],
 } as const;
