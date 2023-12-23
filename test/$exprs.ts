@@ -2,7 +2,7 @@ import util from 'util';
 
 import type { Operand, STEP } from 'sevm';
 import type { Expr } from 'sevm/ast';
-import { Add, Block, Mul, Sub, Val, Div, Exp, Mod, Not, Eq, Sig, Msg, Tx, CallValue, CallDataLoad } from 'sevm/ast';
+import { Add, Mul, Sub, Val, Div, Exp, Mod, Not, Eq, Sig, CallValue, CallDataLoad, Props } from 'sevm/ast';
 
 const id = <E>(expr: E): E => expr;
 
@@ -21,7 +21,7 @@ export const title = (obj: unknown) => truncate(util.inspect(obj, { breakLength:
 
 export const $exprs = {
     alu: [
-        F(['NUMBER', 15n, 'ADD'], new Add(new Val(15n), Block.number), id, '0xf + block.number'),
+        F(['NUMBER', 15n, 'ADD'], new Add(new Val(15n), Props['block.number']), id, '0xf + block.number'),
         F([2n, 1n, 'ADD'], new Add(new Val(1n), new Val(2n)), new Val(3n), '0x1 + 0x2'),
         F([2n, 1n, 'SUB'], new Sub(new Val(1n), new Val(2n)), new Val(-1n), '0x1 - 0x2'),
         F([3n, 2n, 'ADD', 1n, 'ADD'], new Add(new Val(1n), new Add(new Val(2n), new Val(3n))), new Val(6n), '0x1 + 0x2 + 0x3'),
@@ -39,10 +39,10 @@ export const $exprs = {
 
         F([0n, 'NOT'], new Not(new Val(BigInt(0))), new Val(BigInt('0x' + 'ff'.repeat(32))), '~0x0'),
         F([1n, 'NOT'], new Not(new Val(BigInt(1))), new Val(BigInt('0x' + 'ff'.repeat(31) + 'fe')), '~0x1'),
-        F(['NUMBER', 'NOT'], new Not(Block.number), id, '~block.number'),
+        F(['NUMBER', 'NOT'], new Not(Props['block.number']), id, '~block.number'),
         F([1n, 1n, 'EQ'], new Val(1n), id, '0x1'),
         F([1n, 2n, 'EQ'], new Val(0n), id, '0x0'),
-        F([1n, 'NUMBER', 'EQ'], new Eq(Block.number, new Val(1n)), id, 'block.number == 0x1'),
+        F([1n, 'NUMBER', 'EQ'], new Eq(Props['block.number'], new Val(1n)), id, 'block.number == 0x1'),
 
         ...['06fdde03', '12345678', '00000001', '00000000'].map(selector =>
             [
@@ -56,19 +56,19 @@ export const $exprs = {
         ).flat(),
     ],
     special: [
-        F(['BASEFEE'], Block.basefee, id, 'block.basefee'),
-        F(['CHAINID'], Block.chainid, id, 'block.chainid'),
-        F(['COINBASE'], Block.coinbase, id, 'block.coinbase'),
-        F(['DIFFICULTY'], Block.difficulty, id, 'block.difficulty'),
-        F(['GASLIMIT'], Block.gaslimit, id, 'block.gaslimit'),
-        F(['NUMBER'], Block.number, id, 'block.number'),
-        F(['TIMESTAMP'], Block.timestamp, id, 'block.timestamp'),
+        F(['BASEFEE'], Props['block.basefee'], id, 'block.basefee'),
+        F(['CHAINID'], Props['block.chainid'], id, 'block.chainid'),
+        F(['COINBASE'], Props['block.coinbase'], id, 'block.coinbase'),
+        F(['DIFFICULTY'], Props['block.difficulty'], id, 'block.difficulty'),
+        F(['GASLIMIT'], Props['block.gaslimit'], id, 'block.gaslimit'),
+        F(['NUMBER'], Props['block.number'], id, 'block.number'),
+        F(['TIMESTAMP'], Props['block.timestamp'], id, 'block.timestamp'),
 
-        F(['CALLER'], Msg.sender, id, 'msg.sender'),
-        F(['CALLDATASIZE'], Msg['data.length'], id, 'msg.data.length'),
+        F(['CALLER'], Props['msg.sender'], id, 'msg.sender'),
+        F(['CALLDATASIZE'], Props['msg.data.length'], id, 'msg.data.length'),
 
-        F(['ORIGIN'], Tx.origin, id, 'tx.origin'),
-        F(['GASPRICE'], Tx.gasprice, id, 'tx.gasprice'),
+        F(['ORIGIN'], Props['tx.origin'], id, 'tx.origin'),
+        F(['GASPRICE'], Props['tx.gasprice'], id, 'tx.gasprice'),
 
         F(['CALLVALUE'], new CallValue(), id, 'msg.value'),
 

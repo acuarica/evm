@@ -3,7 +3,7 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
 import { EVM, State, stripMetadataHash, STEP } from 'sevm';
-import { And, Block, Not, Val, Local, type Inst, type Expr } from 'sevm/ast';
+import { And, Not, Val, Local, type Inst, type Expr, Props } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
 import { compile } from './utils/solc';
@@ -50,7 +50,7 @@ describe('evm', function () {
         expect(stmt.args![0]).to.be.deep.equal(
             new And(
                 new Val(BigInt('0x' + 'ff'.repeat(16)), true),
-                new Local(1, new Not(Block.number))
+                new Local(1, new Not(Props['block.number']))
             )
         );
     });

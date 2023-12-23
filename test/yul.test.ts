@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { yul } from 'sevm';
 import {
     Add,
-    Block,
     Byte,
     CallDataLoad,
     CallValue,
@@ -13,6 +12,7 @@ import {
     MLoad,
     Mul,
     Not,
+    Props,
     Sha3,
     Shl,
     Sig,
@@ -34,7 +34,7 @@ describe('::yul', function () {
             [new CallDataLoad(new Add(new Val(4n), new Val(8n))), 'calldataload(add(0x4, 0x8))'],
             [new MLoad(new Add(new Val(4n), new Val(8n))), 'mload(add(0x4, 0x8))'],
             [new Sha3(new Val(4n), new Val(8n)), 'keccak256(0x4, 0x8)'],
-            [Block.coinbase, 'block.coinbase'],
+            [Props['block.coinbase'], 'block.coinbase'],
         ] as const
     ).forEach(([expr, str]) => {
         it(`should convert \`Expr\` to Yul \`${str}\``, function () {

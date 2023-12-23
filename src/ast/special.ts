@@ -1,62 +1,17 @@
 import { type Expr, Tag } from '.';
+import type { Type } from '../type';
 
-const BLOCK = {
-    BASEFEE: ['basefee', 'uint', 0x48],
-    COINBASE: ['coinbase', 'address payable', 0x41],
-    TIMESTAMP: ['timestamp', 'uint', 0x42],
-    NUMBER: ['number', 'uint', 0x43],
-    DIFFICULTY: ['difficulty', 'uint', 0x44],
-    // TODO: enable prevrandao
-    // PREVRANDAO: ['prevrandao', 'uint', 0x44],
-    GASLIMIT: ['gaslimit', 'uint', 0x45],
-    CHAINID: ['chainid', 'uint', 0x46],
-} as const;
-
-const MSG = {
-    CALLER: ['sender', 'address', 0x33],
-    CALLDATASIZE: ['data.length', 'uint', 0x36],
-} as const;
-
-const TX = {
-    ORIGIN: ['origin', 'address', 0x32],
-    GASPRICE: ['gasprice', 'uint', 0x3a],
-} as const;
-
-type Props<K extends string = string> = { [k in K]: readonly [string, string, number] };
-
-const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
-    Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
-
-const applyPrefix = <const P extends Props, const O extends string>(props: P, obj: O) =>
-    mapValues(props, ([field, type, opcode]) => [`${obj}.${field}`, type, opcode]) as {
-        [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1], P[prop][2]];
-    };
-
-const PROPS = {
-    ADDRESS: ['address(this)', 'address', 0x30],
-    CODESIZE: ['codesize()', 'uint', 0x38],
-    RETURNDATASIZE: ['returndatasize()', 'uint', 0x3d],
-    ...applyPrefix(BLOCK, 'block'),
-    ...applyPrefix(MSG, 'msg'),
-    ...applyPrefix(TX, 'tx'),
-    SELFBALANCE: ['address(this).balance', 'uint', 0x47],
-    MSIZE: ['msize()', 'uint', 0x59],
-    GAS: ['gasleft()', 'uint', 0x5a],
-} as const;
+// TODO: enable prevrandao
+// PREVRANDAO: ['prevrandao', 'uint', 0x44],
 
 /**
  * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 export class Prop extends Tag {
     readonly tag = 'Prop';
-    readonly value: (typeof PROPS)[keyof typeof PROPS][0];
-    readonly opcode: number;
 
-    constructor([value, type, opcode]: (typeof PROPS)[keyof typeof PROPS]) {
+    constructor(readonly symbol: string, override readonly type: Type) {
         super();
-        this.value = value;
-        this.type = type;
-        this.opcode = opcode;
     }
 
     eval(): Expr {
@@ -64,18 +19,46 @@ export class Prop extends Tag {
     }
 }
 
-export const Info = mapValues(PROPS, info => new Prop(info));
+const prop = <S extends string>(prop: readonly [S, Type]) =>
+    [prop[0], new Prop(prop[0], prop[1])] as const;
 
-export const Block = Object.fromEntries(
-    Object.entries(BLOCK).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
-);
+const applyPrefix = <const S extends string, const O extends string>(
+    props: readonly (readonly [S, Type])[], obj: O
+) => props.map(([field, type]) => [`${obj}.${field}`, type] as const);
 
-export const Msg = Object.fromEntries(
-    Object.entries(MSG).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
-);
-
-export const Tx = Object.fromEntries(
-    Object.entries(TX).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
+/**
+ * A collection of _Block and Transaction Properties_ defined as `Prop`.
+ * 
+ * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties
+ * 
+ * @see {@link Prop}
+ */
+export const Props = Object.assign(
+    Object.fromEntries(([
+        ['address(this)', 'address'],
+        ['codesize()', 'uint'],
+        ['returndatasize()', 'uint'],
+        ['address(this).balance', 'uint'],
+        ['msize()', 'uint'],
+        ['gasleft()', 'uint'],
+    ] as const).map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['basefee', 'uint'],
+        ['coinbase', 'address payable'],
+        ['timestamp', 'uint'],
+        ['number', 'uint'],
+        ['difficulty', 'uint'],
+        ['gaslimit', 'uint'],
+        ['chainid', 'uint'],
+    ] as const, 'block').map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['sender', 'address'],
+        ['data.length', 'uint'],
+    ] as const, 'msg').map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['origin', 'address'],
+        ['gasprice', 'uint'],
+    ] as const, 'tx').map(prop)),
 );
 
 export const FNS = {

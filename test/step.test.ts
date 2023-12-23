@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, STEP } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Block, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents } from 'sevm/ast';
-import { Add, Create, Info, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props } from 'sevm/ast';
+import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
@@ -68,7 +68,7 @@ describe('::step', function () {
                 }
             }, STEP());
             step.NUMBER({ stack });
-            expect(stack.top).to.be.deep.equal(Block.number);
+            expect(stack.top).to.be.deep.equal(Props['block.number']);
             expect(numberWasCalled, '`NUMBER` step was not overriden').to.be.true;
         });
     });
@@ -281,12 +281,12 @@ describe('::step', function () {
         it('should `MSTORE` value into memory', function () {
             const state = new State<Inst, Expr>();
 
-            state.stack.push(Block.coinbase);
+            state.stack.push(Props['block.coinbase']);
             state.stack.push(new Val(4n));
             STEP().MSTORE(state);
 
-            expect(state.memory).to.be.deep.equal({ '4': Block.coinbase });
-            expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Block.coinbase)]);
+            expect(state.memory).to.be.deep.equal({ '4': Props['block.coinbase'] });
+            expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
         });
     });
 
@@ -339,7 +339,7 @@ describe('::step', function () {
             STEP().ADDRESS(state);
             STEP().SELFDESTRUCT(state);
             expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([new SelfDestruct(Info.ADDRESS)]);
+            expect(state.stmts).to.be.deep.equal([new SelfDestruct(Props['address(this)'])]);
             expect(sol`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
         });
 
@@ -446,7 +446,7 @@ describe('::step', function () {
 
         it('should halt when `JUMPI` step', function () {
             const state = new State<Inst, Expr>();
-            state.stack.push(Block.gaslimit);
+            state.stack.push(Props['block.gaslimit']);
             state.stack.push(new Val(4n));
             STEP().JUMPI(state, new Opcode(1, 0xa, 'jumpi', null), Buffer.from('ff0001025b', 'hex'));
 
@@ -454,22 +454,22 @@ describe('::step', function () {
             offset.jumpDest = 4;
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
-                new Jumpi(Block.gaslimit, offset, Branch.make(2, new State()), Branch.make(4, new State()))
+                new Jumpi(Props['block.gaslimit'], offset, Branch.make(2, new State()), Branch.make(4, new State()))
             ]);
         });
 
         ['JUMP' as const, 'JUMPI' as const].forEach(inst => {
             it(`should throw when \`${inst}\` step with non-numeric offset`, function () {
                 const state = new State<Inst, Expr>();
-                if (inst === 'JUMPI') state.stack.push(Block.chainid);
-                state.stack.push(Block.number);
+                if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
+                state.stack.push(Props['block.number']);
                 expect(() => STEP()[inst](state, new Opcode(1, 0xa, 'jump', null), Buffer.from([])))
-                    .to.throw(`jump(0xa)@1 offset should be numeric but found '${Block.number.tag}'`);
+                    .to.throw(`jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
             });
 
             it(`should throw when \`${inst}\` step with non-\`JUMPDEST\` destination`, function () {
                 const state = new State<Inst, Expr>();
-                if (inst === 'JUMPI') state.stack.push(Block.chainid);
+                if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(1n));
                 expect(() => STEP()[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
                     .to.throw(`jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
@@ -477,7 +477,7 @@ describe('::step', function () {
 
             it(`should throw when \`${inst}\` step with out-of-bounds destination`, function () {
                 const state = new State<Inst, Expr>();
-                if (inst === 'JUMPI') state.stack.push(Block.chainid);
+                if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(2n));
                 expect(() => STEP()[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
                     .to.throw(`jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);

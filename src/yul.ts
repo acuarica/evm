@@ -51,7 +51,7 @@ function yulExpr(expr: Expr): string {
         case 'CallDataLoad':
             return yul`calldataload(${expr.location})`;
         case 'Prop':
-            return expr.value;
+            return expr.symbol;
         case 'Fn':
             throw new Error('');
         case 'DataCopy':

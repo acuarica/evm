@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { EVM, State, sol, yul } from 'sevm';
 import type { Expr, Inst } from 'sevm/ast';
-import { Add, Info, MappingLoad, MappingStore, Msg, Sha3, Stop, Sub, Val } from 'sevm/ast';
+import { Add, MappingLoad, MappingStore, Props, Sha3, Stop, Sub, Val } from 'sevm/ast';
 
 import { compile } from '../utils/solc';
 
@@ -134,15 +134,15 @@ describe('evm::storage', function () {
                     new Val(32n, true),
                     new Add(new Val(32n, true), new Val(0n, true))
                 );
-                const slot = new Sha3(new Val(0n, true), size, [Msg.sender, new Val(0n, true)]);
+                const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(0n, true)]);
                 expect(state.stmts[0]).to.be.deep.equal(
                     new MappingStore(
                         slot,
                         evm.step.mappings,
                         0,
-                        [Msg.sender],
+                        [Props['msg.sender']],
                         new Add(
-                            new MappingLoad(slot, evm.step.mappings, 0, [Msg.sender]),
+                            new MappingLoad(slot, evm.step.mappings, 0, [Props['msg.sender']]),
                             new Val(3n, true)
                         )
                     )
@@ -158,15 +158,15 @@ describe('evm::storage', function () {
                     new Val(32n, true),
                     new Add(new Val(32n, true), new Val(0n, true))
                 );
-                const slot = new Sha3(new Val(0n, true), size, [Msg.sender, new Val(1n, true)]);
+                const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(1n, true)]);
                 expect(state.stmts[1]).to.be.deep.equal(
                     new MappingStore(
                         slot,
                         evm.step.mappings,
                         1,
-                        [Info.CALLER],
+                        [Props['msg.sender']],
                         new Add(
-                            new MappingLoad(slot, evm.step.mappings, 1, [Msg.sender]),
+                            new MappingLoad(slot, evm.step.mappings, 1, [Props['msg.sender']]),
                             new Val(5n, true)
                         )
                     )
@@ -183,17 +183,17 @@ describe('evm::storage', function () {
                     new Add(new Val(32n, true), new Val(0n, true))
                 );
                 const slot = new Sha3(new Val(0n, true), size, [
-                    Msg.sender,
-                    new Sha3(new Val(0n, true), size, [Info.ADDRESS, new Val(2n, true)]),
+                    Props['msg.sender'],
+                    new Sha3(new Val(0n, true), size, [Props['address(this)'], new Val(2n, true)]),
                 ]);
                 expect(state.stmts[2]).to.be.deep.equal(
                     new MappingStore(
                         slot,
                         evm.step.mappings,
                         2,
-                        [Info.ADDRESS, Msg.sender],
+                        [Props['address(this)'], Props['msg.sender']],
                         new Sub(
-                            new MappingLoad(slot, evm.step.mappings, 2, [Info.ADDRESS, Msg.sender]),
+                            new MappingLoad(slot, evm.step.mappings, 2, [Props['address(this)'], Props['msg.sender']]),
                             new Val(11n, true)
                         )
                     )

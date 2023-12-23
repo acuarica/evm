@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Contract } from 'sevm';
-import { Add, CallDataLoad, Require, Msg, Return, SLoad, SStore, Sha3, Stop, Val } from 'sevm/ast';
+import { Add, CallDataLoad, Props, Require, Return, SLoad, SStore, Sha3, Stop, Val } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
@@ -39,7 +39,7 @@ contracts('internal', compile => {
 
                 expect(fn.stmts.at(-2)).to.be.deep.equal(
                     new SStore(
-                        new Sha3(new Val(-1n), new Val(-1n), [Msg.sender, new Val(0n)]),
+                        new Sha3(new Val(-1n), new Val(-1n), [Props['msg.sender'], new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
                         contract.variables
                     )
@@ -81,7 +81,7 @@ contracts('internal', compile => {
         });
 
         [
-            { sig: 'getForSender()', value: Msg.sender },
+            { sig: 'getForSender()', value: Props['msg.sender'] },
             { sig: 'getForArg(address)', value: new CallDataLoad(new Val(4n)) },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);

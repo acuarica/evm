@@ -98,7 +98,7 @@ function solExpr(expr: Expr): string {
                 ? `_arg${(expr.location.val - 4n) / 32n}`
                 : sol`msg.data[${expr.location}]`;
         case 'Prop':
-            return expr.value;
+            return expr.symbol;
         case 'Fn':
             return FNS[expr.mnemonic][0](solExpr(expr.value));
         case 'DataCopy':

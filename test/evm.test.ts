@@ -2,7 +2,7 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
 import { EVM, State, type Ram, sol, yul, solStmts, STEP } from 'sevm';
-import { Invalid, Tx, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump, Block } from 'sevm/ast';
+import { Invalid, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump, Props } from 'sevm/ast';
 
 import { compile } from './utils/solc';
 import { eventSelector } from './utils/selector';
@@ -90,8 +90,8 @@ describe('::evm', function () {
 
         evm.start();
         expect(count).to.be.equal(2);
-        expect(gasLimit).to.be.equal(Block.gaslimit);
-        expect(gasPrice).to.be.equal(Tx.gasprice);
+        expect(gasLimit).to.be.equal(Props['block.gaslimit']);
+        expect(gasPrice).to.be.equal(Props['tx.gasprice']);
     });
 
     it('should dedup locals when ref non-inlineable value', function () {

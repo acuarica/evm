@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-import { Add, type Expr, Val } from 'sevm/ast';
+import { Add, type Expr, Val, Props } from 'sevm/ast';
 import { Byte, IsZero, Lt, MLoad, Not, SLoad, Shl, Sig } from 'sevm/ast';
-import { Block, CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
+import { CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
 import { Create, Create2, ReturnData, Sha3 } from 'sevm/ast';
 
 import { $exprs, title } from './$exprs';
@@ -35,7 +35,7 @@ describe('::ast', function () {
 
             F(new MLoad(new Val(32n)), expr => [expr.loc]),
 
-            F(Block.basefee, () => []),
+            F(Props['block.basefee'], () => []),
             F(new Fn('BLOCKHASH', new Val(1234n)), expr => [expr.value]),
             F(new DataCopy('calldatacopy', new Val(0n), new Val(32n)), expr => [expr.offset, expr.size]),
             F(new DataCopy('extcodecopy', new Val(0n), new Val(32n), new Val(0x1234n)), expr => [expr.offset, expr.size, expr.address!]),

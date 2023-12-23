@@ -2,25 +2,25 @@ import { expect } from 'chai';
 
 import { EVM, State, reduce } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
-import { Info } from 'sevm/ast';
+import { Props } from 'sevm/ast';
 
 import { compile } from '../utils/solc';
 
 describe('evm::special', function () {
-    for (const [mnemonic, sym] of Object.entries(Info)) {
-        describe(`\`${sym.value}\` prop pushed from \`${mnemonic}\``, function () {
+    for (const [name, prop] of Object.entries(Props)) {
+        describe(`\`${prop.symbol}\` prop pushed from \`${name}\``, function () {
             it('should get it from compiled code', function () {
-                const src = ['msize()', 'codesize()', 'returndatasize()'].includes(sym.value)
+                const src = ['msize()', 'codesize()', 'returndatasize()'].includes(prop.symbol)
                     ? `contract Test {
-                        event Deposit(${sym.type});
+                        event Deposit(${prop.type});
                         fallback() external payable {
-                            uint256 value; assembly { value := ${sym.value} }
+                            uint256 value; assembly { value := ${prop.symbol} }
                             emit Deposit(value);
                         }
                     }`
                     : `contract Test {
-                        event Deposit(${sym.type});
-                        fallback() external payable { emit Deposit(${sym.value}); }
+                        event Deposit(${prop.type});
+                        fallback() external payable { emit Deposit(${prop.symbol}); }
                     }`;
 
                 const evm = new EVM(compile(src, '0.8.16', this).bytecode);
@@ -34,7 +34,7 @@ describe('evm::special', function () {
                 const stmts = reduce(state.stmts);
                 const stmt = stmts[0];
                 expect(stmt.name).to.be.equal('Log');
-                expect((<Log>stmt).args![0].eval()).to.be.deep.equal(sym);
+                expect((<Log>stmt).args![0].eval()).to.be.deep.equal(prop);
             });
         });
     }

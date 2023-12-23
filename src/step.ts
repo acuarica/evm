@@ -5,7 +5,7 @@ import { type Expr, type Inst, Val, Locali, Local } from './ast';
 import { Invalid } from './ast/system';
 import { Add, Div, Exp, Mod, Mul, Sub } from './ast/alu';
 import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/alu';
-import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Info } from './ast/special';
+import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Props } from './ast/special';
 import { Call, CallCode, Create, Create2, DelegateCall, Return, ReturnData, Revert, SelfDestruct, Sha3, StaticCall, Stop } from './ast/system';
 import { type IEvents, Log } from './ast/log';
 import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './ast';
@@ -525,8 +525,32 @@ function SPECIAL() {
     const mapKeys = <K extends string, U>(o: { [k in K]: unknown }, fn: (k: K) => U) =>
         Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
 
+    const prop = (symbol: keyof typeof Props) => function prop({ stack }: Operand<Expr>) {
+        stack.push(Props[symbol]);
+    };
+
     return Step({
-        ...mapValues(Info, sym => [sym.opcode, ({ stack }) => stack.push(sym)]),
+        BASEFEE: [0x48, prop('block.basefee')],
+        COINBASE: [0x41, prop('block.coinbase')],
+        TIMESTAMP: [0x42, prop('block.timestamp')],
+        NUMBER: [0x43, prop('block.number')],
+        DIFFICULTY: [0x44, prop('block.difficulty')],
+        GASLIMIT: [0x45, prop('block.gaslimit')],
+        CHAINID: [0x46, prop('block.chainid')],
+
+        CALLER: [0x33, prop('msg.sender')],
+        CALLDATASIZE: [0x36, prop('msg.data.length')],
+
+        ORIGIN: [0x32, prop('tx.origin')],
+        GASPRICE: [0x3a, prop('tx.gasprice')],
+
+        ADDRESS: [0x30, prop('address(this)')],
+        CODESIZE: [0x38, prop('codesize()')],
+        RETURNDATASIZE: [0x3d, prop('returndatasize()')],
+        SELFBALANCE: [0x47, prop('address(this).balance')],
+        MSIZE: [0x59, prop('msize()')],
+        GAS: [0x5a, prop('gasleft()')],
+
         ...mapKeys(FNS, n => [FNS[n][2], ({ stack }) => stack.push(new Fn(n, stack.pop()))]),
         CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
         CALLDATALOAD: [0x35, ({ stack }) => stack.push(new CallDataLoad(stack.pop()))],
