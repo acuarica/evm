@@ -15,12 +15,9 @@ describe('evm::system', function () {
             function hola() external pure returns (string memory) { return "12345"; }
         }`;
 
-        const evm = new EVM(
-            compile(src, '0.8.16', this, {
-                enabled: true,
-                details: { jumpdestRemover: true },
-            }).bytecode
-        );
+        const evm = new EVM(compile(src, '0.8.16', this, {
+            enabled: true, details: { jumpdestRemover: true },
+        }).bytecode);
         evm.start();
 
         const selector = fnselector('name()');
@@ -28,21 +25,11 @@ describe('evm::system', function () {
         const hola = fnselector('hola()');
         expect(evm.step.functionBranches).to.have.keys(selector, symbolSelector, hola);
 
-        {
-            const branch = evm.step.functionBranches.get(selector)!;
-            const ast = build(branch.state);
-            expect(solStmts(ast)).to.be.deep.equal('return 0x7;\n');
-        }
-        {
-            const branch = evm.step.functionBranches.get(symbolSelector)!;
-            const ast = solStmts(build(branch.state));
-            expect(ast).to.be.deep.equal('return 0xb;\n');
-        }
-        {
-            const branch = evm.step.functionBranches.get(hola)!;
-            const ast = solStmts(build(branch.state));
-            expect(ast.trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
-        }
+        const ast = (selector: string) => build(evm.step.functionBranches.get(selector)!.state);
+
+        expect(solStmts(ast(selector))).to.be.deep.equal('return 0x7;\n');
+        expect(solStmts(ast(symbolSelector))).to.be.deep.equal('return 0xb;\n');
+        expect(solStmts(ast(hola)).trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
     });
 
     it('should stringify CREATE', function () {
