@@ -75,7 +75,7 @@ event ${eventSelector(unknownEventSig)};
             'mstore(add(0x20, 0x80), 0x3)',
             'mstore(add(0x20, add(0x20, 0x80)), 0x4)',
             `log1(0x80, sub(add(0x20, add(0x20, add(0x20, 0x80))), 0x80), 0x${topic})`,
-            `uint ${local} = block.number // #refs 1`,
+            `uint ${local} = number() // #refs 1`,
             `mstore(0x80, ${local})`,
             `log1(0x80, sub(add(0x20, 0x80), 0x80), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
             `mstore(0x80, add(${local}, 0x7))`,
