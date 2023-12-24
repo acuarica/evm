@@ -1,19 +1,19 @@
 import { expect } from 'chai';
 
-import { Contract, type EVM } from 'sevm';
+import { Contract } from 'sevm';
 import { Revert, Val } from 'sevm/ast';
 
 import { contracts } from '../utils/solc';
 
 contracts('empty', (compile, fallback, version) => {
     let contract: Contract;
-    let evm: EVM;
+    // let evm: EVM;
 
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
         const src = 'contract Empty { }';
         contract = new Contract(compile(src, this).bytecode);
-        evm = contract.evm;
+        // evm = contract.evm;
     });
 
     it(`should get metadata hash for minimal contract definition`, function () {
@@ -23,33 +23,34 @@ contracts('empty', (compile, fallback, version) => {
             '0.6.12': ['ipfs', 'QmbHEL45gDehV886FXqUJ5JFvWWZ2ZzFz75JEANWPBN9gq'],
             '0.7.6': ['ipfs', 'Qmf1g3GNsgpLdGx4TVkQPZBpBNARw4GDtR2i5QGXQSWixu'],
             '0.8.16': ['ipfs', 'QmQ5UGtrYrGDU9btfXYzuy1dZNQKQy7duqeLxbYfyunosc'],
+            '0.8.21': ['ipfs', 'QmNSLs8r9KjVRzEoddMkRhASQCPvUd9BnEuUpUgH7aqC5f'],
         } as const;
 
-        expect(evm.metadata).to.be.not.undefined;
+        expect(contract.metadata).to.be.not.undefined;
 
         const hash = HASHES[version];
-        expect(evm.metadata!.protocol).to.be.equal(hash[0]);
-        expect(evm.metadata!.solc).to.be.equal(version === '0.5.5' ? '<0.5.9' : version);
+        expect(contract.metadata!.protocol).to.be.equal(hash[0]);
+        expect(contract.metadata!.solc).to.be.equal(version === '0.5.5' ? '<0.5.9' : version);
 
-        expect(evm.metadata!.hash).to.be.equal(hash[1]);
-        expect(evm.metadata!.url).to.be.equal(`${hash[0]}://${hash[1]}`);
+        expect(contract.metadata!.hash).to.be.equal(hash[1]);
+        expect(contract.metadata!.url).to.be.equal(`${hash[0]}://${hash[1]}`);
     });
 
     it('should not have functions nor events', function () {
         expect(contract.functions).to.be.empty;
-        expect(evm.functionBranches).to.be.empty;
-        expect(evm.events).to.be.empty;
+        expect(contract.functionBranches).to.be.empty;
+        expect(contract.events).to.be.empty;
     });
 
     it.skip('should have 1 block & 1 `revert`', function () {
-        expect(contract.evm.chunks).to.be.of.length(1);
-        const chunk = contract.evm.chunks.get(0)!;
-        expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
-        expect(chunk.states).to.be.of.length(1);
-        const state = chunk.states[0]!;
-        expect(state.last?.eval()).to.be.deep.equal(
-            new Revert(new Val(0n, true), new Val(0n, true), [])
-        );
+        // expect(contract.evm.chunks).to.be.of.length(1);
+        // const chunk = contract.evm.chunks.get(0)!;
+        // expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
+        // expect(chunk.states).to.be.of.length(1);
+        // const state = chunk.states[0]!;
+        // expect(state.last?.eval()).to.be.deep.equal(
+        //     new Revert(new Val(0n, true), new Val(0n, true), [])
+        // );
 
         expect(contract.main.length).to.be.at.least(1);
         expect(contract.main.at(-1)?.eval()).to.be.deep.equal(
