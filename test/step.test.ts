@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, STEP, London, Paris } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs } from './$exprs';
 
@@ -293,6 +293,12 @@ describe('::step', function () {
 
             expect(state.memory).to.be.deep.equal({ '4': Props['block.coinbase'] });
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
+        });
+
+        it('should push `MSIZE` onto stack', function () {
+            const state = new State<Inst, Expr>();
+            STEP().MSIZE(state);
+            expect(state.stack.values).to.be.deep.equal([new Prop('msize()', 'uint')]);
         });
     });
 

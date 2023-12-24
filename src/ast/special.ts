@@ -37,7 +37,6 @@ export const Props = Object.assign(
         ['codesize()', 'uint'],
         ['returndatasize()', 'uint'],
         ['address(this).balance', 'uint'],
-        ['msize()', 'uint'],
         ['gasleft()', 'uint'],
     ] as const).map(prop)),
     Object.fromEntries(applyPrefix([

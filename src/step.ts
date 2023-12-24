@@ -5,7 +5,7 @@ import { type Expr, type Inst, Val, Locali, Local } from './ast';
 import { Invalid } from './ast/system';
 import { Add, Div, Exp, Mod, Mul, Sub } from './ast/alu';
 import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/alu';
-import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Props } from './ast/special';
+import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Prop, Props } from './ast/special';
 import { Call, CallCode, Create, Create2, DelegateCall, Return, ReturnData, Revert, SelfDestruct, Sha3, StaticCall, Stop } from './ast/system';
 import { type IEvents, Log } from './ast/log';
 import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './ast';
@@ -597,7 +597,6 @@ function SPECIAL() {
         CODESIZE: [0x38, prop('codesize()')],
         RETURNDATASIZE: [0x3d, prop('returndatasize()')],
         SELFBALANCE: [0x47, prop('address(this).balance')],
-        MSIZE: [0x59, prop('msize()')],
         GAS: [0x5a, prop('gasleft()')],
 
         ...mapKeys(FNS, n => [FNS[n][2], ({ stack }) => stack.push(new Fn(n, stack.pop()))]),
@@ -630,6 +629,9 @@ function DATACOPY() {
     });
 }
 
+/**
+ * https://ethereum.github.io/execution-specs/autoapi/ethereum/frontier/vm/instructions/memory/index.html#msize
+ */
 function MEMORY() {
     const mstore = ({ stack, memory, stmts }: State<Inst, Expr>) => {
         let location = stack.pop();
@@ -647,7 +649,7 @@ function MEMORY() {
     };
 
     return Step({
-        MLOAD: [0x51, ({ stack, memory }) => {
+        MLOAD: [0x51, function mload({ stack, memory }) {
             let loc = stack.pop();
             loc = loc.eval();
             stack.push(
@@ -657,6 +659,9 @@ function MEMORY() {
         }],
         MSTORE: [0x52, mstore],
         MSTORE8: [0x53, mstore],
+        MSIZE: [0x59, function msize({ stack }) {
+            stack.push(new Prop('msize()', 'uint'));
+        }],
     });
 }
 
