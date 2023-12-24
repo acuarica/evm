@@ -34,7 +34,6 @@ describe('evm::special', function () {
                 }
 
                 const stmts = reduce(state.stmts);
-                console.log(stmts);
                 const stmt = stmts[0];
                 expect(stmt.name).to.be.equal('Log');
                 expect((<Log>stmt).args![0].eval()).to.be.deep.equal(prop);
