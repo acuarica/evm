@@ -11,7 +11,6 @@ export class EVM<S extends
     {
         readonly [opcode: number]: readonly [size: number, halts: boolean, mnemonic: Mnemonic<S>];
         readonly functionBranches: ISelectorBranches;
-        haltingSteps(): Mnemonic<S>[];
         opcodes(): { [mnemonic: string]: number },
         decode(code: string): Opcode<Mnemonic<S>>[];
     } & {

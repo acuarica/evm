@@ -20,9 +20,9 @@ describe('::evm', function () {
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
         const evm = new EVM('0x');
         expect(() => evm.containsOpcode('add' as keyof ReturnType<typeof STEP>['opcodes']))
-            .to.throw('Provided opcode `add` is not');
+            .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
         expect(() => evm.containsOpcode('haltingSteps'))
-            .to.throw('Provided opcode `haltingSteps` is not');
+            .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
     });
 
     it('should halt when `exec` invalid opcode', function () {
