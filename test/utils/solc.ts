@@ -9,7 +9,7 @@ import type { Runnable, Suite } from 'mocha';
 import wrapper from 'solc/wrapper';
 import type { ABI, SolcInput, SolcOutput } from 'solc';
 
-export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
+const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
 type Version = (typeof VERSIONS)[number];
 
@@ -27,8 +27,11 @@ const versionsLoaded = new Set<Version>();
 export function compile(
     content: string,
     version: Version,
-    context?: Mocha.Context,
-    optimizer?: SolcInput['settings']['optimizer']
+    context: Mocha.Context | null,
+    opts?: {
+        optimizer?: SolcInput['settings']['optimizer'],
+        ignoreWarnings?: boolean,
+    }
 ): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
         language: 'Solidity',
@@ -38,7 +41,7 @@ export function compile(
             },
         },
         settings: {
-            optimizer,
+            optimizer: opts?.optimizer,
             outputSelection: {
                 '*': {
                     '*': ['abi', 'metadata', 'evm.deployedBytecode'],
@@ -48,7 +51,7 @@ export function compile(
     } satisfies SolcInput);
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
-    if (context !== undefined) {
+    if (context !== null) {
         const title = (test: Runnable | Suite | undefined): string =>
             test ? title(test.parent) + '.' + test.title : '';
         const fileName = title(context.test)
@@ -81,7 +84,7 @@ export function compile(
             writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
         }
     } else {
-        writeCacheFn = _output => {};
+        writeCacheFn = _output => { };
     }
 
     versionsLoaded.add(version);
@@ -89,7 +92,7 @@ export function compile(
     const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.js`)));
     const { errors, contracts } = JSON.parse(solc.compile(input)) as SolcOutput;
 
-    if (errors !== undefined) {
+    if (errors !== undefined && (!opts?.ignoreWarnings || errors.some(err => err.severity === 'error'))) {
         throw new Error(errors.map(err => err.formattedMessage).join('\n'));
     }
 
@@ -109,7 +112,7 @@ export function forVersion(
         compile_: (
             content: string,
             context: Mocha.Context,
-            optimizer?: SolcInput['settings']['optimizer']
+            opts?: Parameters<typeof compile>[3],
         ) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
@@ -123,7 +126,7 @@ export function forVersion(
 
             describe(`solc-v${version}`, function () {
                 fn(
-                    (content, context, optimizer) => compile(content, version, context, optimizer),
+                    (content, context, opts) => compile(content, version, context, opts),
                     fallback,
                     version
                 );
