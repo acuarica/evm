@@ -171,7 +171,9 @@ describe('::evm', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, {
+            optimizer: { enabled: true }
+        }).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });

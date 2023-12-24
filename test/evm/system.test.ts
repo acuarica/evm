@@ -16,7 +16,9 @@ describe('evm::system', function () {
         }`;
 
         const evm = new EVM(compile(src, '0.8.16', this, {
-            enabled: true, details: { jumpdestRemover: true },
+            optimizer: {
+                enabled: true, details: { jumpdestRemover: true },
+            }
         }).bytecode);
         evm.start();
 
@@ -41,7 +43,7 @@ describe('evm::system', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.8.16', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         const stmts = build(state);

@@ -73,7 +73,9 @@ describe('evm::storage', function () {
                 val3 += 7;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: false }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, {
+            optimizer: { enabled: false }
+        }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
         // state.stmts.forEach(stmt => console.log(sol`${stmt}`));
@@ -92,7 +94,9 @@ describe('evm::storage', function () {
                 t.val2 += 11;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this, { enabled: true }).bytecode);
+        const evm = new EVM(compile(src, '0.7.6', this, {
+            optimizer: { enabled: true }
+        }).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 
