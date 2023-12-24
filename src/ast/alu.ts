@@ -85,10 +85,6 @@ export class Exp extends Bin {
 }
 
 
-
-
-
-
 abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
         super();
