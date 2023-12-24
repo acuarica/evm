@@ -1,43 +1,36 @@
 import { expect } from 'chai';
 
-import { EVM, London, Shanghai, State, reduce } from 'sevm';
+import { EVM, London, Shanghai, State } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
-import { Props } from 'sevm/ast';
+import { Props, Stop } from 'sevm/ast';
 
-import { compile } from '../utils/solc';
+import { type Version, compile } from '../utils/solc';
 
 describe('evm::special', function () {
-    for (const [name, prop] of Object.entries(Props)) {
-        describe(`\`${prop.symbol}\` prop pushed from \`${name}\``, function () {
-            it('should get it from compiled code', function () {
-                const src = ['msize()', 'codesize()', 'returndatasize()'].includes(prop.symbol)
-                    ? `contract Test {
+
+    for (const prop of Object.values(Props)) {
+        it(`should get \`${prop.symbol}\` from compiled code`, function () {
+            const src = `contract Test {
                         event Deposit(${prop.type});
                         fallback() external payable {
-                            uint256 value; assembly { value := ${prop.symbol} }
-                            emit Deposit(value);
+                            ${['codesize()', 'returndatasize()'].includes(prop.symbol)
+                    ? `uint256 value; assembly { value := ${prop.symbol} } emit Deposit(value);`
+                    : `emit Deposit(${prop.symbol});`}
                         }
-                    }`
-                    : `contract Test {
-                        event Deposit(${prop.type});
-                        fallback() external payable { emit Deposit(${prop.symbol}); }
                     }`;
 
-                const evm = name === 'block.difficulty'
-                    ? new EVM(compile(src, '0.8.16', this).bytecode, London())
-                    : new EVM(compile(src, '0.8.21', this).bytecode, Shanghai());
-                let state = new State<Inst, Expr>();
-                evm.run(0, state);
+            const bytecode = (version: Version) => compile(src, version, this, { optimizer: { enabled: true } }).bytecode;
+            const evm = prop.symbol === 'block.difficulty'
+                ? new EVM(bytecode('0.8.16'), London())
+                : new EVM(bytecode('0.8.21'), Shanghai());
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
 
-                while (state.last?.name === 'Jump') {
-                    state = state.last.destBranch.state;
-                }
+            expect(state.stmts.at(-1)).to.be.deep.equal(new Stop());
 
-                const stmts = reduce(state.stmts);
-                const stmt = stmts[0];
-                expect(stmt.name).to.be.equal('Log');
-                expect((<Log>stmt).args![0].eval()).to.be.deep.equal(prop);
-            });
+            const stmt = state.stmts.at(-2)!;
+            expect(stmt.name).to.be.equal('Log');
+            expect((stmt as Log).args![0].eval()).to.be.deep.equal(prop);
         });
     }
 });

@@ -11,7 +11,7 @@ import type { ABI, SolcInput, SolcOutput } from 'solc';
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
-type Version = (typeof VERSIONS)[number];
+export type Version = (typeof VERSIONS)[number];
 
 const versionsLoaded = new Set<Version>();
 
