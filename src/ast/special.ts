@@ -1,11 +1,10 @@
 import { type Expr, Tag } from '.';
 import type { Type } from '../type';
 
-// TODO: enable prevrandao
-// PREVRANDAO: ['prevrandao', 'uint', 0x44],
-
 /**
- * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
+ * Represents a global Solidity built-in property.
+ * 
+ * @see https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 export class Prop extends Tag {
     readonly tag = 'Prop';
@@ -29,8 +28,7 @@ const applyPrefix = <const S extends string, const O extends string>(
 /**
  * A collection of _Block and Transaction Properties_ defined as `Prop`.
  * 
- * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties
- * 
+ * @see https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties
  * @see {@link Prop}
  */
 export const Props = Object.assign(
@@ -50,6 +48,7 @@ export const Props = Object.assign(
         ['difficulty', 'uint'],
         ['gaslimit', 'uint'],
         ['chainid', 'uint'],
+        ['prevrandao', 'uint'],
     ] as const, 'block').map(prop)),
     Object.fromEntries(applyPrefix([
         ['sender', 'address'],
