@@ -175,6 +175,12 @@ describe('::step', function () {
             STEP().PUSH1({ stack }, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
             expect(stack.values).to.deep.equal([new Val(1n, true)]);
         });
+
+        it('should `PUSH0` value onto stack', function () {
+            const stack = new Stack<Expr>();
+            STEP().PUSH0({ stack });
+            expect(stack.values).to.deep.equal([new Val(0n, true)]);
+        });
     });
 
     describe('DUPS', function () {

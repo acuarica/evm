@@ -63,6 +63,7 @@ export const $exprs = {
         F(['GASLIMIT'], Props['block.gaslimit'], id, 'block.gaslimit'),
         F(['NUMBER'], Props['block.number'], id, 'block.number'),
         F(['TIMESTAMP'], Props['block.timestamp'], id, 'block.timestamp'),
+        F(['PREVRANDAO'], Props['block.prevrandao'], id, 'block.prevrandao'),
 
         F(['CALLER'], Props['msg.sender'], id, 'msg.sender'),
         F(['CALLDATASIZE'], Props['msg.data.length'], id, 'msg.data.length'),
