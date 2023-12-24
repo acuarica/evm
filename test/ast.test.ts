@@ -59,7 +59,7 @@ describe('::ast', function () {
     });
 
     describe('eval', function () {
-        for (const [name, exprs] of Object.entries($exprs)) {
+        Object.entries($exprs).forEach(([name, exprs]) => {
             describe(name, function () {
                 exprs.forEach(({ expr, val, str }) => {
                     it(`should \`eval\` \`${str}\``, function () {
@@ -67,6 +67,7 @@ describe('::ast', function () {
                     });
                 });
             });
-        }
+        });
     });
+
 });

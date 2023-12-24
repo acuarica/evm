@@ -254,7 +254,7 @@ describe('::step', function () {
         });
     });
 
-    for (const [name, exprs] of Object.entries($exprs)) {
+    Object.entries($exprs).forEach(([name, exprs]) => {
         describe(name.toUpperCase(), function () {
             exprs.forEach(({ insts, expr, str }) => {
                 it(`should \`STEP\` \`[${insts.join('|')}]\` into \`${str}\``, function () {
@@ -271,7 +271,7 @@ describe('::step', function () {
                 });
             });
         });
-    }
+    });
 
     describe('MEMORY', function () {
         it('should `MLOAD` value onto stack', function () {

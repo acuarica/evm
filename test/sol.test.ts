@@ -12,7 +12,7 @@ describe('::sol', function () {
         });
     });
 
-    for (const [name, exprs] of Object.entries($exprs)) {
+    Object.entries($exprs).forEach(([name, exprs]) => {
         describe(name, function () {
             exprs.forEach(({ expr, str }) => {
                 it(`should \`sol\` \`${title(expr)}\` into \`${str}\``, function () {
@@ -20,5 +20,6 @@ describe('::sol', function () {
                 });
             });
         });
-    }
+    });
+
 });
