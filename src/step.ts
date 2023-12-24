@@ -126,15 +126,64 @@ function Step<
 }
 
 /**
- * This module is used to `decode` bytecode into `Opcode`.
- *
- * https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
- * https://eips.ethereum.org/EIPS/eip-3855
- * 
- * https://ethereum.github.io/execution-specs/diffs/gray_glacier_paris.html 
- * https://eips.ethereum.org/EIPS/eip-4399
+ * Latest fork definition.
  */
-export function STEP(
+export const STEP = Shanghai;
+
+/**
+ * Defines the `Shanghai` hardfork.
+ * It includes the `PUSH0` instruction.
+ * 
+ * Solidity `0.8.20` uses `push0` for placing `0` on the Stack.
+ * This decreases the deployment and runtime costs.
+ * 
+ * @see https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
+ * @see https://eips.ethereum.org/EIPS/eip-3855
+ * @see https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/
+ */
+export function Shanghai(
+    events: IEvents = {},
+    variables: IStore['variables'] = {},
+    mappings: IStore['mappings'] = {},
+    functionBranches: ISelectorBranches = new Map(),
+) {
+    return Object.assign(
+        Paris(events, variables, mappings, functionBranches),
+        Step({
+            PUSH0: [0x5f, ({ stack }: Operand<Expr>) => stack.push(new Val(0n, true))]
+        })
+    );
+}
+
+/**
+ * Defines the `Paris` hardfork.
+ * It includes the `PREVRANDAO` instruction.
+ * 
+ * Solidity `0.8.18` includes _Support for Paris Hardfork_, 
+ * which introduces the global `block.prevrandao` built-in in Solidity and `prevrandao()`
+ * instruction in inline assembly for EVM versions >= Paris.
+ * 
+ * @see https://ethereum.github.io/execution-specs/diffs/gray_glacier_paris.html 
+ * @see https://eips.ethereum.org/EIPS/eip-4399
+ * @see https://soliditylang.org/blog/2023/02/01/solidity-0.8.18-release-announcement
+ */
+export function Paris(
+    events: IEvents = {},
+    variables: IStore['variables'] = {},
+    mappings: IStore['mappings'] = {},
+    functionBranches: ISelectorBranches = new Map(),
+) {
+    return Object.assign(
+        London(events, variables, mappings, functionBranches),
+        Step({
+            PREVRANDAO: [0x44, function prevrandao({ stack }: Operand<Expr>) {
+                stack.push(Props['block.prevrandao']);
+            }],
+        })
+    );
+}
+
+export function London(
     events: IEvents = {},
     variables: IStore['variables'] = {},
     mappings: IStore['mappings'] = {},
@@ -156,9 +205,6 @@ export function STEP(
         LOGS(events),
         STORAGE({ variables, mappings }),
         FLOW(functionBranches),
-        Step({
-            PUSH0: [0x5f, ({ stack }) => stack.push(new Val(0n))]
-        })
     );
 }
 
@@ -167,6 +213,9 @@ export function STEP(
  */
 export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
 
+/**
+ * This module is used to `decode` bytecode into `Opcode`.
+ */
 class Undef {
 
     /**

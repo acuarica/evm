@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { EVM, State, reduce } from 'sevm';
+import { EVM, London, Shanghai, State, reduce } from 'sevm';
 import type { Expr, Inst, Log } from 'sevm/ast';
 import { Props } from 'sevm/ast';
 
@@ -23,7 +23,9 @@ describe('evm::special', function () {
                         fallback() external payable { emit Deposit(${prop.symbol}); }
                     }`;
 
-                const evm = new EVM(compile(src, '0.8.16', this).bytecode);
+                const evm = name === 'block.difficulty'
+                    ? new EVM(compile(src, '0.8.16', this).bytecode, London())
+                    : new EVM(compile(src, '0.8.21', this).bytecode, Shanghai());
                 let state = new State<Inst, Expr>();
                 evm.run(0, state);
 
@@ -32,6 +34,7 @@ describe('evm::special', function () {
                 }
 
                 const stmts = reduce(state.stmts);
+                console.log(stmts);
                 const stmt = stmts[0];
                 expect(stmt.name).to.be.equal('Log');
                 expect((<Log>stmt).args![0].eval()).to.be.deep.equal(prop);

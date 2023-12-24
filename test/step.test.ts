@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, STEP } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, STEP, London, Paris } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs } from './$exprs';
@@ -491,4 +491,28 @@ describe('::step', function () {
         });
     });
 
+    describe('London -> Paris upgrade', function () {
+        it('should decode `0x44` -> `DIFFICULTY` with London', function () {
+            const step = London();
+
+            const [, , mnemonic] = step[0x44] as [unknown, unknown, 'DIFFICULTY'];
+            expect(mnemonic).to.be.deep.equal('DIFFICULTY');
+
+            const stack = new Stack<Expr>();
+            step[mnemonic]({ stack });
+            expect(stack.top).to.be.equal(Props['block.difficulty']);
+        });
+
+        it('should decode `0x44` -> `PREVRANDAO` with Paris', function () {
+            const step = Paris();
+
+            const [, , mnemonic] = step[0x44] as [unknown, unknown, 'PREVRANDAO'];
+            expect(mnemonic).to.be.deep.equal('PREVRANDAO');
+
+            const stack = new Stack<Expr>();
+            step[mnemonic]({ stack });
+            expect(stack.top).to.be.equal(Props['block.prevrandao']);
+        });
+
+    });
 });
