@@ -31,6 +31,7 @@ describe('::metadata', function () {
         ['0.6.12', 'ipfs', 'QmR2wMAiGogVWTxtXh1AVNboWSHNggtn9jYzG2zLXi836A'],
         ['0.7.6', 'ipfs', 'QmaRBmmGGny5mjFjSJcbvcQLsJMRsbcSB4QoEcxFu9mxhB'],
         ['0.8.16', 'ipfs', 'QmcshgdTcz3T2rD8BgPAw2njvp2WsCCcsi6qh9VQhJhwLZ'],
+        ['0.8.21', 'ipfs', 'QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2'],
     ] as const;
 
     HASHES.forEach(([version, protocol, hash, expectedVersion]) => {
