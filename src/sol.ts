@@ -588,8 +588,9 @@ function solContract(
 
     text += `contract ${contractName} {\n\n`;
 
-    text += solEvents(this.events, 4);
-    text += '\n';
+    const member = (text: string) => text === '' ? '' : text + '\n';
+
+    text += member(solEvents(this.events, 4));
     text += solStructs(this.mappings);
     text += solMappings(this.mappings);
     text += solVars(this.variables);
