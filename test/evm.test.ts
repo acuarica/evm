@@ -1,11 +1,12 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, type Ram, sol, yul, solStmts, STEP, London, Shanghai } from 'sevm';
-import { Invalid, type Expr, type Inst, Throw, Stop, JumpDest, Jumpi, Jump, Props, type Log } from 'sevm/ast';
+import { EVM, London, STEP, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Ram } from 'sevm';
+import type { Expr, Inst, Local, Log } from 'sevm/ast';
+import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
-import { type Version, compile } from './utils/solc';
-import { eventSelector } from './utils/selector';
+import { eventSelector, fnselector } from './utils/selector';
+import { compile, type Version } from './utils/solc';
 
 describe('::evm', function () {
 
@@ -301,6 +302,292 @@ describe('::evm', function () {
                 expect((stmt as Log).args![0].eval()).to.be.deep.equal(prop);
             });
         }
+    });
+
+    describe('log', function () {
+        it('should decompile known and unknown events with locals', function () {
+            const knownEventSig = 'Deposit(uint256)';
+            const unknownEventSig = 'UnknownEvent(uint256, uint256, uint256)';
+            const src = `contract Test {
+            event ${knownEventSig};
+            event ${unknownEventSig};
+            fallback() external payable {
+                emit Deposit(1);
+                emit UnknownEvent(2, 3, 4);
+                uint256 n = block.number;
+                emit Deposit(n);
+                emit Deposit(n + 7);
+            }
+        }`;
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+
+            const state = new State<Inst, Expr>();
+            evm.exec(0, state);
+            const ev = knownEventSig;
+            evm.step.events[eventSelector(ev)].sig = ev;
+
+            expect(evm.step.events).to.have.keys(
+                eventSelector(knownEventSig),
+                eventSelector(unknownEventSig)
+            );
+            expect(evm.step.events[eventSelector(knownEventSig)]).to.be.deep.equal({
+                sig: knownEventSig,
+                indexedCount: 0,
+            });
+
+            expect(solEvents(evm.step.events)).to.be.equal(`event Deposit(uint256 _arg0);
+event ${eventSelector(unknownEventSig)};
+`);
+
+            const stmts = state.stmts.filter(stmt => stmt.name === 'Log');
+
+            assert(stmts[0].name === 'Log');
+            assert(stmts[0].args![0].tag === 'Local');
+            expect(stmts[0].args![0].value).to.be.deep.equal(new Val(1n, true));
+            expect(stmts[0].eventName).to.be.deep.equal('Deposit');
+
+            assert(stmts[1].name === 'Log');
+            assert(stmts[1].args?.every((e): e is Local => e.tag === 'Local'));
+            expect(stmts[1].args?.map(e => e.value)).to.be.deep.equal([
+                new Val(2n, true),
+                new Val(3n, true),
+                new Val(4n, true),
+            ]);
+
+            const topic = eventSelector(unknownEventSig);
+            const local = 'local10';
+            expect(solStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
+                'emit Deposit(0x1);',
+                `log(0x${topic}, 0x2, 0x3, 0x4);`,
+                `uint ${local} = block.number; // #refs 1`,
+                `emit Deposit(${local});`,
+                `emit Deposit(${local} + 0x7);`,
+                'return;',
+            ]);
+            expect(yulStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
+                'mstore(0x40, 0x80)',
+                'mstore(0x80, 0x1)',
+                'log1(0x80, sub(add(0x20, 0x80), 0x80), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)',
+                'mstore(0x80, 0x2)',
+                'mstore(add(0x20, 0x80), 0x3)',
+                'mstore(add(0x20, add(0x20, 0x80)), 0x4)',
+                `log1(0x80, sub(add(0x20, add(0x20, add(0x20, 0x80))), 0x80), 0x${topic})`,
+                `uint ${local} = number() // #refs 1`,
+                `mstore(0x80, ${local})`,
+                `log1(0x80, sub(add(0x20, 0x80), 0x80), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
+                `mstore(0x80, add(${local}, 0x7))`,
+                `log1(0x80, sub(add(0x20, 0x80), 0x80), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
+                'stop()',
+            ]);
+        });
+    });
+
+    describe('storage', function () {
+
+        it.skip('should detect storage variable', function () {
+            const src = `contract Test {
+            uint256 val1 = 5;
+            uint256 val2 = 7;
+            fallback() external payable {
+                val1 += 3;
+                val2 += 11;
+            }}`;
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+
+            expect(evm.step.variables).to.be.have.keys('0', '1');
+            expect(state.stmts).to.be.have.length(3);
+
+            expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
+            expect(sol`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
+            expect(sol`${state.last}`).to.be.equal('return;');
+
+            expect(yul`${state.stmts[0]}`).to.be.equal('sstore(0x0, add(sload(0x0), 0x3))');
+            expect(yul`${state.stmts[1]}`).to.be.equal('sstore(0x1, add(sload(0x1), 0xb))');
+            expect(yul`${state.last}`).to.be.equal('stop()');
+        });
+
+        it.skip('should detect packed storage variable', function () {
+            const src = `contract Test {
+            uint256 val1 = 0;
+            uint128 val2 = 7;
+            uint128 val3 = 11;
+            function() external payable {
+                // unchecked {
+                val1 = block.number + 5;
+                // val2 = uint128(block.number) + 7;
+                val3 = uint128(block.number) + 11;
+                // uint64 val4 = 9;
+                // }
+            }}`;
+            const evm = new EVM(compile(src, '0.5.5', this).bytecode);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+
+            // state.stmts.forEach(stmt => console.log(sol`${stmt.eval()}`));
+            // state.stmts.forEach(stmt => console.log(yul`${stmt.eval()}`));
+
+            expect(Object.keys(evm.step.variables)).to.be.have.length(3);
+        });
+
+        it.skip('should find storage struct when no optimized', function () {
+            const src = `contract Test {
+            struct T { uint256 val1; uint256 val2; }
+            T t;
+                uint256 val3;
+            fallback() external payable {
+                t.val1 += 3;
+                t.val2 += 11;
+                val3 += 7;
+            }}`;
+            const evm = new EVM(compile(src, '0.7.6', this, {
+                optimizer: { enabled: false }
+            }).bytecode);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+            // state.stmts.forEach(stmt => console.log(sol`${stmt}`));
+            // state.stmts.forEach(stmt => console.log(yul`${stmt}`));
+
+            expect(evm.step.variables).to.be.have.keys('0x0', '0x1');
+            expect(evm.step.mappings).to.be.deep.equal({});
+        });
+
+        it.skip('should not find storage struct when optimized', function () {
+            const src = `contract Test {
+            struct T { uint256 val1; uint256 val2; }
+            T t;
+            fallback() external payable {
+                t.val1 += 3;
+                t.val2 += 11;
+            }}`;
+            const evm = new EVM(compile(src, '0.7.6', this, {
+                optimizer: { enabled: true }
+            }).bytecode);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+
+            expect(state.stmts).to.be.have.length(3);
+
+            expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
+            expect(sol`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
+            expect(sol`${state.stmts[2]}`).to.be.equal('return;');
+
+            expect(yul`${state.stmts[0]}`).to.be.equal('sstore(0x0, add(0x3, sload(0x0)))');
+            expect(yul`${state.stmts[1]}`).to.be.equal('sstore(0x1, add(0xb, sload(0x1)))');
+            expect(yul`${state.stmts[2]}`).to.be.equal('stop()');
+
+            expect(evm.step.variables).to.be.have.keys('0', '1');
+            expect(evm.step.mappings).to.be.deep.equal({});
+        });
+
+        describe('mappings', function () {
+            it.skip('should find mapping loads and stores', function () {
+                const src = `contract Test {
+                mapping (address => uint256) map1;
+                mapping (address => uint256) map2;
+                mapping (address => mapping (address => uint256)) allowance;
+
+                fallback() external payable {
+                    map1[msg.sender] += 3;
+                    map2[msg.sender] += 5;
+                    allowance[address(this)][msg.sender] -= 11;
+                }
+            }`;
+                const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+                const state = new State<Inst, Expr>();
+                evm.run(0, state);
+
+                expect(state.stmts).to.be.have.length(4);
+
+                {
+                    const size = new Add(
+                        new Val(32n, true),
+                        new Add(new Val(32n, true), new Val(0n, true))
+                    );
+                    const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(0n, true)]);
+                    expect(state.stmts[0]).to.be.deep.equal(
+                        new MappingStore(slot, evm.step.mappings, 0, [Props['msg.sender']],
+                            new Add(
+                                new MappingLoad(slot, evm.step.mappings, 0, [Props['msg.sender']]),
+                                new Val(3n, true)
+                            )
+                        )
+                    );
+                    expect(sol`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
+                    expect(yul`${state.stmts[0]}`).to.be.equal(
+                        'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(0/*[msg.sender]*/), 0x3)) /*0[msg.sender]*/'
+                    );
+                }
+
+                {
+                    const size = new Add(
+                        new Val(32n, true),
+                        new Add(new Val(32n, true), new Val(0n, true))
+                    );
+                    const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(1n, true)]);
+                    expect(state.stmts[1]).to.be.deep.equal(
+                        new MappingStore(slot, evm.step.mappings, 1, [Props['msg.sender']],
+                            new Add(
+                                new MappingLoad(slot, evm.step.mappings, 1, [Props['msg.sender']]),
+                                new Val(5n, true)
+                            )
+                        )
+                    );
+                    expect(sol`${state.stmts[1]}`).to.be.equal('mapping2[msg.sender] += 0x5;');
+                    expect(yul`${state.stmts[1]}`).to.be.equal(
+                        'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(1/*[msg.sender]*/), 0x5)) /*1[msg.sender]*/'
+                    );
+                }
+
+                {
+                    const size = new Add(
+                        new Val(32n, true),
+                        new Add(new Val(32n, true), new Val(0n, true))
+                    );
+                    const slot = new Sha3(new Val(0n, true), size, [
+                        Props['msg.sender'],
+                        new Sha3(new Val(0n, true), size, [Props['address(this)'], new Val(2n, true)]),
+                    ]);
+                    expect(state.stmts[2]).to.be.deep.equal(
+                        new MappingStore(slot, evm.step.mappings, 2, [Props['address(this)'], Props['msg.sender']],
+                            new Sub(
+                                new MappingLoad(slot, evm.step.mappings, 2, [Props['address(this)'], Props['msg.sender']]),
+                                new Val(11n, true)
+                            )
+                        )
+                    );
+                }
+
+                expect(sol`${state.stmts[2]}`).to.be.equal(
+                    'mapping3[address(this)][msg.sender] -= 0xb;'
+                );
+                expect(yul`${state.stmts[2]}`).to.be.equal(
+                    'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), sub(sload(2/*[address(this)][msg.sender]*/), 0xb)) /*2[address(this)][msg.sender]*/'
+                );
+                expect(state.last).to.be.deep.equal(new Stop());
+                expect(evm.step.variables).to.be.empty;
+            });
+        });
+    });
+
+    describe('flow', function () {
+        it('should detect `EQ` `balanceOf` function selector', function () {
+            const balanceOf = 'balanceOf(address addr)';
+            const selector = fnselector(balanceOf);
+            const src = `contract Test {
+                function ${balanceOf} external payable returns (address) {
+                    return addr;
+                }
+            }`;
+            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+
+            assert(state.last!.name === 'Jumpi');
+            assert(state.last.fallBranch.state.last?.name === 'SigCase');
+            expect(state.last.fallBranch.state.last?.condition).to.be.deep.equal(new Sig(selector));
+        });
     });
 
 });
