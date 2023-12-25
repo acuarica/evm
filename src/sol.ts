@@ -95,8 +95,8 @@ function solExpr(expr: Expr): string {
             return expr.location.isVal() && expr.location.val === 0n
                 ? 'msg.data'
                 : expr.location.isVal() && (expr.location.val - 4n) % 32n === 0n
-                ? `_arg${(expr.location.val - 4n) / 32n}`
-                : sol`msg.data[${expr.location}]`;
+                    ? `_arg${(expr.location.val - 4n) / 32n}`
+                    : sol`msg.data[${expr.location}]`;
         case 'Prop':
             return expr.symbol;
         case 'Fn':
@@ -125,9 +125,9 @@ function solExpr(expr: Expr): string {
         case 'Call':
             return expr.argsLen.isZero() && expr.retLen.isZero()
                 ? expr.gas.tag === 'Mul' &&
-                  expr.gas.left.isZero() &&
-                  expr.gas.right.isVal() &&
-                  expr.gas.right.val === 2300n
+                    expr.gas.left.isZero() &&
+                    expr.gas.right.isVal() &&
+                    expr.gas.right.val === 2300n
                     ? expr.throwOnFail
                         ? sol`address(${expr.address}).transfer(${expr.value})`
                         : sol`address(${expr.address}).send(${expr.value})`
@@ -189,12 +189,12 @@ function solInst(inst: Inst): string {
             return inst.args === undefined
                 ? sol`return memory[${inst.offset}:(${inst.offset}+${inst.size})];`
                 : inst.args.length === 0
-                ? 'return;'
-                : isStringReturn(inst.args) && inst.args[0].val === 32n
-                ? `return '${hex2a(inst.args[2].val.toString(16))}';`
-                : inst.args.length === 1
-                ? sol`return ${inst.args[0]};`
-                : `return (${inst.args.map(solExpr).join(', ')});`;
+                    ? 'return;'
+                    : isStringReturn(inst.args) && inst.args[0].val === 32n
+                        ? `return '${hex2a(inst.args[2].val.toString(16))}';`
+                        : inst.args.length === 1
+                            ? sol`return ${inst.args[0]};`
+                            : `return (${inst.args.map(solExpr).join(', ')});`;
         case 'Revert':
             return inst.args === undefined
                 ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
@@ -206,14 +206,14 @@ function solInst(inst: Inst): string {
         case 'Log':
             return inst.eventName
                 ? `emit ${inst.eventName}(${[...inst.topics.slice(1), ...(inst.args ?? [])]
-                      .map(solExpr)
-                      .join(', ')});`
+                    .map(solExpr)
+                    .join(', ')});`
                 : 'log(' +
-                      (inst.args === undefined
-                          ? [...inst.topics, sol`memory[${inst.offset}:${inst.size} ]`].join(', ') +
-                            'ii'
-                          : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
-                      ');';
+                (inst.args === undefined
+                    ? [...inst.topics, sol`memory[${inst.offset}:${inst.size} ]`].join(', ') +
+                    'ii'
+                    : [...inst.topics, ...inst.args].map(solExpr).join(', ')) +
+                ');';
         case 'Jump':
             return sol`goto :${inst.offset} branch:${inst.destBranch.pc}`;
         case 'Jumpi':
@@ -332,21 +332,21 @@ function solStmt(stmt: Stmt): string {
 /**
  *
  * @param stmts
- * @param space
+ * @param spaces
  * @returns
  */
-export function solStmts(stmts: Stmt[], space = 0): string {
+export function solStmts(stmts: Stmt[], spaces = 0): string {
     let text = '';
     for (const stmt of stmts) {
         if (stmt instanceof If) {
             const condition = solStmt(stmt);
-            text += ' '.repeat(space) + 'if ' + condition + ' {\n';
-            text += solStmts(stmt.trueBlock!, space + 4);
+            text += ' '.repeat(spaces) + 'if ' + condition + ' {\n';
+            text += solStmts(stmt.trueBlock!, spaces + 4);
             if (stmt.falseBlock) {
-                text += ' '.repeat(space) + '} else {\n';
-                text += solStmts(stmt.falseBlock, space + 4);
+                text += ' '.repeat(spaces) + '} else {\n';
+                text += solStmts(stmt.falseBlock, spaces + 4);
             }
-            text += ' '.repeat(space) + '}\n';
+            text += ' '.repeat(spaces) + '}\n';
         } else {
             if (stmt.name === 'Local' && stmt.local.nrefs <= 0) {
                 continue;
@@ -354,7 +354,7 @@ export function solStmts(stmts: Stmt[], space = 0): string {
             if (stmt.name === 'MStore') {
                 continue;
             }
-            text += ' '.repeat(space) + solStmt(stmt) + '\n';
+            text += ' '.repeat(spaces) + solStmt(stmt) + '\n';
         }
     }
 
@@ -366,11 +366,11 @@ export function solStmts(stmts: Stmt[], space = 0): string {
  * @param events
  * @returns
  */
-export function solEvents(events: IEvents) {
+export function solEvents(events: IEvents, spaces = 0) {
     let text = '';
 
     for (const [topic, event] of Object.entries(events)) {
-        text += 'event ';
+        text += ' '.repeat(spaces) + 'event ';
         if (event.sig === undefined) {
             text += topic;
         } else {
@@ -378,9 +378,7 @@ export function solEvents(events: IEvents) {
             const params = event.sig.replace(eventName, '').substring(1).slice(0, -1);
             if (params) {
                 text += eventName + '(';
-                text += params
-                    .split(',')
-                    .map((param, i) =>
+                text += params.split(',').map((param, i) =>
                         i < event.indexedCount ? `${param} indexed _arg${i}` : `${param} _arg${i}`
                     )
                     .join(', ');
@@ -590,16 +588,17 @@ function solContract(
 
     text += `contract ${contractName} {\n\n`;
 
-    text += solEvents(this.events);
+    text += solEvents(this.events, 4);
+    text += '\n';
     text += solStructs(this.mappings);
     text += solMappings(this.mappings);
     text += solVars(this.variables);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const fallback = this.metadata?.minor! >= 6 ? 'fallback' : 'function';
-    text += `${fallback}() external payable {\n`;
-    text += solStmts(this.main, 4);
-    text += '}\n\n';
+    text += ' '.repeat(4) + `${fallback}() external payable {\n`;
+    text += solStmts(this.main, 8);
+    text += ' '.repeat(4) + '}\n\n';
     for (const [, fn] of Object.entries(this.functions)) {
         text += solPublicFunction(fn);
     }

@@ -62,9 +62,9 @@ contracts('empty', (compile, fallback, version) => {
         const text = contract.solidify({ license: null, pragma: false, contractName: 'Empty' });
         expect(text).to.be.equal(`contract Empty {
 
-${fallback}() external payable {
-    revert();
-}
+    ${fallback}() external payable {
+        revert();
+    }
 
 }
 `);

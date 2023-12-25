@@ -24,9 +24,9 @@ contracts('selfdestruct', (compile, fallback, version) => {
         expect(text).to.be.equal(
             `contract Contract {
 
-${fallback}() external payable {
-    selfdestruct(msg.sender);
-}
+    ${fallback}() external payable {
+        selfdestruct(msg.sender);
+    }
 
 }
 `
