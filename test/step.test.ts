@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { Opcode, type Operand, sol, Stack, State, STEP, London, Paris } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
-import { $exprs } from './$exprs';
+import { $exprs, truncate } from './$exprs';
 
 type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 const sizes = [...Array(16).keys()].map(i => i + 1);
@@ -257,7 +257,7 @@ describe('::step', function () {
     Object.entries($exprs).forEach(([name, exprs]) => {
         describe(name.toUpperCase(), function () {
             exprs.forEach(({ insts, expr, str }) => {
-                it(`should \`STEP\` \`[${insts.join('|')}]\` into \`${str}\``, function () {
+                it(`should \`STEP\` \`[${insts.map(i => truncate(i, 12)).join('|')}]\` into \`${str}\``, function () {
                     const stack = new Stack<Expr>();
                     for (const inst of insts) {
                         if (typeof inst === 'bigint') {

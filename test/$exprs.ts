@@ -17,8 +17,11 @@ const F = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), str:
     yulstr,
 });
 
-const truncate = (str: string) => (str.length <= 60 ? str : str.slice(0, 60) + '[...]');
-export const title = (obj: unknown) => truncate(util.inspect(obj, { breakLength: Infinity }));
+export const truncate = (str: unknown, len = 50) =>
+    (`${str}`.length <= len ? `${str}` : `${str}`.slice(0, len) + '[..]');
+
+export const title = (obj: unknown) =>
+    truncate(util.inspect(obj, { breakLength: Infinity }).replace(/ /g, ''));
 
 export const $exprs = {
     core: [
