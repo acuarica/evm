@@ -81,7 +81,7 @@ export class EVM<S extends
     }[] {
         let lastPc = 0;
 
-        const result: ReturnType<typeof this.chunks> = [];
+        const result: ReturnType<typeof EVM.prototype.chunks> = [];
         const pcs = [...this.blocks.keys()];
         pcs.sort((a, b) => a - b);
         for (const pc of pcs) {
@@ -210,11 +210,11 @@ export class EVM<S extends
 
         if (!state.halted) throw new Error(`State must be halted after \`exec\` at ${pc0}:${pc}`);
 
-        const chunk = this.blocks.get(pc0);
-        if (chunk === undefined) {
+        const block = this.blocks.get(pc0);
+        if (block === undefined) {
             this.blocks.set(pc0, { pcend: pc, states: [state] });
         } else {
-            chunk.states.push(state);
+            block.states.push(state);
         }
     }
 
