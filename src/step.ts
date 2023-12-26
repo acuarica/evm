@@ -620,7 +620,23 @@ function DATACOPY() {
 
     return Step({
         CALLDATACOPY: [0x37, state => datacopy('calldatacopy')(state)],
-        CODECOPY: [0x39, state => datacopy('codecopy')(state)],
+        CODECOPY: [0x39, function codecopy({ stack, memory }, _opcode, bytecode) {
+            const dest = stack.pop().eval();
+            const offset = stack.pop();
+            const size = stack.pop();
+            if (!dest.isVal()) {
+                throw new Error('expected number in codecopy');
+            } else {
+                memory[Number(dest.val)] = new DataCopy('codecopy', offset, size, undefined,
+                    ((offset, size) => {
+                        if (offset.isVal() && size.isVal()) {
+                            return bytecode.subarray(Number(offset.val), Number(offset.val + size.val));
+                        }
+                        return undefined;
+                    })(offset.eval(), size.eval())
+                );
+            }
+        }],
         EXTCODECOPY: [0x3c, state => {
             const address = state.stack.pop();
             datacopy('extcodecopy')(state, address);
@@ -672,11 +688,20 @@ function SYSTEM() {
     return Step({
         SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
         STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
-        CREATE: [0xf0, function create({ stack }) {
+        CREATE: [0xf0, function create({ stack, memory }) {
             const value = stack.pop();
             const offset = stack.pop();
             const size = stack.pop();
-            stack.push(new Create(value, offset, size));
+
+            stack.push(new Create(value, offset, size, ((offset, size) => {
+                if (offset.isVal() && size.isVal() && Number(offset.val) in memory) {
+                    const data = memory[Number(offset.val)];
+                    if (data.tag === 'DataCopy' && data.bytecode !== undefined && data.bytecode.length === Number(size.val)) {
+                        return data.bytecode;
+                    }
+                }
+                return null;
+            })(offset.eval(), size.eval())));
         }],
         CALL: [0xf1, function call({ stack, memory }) {
             const gas = stack.pop();

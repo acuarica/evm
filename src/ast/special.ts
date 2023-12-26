@@ -84,7 +84,8 @@ export class DataCopy extends Tag {
         readonly kind: 'calldatacopy' | 'codecopy' | 'extcodecopy' | 'returndatacopy',
         readonly offset: Expr,
         readonly size: Expr,
-        readonly address?: Expr
+        readonly address?: Expr,
+        readonly bytecode?: Uint8Array,
     ) {
         super();
     }

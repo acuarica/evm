@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, STEP, London, Paris } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
 
@@ -273,6 +273,24 @@ describe('::step', function () {
         });
     });
 
+    describe('DATACOPY', function () {
+        it('should `CODECOPY` executing bytecode into memory', function () {
+            const bytecode = Buffer.from('0102030405060708', 'hex');
+            const state = new State<Inst, Expr>();
+
+            const [offset, size] = [new Val(2n), new Sub(new Val(7n), new Val(4n))];
+            state.stack.push(size);
+            state.stack.push(offset);
+            state.stack.push(new Val(4n));
+            STEP().CODECOPY(state, new Opcode(0, 0, null, null), bytecode);
+
+            expect(state.memory).to.be.deep.equal({
+                '4': new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5))
+            });
+            expect(state.stack.values).to.be.deep.equal([]);
+        });
+    });
+
     describe('MEMORY', function () {
         it('should `MLOAD` value onto stack', function () {
             const state = new State<Inst, Expr>();
@@ -323,7 +341,7 @@ describe('::step', function () {
             expect(sol`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
         });
 
-        it('should exec `CREATE`', function () {
+        it('should exec `CREATE` with no bytecode', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x10n));
@@ -335,6 +353,25 @@ describe('::step', function () {
             ]);
             expect(sol`${state.stack.values[0]}`).to.be.equal(
                 'new Contract(memory[0x10..0x10+0x20]).value(0x1000).address'
+            );
+        });
+
+        it('should exec `CREATE` with bytecode', function () {
+            const bytecode = Buffer.from('01020304', 'hex');
+            const state = new State<Inst, Expr>();
+
+            state.stack.push(new Val(0x4n));
+            state.stack.push(new Val(0x10n));
+            state.stack.push(new Val(0x1000n));
+
+            state.memory[0x10] = new DataCopy('codecopy', new Val(1n), new Val(2n), undefined, bytecode);
+
+            STEP().CREATE(state);
+            expect(state.stack.values).to.be.deep.equal([
+                new Create(new Val(0x1000n), new Val(16n), new Val(4n), bytecode),
+            ]);
+            expect(sol`${state.stack.values[0]}`).to.be.equal(
+                'new Contract(memory[0x10..0x10+0x4]).value(0x1000).address'
             );
         });
 
