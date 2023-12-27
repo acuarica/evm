@@ -93,7 +93,7 @@ function yulExpr(expr: Expr): string {
 function yulInst(inst: Inst): string {
     switch (inst.name) {
         case 'Local':
-            return yul`${inst.local.value.type} local${inst.local.index} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
+            return yul`let local${inst.local.index}: ${inst.local.value.type} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
         case 'Log':
             return yul`log${inst.topics.length}(${inst.offset}, ${inst.size}, ${inst.topics
                 .map(yulExpr)

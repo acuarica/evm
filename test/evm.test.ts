@@ -276,8 +276,7 @@ describe('::evm', function () {
     });
 
     describe('special', function () {
-
-        for (const prop of Object.values(Props)) {
+        Object.values(Props).forEach(prop => {
             it(`should get \`${prop.symbol}\` from compiled code`, function () {
                 const src = `contract Test {
                         event Deposit(${prop.type});
@@ -301,7 +300,7 @@ describe('::evm', function () {
                 expect(stmt.name).to.be.equal('Log');
                 expect((stmt as Log).args![0].eval()).to.be.deep.equal(prop);
             });
-        }
+        });
     });
 
     describe('log', function () {
@@ -372,7 +371,7 @@ event ${eventSelector(unknownEventSig)};
                 'mstore(add(0x20, 0x80), 0x3)',
                 'mstore(add(0x20, add(0x20, 0x80)), 0x4)',
                 `log1(0x80, sub(add(0x20, add(0x20, add(0x20, 0x80))), 0x80), 0x${topic})`,
-                `uint ${local} = number() // #refs 1`,
+                `let ${local}: uint = number() // #refs 1`,
                 `mstore(0x80, ${local})`,
                 `log1(0x80, sub(add(0x20, 0x80), 0x80), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
                 `mstore(0x80, add(${local}, 0x7))`,
