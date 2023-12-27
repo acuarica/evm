@@ -151,18 +151,22 @@ describe('::step', function () {
                 expect(opcodes).to.be.empty;
             });
 
-            it(`should \`decode\` opcodes`, function () {
-                const opcodes = decode(p + '00010203');
-                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(['STOP', 'ADD', 'MUL', 'SUB']);
+            it(`should \`decode\` opcodes and accept lower and uppercase hex digits`, function () {
+                const opcodes = decode(p + '00010203FAff');
+                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(
+                    ['STOP', 'ADD', 'MUL', 'SUB', 'STATICCALL', 'SELFDESTRUCT']
+                );
             });
 
             it(`should throw when input is not even`, function () {
-                expect(() => decode(p + '1')).to.throw('input should have even length');
+                expect(() => decode(p + 'a')).to.throw(
+                    `Unable to decode, input should have even length, but got length '${p.length + 1}'`
+                );
             });
 
-            it(`should throw when input has an invalid number`, function () {
-                expect(() => decode(p + 'gg')).to.throw(
-                    `invalid value found at ${p.length}`
+            it(`should throw when input has an invalid hex byte`, function () {
+                expect(() => decode(p + '010203xx')).to.throw(
+                    `Unable to decode, invalid hex byte 'xx' found at position '${p.length + 7}'`
                 );
             });
         }));

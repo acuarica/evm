@@ -296,17 +296,18 @@ class Undef {
  */
 export function fromHexString(hexstr: string): Uint8Array {
     if (hexstr.length % 2 !== 0) {
-        throw new Error('Unable to decode, input should have even length');
+        throw new Error(`Unable to decode, input should have even length, but got length '${hexstr.length}'`);
     }
 
     const start = hexstr.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
     const buffer = new Uint8Array((hexstr.length - start) / 2);
     for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
-        const value = parseInt(hexstr.slice(i, i + 2), 16);
+        const byte = hexstr.slice(i, i + 2);
+        const value = parseInt(byte, 16);
         if (value >= 0) {
             buffer[j] = value;
         } else {
-            throw new Error(`Unable to decode, invalid value found at ${i}`);
+            throw new Error(`Unable to decode, invalid hex byte '${byte}' found at position '${i + 1}'`);
         }
     }
     return buffer;
