@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, London, STEP, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Ram } from 'sevm';
+import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand } from 'sevm';
 import type { Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
@@ -20,7 +20,7 @@ describe('::evm', function () {
 
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
         const evm = new EVM('0x');
-        expect(() => evm.containsOpcode('add' as keyof ReturnType<typeof STEP>['opcodes']))
+        expect(() => evm.containsOpcode('add' as keyof InstanceType<typeof Shanghai>['opcodes']))
             .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
         expect(() => evm.containsOpcode('haltingSteps'))
             .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
@@ -75,19 +75,18 @@ describe('::evm', function () {
         }`;
         let count = 0, gasLimit = null, gasPrice = null;
 
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode, Object.setPrototypeOf({
-            GASLIMIT(state: Ram<Expr>) {
+        const evm = new EVM(compile(src, '0.7.6', this).bytecode, new class extends London {
+            override GASLIMIT = (state: Operand<Expr>) => {
                 count++;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 super.GASLIMIT(state);
                 gasLimit = state.stack.top;
-            },
-            GASPRICE(state: Ram<Expr>) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            };
+
+            override GASPRICE = (state: Operand<Expr>) => {
                 super.GASPRICE(state);
                 gasPrice = state.stack.top;
-            },
-        }, STEP()));
+            };
+        }());
 
         evm.start();
         expect(count).to.be.equal(2);
@@ -288,9 +287,9 @@ describe('::evm', function () {
                     }`;
 
                 const bytecode = (version: Version) => compile(src, version, this, { optimizer: { enabled: true } }).bytecode;
-                const evm = prop.symbol === 'block.difficulty'
-                    ? new EVM(bytecode('0.8.16'), London())
-                    : new EVM(bytecode('0.8.21'), Shanghai());
+                const evm = new EVM(...prop.symbol === 'block.difficulty'
+                    ? [bytecode('0.8.16'), new London()] as const
+                    : [bytecode('0.8.21'), new Shanghai()] as const);
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);
 
