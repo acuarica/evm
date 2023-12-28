@@ -2,7 +2,7 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, stripMetadataHash, STEP } from 'sevm';
+import { EVM, State, stripMetadataHash, Shanghai } from 'sevm';
 import { And, Not, Val, Local, type Inst, type Expr, Props } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
@@ -56,6 +56,8 @@ describe('evm', function () {
     });
 
     describe('different empty contracts should have the same bytecode', function () {
+        const step = new Shanghai();
+
         const bytecodes = new Set<string>();
         [
             {
@@ -100,7 +102,7 @@ describe('evm', function () {
                 bytecodes.add(bytecode);
                 expect(bytecodes).to.have.length(1);
 
-                expect(STEP().decode(bytecode).map(o => o.mnemonic)).to.be.deep.equal([
+                expect(step.decode(bytecode).map(o => o.mnemonic)).to.be.deep.equal([
                     'PUSH1', 'PUSH1', 'MSTORE', 'PUSH1', 'DUP1', 'REVERT', 'INVALID',
                 ]);
             });

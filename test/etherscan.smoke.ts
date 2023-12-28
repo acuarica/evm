@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import c from 'ansi-colors';
 import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
-import { Contract, ERCIds, sol, type State, STEP } from 'sevm';
+import { Contract, ERCIds, sol, type State, Shanghai } from 'sevm';
 import type { Expr, Inst, StaticCall, Throw } from 'sevm/ast';
 import 'sevm-4byte';
 
@@ -158,7 +158,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     return;
                 }
 
-                const step = STEP();
+                const step = new Shanghai();
                 /** @param {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} state */
                 const STATICCALL = (state: State<Inst, Expr>) => {
                     step['STATICCALL'](state);

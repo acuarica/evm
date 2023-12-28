@@ -8,7 +8,7 @@ import type { Type } from './type';
 import { State } from './state';
 import { EVM } from './evm';
 import ERCs from './ercs';
-import { STEP, type ISelectorBranches } from './step';
+import { Shanghai, type ISelectorBranches } from './step';
 import type { Metadata } from './metadata';
 
 /**
@@ -50,12 +50,7 @@ export class Contract {
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
     constructor(readonly bytecode: string, _insts = {}) {
-        const evm = new EVM(bytecode, STEP(
-            this.events,
-            this.variables,
-            this.mappings,
-            this.functionBranches
-        ));
+        const evm = new EVM(bytecode, new Shanghai());
         const main = new State<Inst, Expr>();
         evm.run(0, main);
         this.main = build(main);
@@ -67,6 +62,10 @@ export class Contract {
             this.functions[selector] = new PublicFunction(this, build(branch.state), selector);
         }
 
+        this.events = evm.step.events;
+        this.variables = evm.step.variables;
+        this.mappings = evm.step.mappings;
+        this.functionBranches = evm.step.functionBranches;
         this.metadata = evm.metadata;
         this.errors = evm.errors;
     }

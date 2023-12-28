@@ -1,6 +1,6 @@
 import util from 'util';
 
-import type { Operand, STEP } from 'sevm';
+import type { Operand, Shanghai } from 'sevm';
 import type { Expr } from 'sevm/ast';
 import { Add, Mul, Sub, Val, Div, Exp, Mod, Not, Eq, Sig, CallValue, CallDataLoad, Props, IsZero, Shl, Byte } from 'sevm/ast';
 
@@ -8,7 +8,7 @@ const id = <E>(expr: E): E => expr;
 
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 
-type StackStep = bigint | FilterFn<ReturnType<typeof STEP>, (state: Operand<Expr>) => void>;
+type StackStep = bigint | FilterFn<InstanceType<typeof Shanghai>, (state: Operand<Expr>) => void>;
 const F = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), str: string, yulstr: string) => ({
     insts,
     expr,
