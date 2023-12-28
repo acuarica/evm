@@ -19,10 +19,11 @@ describe('::evm', function () {
     });
 
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
+        type OpcodeType = keyof InstanceType<typeof Shanghai>['opcodes'];
         const evm = new EVM('0x');
-        expect(() => evm.containsOpcode('add' as keyof InstanceType<typeof Shanghai>['opcodes']))
+        expect(() => evm.containsOpcode('add' as OpcodeType))
             .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
-        expect(() => evm.containsOpcode('haltingSteps'))
+        expect(() => evm.containsOpcode('haltingSteps' as OpcodeType))
             .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
     });
 
@@ -287,9 +288,15 @@ describe('::evm', function () {
                     }`;
 
                 const bytecode = (version: Version) => compile(src, version, this, { optimizer: { enabled: true } }).bytecode;
-                const evm = new EVM(...prop.symbol === 'block.difficulty'
-                    ? [bytecode('0.8.16'), new London()] as const
-                    : [bytecode('0.8.21'), new Shanghai()] as const);
+                const evm = prop.symbol === 'block.difficulty'
+                    ? new EVM(bytecode('0.8.16'), new London())
+                    : new EVM(bytecode('0.8.21'), new Shanghai());
+                // TODO: fix
+                // const a = prop.symbol === 'block.difficulty'
+                //     ? [bytecode('0.8.16'), new London() ] as const
+                //     : [bytecode('0.8.21'), new Shanghai() ] as const;
+                // const evm = new EVM(d);
+
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);
 

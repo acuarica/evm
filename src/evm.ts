@@ -1,8 +1,8 @@
-import { type Ram, State } from './state';
+import { type Ram, State, type Stack } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { type ISelectorBranches, Opcode, fromHexString, STEP, type Mnemonic } from './step';
+import { type ISelectorBranches, Opcode, fromHexString, type Mnemonic, Shanghai } from './step';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
@@ -15,7 +15,7 @@ export class EVM<S extends
         decode(code: string): Opcode<Mnemonic<S>>[];
     } & {
         readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
-    } = ReturnType<typeof STEP>
+    } = InstanceType<typeof Shanghai>
 > {
     /**
      * The `metadataHash` part from the `bytecode`.
@@ -26,7 +26,7 @@ export class EVM<S extends
     /**
      *
      */
-    readonly blocks = new Map<number, { pcend: number; states: State<Inst, Expr>[] }>();
+    readonly blocks = new Map<number, { pcend: number; opcodes: { opcode: Opcode<Mnemonic<S>>, stack: Stack<Expr> }[]; states: State<Inst, Expr>[]; }>();
 
     /**
      *
@@ -59,7 +59,7 @@ export class EVM<S extends
          * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
          * `INVALID` is used instead.
          */
-        readonly step: S = STEP() as unknown as S
+        readonly step: S = new Shanghai() as unknown as S
     ) {
         this.JUMPDEST = this.step.opcodes()['JUMPDEST'];
 
@@ -175,6 +175,8 @@ export class EVM<S extends
         //         return Reflect.get(target, prop, receiver);
         //     },
         // });
+
+        const opcodes = [];
         let pc = pc0;
         // for (; !state.halted && pc < this.opcodes.length; pc++) {
         for (; !state.halted && pc < this.bytecode.length; pc++) {
@@ -189,10 +191,9 @@ export class EVM<S extends
                 })()
             );
 
-            const step = this.step[mnemonic];
-
             try {
-                step(state, opcode, this.bytecode);
+                this.step[mnemonic](state, opcode, this.bytecode);
+                opcodes.push({ opcode, stack: state.stack.clone() });
             } catch (err) {
                 // console.log(err);
                 const inv = new Throw((err as Error).message, opcode, state);
@@ -212,7 +213,7 @@ export class EVM<S extends
 
         const block = this.blocks.get(pc0);
         if (block === undefined) {
-            this.blocks.set(pc0, { pcend: pc, states: [state] });
+            this.blocks.set(pc0, { pcend: pc, opcodes, states: [state] });
         } else {
             block.states.push(state);
         }

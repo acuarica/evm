@@ -63,7 +63,7 @@ describe('::step', function () {
             let numberWasCalled = false;
 
             new class extends Shanghai {
-                NUMBER = (state: Operand<Expr>) => {
+                override NUMBER = (state: Operand<Expr>) => {
                     super.NUMBER(state);
                     numberWasCalled = true;
                 };
@@ -499,7 +499,7 @@ describe('::step', function () {
 
         it('should not change state when `JUMPDEST` step', function () {
             const state = new State<Inst, Expr>();
-            step.JUMPDEST(new State(), new Opcode(0, 0, null, null), Buffer.from([]));
+            step.JUMPDEST(new State());
             expect(state).to.be.deep.equal(new State());
         });
 
@@ -559,22 +559,22 @@ describe('::step', function () {
         it('should decode `0x44` -> `DIFFICULTY` with London', function () {
             const step = new London();
 
-            const [, , mnemonic] = step[0x44] as readonly [unknown, unknown, 'DIFFICULTY'];
+            const [, , mnemonic] = step[0x44];
             expect(mnemonic).to.be.deep.equal('DIFFICULTY');
 
             const stack = new Stack<Expr>();
-            step[mnemonic]({ stack });
+            step[mnemonic as 'DIFFICULTY']({ stack });
             expect(stack.top).to.be.equal(Props['block.difficulty']);
         });
 
         it('should decode `0x44` -> `PREVRANDAO` with Paris', function () {
             const step = new Paris();
 
-            const [, , mnemonic] = step[0x44] as readonly [unknown, unknown, 'PREVRANDAO'];
+            const [, , mnemonic] = step[0x44];
             expect(mnemonic).to.be.deep.equal('PREVRANDAO');
 
             const stack = new Stack<Expr>();
-            step[mnemonic]({ stack });
+            step[mnemonic as 'PREVRANDAO']({ stack });
             expect(stack.top).to.be.equal(Props['block.prevrandao']);
         });
 

@@ -12,27 +12,18 @@ import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from 
 import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
 
 /**
- * Store selectors starting point.
- */
-export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
-
-// type ObjectToUnion<
-//   T extends object,
-//   U = { [K in keyof T]: { key: K; value: T[K] } }
-// > = U[keyof U]
-
-const mapValues = <K extends string, V, W>(o: { [k in K]: V }, fn: (v: V) => W) =>
-    Object.fromEntries(Object.entries(o).map(([name, value]) => [name, fn(value)]));
-
-
-/**
  * Represents an opcode found in the bytecode augmented with
  * offset and operand information as defined by the EVM.
  *
  * It can be either a unary opcode, _which does not take any operand data_,
- * or either a `PUSHn` mnemonic augmented with its `pushData`.
+ * or either a `PUSHn` mnemonic augmented with its push `data`.
  * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
  *
+ * `PUSHn` `n >= 1` opcodes takes an `n`-byte argument from the bytecode.
+ * Note that `PUSH0`[^1] does not take any data argument from the bytecode (just pushes `0` onto the `Stack`).
+ * Thus it can be considered as an unary opcode.
+ * 
+ * [^1]: https://eips.ethereum.org/EIPS/eip-3855
  */
 export class Opcode<M = unknown> {
 
@@ -98,120 +89,9 @@ export class Opcode<M = unknown> {
 type StepFn = (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
 
 /**
- * Set of opcodes defined by the EVM.
- *
- * They are constructed from two kinds of opcodes.
- * `Unary` opcodes which takes no-arguments and,
- * `PUSHn` opcodes which takes an `n` byte argument from the bytecode.
- *
- * From these two different categories is easier to distinguish between the two.
- */
-function Step<
-    M extends Uppercase<string>,
-    F extends StepFn
->(step: {
-    readonly [m in M]: readonly [number | { opcode: number, size?: number, halts?: true }, F]
-}): {
-    readonly [m in M]: F;
-} & {
-    [o: number]: readonly [size: number, halts: boolean, M];
-} {
-    const ms = mapValues(step, ([, f]) => f);
-    const os = Object.entries(step)
-        .map(([m, [o,]]) => typeof o === 'number'
-            ? [o, [0, false, m]] as const
-            : [o.opcode, [o.size ?? 0, !!o.halts, m]] as const
-        );
-    return { ...ms, ...Object.fromEntries(os) };
-}
-
-/**
- * Latest fork definition.
- */
-export const STEP = Shanghai;
-
-/**
- * Defines the `Shanghai` hardfork.
- * It includes the `PUSH0` instruction.
- * 
- * Solidity `0.8.20` uses `push0` for placing `0` on the Stack.
- * This decreases the deployment and runtime costs.
- * 
- * @see https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
- * @see https://eips.ethereum.org/EIPS/eip-3855
- * @see https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/
- */
-export function Shanghai(
-    events: IEvents = {},
-    variables: IStore['variables'] = {},
-    mappings: IStore['mappings'] = {},
-    functionBranches: ISelectorBranches = new Map(),
-) {
-    return Object.assign(
-        Paris(events, variables, mappings, functionBranches),
-        Step({
-            PUSH0: [0x5f, ({ stack }: Operand<Expr>) => stack.push(new Val(0n, true))]
-        })
-    );
-}
-
-/**
- * Defines the `Paris` hardfork.
- * It includes the `PREVRANDAO` instruction.
- * 
- * Solidity `0.8.18` includes _Support for Paris Hardfork_, 
- * which introduces the global `block.prevrandao` built-in in Solidity and `prevrandao()`
- * instruction in inline assembly for EVM versions >= Paris.
- * 
- * @see https://ethereum.github.io/execution-specs/diffs/gray_glacier_paris.html 
- * @see https://eips.ethereum.org/EIPS/eip-4399
- * @see https://soliditylang.org/blog/2023/02/01/solidity-0.8.18-release-announcement
- */
-export function Paris(
-    events: IEvents = {},
-    variables: IStore['variables'] = {},
-    mappings: IStore['mappings'] = {},
-    functionBranches: ISelectorBranches = new Map(),
-) {
-    return Object.assign(
-        London(events, variables, mappings, functionBranches),
-        Step({
-            PREVRANDAO: [0x44, function prevrandao({ stack }: Operand<Expr>) {
-                stack.push(Props['block.prevrandao']);
-            }],
-        })
-    );
-}
-
-export function London(
-    events: IEvents = {},
-    variables: IStore['variables'] = {},
-    mappings: IStore['mappings'] = {},
-    functionBranches: ISelectorBranches = new Map(),
-) {
-    return Object.assign(new Undef(),
-        PUSHES(),
-        DUPS(),
-        SWAPS(),
-        ALU(),
-        SPECIAL(),
-        DATACOPY(),
-        MEMORY(),
-        SYSTEM(),
-        Step({
-            PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
-            INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
-        }),
-        LOGS(events),
-        STORAGE({ variables, mappings }),
-        FLOW(functionBranches),
-    );
-}
-
-/**
  * 
  */
-export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k & string) : never }[keyof T];
+export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k extends Uppercase<string> ? k : never) : never }[keyof T];
 
 /**
  * This module is used to `decode` bytecode into `Opcode`.
@@ -225,12 +105,11 @@ class Undef {
 
     constructor() {
         Object.assign(this,
-            {
-                UNDEF: (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode)),
-            } as const,
             Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
         );
     }
+
+    UNDEF = (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode));
 
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
@@ -286,6 +165,28 @@ class Undef {
 
         return opcodes;
     }
+
+    *decode2(code: string) {
+        const bytecode = fromHexString(code);
+
+        for (let pc = 0; pc < bytecode.length; pc++) {
+            const opcode = bytecode[pc];
+            const [size, , mnemonic] = this[opcode];
+            yield new Opcode(
+                pc,
+                opcode,
+                mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
+                size === 0 ? null : function () {
+                    const data = bytecode.subarray(pc + 1, pc + size + 1);
+                    if (data.length !== size) throw new Error('asdfsadfdffd');
+                    pc += size;
+                    return data;
+                }(),
+            );
+        }
+
+        throw new Error('sdsdsdsdsd');
+    }
 }
 
 /**
@@ -313,6 +214,99 @@ export function fromHexString(hexstr: string): Uint8Array {
     return buffer;
 }
 
+function ForkFactory<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    T extends new (...args: any[]) => { [o: number]: readonly [number, boolean, unknown] },
+    U extends {
+        readonly [m in string]: readonly [number | { opcode: number, size?: number, halts?: true }, step: StepFn]
+    }
+>(Klass: T, steps: U) {
+    const lookup = Object.fromEntries(
+        Object.entries(steps).map(([m, [o,]]) => typeof o === 'number'
+            ? [o, [0, false, m]] as const
+            : [o.opcode, [o.size ?? 0, !!o.halts, m]] as const
+        ));
+
+    class Fork extends Klass {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        constructor(..._args: any[]) {
+            super();
+            Object.assign(this, lookup);
+        }
+    }
+
+    const props = Object.fromEntries(Object.entries(steps).map(([m, value]) => [m, value[1]]));
+    Object.assign(Fork.prototype, props);
+
+    return Fork as unknown as new () => Omit<InstanceType<T> & { readonly [m in keyof U]: U[m][1] }, number> & {
+        [o: number]: [size: number, halts: boolean, keyof U | InstanceType<T>[number][2]];
+    };
+}
+
+/**
+ * Store selectors', _i.e._, public and external `function`s program counter entry.
+ */
+export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
+
+/**
+ * asdfdsa
+ */
+export const London = class extends ForkFactory(Undef, {
+    ...PUSHES(),
+    ...DUPS(),
+    ...SWAPS(),
+    ...ALU(),
+    ...SPECIAL(),
+    ...DATACOPY(),
+    ...MEMORY(),
+    ...SYSTEM(),
+    ...{
+        PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
+        INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
+    },
+    ...LOGS(),
+    ...STORAGE(),
+    ...FLOW(),
+}) {
+    readonly events: IEvents = {};
+    readonly variables: IStore['variables'] = {};
+    readonly mappings: IStore['mappings'] = {};
+    readonly functionBranches: ISelectorBranches = new Map();
+};
+
+/**
+ * Defines the `Paris` hardfork.
+ * It includes the `PREVRANDAO` instruction.
+ * 
+ * Solidity `0.8.18` includes _Support for Paris Hardfork_, 
+ * which introduces the global `block.prevrandao` built-in in Solidity and `prevrandao()`
+ * instruction in inline assembly and Yul for EVM versions >= Paris.
+ * 
+ * @see https://ethereum.github.io/execution-specs/diffs/gray_glacier_paris.html 
+ * @see https://eips.ethereum.org/EIPS/eip-4399
+ * @see https://soliditylang.org/blog/2023/02/01/solidity-0.8.18-release-announcement
+ */
+export const Paris = ForkFactory(London, {
+    PREVRANDAO: [0x44, function prevrandao({ stack }: Operand<Expr>) {
+        stack.push(Props['block.prevrandao']);
+    }],
+});
+
+/**
+ * Defines the `Shanghai` hardfork.
+ * It includes the `PUSH0` instruction.
+ * 
+ * Solidity `0.8.20` uses `push0` for placing `0` on the Stack.
+ * This decreases the deployment and runtime costs.
+ * 
+ * @see https://ethereum.github.io/execution-specs/diffs/paris_shanghai.html
+ * @see https://eips.ethereum.org/EIPS/eip-3855
+ * @see https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/
+ */
+export const Shanghai = ForkFactory(Paris, {
+    PUSH0: [0x5f, ({ stack }: Operand<Expr>) => stack.push(new Val(0n, true))]
+});
+
 function PUSHES() {
     const push = (size: number) => [
         { opcode: 0x60 - 1 + size, size },
@@ -321,15 +315,15 @@ function PUSHES() {
         }
     ] as const;
 
-    return Step({
-        POP: [0x50, function pop({ stack }) {
+    return {
+        POP: [0x50, function pop({ stack }: Operand<Expr>) {
             const expr = stack.pop();
             if (expr.tag === 'Local') {
                 // expr.nrefs--;
                 // console.log('POP: Local', expr);
                 // throw new Error('POP: Local');
             }
-        }],
+        }] as const,
         PUSH1: push(1),
         PUSH2: push(2),
         PUSH3: push(3),
@@ -362,11 +356,28 @@ function PUSHES() {
         PUSH30: push(30),
         PUSH31: push(31),
         PUSH32: push(32),
-    });
+    };
 }
 
 function DUPS() {
-    return Step({
+    const dup = (position: number) => [0x80 + position, (state: State<Inst, Expr>) => {
+        if (position >= state.stack.values.length) {
+            throw new Error('Invalid duplication operation, position was not found');
+            // state.stack.values[position] = Block.coinbase;
+        }
+
+        const expr = state.stack.values[position];
+        if (expr.tag !== 'Local') {
+            const local = new Local(state.nlocals++, expr);
+            state.stack.values[position] = local;
+            state.stmts.push(new Locali(local));
+        } else {
+            expr.nrefs++;
+        }
+        state.stack.push(state.stack.values[position]);
+    }] as const;
+
+    return {
         DUP1: dup(0),
         DUP2: dup(1),
         DUP3: dup(2),
@@ -383,37 +394,13 @@ function DUPS() {
         DUP14: dup(13),
         DUP15: dup(14),
         DUP16: dup(15),
-    });
-
-    function dup(position: number) {
-        return [0x80 + position, function dup(state: State<Inst, Expr>) {
-            if (position >= state.stack.values.length) {
-                throw new Error('Invalid duplication operation, position was not found');
-                // state.stack.values[position] = Block.coinbase;
-            }
-
-            const expr = state.stack.values[position];
-            if (expr.tag !== 'Local') {
-                const local = new Local(state.nlocals++, expr);
-                state.stack.values[position] = local;
-                state.stmts.push(new Locali(local));
-            } else {
-                expr.nrefs++;
-            }
-            state.stack.push(state.stack.values[position]);
-        }] as const;
-    }
+    };
 }
 
 function SWAPS() {
-    const swap = (position: number) => [
-        0x90 - 1 + position,
-        function swap({ stack }: Operand<Expr>) {
-            stack.swap(position);
-        }
-    ] as const;
+    const swap = (p: number) => [0x90 - 1 + p, ({ stack }: Operand<Expr>) => stack.swap(p)] as const;
 
-    return Step({
+    return {
         SWAP1: swap(1),
         SWAP2: swap(2),
         SWAP3: swap(3),
@@ -430,7 +417,7 @@ function SWAPS() {
         SWAP14: swap(14),
         SWAP15: swap(15),
         SWAP16: swap(16),
-    });
+    };
 }
 
 function ALU() {
@@ -445,7 +432,7 @@ function ALU() {
         stack.push(new Cons(value, shift));
     };
 
-    return Step({
+    return {
         ADD: [0x01, bin(Add)],
         MUL: [0x02, bin(Mul)],
         SUB: [0x03, bin(Sub)],
@@ -565,7 +552,7 @@ function ALU() {
         SHL: [0x1b, shift(Shl)],
         SHR: [0x1c, shift(Shr)],
         SAR: [0x1d, shift(Sar)],
-    });
+    } satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void] };
 }
 
 /**
@@ -575,11 +562,9 @@ function SPECIAL() {
     const mapKeys = <K extends string, U>(o: { [k in K]: unknown }, fn: (k: K) => U) =>
         Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
 
-    const prop = (symbol: keyof typeof Props) => function prop({ stack }: Operand<Expr>) {
-        stack.push(Props[symbol]);
-    };
+    const prop = (symbol: keyof typeof Props) => ({ stack }: Operand<Expr>) => stack.push(Props[symbol]);
 
-    return Step({
+    return {
         BASEFEE: [0x48, prop('block.basefee')],
         COINBASE: [0x41, prop('block.coinbase')],
         TIMESTAMP: [0x42, prop('block.timestamp')],
@@ -603,7 +588,7 @@ function SPECIAL() {
         ...mapKeys(FNS, n => [FNS[n][2], ({ stack }) => stack.push(new Fn(n, stack.pop()))]),
         CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
         CALLDATALOAD: [0x35, ({ stack }) => stack.push(new CallDataLoad(stack.pop()))],
-    } as const satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void]; });
+    } satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void] };
 }
 
 function DATACOPY() {
@@ -619,7 +604,7 @@ function DATACOPY() {
         // stmts.push(new MStore(location, data));
     };
 
-    return Step({
+    return {
         CALLDATACOPY: [0x37, state => datacopy('calldatacopy')(state)],
         CODECOPY: [0x39, function codecopy({ stack, memory }, _opcode, bytecode) {
             const dest = stack.pop().eval();
@@ -643,7 +628,7 @@ function DATACOPY() {
             datacopy('extcodecopy')(state, address);
         }],
         RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
-    });
+    } satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>, _opcode: unknown, bytecode: Uint8Array) => void] };
 }
 
 /**
@@ -665,7 +650,7 @@ function MEMORY() {
         }
     };
 
-    return Step({
+    return {
         MLOAD: [0x51, function mload({ stack, memory }) {
             let loc = stack.pop();
             loc = loc.eval();
@@ -679,14 +664,14 @@ function MEMORY() {
         MSIZE: [0x59, function msize({ stack }) {
             stack.push(new Prop('msize()', 'uint'));
         }],
-    });
+    } satisfies { [m: string]: [opcode: number, (state: State<Inst, Expr>) => void] };
 }
 
 /**
  * Keep track of https://eips.ethereum.org/EIPS/eip-6780
  */
 function SYSTEM() {
-    return Step({
+    return {
         SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
         STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
         CREATE: [0xf0, function create({ stack, memory }) {
@@ -757,7 +742,7 @@ function SYSTEM() {
             const address = state.stack.pop();
             state.halt(new SelfDestruct(address));
         }],
-    });
+    } satisfies { [m: string]: [opcode: number | { opcode: number, halts: boolean }, (state: State<Inst, Expr>) => void] };
 
     function memArgs<T>(
         { stack, memory }: State<Inst, Expr>,
@@ -786,17 +771,17 @@ function SYSTEM() {
     }
 }
 
-function LOGS(events: IEvents) {
-    return Object.assign({ events }, Step({
-        LOG0: log(0, events),
-        LOG1: log(1, events),
-        LOG2: log(2, events),
-        LOG3: log(3, events),
-        LOG4: log(4, events),
-    }));
+function LOGS() {
+    return {
+        LOG0: log(0),
+        LOG1: log(1),
+        LOG2: log(2),
+        LOG3: log(3),
+        LOG4: log(4),
+    };
 
-    function log(topicsCount: number, events: IEvents) {
-        return [0xa0 + topicsCount, function log({ stack, memory, stmts }: State<Inst, Expr>) {
+    function log(topicsCount: number) {
+        return [0xa0 + topicsCount, function log(this: { events: IEvents }, { stack, memory, stmts }: State<Inst, Expr>) {
             const offset = stack.pop();
             const size = stack.pop();
 
@@ -808,10 +793,10 @@ function LOGS(events: IEvents) {
             let event: IEvents[string] | undefined = undefined;
             if (topics.length > 0 && topics[0].isVal()) {
                 const eventTopic = topics[0].val.toString(16).padStart(64, '0');
-                event = events[eventTopic];
+                event = this.events[eventTopic];
                 if (event === undefined) {
                     event = { indexedCount: topics.length - 1 };
-                    events[eventTopic] = event;
+                    this.events[eventTopic] = event;
                 }
             }
 
@@ -830,38 +815,50 @@ function LOGS(events: IEvents) {
     }
 }
 
-function STORAGE({ variables, mappings }: IStore) {
-    return Object.assign({ variables, mappings }, Step({
-        SLOAD: [0x54, function sload({ stack }) {
+function STORAGE() {
+    return {
+        SLOAD: [0x54, function sload(this: IStore, { stack }) {
             const loc = stack.pop();
 
             if (loc.tag === 'Sha3') {
                 const [base, parts] = parseSha3(loc);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(loc, mappings, base, parts));
+                    stack.push(new MappingLoad(loc, this.mappings, base, parts));
                 } else {
-                    stack.push(new SLoad(loc, variables));
+                    stack.push(new SLoad(loc, this.variables));
                 }
             } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
                 const [base, parts] = parseSha3(loc.left);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.right.val));
+                    stack.push(new MappingLoad(loc, this.mappings, base, parts, loc.right.val));
                 } else {
-                    stack.push(new SLoad(loc, variables));
+                    stack.push(new SLoad(loc, this.variables));
                 }
             } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
                 const [base, parts] = parseSha3(loc.right);
                 if (base !== undefined && parts.length > 0) {
-                    stack.push(new MappingLoad(loc, mappings, base, parts, loc.left.val));
+                    stack.push(new MappingLoad(loc, this.mappings, base, parts, loc.left.val));
                 } else {
-                    stack.push(new SLoad(loc, variables));
+                    stack.push(new SLoad(loc, this.variables));
                 }
             } else {
-                stack.push(new SLoad(loc, variables));
+                stack.push(new SLoad(loc, this.variables));
             }
         }],
 
-        SSTORE: [0x55, function sstore({ stack, stmts }) {
+        SSTORE: [0x55, function sstore(this: IStore, { stack, stmts }) {
+            const sstoreVariable = () => {
+                if (slot.isVal()) {
+                    const key = slot.val.toString();
+                    if (key in this.variables) {
+                        this.variables[key].types.push(value);
+                    } else {
+                        this.variables[key] = new Variable(undefined, [value]);
+                    }
+                }
+                stmts.push(new SStore(slot, value, this.variables));
+            };
+
             const slot = stack.pop();
             const value = stack.pop();
 
@@ -870,7 +867,7 @@ function STORAGE({ variables, mappings }: IStore) {
             } else if (slot.tag === 'Sha3') {
                 const [base, parts] = parseSha3(slot);
                 if (base !== undefined && parts.length > 0) {
-                    stmts.push(new MappingStore(slot, mappings, base, parts, value));
+                    stmts.push(new MappingStore(slot, this.mappings, base, parts, value));
                 } else {
                     sstoreVariable();
                 }
@@ -878,7 +875,7 @@ function STORAGE({ variables, mappings }: IStore) {
                 const [base, parts] = parseSha3(slot.left);
                 if (base !== undefined && parts.length > 0) {
                     stmts.push(
-                        new MappingStore(slot, mappings, base, parts, value, slot.right.val)
+                        new MappingStore(slot, this.mappings, base, parts, value, slot.right.val)
                     );
                 } else {
                     sstoreVariable();
@@ -886,27 +883,15 @@ function STORAGE({ variables, mappings }: IStore) {
             } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3') {
                 const [base, parts] = parseSha3(slot.right);
                 if (base !== undefined && parts.length > 0) {
-                    stmts.push(new MappingStore(slot, mappings, base, parts, value, slot.left.val));
+                    stmts.push(new MappingStore(slot, this.mappings, base, parts, value, slot.left.val));
                 } else {
                     sstoreVariable();
                 }
             } else {
                 sstoreVariable();
             }
-
-            function sstoreVariable() {
-                if (slot.isVal()) {
-                    const key = slot.val.toString();
-                    if (key in variables) {
-                        variables[key].types.push(value);
-                    } else {
-                        variables[key] = new Variable(undefined, [value]);
-                    }
-                }
-                stmts.push(new SStore(slot, value, variables));
-            }
         }],
-    }));
+    } satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>) => void] };
 
     function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
         const shas = [sha];
@@ -931,9 +916,9 @@ function STORAGE({ variables, mappings }: IStore) {
 /**
  * Keep track of https://eips.ethereum.org/EIPS/eip-4200
  */
-function FLOW(functionBranches: ISelectorBranches) {
+function FLOW() {
     const JUMPDEST = 0x5b;
-    return Object.assign({ functionBranches }, Step({
+    return {
         JUMPDEST: [JUMPDEST, _state => { }],
         JUMP: [0x56, function jump(state, opcode, bytecode) {
             const offset = state.stack.pop();
@@ -941,7 +926,7 @@ function FLOW(functionBranches: ISelectorBranches) {
             const destBranch = Branch.make(destpc, state);
             state.halt(new Jump(offset, destBranch));
         }],
-        JUMPI: [0x57, function jumpi(state, opcode, bytecode) {
+        JUMPI: [0x57, function jumpi(this: { functionBranches: ISelectorBranches }, state, opcode, bytecode) {
             const offset = state.stack.pop();
             const cond = state.stack.pop();
             const destpc = getJumpDest(offset, opcode, bytecode);
@@ -950,7 +935,7 @@ function FLOW(functionBranches: ISelectorBranches) {
 
             let last: SigCase | Jumpi;
             if (cond.tag === 'Sig') {
-                functionBranches.set(cond.selector, {
+                this.functionBranches.set(cond.selector, {
                     pc: destpc,
                     state: state.clone(),
                 });
@@ -960,7 +945,7 @@ function FLOW(functionBranches: ISelectorBranches) {
             }
             state.halt(last);
         }],
-    }));
+    } satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void] };
 
     function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
         const offset2 = offset.eval();
