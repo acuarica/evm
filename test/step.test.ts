@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, STEP, London, Paris } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
@@ -31,15 +31,17 @@ describe('::step', function () {
     });
 
     describe('support methods', function () {
+        const step = new Shanghai();
+
         it('should retrieve `haltingInsts`', function () {
-            const haltingSteps = STEP().haltingSteps();
+            const haltingSteps = step.haltingSteps();
             expect(haltingSteps).to.be.deep.equal(
                 ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
             );
         });
 
         it('should retrieve `opcodes`', function () {
-            const opcodes = STEP().opcodes();
+            const opcodes = step.opcodes();
             expect(opcodes.STOP).to.be.equal(0);
             expect(opcodes.ADD).to.be.equal(1);
             expect(opcodes.PUSH32).to.be.equal(0x60 + 32 - 1);
@@ -47,7 +49,6 @@ describe('::step', function () {
         });
 
         it('should find decoder table by opcode number', function () {
-            const step = STEP();
             expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
             expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
             expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
@@ -60,21 +61,21 @@ describe('::step', function () {
         it('should override `NUMBER` step', function () {
             const stack = new Stack<Expr>();
             let numberWasCalled = false;
-            const step = Object.setPrototypeOf({
-                NUMBER(state: Operand<Expr>) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
+            new class extends Shanghai {
+                NUMBER = (state: Operand<Expr>) => {
                     super.NUMBER(state);
                     numberWasCalled = true;
-                }
-            }, STEP());
-            step.NUMBER({ stack });
+                };
+            }().NUMBER({ stack });
+
             expect(stack.top).to.be.deep.equal(Props['block.number']);
             expect(numberWasCalled, '`NUMBER` step was not overriden').to.be.true;
         });
     });
 
     describe('decode', function () {
-        const step = STEP();
+        const step = new London();
         const OPCODES = step.opcodes();
         const decode = step.decode.bind(step);
 
@@ -176,18 +177,20 @@ describe('::step', function () {
     describe('PUSHES', function () {
         it('should PUSH value onto stack', function () {
             const stack = new Stack<Expr>();
-            STEP().PUSH1({ stack }, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
+            new London().PUSH1({ stack }, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
             expect(stack.values).to.deep.equal([new Val(1n, true)]);
         });
 
-        it('should `PUSH0` value onto stack', function () {
+        it('should `PUSH0` (`Shanghai`) value onto stack', function () {
             const stack = new Stack<Expr>();
-            STEP().PUSH0({ stack });
+            new Shanghai().PUSH0({ stack });
             expect(stack.values).to.deep.equal([new Val(0n, true)]);
         });
     });
 
     describe('DUPS', function () {
+        const step = new London();
+
         sizes.forEach(size => {
             it(`should DUP #${size - 1} element on the stack`, function () {
                 const state = new State<never, Expr>();
@@ -199,7 +202,7 @@ describe('::step', function () {
                     state.stack.push(new Val(1n));
                 }
 
-                STEP()[`DUP${size as Size}`](state);
+                step[`DUP${size as Size}`](state);
 
                 const local = new Local(0, new Val(2n));
                 expect(state.nlocals).to.be.equal(1);
@@ -214,7 +217,7 @@ describe('::step', function () {
                     state.stack.push(new Val(1n));
                 }
 
-                expect(() => STEP()[`DUP${size as Size}`](state)).to.throw(
+                expect(() => step[`DUP${size as Size}`](state)).to.throw(
                     'Invalid duplication operation'
                 );
             });
@@ -222,6 +225,8 @@ describe('::step', function () {
     });
 
     describe('SWAPS', function () {
+        const step = new Shanghai();
+
         sizes.forEach(size => {
             it(`should SWAP #${size} element on the stack`, function () {
                 const stack = new Stack<Expr>();
@@ -235,7 +240,7 @@ describe('::step', function () {
 
                 stack.push(new Val(3n));
 
-                STEP()[`SWAP${size as Size}`]({ stack });
+                step[`SWAP${size as Size}`]({ stack });
 
                 expect(stack.values).to.deep.equal([
                     new Val(2n),
@@ -251,7 +256,7 @@ describe('::step', function () {
                     stack.push(new Val(1n));
                 }
 
-                expect(() => STEP()[`SWAP${size as Size}`]({ stack })).to.throw(
+                expect(() => step[`SWAP${size as Size}`]({ stack })).to.throw(
                     'Position not found for swap operation'
                 );
             });
@@ -259,6 +264,8 @@ describe('::step', function () {
     });
 
     Object.entries($exprs).forEach(([name, exprs]) => {
+        const step = new Shanghai();
+
         describe(name.toUpperCase(), function () {
             exprs.forEach(({ insts, expr, str }) => {
                 it(`should \`STEP\` \`[${insts.map(i => truncate(i, 12)).join('|')}]\` into \`${str}\``, function () {
@@ -267,7 +274,7 @@ describe('::step', function () {
                         if (typeof inst === 'bigint') {
                             stack.push(new Val(inst));
                         } else {
-                            STEP()[inst]({ stack });
+                            step[inst]({ stack });
                         }
                     }
 
@@ -278,6 +285,8 @@ describe('::step', function () {
     });
 
     describe('DATACOPY', function () {
+        const step = new Shanghai();
+
         it('should `CODECOPY` executing bytecode into memory', function () {
             const bytecode = Buffer.from('0102030405060708', 'hex');
             const state = new State<Inst, Expr>();
@@ -286,7 +295,7 @@ describe('::step', function () {
             state.stack.push(size);
             state.stack.push(offset);
             state.stack.push(new Val(4n));
-            STEP().CODECOPY(state, new Opcode(0, 0, null, null), bytecode);
+            step.CODECOPY(state, new Opcode(0, 0, null, null), bytecode);
 
             expect(state.memory).to.be.deep.equal({
                 '4': new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5))
@@ -296,12 +305,14 @@ describe('::step', function () {
     });
 
     describe('MEMORY', function () {
+        const step = new Shanghai();
+
         it('should `MLOAD` value onto stack', function () {
             const state = new State<Inst, Expr>();
 
             state.memory[4] = new Val(1n);
             state.stack.push(new Val(4n));
-            STEP().MLOAD(state);
+            step.MLOAD(state);
 
             expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
         });
@@ -311,7 +322,7 @@ describe('::step', function () {
 
             state.stack.push(Props['block.coinbase']);
             state.stack.push(new Val(4n));
-            STEP().MSTORE(state);
+            step.MSTORE(state);
 
             expect(state.memory).to.be.deep.equal({ '4': Props['block.coinbase'] });
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
@@ -319,15 +330,17 @@ describe('::step', function () {
 
         it('should push `MSIZE` onto stack', function () {
             const state = new State<Inst, Expr>();
-            STEP().MSIZE(state);
+            step.MSIZE(state);
             expect(state.stack.values).to.be.deep.equal([new Prop('msize()', 'uint')]);
         });
     });
 
     describe('SYSTEM', function () {
+        const step = new Shanghai();
+
         it('should halt when `INVALID` step', function () {
             const state = new State<Inst, Expr>();
-            STEP().INVALID(state, new Opcode(0, 1, 'INVALID', null));
+            step.INVALID(state, new Opcode(0, 1, 'INVALID', null));
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
             expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
@@ -337,7 +350,7 @@ describe('::step', function () {
             const state = new State<never, Expr>();
             state.stack.push(new Val(4n));
             state.stack.push(new Val(0x10n));
-            STEP().SHA3(state);
+            step.SHA3(state);
             expect(state.halted).to.be.false;
             expect(state.stack.values).to.be.deep.equal([
                 new Sha3(new Val(0x10n), new Val(4n), [new MLoad(new Val(0x10n))]),
@@ -350,7 +363,7 @@ describe('::step', function () {
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x10n));
             state.stack.push(new Val(0x1000n));
-            STEP().CREATE(state);
+            step.CREATE(state);
             expect(state.halted).to.be.false;
             expect(state.stack.values).to.be.deep.equal([
                 new Create(new Val(0x1000n), new Val(16n), new Val(32n)),
@@ -370,7 +383,7 @@ describe('::step', function () {
 
             state.memory[0x10] = new DataCopy('codecopy', new Val(1n), new Val(2n), undefined, bytecode);
 
-            STEP().CREATE(state);
+            step.CREATE(state);
             expect(state.stack.values).to.be.deep.equal([
                 new Create(new Val(0x1000n), new Val(16n), new Val(4n), bytecode),
             ]);
@@ -381,7 +394,7 @@ describe('::step', function () {
 
         it('should halt with `STOP`', function () {
             const state = new State<Inst, Expr>();
-            STEP().STOP(state);
+            step.STOP(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Stop()]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return;');
@@ -389,8 +402,8 @@ describe('::step', function () {
 
         it('should halt with `SELFDESTRUCT`', function () {
             const state = new State<Inst, Expr>();
-            STEP().ADDRESS(state);
-            STEP().SELFDESTRUCT(state);
+            step.ADDRESS(state);
+            step.SELFDESTRUCT(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new SelfDestruct(Props['address(this)'])]);
             expect(sol`${state.stmts[0]}`).to.be.equal('selfdestruct(address(this));');
@@ -400,7 +413,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x0n));
             state.stack.push(new Val(0x0n));
-            STEP().RETURN(state);
+            step.RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Return(new Val(0n), new Val(0n), [])]);
             expect(sol`${state.stmts[0]}`).to.be.equal('return;');
@@ -410,7 +423,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(0x20n));
             state.stack.push(new Val(0x4n));
-            STEP().RETURN(state);
+            step.RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
                 new Return(new Val(0x4n), new Val(0x20n), [new MLoad(new Val(0x4n))]),
@@ -422,7 +435,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Add(new Val(0x20n), new Val(0x10n)));
             state.stack.push(new Val(0x4n));
-            STEP().RETURN(state);
+            step.RETURN(state);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
                 new Return(new Val(0x4n), new Add(new Val(0x20n), new Val(0x10n)), [
@@ -436,7 +449,8 @@ describe('::step', function () {
 
     describe('LOGS', function () {
         it('should have empty `events` when emitting `LOG0` event', function () {
-            const step = STEP();
+            const step = new Shanghai();
+
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(1n));
             state.stack.push(new Val(2n));
@@ -449,7 +463,8 @@ describe('::step', function () {
         });
 
         it('should have `events` when emitting `LOG1` event', function () {
-            const step = STEP();
+            const step = new Shanghai();
+
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(5n));
             state.stack.push(new Val(1n));
@@ -468,7 +483,7 @@ describe('::step', function () {
 
     describe('STORAGE', function () {
         it('should `SSTORE` variable', function () {
-            const step = STEP();
+            const step = new Shanghai();
 
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(1n));
@@ -480,16 +495,18 @@ describe('::step', function () {
     });
 
     describe('FLOW', function () {
+        const step = new Shanghai();
+
         it('should not change state when `JUMPDEST` step', function () {
             const state = new State<Inst, Expr>();
-            STEP().JUMPDEST(new State(), new Opcode(0, 0, null, null), Buffer.from([]));
+            step.JUMPDEST(new State(), new Opcode(0, 0, null, null), Buffer.from([]));
             expect(state).to.be.deep.equal(new State());
         });
 
         it('should halt when `JUMP` step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(2n));
-            STEP().JUMP(state, new Opcode(1, 0xa, 'jump', null), Buffer.from('ff005b', 'hex'));
+            step.JUMP(state, new Opcode(1, 0xa, 'jump', null), Buffer.from('ff005b', 'hex'));
 
             const offset = new Val(2n);
             offset.jumpDest = 2;
@@ -501,7 +518,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(Props['block.gaslimit']);
             state.stack.push(new Val(4n));
-            STEP().JUMPI(state, new Opcode(1, 0xa, 'jumpi', null), Buffer.from('ff0001025b', 'hex'));
+            step.JUMPI(state, new Opcode(1, 0xa, 'jumpi', null), Buffer.from('ff0001025b', 'hex'));
 
             const offset = new Val(4n);
             offset.jumpDest = 4;
@@ -516,7 +533,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(Props['block.number']);
-                expect(() => STEP()[inst](state, new Opcode(1, 0xa, 'jump', null), Buffer.from([])))
+                expect(() => step[inst](state, new Opcode(1, 0xa, 'jump', null), Buffer.from([])))
                     .to.throw(`jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
             });
 
@@ -524,7 +541,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(1n));
-                expect(() => STEP()[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
                     .to.throw(`jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
             });
 
@@ -532,7 +549,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(2n));
-                expect(() => STEP()[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
                     .to.throw(`jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);
             });
         });
@@ -540,9 +557,9 @@ describe('::step', function () {
 
     describe('London -> Paris upgrade', function () {
         it('should decode `0x44` -> `DIFFICULTY` with London', function () {
-            const step = London();
+            const step = new London();
 
-            const [, , mnemonic] = step[0x44] as [unknown, unknown, 'DIFFICULTY'];
+            const [, , mnemonic] = step[0x44] as readonly [unknown, unknown, 'DIFFICULTY'];
             expect(mnemonic).to.be.deep.equal('DIFFICULTY');
 
             const stack = new Stack<Expr>();
@@ -551,9 +568,9 @@ describe('::step', function () {
         });
 
         it('should decode `0x44` -> `PREVRANDAO` with Paris', function () {
-            const step = Paris();
+            const step = new Paris();
 
-            const [, , mnemonic] = step[0x44] as [unknown, unknown, 'PREVRANDAO'];
+            const [, , mnemonic] = step[0x44] as readonly [unknown, unknown, 'PREVRANDAO'];
             expect(mnemonic).to.be.deep.equal('PREVRANDAO');
 
             const stack = new Stack<Expr>();
