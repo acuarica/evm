@@ -30,7 +30,7 @@ export class Stack<in out E> {
      */
     push(elem: E): void | never {
         if (this.values.length >= 1024) {
-            throw new Error('Stack too deep');
+            throw new ExecError('Stack too deep');
         }
 
         this.values.unshift(elem);
@@ -44,7 +44,7 @@ export class Stack<in out E> {
      */
     pop(): E | never {
         if (this.values.length === 0) {
-            throw new Error('POP with empty stack');
+            throw new ExecError('POP with empty stack');
         }
 
         // The non-null assertion operator `!` is needed here because the
@@ -61,9 +61,9 @@ export class Stack<in out E> {
      */
     swap(secondPosition: number): void | never {
         if (secondPosition < 1 || secondPosition > 16) {
-            throw new Error('Unsupported position for swap operation');
+            throw new ExecError('Unsupported position for swap operation');
         } else if (!(secondPosition in this.values)) {
-            throw new Error('Position not found for swap operation,');
+            throw new ExecError('Position not found for swap operation,');
         }
 
         const firstValue = this.values[0]!;
@@ -133,6 +133,10 @@ export class State<S, E> {
      * @param last The `S` that halts this `State`.
      */
     halt(last: S): void {
+        if (this._halted) {
+            throw new ExecError('State already halted');
+        }
+
         this.stmts.push(last);
         this._halted = true;
     }
@@ -163,3 +167,10 @@ export type Operand<E> = Pick<State<never, E>, 'stack'>;
  * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
  */
 export type Ram<E> = Pick<State<never, E>, 'stack' | 'memory'>;
+
+/**
+ * Represents an error due to an invalid symbolic state execution.
+ */
+export class ExecError extends Error {
+
+}

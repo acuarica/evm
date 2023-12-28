@@ -1,4 +1,4 @@
-import type { Operand, Ram, State } from './state';
+import { ExecError, type Operand, type Ram, type State } from './state';
 
 import { MLoad, MStore } from './ast/memory';
 import { type Expr, type Inst, Val, Locali, Local } from './ast';
@@ -249,7 +249,7 @@ function ForkFactory<
 export type ISelectorBranches = Map<string, { pc: number; state: State<Inst, Expr> }>;
 
 /**
- * asdfdsa
+ * 
  */
 export const London = class extends ForkFactory(Undef, {
     ...PUSHES(),
@@ -362,8 +362,7 @@ function PUSHES() {
 function DUPS() {
     const dup = (position: number) => [0x80 + position, (state: State<Inst, Expr>) => {
         if (position >= state.stack.values.length) {
-            throw new Error('Invalid duplication operation, position was not found');
-            // state.stack.values[position] = Block.coinbase;
+            throw new ExecError('Invalid duplication operation, position was not found');
         }
 
         const expr = state.stack.values[position];
@@ -950,14 +949,14 @@ function FLOW() {
     function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
         const offset2 = offset.eval();
         if (!offset2.isVal()) {
-            throw new Error(`${opcode.format()} offset should be numeric but found '${offset.tag}'`);
+            throw new ExecError(`${opcode.format()} offset should be numeric but found '${offset.tag}'`);
         }
         const destpc = Number(offset2.val);
         if (bytecode[destpc] === JUMPDEST) {
             (offset as Val).jumpDest = destpc;
             return destpc;
         } else {
-            throw new Error(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
+            throw new ExecError(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
                 ? `'${destpc}' is out-of-bounds`
                 : `found '0x${bytecode[destpc]?.toString(16)}'`
                 }`);

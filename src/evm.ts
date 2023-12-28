@@ -1,4 +1,4 @@
-import { type Ram, State, type Stack } from './state';
+import { type Ram, State, type Stack, ExecError } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
@@ -195,12 +195,14 @@ export class EVM<S extends
                 this.step[mnemonic](state, opcode, this.bytecode);
                 opcodes.push({ opcode, stack: state.stack.clone() });
             } catch (err) {
-                // console.log(err);
-                const inv = new Throw((err as Error).message, opcode, state);
-                state.halt(inv);
-                this.errors.push(inv);
-                // console.log(this.errors[0].state);
-                continue;
+                if (err instanceof ExecError) {
+                    const inv = new Throw(err.message, opcode, state);
+                    state.halt(inv);
+                    this.errors.push(inv);
+                    continue;
+                }
+
+                throw err;
             }
 
             if (!state.halted && this.bytecode[pc + 1] === this.JUMPDEST) {

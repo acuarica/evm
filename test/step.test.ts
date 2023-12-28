@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
@@ -217,9 +217,8 @@ describe('::step', function () {
                     state.stack.push(new Val(1n));
                 }
 
-                expect(() => step[`DUP${size as Size}`](state)).to.throw(
-                    'Invalid duplication operation'
-                );
+                expect(() => step[`DUP${size as Size}`](state))
+                    .to.throw(ExecError, 'Invalid duplication operation');
             });
         });
     });
@@ -256,9 +255,8 @@ describe('::step', function () {
                     stack.push(new Val(1n));
                 }
 
-                expect(() => step[`SWAP${size as Size}`]({ stack })).to.throw(
-                    'Position not found for swap operation'
-                );
+                expect(() => step[`SWAP${size as Size}`]({ stack }))
+                    .to.throw(ExecError, 'Position not found for swap operation');
             });
         });
     });
@@ -400,6 +398,12 @@ describe('::step', function () {
             expect(sol`${state.stmts[0]}`).to.be.equal('return;');
         });
 
+        it('should throw when halting already halted state', function () {
+            const state = new State<Inst, Expr>();
+            step.STOP(state);
+            expect(() => step.STOP(state)).to.throw(ExecError, 'State already halted');
+        });
+
         it('should halt with `SELFDESTRUCT`', function () {
             const state = new State<Inst, Expr>();
             step.ADDRESS(state);
@@ -534,7 +538,7 @@ describe('::step', function () {
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(Props['block.number']);
                 expect(() => step[inst](state, new Opcode(1, 0xa, 'jump', null), Buffer.from([])))
-                    .to.throw(`jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
+                    .to.throw(ExecError, `jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
             });
 
             it(`should throw when \`${inst}\` step with non-\`JUMPDEST\` destination`, function () {
@@ -542,7 +546,7 @@ describe('::step', function () {
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(1n));
                 expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
-                    .to.throw(`jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
+                    .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
             });
 
             it(`should throw when \`${inst}\` step with out-of-bounds destination`, function () {
@@ -550,7 +554,7 @@ describe('::step', function () {
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(2n));
                 expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
-                    .to.throw(`jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);
+                    .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);
             });
         });
     });

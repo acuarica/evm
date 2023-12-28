@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Stack, State } from 'sevm';
+import { ExecError, Stack, State } from 'sevm';
 
 describe('::state', function () {
     describe('Stack', function () {
@@ -28,7 +28,7 @@ describe('::state', function () {
             expect(stack.values).to.be.deep.equal([1]);
             expect(stack.pop()).to.be.equal(1);
             expect(stack.values).to.be.deep.equal([]);
-            expect(() => stack.pop()).to.throw(Error, 'POP with empty stack');
+            expect(() => stack.pop()).to.throw(ExecError, 'POP with empty stack');
         });
 
         it('should `swap` successfully', function () {
@@ -41,9 +41,9 @@ describe('::state', function () {
             expect(stack.values).to.be.deep.equal(['b', 'c', 'a']);
             stack.swap(2);
             expect(stack.values).to.be.deep.equal(['a', 'c', 'b']);
-            expect(() => stack.swap(0)).to.throw(Error, 'Unsupported position for swap operation');
-            expect(() => stack.swap(17)).to.throw(Error, 'Unsupported position for swap operation');
-            expect(() => stack.swap(3)).to.throw(Error, 'Position not found for swap operation');
+            expect(() => stack.swap(0)).to.throw(ExecError, 'Unsupported position for swap operation');
+            expect(() => stack.swap(17)).to.throw(ExecError, 'Unsupported position for swap operation');
+            expect(() => stack.swap(3)).to.throw(ExecError, 'Position not found for swap operation');
         });
 
         it('should `clone` successfully', function () {
@@ -63,7 +63,7 @@ describe('::state', function () {
                 stack.push(1);
             }
 
-            expect(() => stack.push(1)).to.throw(Error, 'Stack too deep');
+            expect(() => stack.push(1)).to.throw(ExecError, 'Stack too deep');
         });
     });
 
