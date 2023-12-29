@@ -101,12 +101,16 @@ class Undef {
     /**
      * A map from numeric opcodes to decode configuration and string mnemonics.
      */
-    readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
+    // readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
 
     constructor() {
         Object.assign(this,
             Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
         );
+    }
+
+    at(o: number): [size: number, halts: boolean, Mnemonic<this>] {
+        return (this as unknown as { [o: number]: unknown })[o] as [number, boolean, Mnemonic<this>];
     }
 
     UNDEF = (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode));
@@ -126,7 +130,7 @@ class Undef {
      */
     opcodes(): { readonly [m in Mnemonic<this>]: number } {
         return Object.fromEntries([...Array(256).keys()]
-            .map(o => [this[o][2] as Mnemonic<this>, o] as const)
+            .map(o => [this.at(o)[2], o] as const)
             .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
         );
     }
@@ -150,11 +154,11 @@ class Undef {
 
         for (let pc = 0; pc < bytecode.length; pc++) {
             const opcode = bytecode[pc];
-            const [size, , mnemonic] = this[opcode];
+            const [size, , mnemonic] = this.at(opcode);
             opcodes.push(new Opcode(
                 pc,
                 opcode,
-                mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
+                mnemonic,
                 size === 0 ? null : (() => {
                     const data = bytecode.subarray(pc + 1, pc + size + 1);
                     pc += size;
@@ -171,11 +175,11 @@ class Undef {
 
         for (let pc = 0; pc < bytecode.length; pc++) {
             const opcode = bytecode[pc];
-            const [size, , mnemonic] = this[opcode];
+            const [size, , mnemonic] = this.at(opcode);
             yield new Opcode(
                 pc,
                 opcode,
-                mnemonic as Opcode<Mnemonic<this>>['mnemonic'],
+                mnemonic,
                 size === 0 ? null : function () {
                     const data = bytecode.subarray(pc + 1, pc + size + 1);
                     if (data.length !== size) throw new Error('asdfsadfdffd');
@@ -216,7 +220,7 @@ export function fromHexString(hexstr: string): Uint8Array {
 
 function ForkFactory<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    T extends new (...args: any[]) => { [o: number]: readonly [number, boolean, unknown] },
+    T extends new (...args: any[]) => object,
     U extends {
         readonly [m in string]: readonly [number | { opcode: number, size?: number, halts?: true }, step: StepFn]
     }
@@ -238,9 +242,7 @@ function ForkFactory<
     const props = Object.fromEntries(Object.entries(steps).map(([m, value]) => [m, value[1]]));
     Object.assign(Fork.prototype, props);
 
-    return Fork as unknown as new () => Omit<InstanceType<T> & { readonly [m in keyof U]: U[m][1] }, number> & {
-        [o: number]: [size: number, halts: boolean, keyof U | InstanceType<T>[number][2]];
-    };
+    return Fork as unknown as new () => InstanceType<T> & { readonly [m in keyof U]: U[m][1] };
 }
 
 /**

@@ -293,8 +293,7 @@ describe('::evm', function () {
         const evm = new EVM(bytecode, new Paris());
         const state = evm.start();
         expect(evm.errors).to.be.empty;
-        // TODO: use opcode from Shanghai definition
-        expect(state.stmts.at(-1)).to.be.deep.equal(new Invalid(0x5f));
+        expect(state.stmts.at(-1)).to.be.deep.equal(new Invalid(new Shanghai().opcodes().PUSH0));
     });
 
     it('should decode `prevrandao` as `difficulty` using an older fork', function () {
@@ -323,14 +322,9 @@ describe('::evm', function () {
                     }`;
 
                 const bytecode = (version: Version) => compile(src, version, this, { optimizer: { enabled: true } }).bytecode;
-                const evm = prop.symbol === 'block.difficulty'
-                    ? new EVM(bytecode('0.8.16'), new London())
-                    : new EVM(bytecode('0.8.21'), new Shanghai());
-                // TODO: fix compatible types the evm accepts
-                // const a = prop.symbol === 'block.difficulty'
-                //     ? [bytecode('0.8.16'), new London() ] as const
-                //     : [bytecode('0.8.21'), new Shanghai() ] as const;
-                // const evm = new EVM(d);
+                const evm = new EVM(...prop.symbol === 'block.difficulty'
+                    ? [bytecode('0.8.16'), new London()] as const
+                    : [bytecode('0.8.21'), new Shanghai()] as const);
 
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);

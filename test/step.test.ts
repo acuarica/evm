@@ -49,13 +49,16 @@ describe('::step', function () {
         });
 
         it('should find decoder table by opcode number', function () {
-            expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
-            expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
-            expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
-            expect(step[0xfc]).to.be.deep.equal([0, true, 'UNDEF']);
-            expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
-            expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
-            expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+            expect(step.at(0)).to.be.deep.equal([0, true, 'STOP']);
+            expect(step.at(1)).to.be.deep.equal([0, false, 'ADD']);
+            expect(step.at(0x60 + 32 - 1)).to.be.deep.equal([32, false, 'PUSH32']);
+            expect(step.at(0xfc)).to.be.deep.equal([0, true, 'UNDEF']);
+            expect(step.at(0xfd)).to.be.deep.equal([0, true, 'REVERT']);
+            expect(step.at(0xfe)).to.be.deep.equal([0, true, 'INVALID']);
+            expect(step.at(0xff)).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+
+            // @ts-expect-error `add` should not be in Shanghai's mnemonics
+            step.at(0)[2] === 'add';
         });
 
         it('should override `NUMBER` step', function () {
@@ -563,7 +566,7 @@ describe('::step', function () {
         it('should decode `0x44` -> `DIFFICULTY` with London', function () {
             const step = new London();
 
-            const [, , mnemonic] = step[0x44];
+            const [, , mnemonic] = step.at(0x44);
             expect(mnemonic).to.be.deep.equal('DIFFICULTY');
 
             const stack = new Stack<Expr>();
@@ -574,7 +577,7 @@ describe('::step', function () {
         it('should decode `0x44` -> `PREVRANDAO` with Paris', function () {
             const step = new Paris();
 
-            const [, , mnemonic] = step[0x44];
+            const [, , mnemonic] = step.at(0x44);
             expect(mnemonic).to.be.deep.equal('PREVRANDAO');
 
             const stack = new Stack<Expr>();

@@ -9,7 +9,7 @@ import { type ISelectorBranches, Opcode, fromHexString, type Mnemonic, Shanghai 
  */
 export class EVM<S extends
     {
-        readonly [opcode: number]: readonly [size: number, halts: boolean, mnemonic: Mnemonic<S>];
+        at(opcode: number): [size: number, halts: boolean, mnemonic: Mnemonic<S>];
         readonly functionBranches: ISelectorBranches;
         opcodes(): { [mnemonic: string]: number },
         decode(code: string): Opcode<Mnemonic<S>>[];
@@ -181,7 +181,7 @@ export class EVM<S extends
         // for (; !state.halted && pc < this.opcodes.length; pc++) {
         for (; !state.halted && pc < this.bytecode.length; pc++) {
             const op = this.bytecode[pc];
-            const [size, , mnemonic] = this.step[op];
+            const [size, , mnemonic] = this.step.at(op);
             const opcode = new Opcode(pc, op, mnemonic,
                 size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
@@ -243,7 +243,7 @@ export class EVM<S extends
                 return true;
             } else if (currentOpcode === this.JUMPDEST) {
                 halted = false;
-            } else if (this.step[currentOpcode][1]) {
+            } else if (this.step.at(currentOpcode)[1]) {
                 halted = true;
             }
         }
