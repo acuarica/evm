@@ -19,11 +19,13 @@ describe('::evm', function () {
     });
 
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
-        type OpcodeType = keyof InstanceType<typeof Shanghai>['opcodes'];
         const evm = new EVM('0x');
-        expect(() => evm.containsOpcode('add' as OpcodeType))
+
+        // @ts-expect-error `add` should not be assignable to mnemonics of `Shanghai`
+        expect(() => evm.containsOpcode('add'))
             .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
-        expect(() => evm.containsOpcode('haltingSteps' as OpcodeType))
+        // @ts-expect-error `haltingSteps` should not be assignable to mnemonics of `Shanghai`
+        expect(() => evm.containsOpcode('haltingSteps'))
             .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
     });
 
