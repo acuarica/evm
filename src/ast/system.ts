@@ -9,6 +9,10 @@ export class Sha3 extends Tag {
     eval(): Expr {
         return new Sha3(this.offset, this.size, this.args?.map(evalE));
     }
+
+    override children(): Expr[] {
+        return [...super.children(), ...this.args ?? []];
+    }
 }
 
 export class Create extends Tag {
