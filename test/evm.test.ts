@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand } from 'sevm';
+import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand, Paris } from 'sevm';
 import type { Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
@@ -275,6 +275,39 @@ describe('::evm', function () {
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
+    it('should not accept `PUSH0` as a valid opcode in Paris fork', function () {
+        const src = `contract Test {
+            event Deposit(uint256);
+            fallback() external payable {
+                emit Deposit(0);
+            }
+        }`;
+
+        const bytecode = compile(src, '0.8.21', this, { optimizer: { enabled: true } }).bytecode;
+
+        const opcodes = new Shanghai().decode(bytecode).map(o => o.mnemonic);
+        expect(opcodes).to.contain('PUSH0');
+
+        const evm = new EVM(bytecode, new Paris());
+        const state = evm.start();
+        expect(evm.errors).to.be.empty;
+        // TODO: use opcode from Shanghai definition
+        expect(state.stmts.at(-1)).to.be.deep.equal(new Invalid(0x5f));
+    });
+
+    it('should decode `prevrandao` as `difficulty` using an older fork', function () {
+        const src = `contract Test {
+            event Deposit(uint256);
+            fallback() external payable {
+                emit Deposit(block.prevrandao);
+            }
+        }`;
+        const evm = new EVM(compile(src, '0.8.21', this, { optimizer: { enabled: true } }).bytecode, new London());
+        const state = evm.start();
+        expect(evm.errors).to.be.empty;
+        expect((state.stmts.at(-2) as Log).args).to.be.deep.equal([Props['block.difficulty']]);
+    });
+
     describe('special', function () {
         Object.values(Props).forEach(prop => {
             it(`should get \`${prop.symbol}\` from compiled code`, function () {
@@ -291,7 +324,7 @@ describe('::evm', function () {
                 const evm = prop.symbol === 'block.difficulty'
                     ? new EVM(bytecode('0.8.16'), new London())
                     : new EVM(bytecode('0.8.21'), new Shanghai());
-                // TODO: fix
+                // TODO: fix compatible types the evm accepts
                 // const a = prop.symbol === 'block.difficulty'
                 //     ? [bytecode('0.8.16'), new London() ] as const
                 //     : [bytecode('0.8.21'), new Shanghai() ] as const;
