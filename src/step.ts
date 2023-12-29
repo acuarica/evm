@@ -98,19 +98,23 @@ export type Mnemonic<T> = { [k in keyof T]: T[k] extends StepFn ? (k extends Upp
  */
 class Undef {
 
-    /**
-     * A map from numeric opcodes to decode configuration and string mnemonics.
-     */
-    // readonly [o: number]: readonly [size: number, halts: boolean, 'UNDEF'];
-
     constructor() {
         Object.assign(this,
             Object.fromEntries([...Array(256).keys()].map(k => [k, [0, true, 'UNDEF']] as const))
         );
     }
 
-    at(o: number): [size: number, halts: boolean, Mnemonic<this>] {
-        return (this as unknown as { [o: number]: unknown })[o] as [number, boolean, Mnemonic<this>];
+    /**
+     * Maps numeric opcodes to their decode configuration and string mnemonics.
+     * 
+     * @param opcode the byte (between `0` and `255`) opcode.
+     * @returns a tuple representing the decode configuration and string mnemonic
+     * for the given `opcode`. `size` indicates the size of the `opcode`'s operand to consume from bytecode in bytes.
+     * `halts` indicates where the step associated with this `opcode` should `halt` the EVM `State`.
+     * `mnemonic` indicates the step the `EVM` should execute.
+     */
+    at(opcode: number): [size: number, halts: boolean, mnemonic: Mnemonic<this>] {
+        return (this as unknown as { [opcode: number]: unknown })[opcode] as [number, boolean, Mnemonic<this>];
     }
 
     UNDEF = (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode));
