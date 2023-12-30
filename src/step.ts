@@ -840,7 +840,7 @@ function ForkFactory<U extends Step>(steps: U) {
     const props = Object.fromEntries(Object.entries(steps).map(([m, value]) => [m, value[1]]));
     Object.assign(Fork.prototype, props);
 
-    return Fork as unknown as new () => InstanceType<typeof Fork> & { readonly [m in keyof U]: U[m][1] };
+    return Fork as unknown as new () => Undef<keyof U & string> & { readonly [m in keyof U]: U[m][1] };
 }
 
 /**
