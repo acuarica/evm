@@ -242,20 +242,7 @@ type Step = { readonly [m in string]: readonly [
     step: StepFn,
 ] };
 
-const bin = (Cons: new (lhs: Expr, rhs: Expr) => Expr) => function bin({ stack }: Operand<Expr>) {
-    const lhs = stack.pop();
-    const rhs = stack.pop();
-    stack.push(new Cons(lhs, rhs));
-};
-
 const ALU = {
-    ADD: [0x01, bin(Add)],
-    MUL: [0x02, bin(Mul)],
-    SUB: [0x03, bin(Sub)],
-    DIV: [0x04, bin(Div)],
-    SDIV: [0x05, bin(Div)],
-    MOD: [0x06, bin(Mod)],
-    SMOD: [0x07, bin(Mod)],
     ADDMOD: [0x08, ({ stack }) => {
         const left = stack.pop();
         const right = stack.pop();
@@ -278,7 +265,6 @@ const ALU = {
                 : new Mod(new Mul(left, right), mod)
         );
     }],
-    EXP: [0x0a, bin(Exp)],
     SIGNEXTEND: [0x0b, ({ stack }) => {
         const left = stack.pop();
         const right = stack.pop();
@@ -290,10 +276,6 @@ const ALU = {
         );
     }],
 
-    LT: [0x10, bin(Lt)],
-    GT: [0x11, bin(Gt)],
-    SLT: [0x12, bin(Lt)],
-    SGT: [0x13, bin(Gt)],
     EQ: [0x14, ({ stack }) => {
         const DIVEXPsig = (left: Expr, right: Expr): Sig | undefined => {
             left = left.eval();
@@ -348,9 +330,6 @@ const ALU = {
         const value = stack.pop();
         stack.push(new IsZero(value));
     }],
-    AND: [0x16, bin(And)],
-    OR: [0x17, bin(Or)],
-    XOR: [0x18, bin(Xor)],
     NOT: [0x19, ({ stack }) => {
         const value = stack.pop();
         stack.push(new Not(value));
@@ -362,33 +341,23 @@ const ALU = {
     }],
 } satisfies { [m: string]: [opcode: number, (state: Operand<Expr>) => void] };
 
-const mapKeys = <K extends string, U>(o: { [k in K]: unknown }, fn: (k: K) => U) =>
-    Object.fromEntries(Object.keys(o).map(k => [k, fn(k)]));
-
 const prop = (symbol: keyof typeof Props) => ({ stack }: Operand<Expr>) => stack.push(Props[symbol]);
 
-/**
- * https://eips.ethereum.org/EIPS/eip-3198
- */
 const SPECIAL = {
     COINBASE: [0x41, prop('block.coinbase')],
     TIMESTAMP: [0x42, prop('block.timestamp')],
     NUMBER: [0x43, prop('block.number')],
     DIFFICULTY: [0x44, prop('block.difficulty')],
     GASLIMIT: [0x45, prop('block.gaslimit')],
-
     CALLER: [0x33, prop('msg.sender')],
     CALLDATASIZE: [0x36, prop('msg.data.length')],
-
     ORIGIN: [0x32, prop('tx.origin')],
     GASPRICE: [0x3a, prop('tx.gasprice')],
-
     ADDRESS: [0x30, prop('address(this)')],
     CODESIZE: [0x38, prop('codesize()')],
     RETURNDATASIZE: [0x3d, prop('returndatasize()')],
     GAS: [0x5a, prop('gasleft()')],
 
-    ...mapKeys(FNS, n => [FNS[n][2], ({ stack }) => stack.push(new Fn(n, stack.pop()))]),
     CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
     CALLDATALOAD: [0x35, ({ stack }) => stack.push(new CallDataLoad(stack.pop()))],
 } satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void] };
@@ -472,13 +441,13 @@ function memArgs<T>(
     })(offset.eval(), size.eval()));
 }
 
-function log(topicsCount: number) {
-    return [0xa0 + topicsCount, function log(this: { events: IEvents }, { stack, memory, stmts }: State<Inst, Expr>) {
+function log(ntopics: number) {
+    return [0xa0 + ntopics, function (this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
         const offset = stack.pop();
         const size = stack.pop();
 
         const topics = [];
-        for (let i = 0; i < topicsCount; i++) {
+        for (let i = 0; i < ntopics; i++) {
             topics.push(stack.pop());
         }
 
@@ -662,8 +631,33 @@ const FrontierStep = {
         [0x90 + position, ({ stack }: Operand<Expr>) => stack.swap(position + 1)]
     ] as const)),
 
+    ...Object.fromEntries(([
+        ['ADD', 0x01, Add],
+        ['MUL', 0x02, Mul],
+        ['SUB', 0x03, Sub],
+        ['DIV', 0x04, Div],
+        ['SDIV', 0x05, Div],
+        ['MOD', 0x06, Mod],
+        ['SMOD', 0x07, Mod],
+        ['EXP', 0x0a, Exp],
+        ['LT', 0x10, Lt],
+        ['GT', 0x11, Gt],
+        ['SLT', 0x12, Lt],
+        ['SGT', 0x13, Gt],
+        ['AND', 0x16, And],
+        ['OR', 0x17, Or],
+        ['XOR', 0x18, Xor],
+    ] as const).map(([mnemonic, opcode, Cons]) => [mnemonic, [opcode, ({ stack }: Operand<Expr>) => {
+        const lhs = stack.pop();
+        const rhs = stack.pop();
+        stack.push(new Cons(lhs, rhs));
+    }]])),
+
     ...ALU,
     ...SPECIAL,
+    ...Object.fromEntries(Object.entries(FNS).map(([m, [, , o]]) => [m, [
+        o, ({ stack }) => stack.push(new Fn(m, stack.pop()))
+    ]])),
     ...DATACOPY,
 
     MLOAD: [0x51, ({ stack, memory }) => {
@@ -745,7 +739,11 @@ const FrontierStep = {
     PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
     INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
 
-    LOG0: log(0), LOG1: log(1), LOG2: log(2), LOG3: log(3), LOG4: log(4),
+    LOG0: log(0),
+    LOG1: log(1),
+    LOG2: log(2),
+    LOG3: log(3),
+    LOG4: log(4),
 
     ...STORAGE,
     JUMPDEST: [JUMPDEST, _state => { }],
@@ -777,7 +775,7 @@ const FrontierStep = {
 } satisfies Step;
 
 /**
- * TODO: implements
+ * `EXTCODEHASH` implemented in `FNS`.
  * https://eips.ethereum.org/EIPS/eip-1052
  */
 const ConstantinopleStep = {
@@ -814,7 +812,7 @@ const LondonStep = {
 
 const ParisStep = {
     ...LondonStep,
-    PREVRANDAO: [0x44, ({ stack }: Operand<Expr>) => stack.push(Props['block.prevrandao'])],
+    PREVRANDAO: [0x44, prop('block.prevrandao')],
 } satisfies Step;
 
 const ShanghaiStep = {
@@ -846,6 +844,8 @@ function ForkFactory<U extends Step>(steps: U) {
 }
 
 /**
+ * https://eips.ethereum.org/EIPS/eip-3198
+ * 
  * Keep track of https://eips.ethereum.org/EIPS/eip-4200
  */
 export const London = ForkFactory(LondonStep);
