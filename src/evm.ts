@@ -60,7 +60,7 @@ export class EVM<M extends string> {
     }
 
     /**
-     * Creates a new `EVM` with the latest fork, _i.e._, `Shanghai`.
+     * Creates a new `EVM` with the latest defined execution fork.
      */
     static new(bytecode: string) {
         return new EVM(bytecode, new Shanghai());
