@@ -5,7 +5,6 @@ import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
 
-type Size = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 const sizes = [...Array(16).keys()].map(i => i + 1);
 
 describe('::step', function () {
@@ -49,16 +48,16 @@ describe('::step', function () {
         });
 
         it('should find decoder table by opcode number', function () {
-            expect(step.at(0)).to.be.deep.equal([0, true, 'STOP']);
-            expect(step.at(1)).to.be.deep.equal([0, false, 'ADD']);
-            expect(step.at(0x60 + 32 - 1)).to.be.deep.equal([32, false, 'PUSH32']);
-            expect(step.at(0xfc)).to.be.deep.equal([0, true, 'UNDEF']);
-            expect(step.at(0xfd)).to.be.deep.equal([0, true, 'REVERT']);
-            expect(step.at(0xfe)).to.be.deep.equal([0, true, 'INVALID']);
-            expect(step.at(0xff)).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
+            expect(step[0]).to.be.deep.equal([0, true, 'STOP']);
+            expect(step[1]).to.be.deep.equal([0, false, 'ADD']);
+            expect(step[0x60 + 32 - 1]).to.be.deep.equal([32, false, 'PUSH32']);
+            expect(step[0xfc]).to.be.deep.equal([0, true, 'UNDEF']);
+            expect(step[0xfd]).to.be.deep.equal([0, true, 'REVERT']);
+            expect(step[0xfe]).to.be.deep.equal([0, true, 'INVALID']);
+            expect(step[0xff]).to.be.deep.equal([0, true, 'SELFDESTRUCT']);
 
             // @ts-expect-error `add` should not be in Shanghai's mnemonics
-            step.at(0)[2] === 'add';
+            step[0][2] === 'add';
         });
 
         it('should override `NUMBER` step', function () {
@@ -205,7 +204,7 @@ describe('::step', function () {
                     state.stack.push(new Val(1n));
                 }
 
-                step[`DUP${size as Size}`](state);
+                step[`DUP${size as Size<16>}`](state);
 
                 const local = new Local(0, new Val(2n));
                 expect(state.nlocals).to.be.equal(1);
@@ -220,7 +219,7 @@ describe('::step', function () {
                     state.stack.push(new Val(1n));
                 }
 
-                expect(() => step[`DUP${size as Size}`](state))
+                expect(() => step[`DUP${size as Size<16>}`](state))
                     .to.throw(ExecError, 'Invalid duplication operation');
             });
         });
@@ -242,7 +241,7 @@ describe('::step', function () {
 
                 stack.push(new Val(3n));
 
-                step[`SWAP${size as Size}`]({ stack });
+                step[`SWAP${size as Size<16>}`]({ stack });
 
                 expect(stack.values).to.deep.equal([
                     new Val(2n),
@@ -258,7 +257,7 @@ describe('::step', function () {
                     stack.push(new Val(1n));
                 }
 
-                expect(() => step[`SWAP${size as Size}`]({ stack }))
+                expect(() => step[`SWAP${size as Size<16>}`]({ stack }))
                     .to.throw(ExecError, 'Position not found for swap operation');
             });
         });
@@ -566,7 +565,7 @@ describe('::step', function () {
         it('should decode `0x44` -> `DIFFICULTY` with London', function () {
             const step = new London();
 
-            const [, , mnemonic] = step.at(0x44);
+            const [, , mnemonic] = step[0x44];
             expect(mnemonic).to.be.deep.equal('DIFFICULTY');
 
             const stack = new Stack<Expr>();
@@ -577,7 +576,7 @@ describe('::step', function () {
         it('should decode `0x44` -> `PREVRANDAO` with Paris', function () {
             const step = new Paris();
 
-            const [, , mnemonic] = step.at(0x44);
+            const [, , mnemonic] = step[0x44];
             expect(mnemonic).to.be.deep.equal('PREVRANDAO');
 
             const stack = new Stack<Expr>();
