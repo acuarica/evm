@@ -24,13 +24,13 @@ describe.skip('contracts metadata', function () {
         try {
             const randomData = readFileSync(randomDataPath, 'utf8');
             const src = solTemplate.replace('[randomData]', randomData);
-            evm = new EVM(compile(src, version, this).bytecode);
+            evm = EVM.new(compile(src, version, this).bytecode);
         } catch {
             let src: string, randomData: string;
             do {
                 randomData = randomBytes(16).toString('hex');
                 src = solTemplate.replace('[randomData]', randomData);
-                evm = new EVM(compile(src, version, null).bytecode);
+                evm = EVM.new(compile(src, version, null).bytecode);
                 console.log(randomData, evm.metadata?.hash);
             } while (!includesFF(evm.metadata!.hash) || !evm.containsOpcode('SELFDESTRUCT'));
             // writeFileSync(randomDataPath, randomData);

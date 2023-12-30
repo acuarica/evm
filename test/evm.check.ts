@@ -21,7 +21,7 @@ describe('evm', function () {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = new EVM(compile(src, '0.7.6', this).bytecode).opcodes;
+        const opcodes = EVM.new(compile(src, '0.7.6', this).bytecode).opcodes;
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && o.hexData() === selector);
@@ -41,7 +41,7 @@ describe('evm', function () {
                 emit Deposit(uint128(~block.number));
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         const state = new State<Inst, Expr>();
         evm.run(0, state);
 

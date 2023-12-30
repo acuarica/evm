@@ -8,7 +8,7 @@ import type { Type } from './type';
 import { State } from './state';
 import { EVM } from './evm';
 import ERCs from './ercs';
-import { Shanghai, type ISelectorBranches } from './step';
+import { Shanghai, type Members } from './step';
 import type { Metadata } from './metadata';
 
 /**
@@ -20,6 +20,7 @@ export const ERCIds = Object.keys(ERCs);
  *
  */
 export class Contract {
+
     /**
      *
      */
@@ -35,7 +36,7 @@ export class Contract {
     readonly events: IEvents = {};
     readonly variables: IStore['variables'] = {};
     readonly mappings: IStore['mappings'] = {};
-    readonly functionBranches: ISelectorBranches = new Map();
+    readonly functionBranches: Members['functionBranches'] = new Map();
     readonly errors: Throw[];
 
     /**

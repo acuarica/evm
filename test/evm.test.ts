@@ -11,7 +11,7 @@ import { compile, type Version } from './utils/solc';
 describe('::evm', function () {
 
     it('should find opcodes when exec `containsOpcode`', function () {
-        const evm = new EVM('0x60016002ff');
+        const evm = EVM.new('0x60016002ff');
         expect(evm.containsOpcode('PUSH1')).to.be.true;
         expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
         expect(evm.containsOpcode('ADD')).to.be.false;
@@ -19,7 +19,7 @@ describe('::evm', function () {
     });
 
     it('should throw in `containsOpcode` when providing invalid opcode', function () {
-        const evm = new EVM('0x');
+        const evm = EVM.new('0x');
 
         // @ts-expect-error `add` should not be assignable to mnemonics of `Shanghai`
         expect(() => evm.containsOpcode('add'))
@@ -30,7 +30,7 @@ describe('::evm', function () {
     });
 
     it('should halt when `exec` invalid opcode', function () {
-        const evm = new EVM('0xd001');
+        const evm = EVM.new('0xd001');
         const state = evm.start();
 
         expect(state.halted).to.be.true;
@@ -43,20 +43,20 @@ describe('::evm', function () {
 
     it('should throw when exec `halted` state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x');
+        const evm = EVM.new('0x');
         state.halt(new Stop());
         expect(() => evm.exec(0, state)).to.throw('State at 0 must be non-halted to be `exec`');
     });
 
     it('should throw when finishing exec non-`halted` state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x6001600201');
+        const evm = EVM.new('0x6001600201');
         expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:5');
     });
 
     it('should halt when `exec` invalid opcode & state', function () {
         const state = new State<Inst, Expr>();
-        const evm = new EVM('0x01');
+        const evm = EVM.new('0x01');
         evm.exec(0, state);
 
         const err = new Throw('POP with empty stack', evm.opcodes[0], state);
@@ -106,7 +106,7 @@ describe('::evm', function () {
                 emit Deposit(n * 3);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         const main = evm.start();
         expect(evm.step.functionBranches).to.be.empty;
         expect(evm.opcodes.filter(op => op.mnemonic === 'NUMBER')).to.have.length(1);
@@ -133,7 +133,7 @@ describe('::evm', function () {
                 value = temp;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         // const main =
         // evm.start();
         const state = new State<Inst, Expr>();
@@ -174,7 +174,7 @@ describe('::evm', function () {
                 }
             }`;
 
-        const evm = new EVM(compile(src, '0.7.6', this, {
+        const evm = EVM.new(compile(src, '0.7.6', this, {
             optimizer: { enabled: true }
         }).bytecode);
         evm.start();
@@ -188,7 +188,7 @@ describe('::evm', function () {
                 for (uint256 i = 0; i < 10; i++) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         // const main =
         evm.start();
         // require('util').inspect.defaultOptions.depth = null;
@@ -207,7 +207,7 @@ describe('::evm', function () {
                 for (uint256 i = 0; i < block.number; i++) value = i;
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         const main = evm.start();
 
         // require('util').inspect.defaultOptions.depth = null;
@@ -251,7 +251,7 @@ describe('::evm', function () {
                 for (uint256 i = 0; i < block.number; ) emit Deposit(i);
             }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -272,7 +272,7 @@ describe('::evm', function () {
                     return amount + 7;
                 }
         }`;
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         evm.start();
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
@@ -322,9 +322,9 @@ describe('::evm', function () {
                     }`;
 
                 const bytecode = (version: Version) => compile(src, version, this, { optimizer: { enabled: true } }).bytecode;
-                const evm = new EVM(...prop.symbol === 'block.difficulty'
-                    ? [bytecode('0.8.16'), new London()] as const
-                    : [bytecode('0.8.21'), new Shanghai()] as const);
+                const evm = prop.symbol === 'block.difficulty'
+                    ? new EVM(bytecode('0.8.16'), new London())
+                    : new EVM(bytecode('0.8.21'), new Shanghai());
 
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);
@@ -353,7 +353,7 @@ describe('::evm', function () {
                 emit Deposit(n + 7);
             }
         }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
 
             const state = new State<Inst, Expr>();
             evm.exec(0, state);
@@ -426,7 +426,7 @@ event ${eventSelector(unknownEventSig)};
                 val1 += 3;
                 val2 += 11;
             }}`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 
@@ -455,7 +455,7 @@ event ${eventSelector(unknownEventSig)};
                 // uint64 val4 = 9;
                 // }
             }}`;
-            const evm = new EVM(compile(src, '0.5.5', this).bytecode);
+            const evm = EVM.new(compile(src, '0.5.5', this).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 
@@ -475,7 +475,7 @@ event ${eventSelector(unknownEventSig)};
                 t.val2 += 11;
                 val3 += 7;
             }}`;
-            const evm = new EVM(compile(src, '0.7.6', this, {
+            const evm = EVM.new(compile(src, '0.7.6', this, {
                 optimizer: { enabled: false }
             }).bytecode);
             const state = new State<Inst, Expr>();
@@ -495,7 +495,7 @@ event ${eventSelector(unknownEventSig)};
                 t.val1 += 3;
                 t.val2 += 11;
             }}`;
-            const evm = new EVM(compile(src, '0.7.6', this, {
+            const evm = EVM.new(compile(src, '0.7.6', this, {
                 optimizer: { enabled: true }
             }).bytecode);
             const state = new State<Inst, Expr>();
@@ -528,7 +528,7 @@ event ${eventSelector(unknownEventSig)};
                     allowance[address(this)][msg.sender] -= 11;
                 }
             }`;
-                const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+                const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);
 
@@ -614,7 +614,7 @@ event ${eventSelector(unknownEventSig)};
                     return addr;
                 }
             }`;
-            const evm = new EVM(compile(src, '0.7.6', this).bytecode);
+            const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 

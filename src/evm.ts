@@ -2,21 +2,13 @@ import { type Ram, State, type Stack, ExecError } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { type ISelectorBranches, Opcode, fromHexString, type Mnemonic, Shanghai } from './step';
+import { Opcode, fromHexString, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
 
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
  */
-export class EVM<S extends
-    {
-        at(opcode: number): [size: number, halts: boolean, mnemonic: Mnemonic<S>];
-        readonly functionBranches: ISelectorBranches;
-        opcodes(): { [mnemonic: string]: number },
-        decode(code: string): Opcode<Mnemonic<S>>[];
-    } & {
-        readonly [m in Mnemonic<S>]: (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
-    } = InstanceType<typeof Shanghai>
-> {
+export class EVM<M extends string> {
+
     /**
      * The `metadataHash` part from the `bytecode`.
      * That is, if present, the `bytecode` without its `code`.
@@ -26,7 +18,7 @@ export class EVM<S extends
     /**
      *
      */
-    readonly blocks = new Map<number, { pcend: number; opcodes: { opcode: Opcode<Mnemonic<S>>, stack: Stack<Expr> }[]; states: State<Inst, Expr>[]; }>();
+    readonly blocks = new Map<number, { pcend: number; opcodes: { opcode: Opcode<M>, stack: Stack<Expr> }[]; states: State<Inst, Expr>[]; }>();
 
     /**
      *
@@ -36,15 +28,13 @@ export class EVM<S extends
     /**
      * The `Opcode[]` decoded from `bytecode`.
      */
-    readonly opcodes: Opcode<Mnemonic<S>>[];
+    readonly opcodes: Opcode<M>[];
 
     /**
      * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
      * This is used to speed up offset search.
      */
     readonly bytecode: Uint8Array;
-
-    readonly JUMPDEST: number;
 
     constructor(
         bytecode: string,
@@ -59,16 +49,21 @@ export class EVM<S extends
          * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
          * `INVALID` is used instead.
          */
-        readonly step: S = new Shanghai() as unknown as S
+        readonly step: Undef<M> & { readonly [m in M]: StepFn }
     ) {
-        this.JUMPDEST = this.step.opcodes()['JUMPDEST'];
-
         this.bytecode = fromHexString(bytecode);
 
         const [code, metadata] = stripMetadataHash(bytecode);
         this.metadata = metadata;
 
         this.opcodes = this.step.decode(code);
+    }
+
+    /**
+     * Creates a new `EVM` with the latest fork, _i.e._, `Shanghai`.
+     */
+    static new(bytecode: string) {
+        return new EVM(bytecode, new Shanghai());
     }
 
     /**
@@ -181,7 +176,7 @@ export class EVM<S extends
         // for (; !state.halted && pc < this.opcodes.length; pc++) {
         for (; !state.halted && pc < this.bytecode.length; pc++) {
             const op = this.bytecode[pc];
-            const [size, , mnemonic] = this.step.at(op);
+            const [size, , mnemonic] = this.step[op];
             const opcode = new Opcode(pc, op, mnemonic,
                 size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
@@ -205,7 +200,7 @@ export class EVM<S extends
                 throw err;
             }
 
-            if (!state.halted && this.bytecode[pc + 1] === this.JUMPDEST) {
+            if (!state.halted && this.bytecode[pc + 1] === JUMPDEST) {
                 const fallBranch = Branch.make(pc + 1, state);
                 state.halt(new JumpDest(fallBranch));
             }
@@ -228,7 +223,7 @@ export class EVM<S extends
      * @param opcode The opcode to look for.
      * @returns Whether the contract contains the given `opcode`.
      */
-    containsOpcode(opcode: number | Mnemonic<S>): boolean {
+    containsOpcode(opcode: number | M): boolean {
         const opcodes = this.step.opcodes();
 
         let halted = false;
@@ -241,9 +236,9 @@ export class EVM<S extends
             const currentOpcode = this.opcodes[index].opcode;
             if (currentOpcode === opcode && !halted) {
                 return true;
-            } else if (currentOpcode === this.JUMPDEST) {
+            } else if (currentOpcode === JUMPDEST) {
                 halted = false;
-            } else if (this.step.at(currentOpcode)[1]) {
+            } else if (this.step[currentOpcode][1]) {
                 halted = true;
             }
         }

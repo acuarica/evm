@@ -15,7 +15,7 @@ describe('evm::system', function () {
             function hola() external pure returns (string memory) { return "12345"; }
         }`;
 
-        const evm = new EVM(compile(src, '0.8.16', this, {
+        const evm = EVM.new(compile(src, '0.8.16', this, {
             optimizer: {
                 enabled: true, details: { jumpdestRemover: true },
             }
@@ -56,7 +56,7 @@ describe('evm::system', function () {
                 super.CREATE(state);
                 const code = (state.stack.top as Create).bytecode!;
                 const bytecode = Buffer.from(code).toString('hex');
-                console.log(new EVM(bytecode).metadata);
+                console.log(EVM.new(bytecode).metadata);
                 console.log(new Contract(bytecode).solidify());
 
                 new EVM(bytecode, new class extends London {
