@@ -409,40 +409,6 @@ function memArgs<T>(
     })(offset.eval(), size.eval()));
 }
 
-function log(ntopics: number) {
-    return [0xa0 + ntopics, function (this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
-        const offset = stack.pop();
-        const size = stack.pop();
-
-        const topics = [];
-        for (let i = 0; i < ntopics; i++) {
-            topics.push(stack.pop());
-        }
-
-        let event: IEvents[string] | undefined = undefined;
-        if (topics.length > 0 && topics[0].isVal()) {
-            const eventTopic = topics[0].val.toString(16).padStart(64, '0');
-            event = this.events[eventTopic];
-            if (event === undefined) {
-                event = { indexedCount: topics.length - 1 };
-                this.events[eventTopic] = event;
-            }
-        }
-
-        stmts.push(new Log(event, offset, size, topics, (function (offset, size) {
-            if (offset.isVal() && size.isVal()) {
-                const args = [];
-                for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-                    args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
-                }
-                return args;
-            } else {
-                return undefined;
-            }
-        })(offset.eval(), size.eval())));
-    }] as const;
-}
-
 const STORAGE = {
     SLOAD: [0x54, function sload(this: IStore, { stack }) {
         const loc = stack.pop();
@@ -622,6 +588,7 @@ const FrontierStep = {
     ...ALU,
 
     ...SPECIAL,
+    PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
     ...Object.fromEntries(Object.entries(FNS).map(([m, [, , o]]) => [m, [
         o, ({ stack }) => stack.push(new Fn(m, stack.pop()))
     ]])),
@@ -719,16 +686,43 @@ const FrontierStep = {
         const address = state.stack.pop();
         state.halt(new SelfDestruct(address));
     }],
-
-    PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
     INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
 
     /* Log operations */
-    LOG0: log(0),
-    LOG1: log(1),
-    LOG2: log(2),
-    LOG3: log(3),
-    LOG4: log(4),
+    ...Object.fromEntries(([0, 1, 2, 3, 4] as const).map(ntopics => [
+        `LOG${ntopics}` as const,
+        [0xa0 + ntopics, function log(this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
+            const offset = stack.pop();
+            const size = stack.pop();
+
+            const topics = [];
+            for (let i = 0; i < ntopics; i++) {
+                topics.push(stack.pop());
+            }
+
+            let event: IEvents[string] | undefined = undefined;
+            if (topics.length > 0 && topics[0].isVal()) {
+                const eventTopic = topics[0].val.toString(16).padStart(64, '0');
+                event = this.events[eventTopic];
+                if (event === undefined) {
+                    event = { indexedCount: topics.length - 1 };
+                    this.events[eventTopic] = event;
+                }
+            }
+
+            stmts.push(new Log(event, offset, size, topics, function (offset, size) {
+                if (offset.isVal() && size.isVal()) {
+                    const args = [];
+                    for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+                        args.push(i in memory ? memory[i] : new MLoad(new Val(BigInt(i))));
+                    }
+                    return args;
+                } else {
+                    return undefined;
+                }
+            }(offset.eval(), size.eval())));
+        }]
+    ])),
 
     ...STORAGE,
 
