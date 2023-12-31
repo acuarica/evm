@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand, Paris } from 'sevm';
+import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand, Paris, Opcode } from 'sevm';
 import type { Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
@@ -9,26 +9,6 @@ import { eventSelector, fnselector } from './utils/selector';
 import { compile, type Version } from './utils/solc';
 
 describe('::evm', function () {
-
-    it('should find opcodes when exec `containsOpcode`', function () {
-        const evm = EVM.new('0x60016002ff');
-        expect(evm.containsOpcode('PUSH1')).to.be.true;
-        expect(evm.containsOpcode('SELFDESTRUCT')).to.be.true;
-        expect(evm.containsOpcode('ADD')).to.be.false;
-        expect(evm.containsOpcode('SUB')).to.be.false;
-    });
-
-    it('should throw in `containsOpcode` when providing invalid opcode', function () {
-        const evm = EVM.new('0x');
-
-        // @ts-expect-error `add` should not be assignable to mnemonics of `Shanghai`
-        expect(() => evm.containsOpcode('add'))
-            .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
-        // @ts-expect-error `haltingSteps` should not be assignable to mnemonics of `Shanghai`
-        expect(() => evm.containsOpcode('haltingSteps'))
-            .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
-    });
-
     it('should halt when `exec` invalid opcode', function () {
         const evm = EVM.new('0xd001');
         const state = evm.start();
@@ -37,8 +17,8 @@ describe('::evm', function () {
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
         expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
         expect(yul`${state.stmts[0]}`).to.be.equal('invalid()');
-        expect(evm.containsOpcode(0xd0)).to.be.true;
-        expect(evm.containsOpcode('ADD')).to.be.false;
+        expect(evm.containsOpcode(0xd0)).to.be.deep.equal([new Opcode(0, 0xd0, 'UNDEF', null)]);
+        expect(evm.containsOpcode('ADD')).to.be.empty;
     });
 
     it('should throw when exec `halted` state', function () {
@@ -59,7 +39,7 @@ describe('::evm', function () {
         const evm = EVM.new('0x01');
         evm.exec(0, state);
 
-        const err = new Throw('POP with empty stack', evm.opcodes[0], state);
+        const err = new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD', null), state);
 
         expect(evm.errors).to.be.deep.equal([err]);
         expect(state.halted).to.be.true;
@@ -109,7 +89,10 @@ describe('::evm', function () {
         const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
         const main = evm.start();
         expect(evm.step.functionBranches).to.be.empty;
-        expect(evm.opcodes.filter(op => op.mnemonic === 'NUMBER')).to.have.length(1);
+        expect(
+            evm.blocks.get(0)?.opcodes.filter(({ opcode, }) => opcode.mnemonic === 'NUMBER')
+        ).to.have.length(1);
+
         const local = 'local0';
         const topic = eventSelector('Deposit(uint256)');
         expect(solStmts(main.stmts).trim().split('\n')).to.be.deep.equal([
@@ -287,7 +270,7 @@ describe('::evm', function () {
 
         const bytecode = compile(src, '0.8.21', this, { optimizer: { enabled: true } }).bytecode;
 
-        const opcodes = new Shanghai().decode(bytecode).map(o => o.mnemonic);
+        const opcodes = [...new Shanghai().decode(bytecode)].map(o => o.mnemonic);
         expect(opcodes).to.contain('PUSH0');
 
         const evm = new EVM(bytecode, new Paris());
@@ -624,4 +607,46 @@ event ${eventSelector(unknownEventSig)};
         });
     });
 
+    describe('`containsOpcode`', function () {
+        it('should throw when `blocks` has not yet been initialized', function () {
+            const evm = EVM.new('0x01');
+            expect(() => evm.containsOpcode('ADD'))
+                .to.throw('`blocks` is empty, call `start`, `run` or `exec` first');
+        });
+
+        it('should return single opcode', function () {
+            const evm = EVM.new('0x01');
+            evm.start();
+            expect(evm.errors.map(e => e.reason))
+                .to.be.deep.equal(['POP with empty stack']);
+            expect(evm.containsOpcode('ADD'))
+                .to.be.deep.equal([new Opcode(0, 0x1, 'ADD', null)]);
+        });
+
+        it('should find opcodes when exec `containsOpcode`', function () {
+            const evm = EVM.new('0x60016002ff');
+            evm.start();
+            expect(evm.containsOpcode('PUSH1')).to.be.deep.equal([
+                new Opcode(0, 0x60, 'PUSH1', new Uint8Array([1])),
+                new Opcode(2, 0x60, 'PUSH1', new Uint8Array([2])),
+            ]);
+            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.deep.equal([
+                new Opcode(4, 0xff, 'SELFDESTRUCT', null),
+            ]);
+            expect(evm.containsOpcode('ADD')).to.be.empty;
+            expect(evm.containsOpcode('SUB')).to.be.empty;
+        });
+
+        it('should throw in `containsOpcode` when providing invalid opcode', function () {
+            const evm = EVM.new('0x01');
+            evm.start();
+
+            // @ts-expect-error `add` should not be assignable to mnemonics of `Shanghai`
+            expect(() => evm.containsOpcode('add'))
+                .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
+            // @ts-expect-error `haltingSteps` should not be assignable to mnemonics of `Shanghai`
+            expect(() => evm.containsOpcode('haltingSteps'))
+                .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
+        });
+    });
 });

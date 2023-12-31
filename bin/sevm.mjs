@@ -14,13 +14,7 @@ import 'sevm/4byte';
 
 const paths = envPaths('sevm');
 
-const underline = c.underline;
-const blue = c.blue;
-const dim = c.dim;
-const magenta = c.magenta;
-// const red = c.red;
-const info = c.cyan;
-const warn = c.yellow;
+const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
 
 /**
  * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
@@ -29,11 +23,10 @@ const warn = c.yellow;
 /** @param {import('sevm').Opcode<string>} opcode */
 export function ansiOpcode(opcode) {
     const pc = opcode.pc.toString().padStart(6).toUpperCase();
-    const offset = '?';//`0x${opcode.offset.toString(16)}`.padStart(8);
     const pushData = opcode.data
         ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
         : '';
-    return `${dim(pc)} ${blue(offset)}  ${magenta(opcode.mnemonic)}    ${pushData}`;
+    return `${dim(pc)}   ${magenta(opcode.mnemonic)}    ${pushData}`;
 }
 
 /**
@@ -61,30 +54,33 @@ function abi(contract) {
     contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
 }
 
-/** @param {Contract} _contract */
-function dis(_contract) {
+/** @param {Contract} contract */
+function dis(contract) {
     console.info(
-        `${dim('index'.padStart(6))} ${blue('pc'.padStart(8))}  ${magenta(
+        `${dim('pc'.padStart(6))}   ${magenta(
             'mnemonic'
         )}  ${'push data (PUSHx)'}`
     );
 
-    // for (const chunk of contract.chunks()) {
-        // console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
+    for (const chunk of contract.chunks()) {
+        console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
 
-        // for (let i = chunk.pcstart; i < chunk.pcend; i++) {
-        //     const opcode = contract.evm.opcodes[i];
-        //     console.info(ansiOpcode(opcode));
-        // }
+        if (chunk.chunk instanceof Uint8Array) {
+            console.info(Buffer.from(chunk.chunk).toString('hex'));
+        } else {
+            for (const opcode of chunk.chunk ?? []) {
+                console.info(ansiOpcode(opcode));
+            }
+        }
 
-        // if (chunk.states !== undefined) {
-        //     for (const state of chunk.states) {
-        //         console.info('state');
-        //         console.info('    〒 ', state.stack.values.join(' | '));
-        //         state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
-        //     }
-        // }
-    // }
+        if (chunk.states !== undefined) {
+            for (const state of chunk.states) {
+                console.info('state');
+                console.info('    〒 ', state.stack.values.join(' | '));
+                state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
+            }
+        }
+    }
 }
 
 /** @param {Contract} contract */

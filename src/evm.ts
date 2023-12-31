@@ -4,6 +4,18 @@ import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
 import { Opcode, fromHexString, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
 
+interface Block<M> {
+    pcend: number;
+    /**
+     * The `Opcode`s decoded from `bytecode` augmented with its `Stack` trace.
+     */
+    opcodes: {
+        opcode: Opcode<M>,
+        stack: Stack<Expr>
+    }[];
+    states: State<Inst, Expr>[];
+}
+
 /**
  * https://ethereum.github.io/execution-specs/autoapi/ethereum/index.html
  */
@@ -18,7 +30,7 @@ export class EVM<M extends string> {
     /**
      *
      */
-    readonly blocks = new Map<number, { pcend: number; opcodes: { opcode: Opcode<M>, stack: Stack<Expr> }[]; states: State<Inst, Expr>[]; }>();
+    readonly blocks = new Map<number, Block<M>>();
 
     /**
      *
@@ -26,9 +38,7 @@ export class EVM<M extends string> {
     readonly errors: Throw[] = [];
 
     /**
-     * The `Opcode[]` decoded from `bytecode`.
      */
-    readonly opcodes: Opcode<M>[];
 
     /**
      * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
@@ -53,10 +63,7 @@ export class EVM<M extends string> {
     ) {
         this.bytecode = fromHexString(bytecode);
 
-        const [code, metadata] = stripMetadataHash(bytecode);
-        this.metadata = metadata;
-
-        this.opcodes = this.step.decode(code);
+        this.metadata = stripMetadataHash(bytecode)[1];
     }
 
     /**
@@ -72,6 +79,7 @@ export class EVM<M extends string> {
     chunks(): {
         pcstart: number;
         pcend: number;
+        chunk: Opcode<M>[] | Uint8Array,
         states?: State<Inst, Expr>[]
     }[] {
         let lastPc = 0;
@@ -82,14 +90,15 @@ export class EVM<M extends string> {
         for (const pc of pcs) {
             const block = this.blocks.get(pc)!;
             if (lastPc !== pc) {
-                result.push({ pcstart: lastPc, pcend: pc });
+                result.push({ pcstart: lastPc, pcend: pc, chunk: this.bytecode.subarray(lastPc, pc) });
             }
             lastPc = block.pcend;
-            result.push({ pcstart: pc, pcend: block.pcend, states: block.states });
+            const opcodes = block.opcodes.map(({ opcode, }) => opcode);
+            result.push({ pcstart: pc, pcend: block.pcend, chunk: opcodes, states: block.states });
         }
 
         if (lastPc !== this.bytecode.length) {
-            result.push({ pcstart: lastPc, pcend: this.bytecode.length });
+            result.push({ pcstart: lastPc, pcend: this.bytecode.length, chunk: this.bytecode.subarray(lastPc) });
         }
 
         return result;
@@ -173,10 +182,9 @@ export class EVM<M extends string> {
 
         const opcodes = [];
         let pc = pc0;
-        // for (; !state.halted && pc < this.opcodes.length; pc++) {
-        for (; !state.halted && pc < this.bytecode.length; pc++) {
+        for (; pc < this.bytecode.length; pc++) {
             const op = this.bytecode[pc];
-            const [size, , mnemonic] = this.step[op];
+            const [size, halts, mnemonic] = this.step[op];
             const opcode = new Opcode(pc, op, mnemonic,
                 size === 0 ? null : (() => {
                     const data = this.bytecode.subarray(pc + 1, pc + size + 1);
@@ -186,23 +194,31 @@ export class EVM<M extends string> {
                 })()
             );
 
-            try {
-                this.step[mnemonic](state, opcode, this.bytecode);
-                opcodes.push({ opcode, stack: state.stack.clone() });
-            } catch (err) {
-                if (err instanceof ExecError) {
-                    const inv = new Throw(err.message, opcode, state);
-                    state.halt(inv);
-                    this.errors.push(inv);
-                    continue;
-                }
+            opcodes.push({ opcode, stack: state.stack.clone() });
 
-                throw err;
+            try {
+                if (!state.halted)
+                    this.step[mnemonic](state, opcode, this.bytecode);
+            } catch (err) {
+                if (!(err instanceof ExecError)) throw err;
+
+                const invalid = new Throw(err.message, opcode, state);
+                state.halt(invalid);
+                this.errors.push(invalid);
             }
 
-            if (!state.halted && this.bytecode[pc + 1] === JUMPDEST) {
+            // if (!state.halted && this.bytecode[pc + 1] === JUMPDEST) {
+            if (!halts && this.bytecode[pc + 1] === JUMPDEST) {
                 const fallBranch = Branch.make(pc + 1, state);
                 state.halt(new JumpDest(fallBranch));
+                // halts = true;
+                /* two consecutive jumpdest blocks */
+                break;
+            }
+
+            if (halts) {
+                if (!state.halted) throw Error('asfdasdf 12123');
+                break;
             }
         }
 
@@ -217,32 +233,31 @@ export class EVM<M extends string> {
     }
 
     /**
-     * Migrated from old codebase.
-     * Evaluate if it makes sense to keep it.
+     * Indicates whether the given `opcode` is present in any of
+     * the reacheable blocks of `bytecode`.
+     * That is, whether the bytecode contains and executes the given `opcode`.
      *
+     * **NOTE**. You must call either the `start`, `run` or `exec` methods first.
+     * This is to populate the reacheable `blocks`.
+     * 
      * @param opcode The opcode to look for.
-     * @returns Whether the contract contains the given `opcode`.
+     * @returns An array of `Opcode`s of the given `opcode` when present.
+     * Otherwise, it returns an empty array.
      */
-    containsOpcode(opcode: number | M): boolean {
-        const opcodes = this.step.opcodes();
+    containsOpcode(opcode: number | M): Opcode<M>[] {
+        if (this.blocks.size === 0)
+            throw new Error('`blocks` is empty, call `start`, `run` or `exec` first');
 
-        let halted = false;
+        const opcodes = this.step.opcodes();
         if (typeof opcode === 'string' && opcode in opcodes) {
             opcode = opcodes[opcode];
         } else if (typeof opcode === 'string') {
             throw new Error(`Provided opcode \`${opcode}\` is not a valid opcode mnemonic'`);
         }
-        for (let index = 0; index < this.opcodes.length; index++) {
-            const currentOpcode = this.opcodes[index].opcode;
-            if (currentOpcode === opcode && !halted) {
-                return true;
-            } else if (currentOpcode === JUMPDEST) {
-                halted = false;
-            } else if (this.step[currentOpcode][1]) {
-                halted = true;
-            }
-        }
-        return false;
+
+        return [...this.blocks.values()]
+            .flatMap(block => block.opcodes.map(o => o.opcode))
+            .filter(o => o.opcode === opcode);
     }
 
     gc(b: Branch) {

@@ -24,8 +24,6 @@ export class Contract {
     /**
      *
      */
-    // readonly evm: EVM;
-
     readonly metadata: Metadata | undefined;
 
     /**
@@ -38,6 +36,8 @@ export class Contract {
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: Members['functionBranches'] = new Map();
     readonly errors: Throw[];
+
+    readonly chunks: EVM<string>['chunks'];
 
     /**
      *
@@ -69,8 +69,9 @@ export class Contract {
         this.functionBranches = evm.step.functionBranches;
         this.metadata = evm.metadata;
         this.errors = evm.errors;
-    }
 
+        this.chunks = () => evm.chunks();
+    }
 
     /**
      *
