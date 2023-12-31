@@ -713,13 +713,13 @@ const FrontierStep = {
 
     /* Flow operations */
     JUMPDEST: [JUMPDEST, _state => { }],
-    JUMP: [0x56, function (state, opcode, bytecode) {
+    JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, bytecode) {
         const offset = state.stack.pop();
         const destpc = getJumpDest(offset, opcode, bytecode);
         const destBranch = Branch.make(destpc, state);
         state.halt(new Jump(offset, destBranch));
     }],
-    JUMPI: [0x57, function (this: Members, state, opcode, bytecode) {
+    JUMPI: [{ opcode: 0x57, halts: true }, function (this: Members, state, opcode, bytecode) {
         const offset = state.stack.pop();
         const cond = state.stack.pop();
         const destpc = getJumpDest(offset, opcode, bytecode);
