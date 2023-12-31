@@ -299,19 +299,6 @@ const ALU = {
             return undefined;
         };
 
-        const SHRsig = (left: Expr, right: Expr): Sig | undefined => {
-            left = left.eval();
-            right = right.eval();
-            return left.isVal() &&
-                right.tag === 'Shr' &&
-                right.shift.isVal() &&
-                right.shift.val === 0xe0n &&
-                right.value.tag === 'CallDataLoad' &&
-                right.value.location.isZero()
-                ? new Sig(left.val.toString(16).padStart(8, '0'))
-                : undefined;
-        };
-
         const left = stack.pop();
         const right = stack.pop();
 
@@ -319,11 +306,7 @@ const ALU = {
             ? left.val === right.val
                 ? new Val(1n)
                 : new Val(0n)
-            : DIVEXPsig(left, right) ??
-            DIVEXPsig(right, left) ??
-            SHRsig(left, right) ??
-            SHRsig(right, left) ??
-            new Eq(left, right)
+            : DIVEXPsig(left, right) ?? DIVEXPsig(right, left) ?? new Eq(left, right)
         );
     }],
     ISZERO: [0x15, ({ stack }) => {
@@ -399,21 +382,6 @@ const DATACOPY = {
     }],
     RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
 } satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>, _opcode: unknown, bytecode: Uint8Array) => void] };
-
-const mstore = ({ stack, memory, stmts }: State<Inst, Expr>) => {
-    let location = stack.pop();
-    const data = stack.pop();
-
-    if (location.tag === 'Local') location.nrefs--;
-    if (data.tag === 'Local') data.nrefs--;
-
-    stmts.push(new MStore(location, data));
-
-    location = location.eval();
-    if (location.isVal()) {
-        memory[Number(location.val)] = data;
-    }
-};
 
 function memArgs<T>(
     { stack, memory }: State<Inst, Expr>,
@@ -591,6 +559,7 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
 }
 
 const FrontierStep = {
+    /* Stack operations */
     POP: [0x50, function pop({ stack }: Operand<Expr>) {
         const expr = stack.pop();
         if (expr.tag === 'Local') {
@@ -598,15 +567,13 @@ const FrontierStep = {
             // console.log('POP: Local', expr);
             // throw new Error('POP: Local');
         }
-    }] as const,
-
+    }],
     ...Object.fromEntries([...Array(32).keys()].map(size => [
         `PUSH${(size + 1 as Size<32>)}`, [
             { opcode: 0x60 + size, size: size + 1 },
             ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
         ]
     ] as const)),
-
     ...Object.fromEntries([...Array(16).keys()].map(position => [
         `DUP${(position + 1 as Size<16>)}`,
         [0x80 + position, (state: State<Inst, Expr>) => {
@@ -625,12 +592,12 @@ const FrontierStep = {
             state.stack.push(state.stack.values[position]);
         }]
     ] as const)),
-
     ...Object.fromEntries([...Array(16).keys()].map(position => [
         `SWAP${(position + 1 as Size<16>)}`,
         [0x90 + position, ({ stack }: Operand<Expr>) => stack.swap(position + 1)]
     ] as const)),
 
+    /* ALU operations */
     ...Object.fromEntries(([
         ['ADD', 0x01, Add],
         ['MUL', 0x02, Mul],
@@ -652,14 +619,15 @@ const FrontierStep = {
         const rhs = stack.pop();
         stack.push(new Cons(lhs, rhs));
     }]])),
-
     ...ALU,
+
     ...SPECIAL,
     ...Object.fromEntries(Object.entries(FNS).map(([m, [, , o]]) => [m, [
         o, ({ stack }) => stack.push(new Fn(m, stack.pop()))
     ]])),
     ...DATACOPY,
 
+    /* Memory operations */
     MLOAD: [0x51, ({ stack, memory }) => {
         let loc = stack.pop();
         loc = loc.eval();
@@ -668,10 +636,26 @@ const FrontierStep = {
         );
         // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
     }],
-    MSTORE: [0x52, mstore],
-    MSTORE8: [0x53, mstore],
+    ...Object.fromEntries([
+        ['MSTORE', 0x52] as const,
+        ['MSTORE8', 0x53] as const,
+    ].map(([m, o]) => [m, [o, ({ stack, memory, stmts }: State<Inst, Expr>) => {
+        let location = stack.pop();
+        const data = stack.pop();
+
+        if (location.tag === 'Local') location.nrefs--;
+        if (data.tag === 'Local') data.nrefs--;
+
+        stmts.push(new MStore(location, data));
+
+        location = location.eval();
+        if (location.isVal()) {
+            memory[Number(location.val)] = data;
+        }
+    }]])),
     MSIZE: [0x59, ({ stack }) => stack.push(new Prop('msize()', 'uint'))],
 
+    /* System operations */
     SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
     STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
     CREATE: [0xf0, function create({ stack, memory }) {
@@ -739,6 +723,7 @@ const FrontierStep = {
     PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
     INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
 
+    /* Log operations */
     LOG0: log(0),
     LOG1: log(1),
     LOG2: log(2),
@@ -746,6 +731,8 @@ const FrontierStep = {
     LOG4: log(4),
 
     ...STORAGE,
+
+    /* Flow operations */
     JUMPDEST: [JUMPDEST, _state => { }],
     JUMP: [0x56, function (state, opcode, bytecode) {
         const offset = state.stack.pop();
@@ -776,10 +763,32 @@ const FrontierStep = {
 
 /**
  * `EXTCODEHASH` implemented in `FNS`.
+ * 
  * https://eips.ethereum.org/EIPS/eip-1052
  */
 const ConstantinopleStep = {
     ...FrontierStep,
+
+    EQ: [FrontierStep.EQ[0], ({ stack }: Operand<Expr>) => {
+        FrontierStep.EQ[1]({ stack });
+
+        if (stack.top?.tag === 'Eq') {
+            const SHRsig = (left: Expr, right: Expr): Sig | undefined => {
+                left = left.eval();
+                right = right.eval();
+                return left.isVal() &&
+                    right.tag === 'Shr' &&
+                    right.shift.isVal() &&
+                    right.shift.val === 0xe0n &&
+                    right.value.tag === 'CallDataLoad' &&
+                    right.value.location.isZero()
+                    ? new Sig(left.val.toString(16).padStart(8, '0'))
+                    : undefined;
+            };
+            const { left, right } = stack.pop() as Eq;
+            stack.push(SHRsig(left, right) ?? SHRsig(right, left) ?? new Eq(left, right));
+        }
+    }],
 
     ...Object.fromEntries([
         ['SHL', 0x1b, Shl] as const,
