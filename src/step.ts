@@ -76,10 +76,16 @@ export class Opcode<M = unknown> {
 
     /**
      * Returns a `string` representation of `this` `Opcode`.
+     * Usually used for debugging purposes.
+     * 
+     * @param includeDataAsNumeric whether to include `data` as numeric.
+     * @returns the `string` representation of `this` `Opcode`.
      */
-    format(): string {
+    format(includeDataAsNumeric = true): string {
         const pushData = this.data
-            ? ` 0x${this.hexData()} (${parseInt(this.hexData()!, 16)})`
+            ? ` 0x${this.hexData()}` + (includeDataAsNumeric
+                ? ` (${parseInt(this.hexData()!, 16)})`
+                : '')
             : '';
 
         return `${this.mnemonic}(0x${this.opcode.toString(16)})@${this.pc}${pushData}`;
@@ -153,35 +159,13 @@ export class Undef<M extends string> extends Members {
      * ### Example
      *
      * ```typescript
-     * const opcodes = this.decode('0x6003600501');
+     * const opcodes = [...this.decode('0x6003600501')];
      * ```
      *
      * @param code the hexadecimal string containing the bytecode to decode.
-     * @returns the decoded `Opcode`s found in `code`.
+     * @returns a generator of the decoded `Opcode`s found in `code`.
      */
-    decode(code: string): Opcode<M>[] {
-        const bytecode = fromHexString(code);
-        const opcodes: Opcode<M>[] = [];
-
-        for (let pc = 0; pc < bytecode.length; pc++) {
-            const opcode = bytecode[pc];
-            const [size, , mnemonic] = this[opcode];
-            opcodes.push(new Opcode(
-                pc,
-                opcode,
-                mnemonic,
-                size === 0 ? null : (() => {
-                    const data = bytecode.subarray(pc + 1, pc + size + 1);
-                    pc += size;
-                    return data;
-                })(),
-            ));
-        }
-
-        return opcodes;
-    }
-
-    *decode2(code: string) {
+    *decode(code: string) {
         const bytecode = fromHexString(code);
 
         for (let pc = 0; pc < bytecode.length; pc++) {
@@ -193,14 +177,15 @@ export class Undef<M extends string> extends Members {
                 mnemonic,
                 size === 0 ? null : function () {
                     const data = bytecode.subarray(pc + 1, pc + size + 1);
-                    if (data.length !== size) throw new Error('asdfsadfdffd');
+                    if (data.length !== size) {
+                        const op = new Opcode(pc, opcode, mnemonic, data).format(false);
+                        throw new Error(`Trying to get \`${size}\` bytes but got only \`${data.length}\` while decoding \`${op}\` before reaching the end of bytecode`);
+                    }
                     pc += size;
                     return data;
                 }(),
             );
         }
-
-        throw new Error('sdsdsdsdsd');
     }
 }
 

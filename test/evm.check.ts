@@ -21,7 +21,7 @@ describe('evm', function () {
                 addr.balanceOf(7);
             }
         }`;
-        const opcodes = EVM.new(compile(src, '0.7.6', this).bytecode).opcodes;
+        const opcodes = [...new Shanghai().decode(compile(src, '0.7.6', this).bytecode)];
 
         const selector = fnselector(sig);
         const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && o.hexData() === selector);
@@ -102,7 +102,7 @@ describe('evm', function () {
                 bytecodes.add(bytecode);
                 expect(bytecodes).to.have.length(1);
 
-                expect(step.decode(bytecode).map(o => o.mnemonic)).to.be.deep.equal([
+                expect([...step.decode(bytecode)].map(o => o.mnemonic)).to.be.deep.equal([
                     'PUSH1', 'PUSH1', 'MSTORE', 'PUSH1', 'DUP1', 'REVERT', 'INVALID',
                 ]);
             });

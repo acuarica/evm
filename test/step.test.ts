@@ -27,6 +27,13 @@ describe('::step', function () {
             expect(new Opcode(0, 0xb0, 'INVALID', null).format())
                 .to.be.equal('INVALID(0xb0)@0');
         });
+
+        it('should `format` opcodes with not `includeDataAsNumeric`', function () {
+            expect(new Opcode(2, 0x1, 'ADD', null).format(false))
+                .to.be.equal('ADD(0x1)@2');
+            expect(new Opcode(1, 0x63, 'PUSH4', Buffer.from([1, 2, 3, 4])).format(false))
+                .to.be.equal('PUSH4(0x63)@1 0x01020304');
+        });
     });
 
     describe('support methods', function () {
@@ -79,14 +86,13 @@ describe('::step', function () {
     describe('decode', function () {
         const step = new London();
         const OPCODES = step.opcodes();
-        const decode = step.decode.bind(step);
 
-        const decodeArray = (...opcodes: number[]) => decode(Buffer.from(opcodes).toString('hex'));
+        const decodeArray = (...opcodes: number[]) => step.decode(Buffer.from(opcodes).toString('hex'));
 
         it('should `decode` unary opcodes', function () {
             const opcodes = decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD);
 
-            expect(opcodes).to.be.deep.equal([
+            expect([...opcodes]).to.be.deep.equal([
                 new Opcode(0, OPCODES.ADDRESS, 'ADDRESS', null),
                 new Opcode(1, OPCODES.ADDRESS, 'ADDRESS', null),
                 new Opcode(2, OPCODES.JUMPDEST, 'JUMPDEST', null),
@@ -105,7 +111,7 @@ describe('::step', function () {
                 OPCODES.ADD
             );
 
-            expect(opcodes).to.be.deep.equal([
+            expect([...opcodes]).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH4, 'PUSH4', Buffer.from([1, 2, 3, 4])),
                 new Opcode(5, OPCODES.JUMPDEST, 'JUMPDEST', null),
                 new Opcode(6, OPCODES.PUSH4, 'PUSH4', Buffer.from([5, 6, 7, 8])),
@@ -114,19 +120,22 @@ describe('::step', function () {
             ]);
         });
 
-        it('should not fail `PUSH`n does not have enough data', function () {
-            expect(decodeArray(OPCODES.PUSH32)).to.be.deep.equal(
-                [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([]))]
+        it('should fail when `PUSH`n does not have enough data to decode', function () {
+            expect(() => decodeArray(OPCODES.PUSH32).next()).to.throw(
+                'Trying to get `32` bytes but got only `0` while decoding `PUSH32(0x7f)@0 0x` before reaching the end of bytecode'
             );
-            expect(decodeArray(OPCODES.PUSH32, 1)).to.be.deep.equal(
-                [new Opcode(0, OPCODES.PUSH32, 'PUSH32', Buffer.from([1]))]
+            const opcodes = decodeArray(OPCODES.ADD, OPCODES.STOP, OPCODES.PUSH20, 1, 2, 3);
+            expect(opcodes.next().value).to.be.deep.equal(new Opcode(0, OPCODES.ADD, 'ADD', null));
+            expect(opcodes.next().value).to.be.deep.equal(new Opcode(1, OPCODES.STOP, 'STOP', null));
+            expect(() => opcodes.next()).to.throw(
+                'Trying to get `20` bytes but got only `3` while decoding `PUSH20(0x73)@2 0x010203` before reaching the end of bytecode'
             );
         });
 
         it('should `decode` with `INVALID` opcodes', function () {
             const opcodes = decodeArray(0xb0, OPCODES.ADD, 0xb1);
 
-            expect(opcodes).to.be.deep.equal([
+            expect([...opcodes]).to.be.deep.equal([
                 new Opcode(0, 0xb0, 'UNDEF', null),
                 new Opcode(1, OPCODES.ADD, 'ADD', null),
                 new Opcode(2, 0xb1, 'UNDEF', null),
@@ -134,9 +143,9 @@ describe('::step', function () {
         });
 
         it('should `decode` example from hex string', function () {
-            const opcodes = decode('0x6003600501');
+            const opcodes = step.decode('0x6003600501');
 
-            expect(opcodes).to.be.deep.equal([
+            expect([...opcodes]).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH1, 'PUSH1', Buffer.from([3])),
                 new Opcode(2, OPCODES.PUSH1, 'PUSH1', Buffer.from([5])),
                 new Opcode(4, OPCODES.ADD, 'ADD', null),
@@ -144,31 +153,31 @@ describe('::step', function () {
         });
 
         it('should `decode` all `INVALID` opcodes', function () {
-            const opcodes = decode('0c0d0e0ffc');
-            expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
+            const opcodes = step.decode('0c0d0e0ffc');
+            expect([...opcodes].map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
         });
 
         ['', '0x', '0X'].forEach(p => describe(`decode with prefix \`${p}\``, function () {
             it(`should \`decode\` empty buffer`, function () {
-                const opcodes = decode(p + '');
-                expect(opcodes).to.be.empty;
+                const opcodes = step.decode(p + '');
+                expect([...opcodes]).to.be.empty;
             });
 
             it(`should \`decode\` opcodes and accept lower and uppercase hex digits`, function () {
-                const opcodes = decode(p + '00010203FAff');
-                expect(opcodes.map(op => op.mnemonic)).to.be.deep.equal(
+                const opcodes = step.decode(p + '00010203FAff');
+                expect([...opcodes].map(op => op.mnemonic)).to.be.deep.equal(
                     ['STOP', 'ADD', 'MUL', 'SUB', 'STATICCALL', 'SELFDESTRUCT']
                 );
             });
 
             it(`should throw when input is not even`, function () {
-                expect(() => decode(p + 'a')).to.throw(
+                expect(() => step.decode(p + 'a').next()).to.throw(
                     `Unable to decode, input should have even length, but got length '${p.length + 1}'`
                 );
             });
 
             it(`should throw when input has an invalid hex byte`, function () {
-                expect(() => decode(p + '010203xx')).to.throw(
+                expect(() => step.decode(p + '010203xx').next()).to.throw(
                     `Unable to decode, invalid hex byte 'xx' found at position '${p.length + 7}'`
                 );
             });
