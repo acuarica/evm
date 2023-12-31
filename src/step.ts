@@ -64,7 +64,7 @@ export class Opcode<M = unknown> {
          * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
          * then it contains the data attached to this instruction.
          */
-        readonly data: null | Uint8Array
+        readonly data: null | Uint8Array = null
     ) { }
 
     /**
@@ -165,10 +165,10 @@ export class Undef<M extends string> extends Members {
      * @param code the hexadecimal string containing the bytecode to decode.
      * @returns a generator of the decoded `Opcode`s found in `code`.
      */
-    *decode(code: string) {
+    *decode(code: string, pc = 0) {
         const bytecode = fromHexString(code);
 
-        for (let pc = 0; pc < bytecode.length; pc++) {
+        for (; pc < bytecode.length; pc++) {
             const opcode = bytecode[pc];
             const [size, , mnemonic] = this[opcode];
             yield new Opcode(
@@ -499,6 +499,7 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     }
     const destpc = Number(offset2.val);
     if (bytecode[destpc] === JUMPDEST) {
+        // TODO: review is this cast is sound
         (offset as Val).jumpDest = destpc;
         return destpc;
     } else {

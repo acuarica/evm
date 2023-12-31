@@ -17,7 +17,7 @@ describe('::evm', function () {
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
         expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
         expect(yul`${state.stmts[0]}`).to.be.equal('invalid()');
-        expect(evm.containsOpcode(0xd0)).to.be.deep.equal([new Opcode(0, 0xd0, 'UNDEF', null)]);
+        expect(evm.containsOpcode(0xd0)).to.be.deep.equal([new Opcode(0, 0xd0, 'UNDEF')]);
         expect(evm.containsOpcode('ADD')).to.be.empty;
     });
 
@@ -39,7 +39,7 @@ describe('::evm', function () {
         const evm = EVM.new('0x01');
         evm.exec(0, state);
 
-        const err = new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD', null), state);
+        const err = new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD'), state);
 
         expect(evm.errors).to.be.deep.equal([err]);
         expect(state.halted).to.be.true;
@@ -620,7 +620,7 @@ event ${eventSelector(unknownEventSig)};
             expect(evm.errors.map(e => e.reason))
                 .to.be.deep.equal(['POP with empty stack']);
             expect(evm.containsOpcode('ADD'))
-                .to.be.deep.equal([new Opcode(0, 0x1, 'ADD', null)]);
+                .to.be.deep.equal([new Opcode(0, 0x1, 'ADD')]);
         });
 
         it('should find opcodes when exec `containsOpcode`', function () {
@@ -631,7 +631,7 @@ event ${eventSelector(unknownEventSig)};
                 new Opcode(2, 0x60, 'PUSH1', new Uint8Array([2])),
             ]);
             expect(evm.containsOpcode('SELFDESTRUCT')).to.be.deep.equal([
-                new Opcode(4, 0xff, 'SELFDESTRUCT', null),
+                new Opcode(4, 0xff, 'SELFDESTRUCT'),
             ]);
             expect(evm.containsOpcode('ADD')).to.be.empty;
             expect(evm.containsOpcode('SUB')).to.be.empty;

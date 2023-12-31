@@ -11,7 +11,7 @@ describe('::step', function () {
 
     describe('Opcode', function () {
         it('should convert null-`data` to hex format', function () {
-            expect(new Opcode(0, 0, '', null).hexData()).to.be.equal(undefined);
+            expect(new Opcode(0, 0, '').hexData()).to.be.equal(undefined);
         });
 
         it('should convert `data` to hex format', function () {
@@ -20,16 +20,16 @@ describe('::step', function () {
         });
 
         it('should `format` opcodes', function () {
-            expect(new Opcode(2, 0x1, 'ADD', null).format())
+            expect(new Opcode(2, 0x1, 'ADD').format())
                 .to.be.equal('ADD(0x1)@2');
             expect(new Opcode(1, 0x63, 'PUSH4', Buffer.from([1, 2, 3, 4])).format())
                 .to.be.equal('PUSH4(0x63)@1 0x01020304 (16909060)');
-            expect(new Opcode(0, 0xb0, 'INVALID', null).format())
+            expect(new Opcode(0, 0xb0, 'INVALID').format())
                 .to.be.equal('INVALID(0xb0)@0');
         });
 
         it('should `format` opcodes with not `includeDataAsNumeric`', function () {
-            expect(new Opcode(2, 0x1, 'ADD', null).format(false))
+            expect(new Opcode(2, 0x1, 'ADD').format(false))
                 .to.be.equal('ADD(0x1)@2');
             expect(new Opcode(1, 0x63, 'PUSH4', Buffer.from([1, 2, 3, 4])).format(false))
                 .to.be.equal('PUSH4(0x63)@1 0x01020304');
@@ -90,18 +90,17 @@ describe('::step', function () {
         const decodeArray = (...opcodes: number[]) => step.decode(Buffer.from(opcodes).toString('hex'));
 
         it('should `decode` unary opcodes', function () {
-            const opcodes = decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD);
-
-            expect([...opcodes]).to.be.deep.equal([
-                new Opcode(0, OPCODES.ADDRESS, 'ADDRESS', null),
-                new Opcode(1, OPCODES.ADDRESS, 'ADDRESS', null),
-                new Opcode(2, OPCODES.JUMPDEST, 'JUMPDEST', null),
-                new Opcode(3, OPCODES.ADD, 'ADD', null),
-            ]);
+            expect([...decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD)])
+                .to.be.deep.equal([
+                    new Opcode(0, OPCODES.ADDRESS, 'ADDRESS'),
+                    new Opcode(1, OPCODES.ADDRESS, 'ADDRESS'),
+                    new Opcode(2, OPCODES.JUMPDEST, 'JUMPDEST'),
+                    new Opcode(3, OPCODES.ADD, 'ADD'),
+                ]);
         });
 
         it('should `decode` `PUSH`n opcodes', function () {
-            const opcodes = decodeArray(
+            expect([...decodeArray(
                 OPCODES.PUSH4,
                 ...[1, 2, 3, 4],
                 OPCODES.JUMPDEST,
@@ -109,14 +108,12 @@ describe('::step', function () {
                 ...[5, 6, 7, 8],
                 OPCODES.JUMPDEST,
                 OPCODES.ADD
-            );
-
-            expect([...opcodes]).to.be.deep.equal([
+            )]).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH4, 'PUSH4', Buffer.from([1, 2, 3, 4])),
-                new Opcode(5, OPCODES.JUMPDEST, 'JUMPDEST', null),
+                new Opcode(5, OPCODES.JUMPDEST, 'JUMPDEST'),
                 new Opcode(6, OPCODES.PUSH4, 'PUSH4', Buffer.from([5, 6, 7, 8])),
-                new Opcode(11, OPCODES.JUMPDEST, 'JUMPDEST', null),
-                new Opcode(12, OPCODES.ADD, 'ADD', null),
+                new Opcode(11, OPCODES.JUMPDEST, 'JUMPDEST'),
+                new Opcode(12, OPCODES.ADD, 'ADD'),
             ]);
         });
 
@@ -124,48 +121,60 @@ describe('::step', function () {
             expect(() => decodeArray(OPCODES.PUSH32).next()).to.throw(
                 'Trying to get `32` bytes but got only `0` while decoding `PUSH32(0x7f)@0 0x` before reaching the end of bytecode'
             );
+
             const opcodes = decodeArray(OPCODES.ADD, OPCODES.STOP, OPCODES.PUSH20, 1, 2, 3);
-            expect(opcodes.next().value).to.be.deep.equal(new Opcode(0, OPCODES.ADD, 'ADD', null));
-            expect(opcodes.next().value).to.be.deep.equal(new Opcode(1, OPCODES.STOP, 'STOP', null));
+            expect(opcodes.next().value)
+                .to.be.deep.equal(new Opcode(0, OPCODES.ADD, 'ADD'));
+            expect(opcodes.next().value)
+                .to.be.deep.equal(new Opcode(1, OPCODES.STOP, 'STOP'));
             expect(() => opcodes.next()).to.throw(
                 'Trying to get `20` bytes but got only `3` while decoding `PUSH20(0x73)@2 0x010203` before reaching the end of bytecode'
             );
         });
 
         it('should `decode` with `INVALID` opcodes', function () {
-            const opcodes = decodeArray(0xb0, OPCODES.ADD, 0xb1);
-
-            expect([...opcodes]).to.be.deep.equal([
-                new Opcode(0, 0xb0, 'UNDEF', null),
-                new Opcode(1, OPCODES.ADD, 'ADD', null),
-                new Opcode(2, 0xb1, 'UNDEF', null),
+            expect([...decodeArray(0xb0, OPCODES.ADD, 0xb1)]).to.be.deep.equal([
+                new Opcode(0, 0xb0, 'UNDEF'),
+                new Opcode(1, OPCODES.ADD, 'ADD'),
+                new Opcode(2, 0xb1, 'UNDEF'),
             ]);
         });
 
-        it('should `decode` example from hex string', function () {
-            const opcodes = step.decode('0x6003600501');
-
-            expect([...opcodes]).to.be.deep.equal([
+        it('should `decode` `PUSHn`', function () {
+            expect([...step.decode('0x6003600501')]).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH1, 'PUSH1', Buffer.from([3])),
                 new Opcode(2, OPCODES.PUSH1, 'PUSH1', Buffer.from([5])),
-                new Opcode(4, OPCODES.ADD, 'ADD', null),
+                new Opcode(4, OPCODES.ADD, 'ADD'),
+            ]);
+        });
+
+        it('should `decode` starting at a non-zero `pc`', function () {
+            const bytecode = '0x6003600501';
+
+            expect([...step.decode(bytecode, 2)]).to.be.deep.equal([
+                new Opcode(2, OPCODES.PUSH1, 'PUSH1', Buffer.from([5])),
+                new Opcode(4, OPCODES.ADD, 'ADD'),
+            ]);
+
+            expect([...step.decode(bytecode, 1)]).to.be.deep.equal([
+                new Opcode(1, OPCODES.SUB, 'SUB'),
+                new Opcode(2, OPCODES.PUSH1, 'PUSH1', Buffer.from([5])),
+                new Opcode(4, OPCODES.ADD, 'ADD'),
             ]);
         });
 
         it('should `decode` all `INVALID` opcodes', function () {
-            const opcodes = step.decode('0c0d0e0ffc');
-            expect([...opcodes].map(op => op.mnemonic)).to.be.deep.equal(Array(5).fill('UNDEF'));
+            expect([...step.decode('0c0d0e0ffc')].map(op => op.mnemonic))
+                .to.be.deep.equal(Array(5).fill('UNDEF'));
         });
 
         ['', '0x', '0X'].forEach(p => describe(`decode with prefix \`${p}\``, function () {
             it(`should \`decode\` empty buffer`, function () {
-                const opcodes = step.decode(p + '');
-                expect([...opcodes]).to.be.empty;
+                expect([...step.decode(p + '')]).to.be.empty;
             });
 
             it(`should \`decode\` opcodes and accept lower and uppercase hex digits`, function () {
-                const opcodes = step.decode(p + '00010203FAff');
-                expect([...opcodes].map(op => op.mnemonic)).to.be.deep.equal(
+                expect([...step.decode(p + '00010203FAff')].map(op => op.mnemonic)).to.be.deep.equal(
                     ['STOP', 'ADD', 'MUL', 'SUB', 'STATICCALL', 'SELFDESTRUCT']
                 );
             });
@@ -304,7 +313,7 @@ describe('::step', function () {
             state.stack.push(size);
             state.stack.push(offset);
             state.stack.push(new Val(4n));
-            step.CODECOPY(state, new Opcode(0, 0, null, null), bytecode);
+            step.CODECOPY(state, new Opcode(0, 0, 'codecopy'), bytecode);
 
             expect(state.memory).to.be.deep.equal({
                 '4': new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5))
@@ -349,7 +358,7 @@ describe('::step', function () {
 
         it('should halt when `INVALID` step', function () {
             const state = new State<Inst, Expr>();
-            step.INVALID(state, new Opcode(0, 1, 'INVALID', null));
+            step.INVALID(state, new Opcode(0, 1, 'INVALID'));
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
             expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
@@ -521,7 +530,7 @@ describe('::step', function () {
         it('should halt when `JUMP` step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(2n));
-            step.JUMP(state, new Opcode(1, 0xa, 'jump', null), Buffer.from('ff005b', 'hex'));
+            step.JUMP(state, new Opcode(1, 0xa, 'jump'), Buffer.from('ff005b', 'hex'));
 
             const offset = new Val(2n);
             offset.jumpDest = 2;
@@ -533,7 +542,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(Props['block.gaslimit']);
             state.stack.push(new Val(4n));
-            step.JUMPI(state, new Opcode(1, 0xa, 'jumpi', null), Buffer.from('ff0001025b', 'hex'));
+            step.JUMPI(state, new Opcode(1, 0xa, 'jumpi'), Buffer.from('ff0001025b', 'hex'));
 
             const offset = new Val(4n);
             offset.jumpDest = 4;
@@ -548,7 +557,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(Props['block.number']);
-                expect(() => step[inst](state, new Opcode(1, 0xa, 'jump', null), Buffer.from([])))
+                expect(() => step[inst](state, new Opcode(1, 0xa, 'jump'), Buffer.from([])))
                     .to.throw(ExecError, `jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
             });
 
@@ -556,7 +565,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(1n));
-                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), Buffer.from([0xff, 0xff])))
                     .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
             });
 
@@ -564,7 +573,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(2n));
-                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump', null), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), Buffer.from([0xff, 0xff])))
                     .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);
             });
         });
