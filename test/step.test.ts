@@ -42,7 +42,7 @@ describe('::step', function () {
         it('should retrieve `haltingInsts`', function () {
             const haltingSteps = step.haltingSteps();
             expect(haltingSteps).to.be.deep.equal(
-                ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
+                ['STOP', 'JUMP', 'JUMPI', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'] satisfies typeof haltingSteps
             );
         });
 
