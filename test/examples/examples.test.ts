@@ -7,7 +7,7 @@ import { Contract } from 'sevm';
 
 import abis from './abis';
 
-describe.skip('examples', function () {
+describe('examples', function () {
     [
         {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7' as const,
@@ -168,8 +168,8 @@ describe.skip('examples', function () {
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
             lines?.forEach(line =>
-                it(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
-                    expect(text).to.match(line);
+                it.skip(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
+                    expect(text, text).to.match(line);
                 })
             );
 
