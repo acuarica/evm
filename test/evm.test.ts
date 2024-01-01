@@ -17,8 +17,8 @@ describe('::evm', function () {
         expect(state.stmts).to.be.deep.equal([new Invalid(0xd0)]);
         expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0xd0)');");
         expect(yul`${state.stmts[0]}`).to.be.equal('invalid()');
-        expect(evm.containsOpcode(0xd0)).to.be.deep.equal([new Opcode(0, 0xd0, 'UNDEF')]);
-        expect(evm.containsOpcode('ADD')).to.be.empty;
+        expect(evm.opcodes().filter(o => o.opcode === 0xd0)).to.be.deep.equal([new Opcode(0, 0xd0, 'UNDEF')]);
+        expect(evm.opcodes().filter(o => o.mnemonic === 'ADD')).to.be.empty;
     });
 
     it('should throw when exec `halted` state', function () {
@@ -610,7 +610,7 @@ event ${eventSelector(unknownEventSig)};
     describe('`containsOpcode`', function () {
         it('should throw when `blocks` has not yet been initialized', function () {
             const evm = EVM.new('0x01');
-            expect(() => evm.containsOpcode('ADD'))
+            expect(() => evm.opcodes().filter(o => o.mnemonic === 'ADD'))
                 .to.throw('`blocks` is empty, call `start`, `run` or `exec` first');
         });
 
@@ -619,34 +619,22 @@ event ${eventSelector(unknownEventSig)};
             evm.start();
             expect(evm.errors.map(e => e.reason))
                 .to.be.deep.equal(['POP with empty stack']);
-            expect(evm.containsOpcode('ADD'))
+            expect(evm.opcodes().filter(o => o.mnemonic === 'ADD'))
                 .to.be.deep.equal([new Opcode(0, 0x1, 'ADD')]);
         });
 
         it('should find opcodes when exec `containsOpcode`', function () {
             const evm = EVM.new('0x60016002ff');
             evm.start();
-            expect(evm.containsOpcode('PUSH1')).to.be.deep.equal([
+            expect(evm.opcodes().filter(o => o.mnemonic === 'PUSH1')).to.be.deep.equal([
                 new Opcode(0, 0x60, 'PUSH1', new Uint8Array([1])),
                 new Opcode(2, 0x60, 'PUSH1', new Uint8Array([2])),
             ]);
-            expect(evm.containsOpcode('SELFDESTRUCT')).to.be.deep.equal([
+            expect(evm.opcodes().filter(o => o.mnemonic === 'SELFDESTRUCT')).to.be.deep.equal([
                 new Opcode(4, 0xff, 'SELFDESTRUCT'),
             ]);
-            expect(evm.containsOpcode('ADD')).to.be.empty;
-            expect(evm.containsOpcode('SUB')).to.be.empty;
-        });
-
-        it('should throw in `containsOpcode` when providing invalid opcode', function () {
-            const evm = EVM.new('0x01');
-            evm.start();
-
-            // @ts-expect-error `add` should not be assignable to mnemonics of `Shanghai`
-            expect(() => evm.containsOpcode('add'))
-                .to.throw('Provided opcode `add` is not a valid opcode mnemonic');
-            // @ts-expect-error `haltingSteps` should not be assignable to mnemonics of `Shanghai`
-            expect(() => evm.containsOpcode('haltingSteps'))
-                .to.throw('Provided opcode `haltingSteps` is not a valid opcode mnemonic');
+            expect(evm.opcodes().filter(o => o.mnemonic === 'ADD')).to.be.empty;
+            expect(evm.opcodes().filter(o => o.mnemonic === 'SUB')).to.be.empty;
         });
     });
 });

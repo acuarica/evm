@@ -233,31 +233,17 @@ export class EVM<M extends string> {
     }
 
     /**
-     * Indicates whether the given `opcode` is present in any of
-     * the reacheable blocks of `bytecode`.
-     * That is, whether the bytecode contains and executes the given `opcode`.
+     * Returns the `opcode`s present in the reacheable blocks of `bytecode`.
      *
      * **NOTE**. You must call either the `start`, `run` or `exec` methods first.
-     * This is to populate the reacheable `blocks`.
-     * 
-     * @param opcode The opcode to look for.
-     * @returns An array of `Opcode`s of the given `opcode` when present.
-     * Otherwise, it returns an empty array.
+     * This is to populate the `bytecode`'s reacheable `blocks`.
      */
-    containsOpcode(opcode: number | M): Opcode<M>[] {
+    opcodes(): Opcode<M>[] {
         if (this.blocks.size === 0)
             throw new Error('`blocks` is empty, call `start`, `run` or `exec` first');
 
-        const opcodes = this.step.opcodes();
-        if (typeof opcode === 'string' && opcode in opcodes) {
-            opcode = opcodes[opcode];
-        } else if (typeof opcode === 'string') {
-            throw new Error(`Provided opcode \`${opcode}\` is not a valid opcode mnemonic'`);
-        }
-
         return [...this.blocks.values()]
-            .flatMap(block => block.opcodes.map(o => o.opcode))
-            .filter(o => o.opcode === opcode);
+            .flatMap(block => block.opcodes.map(o => o.opcode));
     }
 
     gc(b: Branch) {

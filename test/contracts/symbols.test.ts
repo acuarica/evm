@@ -18,12 +18,11 @@ contracts('symbols', compile => {
         contract = new Contract(compile(src, this).bytecode);
     });
 
-    it.skip('should find symbol opcodes', function () {
-        // TODO: fix opcodes
-        // const opcodes = contract.evm.opcodes;
-        // expect(opcodes.filter(op => op.mnemonic === 'BLOCKHASH')).to.be.of.length(1);
-        // expect(opcodes.filter(op => op.mnemonic === 'BALANCE')).to.be.of.length(1);
-        // expect(opcodes.filter(op => op.mnemonic === 'ADDRESS')).to.be.of.length(1);
+    it('should find symbol opcodes', function () {
+        const opcodes = contract.opcodes();
+        expect(opcodes.filter(op => op.mnemonic === 'BLOCKHASH')).to.be.of.length(1);
+        expect(opcodes.filter(op => op.mnemonic === 'BALANCE')).to.be.of.length(1);
+        expect(opcodes.filter(op => op.mnemonic === 'ADDRESS')).to.be.of.length(1);
     });
 
     [

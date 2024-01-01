@@ -39,6 +39,8 @@ export class Contract {
 
     readonly chunks: EVM<string>['chunks'];
 
+    readonly opcodes: EVM<string>['opcodes'];
+
     /**
      *
      */
@@ -71,6 +73,7 @@ export class Contract {
         this.errors = evm.errors;
 
         this.chunks = () => evm.chunks();
+        this.opcodes = () => evm.opcodes();
     }
 
     /**
