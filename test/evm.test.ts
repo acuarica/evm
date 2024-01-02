@@ -4,8 +4,9 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import { EVM, London, Opcode, Paris, Shanghai, State, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts, type Operand } from 'sevm';
-import type { Expr, Inst, Local, Log } from 'sevm/ast';
+import type { Operand, Ram } from 'sevm';
+import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
+import type { Create, DataCopy, Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
 import { eventSelector, fnselector } from './utils/selector';
@@ -283,6 +284,88 @@ describe('::evm', function () {
                 expect(stmt.name).to.be.equal('Log');
                 expect((stmt as Log).args![0].eval()).to.be.deep.equal(prop);
             });
+        });
+    });
+
+    describe('system', function () {
+        it('should find `RETURN` in bytecode', function () {
+            const src = `contract Test { 
+                function name() external pure returns (uint256) { return 7; }
+                function symbol() external pure returns (uint256) { return 11; }
+                function hola() external pure returns (string memory) { return "12345"; }
+            }`;
+
+            const evm = EVM.new(compile(src, '0.8.16', this, {
+                optimizer: {
+                    enabled: true, details: { jumpdestRemover: true },
+                }
+            }).bytecode);
+            evm.start();
+
+            const selector = fnselector('name()');
+            const symbolSelector = fnselector('symbol()');
+            const hola = fnselector('hola()');
+            expect(evm.step.functionBranches).to.have.keys(selector, symbolSelector, hola);
+
+            const ast = (selector: string) => build(evm.step.functionBranches.get(selector)!.state);
+
+            expect(solStmts(ast(selector))).to.be.deep.equal('return 0x7;\n');
+            expect(solStmts(ast(symbolSelector))).to.be.deep.equal('return 0xb;\n');
+            expect(solStmts(ast(hola)).trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
+        });
+
+        it('should stringify `CREATE` and find `CODECOPY` Contract', function () {
+            const depositEvent = 'Deposit(uint256)';
+            const src = `
+            contract Token {
+                event ${depositEvent};
+                fallback() external payable {
+                    emit Deposit(3);
+                }
+            }
+
+            contract Test {
+                fallback() external payable {
+                    new Token();
+                }
+            }`;
+
+            let tokenBytecode: Uint8Array | undefined = undefined;
+            const step = new class extends Shanghai {
+                override CREATE = (state: State<Inst, Expr>) => {
+                    super.CREATE(state);
+                    const bytecode = (state.stack.top as Create).bytecode!;
+
+                    new EVM(bytecode, new class extends London {
+                        override CODECOPY = ({ stack, memory }: Ram<Expr>, _: unknown, bytecode: Uint8Array) => {
+                            const dest = stack.top?.eval();
+                            super.CODECOPY({ stack, memory }, _, bytecode);
+
+                            if (dest?.isVal()) {
+                                const m = memory[Number(dest.val)] as DataCopy;
+                                tokenBytecode = m.bytecode;
+                            }
+                        };
+                    }()).start();
+                };
+            }();
+
+            const evm = new EVM(compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode, step);
+            const state = new State<Inst, Expr>();
+            evm.run(0, state);
+            const stmts = build(state);
+            expect(sol`${stmts[6]}`).to.be.deep.equal(
+                'require(new Contract(memory[0x80..0x80+0x85 + 0x80 - 0x80]).value(0x0).address);'
+            );
+            expect(sol`${stmts[7]}`).to.be.deep.equal('return;');
+
+            {
+                expect(tokenBytecode).to.be.not.undefined;
+                const evm = EVM.new(tokenBytecode!);
+                const state = evm.start();
+                expect(sol`${state.stmts.at(-2)}`)
+                    .to.be.equal('log(0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426, 0x3);');
+            }
         });
     });
 
