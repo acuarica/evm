@@ -3,7 +3,14 @@ import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
 import { type Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
 
-interface Block<M> {
+/**
+ * Represent a reacheable basic block.
+ */
+export interface Block<M> {
+
+    /**
+     * Where this block ends, exclusive.
+     */
     pcend: number;
     /**
      * The `Opcode`s decoded from `bytecode` augmented with its `Stack` trace.
@@ -21,21 +28,17 @@ interface Block<M> {
 export class EVM<M extends string> {
 
     /**
-     *
+     * Reacheable `blocks` found in `this.bytecode`.
      */
     readonly blocks = new Map<number, Block<M>>();
 
     /**
-     *
+     * Symbolic execution `errors` found during interpretation of `this.bytecode`.
      */
     readonly errors: Throw[] = [];
 
     /**
-     */
-
-    /**
-     * Jump destination (`JUMPDEST`) offsets found in `bytecode`.
-     * This is used to speed up offset search.
+     * The bytecode buffer that represents a Contract or Library.
      */
     readonly bytecode: Uint8Array;
 
