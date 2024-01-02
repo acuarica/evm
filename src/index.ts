@@ -10,6 +10,7 @@ import { EVM } from './evm';
 import ERCs from './ercs';
 import { Shanghai, type Members } from './step';
 import { splitMetadataHash, type Metadata } from './metadata';
+import { arrayify } from './bytes';
 
 /**
  *
@@ -53,7 +54,9 @@ export class Contract {
      *
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
-    constructor(readonly bytecode: string, _insts = {}) {
+    constructor(bytecode: Parameters<typeof arrayify>[0], _insts = {}) {
+        bytecode = arrayify(bytecode);
+
         const evm = new EVM(bytecode, new Shanghai());
         const main = new State<Inst, Expr>();
         evm.run(0, main);
