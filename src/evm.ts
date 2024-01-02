@@ -2,7 +2,7 @@ import { type Ram, State, type Stack, ExecError } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
+import { type Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
 
 interface Block<M> {
     pcend: number;
@@ -74,12 +74,25 @@ export class EVM<M extends string> {
     }
 
     /**
-     *
+     * 
      */
     chunks(): {
-        pcstart: number;
+        /**
+         * Where this `chunk` begins, inclusive.
+         */
+        pcbegin: number;
+        /**
+         * Where this `chunk` ends, exclusive.
+         */
         pcend: number;
-        chunk: Opcode<M>[] | Uint8Array,
+
+        /**
+         * The content found for this `chunk`.
+         * If `pcbegin` is reacheable, then `content` is the `Opcode` for this block. 
+         * Otherwise the uninterpreted slice of the bytecode for this chunk.
+         */
+        content: Opcode<M>[] | Uint8Array,
+
         states?: State<Inst, Expr>[]
     }[] {
         let lastPc = 0;
@@ -90,15 +103,15 @@ export class EVM<M extends string> {
         for (const pc of pcs) {
             const block = this.blocks.get(pc)!;
             if (lastPc !== pc) {
-                result.push({ pcstart: lastPc, pcend: pc, chunk: this.bytecode.subarray(lastPc, pc) });
+                result.push({ pcbegin: lastPc, pcend: pc, content: this.bytecode.subarray(lastPc, pc) });
             }
             lastPc = block.pcend;
             const opcodes = block.opcodes.map(({ opcode, }) => opcode);
-            result.push({ pcstart: pc, pcend: block.pcend, chunk: opcodes, states: block.states });
+            result.push({ pcbegin: pc, pcend: block.pcend, content: opcodes, states: block.states });
         }
 
         if (lastPc !== this.bytecode.length) {
-            result.push({ pcstart: lastPc, pcend: this.bytecode.length, chunk: this.bytecode.subarray(lastPc) });
+            result.push({ pcbegin: lastPc, pcend: this.bytecode.length, content: this.bytecode.subarray(lastPc) });
         }
 
         return result;
@@ -181,18 +194,22 @@ export class EVM<M extends string> {
         // });
 
         const opcodes = [];
-        let pc = pc0;
-        for (; pc < this.bytecode.length; pc++) {
-            const op = this.bytecode[pc];
-            const [size, halts, mnemonic] = this.step[op];
-            const opcode = new Opcode(pc, op, mnemonic,
-                size === 0 ? null : (() => {
-                    const data = this.bytecode.subarray(pc + 1, pc + size + 1);
-                    if (data.length !== size) throw new Error('asdfsadf');
-                    pc += size;
-                    return data;
-                })()
-            );
+        // let pc = pc0;
+        // for (; pc < this.bytecode.length; pc++) {
+        let opcode;
+        for (opcode of this.step.decode(this.bytecode, pc0)) {
+            // const op = this.bytecode[pc];
+            // const [size, halts, mnemonic] = this.step[op];
+            // const opcode = new Opcode(pc, op, mnemonic,
+            //     size === 0 ? null : (() => {
+            //         const data = this.bytecode.subarray(pc + 1, pc + size + 1);
+            //         if (data.length !== size) throw new Error('asdfsadf');
+            //         pc += size;
+            //         return data;
+            //     })()
+            // );
+
+            const [, halts, mnemonic] = this.step[opcode.opcode];
 
             opcodes.push({ opcode, stack: state.stack.clone() });
 
@@ -208,8 +225,9 @@ export class EVM<M extends string> {
             }
 
             // if (!state.halted && this.bytecode[pc + 1] === JUMPDEST) {
-            if (!halts && this.bytecode[pc + 1] === JUMPDEST) {
-                const fallBranch = Branch.make(pc + 1, state);
+            // const nextpc = opcode.pc + opcode.size + 1;
+            if (!halts && this.bytecode[opcode.nextpc] === JUMPDEST) {
+                const fallBranch = Branch.make(opcode.nextpc, state);
                 state.halt(new JumpDest(fallBranch));
                 // halts = true;
                 /* two consecutive jumpdest blocks */
@@ -222,11 +240,13 @@ export class EVM<M extends string> {
             }
         }
 
-        if (!state.halted) throw new Error(`State must be halted after \`exec\` at ${pc0}:${pc}`);
+        if (opcode === undefined) throw new Error(`Executing block at ${pc0} cannot be empty`);
+
+        if (!state.halted) throw new Error(`State must be halted after executing block at ${pc0}..${opcode.pc}`);
 
         const block = this.blocks.get(pc0);
         if (block === undefined) {
-            this.blocks.set(pc0, { pcend: pc, opcodes, states: [state] });
+            this.blocks.set(pc0, { pcend: opcode.nextpc, opcodes, states: [state] });
         } else {
             block.states.push(state);
         }

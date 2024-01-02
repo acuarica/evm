@@ -21,17 +21,23 @@ describe('::evm', function () {
         expect(evm.opcodes().filter(o => o.mnemonic === 'ADD')).to.be.empty;
     });
 
-    it('should throw when exec `halted` state', function () {
+    it('should throw when `exec` `halted` state', function () {
         const state = new State<Inst, Expr>();
         const evm = EVM.new('0x');
         state.halt(new Stop());
         expect(() => evm.exec(0, state)).to.throw('State at 0 must be non-halted to be `exec`');
     });
 
+    it('should throw when `exec` empty block', function () {
+        const state = new State<Inst, Expr>();
+        const evm = EVM.new('0x0102');
+        expect(() => evm.exec(2, state)).to.throw('Executing block at 2 cannot be empty');
+    });
+
     it('should throw when finishing exec non-`halted` state', function () {
         const state = new State<Inst, Expr>();
         const evm = EVM.new('0x6001600201');
-        expect(() => evm.exec(0, state)).to.throw('State must be halted after `exec` at 0:5');
+        expect(() => evm.exec(0, state)).to.throw('State must be halted after executing block at 0..4');
     });
 
     it('should halt when `exec` invalid opcode & state', function () {
@@ -45,6 +51,68 @@ describe('::evm', function () {
         expect(state.halted).to.be.true;
         expect(state.stmts).to.be.deep.equal([err]);
         expect(sol`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
+    });
+
+    it('should `exec` valid bytecode', function () {
+        const state = new State<Inst, Expr>();
+        const evm = EVM.new('0x600160020100');
+        evm.exec(0, state);
+        expect(state.halted).to.be.true;
+        expect(state.stack.values).to.be.deep.equal([new Add(new Val(2n, true), new Val(1n, true))]);
+        expect(evm.errors).to.be.empty;
+    });
+
+    it('should populate `blocks` (and `chunks`) after `exec` `JUMP`s', function () {
+        //             chunks: 0 1 2 3 4 5 6 7|8 9 a b|c d e f 0|1 2 3
+        const evm = EVM.new('0x6001600201600c56010203045b62fffefd5b00');
+
+        let state = new State<Inst, Expr>();
+        evm.exec(0, state);
+        expect(state.last?.name).to.be.deep.equal('Jump');
+        expect((state.last as Jump).destBranch.pc).to.be.equal(12);
+
+        state = state.clone();
+        evm.exec(12, state);
+        expect(state.stack.top).to.be.deep.equal(new Val(BigInt('0xfffefd'), true));
+        expect(state.last?.name).to.be.deep.equal('JumpDest');
+        expect((state.last as JumpDest).fallBranch.pc).to.be.equal(17);
+
+        state = state.clone();
+        evm.exec(17, state);
+        expect(state.last?.name).to.be.deep.equal('Stop');
+
+        expect(evm.blocks).to.have.keys([0, 12, 17]);
+        expect(evm.blocks.get(0)?.pcend).to.be.equal(8);
+        expect(evm.blocks.get(12)?.pcend).to.be.equal(17);
+        expect(evm.blocks.get(17)?.pcend).to.be.equal(19);
+
+        const chunks = evm.chunks().map(({ pcbegin: pcstart, pcend, content: chunk }) => ({ pcstart, pcend, chunk }));
+        expect(chunks).to.be.deep.equal([
+            {
+                pcstart: 0, pcend: 8, chunk: [
+                    new Opcode(0, 0x60, 'PUSH1', new Uint8Array([1])),
+                    new Opcode(2, 0x60, 'PUSH1', new Uint8Array([2])),
+                    new Opcode(4, 0x01, 'ADD'),
+                    new Opcode(5, 0x60, 'PUSH1', new Uint8Array([12])),
+                    new Opcode(7, 0x56, 'JUMP'),
+                ],
+            },
+            {
+                pcstart: 8, pcend: 12, chunk: new Uint8Array([1, 2, 3, 4])
+            },
+            {
+                pcstart: 12, pcend: 17, chunk: [
+                    new Opcode(12, 0x5b, 'JUMPDEST'),
+                    new Opcode(13, 0x62, 'PUSH3', new Uint8Array([255, 254, 253])),
+                ]
+            },
+            {
+                pcstart: 17, pcend: 19, chunk: [
+                    new Opcode(17, 0x5b, 'JUMPDEST'),
+                    new Opcode(18, 0x00, 'STOP'),
+                ]
+            }
+        ]);
     });
 
     it('should attach `STEP` hooks', function () {

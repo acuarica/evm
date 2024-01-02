@@ -63,12 +63,12 @@ function dis(contract) {
     );
 
     for (const chunk of contract.chunks()) {
-        console.info(chunk.pcstart, ':', chunk.states === undefined ? red('unreachable') : '');
+        console.info(chunk.pcbegin, ':', chunk.states === undefined ? red('unreachable') : '');
 
-        if (chunk.chunk instanceof Uint8Array) {
-            console.info(Buffer.from(chunk.chunk).toString('hex'));
+        if (chunk.content instanceof Uint8Array) {
+            console.info(Buffer.from(chunk.content).toString('hex'));
         } else {
-            for (const opcode of chunk.chunk ?? []) {
+            for (const opcode of chunk.content) {
                 console.info(ansiOpcode(opcode));
             }
         }

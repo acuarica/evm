@@ -68,7 +68,14 @@ export class Opcode<M = unknown> {
     ) { }
 
     /**
-     * Returns the hexadecimal representation of `this` `data`.
+     * Where the next opcode should be located at.
+     */
+    get nextpc(): number {
+        return this.pc + (this.data?.length ?? 0) + 1;
+    }
+
+    /**
+     * Returns the hexadecimal representation of `this.data`.
      */
     hexData(): string | undefined {
         return this.data?.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');

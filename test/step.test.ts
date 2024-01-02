@@ -14,8 +14,13 @@ describe('::step', function () {
             expect(new Opcode(0, 0, '').hexData()).to.be.equal(undefined);
         });
 
+        it('should get `nextpc`', function () {
+            expect(new Opcode(0, 0, '', new Uint8Array([1, 2, 3, 4])).nextpc).to.be.equal(5);
+            expect(new Opcode(3, 0, '', new Uint8Array([1, 2, 3, 4])).nextpc).to.be.equal(8);
+        });
+
         it('should convert `data` to hex format', function () {
-            const data = Buffer.from([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]);
+            const data = new Uint8Array([1, 2, 3, 4, 12, 13, 14, 15, 254, 255, 0]);
             expect(new Opcode(0, 0, '', data).hexData()).to.be.equal('010203040c0d0e0ffeff00');
         });
 
