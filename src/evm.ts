@@ -1,5 +1,4 @@
 import { type Ram, State, type Stack, ExecError } from './state';
-import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
 import { type Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
@@ -22,12 +21,6 @@ interface Block<M> {
 export class EVM<M extends string> {
 
     /**
-     * The `metadataHash` part from the `bytecode`.
-     * That is, if present, the `bytecode` without its `code`.
-     */
-    readonly metadata: Metadata | undefined;
-
-    /**
      *
      */
     readonly blocks = new Map<number, Block<M>>();
@@ -47,7 +40,7 @@ export class EVM<M extends string> {
     readonly bytecode: Uint8Array;
 
     constructor(
-        bytecode: string,
+        bytecode: Parameters<typeof arrayify>[0],
 
         /**
          * The `STEP` function that updates the `State`
@@ -62,14 +55,12 @@ export class EVM<M extends string> {
         readonly step: Undef<M> & { readonly [m in M]: StepFn }
     ) {
         this.bytecode = arrayify(bytecode);
-
-        this.metadata = stripMetadataHash(bytecode)[1];
     }
 
     /**
      * Creates a new `EVM` with the latest defined execution fork.
      */
-    static new(bytecode: string) {
+    static new(bytecode: Parameters<typeof arrayify>[0]) {
         return new EVM(bytecode, new Shanghai());
     }
 

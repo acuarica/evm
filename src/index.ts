@@ -9,7 +9,7 @@ import { State } from './state';
 import { EVM } from './evm';
 import ERCs from './ercs';
 import { Shanghai, type Members } from './step';
-import type { Metadata } from './metadata';
+import { stripMetadataHash, type Metadata } from './metadata';
 
 /**
  *
@@ -22,7 +22,8 @@ export const ERCIds = Object.keys(ERCs);
 export class Contract {
 
     /**
-     *
+     * The `metadataHash` part from the `bytecode`.
+     * That is, if present, the `bytecode` without its `code`.
      */
     readonly metadata: Metadata | undefined;
 
@@ -69,7 +70,7 @@ export class Contract {
         this.variables = evm.step.variables;
         this.mappings = evm.step.mappings;
         this.functionBranches = evm.step.functionBranches;
-        this.metadata = evm.metadata;
+        this.metadata = stripMetadataHash(bytecode)[1];
         this.errors = evm.errors;
 
         this.chunks = () => evm.chunks();

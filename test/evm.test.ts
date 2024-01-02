@@ -736,9 +736,9 @@ event ${eventSelector(unknownEventSig)};
 
             const evm = EVM.new(bytecode);
 
-            this.test!.title += ` (data ${randomData} | hash ${metadata?.hash})`;
+            this.test!.title += ` (data ${randomData} | hash ${metadata.hash})`;
 
-            expect(includesFF(evm.metadata!.hash)).to.be.true;
+            expect(includesFF(metadata.hash)).to.be.true;
 
             evm.start();
             expect(evm.opcodes().filter(o => o.opcode === SELFDESTRUCT)).to.be.empty;
