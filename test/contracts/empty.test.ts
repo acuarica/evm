@@ -18,8 +18,8 @@ contracts('empty', (compile, fallback, version) => {
 
     it(`should get metadata hash for minimal contract definition`, function () {
         const HASHES = {
-            '0.5.5': ['bzzr', '61cfa0b8ea656ddbb7d387a8cd4fa87e694ed85d11c93d3f00964aa99fd2ef54'],
-            '0.5.17': ['bzzr', '9e364c1993091e0e8fd8895ef98d43bd325053b76e18433d879d3be18085a210'],
+            '0.5.5': ['bzzr0', '61cfa0b8ea656ddbb7d387a8cd4fa87e694ed85d11c93d3f00964aa99fd2ef54'],
+            '0.5.17': ['bzzr1', '9e364c1993091e0e8fd8895ef98d43bd325053b76e18433d879d3be18085a210'],
             '0.6.12': ['ipfs', 'QmbHEL45gDehV886FXqUJ5JFvWWZ2ZzFz75JEANWPBN9gq'],
             '0.7.6': ['ipfs', 'Qmf1g3GNsgpLdGx4TVkQPZBpBNARw4GDtR2i5QGXQSWixu'],
             '0.8.16': ['ipfs', 'QmQ5UGtrYrGDU9btfXYzuy1dZNQKQy7duqeLxbYfyunosc'],
@@ -30,7 +30,7 @@ contracts('empty', (compile, fallback, version) => {
 
         const hash = HASHES[version];
         expect(contract.metadata!.protocol).to.be.equal(hash[0]);
-        expect(contract.metadata!.solc).to.be.equal(version === '0.5.5' ? '<0.5.9' : version);
+        expect(contract.metadata!.solc).to.be.equal(version === '0.5.5' ? '' : version);
 
         expect(contract.metadata!.hash).to.be.equal(hash[1]);
         expect(contract.metadata!.url).to.be.equal(`${hash[0]}://${hash[1]}`);

@@ -57,8 +57,8 @@ describe('evm', function () {
 
     describe('different empty contracts should have the same bytecode', function () {
         const step = new Shanghai();
-
         const bytecodes = new Set<string>();
+
         [
             {
                 title: 'with no functions',
@@ -99,7 +99,7 @@ describe('evm', function () {
         ].forEach(({ title, src }) => {
             it(title, function () {
                 const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
-                bytecodes.add(bytecode);
+                bytecodes.add(Buffer.from(bytecode).toString('hex'));
                 expect(bytecodes).to.have.length(1);
 
                 expect([...step.decode(bytecode)].map(o => o.mnemonic)).to.be.deep.equal([
