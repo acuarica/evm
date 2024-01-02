@@ -718,22 +718,25 @@ event ${eventSelector(unknownEventSig)};
             const randomDataPath = path.join('.solc', `${this.test!.parent!.title}.${version}.data`);
             const solTemplate = `contract Test { bytes32 constant data = "[randomData]"; }`;
 
-            let randomData, metadata;
+            let randomData, metadata, bytecode;
             try {
                 randomData = fs.readFileSync(randomDataPath, 'utf8');
+                const src = solTemplate.replace('[randomData]', randomData);
+                bytecode = compile(src, version, this).bytecode;
+                metadata = stripMetadataHash(bytecode)[1]!;
             } catch {
                 do {
                     randomData = crypto.randomBytes(16).toString('hex');
                     const src = solTemplate.replace('[randomData]', randomData);
-                    metadata = stripMetadataHash(compile(src, version, null).bytecode)[1]!;
+                    bytecode = compile(src, version, null).bytecode;
+                    metadata = stripMetadataHash(bytecode)[1]!;
                 } while (!includesFF(metadata.hash));
                 fs.writeFileSync(randomDataPath, randomData);
             }
 
-            const src = solTemplate.replace('[randomData]', randomData);
-            const evm = EVM.new(compile(src, version, this).bytecode);
+            const evm = EVM.new(bytecode);
 
-            this.test!.title += ` (data ${randomData} | hash ${evm.metadata?.hash})`;
+            this.test!.title += ` (data ${randomData} | hash ${metadata?.hash})`;
 
             expect(includesFF(evm.metadata!.hash)).to.be.true;
 
