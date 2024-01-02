@@ -106,6 +106,6 @@ jobs:
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn make:4byte
-      - run: yarn compile
+      - run: yarn test
       - run: make dis
       - run: make sol
