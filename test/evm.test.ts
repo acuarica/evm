@@ -1,7 +1,10 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
-import { EVM, London, Shanghai, State, sol, solEvents, solStmts, yul, yulStmts, type Operand, Paris, Opcode } from 'sevm';
+import { EVM, London, Opcode, Paris, Shanghai, State, sol, solEvents, solStmts, stripMetadataHash, yul, yulStmts, type Operand } from 'sevm';
 import type { Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
@@ -705,6 +708,37 @@ event ${eventSelector(unknownEventSig)};
             ]);
             expect(evm.opcodes().filter(o => o.mnemonic === 'ADD')).to.be.empty;
             expect(evm.opcodes().filter(o => o.mnemonic === 'SUB')).to.be.empty;
+        });
+
+        it('should not find `selfdestruct` in `opcodes` reachable from metadata', function () {
+            const SELFDESTRUCT = new Shanghai().opcodes().SELFDESTRUCT;
+            const includesFF = (hash: string) => Buffer.from(hash, 'hex').includes(SELFDESTRUCT);
+
+            const version = '0.5.5';
+            const randomDataPath = path.join('.solc', `${this.test!.parent!.title}.${version}.data`);
+            const solTemplate = `contract Test { bytes32 constant data = "[randomData]"; }`;
+
+            let randomData, metadata;
+            try {
+                randomData = fs.readFileSync(randomDataPath, 'utf8');
+            } catch {
+                do {
+                    randomData = crypto.randomBytes(16).toString('hex');
+                    const src = solTemplate.replace('[randomData]', randomData);
+                    metadata = stripMetadataHash(compile(src, version, null).bytecode)[1]!;
+                } while (!includesFF(metadata.hash));
+                fs.writeFileSync(randomDataPath, randomData);
+            }
+
+            const src = solTemplate.replace('[randomData]', randomData);
+            const evm = EVM.new(compile(src, version, this).bytecode);
+
+            this.test!.title += ` (data ${randomData} | hash ${evm.metadata?.hash})`;
+
+            expect(includesFF(evm.metadata!.hash)).to.be.true;
+
+            evm.start();
+            expect(evm.opcodes().filter(o => o.opcode === SELFDESTRUCT)).to.be.empty;
         });
     });
 });
