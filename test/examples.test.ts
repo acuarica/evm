@@ -4,8 +4,7 @@ import { expect } from 'chai';
 import { FunctionFragment } from 'ethers';
 
 import { Contract } from 'sevm';
-
-import abis from './abis';
+import 'sevm/4byte';
 
 describe('examples', function () {
     [
@@ -132,9 +131,8 @@ describe('examples', function () {
             let text: string;
 
             before(function () {
-                const { events, functions } = abis[name] ?? { events: [], functions: [] };
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
-                contract = new Contract(bytecode).patchevs(...events).patchfns(...functions);
+                contract = new Contract(bytecode).patch();
                 text = contract.solidify();
             });
 
