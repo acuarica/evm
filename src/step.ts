@@ -155,7 +155,7 @@ export class Undef<M extends string> extends Members {
     /**
      * Decodes the input `bytecode` into `Opcode`s.
      * `bytecode` may be a hexadecimal string,
-     * which may or may not begin with hex prefix `0x`.
+     * which may or may not begin with the hex prefix `0x`.
      *
      * ### Example
      *
@@ -164,12 +164,14 @@ export class Undef<M extends string> extends Members {
      * ```
      *
      * @param bytecode hexadecimal string or array of numbers containing the bytecode to decode.
+     * @param begin the byte position where to start decoding the `input` bytecode,
+     * defaults to `0` if not provided.
      * @returns a generator of the decoded `Opcode`s found in `bytecode`.
      */
-    *decode(bytecode: Parameters<typeof arrayify>[0], pc = 0) {
+    *decode(bytecode: Parameters<typeof arrayify>[0], begin = 0) {
         const buffer = arrayify(bytecode);
 
-        for (; pc < buffer.length; pc++) {
+        for (let pc = begin; pc < buffer.length; pc++) {
             const opcode = buffer[pc];
             const [size, , mnemonic] = this[opcode];
             yield new Opcode(
