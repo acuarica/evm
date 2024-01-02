@@ -23,6 +23,11 @@ export const ERCIds = Object.keys(ERCs);
 export class Contract {
 
     /**
+     * The `bytecode` used to create this `Contract`.
+     */
+    readonly bytecode: Uint8Array;
+
+    /**
      * The `metadataHash` part from the `bytecode`.
      * That is, if present, the `bytecode` without its `code`.
      */
@@ -38,6 +43,8 @@ export class Contract {
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: Members['functionBranches'] = new Map();
     readonly errors: Throw[];
+
+    readonly blocks: EVM<string>['blocks'];
 
     readonly chunks: EVM<string>['chunks'];
 
@@ -55,9 +62,9 @@ export class Contract {
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
     constructor(bytecode: Parameters<typeof arrayify>[0], _insts = {}) {
-        bytecode = arrayify(bytecode);
+        this.bytecode = arrayify(bytecode);
 
-        const evm = new EVM(bytecode, new Shanghai());
+        const evm = new EVM(this.bytecode, new Shanghai());
         const main = new State<Inst, Expr>();
         evm.run(0, main);
         this.main = build(main);
@@ -73,9 +80,10 @@ export class Contract {
         this.variables = evm.step.variables;
         this.mappings = evm.step.mappings;
         this.functionBranches = evm.step.functionBranches;
-        this.metadata = splitMetadataHash(bytecode).metadata;
+        this.metadata = splitMetadataHash(this.bytecode).metadata;
         this.errors = evm.errors;
 
+        this.blocks = evm.blocks;
         this.chunks = () => evm.chunks();
         this.opcodes = () => evm.opcodes();
     }

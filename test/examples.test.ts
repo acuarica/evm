@@ -96,7 +96,7 @@ describe('examples', function () {
             ],
             ercs: ['ERC20'] as const,
         },
-    ].forEach(({ name, count: _count, lines, ercs, checkEvents }) => {
+    ].forEach(({ name, count, lines, ercs, checkEvents }) => {
         describe(`${name}`, function () {
             const defs = lines.map(line =>
                 line.source
@@ -137,7 +137,7 @@ describe('examples', function () {
             });
 
             it.skip(`should decode bytecode`, function () {
-                // expect(contract.evm.opcodes).to.be.of.length(count);
+                expect(contract.opcodes()).to.be.of.length(count);
             });
 
             it(`should detect functions`, function () {

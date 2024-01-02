@@ -1,19 +1,17 @@
 import { expect } from 'chai';
 
-import { Contract } from 'sevm';
+import { Contract, Shanghai } from 'sevm';
 import { Revert, Val } from 'sevm/ast';
 
 import { contracts } from '../utils/solc';
 
 contracts('empty', (compile, fallback, version) => {
     let contract: Contract;
-    // let evm: EVM;
 
     // eslint-disable-next-line mocha/no-top-level-hooks
     before(function () {
         const src = 'contract Empty { }';
         contract = new Contract(compile(src, this).bytecode);
-        // evm = contract.evm;
     });
 
     it(`should get metadata hash for minimal contract definition`, function () {
@@ -42,15 +40,17 @@ contracts('empty', (compile, fallback, version) => {
         expect(contract.events).to.be.empty;
     });
 
-    it.skip('should have 1 block & 1 `revert`', function () {
-        // expect(contract.evm.chunks).to.be.of.length(1);
-        // const chunk = contract.evm.chunks.get(0)!;
-        // expect(evm.opcodes[chunk.pcend - 1]!.mnemonic).to.be.equal('REVERT');
-        // expect(chunk.states).to.be.of.length(1);
-        // const state = chunk.states[0]!;
-        // expect(state.last?.eval()).to.be.deep.equal(
-        //     new Revert(new Val(0n, true), new Val(0n, true), [])
-        // );
+    it('should have 1 block & 1 `revert`', function () {
+        expect(contract.blocks).to.be.of.length(1);
+
+        const block = contract.blocks.get(0)!;
+
+        expect(contract.bytecode[block.pcend - 1]).to.be.equal(new Shanghai().opcodes().REVERT);
+
+        expect(block.states).to.be.of.length(1);
+        const state = block.states[0]!;
+        expect(state.last?.eval())
+            .to.be.deep.equal(new Revert(new Val(0n, true), new Val(0n, true), []));
 
         expect(contract.main.length).to.be.at.least(1);
         expect(contract.main.at(-1)?.eval()).to.be.deep.equal(
