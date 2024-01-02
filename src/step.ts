@@ -153,8 +153,9 @@ export class Undef<M extends string> extends Members {
     }
 
     /**
-     * Decodes the hexadecimal string `code` into `Opcode`s.
-     * `code` may or may not begin with hex prefix `0x`.
+     * Decodes the input `bytecode` into `Opcode`s.
+     * `bytecode` may be a hexadecimal string,
+     * which may or may not begin with hex prefix `0x`.
      *
      * ### Example
      *
@@ -162,21 +163,21 @@ export class Undef<M extends string> extends Members {
      * const opcodes = [...this.decode('0x6003600501')];
      * ```
      *
-     * @param code the hexadecimal string containing the bytecode to decode.
-     * @returns a generator of the decoded `Opcode`s found in `code`.
+     * @param bytecode hexadecimal string or array of numbers containing the bytecode to decode.
+     * @returns a generator of the decoded `Opcode`s found in `bytecode`.
      */
-    *decode(code: string, pc = 0) {
-        const bytecode = fromHexString(code);
+    *decode(bytecode: Parameters<typeof arrayify>[0], pc = 0) {
+        const buffer = arrayify(bytecode);
 
-        for (; pc < bytecode.length; pc++) {
-            const opcode = bytecode[pc];
+        for (; pc < buffer.length; pc++) {
+            const opcode = buffer[pc];
             const [size, , mnemonic] = this[opcode];
             yield new Opcode(
                 pc,
                 opcode,
                 mnemonic,
                 size === 0 ? null : function () {
-                    const data = bytecode.subarray(pc + 1, pc + size + 1);
+                    const data = buffer.subarray(pc + 1, pc + size + 1);
                     if (data.length !== size) {
                         const op = new Opcode(pc, opcode, mnemonic, data).format(false);
                         throw new Error(`Trying to get \`${size}\` bytes but got only \`${data.length}\` while decoding \`${op}\` before reaching the end of bytecode`);
@@ -191,19 +192,23 @@ export class Undef<M extends string> extends Members {
 
 /**
  * Represents an `Error` that occurs during decoding.
+ * 
  * position The position in the bytecode where the error occurred.
- * @param hexstr the hexadecimal string to convert to `Uint8Array`
+ * @param data the hexadecimal string to convert to `Uint8Array`
  * @returns the `Uint8Array` representation of `hexstr`
  */
-export function fromHexString(hexstr: string): Uint8Array {
-    if (hexstr.length % 2 !== 0) {
-        throw new Error(`Unable to decode, input should have even length, but got length '${hexstr.length}'`);
+export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Array {
+    if (data instanceof Uint8Array) return data;
+    if (typeof data !== 'string') return new Uint8Array(data);
+
+    if (data.length % 2 !== 0) {
+        throw new Error(`Unable to decode, input should have even length, but got length '${data.length}'`);
     }
 
-    const start = hexstr.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
-    const buffer = new Uint8Array((hexstr.length - start) / 2);
-    for (let i = start, j = 0; i < hexstr.length; i += 2, j++) {
-        const byte = hexstr.slice(i, i + 2);
+    const start = data.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
+    const buffer = new Uint8Array((data.length - start) / 2);
+    for (let i = start, j = 0; i < data.length; i += 2, j++) {
+        const byte = data.slice(i, i + 2);
         const value = parseInt(byte, 16);
         if (value >= 0) {
             buffer[j] = value;

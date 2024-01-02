@@ -2,7 +2,7 @@ import { type Ram, State, type Stack, ExecError } from './state';
 import { type Metadata, stripMetadataHash } from './metadata';
 import { type Expr, type IInst, type Inst, Throw } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { Opcode, fromHexString, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
+import { Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
 
 interface Block<M> {
     pcend: number;
@@ -61,7 +61,7 @@ export class EVM<M extends string> {
          */
         readonly step: Undef<M> & { readonly [m in M]: StepFn }
     ) {
-        this.bytecode = fromHexString(bytecode);
+        this.bytecode = arrayify(bytecode);
 
         this.metadata = stripMetadataHash(bytecode)[1];
     }

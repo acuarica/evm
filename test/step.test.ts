@@ -87,10 +87,8 @@ describe('::step', function () {
         const step = new London();
         const OPCODES = step.opcodes();
 
-        const decodeArray = (...opcodes: number[]) => step.decode(Buffer.from(opcodes).toString('hex'));
-
         it('should `decode` unary opcodes', function () {
-            expect([...decodeArray(OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD)])
+            expect([...step.decode([OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD])])
                 .to.be.deep.equal([
                     new Opcode(0, OPCODES.ADDRESS, 'ADDRESS'),
                     new Opcode(1, OPCODES.ADDRESS, 'ADDRESS'),
@@ -100,7 +98,7 @@ describe('::step', function () {
         });
 
         it('should `decode` `PUSH`n opcodes', function () {
-            expect([...decodeArray(
+            expect([...step.decode([
                 OPCODES.PUSH4,
                 ...[1, 2, 3, 4],
                 OPCODES.JUMPDEST,
@@ -108,7 +106,7 @@ describe('::step', function () {
                 ...[5, 6, 7, 8],
                 OPCODES.JUMPDEST,
                 OPCODES.ADD
-            )]).to.be.deep.equal([
+            ])]).to.be.deep.equal([
                 new Opcode(0, OPCODES.PUSH4, 'PUSH4', Buffer.from([1, 2, 3, 4])),
                 new Opcode(5, OPCODES.JUMPDEST, 'JUMPDEST'),
                 new Opcode(6, OPCODES.PUSH4, 'PUSH4', Buffer.from([5, 6, 7, 8])),
@@ -118,11 +116,11 @@ describe('::step', function () {
         });
 
         it('should fail when `PUSH`n does not have enough data to decode', function () {
-            expect(() => decodeArray(OPCODES.PUSH32).next()).to.throw(
+            expect(() => step.decode([OPCODES.PUSH32]).next()).to.throw(
                 'Trying to get `32` bytes but got only `0` while decoding `PUSH32(0x7f)@0 0x` before reaching the end of bytecode'
             );
 
-            const opcodes = decodeArray(OPCODES.ADD, OPCODES.STOP, OPCODES.PUSH20, 1, 2, 3);
+            const opcodes = step.decode([OPCODES.ADD, OPCODES.STOP, OPCODES.PUSH20, 1, 2, 3]);
             expect(opcodes.next().value)
                 .to.be.deep.equal(new Opcode(0, OPCODES.ADD, 'ADD'));
             expect(opcodes.next().value)
@@ -133,7 +131,7 @@ describe('::step', function () {
         });
 
         it('should `decode` with `INVALID` opcodes', function () {
-            expect([...decodeArray(0xb0, OPCODES.ADD, 0xb1)]).to.be.deep.equal([
+            expect([...step.decode([0xb0, OPCODES.ADD, 0xb1])]).to.be.deep.equal([
                 new Opcode(0, 0xb0, 'UNDEF'),
                 new Opcode(1, OPCODES.ADD, 'ADD'),
                 new Opcode(2, 0xb1, 'UNDEF'),

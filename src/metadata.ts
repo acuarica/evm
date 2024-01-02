@@ -1,4 +1,4 @@
-import { fromHexString } from './step';
+import { arrayify } from './step';
 
 const BZZR0 = '627a7a7230';
 const BZZR1 = '627a7a7231';
@@ -59,7 +59,7 @@ export function stripMetadataHash(bytecode: string): [string, Metadata | undefin
                 bytecode.substring(0, match.index),
                 new Metadata(
                     protocol,
-                    protocol === 'ipfs' ? bs58(fromHexString(match[1])) : match[1],
+                    protocol === 'ipfs' ? bs58(arrayify(match[1])) : match[1],
                     match[2] ? convertVersion(match[2]) : '<0.5.9'
                 ),
             ];
