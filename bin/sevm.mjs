@@ -63,7 +63,7 @@ function dis(contract) {
     );
 
     for (const chunk of contract.chunks()) {
-        console.info(chunk.pcbegin, ':', chunk.states === undefined ? red('unreachable') : '');
+        console.info(c.blue(chunk.pcbegin.toString()), ':', chunk.states === undefined ? red('unreachable') : '');
 
         if (chunk.content instanceof Uint8Array) {
             console.info(Buffer.from(chunk.content).toString('hex'));
