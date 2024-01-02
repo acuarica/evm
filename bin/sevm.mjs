@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-import { existsSync, mkdirSync, promises, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, promises, readFileSync, writeFileSync } from 'fs';
 import yargs from 'yargs';
 import c from 'ansi-colors';
 import assert from 'assert';
@@ -98,6 +98,13 @@ async function getBytecode(pathOrAddress) {
     const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
 
     const tries = [
+        async () => {
+            if (pathOrAddress === '') {
+                const buffer = readFileSync(process.stdin.fd, 'utf-8').trim();
+                if (buffer !== '') return Promise.resolve(buffer);
+            }
+            throw new Error('No input from stdin');
+        },
         async () => {
             const text = await promises.readFile(pathOrAddress, 'utf8');
             if (pathOrAddress.endsWith('.json')) {
