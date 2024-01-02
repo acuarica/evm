@@ -1,6 +1,5 @@
 import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
-import { EOL } from 'os';
 
 chai.use(chaiExec);
 chaiExec.defaults = {
@@ -31,7 +30,7 @@ describe('::bin', function () {
         expect(cli).stderr.to.contain('At least one command must be specified');
     });
 
-    it('should `dis` and find non-reacheable chunk', function () {
+    it('should run `dis` command and find non-reacheable chunk', function () {
         const cli = chaiExec('dis - --no-color', { input: '0x6001600201600c56010203045b62fffefd5b00' });
 
         expect(cli).to.exit.with.code(0);
@@ -39,6 +38,7 @@ describe('::bin', function () {
         expect(cli, cli.stdout).stdout.to.contain([
             '8 : unreachable',
             '01020304'
-        ].join(EOL));
+        // https://github.com/nodejs/node/issues/5038
+        ].join('\n'));
     });
 });
