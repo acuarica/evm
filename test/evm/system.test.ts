@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Contract, EVM, London, type Ram, Shanghai, State, build, sol, solStmts } from 'sevm';
+import { EVM, London, type Ram, Shanghai, State, build, sol, solStmts } from 'sevm';
 import type { Create, DataCopy, Expr, Inst } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
@@ -34,7 +34,7 @@ describe('evm::system', function () {
         expect(solStmts(ast(hola)).trim().split('\n').at(-1)).to.be.deep.equal("return '12345';");
     });
 
-    it('should stringify CREATE', function () {
+    it('should stringify `CREATE` and find `CODECOPY` Contract', function () {
         const depositEvent = 'Deposit(uint256)';
         const src = `
             contract Token {
@@ -50,14 +50,11 @@ describe('evm::system', function () {
                 }
             }`;
 
-        // let create;
+        let tokenBytecode: Uint8Array | undefined = undefined;
         const step = new class extends Shanghai {
             override CREATE = (state: State<Inst, Expr>) => {
                 super.CREATE(state);
-                const code = (state.stack.top as Create).bytecode!;
-                const bytecode = Buffer.from(code).toString('hex');
-                console.log(EVM.new(bytecode).metadata);
-                console.log(new Contract(bytecode).solidify());
+                const bytecode = (state.stack.top as Create).bytecode!;
 
                 new EVM(bytecode, new class extends London {
                     override CODECOPY = ({ stack, memory }: Ram<Expr>, _: unknown, bytecode: Uint8Array) => {
@@ -66,14 +63,12 @@ describe('evm::system', function () {
 
                         if (dest?.isVal()) {
                             const m = memory[Number(dest.val)] as DataCopy;
-                            console.log(new Contract(Buffer.from(m.bytecode!).toString('hex')).solidify());
+                            tokenBytecode = m.bytecode;
                         }
                     };
                 }()).start();
             };
         }();
-
-        console.log(new Contract(compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode, step).solidify());
 
         const evm = new EVM(compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode, step);
         const state = new State<Inst, Expr>();
@@ -83,5 +78,13 @@ describe('evm::system', function () {
             'require(new Contract(memory[0x80..0x80+0x85 + 0x80 - 0x80]).value(0x0).address);'
         );
         expect(sol`${stmts[7]}`).to.be.deep.equal('return;');
+
+        {
+            expect(tokenBytecode).to.be.not.undefined;
+            const evm = EVM.new(tokenBytecode!);
+            const state = evm.start();
+            expect(sol`${state.stmts.at(-2)}`)
+                .to.be.equal('log(0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426, 0x3);');
+        }
     });
 });
