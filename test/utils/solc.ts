@@ -28,10 +28,7 @@ export function compile(
     content: string,
     version: Version,
     context: Mocha.Context | null,
-    opts?: {
-        optimizer?: SolcInput['settings']['optimizer'],
-        ignoreWarnings?: boolean,
-    }
+    opts?: SolcInput['settings'] & { ignoreWarnings?: boolean }
 ): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
         language: 'Solidity',
@@ -42,6 +39,7 @@ export function compile(
         },
         settings: {
             optimizer: opts?.optimizer,
+            metadata: opts?.metadata,
             outputSelection: {
                 '*': {
                     '*': ['abi', 'metadata', 'evm.deployedBytecode'],

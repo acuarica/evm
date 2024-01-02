@@ -64,6 +64,28 @@ declare module 'solc' {
                 };
             };
 
+            /** 
+             * Metadata settings (optional)
+             */
+            metadata?: undefined | {
+                /**
+                 * The CBOR metadata is appended at the end of the bytecode by default.
+                 * Setting this to false omits the metadata from the runtime and deploy time code.
+                 */
+                appendCBOR?: true,
+                /**
+                 * Use only literal content and not URLs (false by default)
+                 */
+                useLiteralContent?: boolean,
+                /**
+                 * Use the given hash method for the metadata hash that is appended to the bytecode.
+                 * The metadata hash can be removed from the bytecode via option "none".
+                 * The other options are "ipfs" and "bzzr1".
+                 * If the option is omitted, "ipfs" is used by default.
+                 */
+                bytecodeHash?: 'ipfs' | 'bzzr1' | 'none',
+            },
+
             /**
              * The following can be used to select desired outputs based
              * on file and contract names.
@@ -109,7 +131,7 @@ declare module 'solc' {
              * Note that using `evm`, `evm.bytecode`, etc. will select every
              * target part of that output. Additionally, `*` can be used as a wildcard to request everything.
              */
-            outputSelection: {
+            outputSelection?: {
                 '*': {
                     '*': string[];
                 };
