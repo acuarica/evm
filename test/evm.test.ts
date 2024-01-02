@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import { EVM, London, Opcode, Paris, Shanghai, State, sol, solEvents, solStmts, stripMetadataHash, yul, yulStmts, type Operand } from 'sevm';
+import { EVM, London, Opcode, Paris, Shanghai, State, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts, type Operand } from 'sevm';
 import type { Expr, Inst, Local, Log } from 'sevm/ast';
 import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
@@ -723,13 +723,13 @@ event ${eventSelector(unknownEventSig)};
                 randomData = fs.readFileSync(randomDataPath, 'utf8');
                 const src = solTemplate.replace('[randomData]', randomData);
                 bytecode = compile(src, version, this).bytecode;
-                metadata = stripMetadataHash(bytecode)[1]!;
+                metadata = splitMetadataHash(bytecode).metadata!;
             } catch {
                 do {
                     randomData = crypto.randomBytes(16).toString('hex');
                     const src = solTemplate.replace('[randomData]', randomData);
                     bytecode = compile(src, version, null).bytecode;
-                    metadata = stripMetadataHash(bytecode)[1]!;
+                    metadata = splitMetadataHash(bytecode).metadata!;
                 } while (!includesFF(metadata.hash));
                 fs.writeFileSync(randomDataPath, randomData);
             }

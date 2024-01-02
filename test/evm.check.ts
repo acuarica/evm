@@ -2,7 +2,7 @@ import { keccak_256 } from '@noble/hashes/sha3';
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 
-import { EVM, State, stripMetadataHash, Shanghai } from 'sevm';
+import { EVM, State, splitMetadataHash, Shanghai } from 'sevm';
 import { And, Not, Val, Local, type Inst, type Expr, Props } from 'sevm/ast';
 
 import { fnselector } from './utils/selector';
@@ -98,7 +98,7 @@ describe('evm', function () {
             },
         ].forEach(({ title, src }) => {
             it(title, function () {
-                const bytecode = stripMetadataHash(compile(src, '0.7.6', this).bytecode)[0];
+                const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
                 bytecodes.add(bytecode);
                 expect(bytecodes).to.have.length(1);
 

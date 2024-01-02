@@ -9,7 +9,7 @@ import { State } from './state';
 import { EVM } from './evm';
 import ERCs from './ercs';
 import { Shanghai, type Members } from './step';
-import { stripMetadataHash, type Metadata } from './metadata';
+import { splitMetadataHash, type Metadata } from './metadata';
 
 /**
  *
@@ -70,7 +70,7 @@ export class Contract {
         this.variables = evm.step.variables;
         this.mappings = evm.step.mappings;
         this.functionBranches = evm.step.functionBranches;
-        this.metadata = stripMetadataHash(bytecode)[1];
+        this.metadata = splitMetadataHash(bytecode).metadata;
         this.errors = evm.errors;
 
         this.chunks = () => evm.chunks();

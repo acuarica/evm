@@ -46,27 +46,37 @@ export class Metadata {
  * Splits the `bytecode` into executable code and embedded metadata hash as
  * placed by the Solidity compiler, if present in the `bytecode`.
  *
- * @param bytecode the contract `bytecode` to test for metadata hash from, hex encoded.
- * @returns An tuple where the first component is the executable code and
- * second one is the metadata hash when the metadata is present.
- * Otherwise, the original `bytecode` and `undefined` respectively.
+ * @param bytecode the contract or library `bytecode` to test for metadata hash.
+ * @returns An object where the `bytecode` is the executable code and
+ * `metadata` is the metadata hash when the metadata is present.
  */
-export function stripMetadataHash(bytecode: string): [string, Metadata | undefined] {
+export function splitMetadataHash(bytecode: string): { 
+    /**
+     * The executable code without metadata when it is present.
+     * Otherwise, the original `bytecode`.
+     */
+    bytecode: string, 
+
+    /**
+     * The metadata if present. Otherwise `undefined`.
+     */
+    metadata: Metadata | undefined 
+} {
     for (const [re, protocol] of protocols) {
         const match = bytecode.match(re);
         if (match && match[1]) {
-            return [
-                bytecode.substring(0, match.index),
-                new Metadata(
+            return { 
+                bytecode: bytecode.substring(0, match.index),
+                metadata: new Metadata(
                     protocol,
                     protocol === 'ipfs' ? bs58(arrayify(match[1])) : match[1],
                     match[2] ? convertVersion(match[2]) : '<0.5.9'
                 ),
-            ];
+             };
         }
     }
 
-    return [bytecode, undefined];
+    return { bytecode, metadata: undefined };
 
     /**
      *

@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 
-import { Metadata, stripMetadataHash } from 'sevm';
+import { Metadata, splitMetadataHash } from 'sevm';
 
 import { compile } from './utils/solc';
 
 describe('::metadata', function () {
     it(`should return original bytecode when no metadata`, function () {
         const originalCode = '01020304';
-        const [code, metadata] = stripMetadataHash(originalCode);
+        const { bytecode, metadata } = splitMetadataHash(originalCode);
 
-        expect(code).to.be.equal(originalCode);
+        expect(bytecode).to.be.equal(originalCode);
         expect(metadata).to.be.undefined;
     });
 
@@ -36,7 +36,7 @@ describe('::metadata', function () {
 
     HASHES.forEach(([version, protocol, hash, expectedVersion]) => {
         it(`should get bytecode's metadata compiled with \`solc-${version}\``, function () {
-            const [, metadata] = stripMetadataHash(compile('contract Test {}', version, this).bytecode);
+            const { metadata } = splitMetadataHash(compile('contract Test {}', version, this).bytecode);
             expect(metadata).to.be.deep.equal(
                 new Metadata(protocol, hash, expectedVersion ?? version)
             );
