@@ -1,15 +1,13 @@
+import { arrayify, hexlify } from './bytes';
 import { ExecError, type Operand, type Ram, type State } from './state';
 
-import { MLoad, MStore } from './ast/memory';
-import { type Expr, type Inst, Val, Locali, Local } from './ast';
-import { Invalid } from './ast/system';
-import { Add, Div, Exp, Mod, Mul, Sub } from './ast/alu';
-import { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './ast/alu';
-import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Prop, Props } from './ast/special';
-import { Call, CallCode, Create, Create2, DelegateCall, Return, ReturnData, Revert, SelfDestruct, Sha3, StaticCall, Stop } from './ast/system';
-import { type IEvents, Log } from './ast/log';
-import { type IStore, MappingLoad, MappingStore, SLoad, SStore, Variable } from './ast';
+import { Local, Locali, MappingLoad, MappingStore, SLoad, SStore, Val, Variable, type Expr, type IStore, type Inst } from './ast';
+import { Add, And, Byte, Div, Eq, Exp, Gt, IsZero, Lt, Mod, Mul, Not, Or, Sar, Shl, Shr, Sig, Sub, Xor } from './ast/alu';
 import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
+import { Log, type IEvents } from './ast/log';
+import { MLoad, MStore } from './ast/memory';
+import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Prop, Props } from './ast/special';
+import { Call, CallCode, Create, Create2, DelegateCall, Invalid, Return, ReturnData, Revert, SelfDestruct, Sha3, StaticCall, Stop } from './ast/system';
 
 /**
  * Represents an opcode found in the bytecode augmented with
@@ -78,7 +76,7 @@ export class Opcode<M = unknown> {
      * Returns the hexadecimal representation of `this.data`.
      */
     hexData(): string | undefined {
-        return this.data?.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
+        return this.data === null ? undefined : hexlify(this.data);
     }
 
     /**
@@ -197,35 +195,6 @@ export class Undef<M extends string> extends Members {
             );
         }
     }
-}
-
-/**
- * Represents an `Error` that occurs during decoding.
- * 
- * position The position in the bytecode where the error occurred.
- * @param data the hexadecimal string to convert to `Uint8Array`
- * @returns the `Uint8Array` representation of `hexstr`
- */
-export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Array {
-    if (data instanceof Uint8Array) return data;
-    if (typeof data !== 'string') return new Uint8Array(data);
-
-    if (data.length % 2 !== 0) {
-        throw new Error(`Unable to decode, input should have even length, but got length '${data.length}'`);
-    }
-
-    const start = data.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
-    const buffer = new Uint8Array((data.length - start) / 2);
-    for (let i = start, j = 0; i < data.length; i += 2, j++) {
-        const byte = data.slice(i, i + 2);
-        const value = parseInt(byte, 16);
-        if (value >= 0) {
-            buffer[j] = value;
-        } else {
-            throw new Error(`Unable to decode, invalid hex byte '${byte}' found at position '${i + 1}'`);
-        }
-    }
-    return buffer;
 }
 
 /**

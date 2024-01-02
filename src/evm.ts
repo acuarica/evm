@@ -1,7 +1,8 @@
-import { type Ram, State, type Stack, ExecError } from './state';
-import { type Expr, type IInst, type Inst, Throw } from './ast';
+import { Throw, type Expr, type IInst, type Inst } from './ast';
 import { Branch, JumpDest } from './ast/flow';
-import { type Opcode, arrayify, Shanghai, JUMPDEST, type StepFn, type Undef } from './step';
+import { arrayify } from './bytes';
+import { ExecError, State, type Ram, type Stack } from './state';
+import { JUMPDEST, Shanghai, type Opcode, type StepFn, type Undef } from './step';
 
 /**
  * Represent a reacheable basic block.
