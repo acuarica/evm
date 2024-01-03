@@ -1,5 +1,6 @@
-import type { MappingLoad, MappingStore } from './ast';
-import { isExpr, type Expr, type Inst, isInst, type Stmt } from './ast';
+import { Contract } from '.';
+import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast';
+import { FNS, isExpr, isInst } from './ast';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either
@@ -21,7 +22,7 @@ function yulExpr(expr: Expr): string {
         case 'Val':
             return `0x${expr.val.toString(16)}`;
         case 'Local':
-            return expr.nrefs > 0 ? `local${expr.index}` : yul`${expr.value}`;
+            return `local${expr.index}`;
         case 'Add':
         case 'Mul':
         case 'Sub':
@@ -60,7 +61,7 @@ function yulExpr(expr: Expr): string {
                 }
             }
         case 'Fn':
-            throw new Error('');
+            return FNS[expr.mnemonic][0](yulExpr(expr.value));
         case 'DataCopy':
             throw new Error('Not implemented yet: "DataCopy" case');
         case 'MLoad':
@@ -93,7 +94,7 @@ function yulExpr(expr: Expr): string {
 function yulInst(inst: Inst): string {
     switch (inst.name) {
         case 'Local':
-            return yul`let local${inst.local.index}: ${inst.local.value.type} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
+            return yul`let local${inst.local.index} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
         case 'Log':
             return yul`log${inst.topics.length}(${inst.offset}, ${inst.size}, ${inst.topics
                 .map(yulExpr)
@@ -117,7 +118,7 @@ function yulInst(inst: Inst): string {
         case 'JumpDest':
             return `jumpdesp(${inst.fallBranch.pc})`;
         case 'SigCase':
-            throw new Error('Not implemented yet: "SigCase" case');
+            return yul`case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore':
             return yul`sstore(${inst.location}, ${inst.data})`;
         case 'MappingStore':
@@ -144,9 +145,55 @@ function yulMapArgs(mapping: MappingLoad | MappingStore): string {
     return mapping.items.map(e => yul`[${e}]`).join('');
 }
 
-export function yulStmts(stmts: Stmt[]): string {
-    return stmts
-        .filter(s => s.name !== 'Local' || s.local.nrefs > 0)
-        .map(yulStmt)
-        .join('\n');
+export function yulStmts(stmts: Stmt[], spaces = 0): string {
+    let text = '';
+    for (const stmt of stmts) {
+        if (stmt.name === 'If') {
+            const condition = yulStmt(stmt);
+            text += ' '.repeat(spaces) + 'if ' + condition + ' {\n';
+            text += yulStmts(stmt.trueBlock!, spaces + 4);
+            if (stmt.falseBlock) {
+                text += ' '.repeat(spaces) + '} else {\n';
+                text += yulStmts(stmt.falseBlock, spaces + 4);
+            }
+            text += ' '.repeat(spaces) + '}\n';
+        } else {
+            if (stmt.name === 'Local' && stmt.local.nrefs <= 0) {
+                // continue;
+            }
+            if (stmt.name === 'MStore') {
+                // continue;
+            }
+            text += ' '.repeat(spaces) + yulStmt(stmt) + '\n';
+        }
+    }
+
+    return text;
+
+    // return stmts
+    // .filter(s => s.name !== 'Local' || s.local.nrefs > 0)
+    // .map(yulStmt)
+    // .join('\n');
 }
+
+declare module '.' {
+    interface Contract {
+        /**
+         * @returns
+         */
+        yul(): string;
+    }
+}
+
+Contract.prototype.yul = function (this: Contract) {
+    let text = '';
+    text += yulStmts(this.main);
+    text += '\n';
+
+    for (const [, fn] of Object.entries(this.functions)) {
+        text += yulStmts(fn.stmts);
+        text += '\n';
+    }
+
+    return text;
+};

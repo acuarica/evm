@@ -9,7 +9,7 @@ import { EtherscanProvider } from 'ethers';
 import envPaths from 'env-paths';
 import path from 'path';
 
-import { Contract, sol } from 'sevm';
+import { Contract, sol, yul } from 'sevm';
 import 'sevm/4byte';
 
 const paths = envPaths('sevm');
@@ -19,40 +19,6 @@ const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
 /**
  * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
  */
-
-/** @param {import('sevm').Opcode<string>} opcode */
-export function ansiOpcode(opcode) {
-    const pc = opcode.pc.toString().padStart(6).toUpperCase();
-    const pushData = opcode.data
-        ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
-        : '';
-    return `${dim(pc)}   ${magenta(opcode.mnemonic)}    ${pushData}`;
-}
-
-/**
- * @param {Contract} contract
- */
-function metadata(contract) {
-    console.info(underline('Contract Metadata'));
-    if (contract.metadata) {
-        console.info(blue('protocol'), contract.metadata.protocol);
-        console.info(blue('hash'), contract.metadata.hash);
-        console.info(blue('solc'), contract.metadata.solc);
-        console.info(blue('url'), contract.metadata.url);
-    } else {
-        console.info(warn('No metadata'));
-    }
-}
-
-/** @param {Contract} contract */
-function abi(contract) {
-    console.info(underline('Function Selectors'));
-    contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
-
-    console.info();
-    console.info(underline('Events'));
-    contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
-}
 
 /** @param {Contract} contract */
 function dis(contract) {
@@ -68,28 +34,28 @@ function dis(contract) {
         if (chunk.content instanceof Uint8Array) {
             console.info(Buffer.from(chunk.content).toString('hex'));
         } else {
-            for (const opcode of chunk.content) {
-                console.info(ansiOpcode(opcode));
+            const block = contract.blocks.get(chunk.pcbegin);
+            for (const {opcode, stack} of block?.opcodes ?? []) {
+                const pc = opcode.pc.toString().padStart(6).toUpperCase();
+                const pushData = opcode.data
+                    ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
+                    : '';
+                const values = stack?.values.map(e=> yul`${e}` ).join(' | ');
+                console.info( `${dim(pc)}   ${magenta(opcode.mnemonic)}    ${pushData} |= ${values}`);
             }
         }
 
         if (chunk.states !== undefined) {
             for (const state of chunk.states) {
                 console.info('state');
-                console.info('    〒 ', state.stack.values.join(' | '));
-                state.stmts.forEach(stmt => console.info('  ', sol`${stmt}`));
+                console.info('    〒 ', state.stack.values.map(e => yul`${e}`).join(' | '));
+                state.stmts.forEach(stmt => console.info('  ', yul`${stmt}`));
             }
         }
     }
 }
 
-/** @param {Contract} contract */
-function decompile(contract) {
-    console.info(contract.solidify());
-}
-
 /**
- *
  * @param {string} pathOrAddress
  * @returns {Promise<string | null>}
  */
@@ -164,12 +130,27 @@ const pos = argv =>
         describe: 'path or address where to locate the bytecode of the contract',
     });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 void yargs(process.argv.slice(2))
     .scriptName('sevm')
     .usage('$0 <cmd> <contract>')
-    .command('metadata <contract>', 'Shows the Metadata of the contract[1]', pos, make(metadata))
-    .command('abi <contract>', 'Shows the ABI of the contract[2]', pos, make(abi))
+    .command('metadata <contract>', 'Shows the Metadata of the contract[1]', pos, make(contract => {
+        console.info(underline('Contract Metadata'));
+        if (contract.metadata) {
+            console.info(blue('protocol'), contract.metadata.protocol);
+            console.info(blue('hash'), contract.metadata.hash);
+            console.info(blue('solc'), contract.metadata.solc);
+            console.info(blue('url'), contract.metadata.url);
+        } else {
+            console.info(warn('No metadata'));
+        }
+    }))
+    .command('abi <contract>', 'Shows the ABI of the contract[2]', pos, make(contract => {
+        console.info(underline('Function Selectors'));
+        contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
+        console.info();
+        console.info(underline('Events'));
+        contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
+    }))
     .command('dis <contract>', 'Disassemble the bytecode into Opcodes', pos, make(dis))
     .command(
         'cfg <contract>',
@@ -177,18 +158,12 @@ void yargs(process.argv.slice(2))
         pos,
         make(cfg)
     )
-    .command(
-        'sol <contract>',
-        "Decompile the contract's bytecode into Solidity-like source code",
-        pos,
-        make(decompile)
-    )
-    .command(
-        'yul <contract>',
-        "Decompile the contract's bytecode into Yul-like source code[3]",
-        pos,
-        make(decompile)
-    )
+    .command('sol <contract>', "Decompile the contract into Solidity-like source", pos, make(contract => {
+        console.info(contract.solidify());
+    }))
+    .command('yul <contract>', "Decompile the contract into Yul-like source[3]", pos, make(contract => {
+        console.info(contract.yul());
+    }))
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
     )
@@ -342,29 +317,3 @@ function cfg(contract) {
         }
     }
 }
-
-// function sel() {
-
-//             let cfg;
-//             const selector = argv['selector'] as string;
-//             if (selector) {
-//                 const fn = evm.contract.getFunction(selector);
-//                 if (!fn) {
-//                     throw new Error('function ' + selector + ' not found');
-//                 }
-//                 cfg = fn.cfg;
-//             } else {
-//                 cfg = evm.contract.main.cfg;
-//             }
-// }
-
-// const entries = [
-//     /** @type {const} */ (['main', { decompile: () => solStmts(contract.main) }]),
-//     ...Object.entries(contract.functions).map(
-//         ([selector, fn]) => /**@type{const}*/ ([fn.label ?? selector, fn])
-//     ),
-// ];
-// const fns = Object.fromEntries(entries);
-// functionList.setItems(Object.keys(fns));
-
-// eventList.setItems(contract.getEvents());
