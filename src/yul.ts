@@ -71,7 +71,7 @@ function yulExpr(expr: Expr): string {
         case 'Create': // create(v, p, n) | F | create new contract with code mem[p…(p+n)) and send v wei and return the new address; returns 0 on error
             return yul`create(${expr.value}, ${expr.offset}, ${expr.size})`;
         case 'Call': // call(g, a, v, in, insize, out, outsize) | F | call contract at address a with input mem[in…(in+insize)) providing g gas and v wei and output area mem[out…(out+outsize)) returning 0 on error (eg. out of gas) and 1 on success See more
-            throw new Error('Not implemented yet: "Call" case');
+            return yul`call(${expr.gas},${expr.address},${expr.value},${expr.argsStart},${expr.argsLen},${expr.retStart},${expr.retLen})`;
         case 'ReturnData':
             throw new Error('Not implemented yet: "ReturnData" case');
         case 'CallCode':
@@ -83,7 +83,7 @@ function yulExpr(expr: Expr): string {
         case 'StaticCall': // staticcall(g, a, in, insize, out, outsize)
             return yul`staticcall(${expr.gas}, ${expr.address}, ${expr.memoryStart}, ${expr.memoryLength}, ${expr.outputStart}, ${expr.outputLength})`;
         case 'DelegateCall':
-            throw new Error('Not implemented yet: "DelegateCall" case');
+            return yul`delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'SLoad':
             return yul`sload(${expr.location})`;
         case 'MappingLoad':
