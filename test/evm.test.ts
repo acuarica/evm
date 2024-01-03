@@ -374,16 +374,16 @@ describe('::evm', function () {
             const knownEventSig = 'Deposit(uint256)';
             const unknownEventSig = 'UnknownEvent(uint256, uint256, uint256)';
             const src = `contract Test {
-            event ${knownEventSig};
-            event ${unknownEventSig};
-            fallback() external payable {
-                emit Deposit(1);
-                emit UnknownEvent(2, 3, 4);
-                uint256 n = block.number;
-                emit Deposit(n);
-                emit Deposit(n + 7);
-            }
-        }`;
+                event ${knownEventSig};
+                event ${unknownEventSig};
+                fallback() external payable {
+                    emit Deposit(1);
+                    emit UnknownEvent(2, 3, 4);
+                    uint256 n = block.number;
+                    emit Deposit(n);
+                    emit Deposit(n + 7);
+                }
+            }`;
             const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
 
             const state = new State<Inst, Expr>();
@@ -463,8 +463,7 @@ event ${eventSelector(unknownEventSig)};
     });
 
     describe('storage', function () {
-
-        it.skip('should detect storage variable', function () {
+        it('should detect storage variable', function () {
             const src = `contract Test {
             uint256 val1 = 5;
             uint256 val2 = 7;
@@ -477,15 +476,25 @@ event ${eventSelector(unknownEventSig)};
             evm.run(0, state);
 
             expect(evm.step.variables).to.be.have.keys('0', '1');
-            expect(state.stmts).to.be.have.length(3);
 
-            expect(sol`${state.stmts[0]}`).to.be.equal('var1 += 0x3;');
-            expect(sol`${state.stmts[1]}`).to.be.equal('var2 += 0xb;');
-            expect(sol`${state.last}`).to.be.equal('return;');
+            expect(yulStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
+                'mstore(0x40, 0x80)',
+                'let local0 = 0x0 // #refs 0',
+                'let local1 = 0x3 // #refs 0',
+                'let local2 = add(sload(local0), local1) // #refs 0',
+                'sstore(local0, local2)',
+                'let local3 = 0xb // #refs 0',
+                'let local4 = 0x1 // #refs -1',
+                'let local5 = add(sload(local4), local3) // #refs 0',
+                'sstore(local4, local5)',
+                'stop()',
+            ]);
 
-            expect(yul`${state.stmts[0]}`).to.be.equal('sstore(0x0, add(sload(0x0), 0x3))');
-            expect(yul`${state.stmts[1]}`).to.be.equal('sstore(0x1, add(sload(0x1), 0xb))');
-            expect(yul`${state.last}`).to.be.equal('stop()');
+            expect(solStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
+                'var1 += 0x3;',
+                'var2 += 0xb;',
+                'return;',
+            ]);
         });
 
         it.skip('should detect packed storage variable', function () {

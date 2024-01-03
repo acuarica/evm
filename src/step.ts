@@ -4,10 +4,11 @@ import { ExecError, type Operand, type Ram, type State } from './state';
 import { Local, Locali, MappingLoad, MappingStore, SLoad, SStore, Val, Variable, type Expr, type IStore, type Inst } from './ast';
 import { Add, And, Byte, Div, Eq, Exp, Gt, IsZero, Lt, Mod, Mul, Not, Or, Sar, Shl, Shr, Sig, Sub, Xor } from './ast/alu';
 import { Branch, Jump, Jumpi, SigCase } from './ast/flow';
-import { Log, type IEvents } from './ast/log';
+import { type IEvents } from './ast/log';
 import { MLoad, MStore } from './ast/memory';
-import { CallDataLoad, CallValue, DataCopy, FNS, Fn, Prop, Props } from './ast/special';
-import { Call, CallCode, Create, Create2, DelegateCall, Invalid, Return, ReturnData, Revert, SelfDestruct, Sha3, StaticCall, Stop } from './ast/system';
+import { type DataCopy, FNS, Fn, Prop, Props } from './ast/special';
+import { Sha3 } from './ast/system';
+import * as ast from './ast';
 
 /**
  * Represents an opcode found in the bytecode augmented with
@@ -135,7 +136,7 @@ export class Undef<M extends string> extends Members {
         );
     }
 
-    UNDEF = (state: State<Inst, Expr>, op: Opcode): void => state.halt(new Invalid(op.opcode));
+    UNDEF = (state: State<Inst, Expr>, op: Opcode): void => state.halt(new ast.Invalid(op.opcode));
 
     /**
      * Retrieves the `mnemonic` of the steps which `halts` the EVM `State`.
@@ -309,8 +310,8 @@ const SPECIAL = {
     RETURNDATASIZE: [0x3d, prop('returndatasize()')],
     GAS: [0x5a, prop('gasleft()')],
 
-    CALLVALUE: [0x34, ({ stack }) => stack.push(new CallValue())],
-    CALLDATALOAD: [0x35, ({ stack }) => stack.push(new CallDataLoad(stack.pop()))],
+    CALLVALUE: [0x34, ({ stack }) => stack.push(new ast.CallValue())],
+    CALLDATALOAD: [0x35, ({ stack }) => stack.push(new ast.CallDataLoad(stack.pop()))],
 } satisfies { [m: string]: readonly [opcode: number, (state: Operand<Expr>) => void] };
 
 const datacopy = (kind: DataCopy['kind']) => function datacopy({ stack, memory }: Ram<Expr>, address?: Expr) {
@@ -320,7 +321,7 @@ const datacopy = (kind: DataCopy['kind']) => function datacopy({ stack, memory }
     if (!dest.isVal()) {
         // throw new Error('expected number in returndatacopy');
     } else {
-        memory[Number(dest.val)] = new DataCopy(kind, offset, size, address);
+        memory[Number(dest.val)] = new ast.DataCopy(kind, offset, size, address);
     }
     // stmts.push(new MStore(location, data));
 };
@@ -334,7 +335,7 @@ const DATACOPY = {
         if (!dest.isVal()) {
             throw new Error('expected number in codecopy');
         } else {
-            memory[Number(dest.val)] = new DataCopy('codecopy', offset, size, undefined,
+            memory[Number(dest.val)] = new ast.DataCopy('codecopy', offset, size, undefined,
                 ((offset, size) => {
                     if (offset.isVal() && size.isVal()) {
                         return bytecode.subarray(Number(offset.val), Number(offset.val + size.val));
@@ -408,48 +409,33 @@ const STORAGE = {
     }],
 
     SSTORE: [0x55, function sstore(this: IStore, { stack, stmts }) {
-        const sstoreVariable = () => {
-            if (slot.isVal()) {
-                const key = slot.val.toString();
-                if (key in this.variables) {
-                    this.variables[key].types.push(value);
-                } else {
-                    this.variables[key] = new Variable(undefined, [value]);
-                }
-            }
-            stmts.push(new SStore(slot, value, this.variables));
-        };
-
         const slot = stack.pop();
         const value = stack.pop();
 
-        if (slot.isVal()) {
-            sstoreVariable();
-        } else if (slot.tag === 'Sha3') {
-            const [base, parts] = parseSha3(slot);
-            if (base !== undefined && parts.length > 0) {
-                stmts.push(new MappingStore(slot, this.mappings, base, parts, value));
-            } else {
-                sstoreVariable();
-            }
-        } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal()) {
-            const [base, parts] = parseSha3(slot.left);
-            if (base !== undefined && parts.length > 0) {
-                stmts.push(
-                    new MappingStore(slot, this.mappings, base, parts, value, slot.right.val)
-                );
-            } else {
-                sstoreVariable();
-            }
-        } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3') {
-            const [base, parts] = parseSha3(slot.right);
-            if (base !== undefined && parts.length > 0) {
-                stmts.push(new MappingStore(slot, this.mappings, base, parts, value, slot.left.val));
-            } else {
-                sstoreVariable();
-            }
+        if (slot.is(ast.Local)) slot.nrefs--;
+
+        let base: number | undefined, parts: Expr[];
+        const check = (slot: Sha3): boolean =>
+            ([base, parts] = parseSha3(slot), base !== undefined && parts.length > 0);
+
+        if (slot.tag === 'Sha3' && check(slot)) {
+            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value));
+        } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal() && check(slot.left)) {
+            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value, slot.right.val));
+        } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3' && check(slot.right)) {
+            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value, slot.left.val));
         } else {
-            sstoreVariable();
+            ((slot) => {
+                if (slot.is(ast.Val)) {
+                    const key = slot.val.toString();
+                    if (key in this.variables) {
+                        this.variables[key].types.push(value);
+                    } else {
+                        this.variables[key] = new Variable(undefined, [value]);
+                    }
+                }
+            })(slot.eval());
+            stmts.push(new SStore(slot, value, this.variables));
         }
     }],
 } satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>) => void] };
@@ -495,14 +481,7 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
 
 const FrontierStep = {
     /* Stack operations */
-    POP: [0x50, function pop({ stack }: Operand<Expr>) {
-        const expr = stack.pop();
-        if (expr.tag === 'Local') {
-            // expr.nrefs--;
-            // console.log('POP: Local', expr);
-            // throw new Error('POP: Local');
-        }
-    }],
+    POP: [0x50, ({ stack }: Operand<Expr>) => stack.pop()],
     ...Object.fromEntries([...Array(32).keys()].map(size => [
         `PUSH${(size + 1 as Size<32>)}`, [
             { opcode: 0x60 + size, size: size + 1 },
@@ -579,8 +558,8 @@ const FrontierStep = {
         let location = stack.pop();
         const data = stack.pop();
 
-        if (location.tag === 'Local') location.nrefs--;
-        if (data.tag === 'Local') data.nrefs--;
+        if (location.is(Local)) location.nrefs--;
+        if (data.is(Local)) data.nrefs--;
 
         stmts.push(new MStore(location, data));
 
@@ -593,12 +572,12 @@ const FrontierStep = {
 
     /* System operations */
     SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
-    STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new Stop())],
+    STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new ast.Stop())],
     CREATE: [0xf0, function create({ stack, memory }) {
         const value = stack.pop();
         const offset = stack.pop();
         const size = stack.pop();
-        stack.push(new Create(value, offset, size, ((offset, size) => {
+        stack.push(new ast.Create(value, offset, size, ((offset, size) => {
             if (offset.isVal() && size.isVal() && Number(offset.val) in memory) {
                 const data = memory[Number(offset.val)];
                 if (data.tag === 'DataCopy' && data.bytecode !== undefined && data.bytecode.length === Number(size.val)) {
@@ -616,9 +595,9 @@ const FrontierStep = {
         const argsLen = stack.pop();
         const retStart = stack.pop();
         const retLen = stack.pop();
-        stack.push(new Call(gas, address, value, argsStart, argsLen, retStart, retLen));
+        stack.push(new ast.Call(gas, address, value, argsStart, argsLen, retStart, retLen));
         if (retStart.isVal()) {
-            memory[Number(retStart.val)] = new ReturnData(retStart, retLen);
+            memory[Number(retStart.val)] = new ast.ReturnData(retStart, retLen);
         }
     }],
     CALLCODE: [0xf2, function callcode({ stack }) {
@@ -629,9 +608,9 @@ const FrontierStep = {
         const argsLen = stack.pop();
         const retStart = stack.pop();
         const retLen = stack.pop();
-        stack.push(new CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
+        stack.push(new ast.CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
     }],
-    RETURN: [{ opcode: 0xf3, halts: true }, state => state.halt(memArgs(state, Return))],
+    RETURN: [{ opcode: 0xf3, halts: true }, state => state.halt(memArgs(state, ast.Return))],
     DELEGATECALL: [0xf4, function delegatecall({ stack }) {
         const gas = stack.pop();
         const address = stack.pop();
@@ -639,7 +618,7 @@ const FrontierStep = {
         const argsLen = stack.pop();
         const retStart = stack.pop();
         const retLen = stack.pop();
-        stack.push(new DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
+        stack.push(new ast.DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
     }],
     STATICCALL: [0xfa, function staticcall({ stack }) {
         const gas = stack.pop();
@@ -648,14 +627,14 @@ const FrontierStep = {
         const argsLen = stack.pop();
         const retStart = stack.pop();
         const retLen = stack.pop();
-        stack.push(new StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
+        stack.push(new ast.StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
     }],
-    REVERT: [{ opcode: 0xfd, halts: true }, state => state.halt(memArgs(state, Revert))],
+    REVERT: [{ opcode: 0xfd, halts: true }, state => state.halt(memArgs(state, ast.Revert))],
     SELFDESTRUCT: [{ opcode: 0xff, halts: true }, function selfdestruct(state) {
         const address = state.stack.pop();
-        state.halt(new SelfDestruct(address));
+        state.halt(new ast.SelfDestruct(address));
     }],
-    INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new Invalid(op.opcode))],
+    INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new ast.Invalid(op.opcode))],
 
     /* Log operations */
     ...Object.fromEntries(([0, 1, 2, 3, 4] as const).map(ntopics => [
@@ -679,7 +658,7 @@ const FrontierStep = {
                 }
             }
 
-            stmts.push(new Log(event, offset, size, topics, function (offset, size) {
+            stmts.push(new ast.Log(event, offset, size, topics, function (offset, size) {
                 if (offset.isVal() && size.isVal()) {
                     const args = [];
                     for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
@@ -767,7 +746,7 @@ const ConstantinopleStep = {
         const value = stack.pop();
         const memoryStart = stack.pop();
         const memoryLength = stack.pop();
-        stack.push(new Create2(memoryStart, memoryLength, value));
+        stack.push(new ast.Create2(memoryStart, memoryLength, value));
     }] as const,
 } satisfies Step;
 

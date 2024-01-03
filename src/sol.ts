@@ -223,12 +223,14 @@ function solInst(inst: Inst): string {
         case 'SigCase':
             return sol`case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore': {
-            const isLoad = (value: Expr) =>
-                value.tag === 'SLoad' && solExpr(value.location) === solExpr(inst.location);
+            const slot = inst.location.eval();
 
-            let varName = sol`storage[${inst.location}]`;
-            if (inst.location.isVal() && inst.location.val.toString() in inst.variables) {
-                const loc = inst.location.val.toString();
+            const isLoad = (value: Expr) =>
+                value.tag === 'SLoad' && solExpr(value.location.eval()) === solExpr(slot);
+
+            let varName = sol`storage[${slot}]`;
+            if (slot.isVal() && slot.val.toString() in inst.variables) {
+                const loc = slot.val.toString();
                 const label = inst.variables[loc].label;
                 if (label) {
                     varName = label;
@@ -236,12 +238,14 @@ function solInst(inst: Inst): string {
                     varName = `var${Object.keys(inst.variables).indexOf(loc) + 1}`;
                 }
             }
-            if (inst.data.tag === 'Add' && isLoad(inst.data.left)) {
-                return sol`${varName} += ${inst.data.right};`;
-            } else if (inst.data.tag === 'Add' && isLoad(inst.data.right)) {
-                return sol`${varName} += ${inst.data.left};`;
-            } else if (inst.data.tag === 'Sub' && isLoad(inst.data.left)) {
-                return sol`${varName} -= ${inst.data.right};`;
+
+            const data = inst.data.eval();
+            if (data.tag === 'Add' && isLoad(data.left)) {
+                return sol`${varName} += ${data.right};`;
+            } else if (data.tag === 'Add' && isLoad(data.right)) {
+                return sol`${varName} += ${data.left};`;
+            } else if (data.tag === 'Sub' && isLoad(data.left)) {
+                return sol`${varName} -= ${data.right};`;
             } else {
                 return sol`${varName} = ${inst.data};`;
             }
