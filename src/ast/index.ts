@@ -115,7 +115,7 @@ export class Throw implements IInst {
         readonly reason: string,
         readonly opcode: Opcode<unknown>,
         readonly state: State<Inst, Expr>
-    ) {}
+    ) { }
 
     eval() {
         return this;
@@ -144,7 +144,7 @@ export class If {
         readonly condition: Expr,
         readonly trueBlock?: Stmt[],
         readonly falseBlock?: Stmt[]
-    ) {}
+    ) { }
     eval() {
         return this;
     }
@@ -152,7 +152,7 @@ export class If {
 
 export class CallSite {
     readonly name = 'CallSite';
-    constructor(readonly selector: string) {}
+    constructor(readonly selector: string) { }
     eval() {
         return this;
     }
@@ -160,7 +160,7 @@ export class CallSite {
 
 export class Require {
     readonly name = 'Require';
-    constructor(readonly condition: Expr, readonly args: Expr[]) {}
+    constructor(readonly condition: Expr, readonly args: Expr[]) { }
     eval() {
         return this;
     }
@@ -181,6 +181,13 @@ export abstract class Tag {
 
     isJumpDest(): this is Val {
         return this.isVal() && this.jumpDest !== null;
+    }
+
+    /**
+     * Indicates whether `this` is an instance of `Klass`.
+     */
+    is<T extends Tag>(Klass: new (...args: never[]) => T): this is T {
+        return this instanceof Klass;
     }
 
     /**
@@ -224,7 +231,7 @@ export class Local extends Tag {
 export class Locali implements IInst {
     readonly name = 'Local';
 
-    constructor(readonly local: Local) {}
+    constructor(readonly local: Local) { }
 
     eval() {
         return this;
