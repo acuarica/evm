@@ -22,11 +22,7 @@ const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
 
 /** @param {Contract} contract */
 function dis(contract) {
-    console.info(
-        `${dim('pc'.padStart(6))}   ${magenta(
-            'mnemonic'
-        )}  ${'push data (PUSHx)'}`
-    );
+    console.info(`${dim('pc'.padStart(5))}  ${magenta('opcode')}  ${'push data (PUSHx)'}`);
 
     for (const chunk of contract.chunks()) {
         console.info(c.blue(chunk.pcbegin.toString()), ':', chunk.states === undefined ? red('unreachable') : '');
@@ -35,20 +31,19 @@ function dis(contract) {
             console.info(Buffer.from(chunk.content).toString('hex'));
         } else {
             const block = contract.blocks.get(chunk.pcbegin);
-            for (const {opcode, stack} of block?.opcodes ?? []) {
-                const pc = opcode.pc.toString().padStart(6).toUpperCase();
+            for (const { opcode, stack } of block?.opcodes ?? []) {
+                const pc = opcode.pc.toString().padStart(5);
                 const pushData = opcode.data
                     ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
                     : '';
-                const values = stack?.values.map(e=> yul`${e}` ).join(' | ');
-                console.info( `${dim(pc)}   ${magenta(opcode.mnemonic)}    ${pushData} |= ${values}`);
+                const values = stack?.values.map(e => yul`${e}`).join(dim('|'));
+                console.info(`${dim(pc)}  ${magenta(opcode.mnemonic)}  ${pushData} ${info('〒')} ${values}`);
             }
         }
 
         if (chunk.states !== undefined) {
             for (const state of chunk.states) {
-                console.info('state');
-                console.info('    〒 ', state.stack.values.map(e => yul`${e}`).join(' | '));
+                console.info('state', '〒 ', state.stack.values.map(e => yul`${e}`).join(' | '));
                 state.stmts.forEach(stmt => console.info('  ', yul`${stmt}`));
             }
         }
