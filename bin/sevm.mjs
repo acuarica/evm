@@ -58,27 +58,37 @@ async function getBytecode(pathOrAddress) {
     const cacheFolder = path.join(paths.cache, 'mainnet');
     const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
 
+    const readInputFile = async () => {
+        if (pathOrAddress === '') {
+            const buffer = readFileSync(process.stdin.fd, 'utf-8').trim();
+            if (buffer !== '') return Promise.resolve(buffer);
+            throw new Error('No input from stdin');
+        }
+        return await promises.readFile(pathOrAddress, 'utf8');
+    };
+
+    /** @param {unknown} field */
+    const fromJSONField = field =>
+        field !== null && typeof field === 'object' && 'object' in field && typeof field['object'] === 'string'
+            ? field['object']
+            : typeof field === 'string'
+                ? field
+                : null;
+
     const tries = [
         async () => {
-            if (pathOrAddress === '') {
-                const buffer = readFileSync(process.stdin.fd, 'utf-8').trim();
-                if (buffer !== '') return Promise.resolve(buffer);
+            const text = await readInputFile();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (e){
+                return text;
             }
-            throw new Error('No input from stdin');
-        },
-        async () => {
-            const text = await promises.readFile(pathOrAddress, 'utf8');
-            if (pathOrAddress.endsWith('.json')) {
-                const { deployedBytecode, bytecode } = JSON.parse(text);
-                if (deployedBytecode !== undefined) {
-                    return deployedBytecode['object'] ?? deployedBytecode;
-                }
-                if (bytecode !== undefined) {
-                    return bytecode['object'] ?? bytecode;
-                }
-                throw new Error('Cannot find `deployedBytecode` in json file');
-            }
-            return text;
+            const { deployedBytecode, bytecode } = json;
+            const value = fromJSONField(deployedBytecode) ?? fromJSONField(bytecode);
+            if (value !== null)
+                return value;
+            throw new Error('Cannot find `deployedBytecode`|`bytecode` in json file');
         },
         () => promises.readFile(cachePath, 'utf8'),
         async () => {
