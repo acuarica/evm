@@ -70,14 +70,16 @@ export function compile(
         const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
         const path = `${basePath}/${fileName}-${hash}`;
 
+        if (context.test)
+            context.test.title += ` #${hash}`;
+
         try {
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
             if (!versionsLoaded.has(version)) {
                 context.timeout(context.timeout() + 5000);
-                if (context.test) {
+                if (context.test)
                     context.test.title += `--loads \`solc-${version}\``;
-                }
             }
             writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
         }
