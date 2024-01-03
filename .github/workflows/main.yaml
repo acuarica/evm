@@ -109,3 +109,4 @@ jobs:
       - run: yarn test
       - run: make dis
       - run: make sol
+      - run: make yul
