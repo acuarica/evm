@@ -1,23 +1,23 @@
 ARTIFACTS=$(wildcard .solc/v*/*.json)
 DISS=$(ARTIFACTS:.solc/%=.solc/%.dis)
-PNGS=$(ARTIFACTS:.solc/%=.solc/%.png)
 SOLS=$(ARTIFACTS:.solc/%=.solc/%.sol)
+YULS=$(ARTIFACTS:.solc/%=.solc/%.yul)
 
-.PHONY: all sol png huff clean
+.PHONY: all dis sol yul clean
 
-all: $(PNGS) $(SOLS)
+all: $(DISS) $(SOLS) ${YULS}
 dis: $(DISS)
 sol: $(SOLS)
-png: $(PNGS)
-
-%.png: %
-	bin/sevm.mjs cfg $* | dot -T png > $*.png
-
-%.sol: %
-	bin/sevm.mjs sol $* > $*.sol
+yul: $(YULS)
 
 %.dis: %
 	bin/sevm.mjs dis --no-color $* > $*.dis
 
+%.sol: %
+	bin/sevm.mjs sol $* > $*.sol
+
+%.yul: %
+	bin/sevm.mjs yul $* > $*.yul
+
 clean:
-	find .solc \( -name "*.sol" -or -name "*.png" \) -print -delete
+	find .solc \( -name "*.dis" -or -name "*.sol" -or -name "*.yul" \) -print -delete
