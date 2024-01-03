@@ -325,104 +325,59 @@ export class ControlFlowGraph {
             // console.log(this.doms);
         }
 
-        /**
-         *
-         * @param offset
-         */
-        function getDest(offset: Expr, from: number): Opcode {
-            const offset2 = evalExpr(offset);
-            if (!isBigInt(offset2)) {
-                throw new Error('Expected numeric offset, found' + offset.toString());
-            }
 
-            const dest = opcodes.find(o => o.offset === Number(offset2));
-            if (dest === undefined) {
-                throw new Error(
-                    `Expected opcode at (0x${offset2.toString(
-                        16
-                    )}) from JUMP or JUMPI instruction, but none was found. Coming PC ${from}`
-                );
-            }
+    }
 
-            if (dest.mnemonic !== 'JUMPDEST') {
-                throw new Error(
-                    'Expected `JUMPDEST` in JUMP destination, found' + formatOpcode(dest)
-                );
-            }
+}
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            (offset as any).isJumpDest = dest.pc;
-            return dest;
-        }
+export function dominatorTree({ blocks, entry, doms }: ControlFlowGraph): void {
+    doms[entry] = new Set([entry]);
 
-        /**
-         *
-         * @param from
-         * @param pc
-         * @param state
-         * @returns
-         */
-        function makeBranch(from: Branch, pc: number, state: State): Branch {
-            // const c = from.path.filter(p => p === pc && p !== from.pc);
-            // check(c.length <= 1, 'pc length ' + c.length.toString());
-            // if (c.length >= 1) {
-            //     const backEdgeKey = from.to(pc, state);
-            //     assert(
-            //         blockLists[backEdgeKey.pc] !== undefined,
-            //         'back key undef' + backEdgeKey + ' ' + from.path.join('->')
-            //     );
-
-            //     for (const block of blockLists[backEdgeKey.pc]) {
-            // console.log(block.key, backEdgeKey.key);
-            // if (block.key === backEdgeKey.key) {
-            // console.log('---',block.key, backEdgeKey.key);
-            // return backEdgeKey;
-            //         }
-            //     }
-            // }
-
-            const to = from.to(pc, state.clone());
-            // branches.push(to);
-            branches.unshift(to);
-            return to;
+    for (const { key } of Object.values(blocks)) {
+        if (key !== entry) {
+            doms[key] = new Set(Object.keys(blocks));
         }
     }
 
-    /**
-     *
-     */
-    public verify() {
-        const HALTS = ['STOP', 'RETURN', 'INVALID', 'JUMP', 'JUMPI', 'REVERT'];
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const [key0, { key }] of Object.entries(blocks)) {
+            assert(key0 === key);
+            assert(blocks[key] !== undefined);
 
-        for (const block of Object.values(this.blocks)) {
-            assert(!block.entry.state.halted);
+            if (key !== entry) {
+                if (blocks[key] === undefined) continue;
+
+                const ds = union(
+                    new Set([key]),
+                    intersect(blocks[key].preds.map(pred => doms[pred]))
+                );
+                if (!equal(ds, doms[key])) {
+                    doms[key] = ds;
+                    changed = true;
+                }
+            }
         }
+    }
 
-        const pcs: number[] = [];
-        for (const [, block] of Object.entries(this.blocks)) {
-            assert(block.opcodes.length > 0);
-            assert(block.opcodes.filter(opcode => HALTS.includes(opcode.mnemonic)).length <= 1);
-            assert(!block.entry.state.halted);
+    function union<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left, ...right]);
+    }
 
-            const last = block.stmts.at(-1);
-
-            assert(
-                (block.end.mnemonic === 'STOP' && last instanceof Stop) ||
-                    (block.end.mnemonic === 'RETURN' && last instanceof Return) ||
-                    (block.end.mnemonic === 'REVERT' && last instanceof Revert) ||
-                    (block.end.opcode === OPCODES.INVALID && last instanceof Invalid) ||
-                    (block.end.mnemonic === 'JUMP' &&
-                        last instanceof Jump &&
-                        last.destBranch.key in this.blocks) ||
-                    (block.end.mnemonic === 'JUMPI' &&
-                        (last instanceof Jumpi || last instanceof SigCase)) ||
-                    (!HALTS.includes(block.end.mnemonic) && last instanceof JumpDest),
-                block.end.mnemonic,
-                block.stmts
-            );
-
-            // assert(block.opcodes.filter(opcode => pcs.includes(opcode.pc)).length === 0);
-            pcs.push(...block.opcodes.map(opcode => opcode.pc));
+    function intersect<T>(sets: Set<T>[]) {
+        let result = sets[0];
+        for (let i = 1; i < sets.length; i++) {
+            result = _intersect(result, sets[i]);
         }
+        return result;
+    }
+
+    function _intersect<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left].filter(elem => right.has(elem)));
+    }
+
+    function equal<T>(left: Set<T>, right: Set<T>) {
+        return left.size === right.size && [...left].every(elem => right.has(elem));
     }
 }
