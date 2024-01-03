@@ -203,10 +203,8 @@ Commands:
   sevm dis <contract>       Disassemble the bytecode into Opcodes
   sevm cfg <contract>       Writes the cfg of the selected function in `dot` for
                             mat into standard output
-  sevm sol <contract>       Decompile the contract's bytecode into Solidity-like
-                             source code
-  sevm yul <contract>       Decompile the contract's bytecode into Yul-like sour
-                            ce code[3]
+  sevm sol <contract>       Decompile the contract into Solidity-like source
+  sevm yul <contract>       Decompile the contract into Yul-like source[3]
   sevm config               Shows cache path used to store downloaded bytecode
 
 Options:
