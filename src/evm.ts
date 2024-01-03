@@ -12,15 +12,15 @@ export interface Block<M> {
     /**
      * Where this block ends, exclusive.
      */
-    pcend: number;
+    readonly pcend: number;
     /**
      * The `Opcode`s decoded from `bytecode` augmented with its `Stack` trace.
      */
-    opcodes: {
-        opcode: Opcode<M>,
-        stack: Stack<Expr>
+    readonly opcodes: {
+        readonly opcode: Opcode<M>,
+        stack?: Stack<Expr>
     }[];
-    states: State<Inst, Expr>[];
+    readonly states: State<Inst, Expr>[];
 }
 
 /**
@@ -206,11 +206,14 @@ export class EVM<M extends string> {
 
             const [, halts, mnemonic] = this.step[opcode.opcode];
 
-            opcodes.push({ opcode, stack: state.stack.clone() });
+            const entry: Block<M>['opcodes'][number] = { opcode };
+            opcodes.push(entry);
 
             try {
-                if (!state.halted)
+                if (!state.halted) {
                     this.step[mnemonic](state, opcode, this.bytecode);
+                    entry.stack = state.stack.clone();
+                }
             } catch (err) {
                 if (!(err instanceof ExecError)) throw err;
 
