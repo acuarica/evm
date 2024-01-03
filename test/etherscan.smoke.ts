@@ -7,7 +7,7 @@ import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider }
 
 import { Contract, ERCIds, sol, type State, Shanghai } from 'sevm';
 import type { Expr, Inst, StaticCall, Throw } from 'sevm/ast';
-import 'sevm-4byte';
+import 'sevm/4byte';
 
 /**
  * Restricts the number of Etherscan contracts to test.
