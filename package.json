@@ -92,7 +92,7 @@
         "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/help.mjs README.md",
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "docs": "http-server docs",
-        "clean": "rm -r .solc/"
+        "clean": "rm -r .artifacts/"
     },
     "engines": {
         "node": ">=16.0.0"

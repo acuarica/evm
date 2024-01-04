@@ -822,7 +822,7 @@ event ${eventSelector(unknownEventSig)};
             const includesFF = (hash: string) => Buffer.from(hash, 'hex').includes(SELFDESTRUCT);
 
             const version = '0.5.5';
-            const randomDataPath = path.join('.solc', `${this.test!.parent!.title}.${version}.data`);
+            const randomDataPath = path.join('.artifacts', `${this.test!.parent!.title}.${version}.data`);
             const solTemplate = `contract Test { bytes32 constant data = "[randomData]"; }`;
 
             let randomData, metadata, bytecode;

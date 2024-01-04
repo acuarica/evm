@@ -1,7 +1,7 @@
-ARTIFACTS=$(wildcard .solc/v*/*.json)
-DISS=$(ARTIFACTS:.solc/%=.solc/%.dis)
-SOLS=$(ARTIFACTS:.solc/%=.solc/%.sol)
-YULS=$(ARTIFACTS:.solc/%=.solc/%.yul)
+ARTIFACTS=$(wildcard .artifacts/v*/*.json)
+DISS=$(ARTIFACTS:.artifacts/%=.artifacts/%.dis)
+SOLS=$(ARTIFACTS:.artifacts/%=.artifacts/%.sol)
+YULS=$(ARTIFACTS:.artifacts/%=.artifacts/%.yul)
 
 .PHONY: all dis sol yul clean
 
@@ -20,4 +20,4 @@ yul: $(YULS)
 	bin/sevm.mjs yul $* > $*.yul
 
 clean:
-	find .solc \( -name "*.dis" -or -name "*.sol" -or -name "*.yul" \) -print -delete
+	find .artifacts \( -name "*.dis" -or -name "*.sol" -or -name "*.yul" \) -print -delete

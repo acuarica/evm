@@ -62,9 +62,9 @@ export function compile(
             .replace(/[:^'()]/g, '_')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
 
-        const basePath = `.solc/v${version}`;
+        const basePath = `.artifacts/v${version}`;
         if (!existsSync(basePath)) {
-            mkdirSync(basePath);
+            mkdirSync(basePath, { recursive: true });
         }
 
         const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
