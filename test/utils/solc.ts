@@ -76,6 +76,9 @@ export function compile(
         try {
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
+            if (context.test)
+                context.test.title += ` 🛠️`;
+
             if (!versionsLoaded.has(version)) {
                 context.timeout(context.timeout() + 5000);
                 if (context.test)
