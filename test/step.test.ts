@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 
 import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub } from 'sevm/ast';
+import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub, Variable } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
+import * as ast from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
 
 const sizes = [...Array(16).keys()].map(i => i + 1);
@@ -517,7 +518,10 @@ describe('::step', function () {
             state.stack.push(new Val(2n));
             step.SSTORE(state);
 
-            expect(step.variables).to.have.keys('2');
+            expect(state.stmts).to.be.deep.equal([
+                new ast.SStore(new Val(2n), new Val(1n), new Variable(null, [new Val(1n)], 1))
+            ]);
+            expect(step.variables).to.have.keys([2n]);
         });
     });
 

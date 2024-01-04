@@ -42,7 +42,7 @@ describe('::ast', function () {
             F(new CallValue(), () => []),
             F(new CallDataLoad(new Val(24n)), expr => [expr.location]),
 
-            F(new SLoad(new Val(32n), {}), expr => [expr.location]),
+            F(new SLoad(new Val(32n), undefined), expr => [expr.slot]),
 
             F(new Sha3(new Val(32n), new Val(64n)), expr => [expr.offset, expr.size]),
             F(new Sha3(new Val(32n), new Val(64n), [new Val(1n), new Val(2n)]), expr => [expr.offset, expr.size, expr.args![0], expr.args![1]]),

@@ -41,7 +41,8 @@ contracts('internal', compile => {
                     new SStore(
                         new Sha3(new Val(-1n), new Val(-1n), [Props['msg.sender'], new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
-                        contract.variables
+                        undefined
+                        // contract.variables
                     )
                 );
                 expect(fn.stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -96,7 +97,8 @@ contracts('internal', compile => {
                     new Return(new Val(-1n), new Val(-1n), [
                         new SLoad(
                             new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
-                            contract.variables
+                            undefined
+                            // contract.variables
                         ),
                     ])
                 );

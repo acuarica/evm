@@ -82,7 +82,7 @@ describe('::evm', function () {
                 value = temp;
             }
         }`;
-        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this, {optimizer: {enabled:true}}).bytecode);
         // const main =
         // evm.start();
         const state = new State<Inst, Expr>();
@@ -475,7 +475,7 @@ event ${eventSelector(unknownEventSig)};
             const state = new State<Inst, Expr>();
             evm.run(0, state);
 
-            expect(evm.step.variables).to.be.have.keys('0', '1');
+            expect(evm.step.variables).to.be.have.keys([0n, 1n]);
 
             expect(yulStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
                 'mstore(0x40, 0x80)',
@@ -491,8 +491,8 @@ event ${eventSelector(unknownEventSig)};
             ]);
 
             expect(solStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
-                'var1 += 0x3;',
-                'var2 += 0xb;',
+                'var_1 += 0x3;',
+                'var_2 += 0xb;',
                 'return;',
             ]);
         });

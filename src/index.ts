@@ -38,7 +38,7 @@ export class Contract {
     readonly main: Stmt[];
 
     readonly events: IEvents = {};
-    readonly variables: IStore['variables'] = {};
+    readonly variables: IStore['variables'] = new Map();
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: Members['functionBranches'] = new Map();
     readonly errors: Throw[];
@@ -208,12 +208,19 @@ export class PublicFunction {
             const functionName = value.split('(')[0];
 
             if (this.isGetter()) {
-                const location = this.stmts[0].args[0].location.val.toString();
-                const variable = this.contract.variables[location];
-                this.contract.variables[this.selector] = new Variable(
-                    functionName,
-                    variable ? variable.types : []
-                );
+                const ret = this.stmts.at(-1) as Return & { args: [SLoad & { slot: Val }] };
+                const location = ret.args[0].slot.val;
+                const variable = this.contract.variables.get(location);
+                if (variable !== undefined) {
+                    variable.label = functionName;
+                } else {
+                    this.contract.variables.set(location, new Variable(functionName, [], this.contract.variables.size + 1));
+                }
+
+                // this.contract.variables[this.selector] = new Variable(
+                //     functionName,
+                //     variable ? variable.types : []
+                // );
             }
 
             if (this.isMappingGetter()) {
@@ -233,15 +240,16 @@ export class PublicFunction {
         }
     }
 
-    private isGetter(): this is { stmts: [Return & { args: [SLoad & { location: Val }] }] } {
-        const exit = this.stmts[0];
+    private isGetter(): this is { stmts: [...Stmt[], Return & { args: [SLoad & { slot: Val }] }] } {
+        const exit = this.stmts.at(-1)!;
         return (
-            this.stmts.length === 1 &&
+            this.stmts.length >= 1 &&
+            this.stmts.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
             exit.name === 'Return' &&
             exit.args !== undefined &&
             exit.args.length === 1 &&
             exit.args[0].tag === 'SLoad' &&
-            exit.args[0].location.isVal()
+            exit.args[0].slot.isVal()
         );
     }
 

@@ -91,12 +91,14 @@ function solExpr(expr: Expr): string {
             return `msg.sig == ${expr.selector}`;
         case 'CallValue':
             return 'msg.value';
-        case 'CallDataLoad':
-            return expr.location.isVal() && expr.location.val === 0n
+        case 'CallDataLoad': {
+            const location = expr.location;
+            return location.isVal() && location.val === 0n
                 ? 'msg.data'
-                : expr.location.isVal() && (expr.location.val - 4n) % 32n === 0n
-                    ? `_arg${(expr.location.val - 4n) / 32n}`
-                    : sol`msg.data[${expr.location}]`;
+                : location.isVal() && (location.val - 4n) % 32n === 0n
+                    ? `_arg${(location.val - 4n) / 32n}`
+                    : sol`msg.data[${location}]`;
+        }
         case 'Prop':
             return expr.symbol;
         case 'Fn':
@@ -144,16 +146,19 @@ function solExpr(expr: Expr): string {
         case 'DelegateCall':
             return sol`delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'SLoad': {
-            if (expr.location.isVal() && expr.location.val.toString() in expr.variables) {
-                const loc = expr.location.val.toString();
-                const label = expr.variables[loc].label;
+            // const slot = expr.slot.eval();
+            // if (slot.isVal() && expr.variable !== undefined) {
+            if (expr.variable !== undefined) {
+                // const loc = slot.val;
+                const label = expr.variable.label;
                 if (label) {
                     return label;
                 } else {
-                    return `var${Object.keys(expr.variables).indexOf(loc) + 1}`;
+                    // return `var${Object.keys(expr.variables).indexOf(loc) + 1}`;
+                    return `var_${expr.variable.index}`;
                 }
             } else {
-                return sol`storage[${expr.location}]`;
+                return sol`storage[${expr.slot}]`;
             }
         }
         case 'MappingLoad': {
@@ -223,19 +228,19 @@ function solInst(inst: Inst): string {
         case 'SigCase':
             return sol`case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore': {
-            const slot = inst.location.eval();
+            const slot = inst.slot.eval();
 
             const isLoad = (value: Expr) =>
-                value.tag === 'SLoad' && solExpr(value.location.eval()) === solExpr(slot);
+                value.tag === 'SLoad' && solExpr(value.slot.eval()) === solExpr(slot);
 
             let varName = sol`storage[${slot}]`;
-            if (slot.isVal() && slot.val.toString() in inst.variables) {
-                const loc = slot.val.toString();
-                const label = inst.variables[loc].label;
+            if (slot.isVal() && inst.variable !== undefined) {
+                const label = inst.variable.label;
                 if (label) {
                     varName = label;
                 } else {
-                    varName = `var${Object.keys(inst.variables).indexOf(loc) + 1}`;
+                    // varName = `var${[...inst.variables.keys()].indexOf(loc) + 1}__${inst.variables.get(loc)!.index}`;
+                    varName = `var_${inst.variable.index}`;
                 }
             }
 
@@ -383,8 +388,8 @@ export function solEvents(events: IEvents, spaces = 0) {
             if (params) {
                 text += eventName + '(';
                 text += params.split(',').map((param, i) =>
-                        i < event.indexedCount ? `${param} indexed _arg${i}` : `${param} _arg${i}`
-                    )
+                    i < event.indexedCount ? `${param} indexed _arg${i}` : `${param} _arg${i}`
+                )
                     .join(', ');
                 text += ')';
             } else {
@@ -404,7 +409,7 @@ export function solEvents(events: IEvents, spaces = 0) {
  */
 export function solVars(variables: IStore['variables']) {
     let output = '';
-    Object.entries(variables).forEach(([hash, variable], index) => {
+    [...variables.entries()].forEach(([hash, variable], index) => {
         const types: string[] = variable.types
             .map(expr => expr.eval())
             .map(expr => (expr.isVal() ? 'bigint' : expr.type ?? ''))
@@ -412,7 +417,7 @@ export function solVars(variables: IStore['variables']) {
         if (types.length === 0) {
             types.push('unknown');
         }
-        const name = variable.label ? ` public ${variable.label}` : ` var${index + 1}`;
+        const name = variable.label ? ` public ${variable.label}` : ` var${index + 1}__${variable.index}`;
         output += [...new Set(types)].join('|') + name + '; // Slot #' + hash;
         output += '\n';
     });

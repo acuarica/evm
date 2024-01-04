@@ -2,9 +2,9 @@ import { type Expr, type IInst, Tag } from '.';
 
 export interface IStore {
     /**
-     * vars definition
+     * Variables definition
      */
-    readonly variables: { [location: string]: Variable };
+    readonly variables: Map<bigint, Variable>;
 
     /**
      * mappings definition
@@ -23,7 +23,11 @@ export interface IStore {
  *
  */
 export class Variable {
-    constructor(public label: string | undefined, readonly types: Expr[]) {}
+    constructor(
+        public label: string | null,
+        readonly types: Expr[],
+        readonly index: number
+    ) { }
 }
 
 export class MappingStore implements IInst {
@@ -56,22 +60,13 @@ export class SStore {
     readonly name = 'SStore';
 
     constructor(
-        readonly location: Expr,
+        readonly slot: Expr,
         readonly data: Expr,
-        readonly variables: IStore['variables']
-    ) {
-        // if (isVal(this.location)) {
-        //     const loc = this.location.toString();
-        //     if (loc in this.variables) {
-        //         this.variables[loc].types.push(this.data.type);
-        //     } else {
-        //         this.variables[loc] = new Variable(undefined, [this.data.type]);
-        //     }
-        // }
-    }
+        readonly variable: Variable | undefined,
+    ) { }
 
     eval() {
-        return new SStore(this.location.eval(), this.data.eval(), this.variables);
+        return new SStore(this.slot.eval(), this.data.eval(), this.variable);
     }
 }
 
@@ -103,10 +98,10 @@ export class MappingLoad extends Tag {
 
 export class SLoad extends Tag {
     readonly tag = 'SLoad';
-    constructor(readonly location: Expr, readonly variables: IStore['variables']) {
+    constructor(readonly slot: Expr, readonly variable: Variable | undefined) {
         super();
     }
     eval(): Expr {
-        return new SLoad(this.location.eval(), this.variables);
+        return new SLoad(this.slot.eval(), this.variable);
     }
 }

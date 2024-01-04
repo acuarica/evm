@@ -105,7 +105,7 @@ export class Members {
 
     readonly events: IEvents = {};
 
-    readonly variables: IStore['variables'] = {};
+    readonly variables: IStore['variables'] = new Map();
 
     readonly mappings: IStore['mappings'] = {};
 
@@ -113,7 +113,6 @@ export class Members {
      * Store selectors', _i.e._, public and external `function`s program counter entry.
      */
     readonly functionBranches: Map<string, { pc: number, state: State<Inst, Expr> }> = new Map();
-
 }
 
 /**
@@ -378,33 +377,36 @@ function memArgs<T>(
     })(offset.eval(), size.eval()));
 }
 
+const getVar = (slot: Expr, values: Expr[], self: IStore) => {
+    let variable;
+    if (slot.isVal()) {
+        variable = self.variables.get(slot.val);
+        if (variable === undefined) {
+            variable = new Variable(null, values, self.variables.size + 1);
+            self.variables.set(slot.val, variable);
+        } else {
+            variable.types.push(...values);
+        }
+    }
+    return variable;
+};
+
 const STORAGE = {
     SLOAD: [0x54, function sload(this: IStore, { stack }) {
-        const loc = stack.pop();
+        const slot = stack.pop();
 
-        if (loc.tag === 'Sha3') {
-            const [base, parts] = parseSha3(loc);
-            if (base !== undefined && parts.length > 0) {
-                stack.push(new MappingLoad(loc, this.mappings, base, parts));
-            } else {
-                stack.push(new SLoad(loc, this.variables));
-            }
-        } else if (loc.tag === 'Add' && loc.left.tag === 'Sha3' && loc.right.isVal()) {
-            const [base, parts] = parseSha3(loc.left);
-            if (base !== undefined && parts.length > 0) {
-                stack.push(new MappingLoad(loc, this.mappings, base, parts, loc.right.val));
-            } else {
-                stack.push(new SLoad(loc, this.variables));
-            }
-        } else if (loc.tag === 'Add' && loc.left.isVal() && loc.right.tag === 'Sha3') {
-            const [base, parts] = parseSha3(loc.right);
-            if (base !== undefined && parts.length > 0) {
-                stack.push(new MappingLoad(loc, this.mappings, base, parts, loc.left.val));
-            } else {
-                stack.push(new SLoad(loc, this.variables));
-            }
+        let base: number | undefined, parts: Expr[];
+        const check = (slot: Sha3): boolean =>
+            ([base, parts] = parseSha3(slot), base !== undefined && parts.length > 0);
+
+        if (slot.tag === 'Sha3' && check(slot)) {
+            stack.push(new MappingLoad(slot, this.mappings, base!, parts!));
+        } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal() && check(slot.left)) {
+            stack.push(new MappingLoad(slot, this.mappings, base!, parts!, slot.right.val));
+        } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3' && check(slot.right)) {
+            stack.push(new MappingLoad(slot, this.mappings, base!, parts!, slot.left.val));
         } else {
-            stack.push(new SLoad(loc, this.variables));
+            stack.push(new SLoad(slot, getVar(slot.eval(), [], this)));
         }
     }],
 
@@ -425,17 +427,7 @@ const STORAGE = {
         } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3' && check(slot.right)) {
             stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value, slot.left.val));
         } else {
-            ((slot) => {
-                if (slot.is(ast.Val)) {
-                    const key = slot.val.toString();
-                    if (key in this.variables) {
-                        this.variables[key].types.push(value);
-                    } else {
-                        this.variables[key] = new Variable(undefined, [value]);
-                    }
-                }
-            })(slot.eval());
-            stmts.push(new SStore(slot, value, this.variables));
+            stmts.push(new SStore(slot, value, getVar(slot.eval(), [value], this)));
         }
     }],
 } satisfies { [m: string]: readonly [opcode: number, (state: State<Inst, Expr>) => void] };
@@ -468,9 +460,11 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     }
     const destpc = Number(offset2.val);
     if (bytecode[destpc] === JUMPDEST) {
-        // TODO: review is this cast is sound
-        (offset as Val).jumpDest = destpc;
-        return destpc;
+        if (offset instanceof Val || offset.is(Local)) {
+            offset2.jumpDest = destpc;
+            return destpc;
+        }
+        throw new Error('getjumpdest: offset is not val');
     } else {
         throw new ExecError(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
             ? `'${destpc}' is out-of-bounds`
@@ -479,18 +473,18 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     }
 }
 
+const zip = Object.fromEntries;
+
 const FrontierStep = {
     /* Stack operations */
     POP: [0x50, ({ stack }: Operand<Expr>) => stack.pop()],
-    ...Object.fromEntries([...Array(32).keys()].map(size => [
-        `PUSH${(size + 1 as Size<32>)}`, [
-            { opcode: 0x60 + size, size: size + 1 },
-            ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
-        ]
-    ] as const)),
-    ...Object.fromEntries([...Array(16).keys()].map(position => [
-        `DUP${(position + 1 as Size<16>)}`,
-        [0x80 + position, (state: State<Inst, Expr>) => {
+    ...zip([...Array(32).keys()].map(size => [`PUSH${(size + 1 as Size<32>)}`, [
+        { opcode: 0x60 + size, size: size + 1 },
+        ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
+    ]] as const)),
+    ...zip([...Array(16).keys()].map(position => [`DUP${(position + 1 as Size<16>)}`, [
+        0x80 + position,
+        (state: State<Inst, Expr>) => {
             if (position >= state.stack.values.length) {
                 throw new ExecError('Invalid duplication operation, position was not found');
             }
@@ -504,15 +498,15 @@ const FrontierStep = {
                 expr.nrefs++;
             }
             state.stack.push(state.stack.values[position]);
-        }]
-    ] as const)),
-    ...Object.fromEntries([...Array(16).keys()].map(position => [
+        }
+    ]] as const)),
+    ...zip([...Array(16).keys()].map(position => [
         `SWAP${(position + 1 as Size<16>)}`,
         [0x90 + position, ({ stack }: Operand<Expr>) => stack.swap(position + 1)]
     ] as const)),
 
     /* ALU operations */
-    ...Object.fromEntries(([
+    ...zip(([
         ['ADD', 0x01, Add],
         ['MUL', 0x02, Mul],
         ['SUB', 0x03, Sub],
@@ -537,7 +531,7 @@ const FrontierStep = {
 
     ...SPECIAL,
     PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
-    ...Object.fromEntries(Object.entries(FNS).map(([m, [, , o]]) => [m, [
+    ...zip(Object.entries(FNS).map(([m, [, , o]]) => [m, [
         o, ({ stack }) => stack.push(new Fn(m, stack.pop()))
     ]])),
     ...DATACOPY,
@@ -637,9 +631,8 @@ const FrontierStep = {
     INVALID: [{ opcode: 0xfe, halts: true }, (state, op) => state.halt(new ast.Invalid(op.opcode))],
 
     /* Log operations */
-    ...Object.fromEntries(([0, 1, 2, 3, 4] as const).map(ntopics => [
-        `LOG${ntopics}` as const,
-        [0xa0 + ntopics, function log(this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
+    ...zip(([0, 1, 2, 3, 4] as const).map(ntopics => [`LOG${ntopics}` as const, [
+        0xa0 + ntopics, function log(this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
             const offset = stack.pop();
             const size = stack.pop();
 

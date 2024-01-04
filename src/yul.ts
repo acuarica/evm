@@ -20,7 +20,8 @@ export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string 
 function yulExpr(expr: Expr): string {
     switch (expr.tag) {
         case 'Val':
-            return `0x${expr.val.toString(16)}`;
+            // return `0x${expr.val.toString(16)}`;
+            return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
         case 'Local':
             return `local${expr.index}`;
         case 'Add':
@@ -85,7 +86,7 @@ function yulExpr(expr: Expr): string {
         case 'DelegateCall':
             return yul`delegatecall(${expr.gas},${expr.address},${expr.memoryStart},${expr.memoryLength},${expr.outputStart},${expr.outputLength})`;
         case 'SLoad':
-            return yul`sload(${expr.location})`;
+            return yul`sload(${expr.slot})`;
         case 'MappingLoad':
             return yul`sload(${expr.location}/*${yulMapArgs(expr)}*/)`;
     }
@@ -120,7 +121,7 @@ function yulInst(inst: Inst): string {
         case 'SigCase':
             return yul`case when ${inst.condition} goto ${inst.offset} or fall ${inst.fallBranch.pc}`;
         case 'SStore':
-            return yul`sstore(${inst.location}, ${inst.data})`;
+            return yul`sstore(${inst.slot}, ${inst.data})`;
         case 'MappingStore':
             return yul`sstore(${inst.slot}, ${inst.data}) /*${inst.location}${yulMapArgs(inst)}*/`;
         case 'Throw':
