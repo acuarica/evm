@@ -53,27 +53,26 @@
     ],
     "dependencies": {
         "ansi-colors": "^4.1.3",
+        "cbor-js": "^0.1.0",
         "env-paths": "^3.0.0",
         "ethers": "^6.9.0",
         "yargs": "^17.7.2"
     },
     "devDependencies": {
+        "@jsdevtools/chai-exec": "^2.1.1",
         "@types/chai": "^4.3.3",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.8.6",
         "@types/yargs": "^17.0.32",
         "@typescript-eslint/eslint-plugin": "^6.7.5",
         "@typescript-eslint/parser": "^6.7.5",
+        "c8": "^9.0.0",
         "chai": "^4.3.6",
         "eslint": "^8.51.0",
         "eslint-plugin-chai-expect": "^3.0.0",
         "eslint-plugin-mocha": "^10.1.0",
         "http-server": "^14.1.1",
-        "husky": "^8.0.1",
         "mocha": "^10.0.1",
-        "nyc": "^15.1.0",
-        "prettier": "^2.8.4",
-        "pretty-quick": "^3.1.3",
         "solc": "^0.8.21",
         "typedoc": "^0.25.2",
         "typedoc-plugin-extras": "^3.0.0",
@@ -82,21 +81,18 @@
         "webpack-cli": "^4.10.0"
     },
     "scripts": {
-        "prepare": "husky install",
         "compile": "tsc",
         "lint": "eslint .",
         "test": "yarn compile && mocha",
         "test:smoke": "mocha 'test/*.smoke.js'",
-        "coverage": "yarn compile && nyc mocha",
+        "coverage": "yarn compile && c8 mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
         "make:4byte": "node scripts/4byte.mjs",
         "make:help": "bin/sevm.mjs 2>&1 | MARKER='sevm --help' scripts/help.mjs README.md",
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
-        "prettier": "prettier --write .",
-        "prettier:staged": "pretty-quick --staged",
         "docs": "http-server docs",
-        "clean": "rm -r .solc/"
+        "clean": "rm -r .artifacts/"
     },
     "engines": {
         "node": ">=16.0.0"

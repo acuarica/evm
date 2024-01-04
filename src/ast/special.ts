@@ -1,57 +1,16 @@
-import { mapValues } from '../object';
-import { type Expr, Tag } from './expr';
-
-const BLOCK = {
-    BASEFEE: ['basefee', 'uint'],
-    COINBASE: ['coinbase', 'address payable'],
-    TIMESTAMP: ['timestamp', 'uint'],
-    NUMBER: ['number', 'uint'],
-    DIFFICULTY: ['difficulty', 'uint'],
-    // prevrandao
-    GASLIMIT: ['gaslimit', 'uint'],
-    CHAINID: ['chainid', 'uint'],
-} as const;
-
-const MSG = {
-    CALLER: ['sender', 'address'],
-    CALLDATASIZE: ['data.length', 'uint'],
-} as const;
-
-const TX = {
-    ORIGIN: ['origin', 'address'],
-    GASPRICE: ['gasprice', 'uint'],
-} as const;
-
-type Props<K extends string = string> = { [k in K]: readonly [string, string] };
-
-const applyPrefix = <P extends Props, O extends string>(props: P, obj: O) =>
-    mapValues(props, ([field, type]) => [`${obj}.${field}`, type]) as {
-        [prop in keyof P]: readonly [`${O}.${P[prop][0]}`, P[prop][1]];
-    };
-
-const PROPS = {
-    ADDRESS: ['address(this)', 'address'],
-    CODESIZE: ['codesize()', 'uint'],
-    RETURNDATASIZE: ['returndatasize()', 'uint'],
-    ...applyPrefix(BLOCK, 'block'),
-    ...applyPrefix(MSG, 'msg'),
-    ...applyPrefix(TX, 'tx'),
-    SELFBALANCE: ['address(this).balance', 'uint'],
-    MSIZE: ['msize()', 'uint'],
-    GAS: ['gasleft()', 'uint'],
-} as const;
+import { type Expr, Tag } from '.';
+import type { Type } from '../type';
 
 /**
- * https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
+ * Represents a global Solidity built-in property.
+ * 
+ * @see https://docs.soliditylang.org/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 export class Prop extends Tag {
     readonly tag = 'Prop';
-    readonly value: (typeof PROPS)[keyof typeof PROPS][0];
 
-    constructor([value, type]: (typeof PROPS)[keyof typeof PROPS]) {
+    constructor(readonly symbol: string, override readonly type: Type) {
         super();
-        this.value = value;
-        this.type = type;
     }
 
     eval(): Expr {
@@ -59,25 +18,52 @@ export class Prop extends Tag {
     }
 }
 
-export const Info = mapValues(PROPS, info => new Prop(info));
+const prop = <S extends string>(prop: readonly [S, Type]) =>
+    [prop[0], new Prop(prop[0], prop[1])] as const;
 
-export const Block = Object.fromEntries(
-    Object.entries(BLOCK).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
-);
+const applyPrefix = <const S extends string, const O extends string>(
+    props: readonly (readonly [S, Type])[], obj: O
+) => props.map(([field, type]) => [`${obj}.${field}`, type] as const);
 
-export const Msg = Object.fromEntries(
-    Object.entries(MSG).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
-);
-
-export const Tx = Object.fromEntries(
-    Object.entries(TX).map(([mnemonic, [field, _type]]) => [field, Info[mnemonic]])
+/**
+ * A collection of _Block and Transaction Properties_ defined as `Prop`.
+ * 
+ * @see https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties
+ * @see {@link Prop}
+ */
+export const Props = Object.assign(
+    Object.fromEntries(([
+        ['address(this)', 'address'],
+        ['codesize()', 'uint'],
+        ['returndatasize()', 'uint'],
+        ['address(this).balance', 'uint'],
+        ['gasleft()', 'uint'],
+    ] as const).map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['basefee', 'uint'],
+        ['coinbase', 'address payable'],
+        ['timestamp', 'uint'],
+        ['number', 'uint'],
+        ['difficulty', 'uint'],
+        ['gaslimit', 'uint'],
+        ['chainid', 'uint'],
+        ['prevrandao', 'uint'],
+    ] as const, 'block').map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['sender', 'address'],
+        ['data.length', 'uint'],
+    ] as const, 'msg').map(prop)),
+    Object.fromEntries(applyPrefix([
+        ['origin', 'address'],
+        ['gasprice', 'uint'],
+    ] as const, 'tx').map(prop)),
 );
 
 export const FNS = {
-    BALANCE: [(address: string) => `${address}.balance`, 'uint256'],
-    EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256'],
-    EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32'],
-    BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32'],
+    BALANCE: [(address: string) => `${address}.balance`, 'uint256', 0x31],
+    EXTCODESIZE: [(address: string) => `address(${address}).code.length`, 'uint256', 0x3b],
+    EXTCODEHASH: [(address: string) => `keccak256(address(${address}).code)`, 'bytes32', 0x3f],
+    BLOCKHASH: [(blockNumber: string) => `blockhash(${blockNumber})`, 'bytes32', 0x40],
 } as const;
 
 export class Fn extends Tag {
@@ -98,7 +84,8 @@ export class DataCopy extends Tag {
         readonly kind: 'calldatacopy' | 'codecopy' | 'extcodecopy' | 'returndatacopy',
         readonly offset: Expr,
         readonly size: Expr,
-        readonly address?: Expr
+        readonly address?: Expr,
+        readonly bytecode?: Uint8Array,
     ) {
         super();
     }
@@ -124,7 +111,8 @@ export class CallDataLoad extends Tag {
         super();
     }
     eval(): Expr {
-        this.location = this.location.eval();
-        return this;
+        return new CallDataLoad(this.location.eval());
+        // this.location = this.location.eval();
+        // return this;
     }
 }

@@ -30,7 +30,7 @@ export class Stack<in out E> {
      */
     push(elem: E): void | never {
         if (this.values.length >= 1024) {
-            throw new Error('Stack too deep');
+            throw new ExecError('Stack too deep');
         }
 
         this.values.unshift(elem);
@@ -44,31 +44,13 @@ export class Stack<in out E> {
      */
     pop(): E | never {
         if (this.values.length === 0) {
-            throw new Error('POP with empty stack');
+            throw new ExecError('POP with empty stack');
         }
 
         // The non-null assertion operator `!` is needed here because the
         // guard `length === 0` does not track array's emptiness.
         // See https://github.com/microsoft/TypeScript/issues/30406.
         return this.values.shift()!;
-    }
-
-    /**
-     * Duplicates the element at `position` by inserting it at the top of the stack.
-     *
-     * `position` must be in the range [0, 16) and the element at `position` must exist.
-     *
-     * @param position the position of the element to be duplicated.
-     * @throws `Error` when `position` is not in the range [0, 16) or the element at `position` does not exist in this `Stack`.
-     */
-    dup(position: number): void | never {
-        if (position < 0 || position > 15) {
-            throw new Error('Unsupported position for duplication operation');
-        } else if (!(position in this.values)) {
-            throw new Error('Invalid duplication operation, position was not found');
-        }
-
-        this.push(this.values[position]!);
     }
 
     /**
@@ -79,9 +61,9 @@ export class Stack<in out E> {
      */
     swap(secondPosition: number): void | never {
         if (secondPosition < 1 || secondPosition > 16) {
-            throw new Error('Unsupported position for swap operation');
+            throw new ExecError('Unsupported position for swap operation');
         } else if (!(secondPosition in this.values)) {
-            throw new Error('Invalid swap operation, position was not found');
+            throw new ExecError('Position not found for swap operation,');
         }
 
         const firstValue = this.values[0]!;
@@ -120,8 +102,13 @@ export class State<S, E> {
      *
      * @param stack
      * @param memory
+     * @param nlocals
      */
-    constructor(readonly stack = new Stack<E>(), readonly memory: { [location: number]: E } = {}) {}
+    constructor(
+        readonly stack = new Stack<E>(),
+        readonly memory: { [location: number]: E } = {},
+        public nlocals = 0
+    ) {}
 
     /**
      * Indicates whether this `State` has been halted.
@@ -146,6 +133,10 @@ export class State<S, E> {
      * @param last The `S` that halts this `State`.
      */
     halt(last: S): void {
+        if (this._halted) {
+            throw new ExecError('State already halted');
+        }
+
         this.stmts.push(last);
         this._halted = true;
     }
@@ -163,11 +154,23 @@ export class State<S, E> {
      * @returns a new `State` detached from this one.
      */
     clone(): State<S, E> {
-        return new State(this.stack.clone(), { ...this.memory });
+        return new State(this.stack.clone(), { ...this.memory }, this.nlocals);
     }
 }
 
 /**
- * Represents the volatile memory of `State`, _i.e._, its `stack` and `memory`.
+ * Represents the operand `stack` of the `State`.
+ */
+export type Operand<E> = Pick<State<never, E>, 'stack'>;
+
+/**
+ * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
  */
 export type Ram<E> = Pick<State<never, E>, 'stack' | 'memory'>;
+
+/**
+ * Represents an error due to an invalid symbolic state execution.
+ */
+export class ExecError extends Error {
+
+}

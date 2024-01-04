@@ -5,10 +5,12 @@ declare global {
     interface ObjectConstructor {
         keys<K extends string>(o: { [k in K]: unknown }): K[];
 
-        entries<K extends string, V>(o: { [k in K]: V }): [K, V][];
+        entries<K extends keyof T & string, T extends { [k in K]: T[k] }>(
+            o: T
+        ): [keyof T, T[keyof T]][];
 
-        fromEntries<K extends string, V>(entries: Iterable<readonly [K, V]>): { [k in K]: V };
+        fromEntries<K, V>(entries: Iterable<readonly [K, V]>): { [k in K]: V };
     }
 }
 
-export {};
+export { };

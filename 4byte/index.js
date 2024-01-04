@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * This module provides a fair database of selectors for both functions and events.
  *
@@ -12,20 +11,25 @@
  * @packageDocumentation
  */
 /* eslint-env node */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const { Contract } = require('sevm');
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore to avoid `has no default export` due to module's size
-const functionHashes = require('./functionHashes.min.js');
-const eventHashes = require('./eventHashes.min.js');
+/**@type {{[hash: string]: string}} */
+// @ts-ignore to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
+const functionHashes = require('./functionHashes.min.json');
+
+/**@type {{[hash: string]: string}} */
+// @ts-ignore to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
+const eventHashes = require('./eventHashes.min.json');
 
 /**
  * @param {Contract} contract
  * @returns {Contract}
  */
 function patch(contract) {
-    for (const [topic, event] of Object.entries(contract.evm.events)) {
+    for (const [topic, event] of Object.entries(contract.events)) {
         if (topic in eventHashes) {
             event.sig = eventHashes[topic];
         }
@@ -33,8 +37,6 @@ function patch(contract) {
 
     for (const [selector, fn] of Object.entries(contract.functions)) {
         if (selector in functionHashes) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
             fn.label = functionHashes[selector];
         }
     }

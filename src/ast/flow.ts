@@ -1,13 +1,13 @@
 import type { State } from '../state';
 
-import type { Inst, Expr, IInst } from './expr';
-import type { Sig } from './logic';
+import type { Inst, Expr, IInst } from '.';
+import type { Sig } from './alu';
 
 /**
  * Represents a jump from one `State` to another from the given `pc`.
  */
 export class Branch {
-    constructor(readonly pc: number, readonly state: State<Inst, Expr>) {}
+    constructor(readonly pc: number, public state: State<Inst, Expr>) {}
 
     static make(pc: number, state: State<Inst, Expr>) {
         return new Branch(pc, state.clone());

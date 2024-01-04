@@ -1,23 +1,23 @@
-ARTIFACTS=$(wildcard .solc/v*/*.json)
-PNGS=$(ARTIFACTS:.solc/%=.solc/%.png)
-SOLS=$(ARTIFACTS:.solc/%=.solc/%.sol)
-HUFF=$(ARTIFACTS:.solc/%=.solc/%.huff)
+ARTIFACTS=$(wildcard .artifacts/v*/*.json)
+DISS=$(ARTIFACTS:.artifacts/%=.artifacts/%.dis)
+SOLS=$(ARTIFACTS:.artifacts/%=.artifacts/%.sol)
+YULS=$(ARTIFACTS:.artifacts/%=.artifacts/%.yul)
 
-.PHONY: all sol png huff clean
+.PHONY: all dis sol yul clean
 
-all: $(PNGS) $(SOLS) $(HUFF)
+all: $(DISS) $(SOLS) ${YULS}
+dis: $(DISS)
 sol: $(SOLS)
-png: $(PNGS)
-huff: $(HUFF)
+yul: $(YULS)
 
-%.png: %
-	scripts/cfg.mjs $* | dot -T png > $*.png
+%.dis: %
+	bin/sevm.mjs dis --no-color $* > $*.dis
 
 %.sol: %
-	scripts/sol.mjs $* > $*.sol
+	bin/sevm.mjs sol $* > $*.sol
 
-%.huff: %
-	scripts/dis.mjs $* > $*.huff
+%.yul: %
+	bin/sevm.mjs yul $* > $*.yul
 
 clean:
-	find .solc \( -name "*.sol" -or -name "*.png" -or -name "*.huff" \) -print -delete
+	find .artifacts \( -name "*.dis" -or -name "*.sol" -or -name "*.yul" \) -print -delete

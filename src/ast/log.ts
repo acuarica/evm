@@ -1,4 +1,4 @@
-import { type Expr, type IInst } from './expr';
+import { evalE, type Expr, type IInst } from '.';
 
 /**
  * Events found through `LOG` instructions.
@@ -29,8 +29,9 @@ export class Log implements IInst {
 
     constructor(
         readonly event: IEvents[string] | undefined,
+        readonly offset: Expr,
+        readonly size: Expr,
         readonly topics: Expr[],
-        readonly mem: { offset: Expr; size: Expr },
         readonly args?: Expr[]
     ) {}
 
@@ -44,9 +45,11 @@ export class Log implements IInst {
     eval() {
         return new Log(
             this.event,
-            this.topics.map(e => e.eval()),
-            { offset: this.mem.offset.eval(), size: this.mem.size.eval() },
-            this.args?.map(e => e.eval())
+            this.offset.eval(),
+            this.size.eval(),
+            this.topics.map(evalE),
+            this.args?.map(evalE)
+            // this.args
         );
     }
 }

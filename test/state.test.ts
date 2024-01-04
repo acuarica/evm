@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-import { Stack, State } from 'sevm';
+import { ExecError, Stack, State } from 'sevm';
 
-describe('state', function () {
+describe('::state', function () {
     describe('Stack', function () {
         it('should create a `new` instance with an empty stack', function () {
             const stack = new Stack<never>();
@@ -28,31 +28,7 @@ describe('state', function () {
             expect(stack.values).to.be.deep.equal([1]);
             expect(stack.pop()).to.be.equal(1);
             expect(stack.values).to.be.deep.equal([]);
-            expect(() => stack.pop()).to.throw(Error, 'POP with empty stack');
-        });
-
-        it('should `dup`licate successfully', function () {
-            const stack = new Stack<string>();
-            stack.push('x');
-            stack.push('y');
-            stack.push('z');
-            expect(stack.values).to.be.deep.equal(['z', 'y', 'x']);
-            stack.dup(0);
-            expect(stack.values).to.be.deep.equal(['z', 'z', 'y', 'x']);
-            stack.dup(3);
-            expect(stack.values).to.be.deep.equal(['x', 'z', 'z', 'y', 'x']);
-            expect(() => stack.dup(-1)).to.throw(
-                Error,
-                'Unsupported position for duplication operation'
-            );
-            expect(() => stack.dup(16)).to.throw(
-                Error,
-                'Unsupported position for duplication operation'
-            );
-            expect(() => stack.dup(5)).to.throw(
-                Error,
-                'Invalid duplication operation, position was not found'
-            );
+            expect(() => stack.pop()).to.throw(ExecError, 'POP with empty stack');
         });
 
         it('should `swap` successfully', function () {
@@ -65,12 +41,9 @@ describe('state', function () {
             expect(stack.values).to.be.deep.equal(['b', 'c', 'a']);
             stack.swap(2);
             expect(stack.values).to.be.deep.equal(['a', 'c', 'b']);
-            expect(() => stack.swap(0)).to.throw(Error, 'Unsupported position for swap operation');
-            expect(() => stack.swap(17)).to.throw(Error, 'Unsupported position for swap operation');
-            expect(() => stack.swap(3)).to.throw(
-                Error,
-                'Invalid swap operation, position was not found'
-            );
+            expect(() => stack.swap(0)).to.throw(ExecError, 'Unsupported position for swap operation');
+            expect(() => stack.swap(17)).to.throw(ExecError, 'Unsupported position for swap operation');
+            expect(() => stack.swap(3)).to.throw(ExecError, 'Position not found for swap operation');
         });
 
         it('should `clone` successfully', function () {
@@ -90,7 +63,7 @@ describe('state', function () {
                 stack.push(1);
             }
 
-            expect(() => stack.push(1)).to.throw(Error, 'Stack too deep');
+            expect(() => stack.push(1)).to.throw(ExecError, 'Stack too deep');
         });
     });
 
@@ -100,14 +73,17 @@ describe('state', function () {
             expect(state.halted).to.be.false;
             expect(state.stmts).to.be.empty;
             expect(state.memory).to.be.empty;
+            expect(state.nlocals).to.be.equal(0);
 
             state.memory[0] = 1;
+            state.nlocals += 3;
             const clone = state.clone();
 
             state.memory[1] = 2;
 
             expect(state.memory).to.have.keys([0, 1]);
             expect(clone.memory).to.have.keys([0]);
+            expect(clone.nlocals).to.be.equal(3);
         });
 
         it('should `clone` a state while aliasing its contents', function () {

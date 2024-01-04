@@ -5,11 +5,13 @@
         "lib": ["es2020"],
         "rootDir": ".",
         "outDir": "dist",
+        "checkJs": true,
         "incremental": true,
         "sourceMap": true,
         "isolatedModules": true,
         "declaration": true,
         "strict": true,
+        "skipLibCheck": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
@@ -19,5 +21,6 @@
         "noPropertyAccessFromIndexSignature": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true
-    }
+    },
+    "include": ["./4byte", "./bin", "./examples", "./scripts", "./src", "./test", "./types"]
 }

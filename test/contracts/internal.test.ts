@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { Contract, Require } from 'sevm';
-import { Add, CallDataLoad, Msg, Return, SLoad, SStore, Sha3, Stop, Val } from 'sevm/ast';
+import { Contract } from 'sevm';
+import { Add, CallDataLoad, Props, Require, Return, SLoad, SStore, Sha3, Stop, Val } from 'sevm/ast';
 
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
@@ -39,9 +39,10 @@ contracts('internal', compile => {
 
                 expect(fn.stmts.at(-2)).to.be.deep.equal(
                     new SStore(
-                        new Sha3(new Val(-1n), new Val(-1n), [Msg.sender, new Val(0n)]),
+                        new Sha3(new Val(-1n), new Val(-1n), [Props['msg.sender'], new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
-                        contract.evm.variables
+                        undefined
+                        // contract.variables
                     )
                 );
                 expect(fn.stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -49,12 +50,12 @@ contracts('internal', compile => {
         });
 
         it('should not have `mappings` nor `variables`', function () {
-            expect(Object.keys(contract.evm.mappings)).to.have.length(1);
-            expect(Object.keys(contract.evm.variables)).to.have.length(0);
+            expect(Object.keys(contract.mappings)).to.have.length(1);
+            expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.not.match(/return msg.sender;/);
             expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 3\)/);
             expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 5\)/);
@@ -81,7 +82,7 @@ contracts('internal', compile => {
         });
 
         [
-            { sig: 'getForSender()', value: Msg.sender },
+            { sig: 'getForSender()', value: Props['msg.sender'] },
             { sig: 'getForArg(address)', value: new CallDataLoad(new Val(4n)) },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
@@ -96,7 +97,8 @@ contracts('internal', compile => {
                     new Return(new Val(-1n), new Val(-1n), [
                         new SLoad(
                             new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
-                            contract.evm.variables
+                            undefined
+                            // contract.variables
                         ),
                     ])
                 );
@@ -104,12 +106,12 @@ contracts('internal', compile => {
         });
 
         it('should not have `mappings` nor `variables`', function () {
-            expect(Object.keys(contract.evm.mappings)).to.have.length(1);
-            expect(Object.keys(contract.evm.variables)).to.have.length(0);
+            expect(Object.keys(contract.mappings)).to.have.length(1);
+            expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.match(/return storage\[keccak256\(msg.sender, 0\)\];$/m);
             expect(text, text).to.match(/return storage\[keccak256\(_arg0, 0\)\];$/m);
         });
@@ -139,7 +141,7 @@ contracts('internal', compile => {
         });
 
         it.skip('should `decompile` bytecode', function () {
-            const text = contract.decompile();
+            const text = contract.solidify();
             expect(text, text).to.match(/storage\[keccak256\(0, 0\)\]/);
         });
     });

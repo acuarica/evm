@@ -3,129 +3,15 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
-import * as c from 'ansi-colors';
+import c from 'ansi-colors';
 import type { Runnable, Suite } from 'mocha';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const wrapper = require('solc/wrapper');
+import wrapper from 'solc/wrapper';
+import type { ABI, SolcInput, SolcOutput } from 'solc';
 
-export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16'] as const;
+const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
-type Version = (typeof VERSIONS)[number];
-
-type Bytecode = {
-    object: string;
-    opcodes: string;
-    sourceMap: string;
-};
-
-type ABI = {
-    type: 'function' | 'event';
-    name: string;
-    inputs: {
-        name: string;
-        type: string;
-    }[];
-}[];
-
-/**
- * https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description
- */
-interface SolcInputSettings {
-    /**
-     * Optional: Optimizer settings
-     */
-    optimizer?: {
-        /**
-         * Disabled by default.
-         * NOTE: enabled=false still leaves some optimizations on. See comments below.
-         * WARNING: Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
-         * it to false and would actually disable all the optimizations.
-         */
-        enabled?: boolean;
-        /**
-         * Switch optimizer components on or off in detail.
-         * The "enabled" switch above provides two defaults which can be tweaked here.
-         * If "details" is given, "enabled" can be omitted.
-         */
-        details?: {
-            /**
-             * The peephole optimizer is always on if no details are given,
-             * use details to switch it off.
-             */
-            peephole?: boolean;
-            /**
-             * The inliner is always off if no details are given,
-             * use details to switch it on.
-             */
-            inliner?: boolean;
-            /**
-             * The unused jumpdest remover is always on if no details are given,
-             * use details to switch it off.
-             */
-            jumpdestRemover?: boolean;
-            /**
-             * Sometimes re-orders literals in commutative operations.
-             */
-            orderLiterals?: boolean;
-            /**
-             * Removes duplicate code blocks.
-             */
-            deduplicate?: boolean;
-            /**
-             * Common subexpression elimination, this is the most complicated step but
-             * can also provide the largest gain.
-             */
-            cse?: boolean;
-            /**
-             * Optimize representation of literal numbers and strings in code.
-             */
-            constantOptimizer?: boolean;
-        };
-    };
-}
-
-/**
- * https://docs.soliditylang.org/en/latest/using-the-compiler.html#output-description
- */
-interface SolcOutput {
-    /**
-     * This contains the contract-level outputs.
-     * It can be limited/filtered by the `outputSelection` settings.
-     */
-    contracts: {
-        'source.sol': {
-            /**
-             * If the language used has no contract names,
-             * this field should equal to an empty string.
-             */
-            [contractName: string]: {
-                /**
-                 * The Ethereum Contract ABI. If empty, it is represented as an empty array.
-                 * See https://docs.soliditylang.org/en/develop/abi-spec.html
-                 */
-                abi: ABI;
-                /**
-                 * EVM-related outputs.
-                 */
-                evm: { bytecode: Bytecode; deployedBytecode: Bytecode };
-            };
-        };
-    };
-    /**
-     * Optional: not present if no errors/warnings/infos were encountered
-     */
-    errors?: {
-        /**
-         * Mandatory ("error", "warning" or "info", but please note that this may be extended in the future)
-         */
-        severity: 'error' | 'warning' | 'info';
-        /**
-         * Optional: the message formatted with source location
-         */
-        formattedMessage: string;
-    }[];
-}
+export type Version = (typeof VERSIONS)[number];
 
 const versionsLoaded = new Set<Version>();
 
@@ -141,70 +27,75 @@ const versionsLoaded = new Set<Version>();
 export function compile(
     content: string,
     version: Version,
-    context?: Mocha.Context,
-    optimizer?: SolcInputSettings['optimizer']
-): { bytecode: string; abi: ABI } {
+    context: Mocha.Context | null,
+    opts?: SolcInput['settings'] & { ignoreWarnings?: boolean }
+): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
         language: 'Solidity',
         sources: {
             'source.sol': {
-                content: `// SPDX-License-Identifier: MIT\npragma solidity ${version};\n${content}`,
+                content: `// SPDX-License-Identifier: UNLICENSED\npragma solidity ${version};\n${content}`,
             },
         },
         settings: {
-            optimizer,
+            optimizer: opts?.optimizer,
+            metadata: opts?.metadata,
             outputSelection: {
                 '*': {
-                    '*': ['abi', 'evm.deployedBytecode'],
+                    '*': ['abi', 'metadata', 'evm.deployedBytecode'],
                 },
             },
         },
-    });
+    } satisfies SolcInput);
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
-    if (context !== undefined) {
+    if (context !== null) {
         const title = (test: Runnable | Suite | undefined): string =>
             test ? title(test.parent) + '.' + test.title : '';
         const fileName = title(context.test)
             .replace(/^../, '')
-            .replace('solc-', '')
+            .replace(`solc-v${version}.`, '')
             .replace(/`/g, '')
+            .replace(/^::/, '')
             .replace(/::/g, '.')
             .replace(/ /g, '-')
             .replace(/[:^'()]/g, '_')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
 
-        const basePath = `.solc/v${version}`;
+        const basePath = `.artifacts/v${version}`;
         if (!existsSync(basePath)) {
-            mkdirSync(basePath);
+            mkdirSync(basePath, { recursive: true });
         }
 
         const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
         const path = `${basePath}/${fileName}-${hash}`;
 
+        if (context.test)
+            context.test.title += ` #${hash}`;
+
         try {
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
+            if (context.test)
+                context.test.title += ` 🛠️`;
+
             if (!versionsLoaded.has(version)) {
                 context.timeout(context.timeout() + 5000);
-                if (context.test) {
+                if (context.test)
                     context.test.title += `--loads \`solc-${version}\``;
-                }
             }
             writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
         }
     } else {
-        writeCacheFn = _output => {};
+        writeCacheFn = _output => { };
     }
 
     versionsLoaded.add(version);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.js`))) as {
-        compile: (input: string) => string;
-    };
+    const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.js`)));
     const { errors, contracts } = JSON.parse(solc.compile(input)) as SolcOutput;
 
-    if (errors !== undefined) {
+    if (errors !== undefined && (!opts?.ignoreWarnings || errors.some(err => err.severity === 'error'))) {
         throw new Error(errors.map(err => err.formattedMessage).join('\n'));
     }
 
@@ -213,9 +104,10 @@ export function compile(
 
     const bytecode = contract.evm.deployedBytecode.object;
     const abi = contract.abi;
-    writeCacheFn({ bytecode, abi });
+    const metadata = contract.metadata;
+    writeCacheFn({ bytecode, abi, metadata });
 
-    return { bytecode, abi };
+    return { bytecode, abi, metadata };
 }
 
 export function forVersion(
@@ -223,7 +115,7 @@ export function forVersion(
         compile_: (
             content: string,
             context: Mocha.Context,
-            optimizer?: SolcInputSettings['optimizer']
+            opts?: Parameters<typeof compile>[3],
         ) => ReturnType<typeof compile>,
         fallback: 'fallback' | 'function',
         version: Version
@@ -237,7 +129,7 @@ export function forVersion(
 
             describe(`solc-v${version}`, function () {
                 fn(
-                    (content, context, optimizer) => compile(content, version, context, optimizer),
+                    (content, context, opts) => compile(content, version, context, opts),
                     fallback,
                     version
                 );
@@ -259,8 +151,7 @@ export async function mochaGlobalSetup() {
     type Releases = { [key: string]: string };
 
     mkdirSync('.solc', { recursive: true });
-
-    process.stdout.write('solc setup ');
+    process.stdout.write(c.magenta('> setup solc-js compilers '));
 
     const releases = await (async function () {
         const path = './.solc/releases.json';
@@ -279,19 +170,13 @@ export async function mochaGlobalSetup() {
     })();
 
     for (const version of VERSIONS) {
-        await download(releases[version], version);
-    }
-
-    console.info();
-
-    async function download(file: string, version: Version) {
         process.stdout.write(`${c.cyan('v' + version)}`);
         const path = `./.solc/soljson-v${version}.js`;
 
         if (existsSync(path)) {
             process.stdout.write(c.green('\u2713 '));
         } else {
-            const resp = await fetch(`https://binaries.soliditylang.org/bin/${file}`);
+            const resp = await fetch(`https://binaries.soliditylang.org/bin/${releases[version]}`);
             if (resp.ok) {
                 writeFileSync(path, await resp.text());
                 process.stdout.write(c.yellow('\u2913 '));

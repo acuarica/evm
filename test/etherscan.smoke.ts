@@ -5,9 +5,9 @@ import { expect } from 'chai';
 import c from 'ansi-colors';
 import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
-import { Contract, ERCIds, sol, type State, STEP } from 'sevm';
+import { Contract, ERCIds, sol, type State, Shanghai } from 'sevm';
 import type { Expr, Inst, StaticCall, Throw } from 'sevm/ast';
-import 'sevm-4byte';
+import 'sevm/4byte';
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -158,7 +158,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     return;
                 }
 
-                const step = STEP();
+                const step = new Shanghai();
                 /** @param {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} state */
                 const STATICCALL = (state: State<Inst, Expr>) => {
                     step['STATICCALL'](state);
@@ -174,21 +174,21 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 benchStats.append(t1 - t0);
 
                 contract = contract.patch();
-                contract.decompile();
+                contract.solidify();
 
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
                 ercsStats.append(contract);
 
-                if (contract.evm.errors.length > 0) {
-                    errorsByContract.set(`${name}-${address}`, contract.evm.errors);
+                if (contract.errors.length > 0) {
+                    errorsByContract.set(`${name}-${address}`, contract.errors);
                 }
 
                 const externals = [
                     ...Object.values(contract.functions).flatMap(fn =>
                         fn.label !== undefined ? [fn.label] : []
                     ),
-                    ...Object.values(contract.evm.variables).flatMap(v =>
+                    ...[...step.variables.values()].flatMap(v =>
                         v.label !== undefined ? [v.label + '()'] : []
                     ),
                 ];

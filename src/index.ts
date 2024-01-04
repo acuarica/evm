@@ -1,24 +1,15 @@
-import { type Expr, type Inst, Throw, type Val } from './ast/expr';
-import type { Type } from './type';
-import { Not } from './ast/logic';
+import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val } from './ast';
+import { Not } from './ast/alu';
+import type { IEvents } from './ast/log';
+import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
 import type { Return, Revert } from './ast/system';
-import { State } from './state';
-import { EVM } from './evm';
-import { type SLoad, Variable, type MappingLoad } from './ast/storage';
-import { solEvents, solMappings, solStructs, solVars, solStmts } from './sol';
+import { arrayify } from './bytes';
 import ERCs from './ercs';
-import type { Step } from './step';
-import { CallSite, If, Require, type Stmt } from './stmt';
-
-export * from './metadata';
-export * from './opcode';
-export * from './state';
-export * from './step';
-export * from './type';
-export * from './evm';
-export * from './stmt';
-export * from './sol';
-export * from './yul';
+import { EVM } from './evm';
+import { splitMetadataHash, type Metadata } from './metadata';
+import { State } from './state';
+import { Shanghai, type Members } from './step';
+import type { Type } from './type';
 
 /**
  *
@@ -29,15 +20,34 @@ export const ERCIds = Object.keys(ERCs);
  *
  */
 export class Contract {
+
     /**
-     *
+     * The `bytecode` used to create this `Contract`.
      */
-    readonly evm: EVM;
+    readonly bytecode: Uint8Array;
+
+    /**
+     * The `metadataHash` part from the `bytecode`.
+     * That is, if present, the `bytecode` without its `code`.
+     */
+    readonly metadata: Metadata | undefined;
 
     /**
      *
      */
     readonly main: Stmt[];
+
+    readonly events: IEvents = {};
+    readonly variables: IStore['variables'] = new Map();
+    readonly mappings: IStore['mappings'] = {};
+    readonly functionBranches: Members['functionBranches'] = new Map();
+    readonly errors: Throw[];
+
+    readonly blocks: EVM<string>['blocks'];
+
+    readonly chunks: EVM<string>['chunks'];
+
+    readonly opcodes: EVM<string>['opcodes'];
 
     /**
      *
@@ -50,47 +60,31 @@ export class Contract {
      *
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
-    constructor(readonly bytecode: string, insts: Partial<Step> = {}) {
-        this.evm = new EVM(bytecode, insts);
+    constructor(bytecode: Parameters<typeof arrayify>[0], _insts = {}) {
+        this.bytecode = arrayify(bytecode);
+
+        const evm = new EVM(this.bytecode, new Shanghai());
         const main = new State<Inst, Expr>();
-        this.evm.run(0, main);
+        evm.run(0, main);
         this.main = build(main);
 
         this.payable = !requiresNoValue(this.main);
 
-        for (const [selector, branch] of this.evm.functionBranches) {
-            this.evm.run(branch.pc, branch.state);
+        for (const [selector, branch] of evm.step.functionBranches) {
+            evm.run(branch.pc, branch.state);
             this.functions[selector] = new PublicFunction(this, build(branch.state), selector);
         }
-    }
 
-    get metadata(): EVM['metadata'] {
-        return this.evm.metadata;
-    }
+        this.events = evm.step.events;
+        this.variables = evm.step.variables;
+        this.mappings = evm.step.mappings;
+        this.functionBranches = evm.step.functionBranches;
+        this.metadata = splitMetadataHash(this.bytecode).metadata;
+        this.errors = evm.errors;
 
-    /**
-     *
-     */
-    chunks(): { pcstart: number; pcend: number; states?: State<Inst, Expr>[] }[] {
-        let lastPc = 0;
-
-        const result = [];
-        const pcs = [...this.evm.chunks.keys()];
-        pcs.sort((a, b) => a - b);
-        for (const pc of pcs) {
-            const chunk = this.evm.chunks.get(pc)!;
-            if (lastPc !== pc) {
-                result.push({ pcstart: lastPc, pcend: pc });
-            }
-            lastPc = chunk.pcend;
-            result.push({ pcstart: pc, pcend: chunk.pcend, states: chunk.states });
-        }
-
-        if (lastPc !== this.evm.opcodes.length) {
-            result.push({ pcstart: lastPc, pcend: this.evm.opcodes.length });
-        }
-
-        return result;
+        this.blocks = evm.blocks;
+        this.chunks = () => evm.chunks();
+        this.opcodes = () => evm.opcodes();
     }
 
     /**
@@ -108,7 +102,7 @@ export class Contract {
      * @returns
      */
     getEvents(): string[] {
-        return Object.values(this.evm.events).flatMap(event =>
+        return Object.values(this.events).flatMap(event =>
             event.sig === undefined ? [] : [event.sig]
         );
     }
@@ -135,33 +129,18 @@ export class Contract {
      */
     isERC(ercid: (typeof ERCIds)[number], checkEvents = true): boolean {
         return (
-            ERCs[ercid].selectors.every(s => this.evm.functionBranches.has(s)) &&
-            (!checkEvents || ERCs[ercid].topics.every(t => t in this.evm.events))
+            ERCs[ercid].selectors.every(s => this.functionBranches.has(s)) &&
+            (!checkEvents || ERCs[ercid].topics.every(t => t in this.events))
         );
-    }
-
-    /**
-     *
-     * @returns
-     */
-    decompile(): string {
-        let text = '';
-
-        text += solEvents(this.evm.events);
-        text += solStructs(this.evm.mappings);
-        text += solMappings(this.evm.mappings);
-        text += solVars(this.evm.variables);
-        text += solStmts(this.main);
-        for (const [, fn] of Object.entries(this.functions)) {
-            text += fn.decompile();
-        }
-
-        return text;
     }
 }
 
-export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [Revert] {
-    return falseBlock.length === 1 && falseBlock[0].name === 'Revert';
+export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [...Inst[], Revert] {
+    return (
+        falseBlock.length >= 1 &&
+        falseBlock.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
+        falseBlock.at(-1)!.name === 'Revert'
+    );
 }
 
 export class PublicFunction {
@@ -229,17 +208,24 @@ export class PublicFunction {
             const functionName = value.split('(')[0];
 
             if (this.isGetter()) {
-                const location = this.stmts[0].args[0].location.val.toString();
-                const variable = this.contract.evm.variables[location];
-                this.contract.evm.variables[this.selector] = new Variable(
-                    functionName,
-                    variable ? variable.types : []
-                );
+                const ret = this.stmts.at(-1) as Return & { args: [SLoad & { slot: Val }] };
+                const location = ret.args[0].slot.val;
+                const variable = this.contract.variables.get(location);
+                if (variable !== undefined) {
+                    variable.label = functionName;
+                } else {
+                    this.contract.variables.set(location, new Variable(functionName, [], this.contract.variables.size + 1));
+                }
+
+                // this.contract.variables[this.selector] = new Variable(
+                //     functionName,
+                //     variable ? variable.types : []
+                // );
             }
 
             if (this.isMappingGetter()) {
                 const location = this.stmts[0].args[0].location;
-                this.contract.evm.mappings[location].name = functionName;
+                this.contract.mappings[location].name = functionName;
             }
 
             const paramTypes = value.replace(functionName, '').slice(1, -1).split(',');
@@ -254,15 +240,16 @@ export class PublicFunction {
         }
     }
 
-    private isGetter(): this is { stmts: [Return & { args: [SLoad & { location: Val }] }] } {
-        const exit = this.stmts[0];
+    private isGetter(): this is { stmts: [...Stmt[], Return & { args: [SLoad & { slot: Val }] }] } {
+        const exit = this.stmts.at(-1)!;
         return (
-            this.stmts.length === 1 &&
+            this.stmts.length >= 1 &&
+            this.stmts.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
             exit.name === 'Return' &&
             exit.args !== undefined &&
             exit.args.length === 1 &&
             exit.args[0].tag === 'SLoad' &&
-            exit.args[0].location.isVal()
+            exit.args[0].slot.isVal()
         );
     }
 
@@ -313,54 +300,13 @@ export class PublicFunction {
             }
         }
     }
-
-    /**
-     *
-     * @returns the decompiled text for `this` function.
-     */
-    decompile(): string {
-        let output = '';
-        output += 'function ';
-        if (this.label !== undefined) {
-            const fullFunction = this.label;
-            const fullFunctionName = fullFunction.split('(')[0];
-            const fullFunctionArguments = fullFunction
-                .replace(fullFunctionName, '')
-                .substring(1)
-                .slice(0, -1);
-            if (fullFunctionArguments) {
-                output += fullFunctionName + '(';
-                output += fullFunctionArguments
-                    .split(',')
-                    .map((a: string, i: number) => `${a} _arg${i}`)
-                    .join(', ');
-                output += ')';
-            } else {
-                output += fullFunction;
-            }
-        } else {
-            output += this.selector + '()';
-        }
-        output += ' ' + this.visibility;
-        if (this.constant) {
-            output += ' view';
-        }
-        if (this.payable) {
-            output += ' payable';
-        }
-        if (this.returns.length > 0) {
-            output += ` returns (${this.returns.join(', ')})`;
-        }
-        output += ' {\n';
-        output += solStmts(this.stmts, 4);
-        output += '}\n\n';
-        return output;
-    }
 }
 
 export function build(state: State<Inst, Expr>): Stmt[] {
     const visited = new WeakSet();
-    return buildState(state);
+    const res = buildState(state);
+    // mem(res);
+    return res;
 
     function buildState(state: State<Inst, Expr>): Stmt[] {
         if (visited.has(state)) {
@@ -373,7 +319,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
         if (last === undefined) return [];
 
         for (let i = 0; i < state.stmts.length; i++) {
-            state.stmts[i] = state.stmts[i].eval();
+            // state.stmts[i] = state.stmts[i].eval();
         }
 
         switch (last.name) {
@@ -392,12 +338,12 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                     ...state.stmts.slice(0, -1),
                     ...(isRevertBlock(falseBlock)
                         ? [
-                              new Require(
-                                  last.cond.eval(),
-                                  (falseBlock[0].args ?? []).map(e => e.eval())
-                              ),
-                              ...trueBlock,
-                          ]
+                            new Require(
+                                last.cond.eval(),
+                                ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
+                            ),
+                            ...trueBlock,
+                        ]
                         : [new If(new Not(last.cond), falseBlock), ...trueBlock]),
                 ];
             }
@@ -418,6 +364,17 @@ export function build(state: State<Inst, Expr>): Stmt[] {
     }
 }
 
+export function reduce(stmts: Inst[]): Stmt[] {
+    const result = [];
+    for (const stmt of stmts) {
+        if (stmt.name !== 'Local' || stmt.local.nrefs > 0) {
+            result.push(stmt);
+        }
+    }
+
+    return result;
+}
+
 function requiresNoValue(stmts: Stmt[]): boolean {
     return (
         stmts.length > 0 &&
@@ -426,3 +383,11 @@ function requiresNoValue(stmts: Stmt[]): boolean {
         stmts[0].condition.value.tag === 'CallValue'
     );
 }
+
+export * from './evm';
+export * from './metadata';
+export * from './sol';
+export * from './state';
+export * from './step';
+export * from './type';
+export * from './yul';

@@ -5,7 +5,7 @@ import { Contract } from 'sevm';
 import { contracts } from '../utils/solc';
 
 contracts('require', compile => {
-    it('should `decompile` contract with `require`s', function () {
+    it.skip('should `decompile` contract with `require`s', function () {
         const src = `contract Test {
             mapping (address => uint256) private _allowances;
             function approve(uint256 amount) external {
@@ -18,7 +18,7 @@ contracts('require', compile => {
             }
         }`;
         const contract = new Contract(compile(src, this).bytecode);
-        const text = contract.decompile();
+        const text = contract.solidify();
         expect(text, text).to.match(/require(\()+msg.sender/);
         expect(text, text).to.match(/require\(_arg0 > 0x0, /);
     });

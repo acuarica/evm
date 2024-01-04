@@ -5,8 +5,6 @@
     "statements": "85",
     "exclude": [
         ".solc/soljson-v*.js",
-        "test/**/*.{test,check}.ts",
-        "test/utils/*.ts",
-        "test/examples/abis.ts"
+        "dist/test/"
     ]
 }

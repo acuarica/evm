@@ -1,4 +1,4 @@
-import { type IInst, Tag, type Expr, evalE } from './expr';
+import { type IInst, Tag, type Expr, evalE } from '.';
 
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';
@@ -8,6 +8,10 @@ export class Sha3 extends Tag {
 
     eval(): Expr {
         return new Sha3(this.offset, this.size, this.args?.map(evalE));
+    }
+
+    override children(): Expr[] {
+        return [...super.children(), ...this.args ?? []];
     }
 }
 
@@ -21,8 +25,14 @@ export class Create extends Tag {
      * @param value Value in _wei_ to send to the new account.
      * @param offset Byte offset in the memory in bytes, the initialisation code for the new account.
      * @param size Byte size to copy (size of the initialisation code).
+     * @param bytecode 
      */
-    constructor(readonly value: Expr, readonly offset: Expr, readonly size: Expr) {
+    constructor(
+        readonly value: Expr,
+        readonly offset: Expr,
+        readonly size: Expr,
+        readonly bytecode: Uint8Array | null = null
+    ) {
         super();
     }
 
@@ -149,7 +159,7 @@ export class Return implements IInst {
      * @param size Byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
+    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) { }
 
     eval() {
         return this;
@@ -172,16 +182,16 @@ export class Revert implements IInst {
      * @param size byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {}
+    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) { }
 
     eval() {
-        return this;
+        return new Revert(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
     }
 }
 
 export class Invalid implements IInst {
     readonly name = 'Invalid';
-    constructor(readonly opcode: number) {}
+    constructor(readonly opcode: number) { }
     eval() {
         return this;
     }
@@ -189,7 +199,7 @@ export class Invalid implements IInst {
 
 export class SelfDestruct implements IInst {
     readonly name = 'SelfDestruct';
-    constructor(readonly address: Expr) {}
+    constructor(readonly address: Expr) { }
     eval() {
         return this;
     }
