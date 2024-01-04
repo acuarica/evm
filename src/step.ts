@@ -500,32 +500,32 @@ const FrontierStep = {
             state.stack.push(state.stack.values[position]);
         }
     ]] as const)),
-    ...zip([...Array(16).keys()].map(position => [
-        `SWAP${(position + 1 as Size<16>)}`,
-        [0x90 + position, ({ stack }: Operand<Expr>) => stack.swap(position + 1)]
+    ...zip([...Array(16).keys()].map(position => [`SWAP${(position + 1 as Size<16>)}`, [
+        0x90 + position,
+        ({ stack }: Operand<Expr>) => stack.swap(position + 1)]
     ] as const)),
 
     /* ALU operations */
-    ...zip(([
-        ['ADD', 0x01, Add],
-        ['MUL', 0x02, Mul],
-        ['SUB', 0x03, Sub],
-        ['DIV', 0x04, Div],
-        ['SDIV', 0x05, Div],
-        ['MOD', 0x06, Mod],
-        ['SMOD', 0x07, Mod],
-        ['EXP', 0x0a, Exp],
-        ['LT', 0x10, Lt],
-        ['GT', 0x11, Gt],
-        ['SLT', 0x12, Lt],
-        ['SGT', 0x13, Gt],
-        ['AND', 0x16, And],
-        ['OR', 0x17, Or],
-        ['XOR', 0x18, Xor],
-    ] as const).map(([mnemonic, opcode, Cons]) => [mnemonic, [opcode, ({ stack }: Operand<Expr>) => {
+    ...zip([
+        ['ADD', 0x01, Add] as const,
+        ['MUL', 0x02, Mul] as const,
+        ['SUB', 0x03, Sub] as const,
+        ['DIV', 0x04, Div] as const,
+        ['SDIV', 0x05, Div] as const,
+        ['MOD', 0x06, Mod] as const,
+        ['SMOD', 0x07, Mod] as const,
+        ['EXP', 0x0a, Exp] as const,
+        ['LT', 0x10, Lt] as const,
+        ['GT', 0x11, Gt] as const,
+        ['SLT', 0x12, Lt] as const,
+        ['SGT', 0x13, Gt] as const,
+        ['AND', 0x16, And] as const,
+        ['OR', 0x17, Or] as const,
+        ['XOR', 0x18, Xor] as const,
+    ].map(([mnemonic, opcode, Klass]) => [mnemonic, [opcode, ({ stack }: Operand<Expr>) => {
         const lhs = stack.pop();
         const rhs = stack.pop();
-        stack.push(new Cons(lhs, rhs));
+        stack.push(new Klass(lhs, rhs));
     }]])),
     ...ALU,
 
@@ -725,7 +725,7 @@ const ConstantinopleStep = {
         }
     }],
 
-    ...Object.fromEntries([
+    ...zip([
         ['SHL', 0x1b, Shl] as const,
         ['SHR', 0x1c, Shr] as const,
         ['SAR', 0x1d, Sar] as const,
