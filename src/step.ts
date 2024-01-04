@@ -545,7 +545,7 @@ const FrontierStep = {
         );
         // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
     }],
-    ...Object.fromEntries([
+    ...zip([
         ['MSTORE', 0x52] as const,
         ['MSTORE8', 0x53] as const,
     ].map(([m, o]) => [m, [o, ({ stack, memory, stmts }: State<Inst, Expr>) => {
