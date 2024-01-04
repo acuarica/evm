@@ -188,7 +188,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                     ...Object.values(contract.functions).flatMap(fn =>
                         fn.label !== undefined ? [fn.label] : []
                     ),
-                    ...Object.values(step.variables).flatMap(v =>
+                    ...[...step.variables.values()].flatMap(v =>
                         v.label !== undefined ? [v.label + '()'] : []
                     ),
                 ];
