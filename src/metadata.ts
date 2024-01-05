@@ -1,5 +1,5 @@
 import CBOR from 'cbor-js';
-import { arrayify, hexlify } from './bytes';
+import { arrayify, hexlify } from './.bytes';
 
 /**
  * https://docs.soliditylang.org/en/v0.5.8/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode

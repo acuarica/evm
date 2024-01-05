@@ -1,6 +1,5 @@
-import { Throw, type Expr, type IInst, type Inst } from './ast';
-import { Branch, JumpDest } from './ast/flow';
-import { arrayify } from './bytes';
+import { arrayify } from './.bytes';
+import { Branch, JumpDest, Throw, type Expr, type IInst, type Inst } from './ast';
 import { ExecError, State, type Ram, type Stack } from './state';
 import { JUMPDEST, Shanghai, type Opcode, type StepFn, type Undef } from './step';
 

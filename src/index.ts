@@ -3,7 +3,7 @@ import { Not } from './ast/alu';
 import type { IEvents } from './ast/log';
 import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
 import type { Return, Revert } from './ast/system';
-import { arrayify } from './bytes';
+import { arrayify } from './.bytes';
 import ERCs from './ercs';
 import { EVM } from './evm';
 import { splitMetadataHash, type Metadata } from './metadata';
