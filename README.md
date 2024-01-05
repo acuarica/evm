@@ -45,16 +45,40 @@ yarn add sevm
 npm install sevm
 ```
 
-or if you're interested only in the CLI tool, install globally in your system
+### **Browser <span class="tab-badge">WIP</span>**
+
+```javascript
+<script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
+```
+
+<!-- tabs:end -->
+
+or if you're interested only in the [CLI Tool](#cli-tool), install globally in your system
 
 ```sh
 npm install --global sevm
 ```
 
-### **Browser <span class="tab-badge">WIP</span>**
+`sevm` supports both ESM `import` and Node's CommonJS `require`.
 
-```javascript
-<script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
+<!-- tabs:start -->
+
+### **ESM**
+
+```js examples/Use-with-Import.mjs
+import { Contract } from 'sevm';
+
+const contract = new Contract('0x00');
+console.log(contract.solidify());
+```
+
+### **CJS**
+
+```js examples/Use-with-Require.js
+const { Contract } = require('sevm');
+
+const contract = new Contract('0x00');
+console.log(contract.solidify());
 ```
 
 <!-- tabs:end -->
@@ -75,43 +99,22 @@ npm install --global sevm
 
 ## Usage
 
-### Converting Bytecode to Opcodes
+These examples use the `import` syntax and [`ethers.js`](https://docs.ethers.org/v6/) is used to fetch bytecode from public EVM-based networks.
 
-<!-- tabs:start -->
+### Decode Bytecode into Opcodes
 
-#### **Node.js**
+```js examples/Decode-Bytecode-into-Opcodes.mjs
+import { EtherscanProvider as Provider } from 'ethers';
+import { Contract } from 'sevm';
 
-```js
-const { EVM } = require('evm');
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
-
-web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
-  /* CryptoKitties contract */
-  const evm = new EVM(code);
-  console.log(evm.getOpcodes()); /* Get opcodes */
-});
+// CryptoKitties contract
+const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
+const contract = new Contract(bytecode);
+const opcodes = contract.opcodes();
+console.log(opcodes.map(opcode => opcode.format()));
 ```
-
-#### **Browser**
-
-```js
-const { EVM } = window.EVM_Utils;
-const web3 = new Web3(window.web3.currentProvider);
-web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, code) {
-  /* DAI contract */ if (err) throw err;
-  const evm = new EVM(code);
-  console.log(evm.getOpcodes()); /* Get opcodes */
-});
-```
-
-<!-- tabs:end -->
 
 ### Decompiling a Contract
-
-<!-- tabs:start -->
-
-#### **Node.js**
 
 ```js
 const { Contract } = require('evm');
@@ -131,31 +134,7 @@ web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
 });
 ```
 
-#### **Browser**
-
-```js
-const { Contract } = window.EVM;
-const web3 = new Web3(window.web3.currentProvider);
-web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, code) {
-  /* DAI contract */ if (err) throw err;
-  const contract = new Contract(code);
-  console.log(contract.getFunctions()); /* Get functions */
-  console.log(contract.getEvents()); /* Get events */
-  console.log(contract.decompile()); /* Decompile bytecode */
-  console.log(
-    contract.containsOpcode('SELFDESTRUCT')
-  ); /* Check whether contract contains a SELFDESTRUCT */
-  console.log(contract.isERC165()); /* Detect whether contract is ERC165-compliant */
-});
-```
-
-<!-- tabs:end -->
-
 ### Extracting data from transaction **WIP**
-
-<!-- tabs:start -->
-
-#### **Node.js**
 
 ```js
 const { Transaction } = require('evm');
@@ -170,24 +149,6 @@ web3.eth
     console.log(transaction.getFunction()); /* Get function */
   });
 ```
-
-#### **Browser**
-
-```js
-const { Transaction } = window.EVM;
-const web3 = new Web3(window.web3.currentProvider);
-web3.eth.getTransaction(
-  '0xd20a8d888a3f29471ea41ea77cc2d95ccd79ade1eaad059e83524e72b9adf962',
-  function (err, transactionData) {
-    if (err) throw err;
-    const transaction = new Transaction();
-    transaction.setInput(transactionData.input);
-    console.log(transaction.getFunction()); /* Get function */
-  }
-);
-```
-
-<!-- tabs:end -->
 
 ## Advanced Usage
 
@@ -215,7 +176,11 @@ const evm = new EVM(bytecode, new class extends London {
 evm.start();
 ```
 
-## CLI `--help`
+## CLI Tool
+
+`sevm` comes with a CLI tool to examine bytecode from the command line.
+
+### `sevm --help`
 
 ```console !sevm=bin/sevm.mjs --help
 $ sevm --help
