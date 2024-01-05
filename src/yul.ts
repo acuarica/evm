@@ -125,7 +125,7 @@ function yulInst(inst: Inst): string {
         case 'MappingStore':
             return yul`sstore(${inst.slot}, ${inst.data}) /*${inst.location}${yulMapArgs(inst)}*/`;
         case 'Throw':
-            throw new Error('Not implemented yet: "Throw" case');
+            return `throw('${inst.reason}');`;
     }
 }
 

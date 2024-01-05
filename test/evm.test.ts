@@ -724,6 +724,7 @@ event ${eventSelector(unknownEventSig)};
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([err]);
             expect(sol`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
+            expect(yul`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
         });
 
         it('should `exec` valid bytecode', function () {
