@@ -24,7 +24,9 @@ describe('::evm', function () {
         }`;
         let count = 0, gasLimit = null, gasPrice = null;
 
-        const evm = new EVM(compile(src, '0.7.6', this).bytecode, new class extends London {
+        const evm = new EVM(compile(src, '0.7.6', this, {
+            optimizer: { enabled: true }
+        }).bytecode, new class extends London {
             override GASLIMIT = (state: Operand<Expr>) => {
                 count++;
                 super.GASLIMIT(state);
@@ -82,7 +84,7 @@ describe('::evm', function () {
                 value = temp;
             }
         }`;
-        const evm = EVM.new(compile(src, '0.7.6', this, {optimizer: {enabled:true}}).bytecode);
+        const evm = EVM.new(compile(src, '0.7.6', this, { optimizer: { enabled: true } }).bytecode);
         // const main =
         // evm.start();
         const state = new State<Inst, Expr>();
