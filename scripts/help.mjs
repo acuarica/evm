@@ -43,6 +43,11 @@ function main() {
                 console.info('exec', c.cyan(file));
             } else {
                 content = readFileSync(file, 'utf8');
+                content = content
+                    .replace('#!/usr/bin/env node', '')
+                    .replace('/* eslint-env node */', '')
+                    .trim();
+
                 console.info('verbatim', c.cyan(file));
             }
             write(content);
