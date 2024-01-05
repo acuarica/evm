@@ -250,7 +250,7 @@ export class EVM<M extends string> {
     }
 
     /**
-     * Returns the `opcode`s present in the reacheable blocks of `bytecode`.
+     * Returns the `opcode`s present in the **reacheable blocks** of `this` EVM's `bytecode`.
      *
      * **NOTE**. You must call either the `start`, `run` or `exec` methods first.
      * This is to populate the `bytecode`'s reacheable `blocks`.

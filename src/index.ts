@@ -8,7 +8,7 @@ import ERCs from './ercs';
 import { EVM } from './evm';
 import { splitMetadataHash, type Metadata } from './metadata';
 import { State } from './state';
-import { Shanghai, type Members } from './step';
+import { Shanghai, type Members, type Opcode } from './step';
 import type { Type } from './type';
 
 /**
@@ -47,7 +47,10 @@ export class Contract {
 
     readonly chunks: EVM<string>['chunks'];
 
-    readonly opcodes: EVM<string>['opcodes'];
+    /**
+     * Returns the `opcode`s present in the **reacheable blocks** of `this` Contract's `bytecode`.
+     */
+    readonly opcodes: () => Opcode<string>[];
 
     /**
      *
