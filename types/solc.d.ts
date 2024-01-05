@@ -72,7 +72,7 @@ declare module 'solc' {
                  * The CBOR metadata is appended at the end of the bytecode by default.
                  * Setting this to false omits the metadata from the runtime and deploy time code.
                  */
-                appendCBOR?: true,
+                appendCBOR?: boolean,
                 /**
                  * Use only literal content and not URLs (false by default)
                  */
