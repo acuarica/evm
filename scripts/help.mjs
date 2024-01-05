@@ -45,7 +45,7 @@ function main() {
                 content = readFileSync(file, 'utf8');
                 content = content
                     .replace('#!/usr/bin/env node', '')
-                    .replace('/* eslint-env node */', '')
+                    .replace(/\/\* eslint-.+ \*\//g, '')
                     .trim();
 
                 console.info('verbatim', c.cyan(file));
