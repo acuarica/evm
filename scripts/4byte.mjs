@@ -20,24 +20,17 @@ function json(fileName) {
 
 /**
  * @param {string} fileName
- * @param {Hashes} data
- * @returns
- */
-function writeJson(fileName, data) {
-    const path = `./scripts/4byte/${fileName}.json`;
-    console.info('Writing JSON', c.magenta(path));
-    writeFileSync(path, JSON.stringify(data, null, 4));
-}
-
-/**
- * @param {string} fileName
  * @param {Hashes} hashes
  * @returns
  */
-function writeMinJson(fileName, hashes) {
-    const path = `./4byte/${fileName}.min.json`;
-    console.info('Writing minified JSON', c.magenta(path));
-    writeFileSync(path, JSON.stringify(hashes));
+function writeJson(fileName, hashes) {
+    const path = `./scripts/4byte/${fileName}.json`;
+    const minPath = `./4byte/${fileName}.min.json`;
+
+    console.info('Writing JSON', c.magenta(path), '| minified', c.magenta(minPath));
+
+    writeFileSync(path, JSON.stringify(hashes, null, 4));
+    writeFileSync(minPath, JSON.stringify(hashes));
 }
 
 /**
@@ -61,10 +54,10 @@ function check(msg, fn) {
 }
 
 /**
- * @param {string[]} functions
- * @param {string[]} events
+ * @param {import('ethers').ParamType} param
+ * @returns {boolean}
  */
-function validate(functions, events) {
+function isValidType(param) {
     const BITS = [...Array(32).keys()].map(n => (n + 1) * 8);
     const BYTES = [...Array(32).keys()].map(n => n + 1);
     const ELEM_TYPES = [
@@ -80,157 +73,102 @@ function validate(functions, events) {
         'string',
         'function',
     ];
-
-    const stats = {
-        lengthyFunctionSigs: /**@type {string[]}*/ ([]),
-        lengthyEventSigs: /**@type {string[]}*/ ([]),
-    };
-
-    desc('functions.json', function () {
-        check('should not contain duplicates', function () {
-            expect(functions).to.be.deep.equal([...new Set(functions)]);
-        });
-
-        check('entries should not contain spaces (`storage` being an exception)', function () {
-            expect(
-                functions.filter(functionSig => functionSig.replace(/ storage/g, '').includes(' '))
-            ).to.be.deep.equal([]);
-        });
-
-        check('entries should not contain semicolons', function () {
-            expect(functions.filter(functionSig => functionSig.includes(';'))).to.be.deep.equal([]);
-        });
-
-        check(
-            'entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)',
-            function () {
-                expect(
-                    functions.filter(
-                        functionSig =>
-                            !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)
-                    )
-                ).to.be.deep.equal([]);
-            }
-        );
-
-        check('entries should contain valid arguments', function () {
-            for (let functionSig of functions) {
-                if (functionSig.length >= 256) {
-                    stats.lengthyFunctionSigs.push(functionSig);
-                }
-
-                functionSig = functionSig.replace(/ storage/g, '');
-                if (functionSig.includes('.')) {
-                    continue;
-                }
-
-                let func;
-                try {
-                    func = FunctionFragment.from(functionSig);
-                } catch (e) {
-                    continue;
-                }
-                expect(functionSig, functionSig).to.be.equal(func.format());
-                expect(func.inputs.every(isValidType), functionSig).to.be.true;
-            }
-        });
-    });
-
-    desc('events.json', function () {
-        check('should not contain duplicates', function () {
-            expect(events).to.deep.equal([...new Set(events)]);
-        });
-
-        check('entries should not contain spaces', function () {
-            expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
-        });
-
-        check('entries should not contain semicolons', function () {
-            expect(events.filter(eventSig => eventSig.includes(';'))).to.be.deep.equal([]);
-        });
-
-        check(
-            'entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)',
-            function () {
-                expect(
-                    events.filter(
-                        eventSig => !eventSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/)
-                    )
-                ).to.be.deep.equal([]);
-            }
-        );
-
-        check('entries should contain valid arguments', function () {
-            for (const eventSig of events) {
-                if (eventSig.length >= 256) {
-                    stats.lengthyEventSigs.push(eventSig);
-                }
-
-                let event;
-                try {
-                    event = EventFragment.from(eventSig);
-                } catch (e) {
-                    continue;
-                }
-                expect(eventSig, eventSig).to.be.equal(event.format());
-                expect(event.inputs.every(isValidType), eventSig).to.be.true;
-            }
-        });
-    });
-
-    const info = c.blue;
-    const warn = c.yellow;
-
-    /**
-     * @param {string} title
-     * @param {string[]} sigs
-     * @returns
-     */
-    const statsinfo = (title, sigs) =>
-        console.info(`    • ${info('Lengthy ' + title)} ${warn(sigs.length.toString())}`);
-
-    console.info('\n  Signature Stats');
-    statsinfo('Functions', stats.lengthyFunctionSigs);
-    statsinfo('Events', stats.lengthyEventSigs);
-
-    /**
-     * @param {string} name
-     * @param {{(): void}} fn
-     */
-    function desc(name, fn) {
-        console.info('Validate', c.cyan(name));
-        fn();
-    }
-
-    /**
-     * @param {import('ethers').ParamType} param
-     * @returns {boolean}
-     */
-    function isValidType(param) {
-        return (
-            ELEM_TYPES.includes(param.type) ||
-            (param.baseType === 'tuple' &&
+    return (
+        ELEM_TYPES.includes(param.type) ||
+        (param.baseType === 'tuple' &&
                 /**@type{import('ethers').ParamType[]}*/ (param.components).every(isValidType)) ||
-            (param.baseType === 'array' &&
-                isValidType(/**@type{import('ethers').ParamType}*/ (param.arrayChildren)))
-        );
-    }
+        (param.baseType === 'array' &&
+            isValidType(/**@type{import('ethers').ParamType}*/(param.arrayChildren)))
+    );
+}
+
+/**
+ * @param {string[]} functions
+ */
+function validateFunctions(functions) {
+    check('should not contain duplicates', function () {
+        expect(functions).to.be.deep.equal([...new Set(functions)]);
+    });
+
+    check('entries should not contain spaces (`storage` being an exception)', function () {
+        expect(
+            functions.filter(functionSig => functionSig.replace(/ storage/g, '').includes(' '))
+        ).to.be.deep.equal([]);
+    });
+
+    check('entries should not contain semicolons', function () {
+        expect(functions.filter(functionSig => functionSig.includes(';'))).to.be.deep.equal([]);
+    });
+
+    check('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', function () {
+        expect(functions.filter(functionSig => !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)))
+            .to.be.deep.equal([]);
+    });
+
+    check('entries should contain valid arguments', function () {
+        for (let functionSig of functions) {
+            functionSig = functionSig.replace(/ storage/g, '');
+            if (functionSig.includes('.')) {
+                continue;
+            }
+
+            let func;
+            try {
+                func = FunctionFragment.from(functionSig);
+            } catch (e) {
+                continue;
+            }
+            expect(functionSig, functionSig).to.be.equal(func.format());
+            expect(func.inputs.every(isValidType), functionSig).to.be.true;
+        }
+    });
+}
+
+/** @param {string[]} events */
+function validateEvents(events) {
+    check('should not contain duplicates', function () {
+        expect(events).to.deep.equal([...new Set(events)]);
+    });
+
+    check('entries should not contain spaces', function () {
+        expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
+    });
+
+    check('entries should not contain semicolons', function () {
+        expect(events.filter(eventSig => eventSig.includes(';'))).to.be.deep.equal([]);
+    });
+
+    check('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', function () {
+        expect(events.filter(eventSig => !eventSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/)))
+            .to.be.deep.equal([]);
+    });
+
+    check('entries should contain valid arguments', function () {
+        for (const eventSig of events) {
+            let event;
+            try {
+                event = EventFragment.from(eventSig);
+            } catch (e) {
+                continue;
+            }
+            expect(eventSig, eventSig).to.be.equal(event.format());
+            expect(event.inputs.every(isValidType), eventSig).to.be.true;
+        }
+    });
 }
 
 function main() {
     const functions = json('functions');
-    const events = json('events');
+    validateFunctions(functions);
 
-    validate(functions, events);
+    const events = json('events');
+    validateEvents(events);
 
     const functionHashes = reduce(functions, s => s.substring(2, 10));
     const eventHashes = reduce(events, s => s.substring(2));
 
     writeJson('functionHashes', functionHashes);
     writeJson('eventHashes', eventHashes);
-
-    writeMinJson('functionHashes', functionHashes);
-    writeMinJson('eventHashes', eventHashes);
 
     console.info('Updated hashes successfully');
 }
