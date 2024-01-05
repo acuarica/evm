@@ -17,11 +17,11 @@
 const { Contract } = require('sevm');
 
 /**@type {{[hash: string]: string}} */
-// @ts-ignore to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
+// @ts-expect-error to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
 const functionHashes = require('./functionHashes.min.json');
 
 /**@type {{[hash: string]: string}} */
-// @ts-ignore to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
+// @ts-expect-error to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
 const eventHashes = require('./eventHashes.min.json');
 
 /**
