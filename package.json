@@ -88,7 +88,7 @@
         "coverage": "yarn compile && c8 mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
-        "make:4byte": "scripts/4byte.mjs",
+        "make:4byte": "node scripts/4byte.mjs",
         "make:help": "scripts/help.mjs README.md",
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "docs": "http-server docs",
