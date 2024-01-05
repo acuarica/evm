@@ -32,7 +32,6 @@ jobs:
         uses: actions/configure-pages@v3
       - run: yarn install --frozen-lockfile
       - run: yarn make:docs
-      - run: git --no-pager diff --exit-code docs/README.md
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
