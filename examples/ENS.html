@@ -16,7 +16,7 @@
                 .getCode('0x314159265dD8dbb310642f98f50C066173C1259b')
                 .then(code => {
                     const contract = new Contract(code);
-                    document.getElementById('code').innerText = contract.decompile();
+                    document.getElementById('code').innerText = contract.solidify();
                 })
                 .catch(err => {
                     console.error(err);
