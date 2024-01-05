@@ -114,38 +114,38 @@ web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, co
 #### **Node.js**
 
 ```javascript
-const { EVM } = require('evm');
+const { Contract } = require('evm');
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
 
 web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
   /* CryptoKitties contract */
-  const evm = new EVM(code);
-  console.log(evm.getFunctions()); /* Get functions */
-  console.log(evm.getEvents()); /* Get events */
-  console.log(evm.decompile()); /* Decompile bytecode */
+  const contract = new Contract(code);
+  console.log(contract.getFunctions()); /* Get functions */
+  console.log(contract.getEvents()); /* Get events */
+  console.log(contract.decompile()); /* Decompile bytecode */
   console.log(
-    evm.containsOpcode('SELFDESTRUCT')
+    contract.containsOpcode('SELFDESTRUCT')
   ); /* Check whether contract contains a SELFDESTRUCT */
-  console.log(evm.isERC165()); /* Detect whether contract is ERC165-compliant */
+  console.log(contract.isERC165()); /* Detect whether contract is ERC165-compliant */
 });
 ```
 
 #### **Browser**
 
 ```javascript
-const { EVM } = window.EVM;
+const { Contract } = window.EVM;
 const web3 = new Web3(window.web3.currentProvider);
 web3.eth.getCode('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359', function (err, code) {
   /* DAI contract */ if (err) throw err;
-  const evm = new EVM(code);
-  console.log(evm.getFunctions()); /* Get functions */
-  console.log(evm.getEvents()); /* Get events */
-  console.log(evm.decompile()); /* Decompile bytecode */
+  const contract = new Contract(code);
+  console.log(contract.getFunctions()); /* Get functions */
+  console.log(contract.getEvents()); /* Get events */
+  console.log(contract.decompile()); /* Decompile bytecode */
   console.log(
-    evm.containsOpcode('SELFDESTRUCT')
+    contract.containsOpcode('SELFDESTRUCT')
   ); /* Check whether contract contains a SELFDESTRUCT */
-  console.log(evm.isERC165()); /* Detect whether contract is ERC165-compliant */
+  console.log(contract.isERC165()); /* Detect whether contract is ERC165-compliant */
 });
 ```
 
