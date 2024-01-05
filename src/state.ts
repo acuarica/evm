@@ -1,3 +1,5 @@
+import type { Expr } from "./ast";
+
 /**
  * Represents the EVM stack of expressions `E`.
  * The stack is a list of expressions `E` elements used to store smart contract instruction inputs and outputs.
@@ -108,7 +110,7 @@ export class State<S, E> {
         readonly stack = new Stack<E>(),
         readonly memory: { [location: number]: E } = {},
         public nlocals = 0
-    ) {}
+    ) { }
 
     /**
      * Indicates whether this `State` has been halted.
@@ -161,12 +163,12 @@ export class State<S, E> {
 /**
  * Represents the operand `stack` of the `State`.
  */
-export type Operand<E> = Pick<State<never, E>, 'stack'>;
+export type Operand<E = Expr> = Pick<State<never, E>, 'stack'>;
 
 /**
  * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
  */
-export type Ram<E> = Pick<State<never, E>, 'stack' | 'memory'>;
+export type Ram<E = Expr> = Pick<State<never, E>, 'stack' | 'memory'>;
 
 /**
  * Represents an error due to an invalid symbolic state execution.
