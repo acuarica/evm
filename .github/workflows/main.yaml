@@ -47,7 +47,7 @@ jobs:
   test:
     strategy:
       # Runs all node versions using the same `os` in parallel
-      max-parallel: 2
+      max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-latest]
         # https://nodejs.dev/en/about/releases/
