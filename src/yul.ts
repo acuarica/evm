@@ -64,7 +64,18 @@ function yulExpr(expr: Expr): string {
         case 'Fn':
             return FNS[expr.mnemonic][0](yulExpr(expr.value));
         case 'DataCopy':
-            throw new Error('Not implemented yet: "DataCopy" case');
+            switch (expr.kind) {
+                case 'calldatacopy':
+                    return yul`calldatacopy(${expr.offset}, ${expr.size})`;
+                case 'codecopy':
+                    return yul`codecopy(${expr.offset}, ${expr.size})`;
+                case 'extcodecopy':
+                    return yul`extcodecopy(${expr.address}, ${expr.offset}, ${expr.size})`;
+                case 'returndatacopy':
+                    return yul`returndatacopy(${expr.offset}, ${expr.size})`;
+                default:
+                    throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
+            }
         case 'MLoad':
             return yul`mload(${expr.loc})`;
         case 'Sha3':
