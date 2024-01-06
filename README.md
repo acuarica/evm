@@ -46,7 +46,7 @@ yarn add sevm
 npm install sevm
 ```
 
-### **Browser <span class="tab-badge">WIP</span>**
+### **Browser**
 
 ```js
 <script src="https://cdn.jsdelivr.net/npm/sevm@0.6/dist/sevm.js"></script>
@@ -60,7 +60,8 @@ or if you're interested only in the [CLI Tool](#cli-tool), install globally in y
 npm install --global sevm
 ```
 
-`sevm` supports both ESM `import` and Node's CommonJS `require`.
+`sevm` supports ESM `import` and Node's CommonJS `require`.
+Also can be used in browsers under the `sevm` global object.
 
 <!-- tabs:start -->
 
@@ -82,6 +83,20 @@ const { Contract } = require('sevm');
 // 00 opcode is STOP https://www.evm.codes/#00?fork=shanghai
 const contract = new Contract('0x00');
 console.log(contract.solidify());
+```
+
+### **`script` tag**
+
+```js
+<script src="https://cdn.jsdelivr.net/npm/sevm@0.6/dist/sevm.js"></script>
+
+<script>
+  console.log('sevm exported symbols', sevm);
+
+  // 00 opcode is STOP https://www.evm.codes/#00?fork=shanghai
+  const contract = new sevm.Contract('0x00');
+  document.getElementById('code').innerHTML = contract.solidify();
+</script>
 ```
 
 <!-- tabs:end -->
