@@ -18,6 +18,7 @@ describe('::bin', function () {
         expect(cli).stdout.to.contain('sevm <cmd> <contract>');
         expect(cli).stdout.to.contain('sevm metadata');
         expect(cli).stdout.to.contain('sevm abi');
+        expect(cli).stdout.to.contain('sevm selectors');
         expect(cli).stdout.to.contain('sevm dis');
         expect(cli).stdout.to.contain('sevm cfg');
         expect(cli).stdout.to.contain('sevm sol');
