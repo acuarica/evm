@@ -48,8 +48,8 @@ npm install sevm
 
 ### **Browser <span class="tab-badge">WIP</span>**
 
-```javascript
-<script src="https://cdn.jsdelivr.net/gh/acuarica/evm@f88b20a/lib/EVM.js"></script>
+```js
+<script src="https://cdn.jsdelivr.net/npm/sevm@0.6/dist/sevm.js"></script>
 ```
 
 <!-- tabs:end -->
