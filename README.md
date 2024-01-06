@@ -1,6 +1,6 @@
 <!-- markdownlint-disable no-inline-html -->
 
-# EVM Bytecode Decompiler
+# Symbolic EVM Bytecode Decompiler
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yaml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/main.yaml)
 ![nycrc config on GitHub](https://img.shields.io/nycrc/acuarica/evm?config=.c8rc.json&style=flat-square)
@@ -20,7 +20,8 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 > :construction: Under heavy development. Feel free to open an [issue](https://github.com/acuarica/evm/issues) if something is not right. :construction:
 
 - **Lightweight with no dependencies**
-- **Embedded signature database** <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">WIP</small>
+
+- [**Embedded functions and events signature database**](#evm-bytecode-function-and-event-signature-hashes) <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">optional</small>
 - **Convert bytecode to opcodes**
 - **Read information like events or functions from either bytecode or TX data**
 - **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
@@ -270,9 +271,9 @@ Options:
 
 ```
 
-## EVM Bytecode Signature & Topic Hashes
+## EVM Bytecode Function and Event Signature Hashes
 
-`sevm` comes with a collection of Ethereum `function` and `event` signatures.
+`sevm` comes with a collection of Ethereum `function` and `event` signature hashes.
 They are available through the `sevm/4byte` module.
 It looks up in the signature and events database for matching hashes.
 
