@@ -8,6 +8,9 @@ chaiExec.defaults = {
 
 describe('::bin', function () {
 
+    // Increase timeout to include support for Node 16 on Windows.
+    this.timeout(5000);
+
     it('should exit with a zero exit code using `--help`', function () {
         const cli = chaiExec('--help');
 
