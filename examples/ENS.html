@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>EVM Bytecode Decompiler</title>
+        <title>Symbolic EVM Bytecode Decompiler</title>
     </head>
     <body>
-        <h1>EVM Bytecode Decompiler</h1>
+        <h1>Symbolic EVM Bytecode Decompiler</h1>
         <h2>ENS - 0x314159265dD8dbb310642f98f50C066173C1259b</h2>
         <pre style="border: solid"><code id="code"></code></pre>
 
         <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-        <script src="../dist/SEVM.js"></script>
+        <script src="../dist/sevm.js"></script>
 
         <script>
             new ethers.providers.EtherscanProvider()
                 .getCode('0x314159265dD8dbb310642f98f50C066173C1259b')
                 .then(code => {
-                    const contract = new Contract(code);
+                    const contract = new sevm.Contract(code);
                     document.getElementById('code').innerText = contract.solidify();
                 })
                 .catch(err => {

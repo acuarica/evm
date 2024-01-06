@@ -2,6 +2,8 @@
 
 ?> **Info.** This is a decompilation live demo. Bytecode for the following contracts is being fetched from `mainnet` using [ethers.js'](https://docs.ethers.org/) `EtherscanProvider.getCode`.
 
+!> Function and event signatures lookup database is not available for browsers because of its size. Developers should patch contract function and event signatures with another service, _e.g._, <https://www.4byte.directory/>. Tracking issue <https://github.com/acuarica/evm/issues/29>.
+
 <!-- tabs:start -->
 
 ## **Compound**

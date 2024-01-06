@@ -1,12 +1,11 @@
 /** @type {import('webpack').Configuration} */
 export default {
     target: 'web',
-    entry: {
-        SEVM: './dist/src/index.js',
-    },
+    entry: './dist/src/index.js',
     output: {
+        library: 'sevm',
         libraryTarget: 'umd',
         umdNamedDefine: true,
-        filename: '[name].js',
+        filename: 'sevm.js',
     },
 };
