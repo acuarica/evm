@@ -212,6 +212,8 @@ evm.start();
 
 ```console !sevm=bin/sevm.mjs --help
 $ sevm --help
+sevm v0.6.0
+
 sevm <cmd> <contract>
 
 Commands:
@@ -226,11 +228,11 @@ Commands:
   sevm config                Shows cache path used to store downloaded bytecode
 
 Options:
-      --version   Show version number                                  [boolean]
       --color     Display with colors, use `--no-color` to deactivate colors
                                                        [boolean] [default: true]
   -s, --selector  Function signature, e.g., `balanceOf(address)` or selector has
                   h to choose a specific function                       [string]
+      --version   Show version number                                  [boolean]
       --help      Show help                                            [boolean]
 
 Examples:
