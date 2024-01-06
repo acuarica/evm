@@ -95,6 +95,6 @@
         "clean": "rm -r .artifacts/"
     },
     "engines": {
-        "node": ">=16.0.0"
+        "node": ">=16.6.0"
     }
 }
