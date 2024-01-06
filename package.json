@@ -71,7 +71,6 @@
         "eslint": "^8.51.0",
         "eslint-plugin-chai-expect": "^3.0.0",
         "eslint-plugin-mocha": "^10.1.0",
-        "http-server": "^14.1.1",
         "mocha": "^10.0.1",
         "solc": "^0.8.21",
         "typedoc": "^0.25.2",
@@ -91,7 +90,7 @@
         "make:4byte": "node scripts/4byte.mjs",
         "make:help": "scripts/help.mjs README.md",
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
-        "docs": "http-server docs",
+        "docs": "npx http-server docs",
         "clean": "rm -r .artifacts/"
     },
     "engines": {
