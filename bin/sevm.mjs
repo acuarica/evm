@@ -22,6 +22,8 @@ const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
 
 /** @param {Contract} contract */
 function dis(contract) {
+    const MAX_STACK = 10;
+
     console.info(`${dim('pc'.padStart(5))}  ${magenta('opcode')}  ${'push data (PUSHx)'}`);
 
     for (const chunk of contract.chunks()) {
@@ -36,7 +38,10 @@ function dis(contract) {
                 const pushData = opcode.data
                     ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
                     : '';
-                const values = stack?.values.map(e => yul`${e}`).join(dim('|'));
+                const values = stack === undefined
+                    ? warn('<no stack>')
+                    : stack.values.slice(0, MAX_STACK).map(e => yul`${e}`).join(dim('|')) +
+                        (stack.values.length > MAX_STACK ? dim(`| ..${stack.values.length - MAX_STACK} more items`) : '');
                 console.info(`${dim(pc)}  ${magenta(opcode.mnemonic)}  ${pushData} ${info('〒')} ${values}`);
             }
         }
@@ -81,7 +86,7 @@ async function getBytecode(pathOrAddress) {
             let json;
             try {
                 json = JSON.parse(text);
-            } catch (e){
+            } catch (e) {
                 return text;
             }
             const { deployedBytecode, bytecode } = json;
