@@ -68,6 +68,7 @@ npm install --global sevm
 ```js examples/Use-with-Import.mjs
 import { Contract } from 'sevm';
 
+// 00 opcode is STOP https://www.evm.codes/#00?fork=shanghai
 const contract = new Contract('0x00');
 console.log(contract.solidify());
 ```
@@ -77,6 +78,7 @@ console.log(contract.solidify());
 ```js examples/Use-with-Require.js
 const { Contract } = require('sevm');
 
+// 00 opcode is STOP https://www.evm.codes/#00?fork=shanghai
 const contract = new Contract('0x00');
 console.log(contract.solidify());
 ```
@@ -89,13 +91,11 @@ console.log(contract.solidify());
 
 - [**`bytecode`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#bytecode) - Get raw bytecode (not really useful; same as input)
 - [**`metadata`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#metadata) - Get [IPFS](https://docs.ipfs.tech/concepts/content-addressing/#cid-versions) or [Swarm](https://github.com/ethereum/wiki/wiki/Swarm-Hash) hash (if present) for [contract metadata](https://docs.soliditylang.org/en/latest/metadata.html)
-- [**`evm.opcodes`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#opcodes) - Returns opcodes including pc and pushData (if included)
-- [**`evm.jumpdests`**](https://acuarica.github.io/evm/tsdoc/classes/evm.EVM.html#jumpdests) - Get map of program counters from JUMPDEST opcodes
+- [**`opcodes`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#opcodes) - Returns opcodes reachable within bytecode
 - [**`getFunctions()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#getFunctions) - Parse functions from their signatures in bytecode
 - [**`getEvents()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#decompile) - Parse events from their signatures in bytecode
-- [**`containsOpcode(opcode)`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#containsOpcode) - Check whether an opcode exists and is reachable within bytecode
-- [**`decompile()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#decompile) - Decompile bytecode into readable [Solidity](https://soliditylang.org/)-like pseudocode
-- [**`isERC165()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#isERC165) - Detect whether contract is [ERC165](https://eips.ethereum.org/EIPS/eip-165)-compliant
+- [**`solidify()`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#solidify) - Decompile bytecode into readable [Solidity](https://soliditylang.org/)-like pseudocode
+- [**`isERC(ercid)`**](https://acuarica.github.io/evm/tsdoc/classes/index.Contract.html#isERC) - Detect whether contract is ERC id compliant
 
 ## Usage
 
@@ -107,31 +107,59 @@ These examples use the `import` syntax and [`ethers.js`](https://docs.ethers.org
 import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
 
-// CryptoKitties contract
+// CryptoKitties Contract
+// https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
 const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 const contract = new Contract(bytecode);
 const opcodes = contract.opcodes();
 console.log(opcodes.map(opcode => opcode.format()));
 ```
 
-### Decompiling a Contract
+### Decompile a Contract
 
-```js
-const { Contract } = require('evm');
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
+```js examples/Decompile-a-Contract.mjs
+import { EtherscanProvider as Provider } from 'ethers';
+import { Contract } from 'sevm';
+import 'sevm/4byte';
 
-web3.eth.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d').then(code => {
-  /* CryptoKitties contract */
-  const contract = new Contract(code);
-  console.log(contract.getFunctions()); /* Get functions */
-  console.log(contract.getEvents()); /* Get events */
-  console.log(contract.decompile()); /* Decompile bytecode */
-  console.log(
-    contract.containsOpcode('SELFDESTRUCT')
-  ); /* Check whether contract contains a SELFDESTRUCT */
-  console.log(contract.isERC165()); /* Detect whether contract is ERC165-compliant */
-});
+// Compound Contract
+// https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code
+const bytecode = await new Provider().getCode('0x3FDA67f7583380E67ef93072294a7fAc882FD7E7');
+
+const contract = new Contract(bytecode).patch(); // Lookup for 4byte matches
+console.log(contract.solidify()); //Decompile bytecode to Solidity
+```
+
+### Detect Functions, Events and ERC compliance
+
+```js examples/Detect-Functions-Events-ERCs.mjs
+import { EtherscanProvider as Provider } from 'ethers';
+import { Contract } from 'sevm';
+import 'sevm/4byte';
+
+// CryptoKitties Contract
+// https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
+const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
+
+const contract = new Contract(bytecode).patch();
+console.log(contract.getFunctions());
+console.log(contract.getEvents());
+console.log(contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+```
+
+### Extract Contract Metadata
+
+```js examples/Extract-Contract-Metadata.mjs
+import { JsonRpcProvider } from 'ethers';
+import { Contract } from 'sevm';
+
+// USDC Token Proxy on Avalanche Testnet
+// https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65#code
+const provider = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
+const bytecode = await provider.getCode('0x5425890298aed601595a70AB815c96711a31Bc65');
+
+const contract = new Contract(bytecode);
+console.log(contract.metadata);
 ```
 
 ### Extracting data from transaction **WIP**
