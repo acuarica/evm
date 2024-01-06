@@ -92,8 +92,13 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn make:4byte
       - run: yarn compile
-      - run: node examples/Compound.mjs
-      - run: node examples/USDC.mjs
+      - run: examples/Decode-Bytecode-into-Opcodes.mjs
+      - run: examples/Decompile-a-Contract.mjs
+      - run: examples/Detect-Functions-Events-ERCs.mjs
+      - run: examples/Extract-Contract-Metadata.mjs
+      - run: examples/Simple-Hook.mjs
+      - run: examples/Use-with-Import.mjs
+      - run: examples/Use-with-Require.js
 
   bin:
     runs-on: ubuntu-latest
