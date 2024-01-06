@@ -261,6 +261,15 @@ It is not loaded by default in the main module.
 It needs to be `import`ed explicitly.
 This allows the user to create a bundle without the lookup database provided thet want to use another solution.
 
+## Contributing
+
+### `scripts`
+
+- `4byte.mjs` Generates function and events lookup tables
+- `ercs.mjs` Generates ERCs function and event definitions from `ercs.sol`
+- `help.mjs` Embeds examples and `sevm --help` into `README`
+- `solc.mjs` Downloads and caches `solc` compilers used in tests
+
 ## Detached Fork
 
 This GitHub repo was originally a fork of <https://github.com/MrLuit/evm>.
