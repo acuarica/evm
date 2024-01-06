@@ -25,8 +25,6 @@ const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
  * @param {import('yargs').ArgumentsCamelCase} argv 
  */
 function dis(contract, argv) {
-    console.log(argv);
-
     const MAX_STACK = 10;
 
     console.info(`${dim('pc'.padStart(5))}  ${magenta('opcode')}  ${'push data (PUSHx)'}`);
