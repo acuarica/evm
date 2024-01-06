@@ -461,13 +461,16 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     if (bytecode[destpc] === JUMPDEST) {
         if (offset instanceof Val || offset.is(Local)) {
             offset2.jumpDest = destpc;
-            return destpc;
+        } else {
+            // TODO: check if this is sounds
+            // throw new Error('getjumpdest: offset is not val' + inspect(offset));
+            (offset as unknown as Val).jumpDest = destpc;
         }
-        throw new Error('getjumpdest: offset is not val');
+        return destpc;
     } else {
         throw new ExecError(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
             ? `'${destpc}' is out-of-bounds`
-            : `found '0x${bytecode[destpc]?.toString(16)}'`
+            : `found '0x${bytecode[destpc].toString(16)}'`
             }`);
     }
 }
