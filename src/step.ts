@@ -330,8 +330,8 @@ const DATACOPY = {
         const dest = stack.pop().eval();
         const offset = stack.pop();
         const size = stack.pop();
-        if (!dest.isVal()) {
-            throw new Error('expected number in codecopy');
+        if (!dest.isVal() || dest.val >= 1024 * 32) {
+            throw new ExecError('Memory destination for CODECOPY is not reducible to Val');
         } else {
             memory[Number(dest.val)] = new ast.DataCopy('codecopy', offset, size, undefined,
                 ((offset, size) => {
