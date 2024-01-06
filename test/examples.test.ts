@@ -9,35 +9,38 @@ import 'sevm/4byte';
 describe('examples', function () {
     [
         {
-            name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7' as const,
+            name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
+            count: -1,
+            lines: [
+                // TODO when un skip test
+                // /^function supportsInterfac\(bytes4 _arg0a\) public payable {$/m,
+            ],
+            ercs: ['ERC165'] as const,
+        }, {
+            name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
             count: 13208,
             lines: [],
-        },
-        {
-            name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467' as const,
+        }, {
+            name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467',
             count: 6514,
             lines: [],
-        },
-        {
-            name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d' as const,
+        }, {
+            name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
             count: 8098,
             lines: [],
             ercs: ['ERC165'] as const,
-        },
-        {
-            name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359' as const,
+        }, {
+            name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
             count: 2118,
             lines: [],
             ercs: ['ERC20'] as const,
             checkEvents: false,
-        },
-        {
-            name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b' as const,
+        }, {
+            name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
             count: 284,
             lines: [],
-        },
-        {
-            name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7' as const,
+        }, {
+            name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
             count: 1214,
             lines: [
                 /^event Transfer\(address indexed _arg0, address indexed _arg1, uint256 _arg2\);$/m,
@@ -60,15 +63,14 @@ describe('examples', function () {
             ],
             ercs: ['ERC20'] as const,
             checkEvents: false,
-        },
-        {
+        }, {
             /**
              * Bytecode of USDC _proxy_ contract.
              * Fetched with this RPC provider https://api.avax-test.network/ext/bc/C/rpc.
              *
              * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
              */
-            name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65' as const,
+            name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
             count: 741,
             lines: [
                 /^address public implementation;/m,
@@ -77,9 +79,8 @@ describe('examples', function () {
                 /^function upgradeToAndCall\(address _arg0, bytes _arg1\) public payable {$/m,
                 /^function changeAdmin\(address _arg0\) public {$/m,
             ],
-        },
-        {
-            name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as const,
+        }, {
+            name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             count: 1555,
             lines: [
                 /^mapping \(address => unknown\) public balanceOf;$/m,
