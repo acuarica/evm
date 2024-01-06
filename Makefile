@@ -11,7 +11,7 @@ sol: $(SOLS)
 yul: $(YULS)
 
 %.dis: %
-	bin/sevm.mjs dis --no-color $* > $*.dis
+	bin/sevm.mjs dis $* --no-color --with-stack --with-trace > $*.dis
 
 %.sol: %
 	bin/sevm.mjs sol $* > $*.sol
