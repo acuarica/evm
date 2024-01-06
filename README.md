@@ -226,12 +226,10 @@ Commands:
   sevm config                Shows cache path used to store downloaded bytecode
 
 Options:
-      --version   Show version number                                  [boolean]
-      --color     Display with colors, use `--no-color` to deactivate colors
+  --version  Show version number                                       [boolean]
+  --color    Display with colors, use `--no-color` to deactivate colors
                                                        [boolean] [default: true]
-  -s, --selector  Function signature, e.g., `balanceOf(address)` or selector has
-                  h to choose a specific function                       [string]
-      --help      Show help                                            [boolean]
+  --help     Show help                                                 [boolean]
 
 Examples:
   sevm abi 0x00000000000C2E074eC69A0dFb299  shows the ABI of the ENS registry co
@@ -247,6 +245,28 @@ information regarding the ABI specification.
 for more information regarding Function Selectors
 [4] See https://docs.soliditylang.org/en/latest/yul.html for more information re
 garding Yul.
+
+```
+
+### `dis`
+
+```console !sevm=bin/sevm.mjs dis --help
+$ sevm dis --help
+sevm dis <contract>
+
+Disassemble the bytecode into Opcodes
+
+Positionals:
+  contract  path or address where to locate the bytecode of the contract
+                                                             [string] [required]
+
+Options:
+  --version     Show version number                                    [boolean]
+  --color       Display with colors, use `--no-color` to deactivate colors
+                                                       [boolean] [default: true]
+  --help        Show help                                              [boolean]
+  --with-stack  Include the current stack next to each decoded opcode
+  --with-trace  Include the trace of staments at the end of each basic block
 
 ```
 

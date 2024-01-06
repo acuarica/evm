@@ -20,8 +20,13 @@ const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
  * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
  */
 
-/** @param {Contract} contract */
-function dis(contract) {
+/** 
+ * @param {Contract} contract 
+ * @param {import('yargs').ArgumentsCamelCase} argv 
+ */
+function dis(contract, argv) {
+    console.log(argv);
+
     const MAX_STACK = 10;
 
     console.info(`${dim('pc'.padStart(5))}  ${magenta('opcode')}  ${'push data (PUSHx)'}`);
@@ -38,15 +43,22 @@ function dis(contract) {
                 const pushData = opcode.data
                     ? (opcode.mnemonic.length === 5 ? ' ' : '') + `0x${opcode.hexData()}`
                     : '';
-                const values = stack === undefined
-                    ? warn('<no stack>')
-                    : stack.values.slice(0, MAX_STACK).map(e => yul`${e}`).join(dim('|')) +
-                    (stack.values.length > MAX_STACK ? dim(`| ..${stack.values.length - MAX_STACK} more items`) : '');
-                console.info(`${dim(pc)}  ${magenta(opcode.mnemonic)}  ${pushData} ${info('〒')} ${values}`);
+
+                let values;
+                if (argv['with-stack']) {
+                    values = info('〒 ');
+                    values += stack === undefined
+                        ? warn('<no stack>')
+                        : stack.values.slice(0, MAX_STACK).map(e => yul`${e}`).join(dim('|')) +
+                        (stack.values.length > MAX_STACK ? dim(`| ..${stack.values.length - MAX_STACK} more items`) : '');
+                } else {
+                    values = '';
+                }
+                console.info(`${dim(pc)}  ${magenta(opcode.mnemonic)}  ${pushData} ${values}`);
             }
         }
 
-        if (chunk.states !== undefined) {
+        if (argv['with-trace'] && chunk.states !== undefined) {
             for (const state of chunk.states) {
                 console.info('state', '〒 ', state.stack.values.map(e => yul`${e}`).join(' | '));
                 state.stmts.forEach(stmt => console.info('  ', yul`${stmt}`));
@@ -117,7 +129,7 @@ async function getBytecode(pathOrAddress) {
     return null;
 }
 
-/** @param {(contract: Contract) => void} handler */
+/** @param {(contract: Contract, argv: import('yargs').ArgumentsCamelCase) => void} handler */
 function make(handler) {
     /** @param {import('yargs').ArgumentsCamelCase} argv */
     return async argv => {
@@ -125,7 +137,7 @@ function make(handler) {
         const bytecode = await getBytecode(pathOrAddress);
         if (bytecode !== null) {
             const contract = new Contract(bytecode).patch();
-            handler(contract);
+            handler(contract, argv);
         } else {
             console.info(warn(`Cannot find bytecode for ${info(pathOrAddress)}`));
             process.exit(1);
@@ -134,11 +146,10 @@ function make(handler) {
 }
 
 /** @param {import('yargs').Argv} argv */
-const pos = argv =>
-    argv.positional('contract', {
-        type: 'string',
-        describe: 'path or address where to locate the bytecode of the contract',
-    });
+const pos = argv => argv.positional('contract', {
+    type: 'string',
+    describe: 'path or address where to locate the bytecode of the contract',
+});
 
 void yargs(process.argv.slice(2))
     .scriptName('sevm')
@@ -169,7 +180,13 @@ void yargs(process.argv.slice(2))
             );
         }
     }))
-    .command('dis <contract>', 'Disassemble the bytecode into Opcodes', pos, make(dis))
+    .command('dis <contract>', 'Disassemble the bytecode into Opcodes', argv => pos(argv)
+        .option('with-stack', {
+            description: 'Include the current stack next to each decoded opcode',
+        })
+        .option('with-trace', {
+            description: 'Include the trace of staments at the end of each basic block',
+        }), make(dis))
     .command(
         'cfg <contract>',
         'Writes the cfg of the selected function in `dot` format into standard output',
@@ -195,12 +212,12 @@ void yargs(process.argv.slice(2))
         description: 'Display with colors, use `--no-color` to deactivate colors',
         default: true,
     })
-    .option('selector', {
-        alias: 's',
-        type: 'string',
-        description:
-            'Function signature, e.g., `balanceOf(address)` or selector hash to choose a specific function',
-    })
+    // .option('selector', {
+    //     alias: 's',
+    //     type: 'string',
+    //     description:
+    //         'Function signature, e.g., `balanceOf(address)` or selector hash to choose a specific function',
+    // })
     .demandCommand(1, 'At least one command must be specified')
     .recommendCommands()
     .example(
