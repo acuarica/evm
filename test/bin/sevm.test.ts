@@ -15,6 +15,7 @@ describe('::bin', function () {
         const cli = chaiExec('--help');
 
         expect(cli).to.exit.with.code(0);
+        expect(cli).stdout.to.contain('sevm v');
         expect(cli).stdout.to.contain('sevm <cmd> <contract>');
         expect(cli).stdout.to.contain('sevm metadata');
         expect(cli).stdout.to.contain('sevm abi');
