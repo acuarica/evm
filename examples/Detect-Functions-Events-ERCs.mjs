@@ -3,10 +3,13 @@
 
 import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
+import 'sevm/4byte';
 
 // CryptoKitties Contract
 // https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
 const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
-const contract = new Contract(bytecode);
-const opcodes = contract.opcodes();
-console.log(opcodes.map(opcode => opcode.format()));
+
+const contract = new Contract(bytecode).patch();
+console.log(contract.getFunctions());
+console.log(contract.getEvents());
+console.log(contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
