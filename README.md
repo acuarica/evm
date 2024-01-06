@@ -60,8 +60,8 @@ or if you're interested only in the [CLI Tool](#cli-tool), install globally in y
 npm install --global sevm
 ```
 
-`sevm` supports ESM `import` and Node's CommonJS `require`.
-Also can be used in browsers under the `sevm` global object.
+`sevm` supports both ESM `import` and Node's CommonJS `require`.
+Also it can be used in browsers, where all classes and functions can  found under the `sevm` global object.
 
 <!-- tabs:start -->
 
