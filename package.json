@@ -24,6 +24,7 @@
     "files": [
         "src/",
         "dist/src/",
+        "dist/SEVM.js",
         "4byte/",
         "bin/"
     ],

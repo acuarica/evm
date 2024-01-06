@@ -38,6 +38,7 @@ jobs:
       - run: yarn make:4byte
       - run: yarn compile
       - run: yarn lint
+      - run: yarn bundle
       - run: yarn test
       - name: 'Set up git user to be able to commit, tag and push'
         run: |
