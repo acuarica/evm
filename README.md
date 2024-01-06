@@ -61,7 +61,7 @@ npm install --global sevm
 ```
 
 `sevm` supports both ESM `import` and Node's CommonJS `require`.
-Also it can be used in browsers, where all classes and functions can  found under the `sevm` global object.
+Also it can be used in browsers, where all classes and functions can be found under the `sevm` global object.
 
 <!-- tabs:start -->
 
