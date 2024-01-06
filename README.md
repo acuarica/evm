@@ -23,7 +23,7 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 
 - [**Embedded functions and events signature database**](#evm-bytecode-function-and-event-signature-hashes) <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">optional</small>
 - **Convert bytecode to opcodes**
-- **Read information like events or functions from either bytecode or TX data**
+- **Extract events or functions information from bytecode**
 - **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
 - **Check whether an opcode exists and is reachable within bytecode execution**
 - **Detect whether contracts are compliant to certain ERCs**
@@ -161,22 +161,6 @@ const bytecode = await provider.getCode('0x5425890298aed601595a70AB815c96711a31B
 
 const contract = new Contract(bytecode);
 console.log(contract.metadata);
-```
-
-### Extracting data from transaction **WIP**
-
-```js
-const { Transaction } = require('evm');
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://api.mycryptoapi.com/eth'));
-
-web3.eth
-  .getTransaction('0xd20a8d888a3f29471ea41ea77cc2d95ccd79ade1eaad059e83524e72b9adf962')
-  .then(transactionData => {
-    const transaction = new Transaction();
-    transaction.setInput(transactionData.input);
-    console.log(transaction.getFunction()); /* Get function */
-  });
 ```
 
 ## Advanced Usage
