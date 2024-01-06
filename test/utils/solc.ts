@@ -3,7 +3,6 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
-import c from 'ansi-colors';
 import type { Runnable, Suite } from 'mocha';
 
 import wrapper from 'solc/wrapper';
@@ -142,47 +141,4 @@ export function contracts(title: string, fn: Parameters<typeof forVersion>[0]) {
     describe(`contracts::${title}`, function () {
         forVersion(fn);
     });
-}
-
-/**
- *
- */
-export async function mochaGlobalSetup() {
-    type Releases = { [key: string]: string };
-
-    mkdirSync('.solc', { recursive: true });
-    process.stdout.write(c.magenta('> setup solc-js compilers '));
-
-    const releases = await (async function () {
-        const path = './.solc/releases.json';
-        try {
-            return JSON.parse(readFileSync(path, 'utf-8')) as Releases;
-        } catch (_err) {
-            const resp = await fetch('https://binaries.soliditylang.org/bin/list.json');
-            if (resp.ok) {
-                const { releases } = (await resp.json()) as { releases: Releases };
-                writeFileSync(path, JSON.stringify(releases, null, 2));
-                return releases;
-            } else {
-                throw new Error('cannot fetch `list.json`');
-            }
-        }
-    })();
-
-    for (const version of VERSIONS) {
-        process.stdout.write(`${c.cyan('v' + version)}`);
-        const path = `./.solc/soljson-v${version}.js`;
-
-        if (existsSync(path)) {
-            process.stdout.write(c.green('\u2713 '));
-        } else {
-            const resp = await fetch(`https://binaries.soliditylang.org/bin/${releases[version]}`);
-            if (resp.ok) {
-                writeFileSync(path, await resp.text());
-                process.stdout.write(c.yellow('\u2913 '));
-            } else {
-                console.info(c.red(`${resp.status} ${resp.statusText}`));
-            }
-        }
-    }
 }

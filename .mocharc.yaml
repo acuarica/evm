@@ -6,8 +6,9 @@
 # https://mochajs.org/#-enable-source-maps
 enable-source-maps: true
 
+# Fetch and cache `solc` compilers
 # https://mochajs.org/#global-setup-fixtures
-require: dist/test/utils/solc.js
+require: scripts/solc.mjs
 
 # https://github.com/mochajs/mocha/blob/master/example/config/.mocharc.yml
 spec:
