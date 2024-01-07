@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 
 import { Contract } from 'sevm';
-import 'sevm/4byte-get';
 
 const ENABLE_4BYTE_GET_TEST = process.env['ENABLE_4BYTE_GET_TEST'];
 
@@ -14,6 +13,9 @@ describe(`::4byte-get ENABLE_4BYTE_GET_TEST=${ENABLE_4BYTE_GET_TEST}`, function 
         if (!ENABLE_4BYTE_GET_TEST) {
             this.skip();
         }
+
+        // Use dynamic import to avoid failing when test disabled and `fetch` is not defined.
+        await import('sevm/4byte-get');
 
         const name = 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65';
         const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
