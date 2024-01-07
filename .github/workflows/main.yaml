@@ -65,6 +65,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn make:4byte
       - run: yarn test
+        env:
+          4BYTE_GET_TEST: 1
       # - run: yarn test:smoke
 
   coverage:

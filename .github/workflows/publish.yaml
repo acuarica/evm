@@ -40,6 +40,9 @@ jobs:
       - run: yarn lint
       - run: yarn bundle
       - run: yarn test
+        env:
+          4BYTE_GET_TEST: 1
+      
       - name: 'Set up git user to be able to commit, tag and push'
         run: |
           git config --global user.name 'acuarica'
