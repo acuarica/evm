@@ -2,8 +2,8 @@
 /* eslint-env node */
 
 import c from 'ansi-colors';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import https from "https";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import https from 'https';
 
 /** 
  * @param {string} url 
