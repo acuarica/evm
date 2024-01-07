@@ -34,8 +34,9 @@
                 console.info('Fetching code for address', address);
                 new ethers.providers.EtherscanProvider()
                     .getCode(address)
-                    .then(code => {
-                        const contract = new sevm.Contract(code);
+                    .then(code => new sevm.Contract(code).patchf())
+                    .then(contract => {
+                        console.log('contract', contract);
                         document.getElementById('code').innerHTML = contract.solidify();
                         Prism.highlightAll();
                     })
