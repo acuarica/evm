@@ -65,7 +65,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn make:4byte
       - name: Enable `4byte-get` test only when Node > 16 due to `fetch` dependency
-        if: ${{ matrix.node == 16 }}
+        if: ${{ matrix.node > 16 }}
         run: echo "ENABLE_4BYTE_GET_TEST=1" >> "$GITHUB_ENV"
       - run: yarn test
       # - run: yarn test:smoke
