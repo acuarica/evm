@@ -53,9 +53,6 @@ jobs:
         # https://nodejs.dev/en/about/releases/
         node: [16, 18, 20]
     runs-on: ${{ matrix.os }}
-    env:
-      if: ${{ matrix.node == 16 }}
-      4BYTE_GET_TEST: 1
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -67,15 +64,10 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
       - run: yarn make:4byte
-
-      # - if: ${{ matrix.node == 16 }}
-      #   run: 
-      #   env:
-      #     4BYTE_GET_TEST: 1
-
+      - name: Enable `4byte-get` test only when Node > 16 due to `fetch` dependency
+        if: ${{ matrix.node == 16 }}
+        run: echo "ENABLE_4BYTE_GET_TEST=1" >> "$GITHUB_ENV"
       - run: yarn test
-        # env:
-          # ENABLE_4BYTE_GET_TEST: 1
       # - run: yarn test:smoke
 
   coverage:
