@@ -11,39 +11,30 @@
  * @packageDocumentation
  */
 /* eslint-env node */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const { Contract } = require('sevm');
 
-/**@type {{[hash: string]: string}} */
+/** @type {{[hash: string]: string}} */
 // @ts-expect-error to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
 const functionHashes = require('./functionHashes.min.json');
 
-/**@type {{[hash: string]: string}} */
+/** @type {{[hash: string]: string}} */
 // @ts-expect-error to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
 const eventHashes = require('./eventHashes.min.json');
 
-/**
- * @param {Contract} contract
- * @returns {Contract}
- */
-function patch(contract) {
-    for (const [topic, event] of Object.entries(contract.events)) {
+Contract.prototype.patch = function () {
+    for (const [topic, event] of Object.entries(this.events)) {
         if (topic in eventHashes) {
             event.sig = eventHashes[topic];
         }
     }
 
-    for (const [selector, fn] of Object.entries(contract.functions)) {
+    for (const [selector, fn] of Object.entries(this.functions)) {
         if (selector in functionHashes) {
             fn.label = functionHashes[selector];
         }
     }
 
-    return contract;
-}
-
-Contract.prototype.patch = function () {
-    return patch(this);
+    return this;
 };
