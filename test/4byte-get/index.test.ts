@@ -4,9 +4,9 @@ import { readFileSync } from 'fs';
 import { Contract } from 'sevm';
 import 'sevm/4byte-get';
 
-const ENABLE_4BYTE_GET_TEST = process.env['4BYTE_GET_TEST'];
+const ENABLE_4BYTE_GET_TEST = process.env['ENABLE_4BYTE_GET_TEST'];
 
-describe('::4byte-get', function () {
+describe(`::4byte-get ENABLE_4BYTE_GET_TEST=${ENABLE_4BYTE_GET_TEST}`, function () {
 
     const title = !ENABLE_4BYTE_GET_TEST ? ' (enable it by setting `ENABLE_4BYTE_GET_TEST`)' : '';
 
