@@ -2,7 +2,9 @@
     "compilerOptions": {
         "module": "node16",
         "target": "es2020",
-        "lib": ["es2020"],
+        "lib": [
+            "es2020"
+        ],
         "rootDir": ".",
         "outDir": "dist",
         "checkJs": true,
@@ -22,5 +24,14 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
-    "include": ["./4byte", "./bin", "./examples", "./scripts", "./src", "./test", "./types"]
+    "include": [
+        "./4byte",
+        "./4byte-get",
+        "./bin",
+        "./examples",
+        "./scripts",
+        "./src",
+        "./test",
+        "./types"
+    ]
 }

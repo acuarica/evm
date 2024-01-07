@@ -16,6 +16,10 @@
         "./4byte": {
             "types": "./4byte/index.d.ts",
             "default": "./4byte/index.js"
+        },
+        "./4byte-get": {
+            "types": "./4byte-get/index.d.ts",
+            "default": "./4byte-get/index.js"
         }
     },
     "bin": {

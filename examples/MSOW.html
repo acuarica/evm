@@ -5,17 +5,22 @@
     </head>
     <body>
         <h1>Symbolic EVM Bytecode Decompiler</h1>
-        <h2>ENS - 0x314159265dD8dbb310642f98f50C066173C1259b</h2>
+        <h2>MSOW - 0x07880D44b0f7b75464ad18fc2b980049c40A8bc3</h2>
         <pre style="border: solid"><code id="code"></code></pre>
 
         <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
         <script src="../dist/sevm.js"></script>
 
         <script>
+            console.log('sevm exported symbols', sevm);
+
             new ethers.providers.EtherscanProvider()
-                .getCode('0x314159265dD8dbb310642f98f50C066173C1259b')
-                .then(code => {
-                    const contract = new sevm.Contract(code);
+                // MSOW contract
+                // https://etherscan.io/address/0x07880D44b0f7b75464ad18fc2b980049c40A8bc3#code
+                .getCode('0x07880D44b0f7b75464ad18fc2b980049c40A8bc3')
+                .then(code => new sevm.Contract(code).patchf())
+                .then(contract => {
+                    console.log('MSOW contract', contract);
                     document.getElementById('code').innerText = contract.solidify();
                 })
                 .catch(err => {
