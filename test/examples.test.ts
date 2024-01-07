@@ -40,6 +40,10 @@ describe('examples', function () {
             count: 284,
             lines: [],
         }, {
+            name: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
+            count: -1,
+            lines: [],
+        }, {
             name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
             count: 1214,
             lines: [
