@@ -14,7 +14,7 @@ describe(`::4byte-get ENABLE_4BYTE_GET_TEST=${ENABLE_4BYTE_GET_TEST}`, function 
             this.skip();
         }
 
-        // Use dynamic import to avoid failing when test disabled and `fetch` is not defined.
+        // Use dynamic import to avoid failing when test is disabled and `fetch` is not defined.
         await import('sevm/4byte-get');
 
         const name = 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65';
