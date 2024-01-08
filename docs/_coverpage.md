@@ -1,6 +1,6 @@
 <!-- markdownlint-disable no-inline-html -->
 
-# EVM.js <small>BETA</small>
+# SEVM.js <small>BETA</small>
 
 > A Symbolic library & CLI [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethereum-virtual-machine-how-does-it-work-9abac2b7c9e) interpreter and decompiler.
 
@@ -14,4 +14,4 @@
 [GitHub](https://github.com/acuarica/evm)
 [README](README.md)
 [See Examples](examples.md)
-[TS Docs](https://acuarica.github.io/evm/tsdoc/)
+[API docs](https://acuarica.github.io/evm/tsdoc/)
