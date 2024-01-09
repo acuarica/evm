@@ -141,6 +141,9 @@ describe('examples', function () {
             let text: string;
 
             before(function () {
+                // Increasing due to timeout on Node 16
+                this.timeout(5000);
+
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patch();
                 text = contract.solidify();
