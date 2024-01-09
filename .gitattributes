@@ -1,8 +1,12 @@
-# console and the Node API do use '\n' for line endings
-# https://github.com/nodejs/node/issues/5038
-# So console output and files have to compared using only '\n'
-#
-# This fixes line endings on Windows for snapshot testing introduced in
+# Fixes line endings on Windows for Snapshot Testing introduced in
 # https://github.com/acuarica/evm/commit/d4cfa4f6351c665d467bbd6eec1d6d1680a1637c
-# Snapshot testing needs verbatim console output and file comparison
+#
+# Snapshot Testing needs `console` output and file comparison to be left untouched,
+# in particular line endings.
+#
+# `console` and the Node API use '\n' for line endings, see https://github.com/nodejs/node/issues/5038.
+# Thus, `console` output and output files need to be compared using only '\n', regardless of the OS.
+#
+# For reference, Jest, which supports snapshot testing, uses the same approach
+# https://github.com/jestjs/jest/blob/f68bdde2a9817d3e8850ea229b90ad241c29d5c4/.gitattributes
 /test/__snapshots__/* text eol=lf
