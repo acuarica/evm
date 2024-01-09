@@ -1,10 +1,12 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub, Variable } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import * as ast from 'sevm/ast';
 import { $exprs, truncate } from './$exprs';
+import { compile } from './utils/solc';
+import { fnselector } from './utils/selector';
 
 const sizes = [...Array(16).keys()].map(i => i + 1);
 
@@ -172,7 +174,7 @@ describe('::step', function () {
                 .to.be.deep.equal(Array(5).fill('UNDEF'));
         });
 
-        ['', '0x', '0X'].forEach(p => describe(`decode with prefix \`${p}\``, function () {
+        ['', '0x', '0X'].forEach(p => describe(`arrayify and decode with prefix \`${p}\``, function () {
             it(`should \`decode\` empty buffer`, function () {
                 expect([...step.decode(p + '')]).to.be.empty;
             });
@@ -196,6 +198,90 @@ describe('::step', function () {
             });
         }));
 
+        it('should find method selector decoded as `PUSH3`', function () {
+            // "00e4778a": "addAccessoryIdMapping(address,uint64)",
+            const src = `contract Test {
+                function addAccessoryIdMapping(address, uint64) public pure returns (uint) {
+                    return 1;
+                }
+            }`;
+            const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+            const opcodes = [...new Shanghai().decode(bytecode)];
+
+            const push3 = opcodes.find(o => o.mnemonic === 'PUSH3' && o.hexData() === 'e4778a');
+            expect(push3).to.be.not.undefined;
+        });
+
+        it('should find method selector decoded as `PUSH1`', function () {
+            // "000000c7": "withdrawByAdmin_Unau(uint256[])",
+            const src = `contract Test {
+                function withdrawByAdmin_Unau(uint256[] calldata) public pure returns (uint) {
+                    return 1;
+                }
+            }`;
+            const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+            const opcodes = [...new Shanghai().decode(bytecode)];
+
+            const push1 = opcodes.find(o => o.mnemonic === 'PUSH1' && o.hexData() === 'c7');
+            expect(push1).to.be.not.undefined;
+        });
+
+        it('should find `PUSH4` method selector to invoke external contract', function () {
+            const sig = 'balanceOf(uint256)';
+            const src = `interface IERC20 {
+                function ${sig} external view returns (uint256);
+            }
+            contract Test {
+                fallback() external payable {
+                    IERC20 addr = IERC20 (0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359);
+                    addr.balanceOf(7);
+                }
+            }`;
+            const opcodes = [...new Shanghai().decode(compile(src, '0.7.6', this).bytecode)];
+
+            const selector = fnselector(sig);
+            const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && o.hexData() === selector);
+            expect(push4).to.be.not.undefined;
+        });
+
+        describe('decode empty contracts should have the same bytecode', function () {
+            const bytecodes = new Set<string>();
+
+            ([
+                ['with no functions', `contract Test { }`],
+                ['with `internal` unused function', `contract Test {
+                function get() internal pure returns (uint256) {
+                    return 5;
+                }
+            }`],
+                ['with `internal` unused function emitting an event', `contract Test {
+                event Transfer(uint256, address);
+                function get() internal {
+                    emit Transfer(3, address(this));
+                }
+            }`],
+                ['with a private variable and no usages', `contract Test {
+                uint256 private value;
+            }`],
+                ['with a private variable and unreachable usages', `contract Test {
+                uint256 private value;
+                function setValue(uint256 newValue) internal {
+                    value = newValue;
+                }
+            }`],
+            ] satisfies [string, string][]).forEach(([title, src]) => {
+                it(title, function () {
+                    const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+                    bytecodes.add(Buffer.from(bytecode).toString('hex'));
+                    expect(bytecodes).to.have.length(1);
+
+                    expect([...new Shanghai().decode(bytecode)].map(o => o.mnemonic))
+                        .to.be.deep.equal([
+                            'PUSH1', 'PUSH1', 'MSTORE', 'PUSH1', 'DUP1', 'REVERT', 'INVALID',
+                        ]);
+                });
+            });
+        });
     });
 
     describe('PUSHES', function () {
