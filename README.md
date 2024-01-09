@@ -19,12 +19,11 @@ A Symbolic [Ethereum Virtual Machine (EVM)](https://medium.com/mycrypto/the-ethe
 
 > :construction: Under heavy development. Feel free to open an [issue](https://github.com/acuarica/evm/issues) if something is not right. :construction:
 
-- **Lightweight with no dependencies**
-
+- **Lightweight with virtually no dependencies, only 59kb minified**
 - [**Embedded functions and events signature database**](#evm-bytecode-function-and-event-signature-hashes) <small style="background: #f000b8; padding: 0.2em; border-radius: 3px">optional</small>
 - **Convert bytecode to opcodes**
 - **Extract events or functions information from bytecode**
-- **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode**
+- **Extract the [IPFS](https://docs.soliditylang.org/en/latest/metadata.html) or [swarm hash](https://github.com/ethereum/wiki/wiki/Swarm-Hash) (when present) from bytecode using [`cbor-js`](https://www.npmjs.com/package/cbor-js)**
 - **Check whether an opcode exists and is reachable within bytecode execution**
 - **Detect whether contracts are compliant to certain ERCs**
 
