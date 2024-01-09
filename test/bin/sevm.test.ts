@@ -1,5 +1,6 @@
 import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
+import '../utils/snapshot';
 
 chai.use(chaiExec);
 chaiExec.defaults = {
@@ -11,27 +12,20 @@ describe('::bin', function () {
     // Increase timeout to include support for Node 16 on Windows.
     this.timeout(5000);
 
-    it('should exit with a zero exit code using `--help`', function () {
+    it('should exit with a zero code using `--help`', function () {
         const cli = chaiExec('--help');
 
         expect(cli).to.exit.with.code(0);
-        expect(cli).stdout.to.contain('sevm <cmd> <contract>');
-        expect(cli).stdout.to.contain('sevm metadata');
-        expect(cli).stdout.to.contain('sevm abi');
-        expect(cli).stdout.to.contain('sevm selectors');
-        expect(cli).stdout.to.contain('sevm dis');
-        expect(cli).stdout.to.contain('sevm cfg');
-        expect(cli).stdout.to.contain('sevm sol');
-        expect(cli).stdout.to.contain('sevm yul');
-        expect(cli).stdout.to.contain('sevm config');
+        expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
     });
 
-    it('should exit with non-zero exit code on unknown flag `-h`', function () {
+    it('should exit with non-zero code on unknown flag', function () {
         const cli = chaiExec('-h');
 
         expect(cli).to.exit.with.not.code(0);
-        expect(cli).stderr.to.contain('At least one command must be specified');
+        expect(cli).stdout.to.be.empty;
+        expect(cli.stderr).to.matchSnapshot('err', this);
     });
 
     it('should display metadata from JSON `bytecode`', function () {
@@ -42,25 +36,15 @@ describe('::bin', function () {
         const cli = chaiExec('metadata - --no-color', { input });
 
         expect(cli).to.exit.with.code(0);
+        expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
-        expect(cli).stdout.to.contain([
-            'Contract Metadata',
-            'protocol ipfs',
-            'hash QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2',
-            'solc 0.8.21',
-            'url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2',
-        ].join('\n'));
     });
 
     it('should run `dis` command and find non-reacheable chunk', function () {
         const cli = chaiExec('dis - --no-color', { input: '0x6001600201600c56010203045b62fffefd5b00' });
 
         expect(cli).to.exit.with.code(0);
+        expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
-        expect(cli, cli.stdout).stdout.to.contain([
-            '8 : unreachable',
-            '01020304'
-            // https://github.com/nodejs/node/issues/5038
-        ].join('\n'));
     });
 });
