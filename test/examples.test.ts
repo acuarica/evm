@@ -142,7 +142,8 @@ describe('examples', function () {
 
             before(function () {
                 // Increasing due to timeout on Node 16
-                this.timeout(5000);
+                // This seems to be an issue on solidify SmithBot, which is around ~4.3M
+                this.timeout(10000);
 
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patch();
