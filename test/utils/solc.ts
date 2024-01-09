@@ -3,10 +3,10 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
-import type { Runnable, Suite } from 'mocha';
 
-import wrapper from 'solc/wrapper';
 import type { ABI, SolcInput, SolcOutput } from 'solc';
+import wrapper from 'solc/wrapper';
+import { fullTitle } from './snapshot';
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
@@ -49,16 +49,8 @@ export function compile(
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (context !== null) {
-        const title = (test: Runnable | Suite | undefined): string =>
-            test ? title(test.parent) + '.' + test.title : '';
-        const fileName = title(context.test)
-            .replace(/^../, '')
+        const fileName = fullTitle(context)
             .replace(`solc-v${version}.`, '')
-            .replace(/`/g, '')
-            .replace(/^::/, '')
-            .replace(/::/g, '.')
-            .replace(/ /g, '-')
-            .replace(/[:^'()]/g, '_')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
 
         const basePath = `.artifacts/v${version}`;
