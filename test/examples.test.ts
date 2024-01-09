@@ -44,6 +44,11 @@ describe('examples', function () {
             count: -1,
             lines: [],
         }, {
+            name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
+            count: -1,
+            lines: [],
+            selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],
+        }, {
             name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
             count: 1214,
             lines: [
@@ -101,7 +106,7 @@ describe('examples', function () {
             ],
             ercs: ['ERC20'] as const,
         },
-    ].forEach(({ name, count, lines, ercs, checkEvents }) => {
+    ].forEach(({ name, count, lines, ercs, checkEvents, selectors }) => {
         describe(`${name}`, function () {
             const defs = lines.map(line =>
                 line.source
@@ -145,26 +150,28 @@ describe('examples', function () {
                 expect(contract.opcodes()).to.be.of.length(count);
             });
 
-            it(`should detect functions`, function () {
+            it('should detect selectors', function () {
+                if (selectors === undefined) this.skip();
+                expect(contract.functionBranches).to.have.keys(selectors);
+            });
+
+            it('should detect functions', function () {
                 expect(contract.getFunctions()).to.include.members(functions);
             });
 
-            it(`should detect variables`, function () {
+            it('should detect variables', function () {
                 expect(contract.getFunctions()).to.include.members(variables);
             });
 
-            it(`should detect mappings`, function () {
+            it('should detect mappings', function () {
                 expect(contract.getFunctions()).to.include.members(mappings);
             });
 
             it('functions, variables & mappings should cover `getFunctions`', function () {
                 if (lines.length > 0) {
                     const expected = [...functions, ...variables, ...mappings];
-                    expect(
-                        new Set(contract.getFunctions()),
-                        `actual ${inspect(contract.getFunctions())} != expected ${inspect(
-                            expected
-                        )}`
+                    expect(new Set(contract.getFunctions()),
+                        `actual ${inspect(contract.getFunctions())} != expected ${inspect(expected)}`
                     ).to.be.deep.equal(new Set(expected));
                 }
             });

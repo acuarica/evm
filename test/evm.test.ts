@@ -281,6 +281,43 @@ describe('::evm', function () {
         );
     });
 
+    it("should find '0x00000000' method selector decoded as `PUSH1 0x00|EQ`", function () {
+        // https://www.4byte.directory/signatures/?bytes4_signature=0x00000000
+        // 0x00000000: wycpnbqcyf()	
+        const src = `contract Test {
+            function wycpnbqcyf() public payable returns (uint) {
+                return 1;
+            }
+        }`;
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
+        evm.start();
+        expect(evm.step.functionBranches).to.have.keys('00000000');
+    });
+
+    it("should find '0x00000000' method selector decoded as `ISZERO`", function () {
+        const src = `contract Test {
+            function wycpnbqcyf() public payable returns (uint) {
+                return 1;
+            }
+        }`;
+        const evm = EVM.new(compile(src, '0.7.6', this, { optimizer: { enabled: true } }).bytecode);
+        evm.start();
+
+        const opcodes = evm.blocks.get(12)!.opcodes.map(({ opcode }) => opcode.format());
+        expect(opcodes).to.be.deep.equal([
+            'PUSH1(0x60)@12 0x00 (0)',
+            'CALLDATALOAD(0x35)@14',
+            'PUSH1(0x60)@15 0xe0 (224)',
+            'SHR(0x1c)@17',
+            'DUP1(0x80)@18',
+            'ISZERO(0x15)@19',
+            'PUSH1(0x60)@20 0x1c (28)',
+            'JUMPI(0x57)@22',
+        ]);
+
+        expect(evm.step.functionBranches).to.have.keys('00000000');
+    });
+
     describe('special', function () {
         Object.values(Props).forEach(prop => {
             it(`should get \`${prop.symbol}\` from compiled code`, function () {

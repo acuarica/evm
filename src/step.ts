@@ -698,6 +698,13 @@ const FrontierStep = {
     }],
 } satisfies Step;
 
+const isSelectorCallData = (expr: Expr) =>
+    expr.tag === 'Shr' &&
+    expr.shift.isVal() &&
+    expr.shift.val === 0xe0n &&
+    expr.value.tag === 'CallDataLoad' &&
+    expr.value.location.isZero();
+
 /**
  * `EXTCODEHASH` implemented in `FNS`.
  * 
@@ -713,17 +720,20 @@ const ConstantinopleStep = {
             const SHRsig = (left: Expr, right: Expr): Sig | undefined => {
                 left = left.eval();
                 right = right.eval();
-                return left.isVal() &&
-                    right.tag === 'Shr' &&
-                    right.shift.isVal() &&
-                    right.shift.val === 0xe0n &&
-                    right.value.tag === 'CallDataLoad' &&
-                    right.value.location.isZero()
+                return left.isVal() && isSelectorCallData(right)
                     ? new Sig(left.val.toString(16).padStart(8, '0'))
                     : undefined;
             };
             const { left, right } = stack.pop() as ast.Eq;
             stack.push(SHRsig(left, right) ?? SHRsig(right, left) ?? new ast.Eq(left, right));
+        }
+    }],
+    ISZERO: [FrontierStep.ISZERO[0], ({ stack }: Operand<Expr>) => {
+        if (stack.top !== undefined && isSelectorCallData(stack.top.eval())) {
+            void stack.pop();
+            stack.push(new Sig('00000000'));
+        } else {
+            FrontierStep.ISZERO[1]({ stack });
         }
     }],
 
