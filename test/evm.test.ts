@@ -260,7 +260,7 @@ describe('::evm', function () {
         expect((state.stmts.at(-2) as Log).args).to.be.deep.equal([Props['block.difficulty']]);
     });
 
-    it('find type cast for `uint128` using `And`', function () {
+    it('CHECK find type cast for `uint128` using `And`', function () {
         const src = `contract Test {
             event Deposit(uint128); 
             fallback () external payable {
