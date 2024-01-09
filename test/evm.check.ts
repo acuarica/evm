@@ -56,53 +56,37 @@ describe('evm', function () {
     });
 
     describe('different empty contracts should have the same bytecode', function () {
-        const step = new Shanghai();
         const bytecodes = new Set<string>();
 
-        [
-            {
-                title: 'with no functions',
-                src: `contract Test { }`,
-            },
-            {
-                title: 'with `internal` unused function',
-                src: `contract Test {
+        ([
+            ['with no functions', `contract Test { }`],
+            ['with `internal` unused function', `contract Test {
                 function get() internal pure returns (uint256) {
                     return 5;
                 }
-            }`,
-            },
-            {
-                title: 'with `internal` unused function emitting an event',
-                src: `contract Test {
+            }`],
+            ['with `internal` unused function emitting an event', `contract Test {
                 event Transfer(uint256, address);
                 function get() internal {
                     emit Transfer(3, address(this));
                 }
-            }`,
-            },
-            {
-                title: 'with a private variable and no usages',
-                src: `contract Test {
+            }`],
+            ['with a private variable and no usages', `contract Test {
                 uint256 private value;
-            }`,
-            },
-            {
-                title: 'with a private variable and unreachable usages',
-                src: `contract Test {
+            }`],
+            ['with a private variable and unreachable usages', `contract Test {
                 uint256 private value;
                 function setValue(uint256 newValue) internal {
                     value = newValue;
                 }
-            }`,
-            },
-        ].forEach(({ title, src }) => {
+            }`],
+        ] satisfies [string, string][]).forEach(([title, src]) => {
             it(title, function () {
                 const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
                 bytecodes.add(Buffer.from(bytecode).toString('hex'));
                 expect(bytecodes).to.have.length(1);
 
-                expect([...step.decode(bytecode)].map(o => o.mnemonic)).to.be.deep.equal([
+                expect([...new Shanghai().decode(bytecode)].map(o => o.mnemonic)).to.be.deep.equal([
                     'PUSH1', 'PUSH1', 'MSTORE', 'PUSH1', 'DUP1', 'REVERT', 'INVALID',
                 ]);
             });
