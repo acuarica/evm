@@ -6,8 +6,8 @@ import path from 'path';
 
 import type { Operand, Ram } from 'sevm';
 import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
-import type { Create, DataCopy, Expr, Inst, Local, Log } from 'sevm/ast';
-import { Add, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
+import type { Create, DataCopy, Expr, Inst, Log } from 'sevm/ast';
+import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
 
 import { eventSelector, fnselector } from './utils/selector';
 import { compile, type Version } from './utils/solc';
@@ -258,6 +258,27 @@ describe('::evm', function () {
         const state = evm.start();
         expect(evm.errors).to.be.empty;
         expect((state.stmts.at(-2) as Log).args).to.be.deep.equal([Props['block.difficulty']]);
+    });
+
+    it('find type cast for `uint128` using `And`', function () {
+        const src = `contract Test {
+            event Deposit(uint128); 
+            fallback () external payable {
+                emit Deposit(uint128(~block.number));
+            }
+        }`;
+        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
+        const state = new State<Inst, Expr>();
+        evm.run(0, state);
+
+        const stmt = state.stmts.at(-2)!;
+        assert(stmt.name === 'Log');
+        expect(stmt.args![0]).to.be.deep.equal(
+            new And(
+                new Val(BigInt('0x' + 'ff'.repeat(16)), true),
+                new Local(1, new Not(Props['block.number']))
+            )
+        );
     });
 
     describe('special', function () {
