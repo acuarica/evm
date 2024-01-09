@@ -10,7 +10,7 @@ export const fullTitle = (ctx: Mocha.Context) => title(ctx.test)
     .replace(/`/g, '')
     .replace(/^::/, '')
     .replace(/ /g, '-')
-    .replace(/[:^'()]/g, '_');
+    .replace(/[:^'()|]/g, '_');
 
 Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) {
     const actual = this._obj;
