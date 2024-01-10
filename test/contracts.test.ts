@@ -11,8 +11,9 @@ describe('::contracts', function () {
             ['with no functions', `contract Test { }`],
         ],
         dispatch: [
-            ['single public pure function', `contract Test {
+            ['pure payable and non-payable functions', `contract Test {
                 function get() external pure returns (uint256) { return 1; }
+                function getPayable() external payable returns (uint256) { return 1; }
             }`],
         ],
     }).forEach(([name, contracts]) => {
@@ -26,11 +27,11 @@ describe('::contracts', function () {
                         contract = new Contract(compile(src, '0.7.6', this).bytecode);
                     });
 
-                    it(`should match solidify snapshot`, function () {
+                    it(`should match Solidity snapshot`, function () {
                         expect(contract.solidify()).to.matchSnapshot('sol', this);
                     });
 
-                    it(`should match yul snapshot`, function () {
+                    it(`should match Yul snapshot`, function () {
                         expect(contract.yul()).to.matchSnapshot('yul', this);
                     });
                 });
