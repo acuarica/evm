@@ -569,8 +569,7 @@ function solPublicFunction(self: PublicFunction, tab = '    '): string {
 declare module '.' {
     interface Contract {
         /**
-         * asdf
-         * @returns
+         * Decompiles the `Contract` into Solidity-like source code.
          */
         solidify(...args: Parameters<typeof solContract>): string;
     }
