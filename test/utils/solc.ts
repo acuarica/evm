@@ -27,7 +27,7 @@ export function compile(
     content: string,
     version: Version,
     ctx: Mocha.Context | null,
-    opts?: SolcInput['settings'] & { ignoreWarnings?: boolean }
+    options?: SolcInput['settings'] & { ignoreWarnings?: boolean }
 ): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
         language: 'Solidity',
@@ -37,8 +37,8 @@ export function compile(
             },
         },
         settings: {
-            optimizer: opts?.optimizer,
-            metadata: opts?.metadata,
+            optimizer: options?.optimizer,
+            metadata: options?.metadata,
             outputSelection: {
                 '*': {
                     '*': ['abi', 'metadata', 'evm.deployedBytecode'],
@@ -87,7 +87,7 @@ export function compile(
     const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.js`)));
     const { errors, contracts } = JSON.parse(solc.compile(input)) as SolcOutput;
 
-    if (errors !== undefined && (!opts?.ignoreWarnings || errors.some(err => err.severity === 'error'))) {
+    if (errors !== undefined && (!options?.ignoreWarnings || errors.some(err => err.severity === 'error'))) {
         throw new Error(errors.map(err => err.formattedMessage).join('\n'));
     }
 
