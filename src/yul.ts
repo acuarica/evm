@@ -199,13 +199,21 @@ declare module '.' {
 
 Contract.prototype.yul = function (this: Contract) {
     let text = '';
-    text += yulStmts(this.main);
+
+    text += 'object "runtime" {\n';
+    text += '    code {\n';
+    text += yulStmts(this.main, 8);
     text += '\n';
 
-    for (const [, fn] of Object.entries(this.functions)) {
-        text += yulStmts(fn.stmts);
+    for (const [selector, fn] of Object.entries(this.functions)) {
+        text += ' '.repeat(8) + `/*public*/ function $${selector}() {\n`;
+        text += yulStmts(fn.stmts, 12);
+        text += ' '.repeat(8) + '}\n';
         text += '\n';
     }
+
+    text += '    }\n';
+    text += '}\n';
 
     return text;
 };

@@ -26,7 +26,7 @@ const versionsLoaded = new Set<Version>();
 export function compile(
     content: string,
     version: Version,
-    context: Mocha.Context | null,
+    ctx: Mocha.Context | null,
     opts?: SolcInput['settings'] & { ignoreWarnings?: boolean }
 ): { bytecode: string; abi: ABI; metadata: string } {
     const input = JSON.stringify({
@@ -48,8 +48,12 @@ export function compile(
     } satisfies SolcInput);
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
-    if (context !== null) {
-        const fileName = fullTitle(context)
+    if (ctx !== null) {
+        const updateTitle = (text: string) => {
+            if (ctx.test) ctx.test.title += text;
+        };
+
+        const fileName = fullTitle(ctx)
             .replace(`solc-v${version}.`, '')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
 
@@ -61,19 +65,16 @@ export function compile(
         const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
         const path = `${basePath}/${fileName}-${hash}`;
 
-        if (context.test)
-            context.test.title += ` #${hash}`;
+        updateTitle(` #${hash}`);
 
         try {
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
-            if (context.test)
-                context.test.title += ` 🛠️`;
+            updateTitle(` 🛠️`);
 
             if (!versionsLoaded.has(version)) {
-                context.timeout(context.timeout() + 5000);
-                if (context.test)
-                    context.test.title += `--loads \`solc-${version}\``;
+                ctx.timeout(ctx.timeout() + 5000);
+                updateTitle(`--loads \`solc-${version}\``);
             }
             writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
         }
