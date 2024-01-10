@@ -1,14 +1,10 @@
 import { Assertion, expect } from 'chai';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import type { Runnable, Suite } from 'mocha';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
 
-const title = (test: Runnable | Suite | undefined): string =>
-    test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
-
-export const fullTitle = (ctx: Mocha.Context) => title(ctx.test)
-    .replace(/^../, '')
+export const maskTitle = (title: string) => title
+    .replace(/^\.\./, '')
     .replace(/`/g, '')
     .replace(/^::/, '')
     .replace(/ /g, '-')
@@ -19,8 +15,13 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
 
-    const fileName = fullTitle(ctx);
-    const snapshotPath = `./test/__snapshots__/${fileName}.${ext}`;
+    const [root, ...titles] = ctx.test.titlePath();
+
+    const snapshotFolder = `./test/__snapshots__/` + root.replace('::', '');
+    mkdirSync(snapshotFolder, { recursive: true });
+
+    const fileName = maskTitle(titles.map(t => t.replace(/^should /, '')).join('.'));
+    const snapshotPath = `${snapshotFolder}/${fileName}.${ext}`;
 
     if (!existsSync(snapshotPath) || !!UPDATE_SNAPSHOTS) {
         writeFileSync(snapshotPath, actual, 'utf-8');

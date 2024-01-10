@@ -6,7 +6,8 @@ import * as path from 'path';
 
 import type { ABI, SolcInput, SolcOutput } from 'solc';
 import wrapper from 'solc/wrapper';
-import { fullTitle } from './snapshot';
+import { maskTitle } from './snapshot';
+import type { Runnable, Suite } from 'mocha';
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
@@ -49,11 +50,13 @@ export function compile(
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (ctx !== null) {
+        const title = (test: Runnable | Suite | undefined): string =>
+            test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
         const updateTitle = (text: string) => {
             if (ctx.test) ctx.test.title += text;
         };
 
-        const fileName = fullTitle(ctx)
+        const fileName = maskTitle(title(ctx.test))
             .replace(`solc-v${version}.`, '')
             .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
 
