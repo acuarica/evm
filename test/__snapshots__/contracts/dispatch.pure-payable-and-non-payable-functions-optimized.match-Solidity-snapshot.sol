@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// Metadata ipfs://QmRHsusWvnMjnuZciCkG6nDhuk1MKuqDGqGjTaJKWZu36c
+// Metadata ipfs://QmXbZWxxMqei9Rfz17KsZ9b9ei3AtyTbqePnX7jzrQzSPC
 pragma solidity 0.7.6;
 
 contract Contract {

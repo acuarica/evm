@@ -27,7 +27,7 @@ object "runtime" {
 
         /*public*/ function $6d4ce63c() {
             let local1 = callvalue() // #refs 0
-            require(iszero(callvalue()));
+            require(iszero(local1));
             let local2 = 0x80 // #refs 0
             let local3 = 0x1 // #refs -1
             mstore(local2, local3)

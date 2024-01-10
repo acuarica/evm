@@ -414,8 +414,9 @@ describe('::evm', function () {
             const state = new State<Inst, Expr>();
             evm.run(0, state);
             const stmts = build(state);
+            // TODO: fix solidify
             expect(sol`${stmts[6]}`).to.be.deep.equal(
-                'require(new Contract(memory[0x80..0x80+0x85 + 0x80 - 0x80]).value(0x0).address);'
+                'require(new Contract(memory[0x80..0x80+0x85 + 0x80 - 0x80]).value(0x0).address == 0 == 0);'
             );
             expect(sol`${stmts[7]}`).to.be.deep.equal('return;');
 

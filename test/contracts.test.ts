@@ -6,25 +6,44 @@ import { compile } from './utils/solc';
 
 describe('::contracts', function () {
 
-    Object.entries({
+    Object.entries<{
+        title: string,
+        src: string,
+        options?: Parameters<typeof compile>[3],
+    }[]
+    >({
         empty: [
-            ['with no functions', `contract Test { }`],
+            {
+                title: 'with no functions',
+                src: `contract Test { }`,
+            },
         ],
         dispatch: [
-            ['pure payable and non-payable functions', `contract Test {
-                function get() external pure returns (uint256) { return 1; }
-                function getPayable() external payable returns (uint256) { return 1; }
-            }`],
+            {
+                title: 'pure payable and non-payable functions',
+                src: `contract Test {
+                    function get() external pure returns (uint256) { return 1; }
+                    function getPayable() external payable returns (uint256) { return 1; }
+                }`,
+            },
+            {
+                title: 'pure payable and non-payable functions optimized',
+                src: `contract Test {
+                    function get() external pure returns (uint256) { return 1; }
+                    function getPayable() external payable returns (uint256) { return 1; }
+                }`,
+                options: { optimizer: { enabled: true } },
+            },
         ],
     }).forEach(([name, contracts]) => {
         describe(name, function () {
-            contracts.forEach(([title, src]) => {
+            contracts.forEach(({ title, src, options }) => {
 
                 describe(title, function () {
                     let contract: Contract;
 
                     before(function () {
-                        contract = new Contract(compile(src, '0.7.6', this).bytecode);
+                        contract = new Contract(compile(src, '0.7.6', this, options).bytecode);
                     });
 
                     it(`should match Solidity snapshot`, function () {

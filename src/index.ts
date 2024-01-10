@@ -342,8 +342,10 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                     ...(isRevertBlock(falseBlock)
                         ? [
                             new Require(
-                                last.cond.eval(),
-                                ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
+                                // last.cond.eval(),
+                                last.cond,
+                                // ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
+                                (falseBlock.at(-1) as Revert).args ?? []
                             ),
                             ...trueBlock,
                         ]
