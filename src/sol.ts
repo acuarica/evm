@@ -527,9 +527,9 @@ export function solMappings(mappings: IStore['mappings']) {
  *
  * @returns the decompiled text for `this` function.
  */
-function solPublicFunction(self: PublicFunction): string {
+function solPublicFunction(self: PublicFunction, tab = '    '): string {
     let output = '';
-    output += 'function ';
+    output += tab + 'function ';
     if (self.label !== undefined) {
         const fullFunction = self.label;
         const fullFunctionName = fullFunction.split('(')[0];
@@ -561,8 +561,8 @@ function solPublicFunction(self: PublicFunction): string {
         output += ` returns (${self.returns.join(', ')})`;
     }
     output += ' {\n';
-    output += solStmts(self.stmts, 4);
-    output += '}\n\n';
+    output += solStmts(self.stmts, 8);
+    output += tab + '}\n\n';
     return output;
 }
 
