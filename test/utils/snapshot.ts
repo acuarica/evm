@@ -2,6 +2,8 @@ import { Assertion, expect } from 'chai';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { Runnable, Suite } from 'mocha';
 
+const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
+
 const title = (test: Runnable | Suite | undefined): string =>
     test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
 
@@ -20,7 +22,7 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
     const fileName = fullTitle(ctx);
     const snapshotPath = `./test/__snapshots__/${fileName}.${ext}`;
 
-    if (!existsSync(snapshotPath)) {
+    if (!existsSync(snapshotPath) || !!UPDATE_SNAPSHOTS) {
         writeFileSync(snapshotPath, actual, 'utf-8');
         ctx.test.title += ` 📸 `;
     } else {
