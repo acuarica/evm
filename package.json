@@ -97,7 +97,7 @@
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "docs": "npx http-server docs",
         "clean": "rm -r .artifacts/",
-        "clean-snapshots": "rm -v test/__snapshots__/*.*"
+        "clean-snapshots": "rm -v test/__snapshots__/*.snap.md"
     },
     "engines": {
         "node": ">=16.6.0"
