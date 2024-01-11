@@ -73,7 +73,7 @@ export function compile(
         try {
             return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
         } catch {
-            updateTitle(` 🛠️`);
+            updateTitle(' 🛠️');
 
             if (!versionsLoaded.has(version)) {
                 ctx.timeout(ctx.timeout() + 5000);
