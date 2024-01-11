@@ -1,6 +1,6 @@
 # ::contracts
 
-```sol empty/with-no-functions/match-Solidity-snapshot
+```solidity empty/with-no-functions/match-Solidity-snapshot
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://Qmc7NUcdp12QQzhVAMQGPVCLb19V1ifakkLWL7SgvUoYkM
 pragma solidity 0.7.6;
@@ -27,7 +27,7 @@ object "runtime" {
 
 ```
 
-```sol locals/no-dedup-local-variable-with-emit/match-Solidity-snapshot
+```solidity locals/no-dedup-local-variable-with-emit/match-Solidity-snapshot
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmR3j8ecZd9cGBspFUPWFJMuocmpCatPtfUxyqiCS8K1kB
 pragma solidity 0.7.6;
@@ -67,7 +67,7 @@ object "runtime" {
 
 ```
 
-```sol locals/no-dedup-local-variable-with-emit-optimized/match-Solidity-snapshot
+```solidity locals/no-dedup-local-variable-with-emit-optimized/match-Solidity-snapshot
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmSeJbVEgSPm1gJ7wnPsmsSShhZuBgfsjM7qkTsS1SPe1x
 pragma solidity 0.7.6;
@@ -104,7 +104,7 @@ object "runtime" {
 
 ```
 
-```sol dispatch/pure-payable-and-non-payable-functions/match-Solidity-snapshot
+```solidity dispatch/pure-payable-and-non-payable-functions/match-Solidity-snapshot
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://Qmbq3oLNpZcm17Gb7pxnFJnka9fmjwtwMTg5xCnt3E7Xix
 pragma solidity 0.7.6;
@@ -183,7 +183,7 @@ object "runtime" {
 
 ```
 
-```sol dispatch/pure-payable-and-non-payable-functions-optimized/match-Solidity-snapshot
+```solidity dispatch/pure-payable-and-non-payable-functions-optimized/match-Solidity-snapshot
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmXbZWxxMqei9Rfz17KsZ9b9ei3AtyTbqePnX7jzrQzSPC
 pragma solidity 0.7.6;

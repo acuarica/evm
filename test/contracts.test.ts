@@ -72,7 +72,7 @@ describe('::contracts', function () {
                     });
 
                     it(`should match Solidity snapshot`, function () {
-                        expect(contract.solidify()).to.matchSnapshot('sol', this);
+                        expect(contract.solidify()).to.matchSnapshot('solidity', this);
                     });
 
                     it(`should match Yul snapshot`, function () {
