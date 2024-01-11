@@ -1,6 +1,5 @@
 import { Assertion, expect } from 'chai';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { basename } from 'path';
 
 const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
 
@@ -15,7 +14,6 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
     const actual = this._obj;
     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
-    if (ctx.test.file === undefined) throw new TypeError('Context test file is not defined');
 
     const [root, ...titles] = ctx.test.titlePath();
 
@@ -27,10 +25,15 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
         ctx.test!.title += ` 📸 `;
     };
 
-    const name = maskTitle(titles.map(t => t.replace(/^should /, '')).join('/'));
+    const name = maskTitle(titles.map(t => t
+        .replace(/^should /, '')
+        .replace(/ #[0-9a-f]{6}/, '')
+        .replace(' 🛠️', '')
+        .replace(/--loads `solc-.*`/, '')
+    ).join('/'));
     const tag = '```' + `${ext} ${name}`;
 
-    const snapshotFile = `./test/__snapshots__/${basename(ctx.test.file)}.snap.md`;
+    const snapshotFile = `./test/__snapshots__/${maskTitle(root)}.snap.md`;
     const content = existsSync(snapshotFile) ? readFileSync(snapshotFile, 'utf8') : `# ${root}\n`;
     let marker: 'NOT_SEEN' | 'OPEN' | 'CLOSED' = 'NOT_SEEN';
     let output = '';

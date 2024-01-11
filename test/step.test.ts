@@ -422,7 +422,7 @@ describe('::step', function () {
             state.stack.push(new Val(4n));
             step.MLOAD(state);
 
-            expect(state.stack.values).to.be.deep.equal([new Val(1n)]);
+            expect(state.stack.values).to.be.deep.equal([new MLoad(new Val(4n), new Val(1n))]);
         });
 
         it('should `MSTORE` value into memory', function () {

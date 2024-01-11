@@ -33,7 +33,7 @@ describe('::ast', function () {
             F(new Shl(new Val(1n), new Val(32n)), expr => [expr.value, expr.shift]),
             F(new Sig('1234'), () => [],),
 
-            F(new MLoad(new Val(32n)), expr => [expr.loc]),
+            F(new MLoad(new Val(32n)), expr => [expr.location]),
 
             F(Props['block.basefee'], () => []),
             F(new Fn('BLOCKHASH', new Val(1234n)), expr => [expr.value]),
