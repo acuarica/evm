@@ -18,6 +18,31 @@ describe('::contracts', function () {
                 src: `contract Test { }`,
             },
         ],
+        locals: [
+            {
+                title: 'no dedup local variable with emit',
+                src: `contract Test {
+                    event Deposit(uint256);
+                    fallback () external payable {
+                        uint256 n = block.number;
+                        emit Deposit(n);
+                        emit Deposit(n);
+                    }
+                }`
+            },
+            {
+                title: 'no dedup local variable with emit optimized',
+                src: `contract Test {
+                    event Deposit(uint256);
+                    fallback () external payable {
+                        uint256 n = block.number;
+                        emit Deposit(n);
+                        emit Deposit(n);
+                    }
+                }`,
+                options: { optimizer: { enabled: true } },
+            }
+        ],
         dispatch: [
             {
                 title: 'pure payable and non-payable functions',
