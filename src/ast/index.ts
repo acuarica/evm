@@ -162,7 +162,7 @@ export class Require {
     readonly name = 'Require';
     constructor(readonly condition: Expr, readonly args: Expr[]) { }
     eval() {
-        return this;
+        return new Require(this.condition.eval(), this.args.map(evalE));
     }
 }
 

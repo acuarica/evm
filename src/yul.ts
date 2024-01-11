@@ -77,7 +77,7 @@ function yulExpr(expr: Expr): string {
                     throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
             }
         case 'MLoad':
-            return yul`mload(${expr.loc})`;
+            return yul`mload(${expr.location})`;
         case 'Sha3':
             return yul`keccak256(${expr.offset}, ${expr.size})`;
         case 'Create': // create(v, p, n) | F | create new contract with code mem[p…(p+n)) and send v wei and return the new address; returns 0 on error

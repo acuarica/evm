@@ -117,7 +117,7 @@ function solExpr(expr: Expr): string {
                     throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
             }
         case 'MLoad':
-            return sol`memory[${expr.loc}]`;
+            return sol`memory[${expr.location}]`;
         case 'Sha3':
             return expr.args === undefined
                 ? sol`keccak256(memory[${expr.offset}:(${expr.offset}+${expr.size})])`

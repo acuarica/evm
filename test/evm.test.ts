@@ -414,9 +414,8 @@ describe('::evm', function () {
             const state = new State<Inst, Expr>();
             evm.run(0, state);
             const stmts = build(state);
-            // TODO: fix solidify
-            expect(sol`${stmts[6]}`).to.be.deep.equal(
-                'require(new Contract(memory[0x80..0x80+0x85 + 0x80 - 0x80]).value(0x0).address == 0 == 0);'
+            expect(sol`${stmts[6].eval()}`).to.be.deep.equal(
+                'require(new Contract(memory[0x80..0x80+0x85]).value(0x0).address);'
             );
             expect(sol`${stmts[7]}`).to.be.deep.equal('return;');
 
@@ -442,7 +441,7 @@ describe('::evm', function () {
                     emit UnknownEvent(2, 3, 4);
                     uint256 n = block.number;
                     emit Deposit(n);
-                    emit Deposit(n + 7);
+                    emit Deposit(n +   7);
                 }
             }`;
             const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
@@ -490,36 +489,7 @@ event ${eventSelector(unknownEventSig)};
                 `emit Deposit(${local} + 0x7);`,
                 'return;',
             ]);
-            expect(yulStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
-                'mstore(0x40, 0x80)',
-                'let local0 = 0x80 // #refs 0',
-                'let local1 = 0x1 // #refs -1',
-                'mstore(local0, local1)',
-                'let local2 = 0x80 // #refs 0',
-                'log1(local2, sub(add(0x20, local0), local2), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)',
-                'let local3 = 0x80 // #refs 0',
-                'let local4 = 0x2 // #refs -1',
-                'mstore(local3, local4)',
-                'let local5 = 0x3 // #refs -1',
-                'let local6 = add(0x20, local3) // #refs -1',
-                'mstore(local6, local5)',
-                'let local7 = 0x4 // #refs -1',
-                'let local8 = add(0x20, local6) // #refs -1',
-                'mstore(local8, local7)',
-                'let local9 = 0x80 // #refs 0',
-                `log1(local9, sub(add(0x20, local8), local9), 0x${topic})`,
-                `let ${local} = number() // #refs 1`,
-                'let local11 = 0x80 // #refs 0',
-                `mstore(local11, ${local})`,
-                'let local12 = 0x80 // #refs 0',
-                `log1(local12, sub(add(0x20, local11), local12), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
-                'let local13 = 0x80 // #refs 0',
-                'let local14 = add(local10, 0x7) // #refs -1',
-                `mstore(local13, local14)`,
-                "let local15 = 0x80 // #refs 0",
-                `log1(local15, sub(add(0x20, local13), local15), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)`,
-                'stop()',
-            ]);
+            expect(yulStmts(state.stmts)).to.matchSnapshot('yul', this);
         });
     });
 

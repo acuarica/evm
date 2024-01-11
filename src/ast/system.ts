@@ -37,7 +37,12 @@ export class Create extends Tag {
     }
 
     eval(): Expr {
-        return this;
+        return new Create(
+            this.value.eval(),
+            this.offset.eval(),
+            this.size.eval(),
+            this.bytecode,
+        );
     }
 }
 

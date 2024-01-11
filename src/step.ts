@@ -540,12 +540,12 @@ const FrontierStep = {
 
     /* Memory operations */
     MLOAD: [0x51, ({ stack, memory }) => {
-        let loc = stack.pop();
-        loc = loc.eval();
-        stack.push(
-            loc.isVal() && Number(loc.val) in memory ? memory[Number(loc.val)] : new ast.MLoad(loc)
-        );
-        // stmts.push(new Locali(new Local(-1, new MLoad(loc))));
+        const location = stack.pop();
+        stack.push(new ast.MLoad(location, (location =>
+            location.isVal() && Number(location.val) in memory
+                ? memory[Number(location.val)]
+                : undefined
+        )(location.eval())));
     }],
     ...zip([
         ['MSTORE', 0x52] as const,
