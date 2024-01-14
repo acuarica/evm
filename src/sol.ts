@@ -411,7 +411,6 @@ export function solVars(variables: IStore['variables']) {
     let output = '';
     [...variables.entries()].forEach(([hash, variable], index) => {
         const types: string[] = variable.types
-            .map(expr => expr.eval())
             .map(expr => (expr.isVal() ? 'bigint' : expr.type ?? ''))
             .filter(t => t.trim() !== '');
         if (types.length === 0) {
@@ -497,8 +496,7 @@ export function solMappings(mappings: IStore['mappings']) {
                             name: mapping.name,
                             structs: mapping.structs,
                             keys: mapping.keys.map(items => {
-                                items.shift();
-                                return items;
+                                return items.slice(1);
                             }),
                             values: mapping.values,
                         })
