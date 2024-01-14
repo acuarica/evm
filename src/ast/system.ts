@@ -6,7 +6,7 @@ export class Sha3 extends Tag {
         super();
     }
 
-    eval(): Expr {
+    eval(): Sha3 {
         return new Sha3(this.offset, this.size, this.args?.map(evalE));
     }
 
@@ -167,7 +167,7 @@ export class Return implements IInst {
     constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) { }
 
     eval() {
-        return this;
+        return new Return(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
     }
 }
 
