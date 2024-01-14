@@ -413,7 +413,7 @@ const STORAGE = {
         const slot = stack.pop();
         const value = stack.pop();
 
-        if (slot.is(ast.Local)) slot.nrefs--;
+        if (slot.tag === 'Local') slot.nrefs--;
 
         let base: number | undefined, parts: Expr[];
         const check = (slot: Sha3): boolean =>
@@ -459,7 +459,7 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     }
     const destpc = Number(offset2.val);
     if (bytecode[destpc] === JUMPDEST) {
-        if (offset instanceof Val || offset.is(Local)) {
+        if (offset instanceof Val || offset.tag === 'Local') {
             offset2.jumpDest = destpc;
         } else {
             // TODO: check if this is sounds
@@ -554,8 +554,8 @@ const FrontierStep = {
         let location = stack.pop();
         const data = stack.pop();
 
-        if (location.is(Local)) location.nrefs--;
-        if (data.is(Local)) data.nrefs--;
+        if (location.tag === 'Local') location.nrefs--;
+        if (data.tag === 'Local') data.nrefs--;
 
         stmts.push(new ast.MStore(location, data));
 
