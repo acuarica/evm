@@ -8,7 +8,7 @@ describe('::yul', function () {
 
     ([
         [new MLoad(new Add(new Val(4n), new Val(8n))), 'mload(add(0x4, 0x8))'],
-        [new Sha3(new Val(4n), new Val(8n)), 'keccak256(0x4, 0x8)'],
+        [new Sha3(new Val(4n), new Val(8n)), 'keccak256(0x4, 0x8 /*no args*/)'],
     ] as const).forEach(([expr, str]) => {
         it(`should convert \`Expr\` to Yul \`${str}\``, function () {
             expect(yul`${expr}`).to.be.equal(str);
