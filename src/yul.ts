@@ -79,7 +79,7 @@ function yulExpr(expr: Expr): string {
         case 'MLoad':
             return yul`mload(${expr.location})`;
         case 'Sha3':
-            return yul`keccak256(${expr.offset}, ${expr.size})`;
+            return yul`keccak256(${expr.offset}, ${expr.size} /*${expr.args?.map(yulExpr).join('.') ?? 'no args'}*/)`;
         case 'Create': // create(v, p, n) | F | create new contract with code mem[p…(p+n)) and send v wei and return the new address; returns 0 on error
             return yul`create(${expr.value}, ${expr.offset}, ${expr.size})`;
         case 'Call': // call(g, a, v, in, insize, out, outsize) | F | call contract at address a with input mem[in…(in+insize)) providing g gas and v wei and output area mem[out…(out+outsize)) returning 0 on error (eg. out of gas) and 1 on success See more
@@ -99,7 +99,7 @@ function yulExpr(expr: Expr): string {
         case 'SLoad':
             return yul`sload(${expr.slot})`;
         case 'MappingLoad':
-            return yul`sload(${expr.location}/*${yulMapArgs(expr)}*/)`;
+            return yul`sload(${expr.slot}/*base${expr.location}${yulMapArgs(expr)}*/)`;
     }
 }
 
@@ -116,7 +116,7 @@ function yulInst(inst: Inst): string {
         case 'Stop':
             return 'stop()';
         case 'Return':
-            return yul`return(${inst.offset}, ${inst.size})`;
+            return yul`return(${inst.offset}, ${inst.size}) // ${inst.args?.map(yulExpr).join('.')}`;
         case 'Revert':
             return yul`revert(${inst.offset}, ${inst.size})`;
         case 'SelfDestruct':
@@ -181,11 +181,6 @@ export function yulStmts(stmts: Stmt[], spaces = 0): string {
     }
 
     return text;
-
-    // return stmts
-    // .filter(s => s.name !== 'Local' || s.local.nrefs > 0)
-    // .map(yulStmt)
-    // .join('\n');
 }
 
 declare module '.' {
@@ -206,7 +201,8 @@ Contract.prototype.yul = function (this: Contract) {
     text += '\n';
 
     for (const [selector, fn] of Object.entries(this.functions)) {
-        text += ' '.repeat(8) + `/*public*/ function $${selector}() {\n`;
+        const name = fn.label ?? `__$${selector}(/*unknown*/)`;
+        text += ' '.repeat(8) + `function ${name} /*public*/ {\n`;
         text += yulStmts(fn.stmts, 12);
         text += ' '.repeat(8) + '}\n';
         text += '\n';
