@@ -1,5 +1,6 @@
 import { Assertion, expect } from 'chai';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
 
 const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
 
@@ -47,8 +48,8 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
                 writeSnapshot();
                 marker = 'CLOSED';
             } else {
-                expect(actual + '\n', `Snapshot: ${name}`).to.be.equal(snapshot);
                 ctx.test.title += ` 🎞️ `;
+                expect(actual + '\n', `Snapshot: ${name}`).to.be.equal(snapshot);
                 return;
             }
         } else if (marker === 'OPEN') {
@@ -65,11 +66,30 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
     writeFileSync(snapshotFile, output.trimEnd() + '\n');
 });
 
+Assertion.addMethod('matchFile', function (path: string, ctx: Mocha.Context) {
+    const actual = this._obj;
+    if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
+    if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
+
+    const snapshotPath = `./test/__snapshots__/${path}`;
+    const dir = dirname(snapshotPath);
+    mkdirSync(dir, { recursive: true });
+    if (!existsSync(snapshotPath) || !!UPDATE_SNAPSHOTS) {
+        writeFileSync(snapshotPath, actual);
+        ctx.test.title += ` 📸 `;
+    } else {
+        ctx.test.title += ` 🎞️ `;
+        const expected = readFileSync(snapshotPath, 'utf8');
+        expect(actual, `Snapshot file: ${path}`).to.be.equal(expected);
+    }
+});
+
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     export namespace Chai {
         interface Assertion {
             matchSnapshot(ext: string, ctx: Mocha.Context): Assertion;
+            matchFile(path: string, ctx: Mocha.Context): Assertion;
         }
     }
 }
