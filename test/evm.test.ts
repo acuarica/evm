@@ -618,7 +618,8 @@ event ${eventSelector(unknownEventSig)};
                 const state = new State<Inst, Expr>();
                 evm.run(0, state);
 
-                expect(state.stmts).to.be.have.length(4);
+                const stmts = state.stmts.filter(stmt => stmt.name === 'MappingStore');
+                expect(stmts).to.be.have.length(3);
 
                 {
                     const size = new Add(
@@ -626,7 +627,7 @@ event ${eventSelector(unknownEventSig)};
                         new Add(new Val(32n, true), new Val(0n, true))
                     );
                     const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(0n, true)]);
-                    expect(state.stmts[0]).to.be.deep.equal(
+                    expect(stmts[0]).to.be.deep.equal(
                         new MappingStore(slot, evm.step.mappings, 0, [Props['msg.sender']],
                             new Add(
                                 new MappingLoad(slot, evm.step.mappings, 0, [Props['msg.sender']]),
@@ -634,9 +635,9 @@ event ${eventSelector(unknownEventSig)};
                             )
                         )
                     );
-                    expect(sol`${state.stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
-                    expect(yul`${state.stmts[0]}`).to.be.equal(
-                        'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(0/*[msg.sender]*/), 0x3)) /*0[msg.sender]*/'
+                    expect(sol`${stmts[0]}`).to.be.equal('mapping1[msg.sender] += 0x3;');
+                    expect(yul`${stmts[0]}`).to.be.equal(
+                        'sstore(keccak256(0x0, add(0x20, add(0x20, 0x0))), add(sload(0/*[caller()]*/), 0x3)) /*0[caller()]*/'
                     );
                 }
 
@@ -646,7 +647,7 @@ event ${eventSelector(unknownEventSig)};
                         new Add(new Val(32n, true), new Val(0n, true))
                     );
                     const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(1n, true)]);
-                    expect(state.stmts[1]).to.be.deep.equal(
+                    expect(stmts[1]).to.be.deep.equal(
                         new MappingStore(slot, evm.step.mappings, 1, [Props['msg.sender']],
                             new Add(
                                 new MappingLoad(slot, evm.step.mappings, 1, [Props['msg.sender']]),
