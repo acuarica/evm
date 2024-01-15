@@ -7,7 +7,7 @@ contract Contract {
 mapping (address => unknown) public balanceOf;
 mapping (address => unknown) public frozenAccount;
 mapping (address => mapping (address => uint256)) public allowance;
-mapping (address => mapping (address => unknown)) mapping4;
+mapping (address => mapping (address => unknown)) public spentAllowance;
 
 unknown var1__1; // Slot #1
 unknown public totalSupply; // Slot #4
@@ -162,7 +162,7 @@ unknown var5__5; // Slot #2
         if (~frozenAccount[_arg0] == 0) {
             throw('JUMP(0x56)@1483 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~(_arg2 + mapping9[_arg0][msg.sender] <= allowance[_arg0][msg.sender])) {
+        if (~(_arg2 + spentAllowance[_arg0][msg.sender] <= allowance[_arg0][msg.sender])) {
             throw('JUMP(0x56)@1549 destination should be JUMPDEST@2 but found '0x60'');
         }
         storage[keccak256(_arg0, 0x5)] -= _arg2;
@@ -221,8 +221,8 @@ unknown var5__5; // Slot #2
         return frozenAccount[_arg0];
     }
 
-    function dc3080f2() public view payable returns (unknown) {
-        return mapping9[_arg0][_arg1];
+    function spentAllowance(address _arg0, address _arg1) public view payable returns (unknown) {
+        return spentAllowance[_arg0][_arg1];
     }
 
     function allowance(address _arg0, address _arg1) public view payable returns (unknown) {

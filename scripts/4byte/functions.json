@@ -1,4 +1,5 @@
 [
+    "spentAllowance(address,address)",
     "___coinAddress()",
     "___initialize(address,address,address)",
     "___isActive()",
