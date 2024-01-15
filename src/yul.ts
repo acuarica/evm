@@ -202,7 +202,9 @@ Contract.prototype.yul = function (this: Contract) {
 
     for (const [selector, fn] of Object.entries(this.functions)) {
         const name = fn.label ?? `__$${selector}(/*unknown*/)`;
-        text += ' '.repeat(8) + `function ${name} /*public*/ {\n`;
+        const view = fn.constant ? ' view' : '';
+        const payable = fn.payable ? ' payable' : '';
+        text += ' '.repeat(8) + `function ${name} { // public${view}${payable}\n`;
         text += yulStmts(fn.stmts, 12);
         text += ' '.repeat(8) + '}\n';
         text += '\n';

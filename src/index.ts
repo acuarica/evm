@@ -1,4 +1,4 @@
-import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce } from './ast';
+import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce, MStore } from './ast';
 import { Not } from './ast/alu';
 import type { IEvents } from './ast/log';
 import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
@@ -71,7 +71,7 @@ export class Contract {
         evm.run(0, main);
         this.main = build(main);
 
-        this.payable = !requiresNoValue(this.main);
+        this.payable = !requiresNoValue(this.main, true);
 
         for (const [selector, branch] of evm.step.functionBranches) {
             evm.run(branch.pc, branch.state);
@@ -397,7 +397,14 @@ export function reduce0(stmts: Inst[]): Stmt[] {
     return result;
 }
 
-function requiresNoValue(stmts: Stmt[]): boolean {
+/**
+ * 
+ * @param stmts 
+ * @param allowMStoreInit 
+ * @returns 
+ */
+function requiresNoValue(stmts: Stmt[], allowMStoreInit = false): boolean {
+    stmts = allowMStoreInit && stmts[0] instanceof MStore ? stmts.slice(1) : stmts;
     const first = stmts.find(stmt => stmt.name !== 'Local');
     return first instanceof Require && (first =>
         first.condition.tag === 'IsZero' &&

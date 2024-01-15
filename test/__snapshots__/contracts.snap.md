@@ -162,7 +162,7 @@ object "runtime" {
         let local0 = 0x0 // #refs 0
         revert(local0, local0)
 
-        function __$5d2c7ee6(/*unknown*/) /*public*/ {
+        function __$5d2c7ee6(/*unknown*/) { // public payable
             let local1 = mload(0x40) // #refs 0
             let local2 = 0x1 // #refs -1
             mstore(local1, local2)
@@ -170,7 +170,7 @@ object "runtime" {
             return(local3, sub(add(0x20, local1), local3)) // 0x1
         }
 
-        function get() /*public*/ {
+        function get() { // public
             let local1 = callvalue() // #refs 0
             require(iszero(local1));
             let local2 = mload(0x40) // #refs 0
@@ -241,7 +241,7 @@ object "runtime" {
         let local0 = 0x0 // #refs 0
         revert(local0, local0)
 
-        function __$5d2c7ee6(/*unknown*/) /*public*/ {
+        function __$5d2c7ee6(/*unknown*/) { // public payable
             let local1 = 0x40 // #refs 0
             let local2 = mload(local1) // #refs -1
             mstore(local2, 0x1)
@@ -249,7 +249,7 @@ object "runtime" {
             return(local3, add(0x20, sub(local2, local3))) // 0x1
         }
 
-        function get() /*public*/ {
+        function get() { // public
             let local1 = callvalue() // #refs 0
             require(iszero(local1));
             let local2 = 0x40 // #refs 0
@@ -290,11 +290,11 @@ mapping (address => mapping (address => unknown)) public allowance;
         revert();
     }
 
-    function getValue() public payable returns (unknown) {
+    function getValue() public returns (unknown) {
         return allowance[msg.sender][msg.sender];
     }
 
-    function allowance(address _arg0, address _arg1) public payable returns (unknown) {
+    function allowance(address _arg0, address _arg1) public returns (unknown) {
         undefined local2 = 0x4; // #refs 3
         require((msg.data.length - local2 < 0x40) == 0);
         return allowance[_arg0][_arg1];
@@ -326,7 +326,7 @@ object "runtime" {
         let local1 = 0x0 // #refs 0
         revert(local1, local1)
 
-        function getValue() /*public*/ {
+        function getValue() { // public
             let local2 = 0x0 // #refs -1
             let local3 = 0x0 // #refs -1
             mstore(local3, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
@@ -343,7 +343,7 @@ object "runtime" {
             return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, add(0x20, local4) /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
-        function allowance(address,address) /*public*/ {
+        function allowance(address,address) { // public
             let local2 = 0x4 // #refs 3
             let local3 = sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x40)));
