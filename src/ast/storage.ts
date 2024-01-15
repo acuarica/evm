@@ -52,7 +52,7 @@ export class MappingStore implements IInst {
     }
 
     eval() {
-        return this;
+        return new MappingStore(this.slot, this.mappings, this.location, this.items, this.data.eval(), this.structlocation);
     }
 }
 
@@ -66,7 +66,13 @@ export class SStore {
     ) { }
 
     eval() {
-        return new SStore(this.slot.eval(), this.data.eval(), this.variable);
+        const data = this.data.eval();
+        if (this.variable !== undefined) {
+            const i = this.variable.types.indexOf(this.data);
+            if (i === -1) throw new Error('error in eval sstore');
+            this.variable.types[i] = data;
+        }
+        return new SStore(this.slot.eval(), data, this.variable);
     }
 }
 

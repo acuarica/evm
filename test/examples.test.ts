@@ -16,19 +16,23 @@ describe('examples', function () {
                 // /^function supportsInterfac\(bytes4 _arg0a\) public payable {$/m,
             ],
             ercs: ['ERC165'] as const,
+            skipSnapshot: true,
         }, {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
             count: 13208,
             lines: [],
+            skipSnapshot: true,
         }, {
             name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467',
             count: 6514,
             lines: [],
+            skipSnapshot: true,
         }, {
             name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
             count: 8098,
             lines: [],
             ercs: ['ERC165'] as const,
+            skipSnapshot: true,
         }, {
             name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
             count: 2118,
@@ -43,32 +47,34 @@ describe('examples', function () {
             name: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
             count: -1,
             lines: [],
+            skipSnapshot: true,
         }, {
             name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
             count: -1,
             lines: [],
             selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],
+            skipSnapshot: true,
         }, {
             name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
             count: 1214,
             lines: [
-                /^event Transfer\(address indexed _arg0, address indexed _arg1, uint256 _arg2\);$/m,
-                /^event FrozenFunds\(address _arg0, bool _arg1\);$/m,
-                /^mapping \(address => unknown\) public balanceOf;$/m,
-                /^mapping \(address => unknown\) public frozenAccount;$/m,
-                /^mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
+                /event Transfer\(address indexed _arg0, address indexed _arg1, uint256 _arg2\);$/m,
+                /event FrozenFunds\(address _arg0, bool _arg1\);$/m,
+                /mapping \(address => unknown\) public balanceOf;$/m,
+                /mapping \(address => unknown\) public frozenAccount;$/m,
+                /mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
                 // /^mapping \(address => mapping \(address => unknown\)\) mapping4;$/m,
-                /^unknown public owner;/m,
-                /^unknown public decimals;/m,
-                /^unknown public totalSupply;/m,
-                /^function approve\(address _arg0, uint256 _arg1\) public payable returns \(uint256\) {$/m,
-                /^function transferFrom\(address _arg0, address _arg1, uint256 _arg2\) public payable returns \(uint256\) {$/m,
-                /^function mintToken\(address _arg0, uint256 _arg1\) public payable {$/m,
-                /^function name\(\)/m,
-                /^function symbol\(\) public payable {$/m,
-                /^function transfer\(address _arg0, uint256 _arg1\) public payable {$/m,
-                /^function freezeAccount\(address _arg0, bool _arg1\) public payable {$/m,
-                /^function transferOwnership\(address _arg0\) public payable {$/m,
+                /unknown public owner;/m,
+                /unknown public decimals;/m,
+                /unknown public totalSupply;/m,
+                /function approve\(address _arg0, uint256 _arg1\) public payable returns \(uint256\) {$/m,
+                /function transferFrom\(address _arg0, address _arg1, uint256 _arg2\) public payable returns \(uint256\) {$/m,
+                /function mintToken\(address _arg0, uint256 _arg1\) public payable {$/m,
+                /function name\(\)/m,
+                /function symbol\(\) public payable {$/m,
+                /function transfer\(address _arg0, uint256 _arg1\) public payable {$/m,
+                /function freezeAccount\(address _arg0, bool _arg1\) public payable {$/m,
+                /function transferOwnership\(address _arg0\) public payable {$/m,
             ],
             ercs: ['ERC20'] as const,
             checkEvents: false,
@@ -82,31 +88,32 @@ describe('examples', function () {
             name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
             count: 741,
             lines: [
-                /^address public implementation;/m,
-                /^address public admin;/m,
-                /^function upgradeTo\(address _arg0\) public {$/m,
-                /^function upgradeToAndCall\(address _arg0, bytes _arg1\) public payable {$/m,
-                /^function changeAdmin\(address _arg0\) public {$/m,
+                /address public implementation;/m,
+                /address public admin;/m,
+                /function upgradeTo\(address _arg0\) public {$/m,
+                /function upgradeToAndCall\(address _arg0, bytes _arg1\) public payable {$/m,
+                /function changeAdmin\(address _arg0\) public {$/m,
             ],
         }, {
             name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             count: 1555,
             lines: [
-                /^mapping \(address => unknown\) public balanceOf;$/m,
-                /^mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
-                /^unknown public decimals;/m,
-                /^function name\(\)/m,
-                /^function approve\(address _arg0, uint256 _arg1\)/m,
-                /^function totalSupply\(\)/m,
-                /^function transferFrom\(address _arg0, address _arg1, uint256 _arg2\)/m,
-                /^function withdraw\(uint256 _arg0\)/m,
-                /^function symbol\(\)/m,
-                /^function transfer\(address _arg0, uint256 _arg1\)/m,
-                /^function deposit\(\)/m,
+                /mapping \(address => unknown\) public balanceOf;$/m,
+                // TODO: fix mapping -> mapping type
+                /mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
+                /unknown public decimals;/m,
+                /function name\(\)/m,
+                /function approve\(address _arg0, uint256 _arg1\)/m,
+                /function totalSupply\(\)/m,
+                /function transferFrom\(address _arg0, address _arg1, uint256 _arg2\)/m,
+                /function withdraw\(uint256 _arg0\)/m,
+                /function symbol\(\)/m,
+                /function transfer\(address _arg0, uint256 _arg1\)/m,
+                /function deposit\(\)/m,
             ],
             ercs: ['ERC20'] as const,
         },
-    ].forEach(({ name, count, lines, ercs, checkEvents, selectors }) => {
+    ].forEach(({ name, count, lines, ercs, checkEvents, selectors, skipSnapshot }) => {
         describe(`${name}`, function () {
             const defs = lines.map(line =>
                 line.source
@@ -147,7 +154,12 @@ describe('examples', function () {
 
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patch();
-                text = contract.solidify();
+                text = contract.reduce().patch().solidify();
+            });
+
+            it(`should match bytecode`, function () {
+                if (skipSnapshot) this.skip();
+                expect(text).to.matchFile(`examples/${name}.sol`, this);
             });
 
             it.skip(`should decode bytecode`, function () {
@@ -182,8 +194,8 @@ describe('examples', function () {
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
             lines?.forEach(line =>
-                it.skip(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
-                    expect(text, text).to.match(line);
+                it(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
+                    expect(text).to.match(line);
                 })
             );
 

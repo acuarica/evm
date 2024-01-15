@@ -1,4 +1,4 @@
-import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val } from './ast';
+import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce } from './ast';
 import { Not } from './ast/alu';
 import type { IEvents } from './ast/log';
 import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
@@ -90,6 +90,19 @@ export class Contract {
         this.opcodes = () => evm.opcodes();
     }
 
+    reduce(): Contract {
+        const obj = Object.create(Contract.prototype) as object;
+        const contract = Object.assign(obj, this);
+        (contract as { main: unknown }).main = reduce(this.main);
+        (contract as { payable: unknown }).payable = !requiresNoValue(contract.main);
+        (contract as { functions: unknown }).functions = {};
+        for (const [selector, fn] of Object.entries(this.functions)) {
+            contract.functions[selector] = new PublicFunction(contract, reduce(fn.stmts), selector as string, fn.payable);
+        }
+
+        return contract;
+    }
+
     /**
      *
      * @returns
@@ -159,23 +172,25 @@ export class PublicFunction {
     constructor(
         readonly contract: Contract,
         readonly stmts: Stmt[],
-        readonly selector: string // readonly gasUsed: number, // functionHashes: { [s: string]: string }
+        readonly selector: string,
+        payable?: boolean,
     ) {
         this.visibility = 'public';
-        this.constant = false;
-        // this.label = this.hash in functionHashes ? functionHashes[this.hash] : this.hash + '()';
 
-        if (requiresNoValue(this.stmts)) {
-            this.payable = false;
-            this.stmts.shift();
-        } else if (!contract.payable) {
-            this.payable = false;
+        if (payable === undefined) {
+            if (requiresNoValue(this.stmts)) {
+                this.payable = false;
+                // this.stmts.shift();
+            } else if (!contract.payable) {
+                this.payable = false;
+            } else {
+                this.payable = true;
+            }
         } else {
-            this.payable = true;
+            this.payable = payable;
         }
-        if (this.stmts.length === 1 && this.stmts[0].name === 'Return') {
-            this.constant = true;
-        }
+
+        this.constant = this.stmts.length === 1 && this.stmts[0].name === 'Return';
 
         const returns: Expr[][] = [];
         PublicFunction.findReturns(stmts, returns);
@@ -227,7 +242,8 @@ export class PublicFunction {
             }
 
             if (this.isMappingGetter()) {
-                const location = this.stmts[0].args[0].location;
+                const ret = this.stmts.at(-1) as Return & { args: MappingLoad[] };
+                const location = ret.args[0].location;
                 this.contract.mappings[location].name = functionName;
             }
 
@@ -247,7 +263,7 @@ export class PublicFunction {
         const exit = this.stmts.at(-1)!;
         return (
             this.stmts.length >= 1 &&
-            this.stmts.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
+            this.stmts.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore' || stmt.name === 'Require') &&
             exit.name === 'Return' &&
             exit.args !== undefined &&
             exit.args.length === 1 &&
@@ -256,10 +272,11 @@ export class PublicFunction {
         );
     }
 
-    private isMappingGetter(): this is { stmts: [Return & { args: MappingLoad[] }] } {
-        const exit = this.stmts[0];
+    private isMappingGetter(): this is { stmts: [...Stmt[], Return & { args: MappingLoad[] }] } {
+        const exit = this.stmts.find(stmt => stmt.name !== 'Local' && stmt.name !== 'MStore' && stmt.name !== 'Require');
         return (
-            this.stmts.length === 1 &&
+            exit !== undefined &&
+            this.stmts.at(-1) === exit &&
             exit.name === 'Return' &&
             exit.args !== undefined &&
             exit.args.every(arg => arg.tag === 'MappingLoad')
@@ -369,7 +386,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
     }
 }
 
-export function reduce(stmts: Inst[]): Stmt[] {
+export function reduce0(stmts: Inst[]): Stmt[] {
     const result = [];
     for (const stmt of stmts) {
         if (stmt.name !== 'Local' || stmt.local.nrefs > 0) {
@@ -381,12 +398,11 @@ export function reduce(stmts: Inst[]): Stmt[] {
 }
 
 function requiresNoValue(stmts: Stmt[]): boolean {
-    return (
-        stmts.length > 0 &&
-        stmts[0] instanceof Require &&
-        stmts[0].condition.tag === 'IsZero' &&
-        stmts[0].condition.value.tag === 'CallValue'
-    );
+    const first = stmts.find(stmt => stmt.name !== 'Local');
+    return first instanceof Require && (first =>
+        first.condition.tag === 'IsZero' &&
+        first.condition.value.tag === 'CallValue'
+    )(first.eval());
 }
 
 export * from './evm';

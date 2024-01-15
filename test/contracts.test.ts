@@ -60,6 +60,17 @@ describe('::contracts', function () {
                 options: { optimizer: { enabled: true } },
             },
         ],
+        mappings: [
+            {
+                title: 'pure payable and mappings',
+                src: `contract Test {
+                    mapping (address => mapping (address => uint256)) public allowance;
+                    function getValue() external view returns (uint256) {
+                        return allowance[msg.sender][msg.sender];
+                    }
+                }`,
+            },
+        ],
     }).forEach(([name, contracts]) => {
         describe(name, function () {
             contracts.forEach(({ title, src, options }) => {
@@ -68,7 +79,7 @@ describe('::contracts', function () {
                     let contract: Contract;
 
                     before(function () {
-                        contract = new Contract(compile(src, '0.7.6', this, options).bytecode);
+                        contract = new Contract(compile(src, '0.7.6', this, options).bytecode).patch();
                     });
 
                     it(`should match Solidity snapshot`, function () {

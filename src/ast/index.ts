@@ -143,10 +143,14 @@ export class If {
     constructor(
         readonly condition: Expr,
         readonly trueBlock?: Stmt[],
-        readonly falseBlock?: Stmt[]
+        readonly falseBlock?: Stmt[],
     ) { }
     eval() {
-        return this;
+        return new If(
+            this.condition.eval(),
+            this.trueBlock ? reduce(this.trueBlock) : undefined,
+            this.falseBlock ? reduce(this.falseBlock) : undefined,
+        );
     }
 }
 
@@ -187,7 +191,7 @@ export abstract class Tag {
      * Indicates whether `this` is an instance of `Klass`.
      */
     is<T extends Tag>(Klass: new (...args: never[]) => T): this is T {
-        return this instanceof Klass;
+        return (this instanceof Local ? this.value : this) instanceof Klass;
     }
 
     /**
@@ -236,6 +240,10 @@ export class Locali implements IInst {
     eval() {
         return this;
     }
+}
+
+export function reduce(stmts: Stmt[]): Stmt[] {
+    return stmts?.flatMap(stmt => ['Local', 'MStore'].includes(stmt.name) ? [] : stmt.eval());
 }
 
 export function inline0(stmts: Stmt[]): Stmt[] {
