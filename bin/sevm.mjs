@@ -234,12 +234,22 @@ void yargs(process.argv.slice(2))
     )
     .help().argv;
 
-/**
- * @param {Contract} contract
- */
+/** @param {Contract} contract */
 function cfg(contract) {
-    //@ts-ignore
-    const evm = contract.evm;
+    /** @type {WeakMap<EVMState, string>} */
+    const ids = new WeakMap();
+    let id = 0;
+    for (const block of contract.blocks.values()) {
+        for (const state of block.states) {
+            assert(!ids.has(state));
+
+            if (!ids.has(state)) {
+                ids.set(state, `id-${id}`);
+                id++;
+            }
+        }
+    }
+
     const write = console.log;
     write(`digraph G {    
     color="#efefef";
@@ -249,105 +259,80 @@ function cfg(contract) {
     node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
     `);
 
-    /** @type {WeakMap<EVMState, string>} */
-    const ids = new WeakMap();
-    let id = 0;
-    for (const [, chunk] of evm.chunks) {
-        for (const state of chunk.states) {
-            assert(!ids.has(state));
+    let edges = '';
+    for (const [pc, block] of contract.blocks) {
+        write(`subgraph cluster_${pc} {`);
+        write(`  style=filled;`);
+        // write(`  node [style=filled,color=white];`);
+        let label = `pc ${pc}\\l`;
 
-            if (!ids.has(state)) {
-                // state.id = `id-${id}`;
-                ids.set(state, `id-${id}`);
-                id++;
+        // for (let i = pc; i < chunk.pcend; i++) {
+        //     const opcode = evm.opcodes[i];
+        //     label += opcode.formatOpcode() + '\\l';
+        // }
+        write(`  label = "${label}";`);
+
+        for (const state of block.states) {
+            writeNode(pc, state);
+            switch (state.last?.name) {
+                case 'Jumpi':
+                    writeEdge(state, state.last.destBranch);
+                    writeEdge(state, state.last.fallBranch);
+                    break;
+                case 'SigCase':
+                    // writeEdge(pc, state.last.condition.hash);
+                    writeEdge(state, state.last.fallBranch);
+                    break;
+                case 'Jump':
+                    writeEdge(state, state.last.destBranch);
+                    break;
+                case 'JumpDest':
+                    writeEdge(state, state.last.fallBranch);
+                    break;
+                default:
             }
         }
+        write('}\n');
     }
-
-    dot(evm);
+    write(edges);
     write('}');
 
     /**
-     * @parama {import('sevm').EVM<unknown>} evm
-     * @param {any} evm
+     * @param {number} pc
+     * @param {EVMState} state
      */
-    function dot(evm) {
-        let edges = '';
-        for (const [pc, chunk] of evm.blocks) {
-            write(`subgraph cluster_${pc} {`);
-            write(`  style=filled;`);
-            // write(`  node [style=filled,color=white];`);
-            let label = `pc ${pc}\\l`;
+    function writeNode(pc, state) {
+        const id = ids.get(state);
+        let label = `key:${pc} ${id}`;
+        label += '\\l';
+        // label += 'doms: ' + [...doms].join(', ');
+        // label += '\\l';
+        // if (tree) {
+        //     label += 'tree: ' + [...tree].join(', ');
+        //     label += '\\l';
+        // }
+        // label += block.entry.state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
+        // label += '\\l';
+        // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
+        // label += '\\l';
+        label += state.stack.values.map(elem => sol`=| ${elem.eval()}`).join('');
+        label += '\\l';
+        // label += inspect(state.memory);
+        // label += '\\l';
+        Object.entries(state.memory).forEach(([k, v]) => (label += sol`${k}: ${v}\\l`));
+        label += state.stmts.map(stmt => sol`${stmt}`).join('\\l');
+        label += '\\l';
 
-            for (let i = pc; i < chunk.pcend; i++) {
-                const opcode = evm.opcodes[i];
-                label += opcode.formatOpcode() + '\\l';
-            }
-            write(`  label = "${label}";`);
+        write(`"${id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
+    }
 
-            for (const state of chunk.states) {
-                writeNode(pc, state);
-                switch (state.last?.name) {
-                    case 'Jumpi':
-                        writeEdge(state, state.last.destBranch);
-                        writeEdge(state, state.last.fallBranch);
-                        break;
-                    case 'SigCase':
-                        // writeEdge(pc, state.last.condition.hash);
-                        writeEdge(state, state.last.fallBranch);
-                        break;
-                    case 'Jump':
-                        writeEdge(state, state.last.destBranch);
-                        break;
-                    case 'JumpDest':
-                        writeEdge(state, state.last.fallBranch);
-                        break;
-                    default:
-                }
-            }
-            write('}\n');
-        }
-        write(edges);
-
-        /**
-         *
-         * @param {number} pc
-         * @param {EVMState} state
-         */
-        function writeNode(pc, state) {
-            const id = ids.get(state);
-            let label = `key:${pc} ${id}`;
-            label += '\\l';
-            // label += 'doms: ' + [...doms].join(', ');
-            // label += '\\l';
-            // if (tree) {
-            //     label += 'tree: ' + [...tree].join(', ');
-            //     label += '\\l';
-            // }
-            // label += block.entry.state.stack.values.map(elem => `=| ${elem.toString()}`).join('');
-            // label += '\\l';
-            // label += block.opcodes.map(op => formatOpcode(op)).join('\\l');
-            // label += '\\l';
-            label += state.stack.values.map(elem => sol`=| ${elem.eval()}`).join('');
-            label += '\\l';
-            // label += inspect(state.memory);
-            // label += '\\l';
-            Object.entries(state.memory).forEach(([k, v]) => (label += sol`${k}: ${v}\\l`));
-            label += state.stmts.map(stmt => sol`${stmt}`).join('\\l');
-            label += '\\l';
-
-            write(`"${id}" [label="${label}" fillcolor="${'#ffa500'}"];`);
-        }
-
-        /**
-         *
-         * @param {EVMState} src
-         * @param {import('sevm/ast').Branch} branch
-         */
-        function writeEdge(src, branch) {
-            // write(`"${src}" -> "${branch.state.id}";`);
-            const id = ids.get(src);
-            edges += `"${id}" -> "${ids.get(branch.state)}";\n`;
-        }
+    /**
+     * @param {EVMState} src
+     * @param {import('sevm/ast').Branch} branch
+     */
+    function writeEdge(src, branch) {
+        // write(`"${src}" -> "${branch.state.id}";`);
+        const id = ids.get(src);
+        edges += `"${id}" -> "${ids.get(branch.state)}";\n`;
     }
 }
