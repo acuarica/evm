@@ -13,7 +13,7 @@ describe('examples', function () {
     [
         {
             name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
-            lines: [
+            members: [
                 // TODO when un skip test
                 // /^function supportsInterfac\(bytes4 _arg0a\) public payable {$/m,
             ],
@@ -21,38 +21,40 @@ describe('examples', function () {
             skipSnapshot: true,
         }, {
             name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
-            lines: [],
+            members: [],
             skipSnapshot: true,
         }, {
             name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467',
-            lines: [],
+            members: [],
             skipSnapshot: true,
         }, {
             name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
-            lines: [],
+            members: [],
             ercs: ['ERC165'] as const,
             skipSnapshot: true,
         }, {
             name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
-            lines: [],
+            members: [],
             ercs: ['ERC20'] as const,
             checkEvents: false,
         }, {
             name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
-            lines: [],
+            members: [],
             selectors: [],
         }, {
             name: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
-            lines: [],
+            members: [],
+            ercs: ['ERC721'] as const,
+            checkEvents: false,
             skipSnapshot: true,
         }, {
             name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
-            lines: [],
+            members: [],
             selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],
             skipSnapshot: true,
         }, {
             name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
-            lines: [
+            members: [
                 /event Transfer\(address indexed _arg0, address indexed _arg1, uint256 _arg2\);$/m,
                 /event FrozenFunds\(address _arg0, bool _arg1\);$/m,
                 /mapping \(address => unknown\) public balanceOf;$/m,
@@ -81,7 +83,7 @@ describe('examples', function () {
              * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
              */
             name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
-            lines: [
+            members: [
                 /address public implementation;/m,
                 /address public admin;/m,
                 /function upgradeTo\(address _arg0\) public {$/m,
@@ -90,7 +92,7 @@ describe('examples', function () {
             ],
         }, {
             name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            lines: [
+            members: [
                 /mapping \(address => unknown\) public balanceOf;$/m,
                 /mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
                 /unknown public decimals;/m,
@@ -105,9 +107,9 @@ describe('examples', function () {
             ],
             ercs: ['ERC20'] as const,
         },
-    ].forEach(({ name, lines, ercs, checkEvents, selectors, skipSnapshot }) => {
+    ].forEach(({ name, members, ercs, checkEvents, selectors, skipSnapshot }) => {
         describe(`${name}`, function () {
-            const defs = lines.map(line =>
+            const defs = members.map(line =>
                 line.source
                     .replace(/\\/g, '')
                     .replace('^', '')
@@ -185,7 +187,7 @@ describe('examples', function () {
             });
 
             it('should detect selectors', function () {
-                if (selectors === undefined && lines.length === 0) this.skip();
+                if (selectors === undefined && members.length === 0) this.skip();
                 expect([...contract.functionBranches.keys()]).to.have.members(
                     selectors !== undefined
                         ? selectors
@@ -206,7 +208,7 @@ describe('examples', function () {
             });
 
             it('functions, variables & mappings should cover `getFunctions`', function () {
-                if (lines.length > 0) {
+                if (members.length > 0) {
                     const expected = [...functions, ...variables, ...mappings];
                     expect(new Set(contract.getFunctions()),
                         `actual ${inspect(contract.getFunctions())} != expected ${inspect(expected)}`
@@ -215,9 +217,9 @@ describe('examples', function () {
             });
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
-            lines?.forEach(line =>
-                it(`should match decompiled bytecode to '${trunc(line.source)}'`, function () {
-                    expect(text).to.match(line);
+            members.forEach(member =>
+                it(`should match decompiled bytecode to '${trunc(member.source)}'`, function () {
+                    expect(text).to.match(member);
                 })
             );
 
