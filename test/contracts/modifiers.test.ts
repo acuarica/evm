@@ -5,11 +5,11 @@ import { Contract } from 'sevm';
 import { contracts } from '../utils/solc';
 
 contracts('modifiers', (compile, _fallback, version) => {
-    it.skip('should `decompile` bytecode with a modifier calling an internal function', function () {
+    it('should `decompile` bytecode with a modifier calling an internal function', function () {
         const src = `contract Test {
             uint256 private _value;
             address private _owner;
-            constructor() ${['0.7.6', '0.8.16'].includes(version) ? '' : 'public '}{
+            constructor() ${['0.7.6', '0.8.16', '0.8.21'].includes(version) ? '' : 'public '}{
                 address msgSender = _msgSender();
                 _owner = msgSender;
             }
@@ -29,9 +29,9 @@ contracts('modifiers', (compile, _fallback, version) => {
         }`;
         const contract = new Contract(compile(src, this).bytecode);
 
-        const text = contract.solidify();
+        const text = contract.reduce().solidify();
         expect(text, text).to.not.match(/return msg.sender;/);
-        expect(text, text).to.match(/storage\[0x1\] == msg.sender/m);
-        expect(text, text).to.match(/var1 = _arg0 \+ 0x3;$/m);
+        expect(text, text).to.match(/var_2 == msg.sender/m);
+        expect(text, text).to.match(/var_1 = _arg0 \+ 0x3;$/m);
     });
 });

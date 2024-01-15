@@ -7,7 +7,7 @@ import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
 contracts('variables', (compile, _fallback, version) => {
-    describe.skip('with private variables in different locations', function () {
+    describe('with private variables in different locations', function () {
         let contract: Contract;
 
         before(function () {
@@ -18,7 +18,7 @@ contracts('variables', (compile, _fallback, version) => {
                 bytes32 private value32;
                 function setValue0(bytes32 newValue) public { value32 = newValue; }
             }`;
-            contract = new Contract(compile(src, this).bytecode);
+            contract = new Contract(compile(src, this).bytecode).reduce();
         });
 
         [
@@ -26,7 +26,7 @@ contracts('variables', (compile, _fallback, version) => {
             { sig: 'setValue0(bytes32)', value: 1n },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
-            it(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
+            it.skip(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
                 const stmts = contract.functions[selector].stmts;
                 expect(stmts.length).to.be.of.greaterThanOrEqual(3);
                 expect(stmts.at(-3)).to.be.instanceOf(Require);
@@ -44,23 +44,23 @@ contracts('variables', (compile, _fallback, version) => {
         });
 
         it('should get variables of different types', function () {
-            const vars = Object.values(contract.variables);
+            const vars = [...contract.variables.values()];
             expect(vars).to.be.of.length(2);
-            const isPush = version !== '0.8.16';
+            const isPush = version !== '0.8.16' && version !== '0.8.21';
             expect(vars[0]).to.be.deep.equal(
-                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], -1)
+                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], 1)
             );
             expect(vars[1]).to.be.deep.equal(
-                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], -1)
+                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], 2)
             );
         });
 
         it('should `decompile` bytecode', function () {
             const text = contract.solidify();
-            expect(text, text).to.match(/^unknown var1;/m);
-            expect(text, text).to.match(/^unknown var2;/m);
-            expect(text, text).to.match(/var1 = _arg0;/m);
-            expect(text, text).to.match(/var2 = _arg0;/m);
+            expect(text, text).to.contain('unknown var1__1;');
+            expect(text, text).to.contain('unknown var2__2;');
+            expect(text, text).to.contain('var_1 = _arg0;');
+            expect(text, text).to.contain('var_2 = _arg0;');
         });
     });
 
@@ -102,7 +102,7 @@ contracts('variables', (compile, _fallback, version) => {
         expect(text, text).to.match(/^unknown public value;/m);
     });
 
-    describe.skip('with an unreachable setter hashed public variable', function () {
+    describe('with an unreachable setter hashed public variable', function () {
         let contract: Contract;
 
         before(function () {

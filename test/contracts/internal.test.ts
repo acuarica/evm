@@ -42,23 +42,22 @@ contracts('internal', compile => {
                         new Sha3(new Val(-1n), new Val(-1n), [Props['msg.sender'], new Val(0n)]),
                         new Add(new CallDataLoad(new Val(4n)), new Val(value)),
                         undefined
-                        // contract.variables
                     )
                 );
                 expect(fn.stmts.at(-1)).to.be.deep.equal(new Stop());
             });
         });
 
-        it('should not have `mappings` nor `variables`', function () {
+        it('should not have `variables`', function () {
             expect(Object.keys(contract.mappings)).to.have.length(1);
             expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
-        it.skip('should `decompile` bytecode', function () {
-            const text = contract.solidify();
+        it('should `decompile` bytecode', function () {
+            const text = contract.reduce().solidify();
             expect(text, text).to.not.match(/return msg.sender;/);
-            expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 3\)/);
-            expect(text, text).to.match(/storage\[keccak256\(msg.sender, 0\)\] = \(_arg0 \+ 5\)/);
+            expect(text, text).to.contain('mapping1[msg.sender] = _arg0 + 0x3');
+            expect(text, text).to.contain('mapping1[msg.sender] = _arg0 + 0x5');
         });
     });
 
@@ -98,22 +97,21 @@ contracts('internal', compile => {
                         new SLoad(
                             new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
                             undefined
-                            // contract.variables
                         ),
                     ])
                 );
             });
         });
 
-        it('should not have `mappings` nor `variables`', function () {
+        it('should not have `variables`', function () {
             expect(Object.keys(contract.mappings)).to.have.length(1);
             expect(Object.keys(contract.variables)).to.have.length(0);
         });
 
-        it.skip('should `decompile` bytecode', function () {
+        it('should `decompile` bytecode', function () {
             const text = contract.solidify();
-            expect(text, text).to.match(/return storage\[keccak256\(msg.sender, 0\)\];$/m);
-            expect(text, text).to.match(/return storage\[keccak256\(_arg0, 0\)\];$/m);
+            expect(text, text).to.contain('return mapping1[msg.sender];');
+            expect(text, text).to.contain('return mapping1[_arg0];');
         });
     });
 

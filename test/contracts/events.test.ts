@@ -5,8 +5,8 @@ import { Contract } from 'sevm';
 import { eventSelector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
-contracts('events', (compile, fallback) => {
-    it.skip('should emit unknown event', function () {
+contracts('events', (compile, fallback, version) => {
+    it('should emit unknown event', function () {
         const src = `contract Test {
             event Event0(string);
             function emitEvent() external {
@@ -16,12 +16,12 @@ contracts('events', (compile, fallback) => {
         const contract = new Contract(compile(src, this).bytecode);
         const Event0 = eventSelector('Event0(string)');
         expect(contract.events).to.have.keys(Event0);
-        const text = contract.solidify();
+        const text = contract.reduce().solidify();
         expect(text, text).to.match(/event /);
         expect(text, text).to.match(/log\(0x[a-fA-F\d]+(, 0x[a-fA-F\d]+)+\);/);
     });
 
-    it.skip('should emit hashed event', function () {
+    it('should emit hashed event', function () {
         const src = `contract Test {
             event Transfer(uint256, address);
             function f(uint256 value) external {
@@ -33,23 +33,21 @@ contracts('events', (compile, fallback) => {
             'Transfer(uint256,address)'
         );
         expect(contract.getEvents()).to.be.deep.equal(['Transfer(uint256,address)']);
-        const text = contract.solidify();
+        const text = contract.reduce().solidify();
         expect(text, text).to.match(/event Transfer\(uint256 _arg0, address _arg1\);$/m);
         expect(text, text).to.match(/emit Transfer\(_arg0 \+ 0x123, address\(this\)\);$/m);
     });
 
-    it.skip('should emit hashed event with indexed topics', function () {
+    it('should emit hashed event with indexed topics', function () {
         const src = `contract Test {
             event Send(uint256, address indexed);
             function f() external {
                 emit Send(123, address(this));
             }
         }`;
-        const contract = new Contract(compile(src, this).bytecode).patchevs(
-            'Send(uint256,address)'
-        );
+        const contract = new Contract(compile(src, this).bytecode).patchevs('Send(uint256,address)');
         expect(contract.getEvents()).to.be.deep.equal(['Send(uint256,address)']);
-        const text = contract.solidify();
+        const text = contract.reduce().solidify();
         expect(text, text).to.match(/event Send\(uint256 indexed _arg0, address _arg1\);$/m);
         expect(text, text).to.match(/emit Send\(address\(this\), 0x7b\);$/m);
     });
@@ -68,16 +66,16 @@ contracts('events', (compile, fallback) => {
         expect(text, text).to.match(/emit Transfer\(\);$/m);
     });
 
-    it.skip('should emit anonymous event', function () {
+    it('should emit anonymous event', function () {
         const src = `contract Test {
             event Transfer(uint256, address) anonymous;
             function f() external {
                 emit Transfer(123, address(this));
             }
         }`;
-        const evm = new Contract(compile(src, this).bytecode);
-        expect(evm.getEvents()).to.be.deep.equal([]);
-        const text = evm.solidify();
+        const contract = new Contract(compile(src, this).bytecode);
+        expect(contract.getEvents()).to.be.deep.equal([]);
+        const text = contract.reduce().solidify();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(0x7b, address\(this\)\);$/m);
     });
@@ -89,14 +87,14 @@ contracts('events', (compile, fallback) => {
                 emit Transfer();
             }
         }`;
-        const evm = new Contract(compile(src, this).bytecode);
-        expect(evm.getEvents()).to.be.deep.equal([]);
-        const text = evm.solidify();
+        const contract = new Contract(compile(src, this).bytecode);
+        expect(contract.getEvents()).to.be.deep.equal([]);
+        const text = contract.solidify();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(\);$/m);
     });
 
-    it.skip('should emit anonymous event with both arguments and no arguments', function () {
+    it('should emit anonymous event with both arguments and no arguments', function () {
         const src = `contract Test {
             event Transfer() anonymous;
             event Send(uint256, uint256) anonymous;
@@ -105,10 +103,11 @@ contracts('events', (compile, fallback) => {
                 emit Send(123, 124);
             }
         }`;
-        const evm = new Contract(compile(src, this).bytecode);
-        expect(evm.getEvents()).to.be.deep.equal([]);
+        const contract = new Contract(compile(src, this).bytecode);
+        expect(contract.getEvents()).to.be.deep.equal([]);
 
-        const text = evm.solidify();
+        const is8 = version === '0.8.16' || version === '0.8.21';
+        const text = (is8 ? contract.reduce() : contract).solidify();
         expect(text, text).to.not.match(/event/);
         expect(text, text).to.match(/log\(\);$/m);
         expect(text, text).to.match(/log\(0x7b, 0x7c\);$/m);

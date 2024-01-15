@@ -17,8 +17,6 @@ contracts('selfdestruct', (compile, fallback, version) => {
             optimizer: { enabled: true },
             ignoreWarnings: true,
         }).bytecode);
-        // expect(contract.evm.containsOpcode(OPCODES.SELFDESTRUCT)).to.be.true;
-        // expect(contract.evm.containsOpcode('SELFDESTRUCT')).to.be.true;
 
         const text = contract.solidify({ license: null, pragma: false });
         expect(text).to.be.equal(
