@@ -8,6 +8,8 @@ import { contracts } from '../utils/solc';
 
 contracts('variables', (compile, _fallback, version) => {
     describe('with private variables in different locations', function () {
+        const isPush = version !== '0.8.16' && version !== '0.8.21';
+
         let contract: Contract;
 
         before(function () {
@@ -26,17 +28,15 @@ contracts('variables', (compile, _fallback, version) => {
             { sig: 'setValue0(bytes32)', value: 1n },
         ].forEach(({ sig, value }) => {
             const selector = fnselector(sig);
-            it.skip(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
+            it(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
                 const stmts = contract.functions[selector].stmts;
                 expect(stmts.length).to.be.of.greaterThanOrEqual(3);
                 expect(stmts.at(-3)).to.be.instanceOf(Require);
-                const isPush = version !== '0.8.16';
                 expect(stmts.at(-2)).to.be.deep.equal(
                     new SStore(
                         new Val(value, true),
                         new CallDataLoad(new Val(4n, isPush)),
-                        undefined
-                        // contract.variables
+                        contract.variables.get(value)
                     )
                 );
                 expect(stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -46,7 +46,6 @@ contracts('variables', (compile, _fallback, version) => {
         it('should get variables of different types', function () {
             const vars = [...contract.variables.values()];
             expect(vars).to.be.of.length(2);
-            const isPush = version !== '0.8.16' && version !== '0.8.21';
             expect(vars[0]).to.be.deep.equal(
                 new Variable(null, [new CallDataLoad(new Val(4n, isPush))], 1)
             );
