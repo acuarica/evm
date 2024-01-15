@@ -188,21 +188,8 @@ export class EVM<M extends string> {
         // });
 
         const opcodes = [];
-        // let pc = pc0;
-        // for (; pc < this.bytecode.length; pc++) {
         let opcode;
         for (opcode of this.step.decode(this.bytecode, pc0)) {
-            // const op = this.bytecode[pc];
-            // const [size, halts, mnemonic] = this.step[op];
-            // const opcode = new Opcode(pc, op, mnemonic,
-            //     size === 0 ? null : (() => {
-            //         const data = this.bytecode.subarray(pc + 1, pc + size + 1);
-            //         if (data.length !== size) throw new Error('asdfsadf');
-            //         pc += size;
-            //         return data;
-            //     })()
-            // );
-
             const [, halts, mnemonic] = this.step[opcode.opcode];
 
             const entry: Block<M>['opcodes'][number] = { opcode };
@@ -221,13 +208,9 @@ export class EVM<M extends string> {
                 this.errors.push(invalid);
             }
 
-            // if (!state.halted && this.bytecode[pc + 1] === JUMPDEST) {
-            // const nextpc = opcode.pc + opcode.size + 1;
             if (!halts && this.bytecode[opcode.nextpc] === JUMPDEST) {
                 const fallBranch = Branch.make(opcode.nextpc, state);
                 state.halt(new JumpDest(fallBranch));
-                // halts = true;
-                /* two consecutive jumpdest blocks */
                 break;
             }
 
