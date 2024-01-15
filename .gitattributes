@@ -11,4 +11,4 @@
 #
 # For reference, Jest, which supports Snapshot Testing, uses the same approach
 # https://github.com/jestjs/jest/blob/f68bdde2a9817d3e8850ea229b90ad241c29d5c4/.gitattributes
-/test/__snapshots__/* text eol=lf
+/test/__snapshots__/** text eol=lf
