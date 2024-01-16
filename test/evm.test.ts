@@ -85,14 +85,11 @@ describe('::evm', function () {
             }
         }`;
         const evm = EVM.new(compile(src, '0.7.6', this, { optimizer: { enabled: true } }).bytecode);
-        // const main =
-        // evm.start();
-        const state = new State<Inst, Expr>();
-        evm.exec(19, state);
-        // console.log(state.stmts);
-        // console.log(state.stack);
-        // console.log(evm.errors);
+        evm.start();
+
         expect(evm.step.functionBranches).to.be.empty;
+        expect(evm.errors).to.be.empty;
+        // expect(cfg(evm)).to.matchSnapshot('mermaid', this);
     });
 
     it('should create ', function () {
