@@ -22,8 +22,7 @@ const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), sols
 const trunc = (str: unknown, len = 80) =>
     (`${str}`.length <= len ? `${str}` : `${str}`.slice(0, len) + '[..]');
 
-// eslint-disable-next-line mocha/no-exports
-export const title = (obj: unknown) =>
+const title = (obj: unknown) =>
     trunc(util.inspect(obj, { breakLength: Infinity }).replace(/ /g, ''));
 
 const $exprs = {

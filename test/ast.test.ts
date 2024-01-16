@@ -4,7 +4,6 @@ import { Add, type Expr, Val, Props } from 'sevm/ast';
 import { Byte, IsZero, Lt, MLoad, Not, SLoad, Shl, Sig } from 'sevm/ast';
 import { CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
 import { Create, Create2, ReturnData, Sha3 } from 'sevm/ast';
-import { title } from './exprs.test';
 
 describe('::ast', function () {
     it('should test `isVal`', function () {
@@ -46,11 +45,10 @@ describe('::ast', function () {
             t(new Sha3(new Val(32n), new Val(64n)), expr => [expr.offset, expr.size]),
             t(new Sha3(new Val(32n), new Val(64n), [new Val(1n), new Val(2n)]), expr => [expr.offset, expr.size, expr.args![0], expr.args![1]]),
             t(new Create(new Val(100n), new Val(32n), new Val(128n)), expr => [expr.value, expr.offset, expr.size]),
-            t(new Create(new Val(100n), new Val(32n), new Val(128n)), expr => [expr.value, expr.offset, expr.size]),
             t(new ReturnData(new Val(32n), new Val(128n)), expr => [expr.retOffset, expr.retSize]),
             t(new Create2(new Val(100n), new Val(32n), new Val(128n)), expr => [expr.offset, expr.size, expr.value]),
         ].forEach(([expr, children]) => {
-            it(title(expr), function () {
+            it(`should get \`${expr.tag}\` ${children.length} children`, function () {
                 expect(expr.children()).to.have.ordered.members(children);
             });
         });
