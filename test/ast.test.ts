@@ -4,8 +4,7 @@ import { Add, type Expr, Val, Props } from 'sevm/ast';
 import { Byte, IsZero, Lt, MLoad, Not, SLoad, Shl, Sig } from 'sevm/ast';
 import { CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
 import { Create, Create2, ReturnData, Sha3 } from 'sevm/ast';
-
-import { $exprs, title } from './$exprs';
+import { title } from './exprs.test';
 
 describe('::ast', function () {
     it('should test `isVal`', function () {
@@ -56,17 +55,4 @@ describe('::ast', function () {
             });
         });
     });
-
-    describe('eval', function () {
-        Object.entries($exprs).forEach(([name, exprs]) => {
-            describe(name, function () {
-                exprs.forEach(({ expr, val, str }) => {
-                    it(`should \`eval\` \`${str}\``, function () {
-                        expect(expr.eval()).to.be.deep.equal(val);
-                    });
-                });
-            });
-        });
-    });
-
 });

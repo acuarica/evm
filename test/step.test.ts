@@ -4,7 +4,6 @@ import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecE
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub, Variable } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
 import * as ast from 'sevm/ast';
-import { $exprs, truncate } from './$exprs';
 import { compile } from './utils/solc';
 import { fnselector } from './utils/selector';
 
@@ -367,27 +366,6 @@ describe('::step', function () {
 
                 expect(() => step[`SWAP${size as Size<16>}`]({ stack }))
                     .to.throw(ExecError, 'Position not found for swap operation');
-            });
-        });
-    });
-
-    Object.entries($exprs).forEach(([name, exprs]) => {
-        const step = new Shanghai();
-
-        describe(name.toUpperCase(), function () {
-            exprs.forEach(({ insts, expr, str }) => {
-                it(`should \`STEP\` \`[${insts.map(i => truncate(i, 12)).join('|')}]\` into \`${str}\``, function () {
-                    const stack = new Stack<Expr>();
-                    for (const inst of insts) {
-                        if (typeof inst === 'bigint') {
-                            stack.push(new Val(inst));
-                        } else {
-                            step[inst]({ stack });
-                        }
-                    }
-
-                    expect(stack.values).to.be.deep.equal([expr]);
-                });
             });
         });
     });
