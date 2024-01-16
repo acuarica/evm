@@ -109,9 +109,9 @@ function yulInst(inst: Inst): string {
         case 'Local':
             return yul`let local${inst.local.index} = ${inst.local.value} // #refs ${inst.local.nrefs}`;
         case 'Log':
-            return yul`log${inst.topics.length}(${inst.offset}, ${inst.size}, ${inst.topics
-                .map(yulExpr)
-                .join(', ')})`;
+            return yul`log${inst.topics.length}(${[
+                inst.offset, inst.size, ...inst.topics
+            ].map(yulExpr).join(', ')})`;
         case 'MStore':
             return yul`mstore(${inst.location}, ${inst.data})`;
         case 'Stop':
