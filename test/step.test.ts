@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash } from 'sevm';
-import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, Prop, DataCopy, Sub, Variable } from 'sevm/ast';
-import { Add, Create, MLoad, Return, SelfDestruct, Sha3, Stop } from 'sevm/ast';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash, yul } from 'sevm';
+import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, DataCopy, Sub, Variable } from 'sevm/ast';
+import { Add, Create, MLoad, Return, SelfDestruct, Stop } from 'sevm/ast';
 import * as ast from 'sevm/ast';
 import { compile } from './utils/solc';
 import { fnselector } from './utils/selector';
@@ -247,27 +247,28 @@ describe('::step', function () {
             const bytecodes = new Set<string>();
 
             ([
-                ['with no functions', `contract Test { }`],
+                ['with no functions', `contract Test {
+                }`],
                 ['with `internal` unused function', `contract Test {
-                function get() internal pure returns (uint256) {
-                    return 5;
-                }
-            }`],
+                    function get() internal pure returns (uint256) {
+                        return 5;
+                    }
+                }`],
                 ['with `internal` unused function emitting an event', `contract Test {
-                event Transfer(uint256, address);
-                function get() internal {
-                    emit Transfer(3, address(this));
-                }
-            }`],
+                    event Transfer(uint256, address);
+                    function get() internal {
+                        emit Transfer(3, address(this));
+                    }
+                }`],
                 ['with a private variable and no usages', `contract Test {
-                uint256 private value;
-            }`],
+                    uint256 private value;
+                }`],
                 ['with a private variable and unreachable usages', `contract Test {
-                uint256 private value;
-                function setValue(uint256 newValue) internal {
-                    value = newValue;
-                }
-            }`],
+                    uint256 private value;
+                    function setValue(uint256 newValue) internal {
+                        value = newValue;
+                    }
+                }`],
             ] satisfies [string, string][]).forEach(([title, src]) => {
                 it(title, function () {
                     const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
@@ -393,16 +394,6 @@ describe('::step', function () {
     describe('MEMORY', function () {
         const step = new Shanghai();
 
-        it('should `MLOAD` value onto stack', function () {
-            const state = new State<Inst, Expr>();
-
-            state.memory[4] = new Val(1n);
-            state.stack.push(new Val(4n));
-            step.MLOAD(state);
-
-            expect(state.stack.values).to.be.deep.equal([new MLoad(new Val(4n), new Val(1n))]);
-        });
-
         it('should `MSTORE` value into memory', function () {
             const state = new State<Inst, Expr>();
 
@@ -414,11 +405,6 @@ describe('::step', function () {
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
         });
 
-        it('should push `MSIZE` onto stack', function () {
-            const state = new State<Inst, Expr>();
-            step.MSIZE(state);
-            expect(state.stack.values).to.be.deep.equal([new Prop('msize()', 'uint')]);
-        });
     });
 
     describe('SYSTEM', function () {
@@ -430,18 +416,6 @@ describe('::step', function () {
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([new Invalid(1)]);
             expect(sol`${state.stmts[0]}`).to.be.equal("revert('Invalid instruction (0x1)');");
-        });
-
-        it('should exec `SHA3`', function () {
-            const state = new State<never, Expr>();
-            state.stack.push(new Val(4n));
-            state.stack.push(new Val(0x10n));
-            step.SHA3(state);
-            expect(state.halted).to.be.false;
-            expect(state.stack.values).to.be.deep.equal([
-                new Sha3(new Val(0x10n), new Val(4n), [new MLoad(new Val(0x10n))]),
-            ]);
-            expect(sol`${state.stack.values[0]}`).to.be.equal('keccak256(memory[0x10])');
         });
 
         it('should exec `CREATE` with no bytecode', function () {
@@ -552,6 +526,8 @@ describe('::step', function () {
             expect(state.stmts).to.be.deep.equal([
                 new Log(undefined, new Val(2n), new Val(1n), [], [new MLoad(new Val(2n))])
             ]);
+            expect(sol`${state.stmts[0]}`).to.be.equal('log(memory[0x2]);');
+            expect(yul`${state.stmts[0]}`).to.be.equal('log0(0x2, 0x1)');
         });
 
         it('should have `events` when emitting `LOG1` event', function () {
@@ -570,6 +546,8 @@ describe('::step', function () {
             expect(state.stmts).to.be.deep.equal([
                 new Log(step.events[topic], new Val(2n), new Val(1n), [new Val(5n)], [new MLoad(new Val(2n))])
             ]);
+            expect(sol`${state.stmts[0]}`).to.be.equal('log(0x5, memory[0x2]);');
+            expect(yul`${state.stmts[0]}`).to.be.equal('log1(0x2, 0x1, 0x5)');
         });
     });
 

@@ -10,12 +10,13 @@ const id = <E>(expr: E): E => expr;
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 
 type StackStep = bigint | FilterFn<InstanceType<typeof Shanghai>, (state: Ram<Expr>) => void>;
-const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), solstr: string, yulstr: string) => ({
+const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), solstr: string, yulstr: string, memory: Ram<Expr>['memory'] = {}) => ({
     insts,
     expr,
     val: typeof val === 'function' ? val(expr) : val,
     solstr,
     yulstr,
+    memory,
 });
 
 const trunc = (str: unknown, len = 80) =>
@@ -102,18 +103,33 @@ const $exprs = {
     ],
     memory: [
         t([8n, 4n, 'ADD', 'MLOAD'], new MLoad(new Add(new Val(4n), new Val(8n))), new MLoad(new Val(12n)), 'memory[0x4 + 0x8]', 'mload(add(0x4, 0x8))'),
+        t(
+            [8n, 4n, 'ADD', 'MLOAD'],
+            new MLoad(new Add(new Val(4n), new Val(8n)), Props['block.chainid']),
+            Props['block.chainid'],
+            'memory[0x4 + 0x8]', 'mload(add(0x4, 0x8))',
+            { 12: Props['block.chainid'] }
+        ),
         t(['MSIZE'], new Prop('msize()', 'uint'), id, 'msize()', 'msize()'),
     ],
     system: [
         t([8n, 4n, 'SHA3'], new Sha3(new Val(4n), new Val(8n), [new MLoad(new Val(4n))]), id, 'keccak256(memory[0x4])', 'keccak256(0x4, 0x8 /*mload(0x4)*/)'),
         t([8n, 'MSIZE', 'SHA3'], new Sha3(new Prop('msize()', 'uint'), new Val(8n)), id, 'keccak256(memory[msize():(msize()+0x8)])', 'keccak256(msize(), 0x8 /*no args*/)'),
+        t(
+            [0x20n, 0x40n, 'SHA3'],
+            new Sha3(new Val(0x40n), new Val(0x20n), [new CallValue()]),
+            id,
+            'keccak256(msg.value)',
+            'keccak256(0x40, 0x20 /*callvalue()*/)',
+            { 0x40: new CallValue() }
+        ),
     ],
 };
 
 describe('::exprs', function () {
     Object.entries($exprs).forEach(([name, exprs]) => {
         describe(name, function () {
-            exprs.forEach(({ insts, expr, val, solstr, yulstr }) => {
+            exprs.forEach(({ insts, expr, val, solstr, yulstr, memory }) => {
                 describe(title(expr), function () {
                     it(`should \`eval\` \`${solstr}\``, function () {
                         expect(expr.eval()).to.be.deep.equal(val);
@@ -121,16 +137,19 @@ describe('::exprs', function () {
 
                     it(`should \`STEP\` \`[${insts.map(i => trunc(i, 12)).join('|')}]\` into expr`, function () {
                         const step = new Shanghai();
-                        const { stack, memory } = new State<never, Expr>();
+                        const state = new State<never, Expr>();
+                        Object.assign(state.memory, memory);
+
                         for (const inst of insts) {
                             if (typeof inst === 'bigint') {
-                                stack.push(new Val(inst));
+                                state.stack.push(new Val(inst));
                             } else {
-                                step[inst]({ stack, memory });
+                                step[inst](state);
                             }
                         }
 
-                        expect(stack.values).to.be.deep.equal([expr]);
+                        expect(state.halted).to.be.false;
+                        expect(state.stack.values).to.be.deep.equal([expr]);
                     });
 
                     it(`should \`sol\` expr into \`${solstr}\``, function () {
