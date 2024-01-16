@@ -7,7 +7,7 @@ import { inspect } from 'util';
 import { Contract } from 'sevm';
 import 'sevm/4byte';
 
-import { fnselector } from './utils/selector';
+import { fnselector } from '../utils/selector';
 
 describe('examples', function () {
     [
