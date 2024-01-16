@@ -26,21 +26,21 @@ object "runtime" {
 
 ```
 
-```graphviz -no-opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lmemory[0x40] = 0x80;\lselfdestruct(0xffffffffffffffffffffffffffffffffffffffff & msg.sender);\l" fillcolor="#cf91f7"];
-  }
-
-
-}
+```mermaid -no-opt
+---
+title: selfdestruct-no-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+memory[0x40] = 0x80;
+selfdestruct(0xffffffffffffffffffffffffffffffffffffffff & msg.sender);
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
 
 ```
 
@@ -70,20 +70,20 @@ object "runtime" {
 
 ```
 
-```graphviz -opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lmemory[0x40] = 0x80;\lselfdestruct(msg.sender);\l" fillcolor="#cf91f7"];
-  }
-
-
-}
+```mermaid -opt
+---
+title: selfdestruct-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+memory[0x40] = 0x80;
+selfdestruct(msg.sender);
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
 
 ```

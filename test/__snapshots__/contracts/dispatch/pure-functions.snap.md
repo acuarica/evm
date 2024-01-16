@@ -79,98 +79,128 @@ object "runtime" {
 
 ```
 
-```graphviz -no-opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lmemory[0x40] = 0x80;\lwhen msg.data.length < 0x4 goto 38 or fall 12\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_12 {
-    style="filled,rounded";
-    label = "pc @12";
-    "id-1" [label="pc @12 (id-1)\l=| local0\lundefined local0 = msg.data >>> 0xe0; // #refs 1\lcase when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_28 {
-    style="filled,rounded";
-    label = "pc @28";
-    "id-2" [label="pc @28 (id-2)\l=| local0\lcase when msg.sig == 6d4ce63c goto [J]0x47 or fall 38\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_38 {
-    style="filled,rounded";
-    label = "pc @38";
-    "id-3" [label="pc @38 (id-3)\l=| local0\lundefined local1 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-    "id-4" [label="pc @38 (id-4)\l=| \lundefined local0 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_43 {
-    style="filled,rounded";
-    label = "pc @43";
-    "id-5" [label="pc @43 (id-5)\l=| [J]0x31|local0\lgoto :[J]0x6f branch:111\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_111 {
-    style="filled,rounded";
-    label = "pc @111";
-    "id-6" [label="pc @111 (id-6)\l=| 0x1|local0\lgoto :[J]0x31 branch:49\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_49 {
-    style="filled,rounded";
-    label = "pc @49";
-    "id-7" [label="pc @49 (id-7)\l=| local0\lundefined local1 = memory[0x40]; // #refs 0\lundefined local2 = 0x1; // #refs -1\lmemory[memory[0x40]] = 0x1;\lundefined local3 = memory[0x40]; // #refs 0\lreturn 0x1;\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_71 {
-    style="filled,rounded";
-    label = "pc @71";
-    "id-8" [label="pc @71 (id-8)\l=| local1|local0\lundefined local1 = msg.value; // #refs 0\lwhen msg.value == 0 goto 82 or fall 78\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_78 {
-    style="filled,rounded";
-    label = "pc @78";
-    "id-9" [label="pc @78 (id-9)\l=| local1|local0\lundefined local2 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_82 {
-    style="filled,rounded";
-    label = "pc @82";
-    "id-10" [label="pc @82 (id-10)\l=| [J]0x59|local0\lgoto :[J]0x78 branch:120\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_120 {
-    style="filled,rounded";
-    label = "pc @120";
-    "id-11" [label="pc @120 (id-11)\l=| 0x1|local0\lgoto :[J]0x59 branch:89\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_89 {
-    style="filled,rounded";
-    label = "pc @89";
-    "id-12" [label="pc @89 (id-12)\l=| local0\lundefined local2 = memory[0x40]; // #refs 0\lundefined local3 = 0x1; // #refs -1\lmemory[memory[0x40]] = 0x1;\lundefined local4 = memory[0x40]; // #refs 0\lreturn 0x1;\l" fillcolor="#cf91f7"];
-  }
-
-  "id-0" -> "id-4";
-  "id-0" -> "id-1";
-  "id-1" -> "id-2";
-  "id-2" -> "id-3";
-  "id-5" -> "id-6";
-  "id-6" -> "id-7";
-  "id-8" -> "id-10";
-  "id-8" -> "id-9";
-  "id-10" -> "id-11";
-  "id-11" -> "id-12";
-
-}
+```mermaid -no-opt
+---
+title: pure functions-no-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+memory[0x40] = 0x80;
+when msg.data.length < 0x4 goto 38 or fall 12
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
+  subgraph cluster_12 [pc @12]
+    s_1("pc @12 (s_1)
+=|local0
+undefined local0 = msg.data >>> 0xe0; // #refs 1
+case when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28
+")
+    class s_1 state
+  end
+  subgraph cluster_28 [pc @28]
+    s_2("pc @28 (s_2)
+=|local0
+case when msg.sig == 6d4ce63c goto [J]0x47 or fall 38
+")
+    class s_2 state
+  end
+  subgraph cluster_38 [pc @38]
+    s_3("pc @38 (s_3)
+=|local0
+undefined local1 = 0x0; // #refs 0
+revert();
+")
+    class s_3 state
+    s_4("pc @38 (s_4)
+=|
+undefined local0 = 0x0; // #refs 0
+revert();
+")
+    class s_4 state
+  end
+  subgraph cluster_43 [pc @43]
+    s_5[["pc @43 (s_5)
+=|[J]0x31|local0
+goto :[J]0x6f branch:111
+"]]
+    class s_5 state
+    style s_5 fill:#5F021F
+  end
+  subgraph cluster_111 [pc @111]
+    s_6("pc @111 (s_6)
+=|0x1|local0
+goto :[J]0x31 branch:49
+")
+    class s_6 state
+  end
+  subgraph cluster_49 [pc @49]
+    s_7("pc @49 (s_7)
+=|local0
+undefined local1 = memory[0x40]; // #refs 0
+undefined local2 = 0x1; // #refs -1
+memory[memory[0x40]] = 0x1;
+undefined local3 = memory[0x40]; // #refs 0
+return 0x1;
+")
+    class s_7 state
+  end
+  subgraph cluster_71 [pc @71]
+    s_8[["pc @71 (s_8)
+=|local1|local0
+undefined local1 = msg.value; // #refs 0
+when msg.value == 0 goto 82 or fall 78
+"]]
+    class s_8 state
+    style s_8 fill:#5F021F
+  end
+  subgraph cluster_78 [pc @78]
+    s_9("pc @78 (s_9)
+=|local1|local0
+undefined local2 = 0x0; // #refs 0
+revert();
+")
+    class s_9 state
+  end
+  subgraph cluster_82 [pc @82]
+    s_10("pc @82 (s_10)
+=|[J]0x59|local0
+goto :[J]0x78 branch:120
+")
+    class s_10 state
+  end
+  subgraph cluster_120 [pc @120]
+    s_11("pc @120 (s_11)
+=|0x1|local0
+goto :[J]0x59 branch:89
+")
+    class s_11 state
+  end
+  subgraph cluster_89 [pc @89]
+    s_12("pc @89 (s_12)
+=|local0
+undefined local2 = memory[0x40]; // #refs 0
+undefined local3 = 0x1; // #refs -1
+memory[memory[0x40]] = 0x1;
+undefined local4 = memory[0x40]; // #refs 0
+return 0x1;
+")
+    class s_12 state
+  end
+  s_0 -- jumpi --> s_4;
+  s_0 -. fall .-> s_1;
+  s_1 -. fall .-> s_2;
+  s_2 -. fall .-> s_3;
+  s_5 -- jump --> s_6;
+  s_6 -- jump --> s_7;
+  s_8 -- jumpi --> s_10;
+  s_8 -. fall .-> s_9;
+  s_10 -- jump --> s_11;
+  s_11 -- jump --> s_12;
 
 ```
 
@@ -253,87 +283,123 @@ object "runtime" {
 
 ```
 
-```graphviz -opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lmemory[0x40] = 0x80;\lwhen msg.data.length < 0x4 goto 38 or fall 12\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_12 {
-    style="filled,rounded";
-    label = "pc @12";
-    "id-1" [label="pc @12 (id-1)\l=| local0\lundefined local0 = msg.data >>> 0xe0; // #refs 1\lcase when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_28 {
-    style="filled,rounded";
-    label = "pc @28";
-    "id-2" [label="pc @28 (id-2)\l=| local0\lcase when msg.sig == 6d4ce63c goto [J]0x43 or fall 38\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_38 {
-    style="filled,rounded";
-    label = "pc @38";
-    "id-3" [label="pc @38 (id-3)\l=| local0\lundefined local1 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-    "id-4" [label="pc @38 (id-4)\l=| \lundefined local0 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_43 {
-    style="filled,rounded";
-    label = "pc @43";
-    "id-5" [label="pc @43 (id-5)\l=| [J]0x31|local0\lgoto :[J]0x52 branch:82\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_82 {
-    style="filled,rounded";
-    label = "pc @82";
-    "id-6" [label="pc @82 (id-6)\l=| 0x1|local0\lgoto :[J]0x31 branch:49\l" fillcolor="#cf91f7"];
-    "id-7" [label="pc @82 (id-7)\l=| 0x1|local0\lgoto :[J]0x31 branch:49\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_49 {
-    style="filled,rounded";
-    label = "pc @49";
-    "id-8" [label="pc @49 (id-8)\l=| local0\lundefined local1 = 0x40; // #refs 0\lundefined local2 = memory[0x40]; // #refs -1\lmemory[memory[0x40]] = 0x1;\lundefined local3 = memory[0x40]; // #refs 0\lreturn 0x1;\l" fillcolor="#cf91f7"];
-    "id-9" [label="pc @49 (id-9)\l=| local0\lundefined local2 = 0x40; // #refs 0\lundefined local3 = memory[0x40]; // #refs -1\lmemory[memory[0x40]] = 0x1;\lundefined local4 = memory[0x40]; // #refs 0\lreturn 0x1;\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_67 {
-    style="filled,rounded";
-    label = "pc @67";
-    "id-10" [label="pc @67 (id-10)\l=| local1|local0\lundefined local1 = msg.value; // #refs 0\lwhen msg.value == 0 goto 78 or fall 74\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_74 {
-    style="filled,rounded";
-    label = "pc @74";
-    "id-11" [label="pc @74 (id-11)\l=| local1|local0\lundefined local2 = 0x0; // #refs 0\lrevert();\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_78 {
-    style="filled,rounded";
-    label = "pc @78";
-    "id-12" [label="pc @78 (id-12)\l=| [J]0x31|local0\lfall: 82:\l" fillcolor="#cf91f7"];
-  }
-
-  "id-0" -> "id-4";
-  "id-0" -> "id-1";
-  "id-1" -> "id-2";
-  "id-2" -> "id-3";
-  "id-5" -> "id-6";
-  "id-6" -> "id-8";
-  "id-7" -> "id-9";
-  "id-10" -> "id-12";
-  "id-10" -> "id-11";
-  "id-12" -> "id-7";
-
-}
+```mermaid -opt
+---
+title: pure functions-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+memory[0x40] = 0x80;
+when msg.data.length < 0x4 goto 38 or fall 12
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
+  subgraph cluster_12 [pc @12]
+    s_1("pc @12 (s_1)
+=|local0
+undefined local0 = msg.data >>> 0xe0; // #refs 1
+case when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28
+")
+    class s_1 state
+  end
+  subgraph cluster_28 [pc @28]
+    s_2("pc @28 (s_2)
+=|local0
+case when msg.sig == 6d4ce63c goto [J]0x43 or fall 38
+")
+    class s_2 state
+  end
+  subgraph cluster_38 [pc @38]
+    s_3("pc @38 (s_3)
+=|local0
+undefined local1 = 0x0; // #refs 0
+revert();
+")
+    class s_3 state
+    s_4("pc @38 (s_4)
+=|
+undefined local0 = 0x0; // #refs 0
+revert();
+")
+    class s_4 state
+  end
+  subgraph cluster_43 [pc @43]
+    s_5[["pc @43 (s_5)
+=|[J]0x31|local0
+goto :[J]0x52 branch:82
+"]]
+    class s_5 state
+    style s_5 fill:#5F021F
+  end
+  subgraph cluster_82 [pc @82]
+    s_6("pc @82 (s_6)
+=|0x1|local0
+goto :[J]0x31 branch:49
+")
+    class s_6 state
+    s_7("pc @82 (s_7)
+=|0x1|local0
+goto :[J]0x31 branch:49
+")
+    class s_7 state
+  end
+  subgraph cluster_49 [pc @49]
+    s_8("pc @49 (s_8)
+=|local0
+undefined local1 = 0x40; // #refs 0
+undefined local2 = memory[0x40]; // #refs -1
+memory[memory[0x40]] = 0x1;
+undefined local3 = memory[0x40]; // #refs 0
+return 0x1;
+")
+    class s_8 state
+    s_9("pc @49 (s_9)
+=|local0
+undefined local2 = 0x40; // #refs 0
+undefined local3 = memory[0x40]; // #refs -1
+memory[memory[0x40]] = 0x1;
+undefined local4 = memory[0x40]; // #refs 0
+return 0x1;
+")
+    class s_9 state
+  end
+  subgraph cluster_67 [pc @67]
+    s_10[["pc @67 (s_10)
+=|local1|local0
+undefined local1 = msg.value; // #refs 0
+when msg.value == 0 goto 78 or fall 74
+"]]
+    class s_10 state
+    style s_10 fill:#5F021F
+  end
+  subgraph cluster_74 [pc @74]
+    s_11("pc @74 (s_11)
+=|local1|local0
+undefined local2 = 0x0; // #refs 0
+revert();
+")
+    class s_11 state
+  end
+  subgraph cluster_78 [pc @78]
+    s_12("pc @78 (s_12)
+=|[J]0x31|local0
+fall: 82:
+")
+    class s_12 state
+  end
+  s_0 -- jumpi --> s_4;
+  s_0 -. fall .-> s_1;
+  s_1 -. fall .-> s_2;
+  s_2 -. fall .-> s_3;
+  s_5 -- jump --> s_6;
+  s_6 -- jump --> s_8;
+  s_7 -- jump --> s_9;
+  s_10 -- jumpi --> s_12;
+  s_10 -. fall .-> s_11;
+  s_12 -. jumpdest .-> s_7;
 
 ```

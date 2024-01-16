@@ -76,7 +76,7 @@ describe('::contracts', function () {
                         });
 
                         it(`should match CFG snapshot`, function () {
-                            expect(cfgdot(contract)).to.matchSnapshot('graphviz', this, [root, suffix]);
+                            expect(cfg(contract, title + suffix)).to.matchSnapshot('mermaid', this, [root, suffix]);
                         });
                     });
                 });
@@ -85,7 +85,9 @@ describe('::contracts', function () {
     });
 });
 
-function cfgdot(evm: Contract) {
+function cfg(evm: Contract, title: string) {
+    const fnEntries = Object.fromEntries([...evm.functionBranches.values()].map(br => [br.pc, true]));
+
     const ids = new WeakMap<State<Inst, Expr>, string>();
     let id = 0;
     for (const block of evm.blocks.values()) {
@@ -93,7 +95,7 @@ function cfgdot(evm: Contract) {
             assert(!ids.has(state));
 
             if (!ids.has(state)) {
-                ids.set(state, `id-${id}`);
+                ids.set(state, `s_${id}`);
                 id++;
             }
         }
@@ -102,59 +104,59 @@ function cfgdot(evm: Contract) {
     let output = '';
     const write = (content: string) => output += content + '\n';
 
-    write(`digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-`);
+    write('---');
+    write(`title: ${title}`);
+    write('---');
+    write('flowchart TD');
+    write(`  classDef state text-align:left`);
 
     let edges = '';
     for (const [pc, block] of evm.blocks) {
-        write(`  subgraph cluster_${pc} {`);
-        write(`    style="filled,rounded";`);
-        write(`    label = "pc @${pc}";`);
+        write(`  subgraph cluster_${pc} [pc @${pc}]`);
 
         for (const state of block.states) {
-            writeNode(pc, state);
+            writeNode(pc, state, pc === 0 || fnEntries[pc] === true);
             switch (state.last?.name) {
                 case 'Jumpi':
-                    writeEdge(state, state.last.destBranch);
-                    writeEdge(state, state.last.fallBranch);
+                    writeEdge(state, state.last.destBranch, '- jumpi -');
+                    writeEdge(state, state.last.fallBranch, '. fall .');
                     break;
                 case 'SigCase':
-                    // writeEdge(pc, state.last.condition.hash);
-                    writeEdge(state, state.last.fallBranch);
+                    writeEdge(state, state.last.fallBranch, '. fall .');
                     break;
                 case 'Jump':
-                    writeEdge(state, state.last.destBranch);
+                    writeEdge(state, state.last.destBranch, '- jump -');
                     break;
                 case 'JumpDest':
-                    writeEdge(state, state.last.fallBranch);
+                    writeEdge(state, state.last.fallBranch, '. jumpdest .');
                     break;
                 default:
             }
         }
-        write('  }\n');
+        write('  end');
     }
-    write(edges);
-    write('}');
+    output += edges;
     return output;
 
-    function writeNode(pc: number, state: State<Inst, Expr>) {
+    function writeNode(pc: number, state: State<Inst, Expr>, entry: boolean) {
         const id = ids.get(state);
         let label = `pc @${pc} (${id})`;
-        label += '\\l';
-        label += '=| ' + state.stack.values.map(elem => yul`${elem}`).join('|');
-        label += '\\l';
-        label += state.stmts.map(stmt => sol`${stmt}`).join('\\l');
-        label += '\\l';
+        label += '\n';
+        label += '=|' + state.stack.values.map(elem => yul`${elem}`).join('|');
+        label += '\n';
+        label += state.stmts.map(stmt => sol`${stmt}`).join('\n');
+        label += '\n';
 
-        write(`    "${id}" [label="${label}" fillcolor="${'#cf91f7'}"];`);
+        const [open, close] = entry ? ['[[', ']]'] : ['(', ')'];
+
+        write(`    ${id}${open}"${label}"${close}`);
+        write(`    class ${id} state`);
+        if (entry)
+            write(`    style ${id} fill:#${pc === 0 ? '471C21' : '5F021F'}`);
     }
 
-    function writeEdge(src: State<Inst, Expr>, branch: Branch) {
+    function writeEdge(src: State<Inst, Expr>, branch: Branch, text: string = '') {
         const id = ids.get(src);
-        edges += `  "${id}" -> "${ids.get(branch.state)}";\n`;
+        edges += `  ${id} -${text}-> ${ids.get(branch.state)};\n`;
     }
 }

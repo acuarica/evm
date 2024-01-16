@@ -135,103 +135,248 @@ object "runtime" {
 
 ```
 
-```graphviz -no-opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| 0x0\lmemory[0x40] = 0x80;\lfall: 7:\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_7 {
-    style="filled,rounded";
-    label = "pc @7";
-    "id-1" [label="pc @7 (id-1)\l=| local0\lundefined local0 = 0x0; // #refs 4\lwhen (local0 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-2" [label="pc @7 (id-2)\l=| local1\lundefined local1 = 0x1 + local0; // #refs 4\lwhen (local1 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-3" [label="pc @7 (id-3)\l=| local2\lundefined local2 = 0x1 + local1; // #refs 4\lwhen (local2 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-4" [label="pc @7 (id-4)\l=| local3\lundefined local3 = 0x1 + local2; // #refs 4\lwhen (local3 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-5" [label="pc @7 (id-5)\l=| local4\lundefined local4 = 0x1 + local3; // #refs 4\lwhen (local4 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-6" [label="pc @7 (id-6)\l=| local5\lundefined local5 = 0x1 + local4; // #refs 4\lwhen (local5 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-7" [label="pc @7 (id-7)\l=| local6\lundefined local6 = 0x1 + local5; // #refs 4\lwhen (local6 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-8" [label="pc @7 (id-8)\l=| local7\lundefined local7 = 0x1 + local6; // #refs 4\lwhen (local7 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-9" [label="pc @7 (id-9)\l=| local8\lundefined local8 = 0x1 + local7; // #refs 4\lwhen (local8 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-10" [label="pc @7 (id-10)\l=| local9\lundefined local9 = 0x1 + local8; // #refs 4\lwhen (local9 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-    "id-11" [label="pc @7 (id-11)\l=| local10\lundefined local10 = 0x1 + local9; // #refs 4\lwhen (local10 < block.number) == 0 goto 33 or fall 15\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_15 {
-    style="filled,rounded";
-    label = "pc @15";
-    "id-12" [label="pc @15 (id-12)\l=| add(0x1, local0)\lvar_1 = local0;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-13" [label="pc @15 (id-13)\l=| add(0x1, local1)\lvar_1 = local1;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-14" [label="pc @15 (id-14)\l=| add(0x1, local2)\lvar_1 = local2;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-15" [label="pc @15 (id-15)\l=| add(0x1, local3)\lvar_1 = local3;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-16" [label="pc @15 (id-16)\l=| add(0x1, local4)\lvar_1 = local4;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-17" [label="pc @15 (id-17)\l=| add(0x1, local5)\lvar_1 = local5;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-18" [label="pc @15 (id-18)\l=| add(0x1, local6)\lvar_1 = local6;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-19" [label="pc @15 (id-19)\l=| add(0x1, local7)\lvar_1 = local7;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-20" [label="pc @15 (id-20)\l=| add(0x1, local8)\lvar_1 = local8;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-21" [label="pc @15 (id-21)\l=| add(0x1, local9)\lvar_1 = local9;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-22" [label="pc @15 (id-22)\l=| add(0x1, local10)\lvar_1 = local10;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_33 {
-    style="filled,rounded";
-    label = "pc @33";
-    "id-23" [label="pc @33 (id-23)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-24" [label="pc @33 (id-24)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-25" [label="pc @33 (id-25)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-26" [label="pc @33 (id-26)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-27" [label="pc @33 (id-27)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-28" [label="pc @33 (id-28)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-29" [label="pc @33 (id-29)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-30" [label="pc @33 (id-30)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-31" [label="pc @33 (id-31)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-32" [label="pc @33 (id-32)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-33" [label="pc @33 (id-33)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-  }
-
-  "id-0" -> "id-1";
-  "id-1" -> "id-33";
-  "id-1" -> "id-12";
-  "id-2" -> "id-32";
-  "id-2" -> "id-13";
-  "id-3" -> "id-31";
-  "id-3" -> "id-14";
-  "id-4" -> "id-30";
-  "id-4" -> "id-15";
-  "id-5" -> "id-29";
-  "id-5" -> "id-16";
-  "id-6" -> "id-28";
-  "id-6" -> "id-17";
-  "id-7" -> "id-27";
-  "id-7" -> "id-18";
-  "id-8" -> "id-26";
-  "id-8" -> "id-19";
-  "id-9" -> "id-25";
-  "id-9" -> "id-20";
-  "id-10" -> "id-24";
-  "id-10" -> "id-21";
-  "id-11" -> "id-23";
-  "id-11" -> "id-22";
-  "id-12" -> "id-2";
-  "id-13" -> "id-3";
-  "id-14" -> "id-4";
-  "id-15" -> "id-5";
-  "id-16" -> "id-6";
-  "id-17" -> "id-7";
-  "id-18" -> "id-8";
-  "id-19" -> "id-9";
-  "id-20" -> "id-10";
-  "id-21" -> "id-11";
-  "id-22" -> "undefined";
-
-}
+```mermaid -no-opt
+---
+title: bounded for-loop-no-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|0x0
+memory[0x40] = 0x80;
+fall: 7:
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
+  subgraph cluster_7 [pc @7]
+    s_1("pc @7 (s_1)
+=|local0
+undefined local0 = 0x0; // #refs 4
+when (local0 < block.number) == 0 goto 33 or fall 15
+")
+    class s_1 state
+    s_2("pc @7 (s_2)
+=|local1
+undefined local1 = 0x1 + local0; // #refs 4
+when (local1 < block.number) == 0 goto 33 or fall 15
+")
+    class s_2 state
+    s_3("pc @7 (s_3)
+=|local2
+undefined local2 = 0x1 + local1; // #refs 4
+when (local2 < block.number) == 0 goto 33 or fall 15
+")
+    class s_3 state
+    s_4("pc @7 (s_4)
+=|local3
+undefined local3 = 0x1 + local2; // #refs 4
+when (local3 < block.number) == 0 goto 33 or fall 15
+")
+    class s_4 state
+    s_5("pc @7 (s_5)
+=|local4
+undefined local4 = 0x1 + local3; // #refs 4
+when (local4 < block.number) == 0 goto 33 or fall 15
+")
+    class s_5 state
+    s_6("pc @7 (s_6)
+=|local5
+undefined local5 = 0x1 + local4; // #refs 4
+when (local5 < block.number) == 0 goto 33 or fall 15
+")
+    class s_6 state
+    s_7("pc @7 (s_7)
+=|local6
+undefined local6 = 0x1 + local5; // #refs 4
+when (local6 < block.number) == 0 goto 33 or fall 15
+")
+    class s_7 state
+    s_8("pc @7 (s_8)
+=|local7
+undefined local7 = 0x1 + local6; // #refs 4
+when (local7 < block.number) == 0 goto 33 or fall 15
+")
+    class s_8 state
+    s_9("pc @7 (s_9)
+=|local8
+undefined local8 = 0x1 + local7; // #refs 4
+when (local8 < block.number) == 0 goto 33 or fall 15
+")
+    class s_9 state
+    s_10("pc @7 (s_10)
+=|local9
+undefined local9 = 0x1 + local8; // #refs 4
+when (local9 < block.number) == 0 goto 33 or fall 15
+")
+    class s_10 state
+    s_11("pc @7 (s_11)
+=|local10
+undefined local10 = 0x1 + local9; // #refs 4
+when (local10 < block.number) == 0 goto 33 or fall 15
+")
+    class s_11 state
+  end
+  subgraph cluster_15 [pc @15]
+    s_12("pc @15 (s_12)
+=|add(0x1, local0)
+var_1 = local0;
+goto :[J]0x7 branch:7
+")
+    class s_12 state
+    s_13("pc @15 (s_13)
+=|add(0x1, local1)
+var_1 = local1;
+goto :[J]0x7 branch:7
+")
+    class s_13 state
+    s_14("pc @15 (s_14)
+=|add(0x1, local2)
+var_1 = local2;
+goto :[J]0x7 branch:7
+")
+    class s_14 state
+    s_15("pc @15 (s_15)
+=|add(0x1, local3)
+var_1 = local3;
+goto :[J]0x7 branch:7
+")
+    class s_15 state
+    s_16("pc @15 (s_16)
+=|add(0x1, local4)
+var_1 = local4;
+goto :[J]0x7 branch:7
+")
+    class s_16 state
+    s_17("pc @15 (s_17)
+=|add(0x1, local5)
+var_1 = local5;
+goto :[J]0x7 branch:7
+")
+    class s_17 state
+    s_18("pc @15 (s_18)
+=|add(0x1, local6)
+var_1 = local6;
+goto :[J]0x7 branch:7
+")
+    class s_18 state
+    s_19("pc @15 (s_19)
+=|add(0x1, local7)
+var_1 = local7;
+goto :[J]0x7 branch:7
+")
+    class s_19 state
+    s_20("pc @15 (s_20)
+=|add(0x1, local8)
+var_1 = local8;
+goto :[J]0x7 branch:7
+")
+    class s_20 state
+    s_21("pc @15 (s_21)
+=|add(0x1, local9)
+var_1 = local9;
+goto :[J]0x7 branch:7
+")
+    class s_21 state
+    s_22("pc @15 (s_22)
+=|add(0x1, local10)
+var_1 = local10;
+goto :[J]0x7 branch:7
+")
+    class s_22 state
+  end
+  subgraph cluster_33 [pc @33]
+    s_23("pc @33 (s_23)
+=|
+return;
+")
+    class s_23 state
+    s_24("pc @33 (s_24)
+=|
+return;
+")
+    class s_24 state
+    s_25("pc @33 (s_25)
+=|
+return;
+")
+    class s_25 state
+    s_26("pc @33 (s_26)
+=|
+return;
+")
+    class s_26 state
+    s_27("pc @33 (s_27)
+=|
+return;
+")
+    class s_27 state
+    s_28("pc @33 (s_28)
+=|
+return;
+")
+    class s_28 state
+    s_29("pc @33 (s_29)
+=|
+return;
+")
+    class s_29 state
+    s_30("pc @33 (s_30)
+=|
+return;
+")
+    class s_30 state
+    s_31("pc @33 (s_31)
+=|
+return;
+")
+    class s_31 state
+    s_32("pc @33 (s_32)
+=|
+return;
+")
+    class s_32 state
+    s_33("pc @33 (s_33)
+=|
+return;
+")
+    class s_33 state
+  end
+  s_0 -. jumpdest .-> s_1;
+  s_1 -- jumpi --> s_33;
+  s_1 -. fall .-> s_12;
+  s_2 -- jumpi --> s_32;
+  s_2 -. fall .-> s_13;
+  s_3 -- jumpi --> s_31;
+  s_3 -. fall .-> s_14;
+  s_4 -- jumpi --> s_30;
+  s_4 -. fall .-> s_15;
+  s_5 -- jumpi --> s_29;
+  s_5 -. fall .-> s_16;
+  s_6 -- jumpi --> s_28;
+  s_6 -. fall .-> s_17;
+  s_7 -- jumpi --> s_27;
+  s_7 -. fall .-> s_18;
+  s_8 -- jumpi --> s_26;
+  s_8 -. fall .-> s_19;
+  s_9 -- jumpi --> s_25;
+  s_9 -. fall .-> s_20;
+  s_10 -- jumpi --> s_24;
+  s_10 -. fall .-> s_21;
+  s_11 -- jumpi --> s_23;
+  s_11 -. fall .-> s_22;
+  s_12 -- jump --> s_2;
+  s_13 -- jump --> s_3;
+  s_14 -- jump --> s_4;
+  s_15 -- jump --> s_5;
+  s_16 -- jump --> s_6;
+  s_17 -- jump --> s_7;
+  s_18 -- jump --> s_8;
+  s_19 -- jump --> s_9;
+  s_20 -- jump --> s_10;
+  s_21 -- jump --> s_11;
+  s_22 -- jump --> undefined;
 
 ```
 
@@ -370,102 +515,247 @@ object "runtime" {
 
 ```
 
-```graphviz -opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| 0x0\lmemory[0x40] = 0x80;\lfall: 7:\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_7 {
-    style="filled,rounded";
-    label = "pc @7";
-    "id-1" [label="pc @7 (id-1)\l=| local0\lundefined local0 = 0x0; // #refs 1\lwhen (local0 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-2" [label="pc @7 (id-2)\l=| local1\lundefined local1 = 0x1 + local0; // #refs 1\lwhen (local1 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-3" [label="pc @7 (id-3)\l=| local2\lundefined local2 = 0x1 + local1; // #refs 1\lwhen (local2 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-4" [label="pc @7 (id-4)\l=| local3\lundefined local3 = 0x1 + local2; // #refs 1\lwhen (local3 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-5" [label="pc @7 (id-5)\l=| local4\lundefined local4 = 0x1 + local3; // #refs 1\lwhen (local4 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-6" [label="pc @7 (id-6)\l=| local5\lundefined local5 = 0x1 + local4; // #refs 1\lwhen (local5 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-7" [label="pc @7 (id-7)\l=| local6\lundefined local6 = 0x1 + local5; // #refs 1\lwhen (local6 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-8" [label="pc @7 (id-8)\l=| local7\lundefined local7 = 0x1 + local6; // #refs 1\lwhen (local7 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-9" [label="pc @7 (id-9)\l=| local8\lundefined local8 = 0x1 + local7; // #refs 1\lwhen (local8 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-10" [label="pc @7 (id-10)\l=| local9\lundefined local9 = 0x1 + local8; // #refs 1\lwhen (local9 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-    "id-11" [label="pc @7 (id-11)\l=| local10\lundefined local10 = 0x1 + local9; // #refs 1\lwhen (local10 < block.number) == 0 goto 26 or fall 15\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_15 {
-    style="filled,rounded";
-    label = "pc @15";
-    "id-12" [label="pc @15 (id-12)\l=| add(0x1, local0)\lvar_1 = local0;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-13" [label="pc @15 (id-13)\l=| add(0x1, local1)\lvar_1 = local1;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-14" [label="pc @15 (id-14)\l=| add(0x1, local2)\lvar_1 = local2;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-15" [label="pc @15 (id-15)\l=| add(0x1, local3)\lvar_1 = local3;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-16" [label="pc @15 (id-16)\l=| add(0x1, local4)\lvar_1 = local4;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-17" [label="pc @15 (id-17)\l=| add(0x1, local5)\lvar_1 = local5;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-18" [label="pc @15 (id-18)\l=| add(0x1, local6)\lvar_1 = local6;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-19" [label="pc @15 (id-19)\l=| add(0x1, local7)\lvar_1 = local7;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-20" [label="pc @15 (id-20)\l=| add(0x1, local8)\lvar_1 = local8;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-21" [label="pc @15 (id-21)\l=| add(0x1, local9)\lvar_1 = local9;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-    "id-22" [label="pc @15 (id-22)\l=| add(0x1, local10)\lvar_1 = local10;\lgoto :[J]0x7 branch:7\l" fillcolor="#cf91f7"];
-  }
-
-  subgraph cluster_26 {
-    style="filled,rounded";
-    label = "pc @26";
-    "id-23" [label="pc @26 (id-23)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-24" [label="pc @26 (id-24)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-25" [label="pc @26 (id-25)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-26" [label="pc @26 (id-26)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-27" [label="pc @26 (id-27)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-28" [label="pc @26 (id-28)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-29" [label="pc @26 (id-29)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-30" [label="pc @26 (id-30)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-31" [label="pc @26 (id-31)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-32" [label="pc @26 (id-32)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-    "id-33" [label="pc @26 (id-33)\l=| \lreturn;\l" fillcolor="#cf91f7"];
-  }
-
-  "id-0" -> "id-1";
-  "id-1" -> "id-33";
-  "id-1" -> "id-12";
-  "id-2" -> "id-32";
-  "id-2" -> "id-13";
-  "id-3" -> "id-31";
-  "id-3" -> "id-14";
-  "id-4" -> "id-30";
-  "id-4" -> "id-15";
-  "id-5" -> "id-29";
-  "id-5" -> "id-16";
-  "id-6" -> "id-28";
-  "id-6" -> "id-17";
-  "id-7" -> "id-27";
-  "id-7" -> "id-18";
-  "id-8" -> "id-26";
-  "id-8" -> "id-19";
-  "id-9" -> "id-25";
-  "id-9" -> "id-20";
-  "id-10" -> "id-24";
-  "id-10" -> "id-21";
-  "id-11" -> "id-23";
-  "id-11" -> "id-22";
-  "id-12" -> "id-2";
-  "id-13" -> "id-3";
-  "id-14" -> "id-4";
-  "id-15" -> "id-5";
-  "id-16" -> "id-6";
-  "id-17" -> "id-7";
-  "id-18" -> "id-8";
-  "id-19" -> "id-9";
-  "id-20" -> "id-10";
-  "id-21" -> "id-11";
-  "id-22" -> "undefined";
-
-}
+```mermaid -opt
+---
+title: bounded for-loop-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|0x0
+memory[0x40] = 0x80;
+fall: 7:
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
+  subgraph cluster_7 [pc @7]
+    s_1("pc @7 (s_1)
+=|local0
+undefined local0 = 0x0; // #refs 1
+when (local0 < block.number) == 0 goto 26 or fall 15
+")
+    class s_1 state
+    s_2("pc @7 (s_2)
+=|local1
+undefined local1 = 0x1 + local0; // #refs 1
+when (local1 < block.number) == 0 goto 26 or fall 15
+")
+    class s_2 state
+    s_3("pc @7 (s_3)
+=|local2
+undefined local2 = 0x1 + local1; // #refs 1
+when (local2 < block.number) == 0 goto 26 or fall 15
+")
+    class s_3 state
+    s_4("pc @7 (s_4)
+=|local3
+undefined local3 = 0x1 + local2; // #refs 1
+when (local3 < block.number) == 0 goto 26 or fall 15
+")
+    class s_4 state
+    s_5("pc @7 (s_5)
+=|local4
+undefined local4 = 0x1 + local3; // #refs 1
+when (local4 < block.number) == 0 goto 26 or fall 15
+")
+    class s_5 state
+    s_6("pc @7 (s_6)
+=|local5
+undefined local5 = 0x1 + local4; // #refs 1
+when (local5 < block.number) == 0 goto 26 or fall 15
+")
+    class s_6 state
+    s_7("pc @7 (s_7)
+=|local6
+undefined local6 = 0x1 + local5; // #refs 1
+when (local6 < block.number) == 0 goto 26 or fall 15
+")
+    class s_7 state
+    s_8("pc @7 (s_8)
+=|local7
+undefined local7 = 0x1 + local6; // #refs 1
+when (local7 < block.number) == 0 goto 26 or fall 15
+")
+    class s_8 state
+    s_9("pc @7 (s_9)
+=|local8
+undefined local8 = 0x1 + local7; // #refs 1
+when (local8 < block.number) == 0 goto 26 or fall 15
+")
+    class s_9 state
+    s_10("pc @7 (s_10)
+=|local9
+undefined local9 = 0x1 + local8; // #refs 1
+when (local9 < block.number) == 0 goto 26 or fall 15
+")
+    class s_10 state
+    s_11("pc @7 (s_11)
+=|local10
+undefined local10 = 0x1 + local9; // #refs 1
+when (local10 < block.number) == 0 goto 26 or fall 15
+")
+    class s_11 state
+  end
+  subgraph cluster_15 [pc @15]
+    s_12("pc @15 (s_12)
+=|add(0x1, local0)
+var_1 = local0;
+goto :[J]0x7 branch:7
+")
+    class s_12 state
+    s_13("pc @15 (s_13)
+=|add(0x1, local1)
+var_1 = local1;
+goto :[J]0x7 branch:7
+")
+    class s_13 state
+    s_14("pc @15 (s_14)
+=|add(0x1, local2)
+var_1 = local2;
+goto :[J]0x7 branch:7
+")
+    class s_14 state
+    s_15("pc @15 (s_15)
+=|add(0x1, local3)
+var_1 = local3;
+goto :[J]0x7 branch:7
+")
+    class s_15 state
+    s_16("pc @15 (s_16)
+=|add(0x1, local4)
+var_1 = local4;
+goto :[J]0x7 branch:7
+")
+    class s_16 state
+    s_17("pc @15 (s_17)
+=|add(0x1, local5)
+var_1 = local5;
+goto :[J]0x7 branch:7
+")
+    class s_17 state
+    s_18("pc @15 (s_18)
+=|add(0x1, local6)
+var_1 = local6;
+goto :[J]0x7 branch:7
+")
+    class s_18 state
+    s_19("pc @15 (s_19)
+=|add(0x1, local7)
+var_1 = local7;
+goto :[J]0x7 branch:7
+")
+    class s_19 state
+    s_20("pc @15 (s_20)
+=|add(0x1, local8)
+var_1 = local8;
+goto :[J]0x7 branch:7
+")
+    class s_20 state
+    s_21("pc @15 (s_21)
+=|add(0x1, local9)
+var_1 = local9;
+goto :[J]0x7 branch:7
+")
+    class s_21 state
+    s_22("pc @15 (s_22)
+=|add(0x1, local10)
+var_1 = local10;
+goto :[J]0x7 branch:7
+")
+    class s_22 state
+  end
+  subgraph cluster_26 [pc @26]
+    s_23("pc @26 (s_23)
+=|
+return;
+")
+    class s_23 state
+    s_24("pc @26 (s_24)
+=|
+return;
+")
+    class s_24 state
+    s_25("pc @26 (s_25)
+=|
+return;
+")
+    class s_25 state
+    s_26("pc @26 (s_26)
+=|
+return;
+")
+    class s_26 state
+    s_27("pc @26 (s_27)
+=|
+return;
+")
+    class s_27 state
+    s_28("pc @26 (s_28)
+=|
+return;
+")
+    class s_28 state
+    s_29("pc @26 (s_29)
+=|
+return;
+")
+    class s_29 state
+    s_30("pc @26 (s_30)
+=|
+return;
+")
+    class s_30 state
+    s_31("pc @26 (s_31)
+=|
+return;
+")
+    class s_31 state
+    s_32("pc @26 (s_32)
+=|
+return;
+")
+    class s_32 state
+    s_33("pc @26 (s_33)
+=|
+return;
+")
+    class s_33 state
+  end
+  s_0 -. jumpdest .-> s_1;
+  s_1 -- jumpi --> s_33;
+  s_1 -. fall .-> s_12;
+  s_2 -- jumpi --> s_32;
+  s_2 -. fall .-> s_13;
+  s_3 -- jumpi --> s_31;
+  s_3 -. fall .-> s_14;
+  s_4 -- jumpi --> s_30;
+  s_4 -. fall .-> s_15;
+  s_5 -- jumpi --> s_29;
+  s_5 -. fall .-> s_16;
+  s_6 -- jumpi --> s_28;
+  s_6 -. fall .-> s_17;
+  s_7 -- jumpi --> s_27;
+  s_7 -. fall .-> s_18;
+  s_8 -- jumpi --> s_26;
+  s_8 -. fall .-> s_19;
+  s_9 -- jumpi --> s_25;
+  s_9 -. fall .-> s_20;
+  s_10 -- jumpi --> s_24;
+  s_10 -. fall .-> s_21;
+  s_11 -- jumpi --> s_23;
+  s_11 -. fall .-> s_22;
+  s_12 -- jump --> s_2;
+  s_13 -- jump --> s_3;
+  s_14 -- jump --> s_4;
+  s_15 -- jump --> s_5;
+  s_16 -- jump --> s_6;
+  s_17 -- jump --> s_7;
+  s_18 -- jump --> s_8;
+  s_19 -- jump --> s_9;
+  s_20 -- jump --> s_10;
+  s_21 -- jump --> s_11;
+  s_22 -- jump --> undefined;
 
 ```

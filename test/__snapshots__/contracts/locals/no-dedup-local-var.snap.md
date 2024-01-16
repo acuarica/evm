@@ -40,21 +40,30 @@ object "runtime" {
 
 ```
 
-```graphviz -no-opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lmemory[0x40] = 0x80;\luint local0 = block.number; // #refs 1\lundefined local1 = memory[0x40]; // #refs 0\lmemory[memory[0x40]] = local0;\lundefined local2 = memory[0x40]; // #refs 0\lemit Deposit(local0);\lundefined local3 = memory[0x40]; // #refs 0\lmemory[memory[0x40]] = local0;\lundefined local4 = memory[0x40]; // #refs 0\lemit Deposit(local0);\lreturn;\l" fillcolor="#cf91f7"];
-  }
-
-
-}
+```mermaid -no-opt
+---
+title: no dedup local var-no-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+memory[0x40] = 0x80;
+uint local0 = block.number; // #refs 1
+undefined local1 = memory[0x40]; // #refs 0
+memory[memory[0x40]] = local0;
+undefined local2 = memory[0x40]; // #refs 0
+emit Deposit(local0);
+undefined local3 = memory[0x40]; // #refs 0
+memory[memory[0x40]] = local0;
+undefined local4 = memory[0x40]; // #refs 0
+emit Deposit(local0);
+return;
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
 
 ```
 
@@ -97,20 +106,29 @@ object "runtime" {
 
 ```
 
-```graphviz -opt
-digraph G {    
-  color="#efefef";
-  graph[fontsize=8];
-
-  node[shape=box style="rounded,filled" fontsize=9 fontname="Arial" fillcolor="#efefef"];
-
-  subgraph cluster_0 {
-    style="filled,rounded";
-    label = "pc @0";
-    "id-0" [label="pc @0 (id-0)\l=| \lundefined local0 = 0x80; // #refs -1\lmemory[0x40] = 0x80;\luint local1 = block.number; // #refs -1\lmemory[0x80] = block.number;\lemit Deposit(block.number);\lundefined local2 = 0x40; // #refs 0\lundefined local3 = memory[0x40]; // #refs -1\lmemory[memory[0x40]] = block.number;\lundefined local4 = memory[0x40]; // #refs 0\lemit Deposit(block.number);\lreturn;\l" fillcolor="#cf91f7"];
-  }
-
-
-}
+```mermaid -opt
+---
+title: no dedup local var-opt
+---
+flowchart TD
+  classDef state text-align:left
+  subgraph cluster_0 [pc @0]
+    s_0[["pc @0 (s_0)
+=|
+undefined local0 = 0x80; // #refs -1
+memory[0x40] = 0x80;
+uint local1 = block.number; // #refs -1
+memory[0x80] = block.number;
+emit Deposit(block.number);
+undefined local2 = 0x40; // #refs 0
+undefined local3 = memory[0x40]; // #refs -1
+memory[memory[0x40]] = block.number;
+undefined local4 = memory[0x40]; // #refs 0
+emit Deposit(block.number);
+return;
+"]]
+    class s_0 state
+    style s_0 fill:#471C21
+  end
 
 ```
