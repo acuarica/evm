@@ -351,7 +351,7 @@ const DATACOPY = {
 } satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>, _opcode: unknown, bytecode: Uint8Array) => void] };
 
 function memArgs<T>(
-    { stack, memory }: State<Inst, Expr>,
+    { stack, memory }: Ram<Expr>,
     Klass: new (offset: Expr, size: Expr, args?: Expr[]) => T
 ): T {
     const MAXSIZE = 1024;
@@ -539,7 +539,7 @@ const FrontierStep = {
     ...DATACOPY,
 
     /* Memory operations */
-    MLOAD: [0x51, ({ stack, memory }) => {
+    MLOAD: [0x51, ({ stack, memory }: Ram<Expr>) => {
         const location = stack.pop();
         stack.push(new ast.MLoad(location, (location =>
             location.isVal() && Number(location.val) in memory
@@ -564,10 +564,10 @@ const FrontierStep = {
             memory[Number(location.val)] = data;
         }
     }]])),
-    MSIZE: [0x59, ({ stack }) => stack.push(new Prop('msize()', 'uint'))],
+    MSIZE: [0x59, ({ stack }: Operand<Expr>) => stack.push(new Prop('msize()', 'uint'))],
 
     /* System operations */
-    SHA3: [0x20, state => state.stack.push(memArgs(state, Sha3))],
+    SHA3: [0x20, (state: Ram<Expr>) => state.stack.push(memArgs(state, Sha3))],
     STOP: [{ opcode: 0x00, halts: true }, state => state.halt(new ast.Stop())],
     CREATE: [0xf0, function create({ stack, memory }) {
         const value = stack.pop();
