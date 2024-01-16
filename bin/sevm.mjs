@@ -263,7 +263,6 @@ function cfg(contract) {
     for (const [pc, block] of contract.blocks) {
         write(`subgraph cluster_${pc} {`);
         write(`  style=filled;`);
-        // write(`  node [style=filled,color=white];`);
         let label = `pc ${pc}\\l`;
 
         // for (let i = pc; i < chunk.pcend; i++) {
@@ -331,7 +330,6 @@ function cfg(contract) {
      * @param {import('sevm/ast').Branch} branch
      */
     function writeEdge(src, branch) {
-        // write(`"${src}" -> "${branch.state.id}";`);
         const id = ids.get(src);
         edges += `"${id}" -> "${ids.get(branch.state)}";\n`;
     }
