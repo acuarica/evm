@@ -56,6 +56,7 @@ function yulExpr(expr: Expr): string {
             switch (expr.symbol) {
                 case 'msg.sender': return 'caller()';
                 case 'msg.data.length': return 'calldatasize()';
+                case 'msize()': return expr.symbol;
                 default: {
                     const i = expr.symbol.indexOf('.');
                     return (i >= -1 ? expr.symbol.substring(i + 1) : expr.symbol) + '()';
