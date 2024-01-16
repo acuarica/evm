@@ -404,7 +404,6 @@ describe('::step', function () {
             expect(state.memory).to.be.deep.equal({ '4': Props['block.coinbase'] });
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
         });
-
     });
 
     describe('SYSTEM', function () {
@@ -650,6 +649,5 @@ describe('::step', function () {
             step[mnemonic as 'PREVRANDAO']({ stack });
             expect(stack.top).to.be.equal(Props['block.prevrandao']);
         });
-
     });
 });
