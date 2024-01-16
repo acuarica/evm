@@ -1,6 +1,6 @@
 # contracts/mappings/public mapping
 
-```sol -no-opt
+```solidity -no-opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmXUabbCeD7Lv8du5q45dZYekx8Qw9ACfgCuRRaMifyEU8
 pragma solidity 0.7.6;
@@ -212,7 +212,7 @@ digraph G {
 
 ```
 
-```sol -opt
+```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmSrjZkbwKtEg7uMhwXX3nW2nesTsmJYYH2ns4jkXWmEqs
 pragma solidity 0.7.6;

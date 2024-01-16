@@ -1,6 +1,6 @@
 # contracts/control/bounded for-loop
 
-```sol -no-opt
+```solidity -no-opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmYPjcvsjL1MSEMDtdGswmUaxVMuxyeHsfaQgTgbUtUoKo
 pragma solidity 0.7.6;
@@ -235,7 +235,7 @@ digraph G {
 
 ```
 
-```sol -opt
+```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmNeUP433KicpZd6iGR1rFCCUNQkYqaFR684J4LNiJSuaL
 pragma solidity 0.7.6;

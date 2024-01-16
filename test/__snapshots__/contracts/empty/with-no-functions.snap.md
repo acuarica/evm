@@ -1,6 +1,6 @@
 # contracts/empty/with no functions
 
-```sol -no-opt
+```solidity -no-opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://Qmc7NUcdp12QQzhVAMQGPVCLb19V1ifakkLWL7SgvUoYkM
 pragma solidity 0.7.6;
@@ -45,7 +45,7 @@ digraph G {
 
 ```
 
-```sol -opt
+```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmbfibgUvdfkZYGTTwQsEqWF8srkJCoMFMsMyAjFSmGw4S
 pragma solidity 0.7.6;

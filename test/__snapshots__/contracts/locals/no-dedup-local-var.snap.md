@@ -1,6 +1,6 @@
 # contracts/locals/no dedup local var
 
-```sol -no-opt
+```solidity -no-opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmdxVs9n72jjdRhjvXStBXyiNMuCfWRoVywqnGpYnKhWJk
 pragma solidity 0.7.6;
@@ -58,7 +58,7 @@ digraph G {
 
 ```
 
-```sol -opt
+```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmQpUm3Zy5qLKhkS9KA8Sad6yUjZTvVB1adauVq2p1qxac
 pragma solidity 0.7.6;

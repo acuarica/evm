@@ -1,6 +1,6 @@
 # contracts/system/selfdestruct
 
-```sol -no-opt
+```solidity -no-opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmVxFdWfLZNK7URjamqvyzq2oL29wiXKHQ9VVPnLgu5xoG
 pragma solidity 0.7.6;
@@ -44,7 +44,7 @@ digraph G {
 
 ```
 
-```sol -opt
+```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmTYoyy7D6orDPjDivuJFhPvSFdRUnpJnq7jYhSE61Nsot
 pragma solidity 0.7.6;
