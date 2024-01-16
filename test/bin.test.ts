@@ -1,6 +1,6 @@
 import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
-import '../utils/snapshot';
+import './utils/snapshot';
 
 chai.use(chaiExec);
 chaiExec.defaults = {
