@@ -1,4 +1,7 @@
 [
+    "get_deposit_root()",
+    "get_deposit_count()",
+    "deposit(bytes,bytes,bytes,bytes32)",
     "spentAllowance(address,address)",
     "___coinAddress()",
     "___initialize(address,address,address)",

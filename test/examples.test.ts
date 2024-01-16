@@ -9,13 +9,15 @@ import 'sevm/4byte';
 
 import { fnselector } from './utils/selector';
 
-describe('examples', function () {
+describe('::examples', function () {
     [
         {
             name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
             members: [
-                // TODO when un skip test
-                // /^function supportsInterfac\(bytes4 _arg0a\) public payable {$/m,
+                /function get_deposit_root\(\) public/m,
+                /function get_deposit_count\(\) public/m,
+                /function deposit\(bytes _arg0, bytes _arg1, bytes _arg2, bytes32 _arg3\)/,
+                /function supportsInterface\(bytes4 _arg0\) public/m,
             ],
             ercs: ['ERC165'] as const,
             skipSnapshot: true,
