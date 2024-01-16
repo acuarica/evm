@@ -47,17 +47,16 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
     this.bail(true);
 
     const csvPath = 'test/export-verified-contractaddress-opensource-license.csv';
-    /** @type {Buffer} */
-    let csv;
+    let csv: string;
     try {
         /**
          * Needs to be manually downloaded from
          * https://etherscan.io/exportData?type=open-source-contract-codes
          */
-        csv = readFileSync(csvPath);
+        csv = readFileSync(csvPath, 'utf8');
     } catch {
-        it.skip(`Addresses CSV \`${csvPath}\` not found, skipping`, function () {
-            /**/
+        it(`Addresses CSV \`${csvPath}\` not found, skipping`, function () {
+            this.skip();
         });
         return;
     }
@@ -127,7 +126,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         }
     })();
 
-    csv.toString()
+    csv
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(','))
