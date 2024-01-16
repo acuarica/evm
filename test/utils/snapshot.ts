@@ -11,12 +11,10 @@ export const maskTitle = (title: string) => title
     .replace(/ /g, '-')
     .replace(/[:^'()|]/g, '_');
 
-Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) {
+Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context, titlePath?: string[]) {
     const actual = this._obj;
     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
-
-    const [root, ...titles] = ctx.test.titlePath();
 
     const write = (line: string) => (output += line + '\n');
     const writeSnapshot = () => {
@@ -26,6 +24,7 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
         ctx.test!.title += ` 📸 `;
     };
 
+    const [root, ...titles] = titlePath ?? ctx.test.titlePath();
     const name = maskTitle(titles.map(t => t
         .replace(/^should /, '')
         .replace(/ #[0-9a-f]{6}/, '')
@@ -35,6 +34,9 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context) 
     const tag = '```' + `${ext} ${name}`;
 
     const snapshotFile = `./test/__snapshots__/${maskTitle(root)}.snap.md`;
+    const dir = dirname(snapshotFile);
+    mkdirSync(dir, { recursive: true });
+
     const content = existsSync(snapshotFile) ? readFileSync(snapshotFile, 'utf8') : `# ${root}\n`;
     let marker: 'NOT_SEEN' | 'OPEN' | 'CLOSED' = 'NOT_SEEN';
     let output = '';
@@ -88,7 +90,7 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     export namespace Chai {
         interface Assertion {
-            matchSnapshot(ext: string, ctx: Mocha.Context): Assertion;
+            matchSnapshot(ext: string, ctx: Mocha.Context, titlePath?: string[]): Assertion;
             matchFile(path: string, ctx: Mocha.Context): Assertion;
         }
     }
