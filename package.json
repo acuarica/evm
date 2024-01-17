@@ -13,9 +13,9 @@
             "types": "./dist/src/ast/index.d.ts",
             "default": "./dist/src/ast/index.js"
         },
-        "./4byte-get": {
-            "types": "./4byte-get/index.d.ts",
-            "default": "./4byte-get/index.js"
+        "./4byte": {
+            "types": "./4byte/index.d.ts",
+            "default": "./4byte/index.js"
         },
         "./4bytedb": {
             "types": "./4bytedb/index.d.ts",
@@ -29,6 +29,7 @@
         "src/",
         "dist/src/",
         "dist/sevm.js",
+        "4byte/",
         "4bytedb/",
         "bin/"
     ],

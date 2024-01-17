@@ -1,7 +1,7 @@
 /** @type {import('webpack').Configuration} */
 export default {
     target: 'web',
-    entry: ['./4byte-get/index.js'],
+    entry: ['./4byte/index.js'],
     output: {
         library: 'sevm',
         libraryTarget: 'umd',

@@ -6,7 +6,7 @@ const sevm = require('sevm');
 /** @param {{name: string, filtered: boolean}[]} matches */
 const getName = (matches) => matches[0].name;
 
-sevm.Contract.prototype.patchf = async function () {
+sevm.Contract.prototype.patch = async function () {
     const functions = Object.keys(this.functions).map(selector => '0x' + selector).join(',');
     const events = Object.keys(this.events).map(topic => '0x' + topic).join(',');
 

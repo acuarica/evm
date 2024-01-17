@@ -41,7 +41,7 @@ jobs:
       - run: yarn bundle
       - run: yarn test
         env:
-          ENABLE_4BYTE_GET_TEST: 1
+          ENABLE_4BYTE_TEST: 1
       
       - name: 'Set up git user to be able to commit, tag and push'
         run: |

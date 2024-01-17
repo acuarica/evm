@@ -3,19 +3,19 @@ import { readFileSync } from 'fs';
 
 import { Contract } from 'sevm';
 
-const ENABLE_4BYTE_GET_TEST = process.env['ENABLE_4BYTE_GET_TEST'];
+const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 
-describe(`::4byte-get ENABLE_4BYTE_GET_TEST=${ENABLE_4BYTE_GET_TEST}`, function () {
+describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}`, function () {
 
-    const title = !ENABLE_4BYTE_GET_TEST ? ' (enable it by setting `ENABLE_4BYTE_GET_TEST`)' : '';
+    const title = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
     it(`should fetch function signatures${title}`, async function () {
-        if (!ENABLE_4BYTE_GET_TEST) {
+        if (!ENABLE_4BYTE_TEST) {
             this.skip();
         }
 
         // Use dynamic import to avoid failing when test is disabled and `fetch` is not defined.
-        await import('sevm/4byte-get');
+        await import('sevm/4byte');
 
         const name = 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65';
         const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
@@ -30,7 +30,7 @@ describe(`::4byte-get ENABLE_4BYTE_GET_TEST=${ENABLE_4BYTE_GET_TEST}`, function 
             ['4f1ef286', undefined]
         ]);
 
-        contract = await contract.patchf();
+        contract = await contract.patch();
 
         selectors = Object.entries(contract.functions).map(([s, f]) => [s, f.label]);
         expect(selectors).to.be.deep.equal([
