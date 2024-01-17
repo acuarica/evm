@@ -15,7 +15,7 @@ import { expect } from 'chai';
 function json(fileName) {
     const path = `./scripts/4bytedb/${fileName}.json`;
     const [dir, ext] = path.split(fileName).map(c.magenta);
-    process.stderr.write(`${dir}${c.cyan(fileName)}${ext} `);
+    process.stdout.write(`${dir}${c.cyan(fileName)}${ext} `);
     return JSON.parse(readFileSync(path, 'utf-8'));
 }
 
