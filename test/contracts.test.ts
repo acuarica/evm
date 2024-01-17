@@ -7,15 +7,14 @@ import type { Branch, Expr, Inst } from 'sevm/ast';
 import { compile } from './utils/solc';
 
 describe('::contracts', function () {
-    const t = (title: string, src: string, options?: Parameters<typeof compile>[3]) =>
-        ({ title, src, options });
+    const _ = (title: string, src: string) => ({ title, src });
 
     Object.entries<{ title: string, src: string }[]>({
         empty: [
-            t('with no functions', `contract Test { }`),
+            _('with no functions', `contract Test { }`),
         ],
         locals: [
-            t('no dedup local var', `contract Test {
+            _('no dedup local var', `contract Test {
                 event Deposit(uint256);
                 fallback () external payable {
                     uint256 n = block.number;
@@ -25,18 +24,18 @@ describe('::contracts', function () {
             }`),
         ],
         dispatch: [
-            t('pure functions', `contract Test {
+            _('pure functions', `contract Test {
                 function get() external pure returns (uint256) { return 1; }
                 function getPayable() external payable returns (uint256) { return 1; }
             }`),
-            t('symbols', `contract Test {
+            _('symbols', `contract Test {
                 function getBlockHash() public view returns (bytes32) { return blockhash(7); }
                 function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
                 function getThis() public view returns (address) { return address(this); }
             }`),
         ],
         mappings: [
-            t('public mapping', `contract Test {
+            _('public mapping', `contract Test {
                 mapping (address => mapping (address => uint256)) public allowance;
                 function getValue() external view returns (uint256) {
                     return allowance[msg.sender][msg.sender];
@@ -44,13 +43,13 @@ describe('::contracts', function () {
             }`),
         ],
         control: [
-            t('bounded for-loop', `contract Test {
+            _('bounded for-loop', `contract Test {
                 uint256 value;
                 fallback() external payable {
                     for (uint256 i = 0; i < block.number; i++) value = i;
                 }
             }`),
-            t('require', `contract Test {
+            _('require', `contract Test {
                 mapping (address => uint256) private _allowances;
                 function approve(uint256 amount) external {
                     _approve(msg.sender, amount);
@@ -61,19 +60,30 @@ describe('::contracts', function () {
                     _allowances[owner] = amount;
                 }
             }`),
+            _('modifier', `contract Test {
+                uint256 private _value;
+                address private _owner;
+                function _msgSender() internal view returns (address) { return msg.sender; }
+                modifier onlyOwner() {
+                    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+                    _;
+                } 
+                function setWithNoModifier(uint256 value) external { _value = value + 1; }
+                function setWithModifier(uint256 value) external onlyOwner { _value = value + 3; }
+            }`),
         ],
         system: [
-            t('selfdestruct', `contract Test {
+            _('selfdestruct', `contract Test {
                 fallback() external payable {
                     selfdestruct(payable(msg.sender));
                 }
             }`),
         ],
-    }).forEach(([name, contracts]) => {
-        describe(name, function () {
+    }).forEach(([group, contracts]) => {
+        describe(group, function () {
             contracts.forEach(({ title, src }) => {
                 [undefined, { optimizer: { enabled: true } }].forEach(options => {
-                    const root = `contracts/${name}/${title}`;
+                    const root = `contracts/${group}/${title}`;
                     const suffix = options === undefined ? '-no-opt' : '-opt';
 
                     describe(title + suffix, function () {
