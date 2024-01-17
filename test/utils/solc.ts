@@ -105,7 +105,7 @@ export function compile(
     return { bytecode, abi, metadata };
 }
 
-export function forVersion(
+function forVersion(
     fn: (
         compile_: (
             content: string,
