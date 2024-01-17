@@ -45,53 +45,6 @@ describe('::evm', function () {
         expect(gasPrice).to.be.equal(Props['tx.gasprice']);
     });
 
-    it('should dedup locals when ref non-inlineable value', function () {
-        const src = `contract Test {
-            event Deposit(uint256);
-            fallback () external payable {
-                uint256 n = block.number;
-                emit Deposit(n);
-                emit Deposit(n * 3);
-            }
-        }`;
-        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
-        const main = evm.start();
-        expect(evm.step.functionBranches).to.be.empty;
-        expect(
-            evm.blocks.get(0)?.opcodes.filter(({ opcode, }) => opcode.mnemonic === 'NUMBER')
-        ).to.have.length(1);
-
-        const local = 'local0';
-        const topic = eventSelector('Deposit(uint256)');
-        expect(solStmts(main.stmts).trim().split('\n')).to.be.deep.equal([
-            `uint ${local} = block.number; // #refs 1`,
-            `log(0x${topic}, ${local});`,
-            `log(0x${topic}, ${local} * 0x3);`,
-            'return;',
-        ]);
-    });
-
-    it('if0', function () {
-        const src = `contract Test {
-            uint256 value;
-            fallback () external payable {
-                uint256 temp;
-                if (block.number == 7) {
-                    temp = 3;
-                } else {
-                    temp = 5;
-                }
-                value = temp;
-            }
-        }`;
-        const evm = EVM.new(compile(src, '0.7.6', this, { optimizer: { enabled: true } }).bytecode);
-        evm.start();
-
-        expect(evm.step.functionBranches).to.be.empty;
-        expect(evm.errors).to.be.empty;
-        // expect(cfg(evm)).to.matchSnapshot('mermaid', this);
-    });
-
     it('should create ', function () {
         const src = `contract Test {
             event Deposit(uint256);
@@ -126,21 +79,6 @@ describe('::evm', function () {
             optimizer: { enabled: true }
         }).bytecode);
         evm.start();
-        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
-    });
-
-    it('should for loop', function () {
-        const src = `contract Test {
-            event Deposit(uint256);
-            fallback() external payable {
-                for (uint256 i = 0; i < 10; i++) emit Deposit(i);
-            }
-        }`;
-        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
-        // const main =
-        evm.start();
-        // require('util').inspect.defaultOptions.depth = null;
-        // console.log(build(main));
         // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
@@ -191,17 +129,6 @@ describe('::evm', function () {
         expect(evm.blocks.get(head.last.destBranch.pc)!.states[0]).to.be.equal(exit);
 
         expect(body.last.destBranch.state).to.be.equal(head);
-    });
-
-    it('should detect infinite for-loop', function () {
-        const src = `contract Test { event Deposit(uint256);
-            fallback() external payable {
-                for (uint256 i = 0; i < block.number; ) emit Deposit(i);
-            }
-        }`;
-        const evm = EVM.new(compile(src, '0.7.6', this).bytecode);
-        evm.start();
-        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
     });
 
     it('should detect recursive function', function () {

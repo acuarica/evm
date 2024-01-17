@@ -43,10 +43,34 @@ describe('::contracts', function () {
             }`),
         ],
         control: [
+            _('if-else', `contract Test {
+                uint256 value;
+                fallback () external payable {
+                    uint256 temp;
+                    if (block.number == 7) {
+                        temp = 3;
+                    } else {
+                        temp = 5;
+                    }
+                    value = temp;
+                }
+            }`),
+            _('constant for-loop', `contract Test {
+                event Deposit(uint256);
+                fallback() external payable {
+                    for (uint256 i = 0; i < 10; i++) emit Deposit(i);
+                }
+            }`),
             _('bounded for-loop', `contract Test {
                 uint256 value;
                 fallback() external payable {
                     for (uint256 i = 0; i < block.number; i++) value = i;
+                }
+            }`),
+            _('infinite for-loop', `contract Test {
+                event Deposit(uint256);
+                fallback() external payable {
+                    for (uint256 i = 0; i < block.number; ) emit Deposit(i);
                 }
             }`),
             _('require', `contract Test {
