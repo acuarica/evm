@@ -5,14 +5,12 @@ import { Contract } from 'sevm';
 
 const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 
-describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}`, function () {
+const title = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
-    const title = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
+describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${title}`, function () {
 
-    it(`should fetch function signatures${title}`, async function () {
-        if (!ENABLE_4BYTE_TEST) {
-            this.skip();
-        }
+    it('should fetch function signatures', async function () {
+        if (!ENABLE_4BYTE_TEST) this.skip();
 
         // Use dynamic import to avoid failing when test is disabled and `fetch` is not defined.
         await import('sevm/4byte');

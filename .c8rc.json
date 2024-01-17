@@ -5,6 +5,7 @@
     "statements": "85",
     "exclude": [
         ".solc/soljson-v*.js",
-        "dist/test/"
+        "dist/test/",
+        "scripts/solc.mjs"
     ]
 }

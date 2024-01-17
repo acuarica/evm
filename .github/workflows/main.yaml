@@ -82,6 +82,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn make:4bytedb
       - run: yarn coverage
+        env:
+          ENABLE_4BYTE_TEST: 1
 
   examples:
     runs-on: ubuntu-latest
