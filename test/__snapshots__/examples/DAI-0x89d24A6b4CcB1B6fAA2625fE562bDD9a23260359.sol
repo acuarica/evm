@@ -7,8 +7,8 @@ contract Contract {
     event Approval(address indexed _arg0, address indexed _arg1, uint256 _arg2);
     event LogSetOwner(address indexed _arg0);
 
-mapping (address => unknown) public balanceOf;
-mapping (address => mapping (address => uint256)) public allowance;
+    mapping (address => unknown) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
 
 unknown public name; // Slot #7
 unknown public owner; // Slot #4

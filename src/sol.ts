@@ -460,17 +460,9 @@ export function solMappings(mappings: IStore['mappings']) {
 
     Object.keys(mappings).forEach((key: string, index: number) => {
         const mapping = mappings[key];
-        if (mapping.name) {
-            output += solMapping(mapping) + ' public ' + mapping.name + ';';
-        } else {
-            output += solMapping(mapping) + ` mapping${index + 1};`;
-        }
-        output += '\n';
+        const label = mapping.name ? `public ${mapping.name}` : `mapping${index + 1}`;
+        output += `    ${solMapping(mapping)} ${label};\n`;
     });
-
-    if (Object.keys(mappings).length > 0) {
-        output += '\n';
-    }
 
     return output;
 
@@ -598,7 +590,7 @@ function solContract(
 
     text += member(solEvents(this.events, 4));
     text += solStructs(this.mappings);
-    text += solMappings(this.mappings);
+    text += member(solMappings(this.mappings));
     text += solVars(this.variables);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain

@@ -9,8 +9,8 @@ contract Contract {
     event Transfer(address indexed _arg0, address indexed _arg1, uint256 _arg2);
     event Withdrawal(address indexed _arg0, uint256 _arg1);
 
-mapping (address => unknown) public balanceOf;
-mapping (address => mapping (address => uint256)) public allowance;
+    mapping (address => unknown) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
 
 unknown var1__1; // Slot #0
 unknown public decimals; // Slot #2

@@ -7,7 +7,7 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-mapping (address => mapping (address => unknown)) public allowance;
+    mapping (address => mapping (address => unknown)) public allowance;
 
     fallback() external payable {
         require(msg.value == 0);
@@ -271,7 +271,7 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-mapping (address => mapping (address => unknown)) public allowance;
+    mapping (address => mapping (address => unknown)) public allowance;
 
     fallback() external payable {
         require(msg.value == 0);

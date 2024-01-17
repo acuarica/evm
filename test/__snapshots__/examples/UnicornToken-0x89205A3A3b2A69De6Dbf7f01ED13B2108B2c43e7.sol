@@ -4,10 +4,10 @@ contract Contract {
     event Transfer(address indexed _arg0, address indexed _arg1, uint256 _arg2);
     event FrozenFunds(address _arg0, bool _arg1);
 
-mapping (address => unknown) public balanceOf;
-mapping (address => unknown) public frozenAccount;
-mapping (address => mapping (address => uint256)) public allowance;
-mapping (address => mapping (address => unknown)) public spentAllowance;
+    mapping (address => unknown) public balanceOf;
+    mapping (address => unknown) public frozenAccount;
+    mapping (address => mapping (address => uint256)) public allowance;
+    mapping (address => mapping (address => unknown)) public spentAllowance;
 
 unknown var1__1; // Slot #1
 unknown public totalSupply; // Slot #4
