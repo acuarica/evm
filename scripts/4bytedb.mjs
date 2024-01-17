@@ -14,7 +14,8 @@ import { expect } from 'chai';
  */
 function json(fileName) {
     const path = `./scripts/4bytedb/${fileName}.json`;
-    console.info('Reading', c.cyan(fileName), 'from', c.magenta(path));
+    const [dir, ext] = path.split(fileName).map(c.magenta);
+    process.stderr.write(`${dir}${c.cyan(fileName)}${ext} `);
     return JSON.parse(readFileSync(path, 'utf-8'));
 }
 
@@ -27,7 +28,7 @@ function writeJson(fileName, hashes) {
     const path = `./scripts/4bytedb/${fileName}.json`;
     const minPath = `./4bytedb/${fileName}.min.json`;
 
-    console.info('Writing JSON', c.magenta(path), '| minified', c.magenta(minPath));
+    console.info(c.dim('->'), c.blue(path), c.blue(minPath));
 
     writeFileSync(path, JSON.stringify(hashes, null, 4));
     writeFileSync(minPath, JSON.stringify(hashes));
@@ -44,125 +45,38 @@ const reduce = (entries, replacer) =>
         return map;
     }, {});
 
-/**
- * @param {string} msg
- * @param {{ (): void }} fn
- */
-function check(msg, fn) {
-    console.info(c.blue(`  • ${msg}`));
+/** @param {{ (): void }} fn */
+function check(fn) {
     fn();
-}
-
-/**
- * @param {import('ethers').ParamType} param
- * @returns {boolean}
- */
-function isValidType(param) {
-    const BITS = [...Array(32).keys()].map(n => (n + 1) * 8);
-    const BYTES = [...Array(32).keys()].map(n => n + 1);
-    const ELEM_TYPES = [
-        'address',
-        'address payable',
-        'bool',
-        'uint',
-        ...BITS.map(n => `uint${n}`),
-        'int',
-        ...BITS.map(n => `int${n}`),
-        'bytes',
-        ...BYTES.map(n => `bytes${n}`),
-        'string',
-        'function',
-    ];
-    return (
-        ELEM_TYPES.includes(param.type) ||
-        (param.baseType === 'tuple' &&
-                /**@type{import('ethers').ParamType[]}*/ (param.components).every(isValidType)) ||
-        (param.baseType === 'array' &&
-            isValidType(/**@type{import('ethers').ParamType}*/(param.arrayChildren)))
-    );
-}
-
-/**
- * @param {string[]} functions
- */
-function validateFunctions(functions) {
-    check('should not contain duplicates', function () {
-        expect(functions).to.be.deep.equal([...new Set(functions)]);
-    });
-
-    check('entries should not contain spaces (`storage` being an exception)', function () {
-        expect(
-            functions.filter(functionSig => functionSig.replace(/ storage/g, '').includes(' '))
-        ).to.be.deep.equal([]);
-    });
-
-    check('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', function () {
-        expect(functions.filter(functionSig => !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)))
-            .to.be.deep.equal([]);
-    });
-
-    check('entries should contain valid arguments', function () {
-        for (let functionSig of functions) {
-            functionSig = functionSig.replace(/ storage/g, '');
-            if (functionSig.includes('.')) {
-                continue;
-            }
-
-            let func;
-            try {
-                func = FunctionFragment.from(functionSig);
-            } catch (e) {
-                continue;
-            }
-            expect(functionSig, functionSig).to.be.equal(func.format());
-            expect(func.inputs.every(isValidType), functionSig).to.be.true;
-        }
-    });
-}
-
-/** @param {string[]} events */
-function validateEvents(events) {
-    check('should not contain duplicates', function () {
-        expect(events).to.deep.equal([...new Set(events)]);
-    });
-
-    check('entries should not contain spaces', function () {
-        expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
-    });
-
-    check('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', function () {
-        expect(events.filter(eventSig => !eventSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,[\]()]*\)$/)))
-            .to.be.deep.equal([]);
-    });
-
-    check('entries should contain valid arguments', function () {
-        for (const eventSig of events) {
-            let event;
-            try {
-                event = EventFragment.from(eventSig);
-            } catch (e) {
-                continue;
-            }
-            expect(eventSig, eventSig).to.be.equal(event.format());
-            expect(event.inputs.every(isValidType), eventSig).to.be.true;
-        }
-    });
+    process.stdout.write(c.green('[OK] '));
 }
 
 function main() {
     const functions = json('functions');
-    validateFunctions(functions);
+    check(function () {
+        const s = new Set();
+        for (const fn of functions) {
+            const func = FunctionFragment.from(fn);
+            expect(fn).to.be.equal(func.format());
+            s.add(fn);
+        }
+        expect(functions.length).to.be.equal(s.size);
+    });
+    const functionHashes = reduce(functions, s => s.substring(2, 10));
+    writeJson('functionHashes', functionHashes);
 
     const events = json('events');
-    validateEvents(events);
-
-    const functionHashes = reduce(functions, s => s.substring(2, 10));
+    check(function () {
+        const s = new Set();
+        for (const ev of events) {
+            const event = EventFragment.from(ev);
+            expect(ev).to.be.equal(event.format());
+            s.add(ev);
+        }
+        expect(events.length).to.be.equal(s.size);
+    });
     const eventHashes = reduce(events, s => s.substring(2));
-
-    writeJson('functionHashes', functionHashes);
     writeJson('eventHashes', eventHashes);
-
-    console.info('Updated hashes successfully');
 }
 
 main();
