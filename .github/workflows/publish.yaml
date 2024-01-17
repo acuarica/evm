@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          # Enable `git push --tags to trigger other workflows`
+          token: ${{ secrets.GH_PAT }}
       - run: echo "Version $VERSION | Confirm $CONFIRM"
         env:
           VERSION: ${{ inputs.version }}
