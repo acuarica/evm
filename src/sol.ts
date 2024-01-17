@@ -417,13 +417,8 @@ export function solVars(variables: IStore['variables']) {
             types.push('unknown');
         }
         const name = variable.label ? ` public ${variable.label}` : ` var${index + 1}__${variable.index}`;
-        output += [...new Set(types)].join('|') + name + '; // Slot #' + hash;
-        output += '\n';
+        output += `    ${[...new Set(types)].join('|') + name}; // Slot #${hash}\n`;
     });
-
-    if (Object.keys(variables).length > 0) {
-        output += '\n';
-    }
 
     return output;
 }
@@ -591,7 +586,7 @@ function solContract(
     text += member(solEvents(this.events, 4));
     text += solStructs(this.mappings);
     text += member(solMappings(this.mappings));
-    text += solVars(this.variables);
+    text += member(solVars(this.variables));
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const fallback = this.metadata?.minor! >= 6 ? 'fallback' : 'function';

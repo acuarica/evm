@@ -7,7 +7,8 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-unknown var1__1; // Slot #0
+    unknown var1__1; // Slot #0
+
     fallback() external payable {
         if (~block.number != 0x7) {
             undefined local0 = 0x3; // #refs 1
@@ -100,7 +101,8 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-bigint var1__1; // Slot #0
+    bigint var1__1; // Slot #0
+
     fallback() external payable {
         if (~0x7 != block.number) {
             var_1 = 0x3;

@@ -12,9 +12,10 @@ contract Contract {
     mapping (address => unknown) public balanceOf;
     mapping (address => mapping (address => uint256)) public allowance;
 
-unknown var1__1; // Slot #0
-unknown public decimals; // Slot #2
-unknown var3__3; // Slot #1
+    unknown var1__1; // Slot #0
+    unknown public decimals; // Slot #2
+    unknown var3__3; // Slot #1
+
     function() external payable {
         if (~(msg.data.length < 0x4)) {
             if (msg.sig == 06fdde03) {

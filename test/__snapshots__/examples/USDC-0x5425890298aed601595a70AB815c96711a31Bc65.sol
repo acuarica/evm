@@ -7,8 +7,9 @@ contract Contract {
     event AdminChanged(address _arg0, address _arg1);
     event Upgraded(address _arg0);
 
-address public admin; // Slot #7616251639890160809447714111544359812065171195189364993079081710756264753419
-address public implementation; // Slot #50801780122331352337026042894847907698553222651959119521779622085092237899971
+    address public admin; // Slot #7616251639890160809447714111544359812065171195189364993079081710756264753419
+    address public implementation; // Slot #50801780122331352337026042894847907698553222651959119521779622085092237899971
+
     fallback() external payable {
         if (~(msg.data.length < 0x4)) {
             if (~(0x5c60da1b > msg.data >>> 0xe0)) {

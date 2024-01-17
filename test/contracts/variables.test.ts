@@ -91,39 +91,6 @@ contracts('variables', (compile, _fallback, version) => {
         expect(contract.variables).to.be.of.length(3);
     });
 
-    it('should `sol` a hashed public variable with no usages', function () {
-        const src = `contract Test { uint256 public value; }`;
-        const contract = new Contract(compile(src, this).bytecode).patchfns('value()');
-
-        expect(contract.getFunctions()).to.be.deep.equal(['value()']);
-
-        const text = contract.solidify();
-        expect(text, text).to.match(/^unknown public value;/m);
-    });
-
-    describe('with an unreachable setter hashed public variable', function () {
-        let contract: Contract;
-
-        before(function () {
-            const src = `contract Test {
-                uint256 public value;
-                function setValue0(uint256 newValue) internal {
-                    value = newValue;
-                }
-            }`;
-            contract = new Contract(compile(src, this).bytecode).patchfns('value()');
-        });
-
-        it('should `getFunctions` but not `getEvents`', function () {
-            expect(contract.getFunctions()).to.be.deep.equal(['value()']);
-        });
-
-        it('should `decompile` bytecode', function () {
-            const text = contract.solidify();
-            expect(text, text).to.match(/^unknown public value;/m);
-        });
-    });
-
     it.skip('with a public `address` variable', function () {
         const src = `contract Test { address public owner; }`;
         const contract = new Contract(compile(src, this).bytecode).patchfns('owner()');

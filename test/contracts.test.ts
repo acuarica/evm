@@ -42,6 +42,14 @@ describe('::contracts', function () {
                 }
             }`),
         ],
+        variables: [
+            _('public unused var', `contract Test { uint256 public value; }`),
+            _('public var set by internal fn', `contract Test {
+                uint256 public value;
+                // This function is removed from bytecode
+                function setValue0(uint256 newValue) internal { value = newValue; }
+            }`),
+        ],
         control: [
             _('if-else', `contract Test {
                 uint256 value;

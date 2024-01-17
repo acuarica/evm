@@ -10,12 +10,13 @@ contract Contract {
     mapping (address => unknown) public balanceOf;
     mapping (address => mapping (address => uint256)) public allowance;
 
-unknown public name; // Slot #7
-unknown public owner; // Slot #4
-unknown public authority; // Slot #3
-unknown public totalSupply; // Slot #0
-unknown public decimals; // Slot #6
-unknown public symbol; // Slot #5
+    unknown public name; // Slot #7
+    unknown public owner; // Slot #4
+    unknown public authority; // Slot #3
+    unknown public totalSupply; // Slot #0
+    unknown public decimals; // Slot #6
+    unknown public symbol; // Slot #5
+
     function() external payable {
         if (~(msg.data.length < 0x4)) {
             if (msg.sig == 06fdde03) {

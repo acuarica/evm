@@ -7,8 +7,9 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-unknown var1__1; // Slot #0
-unknown var2__2; // Slot #1
+    unknown var1__1; // Slot #0
+    unknown var2__2; // Slot #1
+
     fallback() external payable {
         require(msg.value == 0);
         if (~(msg.data.length < 0x4)) {
@@ -302,8 +303,9 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-unknown var1__1; // Slot #0
-unknown var2__2; // Slot #1
+    unknown var1__1; // Slot #0
+    unknown var2__2; // Slot #1
+
     fallback() external payable {
         require(msg.value == 0);
         if (~(msg.data.length < 0x4)) {
