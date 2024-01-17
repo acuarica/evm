@@ -64,7 +64,7 @@ describe('::contracts', function () {
                         let contract: Contract;
 
                         before(function () {
-                            contract = new Contract(compile(src, '0.7.6', this, options).bytecode).patch();
+                            contract = new Contract(compile(src, '0.7.6', this, options).bytecode).patchdb();
                         });
 
                         it(`should match Solidity snapshot`, function () {

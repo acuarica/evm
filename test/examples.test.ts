@@ -149,8 +149,8 @@ describe('::examples', function () {
                 this.timeout(10000);
 
                 const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
-                contract = new Contract(bytecode).patch();
-                text = contract.reduce().patch().solidify();
+                contract = new Contract(bytecode).patchdb();
+                text = contract.reduce().patchdb().solidify();
             });
 
             it('should match `chunks` coverage snapshot', function () {

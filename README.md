@@ -141,7 +141,7 @@ import 'sevm/4bytedb';
 // https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code
 const bytecode = await new Provider().getCode('0x3FDA67f7583380E67ef93072294a7fAc882FD7E7');
 
-const contract = new Contract(bytecode).patch(); // Lookup for 4byte matches
+const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
 console.log(contract.solidify()); //Decompile bytecode to Solidity
 ```
 
@@ -156,7 +156,7 @@ import 'sevm/4bytedb';
 // https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
 const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 
-const contract = new Contract(bytecode).patch();
+const contract = new Contract(bytecode).patchdb();
 console.log(contract.getFunctions());
 console.log(contract.getEvents());
 console.log(contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */

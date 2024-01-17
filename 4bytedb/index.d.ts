@@ -8,6 +8,6 @@ declare module 'sevm' {
          * When a matching `function` or `event` is found,
          * it patches the `function` or `event` with the corresponding signature.
          */
-        patch(): this;
+        patchdb(): this;
     }
 }

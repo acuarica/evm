@@ -172,7 +172,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 const t1 = hrtime.bigint();
                 benchStats.append(t1 - t0);
 
-                contract = contract.patch();
+                contract = contract.patchdb();
                 contract.solidify();
 
                 metadataStats.append(contract.metadata);

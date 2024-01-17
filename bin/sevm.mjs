@@ -134,7 +134,7 @@ function make(handler) {
         const pathOrAddress = /** @type {string} */ (argv['contract']);
         const bytecode = await getBytecode(pathOrAddress);
         if (bytecode !== null) {
-            const contract = new Contract(bytecode).patch();
+            const contract = new Contract(bytecode).patchdb();
             handler(contract, argv);
         } else {
             console.info(warn(`Cannot find bytecode for ${info(pathOrAddress)}`));

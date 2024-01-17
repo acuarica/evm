@@ -9,5 +9,5 @@ import 'sevm/4bytedb';
 // https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code
 const bytecode = await new Provider().getCode('0x3FDA67f7583380E67ef93072294a7fAc882FD7E7');
 
-const contract = new Contract(bytecode).patch(); // Lookup for 4byte matches
+const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
 console.log(contract.solidify()); //Decompile bytecode to Solidity

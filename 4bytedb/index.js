@@ -23,7 +23,7 @@ const functionHashes = require('./functionHashes.min.json');
 // @ts-expect-error to avoid `Consider using '--resolveJsonModule' to import module with '.json' extension.`
 const eventHashes = require('./eventHashes.min.json');
 
-Contract.prototype.patch = function () {
+Contract.prototype.patchdb = function () {
     for (const [topic, event] of Object.entries(this.events)) {
         if (topic in eventHashes) {
             event.sig = eventHashes[topic];
