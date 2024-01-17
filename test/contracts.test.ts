@@ -45,6 +45,17 @@ describe('::contracts', function () {
                     for (uint256 i = 0; i < block.number; i++) value = i;
                 }
             }`),
+            t('require', `contract Test {
+                mapping (address => uint256) private _allowances;
+                function approve(uint256 amount) external {
+                    _approve(msg.sender, amount);
+                }
+                function _approve(address owner, uint256 amount) private {
+                    require(owner != address(0), "approve");
+                    require(amount > 0, "approve address");
+                    _allowances[owner] = amount;
+                }
+            }`),
         ],
         system: [
             t('selfdestruct', `contract Test {
