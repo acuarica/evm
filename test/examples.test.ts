@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { inspect } from 'util';
 
 import { Contract } from 'sevm';
-import 'sevm/4byte';
+import 'sevm/4bytedb';
 
 import { fnselector } from './utils/selector';
 

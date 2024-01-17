@@ -24,7 +24,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - run: yarn compile
       - run: yarn make:help
       - run: git --no-pager diff --exit-code README.md
@@ -39,7 +39,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - run: yarn compile
       - run: yarn lint
       - run: yarn bundle
@@ -63,7 +63,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - name: Enable `4byte-get` test only when Node > 16 due to `fetch` dependency
         if: ${{ matrix.node > 16 }}
         run: echo "ENABLE_4BYTE_GET_TEST=1" >> "$GITHUB_ENV"
@@ -80,7 +80,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - run: yarn coverage
 
   examples:
@@ -93,7 +93,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - run: yarn compile
       - run: examples/Decode-Bytecode-into-Opcodes.mjs
       - run: examples/Decompile-a-Contract.mjs
@@ -113,7 +113,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
-      - run: yarn make:4byte
+      - run: yarn make:4bytedb
       - run: yarn test
       - run: make dis
       - run: make sol

@@ -3,7 +3,7 @@
 
 import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
-import 'sevm/4byte';
+import 'sevm/4bytedb';
 
 // CryptoKitties Contract
 // https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code

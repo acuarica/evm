@@ -13,13 +13,13 @@
             "types": "./dist/src/ast/index.d.ts",
             "default": "./dist/src/ast/index.js"
         },
-        "./4byte": {
-            "types": "./4byte/index.d.ts",
-            "default": "./4byte/index.js"
-        },
         "./4byte-get": {
             "types": "./4byte-get/index.d.ts",
             "default": "./4byte-get/index.js"
+        },
+        "./4bytedb": {
+            "types": "./4bytedb/index.d.ts",
+            "default": "./4bytedb/index.js"
         }
     },
     "bin": {
@@ -29,7 +29,7 @@
         "src/",
         "dist/src/",
         "dist/sevm.js",
-        "4byte/",
+        "4bytedb/",
         "bin/"
     ],
     "repository": "acuarica/evm",
@@ -92,7 +92,7 @@
         "coverage": "yarn compile && c8 mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
-        "make:4byte": "node scripts/4byte.mjs",
+        "make:4bytedb": "node scripts/4bytedb.mjs",
         "make:help": "scripts/help.mjs README.md",
         "make:docs": "cp README.md docs && typedoc --out docs/tsdoc src/index.ts src/ast/index.ts",
         "docs": "npx http-server docs",

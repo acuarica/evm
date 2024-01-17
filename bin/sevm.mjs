@@ -10,7 +10,7 @@ import path from 'path';
 import yargs from 'yargs';
 
 import { Contract, sol, yul } from 'sevm';
-import 'sevm/4byte';
+import 'sevm/4bytedb';
 
 const paths = envPaths('sevm');
 

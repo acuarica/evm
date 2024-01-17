@@ -3,7 +3,7 @@
 
 import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
-import 'sevm/4byte';
+import 'sevm/4bytedb';
 
 // Compound Contract
 // https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code

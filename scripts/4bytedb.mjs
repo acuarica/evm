@@ -13,7 +13,7 @@ import { expect } from 'chai';
  * @returns {string[]}
  */
 function json(fileName) {
-    const path = `./scripts/4byte/${fileName}.json`;
+    const path = `./scripts/4bytedb/${fileName}.json`;
     console.info('Reading', c.cyan(fileName), 'from', c.magenta(path));
     return JSON.parse(readFileSync(path, 'utf-8'));
 }
@@ -24,8 +24,8 @@ function json(fileName) {
  * @returns
  */
 function writeJson(fileName, hashes) {
-    const path = `./scripts/4byte/${fileName}.json`;
-    const minPath = `./4byte/${fileName}.min.json`;
+    const path = `./scripts/4bytedb/${fileName}.json`;
+    const minPath = `./4bytedb/${fileName}.min.json`;
 
     console.info('Writing JSON', c.magenta(path), '| minified', c.magenta(minPath));
 
@@ -96,10 +96,6 @@ function validateFunctions(functions) {
         ).to.be.deep.equal([]);
     });
 
-    check('entries should not contain semicolons', function () {
-        expect(functions.filter(functionSig => functionSig.includes(';'))).to.be.deep.equal([]);
-    });
-
     check('entries should be formatted correctly using `function(...arguments)` (example: `balanceOf(address)`)', function () {
         expect(functions.filter(functionSig => !functionSig.match(/^[a-zA-Z0-9_$]+\([a-zA-Z0-9,._ [\]()]*\)$/)))
             .to.be.deep.equal([]);
@@ -132,10 +128,6 @@ function validateEvents(events) {
 
     check('entries should not contain spaces', function () {
         expect(events.filter(eventSig => eventSig.includes(' '))).to.be.deep.equal([]);
-    });
-
-    check('entries should not contain semicolons', function () {
-        expect(events.filter(eventSig => eventSig.includes(';'))).to.be.deep.equal([]);
     });
 
     check('entries should be formatted correctly using `Event(...arguments)` (example: `Transfer(address,address,uint256)`)', function () {
