@@ -101,7 +101,7 @@ pragma solidity 0.7.6;
 
 contract Contract {
 
-    bigint var1__1; // Slot #0
+    uint256 var1__1; // Slot #0
 
     fallback() external payable {
         if (~0x7 != block.number) {

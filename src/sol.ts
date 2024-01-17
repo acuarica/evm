@@ -411,7 +411,7 @@ export function solVars(variables: IStore['variables']) {
     let output = '';
     [...variables.entries()].forEach(([hash, variable], index) => {
         const types: string[] = variable.types
-            .map(expr => (expr.isVal() ? 'bigint' : expr.type ?? ''))
+            .map(expr => (expr.isVal() ? 'uint256' : expr.type ?? ''))
             .filter(t => t.trim() !== '');
         if (types.length === 0) {
             types.push('unknown');
