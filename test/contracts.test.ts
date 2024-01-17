@@ -29,6 +29,11 @@ describe('::contracts', function () {
                 function get() external pure returns (uint256) { return 1; }
                 function getPayable() external payable returns (uint256) { return 1; }
             }`),
+            t('symbols', `contract Test {
+                function getBlockHash() public view returns (bytes32) { return blockhash(7); }
+                function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
+                function getThis() public view returns (address) { return address(this); }
+            }`),
         ],
         mappings: [
             t('public mapping', `contract Test {
