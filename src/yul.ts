@@ -11,6 +11,7 @@ import { FNS, isExpr, isInst } from './ast';
 export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const str = isExpr(node) ? yulExpr(node) : isInst(node) ? yulInst(node) : `${node}`;
         result.push(str, strings[i + 1]);
     });
@@ -74,8 +75,6 @@ function yulExpr(expr: Expr): string {
                     return yul`extcodecopy(${expr.address}, ${expr.offset}, ${expr.size})`;
                 case 'returndatacopy':
                     return yul`returndatacopy(${expr.offset}, ${expr.size})`;
-                default:
-                    throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
             }
         case 'MLoad':
             return yul`mload(${expr.location})`;

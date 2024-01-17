@@ -154,8 +154,8 @@ describe('::examples', function () {
             });
 
             it('should match `chunks` coverage snapshot', function () {
-                const trunc = (str: unknown, len = 100) =>
-                    (`${str}`.length <= len ? `${str}` : `${str}`.slice(0, len) + '[..]');
+                const trunc = (buf: string, len = 100) =>
+                    (buf.length <= len ? buf : buf.slice(0, len) + '[..]');
 
                 const nopcodes = contract.opcodes().length;
                 let output = `${nopcodes} opcodes in bytecode\n`;

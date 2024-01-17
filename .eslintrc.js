@@ -8,14 +8,12 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'mocha', 'chai-expect'],
     extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-        'plugin:@typescript-eslint/recommended-requiring-type-checking',
+        'plugin:@typescript-eslint/recommended-type-checked',
         'plugin:mocha/recommended',
         'plugin:chai-expect/recommended',
     ],
     rules: {
-        semi: ['error', 'always'],
+        semi: ['warn', 'always'],
 
         /**
          * https://eslint.org/docs/latest/rules/new-parens
@@ -25,14 +23,10 @@ module.exports = {
          * JavaScript allows the omission of parentheses when invoking a function via the `new` keyword and the constructor has no arguments.
          * However, some coders believe that omitting the parentheses is inconsistent with the rest of the language and thus makes code less clear.
          */
-        'new-parens': 'error',
+        'new-parens': 'warn',
 
         '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-        '@typescript-eslint/restrict-template-expressions': ['off'],
         '@typescript-eslint/no-non-null-assertion': 'off',
-
-        '@typescript-eslint/no-unsafe-assignment': 'off',
-        '@typescript-eslint/no-unsafe-call': 'off',
 
         /**
          * Permits to use arrow functions as no-op.

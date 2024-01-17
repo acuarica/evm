@@ -12,7 +12,7 @@ export const maskTitle = (title: string) => title
     .replace(/[:^'()|]/g, '_');
 
 Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context, titlePath?: string[]) {
-    const actual = this._obj;
+    const actual = this._obj as unknown;
     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
 
@@ -69,7 +69,7 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context, 
 });
 
 Assertion.addMethod('matchFile', function (path: string, ctx: Mocha.Context) {
-    const actual = this._obj;
+    const actual = this._obj as unknown;
     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
 

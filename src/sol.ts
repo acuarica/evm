@@ -13,6 +13,7 @@ import { Contract, type PublicFunction } from '.';
 export function sol(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const str = isExpr(node) ? solExpr(node) : isInst(node) ? solStmt(node) : `${node}`;
         result.push(str, strings[i + 1]);
     });
@@ -113,8 +114,6 @@ function solExpr(expr: Expr): string {
                     return sol`address(${expr.address}).code[${expr.offset}:(${expr.offset}+${expr.size})]`;
                 case 'returndatacopy':
                     return sol`output[${expr.offset}:(${expr.offset}+${expr.size})]`;
-                default:
-                    throw new TypeError(`Unknown DataCopy kind: ${expr.kind}`);
             }
         case 'MLoad':
             return sol`memory[${expr.location}]`;

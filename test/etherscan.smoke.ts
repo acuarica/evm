@@ -199,8 +199,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));
-            /** @type {Map<string, number>} */
-            const errorsByReason = new Map();
+            const errorsByReason: Map<string, number> = new Map();
             errors.forEach(err => {
                 const count = errorsByReason.get(err.reason) ?? 0;
                 errorsByReason.set(err.reason, count + 1);

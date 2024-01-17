@@ -23,7 +23,7 @@ import { Sha3 } from './ast/system';
  * 
  * [^1]: https://eips.ethereum.org/EIPS/eip-3855
  */
-export class Opcode<M = unknown> {
+export class Opcode<M extends string = string> {
 
     constructor(
         /**

@@ -19,7 +19,7 @@ const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), sols
     memory,
 });
 
-const trunc = (str: unknown, len = 80) =>
+const trunc = (str: bigint | string, len = 80) =>
     (`${str}`.length <= len ? `${str}` : `${str}`.slice(0, len) + '[..]');
 
 const title = (obj: unknown) =>
