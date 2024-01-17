@@ -112,7 +112,7 @@ function cfg(evm: Contract, title: string) {
 
     let edges = '';
     for (const [pc, block] of evm.blocks) {
-        write(`  subgraph cluster_${pc} [pc @${pc}]`);
+        write(`  subgraph cluster_${pc} ["pc @${pc}"]`);
 
         for (const state of block.states) {
             writeNode(pc, state, pc === 0 || fnEntries[pc] === true);

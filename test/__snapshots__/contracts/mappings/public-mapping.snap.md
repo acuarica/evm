@@ -109,7 +109,7 @@ title: public mapping-no-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|local0
 memory[0x40] = 0x80;
@@ -119,7 +119,7 @@ when msg.value == 0 goto 16 or fall 12
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_12 [pc @12]
+  subgraph cluster_12 ["pc @12"]
     s_1("pc @12 (s_1)
 =|local0
 undefined local1 = 0x0; // #refs 0
@@ -127,14 +127,14 @@ revert();
 ")
     class s_1 state
   end
-  subgraph cluster_16 [pc @16]
+  subgraph cluster_16 ["pc @16"]
     s_2("pc @16 (s_2)
 =|
 when msg.data.length < 0x4 goto 54 or fall 26
 ")
     class s_2 state
   end
-  subgraph cluster_26 [pc @26]
+  subgraph cluster_26 ["pc @26"]
     s_3("pc @26 (s_3)
 =|local1
 undefined local1 = msg.data >>> 0xe0; // #refs 1
@@ -142,14 +142,14 @@ case when msg.sig == 20965255 goto [J]0x3b or fall 43
 ")
     class s_3 state
   end
-  subgraph cluster_43 [pc @43]
+  subgraph cluster_43 ["pc @43"]
     s_4("pc @43 (s_4)
 =|local1
 case when msg.sig == dd62ed3e goto [J]0x59 or fall 54
 ")
     class s_4 state
   end
-  subgraph cluster_54 [pc @54]
+  subgraph cluster_54 ["pc @54"]
     s_5("pc @54 (s_5)
 =|local1
 undefined local2 = 0x0; // #refs 0
@@ -163,7 +163,7 @@ revert();
 ")
     class s_6 state
   end
-  subgraph cluster_59 [pc @59]
+  subgraph cluster_59 ["pc @59"]
     s_7[["pc @59 (s_7)
 =|[J]0x43|local1
 goto :[J]0xd1 branch:209
@@ -171,7 +171,7 @@ goto :[J]0xd1 branch:209
     class s_7 state
     style s_7 fill:#5F021F
   end
-  subgraph cluster_209 [pc @209]
+  subgraph cluster_209 ["pc @209"]
     s_8("pc @209 (s_8)
 =|sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, add(0x20, local4) /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
 undefined local2 = 0x0; // #refs -1
@@ -187,7 +187,7 @@ goto :[J]0x43 branch:67
 ")
     class s_8 state
   end
-  subgraph cluster_67 [pc @67]
+  subgraph cluster_67 ["pc @67"]
     s_9("pc @67 (s_9)
 =|local1
 undefined local7 = memory[0x40]; // #refs 0
@@ -198,7 +198,7 @@ return allowance[msg.sender][msg.sender];
 ")
     class s_9 state
   end
-  subgraph cluster_89 [pc @89]
+  subgraph cluster_89 ["pc @89"]
     s_10[["pc @89 (s_10)
 =|local3|local2|[J]0xbb|local1
 undefined local2 = 0x4; // #refs 3
@@ -208,7 +208,7 @@ when (msg.data.length - local2 < 0x40) == 0 goto 111 or fall 107
     class s_10 state
     style s_10 fill:#5F021F
   end
-  subgraph cluster_107 [pc @107]
+  subgraph cluster_107 ["pc @107"]
     s_11("pc @107 (s_11)
 =|local3|local2|[J]0xbb|local1
 undefined local4 = 0x0; // #refs 0
@@ -216,7 +216,7 @@ revert();
 ")
     class s_11 state
   end
-  subgraph cluster_111 [pc @111]
+  subgraph cluster_111 ["pc @111"]
     s_12("pc @111 (s_12)
 =|and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local4))|and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2))|[J]0xbb|local1
 undefined local4 = 0x20 + local2; // #refs 0
@@ -224,7 +224,7 @@ goto :[J]0x154 branch:340
 ")
     class s_12 state
   end
-  subgraph cluster_340 [pc @340]
+  subgraph cluster_340 ["pc @340"]
     s_13("pc @340 (s_13)
 =|sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)|local7|local1
 memory[0x20] = 0x0;
@@ -238,7 +238,7 @@ goto :[J]0xbb branch:187
 ")
     class s_13 state
   end
-  subgraph cluster_187 [pc @187]
+  subgraph cluster_187 ["pc @187"]
     s_14("pc @187 (s_14)
 =|local7|local1
 undefined local8 = memory[0x40]; // #refs 0
@@ -371,7 +371,7 @@ title: public mapping-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|local0
 memory[0x40] = 0x80;
@@ -381,7 +381,7 @@ when msg.value == 0 goto 15 or fall 11
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_11 [pc @11]
+  subgraph cluster_11 ["pc @11"]
     s_1("pc @11 (s_1)
 =|local0
 undefined local1 = 0x0; // #refs 0
@@ -389,14 +389,14 @@ revert();
 ")
     class s_1 state
   end
-  subgraph cluster_15 [pc @15]
+  subgraph cluster_15 ["pc @15"]
     s_2("pc @15 (s_2)
 =|
 when msg.data.length < 0x4 goto 50 or fall 24
 ")
     class s_2 state
   end
-  subgraph cluster_24 [pc @24]
+  subgraph cluster_24 ["pc @24"]
     s_3("pc @24 (s_3)
 =|local1
 undefined local1 = msg.data >>> 0xe0; // #refs 1
@@ -404,14 +404,14 @@ case when msg.sig == 20965255 goto [J]0x37 or fall 40
 ")
     class s_3 state
   end
-  subgraph cluster_40 [pc @40]
+  subgraph cluster_40 ["pc @40"]
     s_4("pc @40 (s_4)
 =|local1
 case when msg.sig == dd62ed3e goto [J]0x4f or fall 50
 ")
     class s_4 state
   end
-  subgraph cluster_50 [pc @50]
+  subgraph cluster_50 ["pc @50"]
     s_5("pc @50 (s_5)
 =|local1
 undefined local2 = 0x0; // #refs 0
@@ -425,7 +425,7 @@ revert();
 ")
     class s_6 state
   end
-  subgraph cluster_55 [pc @55]
+  subgraph cluster_55 ["pc @55"]
     s_7[["pc @55 (s_7)
 =|[J]0x3d|local1
 goto :[J]0x7a branch:122
@@ -433,7 +433,7 @@ goto :[J]0x7a branch:122
     class s_7 state
     style s_7 fill:#5F021F
   end
-  subgraph cluster_122 [pc @122]
+  subgraph cluster_122 ["pc @122"]
     s_8("pc @122 (s_8)
 =|sload(keccak256(local2, local4 /*caller().keccak256(local2, local4 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
 undefined local2 = 0x0; // #refs 0
@@ -446,7 +446,7 @@ goto :[J]0x3d branch:61
 ")
     class s_8 state
   end
-  subgraph cluster_61 [pc @61]
+  subgraph cluster_61 ["pc @61"]
     s_9("pc @61 (s_9)
 =|local1
 undefined local5 = 0x40; // #refs 0
@@ -466,7 +466,7 @@ return allowance[_arg0][_arg1];
 ")
     class s_10 state
   end
-  subgraph cluster_79 [pc @79]
+  subgraph cluster_79 ["pc @79"]
     s_11[["pc @79 (s_11)
 =|local3|local2|[J]0x3d|local1
 undefined local2 = 0x4; // #refs 1
@@ -476,7 +476,7 @@ when (msg.data.length - local2 < 0x40) == 0 goto 99 or fall 95
     class s_11 state
     style s_11 fill:#5F021F
   end
-  subgraph cluster_95 [pc @95]
+  subgraph cluster_95 ["pc @95"]
     s_12("pc @95 (s_12)
 =|local3|local2|[J]0x3d|local1
 undefined local4 = 0x0; // #refs 0
@@ -484,7 +484,7 @@ revert();
 ")
     class s_12 state
   end
-  subgraph cluster_99 [pc @99]
+  subgraph cluster_99 ["pc @99"]
     s_13("pc @99 (s_13)
 =|and(calldataload(add(0x20, local2)), local4)|and(local4, calldataload(local2))|[J]0x3d|local1
 undefined local4 = (0x1 << 0xa0) - 0x1; // #refs 0
@@ -492,7 +492,7 @@ goto :[J]0x93 branch:147
 ")
     class s_13 state
   end
-  subgraph cluster_147 [pc @147]
+  subgraph cluster_147 ["pc @147"]
     s_14("pc @147 (s_14)
 =|sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(local5, local7 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)|local8|local1
 undefined local5 = 0x0; // #refs 0

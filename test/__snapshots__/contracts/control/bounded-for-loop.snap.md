@@ -141,7 +141,7 @@ title: bounded for-loop-no-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|0x0
 memory[0x40] = 0x80;
@@ -150,7 +150,7 @@ fall: 7:
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_7 [pc @7]
+  subgraph cluster_7 ["pc @7"]
     s_1("pc @7 (s_1)
 =|local0
 undefined local0 = 0x0; // #refs 4
@@ -218,7 +218,7 @@ when (local10 < block.number) == 0 goto 33 or fall 15
 ")
     class s_11 state
   end
-  subgraph cluster_15 [pc @15]
+  subgraph cluster_15 ["pc @15"]
     s_12("pc @15 (s_12)
 =|add(0x1, local0)
 var_1 = local0;
@@ -286,7 +286,7 @@ goto :[J]0x7 branch:7
 ")
     class s_22 state
   end
-  subgraph cluster_33 [pc @33]
+  subgraph cluster_33 ["pc @33"]
     s_23("pc @33 (s_23)
 =|
 return;
@@ -521,7 +521,7 @@ title: bounded for-loop-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|0x0
 memory[0x40] = 0x80;
@@ -530,7 +530,7 @@ fall: 7:
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_7 [pc @7]
+  subgraph cluster_7 ["pc @7"]
     s_1("pc @7 (s_1)
 =|local0
 undefined local0 = 0x0; // #refs 1
@@ -598,7 +598,7 @@ when (local10 < block.number) == 0 goto 26 or fall 15
 ")
     class s_11 state
   end
-  subgraph cluster_15 [pc @15]
+  subgraph cluster_15 ["pc @15"]
     s_12("pc @15 (s_12)
 =|add(0x1, local0)
 var_1 = local0;
@@ -666,7 +666,7 @@ goto :[J]0x7 branch:7
 ")
     class s_22 state
   end
-  subgraph cluster_26 [pc @26]
+  subgraph cluster_26 ["pc @26"]
     s_23("pc @26 (s_23)
 =|
 return;

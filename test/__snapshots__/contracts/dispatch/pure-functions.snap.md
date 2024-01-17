@@ -85,7 +85,7 @@ title: pure functions-no-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|
 memory[0x40] = 0x80;
@@ -94,7 +94,7 @@ when msg.data.length < 0x4 goto 38 or fall 12
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_12 [pc @12]
+  subgraph cluster_12 ["pc @12"]
     s_1("pc @12 (s_1)
 =|local0
 undefined local0 = msg.data >>> 0xe0; // #refs 1
@@ -102,14 +102,14 @@ case when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28
 ")
     class s_1 state
   end
-  subgraph cluster_28 [pc @28]
+  subgraph cluster_28 ["pc @28"]
     s_2("pc @28 (s_2)
 =|local0
 case when msg.sig == 6d4ce63c goto [J]0x47 or fall 38
 ")
     class s_2 state
   end
-  subgraph cluster_38 [pc @38]
+  subgraph cluster_38 ["pc @38"]
     s_3("pc @38 (s_3)
 =|local0
 undefined local1 = 0x0; // #refs 0
@@ -123,7 +123,7 @@ revert();
 ")
     class s_4 state
   end
-  subgraph cluster_43 [pc @43]
+  subgraph cluster_43 ["pc @43"]
     s_5[["pc @43 (s_5)
 =|[J]0x31|local0
 goto :[J]0x6f branch:111
@@ -131,14 +131,14 @@ goto :[J]0x6f branch:111
     class s_5 state
     style s_5 fill:#5F021F
   end
-  subgraph cluster_111 [pc @111]
+  subgraph cluster_111 ["pc @111"]
     s_6("pc @111 (s_6)
 =|0x1|local0
 goto :[J]0x31 branch:49
 ")
     class s_6 state
   end
-  subgraph cluster_49 [pc @49]
+  subgraph cluster_49 ["pc @49"]
     s_7("pc @49 (s_7)
 =|local0
 undefined local1 = memory[0x40]; // #refs 0
@@ -149,7 +149,7 @@ return 0x1;
 ")
     class s_7 state
   end
-  subgraph cluster_71 [pc @71]
+  subgraph cluster_71 ["pc @71"]
     s_8[["pc @71 (s_8)
 =|local1|local0
 undefined local1 = msg.value; // #refs 0
@@ -158,7 +158,7 @@ when msg.value == 0 goto 82 or fall 78
     class s_8 state
     style s_8 fill:#5F021F
   end
-  subgraph cluster_78 [pc @78]
+  subgraph cluster_78 ["pc @78"]
     s_9("pc @78 (s_9)
 =|local1|local0
 undefined local2 = 0x0; // #refs 0
@@ -166,21 +166,21 @@ revert();
 ")
     class s_9 state
   end
-  subgraph cluster_82 [pc @82]
+  subgraph cluster_82 ["pc @82"]
     s_10("pc @82 (s_10)
 =|[J]0x59|local0
 goto :[J]0x78 branch:120
 ")
     class s_10 state
   end
-  subgraph cluster_120 [pc @120]
+  subgraph cluster_120 ["pc @120"]
     s_11("pc @120 (s_11)
 =|0x1|local0
 goto :[J]0x59 branch:89
 ")
     class s_11 state
   end
-  subgraph cluster_89 [pc @89]
+  subgraph cluster_89 ["pc @89"]
     s_12("pc @89 (s_12)
 =|local0
 undefined local2 = memory[0x40]; // #refs 0
@@ -289,7 +289,7 @@ title: pure functions-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|
 memory[0x40] = 0x80;
@@ -298,7 +298,7 @@ when msg.data.length < 0x4 goto 38 or fall 12
     class s_0 state
     style s_0 fill:#471C21
   end
-  subgraph cluster_12 [pc @12]
+  subgraph cluster_12 ["pc @12"]
     s_1("pc @12 (s_1)
 =|local0
 undefined local0 = msg.data >>> 0xe0; // #refs 1
@@ -306,14 +306,14 @@ case when msg.sig == 5d2c7ee6 goto [J]0x2b or fall 28
 ")
     class s_1 state
   end
-  subgraph cluster_28 [pc @28]
+  subgraph cluster_28 ["pc @28"]
     s_2("pc @28 (s_2)
 =|local0
 case when msg.sig == 6d4ce63c goto [J]0x43 or fall 38
 ")
     class s_2 state
   end
-  subgraph cluster_38 [pc @38]
+  subgraph cluster_38 ["pc @38"]
     s_3("pc @38 (s_3)
 =|local0
 undefined local1 = 0x0; // #refs 0
@@ -327,7 +327,7 @@ revert();
 ")
     class s_4 state
   end
-  subgraph cluster_43 [pc @43]
+  subgraph cluster_43 ["pc @43"]
     s_5[["pc @43 (s_5)
 =|[J]0x31|local0
 goto :[J]0x52 branch:82
@@ -335,7 +335,7 @@ goto :[J]0x52 branch:82
     class s_5 state
     style s_5 fill:#5F021F
   end
-  subgraph cluster_82 [pc @82]
+  subgraph cluster_82 ["pc @82"]
     s_6("pc @82 (s_6)
 =|0x1|local0
 goto :[J]0x31 branch:49
@@ -347,7 +347,7 @@ goto :[J]0x31 branch:49
 ")
     class s_7 state
   end
-  subgraph cluster_49 [pc @49]
+  subgraph cluster_49 ["pc @49"]
     s_8("pc @49 (s_8)
 =|local0
 undefined local1 = 0x40; // #refs 0
@@ -367,7 +367,7 @@ return 0x1;
 ")
     class s_9 state
   end
-  subgraph cluster_67 [pc @67]
+  subgraph cluster_67 ["pc @67"]
     s_10[["pc @67 (s_10)
 =|local1|local0
 undefined local1 = msg.value; // #refs 0
@@ -376,7 +376,7 @@ when msg.value == 0 goto 78 or fall 74
     class s_10 state
     style s_10 fill:#5F021F
   end
-  subgraph cluster_74 [pc @74]
+  subgraph cluster_74 ["pc @74"]
     s_11("pc @74 (s_11)
 =|local1|local0
 undefined local2 = 0x0; // #refs 0
@@ -384,7 +384,7 @@ revert();
 ")
     class s_11 state
   end
-  subgraph cluster_78 [pc @78]
+  subgraph cluster_78 ["pc @78"]
     s_12("pc @78 (s_12)
 =|[J]0x31|local0
 fall: 82:

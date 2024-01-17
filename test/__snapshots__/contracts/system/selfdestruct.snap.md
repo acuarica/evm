@@ -32,7 +32,7 @@ title: selfdestruct-no-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|
 memory[0x40] = 0x80;
@@ -76,7 +76,7 @@ title: selfdestruct-opt
 ---
 flowchart TD
   classDef state text-align:left
-  subgraph cluster_0 [pc @0]
+  subgraph cluster_0 ["pc @0"]
     s_0[["pc @0 (s_0)
 =|
 memory[0x40] = 0x80;
