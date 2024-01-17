@@ -1,8 +1,9 @@
 name: Main
 
 on:
-  # We want to trigger these jobs in every branch.
+  # We want to trigger these jobs in every branch but not tags
   push:
+    branches: []
     # But do not trigger them when only `md` files were modified.
     paths-ignore:
       - '**.md'
