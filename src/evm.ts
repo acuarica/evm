@@ -6,7 +6,7 @@ import { JUMPDEST, Shanghai, type Opcode, type StepFn, type Undef } from './step
 /**
  * Represent a reacheable basic block.
  */
-export interface Block<M> {
+export interface Block<M extends string> {
 
     /**
      * Where this block ends, exclusive.

@@ -113,7 +113,7 @@ export class Throw implements IInst {
 
     constructor(
         readonly reason: string,
-        readonly opcode: Opcode<unknown>,
+        readonly opcode: Opcode<string>,
         readonly state: State<Inst, Expr>
     ) { }
 
