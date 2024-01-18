@@ -1,4 +1,4 @@
-import type { Expr } from "./ast";
+import type { Expr, Inst } from "./ast";
 
 /**
  * Represents the EVM stack of expressions `E`.
@@ -89,7 +89,7 @@ export class Stack<in out E> {
 /**
  * Represents the state of an EVM run with statements `S` and expressions `E`.
  */
-export class State<S, E> {
+export class State<S = Inst, E = Expr> {
     /**
      * Indicates whether this `State` has been halted.
      */

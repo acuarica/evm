@@ -63,10 +63,10 @@ export class Contract {
      *
      * @param bytecode the bytecode to analyze in hexadecimal format.
      */
-    constructor(bytecode: Parameters<typeof arrayify>[0], _insts = {}) {
+    constructor(bytecode: Parameters<typeof arrayify>[0], step = new Shanghai()) {
         this.bytecode = arrayify(bytecode);
 
-        const evm = new EVM(this.bytecode, new Shanghai());
+        const evm = new EVM(this.bytecode, step);
         const main = new State<Inst, Expr>();
         evm.run(0, main);
         this.main = build(main);
