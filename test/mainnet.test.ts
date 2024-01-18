@@ -9,7 +9,7 @@ import 'sevm/4bytedb';
 
 import { fnselector } from './utils/selector';
 
-describe('::examples', function () {
+describe('::mainnet', function () {
     [
         {
             name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
@@ -148,7 +148,7 @@ describe('::examples', function () {
                 // This seems to be an issue on solidify SmithBot, which is around ~4.3M
                 this.timeout(10000);
 
-                const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
+                const bytecode = readFileSync(`./test/mainnet/${name}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patchdb();
                 text = contract.reduce().patchdb().solidify();
             });
@@ -180,12 +180,12 @@ describe('::examples', function () {
                 }
 
                 expect(sum).to.be.equal(nopcodes);
-                expect(output).to.matchFile(`examples/${name}.dis`, this);
+                expect(output).to.matchFile(`mainnet/${name}.dis`, this);
             });
 
             it('should match Solidity snapshot', function () {
                 if (skipSnapshot) this.skip();
-                expect(text).to.matchFile(`examples/${name}.sol`, this);
+                expect(text).to.matchFile(`mainnet/${name}.sol`, this);
             });
 
             it('should detect selectors', function () {

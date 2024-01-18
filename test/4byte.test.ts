@@ -16,7 +16,7 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${title}`, function () {
         await import('sevm/4byte');
 
         const name = 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65';
-        const bytecode = readFileSync(`./test/examples/${name}.bytecode`, 'utf8');
+        const bytecode = readFileSync(`./test/mainnet/${name}.bytecode`, 'utf8');
 
         let contract = new Contract(bytecode);
         let selectors = Object.entries(contract.functions).map(([s, f]) => [s, f.label]);
