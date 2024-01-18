@@ -13,7 +13,7 @@ const bytecode = '608060408190524581527f4d6ce1e535dbade1c23defba91e23b8f791ce5ed
 
 const evm = new EVM(bytecode, new class extends London {
     /** @override */
-    GASPRICE = (/** @type {import("sevm").Operand} */ state) => {
+    GASPRICE = (/** @type {import('sevm').Operand} */ state) => {
         super.GASPRICE(state);
         console.log('top', state.stack.top);
     };
