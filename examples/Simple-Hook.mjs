@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env NODE_DISABLE_COLORS=1 node
 /* eslint-env node */
 
 import { EVM, London } from 'sevm';
