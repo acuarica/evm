@@ -98,26 +98,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn make:4bytedb
       - run: yarn compile
-      - run: examples/Decode-Bytecode-into-Opcodes.mjs
-      - run: examples/Decompile-a-Contract.mjs
-      - run: examples/Detect-Functions-Events-ERCs.mjs
-      - run: examples/Extract-Contract-Metadata.mjs
-      - run: examples/Simple-Hook.mjs
-      - run: examples/Use-with-Import.mjs
-      - run: examples/Use-with-Require.js
-
-  bin:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
-      - uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
-      - run: yarn make:4bytedb
-      - run: yarn test
-      - run: make dis
-      - run: make sol
-      - run: make yul
+      - run: yarn test -g ::examples
+        env:
+          ENABLE_EXAMPLES_TEST: 1

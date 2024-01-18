@@ -137,13 +137,15 @@ import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
 import 'sevm/4bytedb';
 
-// Compound Contract
-// https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code
-const bytecode = await new Provider().getCode('0x3FDA67f7583380E67ef93072294a7fAc882FD7E7');
+// WETH Contract
+// https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+const bytecode = await new Provider().getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
 
 const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
 console.log(contract.solidify()); //Decompile bytecode to Solidity
 ```
+
+You can use the `contract.yul()` method to decompile the bytecode into Yul-like format.
 
 ### Detect Functions, Events and ERC compliance
 
@@ -157,9 +159,9 @@ import 'sevm/4bytedb';
 const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 
 const contract = new Contract(bytecode).patchdb();
-console.log(contract.getFunctions());
-console.log(contract.getEvents());
-console.log(contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+console.log('functions', contract.getFunctions());
+console.log('events', contract.getEvents());
+console.log('isERC 165', contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
 ```
 
 ### Extract Contract Metadata
@@ -196,7 +198,7 @@ const evm = new EVM(bytecode, new class extends London {
     /** @override */
     GASPRICE = (/** @type {import("sevm").Operand} */ state) => {
         super.GASPRICE(state);
-        console.log(state.stack.top);
+        console.log('top', state.stack.top);
     };
 }());
 
