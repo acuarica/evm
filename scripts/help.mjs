@@ -44,7 +44,7 @@ function main() {
             } else {
                 content = readFileSync(file, 'utf8');
                 content = content
-                    .replace('#!/usr/bin/env NODE_DISABLE_COLORS=1 node', '')
+                    .replace('#!/usr/bin/env -S NODE_DISABLE_COLORS=1 node', '')
                     .replace(/\/\* eslint-.+ \*\//g, '')
                     .trim();
 
