@@ -16,8 +16,9 @@ describe(`::examples${notice}`, function () {
             if (!ENABLE_EXAMPLES_TEST) this.skip();
             this.timeout(10000);
 
-            const script = file.endsWith('.ts') ? `dist/examples/${file.slice(0, -3)}.js` : `examples/${file}`;
-            const cli = chaiExec('node', script);
+            const cli = file.endsWith('.ts')
+                ? chaiExec('node', `dist/examples/${file.slice(0, -3)}.js`)
+                : chaiExec(`examples/${file}`);
 
             expect(cli).stderr.to.be.empty;
             expect(cli).stdout.to.matchSnapshot('out', this);
