@@ -76,34 +76,6 @@ At least one command must be specified
 
 ```
 
-```out display-metadata-from-JSON-bytecode
-Contract Metadata
-protocol ipfs
-hash QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
-solc 0.8.21
-url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
-
-```
-
-```out run-dis-command-and-find-non-reacheable-chunk
-   pc  opcode  push data (PUSHx)
-0 : 
-    0  PUSH1   0x01 
-    2  PUSH1   0x02 
-    4  ADD   
-    5  PUSH1   0x0c 
-    7  JUMP   
-8 : unreachable
-01020304
-12 : 
-   12  JUMPDEST   
-   13  PUSH3   0xfffefd 
-17 : 
-   17  JUMPDEST   
-   18  STOP   
-
-```
-
 ```err exit-with-non-zero-code-on-unknown-command
 sevm <cmd> <contract>
 
@@ -140,5 +112,33 @@ for more information regarding Function Selectors
 garding Yul.
 
 Unknown argument: unknowncommand
+
+```
+
+```out display-metadata-from-JSON-bytecode
+Contract Metadata
+protocol ipfs
+hash QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
+solc 0.8.21
+url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
+
+```
+
+```out run-dis-command-and-find-non-reacheable-chunk
+   pc  opcode  push data (PUSHx)
+0 : 
+    0  PUSH1   0x01 
+    2  PUSH1   0x02 
+    4  ADD   
+    5  PUSH1   0x0c 
+    7  JUMP   
+8 : unreachable
+01020304
+12 : 
+   12  JUMPDEST   
+   13  PUSH3   0xfffefd 
+17 : 
+   17  JUMPDEST   
+   18  STOP   
 
 ```
