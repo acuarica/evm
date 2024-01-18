@@ -287,11 +287,16 @@ This allows the user to create a bundle without the lookup database provided the
 
 ## Contributing
 
+### `examples`
+
+The `examples.test.ts` test runs every example script to verify they are executed properly.
+Moreover, their output is recorded into `examples.snap.md` and compared against in subsequent tests.
+
 ### `scripts`
 
-- `4byte.mjs` Generates function and events lookup tables
+- `4bytedb.mjs` Generates function and events lookup tables database in `json` format
 - `ercs.mjs` Generates ERCs function and event definitions from `ercs.sol`
-- `help.mjs` Embeds examples and `sevm --help` into `README`
+- `help.mjs` Embeds `examples` and `sevm --help` into `README`
 - `solc.mjs` Downloads and caches `solc` compilers used in tests
 
 ## Detached Fork
