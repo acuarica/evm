@@ -1,5 +1,53 @@
 # ::examples
 
+```out Advanced-Hooks.ts
+// Test contract -- factory
+// SPDX-License-Identifier: UNLICENSED
+// Metadata ipfs://QmTz9xerKDRmnQnVkit4ixqmpn2e7x2gnYWTQTxZ4Pszpy
+pragma solidity 0.7.6;
+
+contract Contract {
+
+    fallback() external payable {
+        require(new Contract(memory[memory[0x40]..memory[0x40]+0x91 + memory[0x40] - memory[0x40]]).value(0x0).address == 0 == 0);
+        return;
+    }
+
+}
+
+// Token contract -- constructor
+// SPDX-License-Identifier: UNLICENSED
+// Metadata ipfs://QmeWTvuWS7UTUtZyKQFTDTsesoHauftVaUod8SCKsXq19p
+pragma solidity 0.7.6;
+
+contract Contract {
+
+    fallback() external payable {
+        require(msg.value == 0);
+        return (this.code[0x1d:(0x1d+0x74)], memory[0x20], 0x80, memory[0x60]);
+    }
+
+}
+
+// Token contract -- deployed bytecode
+// SPDX-License-Identifier: UNLICENSED
+// Metadata ipfs://QmeWTvuWS7UTUtZyKQFTDTsesoHauftVaUod8SCKsXq19p
+pragma solidity 0.7.6;
+
+contract Contract {
+
+    event Deposit(uint256 _arg0);
+
+    fallback() external payable {
+        emit Deposit(0x3);
+        return;
+    }
+
+}
+
+
+```
+
 ```out Decode-Bytecode-into-Opcodes.mjs
 [
   'PUSH1(0x60)@0 0x60 (96)',
