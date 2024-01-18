@@ -232,6 +232,7 @@ void yargs(process.argv.slice(2))
 [3] See https://docs.soliditylang.org/en/latest/abi-spec.html#function-selector for more information regarding Function Selectors
 [4] See https://docs.soliditylang.org/en/latest/yul.html for more information regarding Yul.`
     )
+    .strict()
     .help().argv;
 
 /** @param {Contract} contract */

@@ -28,6 +28,14 @@ describe('::bin', function () {
         expect(cli.stderr).to.matchSnapshot('err', this);
     });
 
+    it('should exit with non-zero code on unknown command', function () {
+        const cli = chaiExec('unknowncommand');
+
+        expect(cli).to.exit.with.not.code(0);
+        expect(cli).stdout.to.be.empty;
+        expect(cli.stderr).to.matchSnapshot('err', this);
+    });
+
     it('should display metadata from JSON `bytecode`', function () {
         const input = `{
             "bytecode": "60806040525f80fdfea2646970667358221220213295e11660e0fa1851b6245c99f6d8ef0d1ad319b69a6483694b3a316c2dc564736f6c63430008150033",
