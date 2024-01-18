@@ -26,7 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Enable `git push --tags to trigger other workflows`
+          # Enable `git push --tags` to trigger other workflows
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
           token: ${{ secrets.GH_PAT }}
       - run: echo "Version $VERSION | Confirm $CONFIRM"
         env:
