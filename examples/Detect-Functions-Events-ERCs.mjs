@@ -1,4 +1,4 @@
-#!/usr/bin/env -S NODE_DISABLE_COLORS=1 node
+#!/usr/bin/env -S FORCE_COLOR=0 node
 /* eslint-env node */
 
 import { EtherscanProvider as Provider } from 'ethers';

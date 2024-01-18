@@ -101,4 +101,3 @@ jobs:
       - run: yarn test -g ::examples
         env:
           ENABLE_EXAMPLES_TEST: 1
-          FORCE_COLOR: 0
