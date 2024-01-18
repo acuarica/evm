@@ -4,11 +4,9 @@ import { readFileSync } from 'fs';
 import { Contract } from 'sevm';
 
 const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
+const notice = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
-const title = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
-
-describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${title}`, function () {
-
+describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${notice}`, function () {
     it('should fetch function signatures', async function () {
         if (!ENABLE_4BYTE_TEST) this.skip();
 
