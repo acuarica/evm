@@ -110,6 +110,17 @@ describe('::contracts', function () {
                     selfdestruct(payable(msg.sender));
                 }
             }`),
+            _('create-codecopy', `contract Token {
+                event Deposit(uint256 value);
+                fallback() external payable {
+                    emit Deposit(3);
+                }
+            }
+            contract Test {
+                fallback() external payable {
+                    new Token();
+                }
+            }`),
         ],
     }).forEach(([group, contracts]) => {
         describe(group, function () {
