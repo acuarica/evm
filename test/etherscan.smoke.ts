@@ -167,8 +167,9 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                         precompiledStats.append(sol`${address}`);
                     }
                 };
+                console.log(STATICCALL);
                 const t0 = hrtime.bigint();
-                let contract = new Contract(bytecode, { STATICCALL });
+                let contract = new Contract(bytecode);
                 const t1 = hrtime.bigint();
                 benchStats.append(t1 - t0);
 
