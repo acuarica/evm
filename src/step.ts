@@ -359,7 +359,7 @@ function memArgs<T>(
     const offset = stack.pop();
     const size = stack.pop();
 
-    return new Klass(offset, size, (function (offset, size) {
+    return new Klass(offset, size, ((offset, size) => {
         if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
             const args = [];
             for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
