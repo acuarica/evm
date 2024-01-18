@@ -33,12 +33,12 @@ export class Metadata {
 }
 
 /**
- * Splits the `bytecode` into executable code and embedded metadata hash as
- * placed by the Solidity compiler, if present in the `bytecode`.
+ * Splits the `buffer` into executable bytecode and the embedded metadata hash
+ * placed by the Solidity compiler if present in the `bytecode`.
  *
  * If `metadata` contains an IPFS hash, it is encoded using base 58.[^1]
  * 
- * @param bytecode the contract or library `bytecode` to test for metadata hash.
+ * @param buffer the contract or library `bytecode` to test for metadata hash.
  * @returns An object where the `bytecode` is the executable code and
  * `metadata` is the metadata hash when the metadata is present.
  * 
@@ -57,7 +57,7 @@ export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
     metadata: Metadata | undefined
 } {
     const bytecode = arrayify(buffer);
-    if (buffer.length <= 2) return { bytecode, metadata: undefined };
+    if (bytecode.length <= 2) return { bytecode, metadata: undefined };
 
     const dataLen = (bytecode.at(-2)! << 8) + bytecode.at(-1)!;
     const data = new Uint8Array(bytecode.subarray(bytecode.length - 2 - dataLen, bytecode.length - 2));
