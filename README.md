@@ -207,6 +207,9 @@ evm.start();
 
 ### Advanced Hooks
 
+A contract might embed another contract it creates and deploys.
+Using hooks you can extract the embedded contract.
+
 ```ts examples/Advanced-Hooks.ts
 import { Contract, type Ram, Shanghai, type State } from 'sevm';
 import type { DataCopy, Create } from 'sevm/ast';
