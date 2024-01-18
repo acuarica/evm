@@ -5,9 +5,9 @@ import { EtherscanProvider as Provider } from 'ethers';
 import { Contract } from 'sevm';
 import 'sevm/4bytedb';
 
-// Compound Contract
-// https://etherscan.io/address/0x3FDA67f7583380E67ef93072294a7fAc882FD7E7#code
-const bytecode = await new Provider().getCode('0x3FDA67f7583380E67ef93072294a7fAc882FD7E7');
+// WETH Contract
+// https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+const bytecode = await new Provider().getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
 
 const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
 console.log(contract.solidify()); //Decompile bytecode to Solidity

@@ -10,6 +10,6 @@ import 'sevm/4bytedb';
 const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 
 const contract = new Contract(bytecode).patchdb();
-console.log(contract.getFunctions());
-console.log(contract.getEvents());
-console.log(contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+console.log('functions', contract.getFunctions());
+console.log('events', contract.getEvents());
+console.log('isERC 165', contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */

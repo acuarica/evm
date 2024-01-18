@@ -15,7 +15,7 @@ const evm = new EVM(bytecode, new class extends London {
     /** @override */
     GASPRICE = (/** @type {import("sevm").Operand} */ state) => {
         super.GASPRICE(state);
-        console.log(state.stack.top);
+        console.log('top', state.stack.top);
     };
 }());
 
