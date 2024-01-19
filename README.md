@@ -340,15 +340,21 @@ This allows the user to create a bundle without the lookup database provided the
 
 ### `examples`
 
-The `examples.test.ts` test runs every example script to verify they are executed properly.
-Moreover, their output is recorded into `examples.snap.md` and compared against in subsequent tests.
+The [`examples`](./examples/) folder contains code examples that showcase `sevm` features.
+These code examples are the ones embedded in this document.
+
+To ensure these examples don't get outdated,
+[`test/examples.test.ts`](./test/examples.test.ts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
+Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](./test/__snapshots__/examples.snap.md) and compared against in subsequent tests.
 
 ### `scripts`
 
-- `4bytedb.mjs` Generates function and events lookup tables database in `json` format
-- `ercs.mjs` Generates ERCs function and event definitions from `ercs.sol`
-- `help.mjs` Embeds `examples` and `sevm --help` into `README`
-- `solc.mjs` Downloads and caches `solc` compilers used in tests
+Contains utility scripts that automates the development process.
+
+- [`4bytedb.mjs`](./scripts/4bytedb.mjs) Generates function and events lookup tables database in `json` format.
+- [`ercs.mjs`](./scripts/ercs.mjs) Generates ERCs function and event definitions from [`scripts/ercs.sol`](./scripts/ercs.sol).
+- [`help.mjs`](./scripts/help.mjs) Embeds [`examples`](#examples) and `sevm --help` into [`README`](./README.md)
+- [`solc.mjs`](./scripts/solc.mjs) Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compilers used in tests. It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
 
 ## Detached Fork
 
