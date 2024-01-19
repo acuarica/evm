@@ -1,4 +1,3 @@
-import type { State } from '../state';
 import type { Opcode } from '../step';
 import type { Type } from '../type';
 import type { Add, Div, Exp, Mod, Mul, Sub } from './alu';
@@ -111,11 +110,7 @@ export type Inst =
 export class Throw implements IInst {
     readonly name = 'Throw';
 
-    constructor(
-        readonly reason: string,
-        readonly opcode: Opcode<string>,
-        readonly state: State<Inst, Expr>
-    ) { }
+    constructor(readonly reason: string, readonly opcode: Opcode<string>) { }
 
     eval() {
         return this;

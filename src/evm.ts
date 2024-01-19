@@ -35,7 +35,17 @@ export class EVM<M extends string> {
     /**
      * Symbolic execution `errors` found during interpretation of `this.bytecode`.
      */
-    readonly errors: Throw[] = [];
+    readonly errors: {
+        /**
+         * The statement that represents the error triggered during symbolic execution.
+         */
+        err: Throw,
+        /**
+         * The state in which the error was triggered.
+         * Given this states ends up in error, `this.last` statement will be `this.err`.
+         */
+        state: State<Inst, Expr>
+    }[] = [];
 
     /**
      * The bytecode buffer that represents a Contract or Library.
@@ -200,12 +210,12 @@ export class EVM<M extends string> {
                     this.step[mnemonic](state, opcode, this.bytecode);
                     entry.stack = state.stack.clone();
                 }
-            } catch (err) {
-                if (!(err instanceof ExecError)) throw err;
+            } catch (error) {
+                if (!(error instanceof ExecError)) throw error;
 
-                const invalid = new Throw(err.message, opcode, state);
-                state.halt(invalid);
-                this.errors.push(invalid);
+                const err = new Throw(error.message, opcode);
+                state.halt(err);
+                this.errors.push({ err, state });
             }
 
             if (!halts && this.bytecode[opcode.nextpc] === JUMPDEST) {
