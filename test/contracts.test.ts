@@ -147,6 +147,13 @@ describe('::contracts', function () {
                         it(`should match CFG snapshot`, function () {
                             expect(cfg(contract, title + suffix)).to.matchSnapshot('mermaid', this, [root, suffix]);
                         });
+
+                        it(`should match errors`, function () {
+                            const replacer = (_key: string, value: unknown) =>
+                                typeof value === 'bigint' ? value.toString(16) : value;
+                            const errors = JSON.stringify(contract.errors.map(e => e.err), replacer, 2);
+                            expect(errors).to.matchSnapshot('errors', this, [root, suffix]);
+                        });
                     });
                 });
             });

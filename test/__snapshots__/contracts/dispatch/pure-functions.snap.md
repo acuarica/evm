@@ -204,6 +204,10 @@ return 0x1;
 
 ```
 
+```errors -no-opt
+[]
+```
+
 ```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmageuWBk2AFaFebYDj6s8YjF6CWqQrsJ3FVvzXcJwQwsN
@@ -402,4 +406,8 @@ fall: 82:
   s_10 -. fall .-> s_11;
   s_12 -. jumpdest .-> s_7;
 
+```
+
+```errors -opt
+[]
 ```

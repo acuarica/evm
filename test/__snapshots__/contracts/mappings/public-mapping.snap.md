@@ -264,6 +264,10 @@ return allowance[_arg0][_arg1];
 
 ```
 
+```errors -no-opt
+[]
+```
+
 ```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmSrjZkbwKtEg7uMhwXX3nW2nesTsmJYYH2ns4jkXWmEqs
@@ -520,4 +524,8 @@ goto :[J]0x3d branch:61
   s_13 -- jump --> s_14;
   s_14 -- jump --> s_10;
 
+```
+
+```errors -opt
+[]
 ```

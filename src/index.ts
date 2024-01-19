@@ -41,7 +41,11 @@ export class Contract {
     readonly variables: IStore['variables'] = new Map();
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: Members['functionBranches'] = new Map();
-    readonly errors: Throw[];
+
+    /**
+     * Symbolic execution `errors` found during interpretation of `this.bytecode`.
+     */
+    readonly errors: EVM<string>['errors'];
 
     readonly blocks: EVM<string>['blocks'];
 

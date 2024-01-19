@@ -6,7 +6,7 @@ import c from 'ansi-colors';
 import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
 
 import { Contract, ERCIds, sol, type State, Shanghai } from 'sevm';
-import type { Expr, Inst, StaticCall, Throw } from 'sevm/ast';
+import type { Expr, Inst, StaticCall } from 'sevm/ast';
 import 'sevm/4bytedb';
 
 /**
@@ -61,7 +61,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         return;
     }
 
-    const errorsByContract: Map<string, Throw[]> = new Map();
+    const errorsByContract: Map<string, Contract['errors']> = new Map();
     const metadataStats = new (class {
         noMetadata = 0;
         protocols: Set<string> = new Set();
@@ -201,7 +201,7 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
         for (const [id, errors] of errorsByContract.entries()) {
             console.info(warn(`    • ${id} - ${errors.length} error(s)`));
             const errorsByReason: Map<string, number> = new Map();
-            errors.forEach(err => {
+            errors.forEach(({ err }) => {
                 const count = errorsByReason.get(err.reason) ?? 0;
                 errorsByReason.set(err.reason, count + 1);
             });

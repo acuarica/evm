@@ -286,6 +286,10 @@ return _arg0.balance;
 
 ```
 
+```errors -no-opt
+[]
+```
+
 ```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmaL8yiEyCy7gvxUG6ypEjHtmNyg4zxmVJE179eC2q5GwZ
@@ -565,4 +569,8 @@ goto :[J]0x47 branch:71
   s_17 -- jump --> s_18;
   s_18 -- jump --> s_11;
 
+```
+
+```errors -opt
+[]
 ```

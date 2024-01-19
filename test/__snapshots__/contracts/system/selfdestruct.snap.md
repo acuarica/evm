@@ -44,6 +44,10 @@ selfdestruct(0xffffffffffffffffffffffffffffffffffffffff & msg.sender);
 
 ```
 
+```errors -no-opt
+[]
+```
+
 ```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmTYoyy7D6orDPjDivuJFhPvSFdRUnpJnq7jYhSE61Nsot
@@ -86,4 +90,8 @@ selfdestruct(msg.sender);
     style s_0 fill:#471C21
   end
 
+```
+
+```errors -opt
+[]
 ```

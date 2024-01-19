@@ -672,9 +672,9 @@ event ${eventSelector(unknownEventSig)};
             const evm = EVM.new('0x01');
             evm.exec(0, state);
 
-            const err = new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD'), state);
+            const err = new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD'));
 
-            expect(evm.errors).to.be.deep.equal([err]);
+            expect(evm.errors).to.be.deep.equal([{ err, state }]);
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([err]);
             expect(sol`${state.stmts[0]}`).to.be.equal("throw('POP with empty stack');");
@@ -754,8 +754,8 @@ event ${eventSelector(unknownEventSig)};
         it('should return single opcode', function () {
             const evm = EVM.new('0x01');
             evm.start();
-            expect(evm.errors.map(e => e.reason))
-                .to.be.deep.equal(['POP with empty stack']);
+            expect(evm.errors.map(({ err }) => err))
+                .to.be.deep.equal([new Throw('POP with empty stack', new Opcode(0, 0x1, 'ADD'))]);
             expect(evm.opcodes().filter(o => o.mnemonic === 'ADD'))
                 .to.be.deep.equal([new Opcode(0, 0x1, 'ADD')]);
         });

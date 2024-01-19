@@ -94,6 +94,10 @@ fall: 27:
 
 ```
 
+```errors -no-opt
+[]
+```
+
 ```solidity -opt
 // SPDX-License-Identifier: UNLICENSED
 // Metadata ipfs://QmfDLKLryZvxaZrwkDPTiRrvukfFKF88ir6f2YXbrGbexw
@@ -180,4 +184,8 @@ fall: 25:
   s_1 -- jump --> s_2;
   s_4 -. jumpdest .-> s_3;
 
+```
+
+```errors -opt
+[]
 ```

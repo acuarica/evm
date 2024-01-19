@@ -163,7 +163,7 @@ describe('::mainnet', function () {
                 let sum = 0;
                 for (const chunk of contract.chunks()) {
                     output += `@${chunk.pcbegin}: `;
-                    
+
                     if (chunk.content instanceof Uint8Array) {
                         assert(chunk.states === undefined);
                         output += `unreachable (${chunk.content.length} bytes in buffer) `;
@@ -216,6 +216,13 @@ describe('::mainnet', function () {
                         `actual ${inspect(contract.getFunctions())} != expected ${inspect(expected)}`
                     ).to.be.deep.equal(new Set(expected));
                 }
+            });
+
+            it('should detect errors', function () {
+                const replacer = (_key: string, value: unknown) =>
+                    typeof value === 'bigint' ? value.toString(16) : value;
+                const errors = JSON.stringify(contract.errors.map(e => e.err), replacer, 2);
+                expect(errors).to.matchSnapshot('errors', this);
             });
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
