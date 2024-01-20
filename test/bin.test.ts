@@ -74,7 +74,7 @@ describe('::bin', function () {
          */
         const stderr = cli.stderr
             .replace(/SEVM \d+:/g, 'SEVM <pid>:')
-            .replace(/'.+0x8Ba1f109551bD432803012645Ac136ddd64DBa72.bytecode'/g, '<addr>');
+            .replace(/'.*0x8Ba1f109551bD432803012645Ac136ddd64DBa72.*'/g, '<addr>');
         expect(stderr).to.matchSnapshot('err', this);
         expect(cli).to.exit.with.code(2);
     });
