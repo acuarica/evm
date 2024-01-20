@@ -1,4 +1,4 @@
-#!/usr/bin/env -S FORCE_COLOR=0 node
+#!/usr/bin/env node
 /* eslint-env node */
 
 import { JsonRpcProvider } from 'ethers';
