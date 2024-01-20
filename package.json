@@ -86,6 +86,7 @@
         "webpack-cli": "^4.10.0"
     },
     "scripts": {
+        "prepare": "node scripts/4bytedb.mjs",
         "compile": "tsc",
         "lint": "eslint .",
         "test": "yarn compile && mocha",

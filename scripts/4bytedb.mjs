@@ -1,22 +1,47 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { keccak256, toUtf8Bytes, EventFragment, FunctionFragment } from 'ethers';
 import c from 'ansi-colors';
 import { expect } from 'chai';
+import { createHash } from 'crypto';
+import { EventFragment, FunctionFragment, keccak256, toUtf8Bytes } from 'ethers';
+import { readFileSync, writeFileSync } from 'fs';
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
 /**
  * @param {'functions'|'events'} fileName
- * @returns {string[]}
+ * @param {{ (entries: string[]): void }} checkFn
+ * @param {{ (entries: string[]): void }} writeFn
  */
-function json(fileName) {
-    const path = `./scripts/4bytedb/${fileName}.json`;
-    const [dir, ext] = path.split(fileName).map(c.magenta);
-    process.stdout.write(`${dir}${c.cyan(fileName)}${ext} `);
-    return JSON.parse(readFileSync(path, 'utf-8'));
+function json(fileName, checkFn, writeFn) {
+    const dir = './scripts/4bytedb';
+    process.stdout.write(`${c.magenta(dir)}/${c.cyan(fileName)}${c.magenta('.json')} `);
+    const file = readFileSync(`${dir}/${fileName}.json`, 'utf8');
+    const entries = /** @type {string[]} */(JSON.parse(file));
+    const hash = createHash('md5').update(file).digest('hex');
+
+    const done = function () {
+        let cachedHash;
+        try {
+            cachedHash = readFileSync(`${dir}/${fileName}.md5`, 'utf8');
+            const match = cachedHash === hash;
+            const msg = match ? c.green('[# ☑︎ ] ') : c.yellow('[#] ');
+            process.stdout.write(msg);
+            return match;
+        } catch (_err) {
+            process.stdout.write(c.dim('[no #] '));
+            return false;
+        }
+    }();
+    if (!done) {
+        checkFn(entries);
+        process.stdout.write(c.green('[OK] '));
+        writeFn(entries);
+        writeFileSync(`${dir}/${fileName}.md5`, hash);
+    } else {
+        console.info();
+    }
 }
 
 /**
@@ -28,7 +53,7 @@ function writeJson(fileName, hashes) {
     const path = `./scripts/4bytedb/${fileName}.json`;
     const minPath = `./4bytedb/${fileName}.min.json`;
 
-    console.info(c.dim('->'), c.blue(path), c.blue(minPath));
+    console.info(c.dim('->'), c.blue(minPath));
 
     writeFileSync(path, JSON.stringify(hashes, null, 4));
     writeFileSync(minPath, JSON.stringify(hashes));
@@ -45,15 +70,8 @@ const reduce = (entries, replacer) =>
         return map;
     }, {});
 
-/** @param {{ (): void }} fn */
-function check(fn) {
-    fn();
-    process.stdout.write(c.green('[OK] '));
-}
-
 function main() {
-    const functions = json('functions');
-    check(function () {
+    json('functions', functions => {
         const s = new Set();
         for (const fn of functions) {
             const func = FunctionFragment.from(fn);
@@ -61,12 +79,12 @@ function main() {
             s.add(fn);
         }
         expect(functions.length).to.be.equal(s.size);
+    }, functions => {
+        const functionHashes = reduce(functions, s => s.substring(2, 10));
+        writeJson('functionHashes', functionHashes);
     });
-    const functionHashes = reduce(functions, s => s.substring(2, 10));
-    writeJson('functionHashes', functionHashes);
 
-    const events = json('events');
-    check(function () {
+    json('events', events => {
         const s = new Set();
         for (const ev of events) {
             const event = EventFragment.from(ev);
@@ -74,9 +92,10 @@ function main() {
             s.add(ev);
         }
         expect(events.length).to.be.equal(s.size);
+    }, events => {
+        const eventHashes = reduce(events, s => s.substring(2));
+        writeJson('eventHashes', eventHashes);
     });
-    const eventHashes = reduce(events, s => s.substring(2));
-    writeJson('eventHashes', eventHashes);
 }
 
 main();
