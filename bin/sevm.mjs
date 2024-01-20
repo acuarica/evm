@@ -7,6 +7,7 @@ import envPaths from 'env-paths';
 import { EtherscanProvider } from 'ethers';
 import { existsSync, mkdirSync, promises, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
+import { debuglog } from 'util';
 import yargs from 'yargs';
 
 import { Contract, sol, yul } from 'sevm';
@@ -15,6 +16,8 @@ import 'sevm/4bytedb';
 const paths = envPaths('sevm');
 
 const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
+
+const trace = debuglog('sevm');
 
 /**
  * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
@@ -120,8 +123,9 @@ async function getBytecode(pathOrAddress) {
     for (const fn of tries) {
         try {
             return await fn();
-        } catch (_err) {
-            // console.log(_err);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : err;
+            trace('%s', msg);
         }
     }
     return null;

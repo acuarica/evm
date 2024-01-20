@@ -54,6 +54,22 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
+    it('should log debug trace when `NODE_DEBUG=sevm` is set', function () {
+        // address doesn't checksum, this is to avoid ethers making a request,
+        // thus making the test more robust
+        const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72', '--no-color'], { env: { ...process.env, 'NODE_DEBUG': 'sevm' } });
+
+        expect(cli.stdout).to.be.empty;
+        /**
+         * `<pid>` and `<addr>` are masked so the test output remains the same between runs and OSes.
+         */
+        const stderr = cli.stderr
+            .replace(/SEVM \d+:/g, 'SEVM <pid>:')
+            .replace(/'.+0x8Ba1f109551bD432803012645Ac136ddd64DBa72.bytecode'/g, '<addr>');
+        expect(stderr).to.matchSnapshot('err', this);
+        expect(cli).to.exit.with.code(2);
+    });
+
     it('should catch error when exec self-destructed contract', function () {
         const cli = chaiExec(sevm, ['metadata', '-', '--no-color'], { input: '0x' });
 
