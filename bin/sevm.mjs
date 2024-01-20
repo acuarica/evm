@@ -133,12 +133,16 @@ function make(handler) {
     return async argv => {
         const pathOrAddress = /** @type {string} */ (argv['contract']);
         const bytecode = await getBytecode(pathOrAddress);
-        if (bytecode !== null) {
+        const name = pathOrAddress === '' ? '-' : pathOrAddress;
+        if (bytecode === null) {
+            console.error(warn(`Cannot find bytecode for contract ${info(name)}`));
+            process.exit(2);
+        } else if (bytecode.toLowerCase() === '0x') {
+            console.error(warn(`Bytecode for contract ${info(name)} is '0x', might have been self-destructed`));
+            process.exit(3);
+        } else {
             const contract = new Contract(bytecode).patchdb();
             handler(contract, argv);
-        } else {
-            console.info(warn(`Cannot find bytecode for ${info(pathOrAddress)}`));
-            process.exit(1);
         }
     };
 }

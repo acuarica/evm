@@ -142,3 +142,8 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
    18  STOP   
 
 ```
+
+```err catch-error-when-exec-self-destructed-contract
+Bytecode for contract - is '0x', might have been self-destructed
+
+```
