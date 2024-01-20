@@ -451,6 +451,10 @@
 ]
 ```
 
+```errors ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3/detect-errors
+[]
+```
+
 ```errors SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283/detect-errors
 []
 ```
