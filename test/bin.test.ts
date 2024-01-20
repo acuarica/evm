@@ -55,9 +55,18 @@ describe('::bin', function () {
     });
 
     it('should log debug trace when `NODE_DEBUG=sevm` is set', function () {
+        /**
+         * `FORCE_COLOR: 0` is set to remove colorized output coming from Node. 
+         * https://nodejs.org/api/cli.html#force_color1-2-3
+         */
+        const env = {
+            ...process.env,
+            'NODE_DEBUG': 'sevm',
+            'FORCE_COLOR': '0',
+        };
         // address doesn't checksum, this is to avoid ethers making a request,
         // thus making the test more robust
-        const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72', '--no-color'], { env: { ...process.env, 'NODE_DEBUG': 'sevm' } });
+        const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72'], { env });
 
         expect(cli.stdout).to.be.empty;
         /**
