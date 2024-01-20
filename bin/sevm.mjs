@@ -15,7 +15,7 @@ import 'sevm/4bytedb';
 
 const paths = envPaths('sevm');
 
-const { underline, blue, dim, magenta, red, cyan: info, yellow: warn } = c;
+const { cyan: info, yellow: warn } = c;
 
 const trace = debuglog('sevm');
 
@@ -30,10 +30,10 @@ const trace = debuglog('sevm');
 function dis(contract, argv) {
     const MAX_STACK = 10;
 
-    console.info(`${dim('pc'.padStart(5))}  ${magenta('opcode')}  ${'push data (PUSHx)'}`);
+    console.info(`${c.dim('pc'.padStart(5))}  ${c.magenta('opcode')}  ${'push data (PUSHx)'}`);
 
     for (const chunk of contract.chunks()) {
-        console.info(c.blue(chunk.pcbegin.toString()), ':', chunk.states === undefined ? red('unreachable') : '');
+        console.info(c.blue(chunk.pcbegin.toString()), ':', chunk.states === undefined ? c.red('unreachable') : '');
 
         if (chunk.content instanceof Uint8Array) {
             console.info(Buffer.from(chunk.content).toString('hex'));
@@ -50,12 +50,12 @@ function dis(contract, argv) {
                     values = info('〒 ');
                     values += stack === undefined
                         ? warn('<no stack>')
-                        : stack.values.slice(0, MAX_STACK).map(e => yul`${e}`).join(dim('|')) +
-                        (stack.values.length > MAX_STACK ? dim(`| ..${stack.values.length - MAX_STACK} more items`) : '');
+                        : stack.values.slice(0, MAX_STACK).map(e => yul`${e}`).join(c.dim('|')) +
+                        (stack.values.length > MAX_STACK ? c.dim(`| ..${stack.values.length - MAX_STACK} more items`) : '');
                 } else {
                     values = '';
                 }
-                console.info(`${dim(pc)}  ${magenta(opcode.mnemonic)}  ${pushData} ${values}`);
+                console.info(`${c.dim(pc)}  ${c.magenta(opcode.mnemonic)}  ${pushData} ${values}`);
             }
         }
 
@@ -161,22 +161,22 @@ void yargs(process.argv.slice(2))
     .scriptName('sevm')
     .usage('$0 <cmd> <contract>')
     .command('metadata <contract>', 'Shows the Metadata of the contract[1]', pos, make(contract => {
-        console.info(underline('Contract Metadata'));
+        console.info(c.underline('Contract Metadata'));
         if (contract.metadata) {
-            console.info(blue('protocol'), contract.metadata.protocol);
-            console.info(blue('hash'), contract.metadata.hash);
-            console.info(blue('solc'), contract.metadata.solc);
-            console.info(blue('url'), contract.metadata.url);
+            console.info(c.blue('protocol'), contract.metadata.protocol);
+            console.info(c.blue('hash'), contract.metadata.hash);
+            console.info(c.blue('solc'), contract.metadata.solc);
+            console.info(c.blue('url'), contract.metadata.url);
         } else {
             console.info(warn('No metadata'));
         }
     }))
     .command('abi <contract>', 'Shows the ABI of the contract[2]', pos, make(contract => {
-        console.info(underline('Function Selectors'));
-        contract.getFunctions().forEach(sig => console.info(' ', blue(sig)));
+        console.info(c.underline('Function Selectors'));
+        contract.getFunctions().forEach(sig => console.info(' ', c.blue(sig)));
         console.info();
-        console.info(underline('Events'));
-        contract.getEvents().forEach(sig => console.info(' ', magenta(sig)));
+        console.info(c.underline('Events'));
+        contract.getEvents().forEach(sig => console.info(' ', c.magenta(sig)));
     }))
     .command('selectors <contract>', 'Shows the function selectors of the contract[3]', pos, make(contract => {
         for (const [selector, fn] of Object.entries(contract.functions)) {
