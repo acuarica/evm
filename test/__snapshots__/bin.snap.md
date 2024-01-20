@@ -143,6 +143,14 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
 
 ```
 
+```err log-debug-trace-when-NODE_DEBUG=sevm-is-set
+SEVM <pid>: ENOENT: no such file or directory, open '0x8Ba1f109551bD432803012645Ac136ddd64DBa72'
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: bad address checksum (argument="address", value="0x8Ba1f109551bD432803012645Ac136ddd64DBa72", code=INVALID_ARGUMENT, version=6.9.0)
+Cannot find bytecode for contract 0x8Ba1f109551bD432803012645Ac136ddd64DBa72
+
+```
+
 ```err catch-error-when-exec-self-destructed-contract
 Bytecode for contract - is '0x', might have been self-destructed
 
