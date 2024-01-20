@@ -2,11 +2,15 @@
 <html>
     <head>
         <title>Symbolic EVM Bytecode Decompiler</title>
+        <link href="https://cdn.jsdelivr.net/npm/prismjs@v1.x/themes/prism.css" rel="stylesheet" />
     </head>
     <body>
         <h1>Symbolic EVM Bytecode Decompiler</h1>
         <h2>MSOW - 0x07880D44b0f7b75464ad18fc2b980049c40A8bc3</h2>
-        <pre style="border: solid"><code id="code"></code></pre>
+        <pre style="border: solid"><code id="code" class="language-solidity"></code></pre>
+
+        <script src="https://cdn.jsdelivr.net/npm/prismjs@v1.x/components/prism-core.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/prismjs@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
 
         <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
         <script src="../dist/sevm.js"></script>
@@ -18,10 +22,11 @@
                 // MSOW contract
                 // https://etherscan.io/address/0x07880D44b0f7b75464ad18fc2b980049c40A8bc3#code
                 .getCode('0x07880D44b0f7b75464ad18fc2b980049c40A8bc3')
-                .then(code => new sevm.Contract(code).patchf())
+                .then(code => new sevm.Contract(code).patch())
                 .then(contract => {
                     console.log('MSOW contract', contract);
-                    document.getElementById('code').innerText = contract.solidify();
+                    document.getElementById('code').innerHTML = contract.solidify();
+                    Prism.highlightAll();
                 })
                 .catch(err => {
                     console.error(err);
