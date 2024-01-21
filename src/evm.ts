@@ -165,37 +165,8 @@ export class EVM<M extends string> {
         }
     }
 
-    // sourceMap = new Map<Expr, Opcode>();
-
     exec(pc0: number, state: State<Inst, Expr>): void {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        // const self = this;
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
-
-        // let opcode: Opcode;
-        // const t = new Proxy(state.stack, {
-        //     get(target, prop, receiver) {
-        //         if (prop === 'push') {
-        //             const pushMethod = target[prop];
-        //             return function (...args: [elem: Expr]) {
-        //                 const expr = args[0];
-        //                 self.sourceMap.set(expr, opcode);
-        //                 pushMethod.apply(target, args);
-        //             };
-        //         }
-        //         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        //         return Reflect.get(target, prop, receiver);
-        //     },
-        // });
-        // state = new Proxy(state, {
-        //     get(target, prop, receiver) {
-        //         if (prop === 'stack') {
-        //             return t;
-        //         }
-        //         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        //         return Reflect.get(target, prop, receiver);
-        //     },
-        // });
 
         const opcodes = [];
         let opcode;
