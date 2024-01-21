@@ -143,6 +143,11 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
 
 ```
 
+```err catch-error-when-input-is-not-a-valid-hex-string
+Error: Unable to decode, invalid hex byte 'ax' found at position '7'
+
+```
+
 ```err log-debug-trace-when-NODE_DEBUG=sevm-is-set
 SEVM <pid>: ENOENT: no such file or directory, open <addr>
 SEVM <pid>: ENOENT: no such file or directory, open <addr>
