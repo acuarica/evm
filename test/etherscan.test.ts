@@ -43,10 +43,10 @@ const provider = {
     },
 };
 
-describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
+describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
     this.bail(true);
 
-    const csvPath = 'test/export-verified-contractaddress-opensource-license.csv';
+    const csvPath = '.etherscan/$export-verified-contractaddress-opensource-license.csv';
     let csv: string;
     try {
         /**
@@ -158,7 +158,6 @@ describe(`etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function (
                 }
 
                 const step = new Shanghai();
-                /** @param {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} state */
                 const STATICCALL = (state: State<Inst, Expr>) => {
                     step['STATICCALL'](state);
                     const call = state.stack.top as StaticCall;
