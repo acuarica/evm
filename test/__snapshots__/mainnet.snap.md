@@ -595,3 +595,7 @@
 ```errors WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/detect-errors
 []
 ```
+
+```errors big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB/detect-errors
+[]
+```

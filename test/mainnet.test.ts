@@ -12,6 +12,14 @@ import { fnselector } from './utils/selector';
 describe('::mainnet', function () {
     [
         {
+            name: 'big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB',
+            members: [
+                /function Try\(string _arg0\) public payable/m,
+                /function question\(\) public/m,
+                /function New\(string _arg0, bytes32 _arg1\) public/m,
+            ],
+            selectors: ['bedf0f4a', 'c76de3e9'],
+        }, {
             name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
             members: [
                 /function get_deposit_root\(\) public/m,
@@ -198,9 +206,7 @@ describe('::mainnet', function () {
             it('should detect selectors', function () {
                 if (selectors === undefined && members.length === 0) this.skip();
                 expect([...contract.functionBranches.keys()]).to.have.members(
-                    selectors !== undefined
-                        ? selectors
-                        : [...functions, ...variables, ...mappings].map(fnselector)
+                    [...(selectors ?? []), ...[...functions, ...variables, ...mappings].map(fnselector)]
                 );
             });
 
