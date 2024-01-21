@@ -1,4 +1,4 @@
-2966 opcodes in bytecode
+3126 opcodes in bytecode
 @0: ⟪8⟫ 1〒
 @13: ⟪9⟫ 1〒
 @30: ⟪5⟫ 1〒
@@ -152,20 +152,30 @@
 @4277: ⟪7⟫ 1〒
 @4290: ⟪5⟫ 1〒
 @4295: ⟪8⟫ 1〒
-@4305: ⟪7⟫ 1〒
-@4315: ⟪8⟫ 1〒
-@4327: ⟪8⟫ 1〒
+@4305: ⟪7⟫ 7〒
+@4315: ⟪8⟫ 7〒
+@4327: ⟪8⟫ 7〒
 @4340: unreachable (1 bytes in buffer) fe
-@4341: ⟪48⟫ 1〒
+@4341: ⟪48⟫ 7〒
 @4398: ⟪6⟫ 11〒
-@4407: ⟪17⟫ 11〒
-@4459: unreachable (123 bytes in buffer) 5b51815160209384036101000a7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff01801990[..]
-@4582: ⟪10⟫ 1〒
+@4407: ⟪17⟫ 8〒
+@4459: ⟪46⟫ 3〒
+@4543: ⟪7⟫ 3〒
+@4552: ⟪13⟫ 3〒
+@4569: ⟪3⟫ 3〒
+@4573: ⟪7⟫ 3〒
+@4582: ⟪10⟫ 7〒
 @4597: unreachable (1 bytes in buffer) fe
-@4598: ⟪47⟫ 1〒
+@4598: ⟪47⟫ 7〒
 @4654: ⟪6⟫ 11〒
-@4663: ⟪17⟫ 11〒
-@4715: unreachable (591 bytes in buffer) 5b51815160209384036101000a7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff01801990[..]
+@4663: ⟪17⟫ 8〒
+@4715: ⟪46⟫ 3〒
+@4799: ⟪7⟫ 3〒
+@4808: ⟪13⟫ 3〒
+@4825: ⟪3⟫ 3〒
+@4829: ⟪5⟫ 3〒
+@4834: ⟪10⟫ 6〒
+@4848: unreachable (458 bytes in buffer) 5b506002826112ff6020546114ba565b600060401b6040516020018084815260200183805190602001908083835b60208310[..]
 @5306: ⟪47⟫ 3〒
 @5363: unreachable (1 bytes in buffer) fe
 @5364: ⟪28⟫ 3〒

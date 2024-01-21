@@ -7,7 +7,7 @@ import path from 'path';
 import type { Operand, Ram } from 'sevm';
 import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
 import type { Create, DataCopy, Expr, Inst, Log } from 'sevm/ast';
-import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val } from 'sevm/ast';
+import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val, type SStore, Shl } from 'sevm/ast';
 
 import { eventSelector, fnselector } from './utils/selector';
 import { compile, type Version } from './utils/solc';
@@ -240,6 +240,37 @@ describe('::evm', function () {
         ]);
 
         expect(evm.step.functionBranches).to.have.keys('00000000');
+    });
+
+    it('should find Sha3 with 256-bits overflow arithmetic', function () {
+        // https://etherscan.io/address/0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB#code
+        const src = `contract big_game {
+            bytes32 responseHash;
+
+            function New() external payable {
+                responseHash = keccak256(abi.encodePacked(msg.sender));
+            }
+        }`;
+
+        const evm = EVM.new(compile(src, '0.8.21', this, { optimizer: { enabled: true } }).bytecode);
+        evm.start();
+
+        const state = evm.step.functionBranches.get(fnselector('New()'))!.state;
+        const sha3 = (state.stmts.at(-2) as SStore).data;
+        expect(sha3).to.be.instanceof(Sha3);
+        expect(sha3.eval()).to.be.deep.equal(
+            new Sha3(
+                new Val(160n),
+                new Val(20n),
+                [
+                    new And(
+                        new Shl(Props['msg.sender'], new Val(96n, true)),
+                        new Not(new Val(0xffffffffffffffffffffffffn)).eval()
+                    )
+                ]
+            )
+        );
+        expect(evm.errors).to.be.empty;
     });
 
     describe('special', function () {
