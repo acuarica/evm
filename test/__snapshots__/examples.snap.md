@@ -150,7 +150,7 @@ contract Contract {
   'PUSH4(0x63)@205 0x27d7874c (668436300)',
   'EQ(0x14)@210',
   'PUSH2(0x61)@211 0x0539 (1337)',
-  ... 6780 more items
+  ... 7060 more items
 ]
 
 ```
