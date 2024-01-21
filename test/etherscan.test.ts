@@ -1,13 +1,33 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { hrtime } from 'process';
 
-import { expect } from 'chai';
 import c from 'ansi-colors';
-import { CloudflareProvider, EtherscanProvider, InfuraProvider, PocketProvider } from 'ethers';
+import { expect } from 'chai';
+import { CloudflareProvider, EtherscanProvider, InfuraProvider } from 'ethers';
 
-import { Contract, ERCIds, sol, type State, Shanghai } from 'sevm';
-import type { Expr, Inst, StaticCall } from 'sevm/ast';
+import { Contract, ERCIds, Shanghai, sol, type State } from 'sevm';
+import type { StaticCall } from 'sevm/ast';
 import 'sevm/4bytedb';
+
+/**
+ * 
+ */
+class MultiSet<T> {
+    _map = new Map<T, number>();
+
+    add(key: T) {
+        const count = this._map.get(key) ?? 0;
+        this._map.set(key, count + 1);
+    }
+
+    get(key: T): number {
+        return this._map.get(key) ?? 0;
+    }
+
+    entries() {
+        return this._map.entries();
+    }
+}
 
 /**
  * Restricts the number of Etherscan contracts to test.
@@ -23,30 +43,22 @@ const MAX = process.env['MAX'];
  */
 const CONTRACT = process.env['CONTRACT'];
 
-const addr = c.cyan;
-const error = c.red;
-const warn = c.yellow;
-const info = c.blue;
+const ENABLE_ETHERSCAN_TEST = process.env['ENABLE_ETHERSCAN_TEST'];
+const hint = !ENABLE_ETHERSCAN_TEST ? ' (enable it by setting `ENABLE_ETHERSCAN_TEST`)' : '';
 
-const provider = {
-    providers: [
-        new InfuraProvider(),
-        new EtherscanProvider(),
-        new CloudflareProvider(),
-        new PocketProvider(),
-    ],
-    current: 0,
-    getCode: async function (address: string): Promise<string> {
-        this.current = (this.current + 1) % this.providers.length;
-        const code = await this.providers[this.current].getCode(address);
-        return code;
-    },
-};
-
-describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function () {
+describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, function () {
     this.bail(true);
 
-    const csvPath = '.etherscan/$export-verified-contractaddress-opensource-license.csv';
+    if (!ENABLE_ETHERSCAN_TEST) {
+        it('(Etherscan test must be manually enabled) ', function () {
+            this.skip();
+        });
+        return;
+    };
+
+    const BASE_PATH = '.etherscan';
+
+    const csvPath = `${BASE_PATH}/$export-verified-contractaddress-opensource-license.csv`;
     let csv: string;
     try {
         /**
@@ -61,11 +73,30 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
         return;
     }
 
+    // const addr = c.cyan;
+    const error = c.red;
+    const warn = c.yellow;
+    const info = c.blue;
+
+    const provider = {
+        providers: [
+            new InfuraProvider(),
+            new EtherscanProvider(),
+            new CloudflareProvider(),
+        ],
+        current: 0,
+        getCode: async function (address: string): Promise<string> {
+            this.current = (this.current + 1) % this.providers.length;
+            const code = await this.providers[this.current].getCode(address);
+            return code;
+        },
+    };
+
     const errorsByContract: Map<string, Contract['errors']> = new Map();
     const metadataStats = new (class {
         noMetadata = 0;
-        protocols: Set<string> = new Set();
-        solcs = new Set();
+        protocols = new MultiSet<string>();
+        solcs = new MultiSet<string>();
 
         append(metadata: Contract['metadata']) {
             if (metadata) {
@@ -93,13 +124,17 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
     const ercsStats = new (class {
         counts = new Map<(typeof ERCIds)[number], number>();
 
-        append(contract: Contract) {
+        append(contract: Contract, ctx: Mocha.Context) {
+            const ercs = [];
             for (const erc of ERCIds) {
                 if (contract.isERC(erc)) {
                     const count = this.counts.get(erc) ?? 0;
                     this.counts.set(erc, count + 1);
+                    ercs.push(erc);
                 }
             }
+            if (ercs.length > 0)
+                ctx.test!.title += ' ' + c.bold(`ERC:${ercs.map(erc => erc.substring(3)).join('|')}`);
         }
     })();
 
@@ -135,12 +170,11 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
         )
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
         .forEach(([_tx, address, name]) => {
-            it(`should decode & decompile ${name} ${address}`, async function () {
-                const BASE_PATH = '.etherscan/';
-                const path = `${BASE_PATH}${name}-${address}.bytecode`;
+            it(`should decompile ${name} ${address}`, async function () {
+                const path = `${BASE_PATH}/${name}-${address}.bytecode`;
                 if (!existsSync(path)) {
                     this.timeout(10000);
-                    console.log(`Fetching code for ${name} at ${addr(address)} into ${BASE_PATH}`);
+                    this.test!.title += c.yellow(' \u2913');
                     try {
                         const code = await provider.getCode(address);
                         writeFileSync(path, code);
@@ -150,6 +184,8 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
                             provider.providers[provider.current]
                         );
                     }
+                } else {
+                    this.test!.title += ' \u2713';
                 }
 
                 const bytecode = readFileSync(path, 'utf8');
@@ -157,16 +193,17 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
                     return;
                 }
 
-                const step = new Shanghai();
-                const STATICCALL = (state: State<Inst, Expr>) => {
-                    step['STATICCALL'](state);
-                    const call = state.stack.top as StaticCall;
-                    const address = call.address.eval();
-                    if (address.tag === 'Val' && address.val <= 9n) {
-                        precompiledStats.append(sol`${address}`);
-                    }
-                };
-                console.log(STATICCALL);
+                const step = new class extends Shanghai {
+                    override STATICCALL = (state: State) => {
+                        super.STATICCALL(state);
+                        const call = state.stack.top as StaticCall;
+                        const address = call.address.eval();
+                        if (address.tag === 'Val' && address.val <= 9n) {
+                            precompiledStats.append(sol`${address}`);
+                        }
+                    };
+                }();
+
                 const t0 = hrtime.bigint();
                 let contract = new Contract(bytecode);
                 const t1 = hrtime.bigint();
@@ -177,10 +214,11 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
 
                 metadataStats.append(contract.metadata);
                 selectorStats.append(contract.functions);
-                ercsStats.append(contract);
+                ercsStats.append(contract, this);
 
                 if (contract.errors.length > 0) {
-                    errorsByContract.set(`${name}-${address}`, contract.errors);
+                    const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k v${contract.metadata?.solc}`;
+                    errorsByContract.set(key, contract.errors);
                 }
 
                 const externals = [
@@ -188,7 +226,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
                         fn.label !== undefined ? [fn.label] : []
                     ),
                     ...[...step.variables.values()].flatMap(v =>
-                        v.label !== undefined ? [v.label + '()'] : []
+                        v.label !== null ? [v.label + '()'] : []
                     ),
                 ];
                 expect(contract.getFunctions().sort()).to.include.members(externals.sort());
@@ -213,10 +251,11 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\``, function
             }
         }
 
+        const cc = ([k, v]: [string, number]) => `${k}(${v})`;
         console.info('\n  Metadata Stats');
         console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols].join('|')}`);
-        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].join('|')}`);
+        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols.entries()].map(cc).join('|')}`);
+        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs.entries()].map(cc).join('|')}`);
 
         console.info('\n  Selector Stats');
         console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
