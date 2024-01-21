@@ -455,6 +455,10 @@
 []
 ```
 
+```errors SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe/detect-errors
+[]
+```
+
 ```errors SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283/detect-errors
 []
 ```

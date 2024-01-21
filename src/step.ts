@@ -453,19 +453,21 @@ function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
 export const JUMPDEST = 0x5b;
 
 function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
-    const offset2 = offset.eval();
-    if (!offset2.isVal()) {
-        throw new ExecError(`${opcode.format()} offset should be numeric but found '${offset.tag}'`);
+    const mask = (lhs: Expr, rhs: Expr) =>
+        lhs.tag === 'Val' && lhs.val === 0xffffffffn && rhs.tag === 'Val'
+            ? rhs
+            : undefined;
+    const offsetVal = offset.tag === 'Local'
+        ? offset.value
+        : offset.tag === 'And'
+            ? mask(offset.left, offset.right) ?? mask(offset.right, offset.left) ?? offset
+            : offset;
+    if (!offsetVal.isVal()) {
+        throw new ExecError(`${opcode.format()} offset should be numeric but found \`${offsetVal.sol()}\``);
     }
-    const destpc = Number(offset2.val);
+    const destpc = Number(offsetVal.val);
     if (bytecode[destpc] === JUMPDEST) {
-        if (offset instanceof Val || offset.tag === 'Local') {
-            offset2.jumpDest = destpc;
-        } else {
-            // TODO: check if this is sounds
-            // throw new Error('getjumpdest: offset is not val' + inspect(offset));
-            (offset as unknown as Val).jumpDest = destpc;
-        }
+        offsetVal.jumpDest = destpc;
         return destpc;
     } else {
         throw new ExecError(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined

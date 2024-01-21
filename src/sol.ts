@@ -1,5 +1,5 @@
 import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt } from './ast';
+import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt, Tag } from './ast';
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
 import { Contract, type PublicFunction } from '.';
@@ -550,17 +550,6 @@ function solPublicFunction(self: PublicFunction, tab = '    '): string {
     return output;
 }
 
-declare module '.' {
-    interface Contract {
-        /**
-         * Decompiles the `Contract` into Solidity-like source code.
-         */
-        solidify(...args: Parameters<typeof solContract>): string;
-    }
-}
-
-Contract.prototype.solidify = solContract;
-
 function solContract(
     this: Contract,
     options: { license?: string | null; pragma?: boolean; contractName?: string } = {}
@@ -599,3 +588,26 @@ function solContract(
 
     return text;
 }
+
+declare module '.' {
+    interface Contract {
+        /**
+         * Decompiles the `Contract` into Solidity-like source code.
+         */
+        solidify(...args: Parameters<typeof solContract>): string;
+    }
+}
+
+declare module './ast' {
+    interface Tag {
+        /**
+         */
+        sol(): string;
+    }
+}
+
+Contract.prototype.solidify = solContract;
+
+Tag.prototype.sol = function (this: Expr) {
+    return solExpr(this);
+};

@@ -609,7 +609,7 @@ describe('::step', function () {
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(Props['block.number']);
                 expect(() => step[inst](state, new Opcode(1, 0xa, 'jump'), Buffer.from([])))
-                    .to.throw(ExecError, `jump(0xa)@1 offset should be numeric but found '${Props['block.number'].tag}'`);
+                    .to.throw(ExecError, `jump(0xa)@1 offset should be numeric but found \`block.number\``);
             });
 
             it(`should throw when \`${inst}\` step with non-\`JUMPDEST\` destination`, function () {
