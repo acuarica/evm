@@ -18,7 +18,7 @@ export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Ar
     const buffer = new Uint8Array((data.length - start) / 2);
     for (let i = start, j = 0; i < data.length; i += 2, j++) {
         const byte = data.slice(i, i + 2);
-        const value = parseInt(byte, 16);
+        const value = Number('0x' + byte);
         if (value >= 0) {
             buffer[j] = value;
         } else {

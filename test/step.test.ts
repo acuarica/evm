@@ -194,6 +194,9 @@ describe('::step', function () {
                 expect(() => step.decode(p + '010203xx').next()).to.throw(
                     `Unable to decode, invalid hex byte 'xx' found at position '${p.length + 7}'`
                 );
+                expect(() => step.decode(p + '010203ax').next()).to.throw(
+                    `Unable to decode, invalid hex byte 'ax' found at position '${p.length + 7}'`
+                );
             });
         }));
 
