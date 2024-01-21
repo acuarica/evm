@@ -53,6 +53,10 @@ describe('::mainnet', function () {
             name: 'ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3',
             members: [],
         }, {
+            name: 'SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe',
+            members: [],
+            skipSnapshot: true,
+        }, {
             name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
             members: [],
             selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],

@@ -455,6 +455,121 @@
 []
 ```
 
+```errors SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe/detect-errors
+[
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "JUMP(0x56)@3520 offset should be numeric but found `0xffffffff & 0xdff`",
+    "opcode": {
+      "pc": 3520,
+      "opcode": 86,
+      "mnemonic": "JUMP",
+      "data": null
+    },
+    "name": "Throw"
+  }
+]
+```
+
 ```errors SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283/detect-errors
 []
 ```
