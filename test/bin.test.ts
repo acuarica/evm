@@ -54,6 +54,14 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
+    it('should catch error when input is not a valid hex string', function () {
+        const cli = chaiExec(sevm, ['dis', '-', '--no-color'], { input: '0x0011ax' });
+
+        expect(cli.stdout).to.be.empty;
+        expect(cli).stderr.to.matchSnapshot('err', this);
+        expect(cli).to.exit.with.code(1);
+    });
+
     it('should log debug trace when `NODE_DEBUG=sevm` is set', function () {
         /**
          * `FORCE_COLOR: 0` is set to remove colorized output coming from Node. 

@@ -19,10 +19,6 @@ const { cyan: info, yellow: warn } = c;
 
 const trace = debuglog('sevm');
 
-/**
- * @typedef {import('sevm').State<import('sevm/ast').Inst, import('sevm/ast').Expr>} EVMState
- */
-
 /** 
  * @param {Contract} contract 
  * @param {import('yargs').ArgumentsCamelCase} argv 
@@ -96,10 +92,12 @@ async function getBytecode(pathOrAddress) {
     const tries = [
         async () => {
             const text = await readInputFile();
+            /** @type {Record<string, unknown>} */
             let json;
             try {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 json = JSON.parse(text);
-            } catch (e) {
+            } catch (_err) {
                 return text;
             }
             const { deployedBytecode, bytecode } = json;
@@ -145,8 +143,14 @@ function make(handler) {
             console.error(warn(`Bytecode for contract ${info(name)} is '0x', might have been self-destructed`));
             process.exit(3);
         } else {
-            const contract = new Contract(bytecode).patchdb();
-            handler(contract, argv);
+            try {
+                const contract = new Contract(bytecode).patchdb();
+                handler(contract, argv);
+            } catch (err) {
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                console.error(warn(`${err}`));
+                process.exit(1);
+            }
         }
     };
 }
@@ -245,7 +249,7 @@ void yargs(process.argv.slice(2))
 
 /** @param {Contract} contract */
 function cfg(contract) {
-    /** @type {WeakMap<EVMState, string>} */
+    /** @type {WeakMap<import('sevm').State, string>} */
     const ids = new WeakMap();
     let id = 0;
     for (const block of contract.blocks.values()) {
@@ -307,7 +311,7 @@ function cfg(contract) {
 
     /**
      * @param {number} pc
-     * @param {EVMState} state
+     * @param {import('sevm').State} state
      */
     function writeNode(pc, state) {
         const id = ids.get(state);
@@ -335,7 +339,7 @@ function cfg(contract) {
     }
 
     /**
-     * @param {EVMState} src
+     * @param {import('sevm').State} src
      * @param {import('sevm/ast').Branch} branch
      */
     function writeEdge(src, branch) {
