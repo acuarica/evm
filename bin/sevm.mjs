@@ -161,6 +161,11 @@ const pos = argv => argv.positional('contract', {
     describe: 'path or address where to locate the bytecode of the contract',
 });
 
+/** @param {import('yargs').Argv} argv */
+const decompileOpts = argv => pos(argv).option('reduce', {
+    description: `Simplify the contract by reducing statements and inlining expressions before decompiling ${warn('[experimental]')}`,
+});
+
 void yargs(process.argv.slice(2))
     .scriptName('sevm')
     .usage('$0 <cmd> <contract>')
@@ -197,17 +202,12 @@ void yargs(process.argv.slice(2))
         .option('with-trace', {
             description: 'Include the trace of staments at the end of each basic block',
         }), make(dis))
-    .command(
-        'cfg <contract>',
-        'Writes the cfg of the selected function in `dot` format into standard output',
-        pos,
-        make(cfg)
-    )
-    .command('sol <contract>', "Decompile the contract into Solidity-like source", pos, make(contract => {
-        console.info(contract.solidify());
+    .command('cfg <contract>', 'Writes the cfg of the selected function in `dot` format into standard output', pos, make(cfg))
+    .command('sol <contract>', "Decompile the contract into Solidity-like source", decompileOpts, make((contract, argv) => {
+        console.info((argv['reduce'] ? contract.reduce() : contract).solidify());
     }))
-    .command('yul <contract>', "Decompile the contract into Yul-like source[4]", pos, make(contract => {
-        console.info(contract.yul());
+    .command('yul <contract>', "Decompile the contract into Yul-like source[4]", decompileOpts, make((contract, argv) => {
+        console.info((argv['reduce'] ? contract.reduce() : contract).yul());
     }))
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
