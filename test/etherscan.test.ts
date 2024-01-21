@@ -205,7 +205,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
             }();
 
             const t0 = hrtime.bigint();
-            let contract = new Contract(bytecode);
+            let contract = new Contract(bytecode, step);
             const t1 = hrtime.bigint();
             benchStats.append(t1 - t0);
 
@@ -217,7 +217,8 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
             ercsStats.append(contract, this);
 
             if (contract.errors.length > 0) {
-                const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k v${contract.metadata?.solc}`;
+                const v = contract.metadata ? `v${contract.metadata?.solc}` : '<no version>';
+                const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k ${v}`;
                 errorsByContract.set(key, contract.errors);
             }
 
