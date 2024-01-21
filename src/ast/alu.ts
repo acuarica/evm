@@ -6,13 +6,15 @@ abstract class Bin extends Tag {
     }
 }
 
+export const MAX_WORD = (1n << 0x100n) - 1n;
+
 export class Add extends Bin {
     readonly tag = 'Add';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
         return left.isVal() && right.isVal()
-            ? new Val(left.val + right.val)
+            ? new Val((left.val + right.val) % (MAX_WORD + 1n))
             : left.isZero()
                 ? right
                 : right.isZero()

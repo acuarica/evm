@@ -73,10 +73,10 @@ object "runtime" {
             let local6 = add(0x20, local5) // #refs -1
             mstore(local6, keccak256(0x0, add(0x20, local4) /*caller().0x0*/))
             let local7 = mload(0x40) // #refs 0
-            let local8 = sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, add(0x20, local4) /*caller().0x0*/)*/)/*base0[caller()][caller()]*/) // #refs -1
+            let local8 = sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/) // #refs -1
             mstore(local7, local8)
             let local9 = mload(0x40) // #refs 0
-            return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, add(0x20, local4) /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
+            return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
         function allowance(address,address) { // public
@@ -173,7 +173,7 @@ goto :[J]0xd1 branch:209
   end
   subgraph cluster_209 ["pc @209"]
     s_8("pc @209 (s_8)
-=|sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, add(0x20, local4) /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
+=|sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
 undefined local2 = 0x0; // #refs -1
 undefined local3 = 0x0; // #refs -1
 memory[0x0] = 0xffffffffffffffffffffffffffffffffffffffff & 0xffffffffffffffffffffffffffffffffffffffff & msg.sender;
@@ -339,9 +339,9 @@ object "runtime" {
             mstore(local3, keccak256(local2, local4 /*caller().0x0*/))
             let local5 = 0x40 // #refs 0
             let local6 = mload(local5) // #refs -1
-            mstore(local6, sload(keccak256(local2, local4 /*caller().keccak256(local2, local4 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/))
+            mstore(local6, sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/))
             let local7 = mload(local5) // #refs 0
-            return(local7, add(0x20, sub(local6, local7))) // sload(keccak256(local2, local4 /*caller().keccak256(local2, local4 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
+            return(local7, add(0x20, sub(local6, local7))) // sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
         function allowance(address,address) { // public
@@ -359,9 +359,9 @@ object "runtime" {
             let local8 = [J]0x3d // #refs 0
             let local9 = 0x40 // #refs 0
             let local10 = mload(local9) // #refs -1
-            mstore(local10, sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(local5, local7 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/))
+            mstore(local10, sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/))
             let local11 = mload(local9) // #refs 0
-            return(local11, add(0x20, sub(local10, local11))) // sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(local5, local7 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
+            return(local11, add(0x20, sub(local10, local11))) // sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
         }
 
     }
@@ -439,7 +439,7 @@ goto :[J]0x7a branch:122
   end
   subgraph cluster_122 ["pc @122"]
     s_8("pc @122 (s_8)
-=|sload(keccak256(local2, local4 /*caller().keccak256(local2, local4 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
+=|sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)|local1
 undefined local2 = 0x0; // #refs 0
 memory[0x0] = msg.sender;
 undefined local3 = 0x20; // #refs -2
@@ -498,7 +498,7 @@ goto :[J]0x93 branch:147
   end
   subgraph cluster_147 ["pc @147"]
     s_14("pc @147 (s_14)
-=|sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(local5, local7 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)|local8|local1
+=|sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)|local8|local1
 undefined local5 = 0x0; // #refs 0
 undefined local6 = 0x20; // #refs -2
 memory[0x20] = 0x0;
