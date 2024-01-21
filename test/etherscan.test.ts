@@ -161,77 +161,77 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
         }
     })();
 
-    csv
+    const contracts = csv
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(','))
-        .filter(
-            ([_, name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT)
-        )
-        .slice(0, MAX !== undefined ? parseInt(MAX) : undefined)
-        .forEach(([_tx, address, name]) => {
-            it(`should decompile ${name} ${address}`, async function () {
-                const path = `${BASE_PATH}/${name}-${address}.bytecode`;
-                if (!existsSync(path)) {
-                    this.timeout(10000);
-                    this.test!.title += c.yellow(' \u2913');
-                    try {
-                        const code = await provider.getCode(address);
-                        writeFileSync(path, code);
-                    } catch (err) {
-                        console.info(
-                            error((err as { message: string }).message),
-                            provider.providers[provider.current]
-                        );
+        .map(([_tx, name, address]) => [name, address])
+        .filter(([name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT))
+        .slice(0, MAX !== undefined ? parseInt(MAX) : undefined);
+
+    contracts.forEach(([address, name]) => {
+        it(`should decompile ${name} ${address}`, async function () {
+            const path = `${BASE_PATH}/${name}-${address}.bytecode`;
+            if (!existsSync(path)) {
+                this.timeout(10000);
+                this.test!.title += c.yellow(' \u2913');
+                try {
+                    const code = await provider.getCode(address);
+                    writeFileSync(path, code);
+                } catch (err) {
+                    console.info(
+                        error((err as { message: string }).message),
+                        provider.providers[provider.current]
+                    );
+                }
+            } else {
+                this.test!.title += ' \u2713';
+            }
+
+            const bytecode = readFileSync(path, 'utf8');
+            if (bytecode === '0x') {
+                return;
+            }
+
+            const step = new class extends Shanghai {
+                override STATICCALL = (state: State) => {
+                    super.STATICCALL(state);
+                    const call = state.stack.top as StaticCall;
+                    const address = call.address.eval();
+                    if (address.tag === 'Val' && address.val <= 9n) {
+                        precompiledStats.append(sol`${address}`);
                     }
-                } else {
-                    this.test!.title += ' \u2713';
-                }
+                };
+            }();
 
-                const bytecode = readFileSync(path, 'utf8');
-                if (bytecode === '0x') {
-                    return;
-                }
+            const t0 = hrtime.bigint();
+            let contract = new Contract(bytecode);
+            const t1 = hrtime.bigint();
+            benchStats.append(t1 - t0);
 
-                const step = new class extends Shanghai {
-                    override STATICCALL = (state: State) => {
-                        super.STATICCALL(state);
-                        const call = state.stack.top as StaticCall;
-                        const address = call.address.eval();
-                        if (address.tag === 'Val' && address.val <= 9n) {
-                            precompiledStats.append(sol`${address}`);
-                        }
-                    };
-                }();
+            contract = contract.patchdb();
+            contract.solidify();
 
-                const t0 = hrtime.bigint();
-                let contract = new Contract(bytecode);
-                const t1 = hrtime.bigint();
-                benchStats.append(t1 - t0);
+            metadataStats.append(contract.metadata);
+            selectorStats.append(contract.functions);
+            ercsStats.append(contract, this);
 
-                contract = contract.patchdb();
-                contract.solidify();
+            if (contract.errors.length > 0) {
+                const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k v${contract.metadata?.solc}`;
+                errorsByContract.set(key, contract.errors);
+            }
 
-                metadataStats.append(contract.metadata);
-                selectorStats.append(contract.functions);
-                ercsStats.append(contract, this);
-
-                if (contract.errors.length > 0) {
-                    const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k v${contract.metadata?.solc}`;
-                    errorsByContract.set(key, contract.errors);
-                }
-
-                const externals = [
-                    ...Object.values(contract.functions).flatMap(fn =>
-                        fn.label !== undefined ? [fn.label] : []
-                    ),
-                    ...[...step.variables.values()].flatMap(v =>
-                        v.label !== null ? [v.label + '()'] : []
-                    ),
-                ];
-                expect(contract.getFunctions().sort()).to.include.members(externals.sort());
-            });
+            const externals = [
+                ...Object.values(contract.functions).flatMap(fn =>
+                    fn.label !== undefined ? [fn.label] : []
+                ),
+                ...[...step.variables.values()].flatMap(v =>
+                    v.label !== null ? [v.label + '()'] : []
+                ),
+            ];
+            expect(contract.getFunctions().sort()).to.include.members(externals.sort());
         });
+    });
 
     after(function () {
         console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
