@@ -148,7 +148,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
         }
 
         get average() {
-            return Number(this.total / BigInt(this.count));
+            return this.count === 0 ? NaN : Number(this.total / BigInt(this.count));
         }
     })();
 
