@@ -1,6 +1,6 @@
 import { Contract } from '.';
 import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast';
-import { FNS, isExpr, isInst } from './ast';
+import { FNS, Tag, isExpr, isInst } from './ast';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either
@@ -214,4 +214,16 @@ Contract.prototype.yul = function (this: Contract) {
     text += '}\n';
 
     return text;
+};
+
+declare module './ast' {
+    interface Tag {
+        /**
+         */
+        yul(): string;
+    }
+}
+
+Tag.prototype.yul = function (this: Expr) {
+    return yulExpr(this);
 };

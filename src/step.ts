@@ -453,17 +453,22 @@ function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
 export const JUMPDEST = 0x5b;
 
 function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
-    const mask = (lhs: Expr, rhs: Expr) =>
-        lhs.tag === 'Val' && lhs.val === 0xffffffffn && rhs.tag === 'Val'
-            ? rhs
+    const unwrapVal = (expr: Expr): Val | undefined => expr.isVal()
+        ? expr
+        : expr.tag === 'Local' && expr.value.isVal()
+            ? expr.value
+            : undefined;
+    const unwrapMask = (lhs: Expr, rhs: Expr): Val | undefined =>
+        lhs.tag === 'Val' && lhs.val === 0xffffffffn
+            ? unwrapVal(rhs)
             : undefined;
     const offsetVal = offset.tag === 'Local'
         ? offset.value
         : offset.tag === 'And'
-            ? mask(offset.left, offset.right) ?? mask(offset.right, offset.left) ?? offset
+            ? unwrapMask(offset.left, offset.right) ?? unwrapMask(offset.right, offset.left) ?? offset
             : offset;
     if (!offsetVal.isVal()) {
-        throw new ExecError(`${opcode.format()} offset should be numeric but found \`${offsetVal.sol()}\``);
+        throw new ExecError(`${opcode.format()} offset should be numeric but found \`${offset.yul()}\``);
     }
     const destpc = Number(offsetVal.val);
     if (bytecode[destpc] === JUMPDEST) {
