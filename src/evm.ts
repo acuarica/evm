@@ -191,7 +191,7 @@ export class EVM<M extends string> {
 
             if (!halts && this.bytecode[opcode.nextpc] === JUMPDEST) {
                 const fallBranch = Branch.make(opcode.nextpc, state);
-                state.halt(new JumpDest(fallBranch));
+                if (!state.halted) state.halt(new JumpDest(fallBranch));
                 break;
             }
 
