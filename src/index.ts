@@ -301,7 +301,10 @@ export class PublicFunction {
         }
     }
 
-    private static patchCallDataLoad(stmtOrExpr: Record<string, Expr>, paramTypes: Type[]) {
+    private static patchCallDataLoad(stmtOrExpr: Record<string, Expr>, paramTypes: Type[], visited = new Set()) {
+        if (stmtOrExpr === null || visited.has(stmtOrExpr)) return;
+
+        visited.add(stmtOrExpr);
         for (const propKey in stmtOrExpr) {
             if (propKey === 'mappings') continue;
 
@@ -318,7 +321,8 @@ export class PublicFunction {
                 ) {
                     PublicFunction.patchCallDataLoad(
                         expr as unknown as Record<string, Expr>,
-                        paramTypes
+                        paramTypes,
+                        visited
                     );
                 }
             }
