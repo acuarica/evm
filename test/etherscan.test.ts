@@ -3,7 +3,7 @@ import { hrtime } from 'process';
 
 import c from 'ansi-colors';
 import { expect } from 'chai';
-import { CloudflareProvider, EtherscanProvider, InfuraProvider } from 'ethers';
+import { AlchemyProvider, CloudflareProvider, EtherscanProvider, InfuraProvider } from 'ethers';
 
 import { Contract, ERCIds, Shanghai, sol, type State } from 'sevm';
 import type { StaticCall } from 'sevm/ast';
@@ -47,7 +47,6 @@ const ENABLE_ETHERSCAN_TEST = process.env['ENABLE_ETHERSCAN_TEST'];
 const hint = !ENABLE_ETHERSCAN_TEST ? ' (enable it by setting `ENABLE_ETHERSCAN_TEST`)' : '';
 
 describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, function () {
-    this.bail(true);
 
     if (!ENABLE_ETHERSCAN_TEST) {
         it('(Etherscan test must be manually enabled) ', function () {
@@ -58,7 +57,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
 
     const BASE_PATH = '.etherscan';
 
-    const csvPath = `${BASE_PATH}/$export-verified-contractaddress-opensource-license.csv`;
+    const csvPath = `${BASE_PATH}/.export-verified-contractaddress-opensource-license.csv`;
     let csv: string;
     try {
         /**
@@ -73,27 +72,34 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
         return;
     }
 
-    // const addr = c.cyan;
     const error = c.red;
     const warn = c.yellow;
     const info = c.blue;
 
-    const provider = {
-        providers: [
+    const provider = new class {
+        providers = [
             new InfuraProvider(),
             new EtherscanProvider(),
             new CloudflareProvider(),
-        ],
-        current: 0,
-        getCode: async function (address: string): Promise<string> {
+        ];
+        current = 0;
+
+        constructor() {
+            try {
+                const apiKey = readFileSync('.etherscan/.ALCHEMY_KEY', 'utf-8');
+                this.providers.push(new AlchemyProvider(undefined, apiKey));
+            } catch { }
+        }
+
+        async getCode(address: string): Promise<string> {
             this.current = (this.current + 1) % this.providers.length;
             const code = await this.providers[this.current].getCode(address);
             return code;
-        },
-    };
+        }
+    }();
 
     const errorsByContract: Map<string, Contract['errors']> = new Map();
-    const metadataStats = new (class {
+    const metadataStats = new class {
         noMetadata = 0;
         protocols = new MultiSet<string>();
         solcs = new MultiSet<string>();
@@ -106,9 +112,9 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
                 this.noMetadata++;
             }
         }
-    })();
+    }();
 
-    const selectorStats = new (class {
+    const selectorStats = new class {
         hitSelectors = new Set<string>();
         missedSelectors = new Set<string>();
 
@@ -119,9 +125,9 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
                 );
             }
         }
-    })();
+    }();
 
-    const ercsStats = new (class {
+    const ercsStats = new class {
         counts = new Map<(typeof ERCIds)[number], number>();
 
         append(contract: Contract, ctx: Mocha.Context) {
@@ -136,9 +142,9 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
             if (ercs.length > 0)
                 ctx.test!.title += ' ' + c.bold(`ERC:${ercs.map(erc => erc.substring(3)).join('|')}`);
         }
-    })();
+    }();
 
-    const benchStats = new (class {
+    const benchStats = new class {
         count = 0;
         total = 0n;
 
@@ -150,16 +156,16 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
         get average() {
             return this.count === 0 ? NaN : Number(this.total / BigInt(this.count));
         }
-    })();
+    }();
 
-    const precompiledStats = new (class {
+    const precompiledStats = new class {
         counts = new Map<string, number>();
 
         append(address: string) {
             const count = this.counts.get(address) ?? 0;
             this.counts.set(address, count + 1);
         }
-    })();
+    }();
 
     const contracts = csv
         .trimEnd()
