@@ -1,4 +1,4 @@
-import { type Expr, Tag, Val } from './index';
+import { type Expr, Tag, Val, MOD_256 } from './index';
 
 abstract class Bin extends Tag {
     constructor(readonly left: Expr, readonly right: Expr) {
@@ -15,8 +15,7 @@ abstract class Bin extends Tag {
  * > Conceptually, understand positive `BigInt`s as having an infinite number of leading 0 bits,
  * > and negative `BigInt`s having an infinite number of leading 1 bits.
  */
-const X = 1n << 0x100n;
-const mod256 = (n: bigint) => ((n % X) + X) % X;
+const mod256 = (n: bigint) => ((n % MOD_256) + MOD_256) % MOD_256;
 
 export class Add extends Bin {
     readonly tag = 'Add';
@@ -39,7 +38,7 @@ export class Mul extends Bin {
         const lhs = this.left.eval();
         const rhs = this.right.eval();
         return lhs.isVal() && rhs.isVal()
-            ? new Val(lhs.val * rhs.val)
+            ? new Val(mod256(lhs.val * rhs.val))
             : lhs.isZero() || rhs.isZero()
                 ? new Val(0n)
                 : new Mul(lhs, rhs);

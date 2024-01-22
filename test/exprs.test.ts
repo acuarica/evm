@@ -39,7 +39,7 @@ const $exprs = {
         t(['NUMBER', 15n, 'ADD'], new Add(new Val(15n), Props['block.number']), id, '0xf + block.number', 'add(0xf, number())'),
         t([2n, 1n, 'ADD'], new Add(new Val(1n), new Val(2n)), new Val(3n), '0x1 + 0x2', 'add(0x1, 0x2)'),
         t([MAX_WORD, 3n, 'ADD'], new Add(new Val(3n), new Val(MAX_WORD)), new Val(2n), `0x3 + 0x${'ff'.repeat(32)}`, `add(0x3, 0x${'ff'.repeat(32)})`),
-        t([MAX_WORD + 2n, 3n, 'ADD'], new Add(new Val(3n), new Val(MAX_WORD + 2n)), new Val(4n), `0x3 + 0x1${'00'.repeat(31)}01`, `add(0x3, 0x1${'00'.repeat(31)}01)`),
+        t([MAX_WORD - 2n, 7n, 'ADD'], new Add(new Val(7n), new Val(MAX_WORD - 2n)), new Val(4n), `0x7 + 0x${'ff'.repeat(31)}fd`, `add(0x7, 0x${'ff'.repeat(31)}fd)`),
         t(
             [0x1fn, 'NOT', 0x80n, 0xb4n, 'SUB', 'ADD'],
             new Add(new Sub(new Val(0xb4n), new Val(0x80n)), new Not(new Val(0x1fn))),

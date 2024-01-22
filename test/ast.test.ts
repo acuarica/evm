@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Add, type Expr, Val, Props } from 'sevm/ast';
+import { Add, type Expr, Val, Props, MOD_256 } from 'sevm/ast';
 import { Byte, IsZero, Lt, MLoad, Not, SLoad, Shl, Sig } from 'sevm/ast';
 import { CallDataLoad, CallValue, DataCopy, Fn } from 'sevm/ast';
 import { Create, Create2, ReturnData, Sha3 } from 'sevm/ast';
@@ -16,6 +16,11 @@ describe('::ast', function () {
         expect(new Val(1n).isZero()).to.be.false;
         expect(new Add(new Val(0n), new Val(0n)).isZero()).to.be.false;
         expect(new Add(new Val(1n), new Val(2n)).isZero()).to.be.false;
+    });
+
+    it('should throw test `isVal`', function () {
+        expect(() => new Val(-1n)).to.throw('Val is a not a valid unsigned 256-word: -1');
+        expect(() => new Val(MOD_256)).to.throw('Val is a not a valid unsigned 256-word: ' + MOD_256.toString());
     });
 
     describe('children', function () {

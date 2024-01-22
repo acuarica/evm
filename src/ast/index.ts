@@ -199,12 +199,15 @@ export abstract class Tag {
     }
 }
 
+export const MOD_256 = 1n << 0x100n;
+
 export class Val extends Tag {
     readonly tag = 'Val';
 
     jumpDest: number | null = null;
 
     constructor(readonly val: bigint, readonly isPush = false) {
+        if (val < 0 || val >= MOD_256) throw new Error(`Val is a not a valid unsigned 256-word: ${val}`);
         super();
     }
 
