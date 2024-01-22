@@ -21,7 +21,6 @@ export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string 
 function yulExpr(expr: Expr): string {
     switch (expr.tag) {
         case 'Val':
-            // return `0x${expr.val.toString(16)}`;
             return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
         case 'Local':
             return `local${expr.index}`;
