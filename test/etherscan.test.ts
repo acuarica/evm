@@ -43,10 +43,16 @@ const MAX = process.env['MAX'];
  */
 const CONTRACT = process.env['CONTRACT'];
 
+/**
+ * Enable this to make test bail after first error.
+ */
+const BAIL = process.env['BAIL'];
+
 const ENABLE_ETHERSCAN_TEST = process.env['ENABLE_ETHERSCAN_TEST'];
 const hint = !ENABLE_ETHERSCAN_TEST ? ' (enable it by setting `ENABLE_ETHERSCAN_TEST`)' : '';
 
-describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, function () {
+describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, function () {
+    if (BAIL) this.bail();
 
     if (!ENABLE_ETHERSCAN_TEST) {
         it('(Etherscan test must be manually enabled) ', function () {
