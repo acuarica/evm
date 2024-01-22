@@ -126,9 +126,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
 
         append(functions: Contract['functions']) {
             for (const fn of Object.values(functions)) {
-                (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(
-                    fn.selector
-                );
+                (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(fn.selector);
             }
         }
     }();
@@ -203,10 +201,12 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
 
             const bytecode = readFileSync(path, 'utf8');
             if (bytecode === '0x') {
+                this.test!.title += ' 🚫';
                 return;
             }
 
-            const step = new class extends Shanghai {
+            const t0 = hrtime.bigint();
+            let contract = new Contract(bytecode, new class extends Shanghai {
                 override STATICCALL = (state: State) => {
                     super.STATICCALL(state);
                     const call = state.stack.top as StaticCall;
@@ -215,15 +215,13 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
                         precompiledStats.append(sol`${address}`);
                     }
                 };
-            }();
-
-            const t0 = hrtime.bigint();
-            let contract = new Contract(bytecode, step);
+            }());
             const t1 = hrtime.bigint();
             benchStats.append(t1 - t0);
 
             contract = contract.patchdb();
-            contract.solidify();
+            expect(contract.solidify()).to.be.not.empty;
+            expect(contract.yul()).to.be.not.empty;
 
             metadataStats.append(contract.metadata);
             selectorStats.append(contract.functions);
@@ -239,7 +237,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
                 ...Object.values(contract.functions).flatMap(fn =>
                     fn.label !== undefined ? [fn.label] : []
                 ),
-                ...[...step.variables.values()].flatMap(v =>
+                ...[...contract.variables.values()].flatMap(v =>
                     v.label !== null ? [v.label + '()'] : []
                 ),
             ];
