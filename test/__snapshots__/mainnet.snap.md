@@ -599,3 +599,7 @@
 ```errors big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB/detect-errors
 []
 ```
+
+```errors SHA1Digest-0x9c9fcEa62bD0A723b62A2F1e98dE0Ee3df813619/detect-errors
+[]
+```

@@ -65,6 +65,11 @@ describe('::mainnet', function () {
             members: [],
             skipSnapshot: true,
         }, {
+            name: 'SHA1Digest-0x9c9fcEa62bD0A723b62A2F1e98dE0Ee3df813619',
+            members: [
+                /function verify\(bytes _arg0, bytes _arg1\) public/m,
+            ],
+        }, {
             name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
             members: [],
             selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],
