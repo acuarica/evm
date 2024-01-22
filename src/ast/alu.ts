@@ -6,7 +6,17 @@ abstract class Bin extends Tag {
     }
 }
 
-export const MAX_WORD = (1n << 0x100n) - 1n;
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder
+ *
+ * > For `BigInt`s, there's no truncation.
+ * > Conceptually, understand positive `BigInt`s as having an infinite number of leading 0 bits,
+ * > and negative `BigInt`s having an infinite number of leading 1 bits.
+ */
+const X = 1n << 0x100n;
+const mod256 = (n: bigint) => ((n % X) + X) % X;
 
 export class Add extends Bin {
     readonly tag = 'Add';
@@ -14,7 +24,7 @@ export class Add extends Bin {
         const left = this.left.eval();
         const right = this.right.eval();
         return left.isVal() && right.isVal()
-            ? new Val((left.val + right.val) % (MAX_WORD + 1n))
+            ? new Val(mod256(left.val + right.val))
             : left.isZero()
                 ? right
                 : right.isZero()
@@ -42,7 +52,7 @@ export class Sub extends Bin {
         const left = this.left.eval();
         const right = this.right.eval();
         return left.isVal() && right.isVal()
-            ? new Val(left.val - right.val)
+            ? new Val(mod256(left.val - right.val))
             : right.isZero()
                 ? left
                 : new Sub(left, right);
@@ -186,23 +196,11 @@ export class Xor extends Bin {
     }
 }
 
-/**
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT
- *
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder
- *
- * > For `BigInt`s, there's no truncation.
- * > Conceptually, understand positive `BigInt`s as having an infinite number of leading 0 bits,
- * > and negative `BigInt`s having an infinite number of leading 1 bits.
- */
-const X = 1n << 0x100n;
-const mod = (n: bigint) => ((n % X) + X) % X;
-
 export class Not extends Unary {
     readonly tag = 'Not';
     eval(): Expr {
         const val = this.value.eval();
-        return val.isVal() ? new Val(mod(~val.val)) : new Not(val);
+        return val.isVal() ? new Val(mod256(~val.val)) : new Not(val);
     }
 }
 

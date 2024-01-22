@@ -356,10 +356,10 @@ function memArgs<T>(
 ): T {
     const MAXSIZE = 1024;
 
-    const offset = stack.pop();
-    const size = stack.pop();
+    const offset_ = stack.pop();
+    const size_ = stack.pop();
 
-    return new Klass(offset, size, ((offset, size) => {
+    return new Klass(offset_, size_, ((offset, size) => {
         if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
             const args = [];
             for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
@@ -368,12 +368,12 @@ function memArgs<T>(
             return args;
         } else {
             if (size.isVal() && size.val > MAXSIZE * 32) {
-                throw new Error(`memargs size ${Klass.name} ${size.val}`);
+                throw new ExecError(`Memory size too large creating ${Klass.name}: ${size.val} in \`${size_.yul()}\``);
             }
 
             return undefined;
         }
-    })(offset.eval(), size.eval()));
+    })(offset_.eval(), size_.eval()));
 }
 
 const getVar = (slot: Expr, values: Expr[], self: IStore) => {

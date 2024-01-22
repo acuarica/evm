@@ -603,3 +603,18 @@
 ```errors SHA1Digest-0x9c9fcEa62bD0A723b62A2F1e98dE0Ee3df813619/detect-errors
 []
 ```
+
+```errors OmniMerlin-0x234F534D322dF1a8a236a2F952d6657bf800F1FA/detect-errors
+[
+  {
+    "reason": "Memory size too large creating Sha3: 115792089237316195423570985008687907853269984665640564039457584007913129639808 in `sub(local12, local21)`",
+    "opcode": {
+      "pc": 1873,
+      "opcode": 32,
+      "mnemonic": "SHA3",
+      "data": null
+    },
+    "name": "Throw"
+  }
+]
+```

@@ -3,7 +3,7 @@ import util from 'util';
 
 import { Shanghai, sol, yul, type Ram, State } from 'sevm';
 import type { Expr } from 'sevm/ast';
-import { Add, Byte, CallDataLoad, CallValue, Div, Eq, Exp, IsZero, MAX_WORD, MLoad, Mod, Mul, Not, Prop, Props, Sha3, Shl, Sig, Sub, Val } from 'sevm/ast';
+import { Add, Byte, CallDataLoad, CallValue, Div, Eq, Exp, IsZero, MLoad, Mod, Mul, Not, Prop, Props, Sha3, Shl, Sig, Sub, Val } from 'sevm/ast';
 
 const id = <E>(expr: E): E => expr;
 
@@ -24,6 +24,8 @@ const trunc = (str: bigint | string, len = 80) =>
 
 const title = (obj: unknown) =>
     trunc(util.inspect(obj, { breakLength: Infinity }).replace(/ /g, ''));
+
+const MAX_WORD = (1n << 0x100n) - 1n;
 
 const $exprs = {
     core: [
@@ -46,7 +48,7 @@ const $exprs = {
             'add(sub(0xb4, 0x80), not(0x1f))'
         ),
 
-        t([2n, 1n, 'SUB'], new Sub(new Val(1n), new Val(2n)), new Val(-1n), '0x1 - 0x2', 'sub(0x1, 0x2)'),
+        t([2n, 1n, 'SUB'], new Sub(new Val(1n), new Val(2n)), new Val(MAX_WORD), '0x1 - 0x2', 'sub(0x1, 0x2)'),
         t([3n, 2n, 'ADD', 1n, 'ADD'], new Add(new Val(1n), new Add(new Val(2n), new Val(3n))), new Val(6n), '0x1 + 0x2 + 0x3', 'add(0x1, add(0x2, 0x3))'),
         t([3n, 5n, 'ADD', 2n, 'MUL'], new Mul(new Val(2n), new Add(new Val(5n), new Val(3n))), new Val(16n), '0x2 * (0x5 + 0x3)', 'mul(0x2, add(0x5, 0x3))'),
         t([3n, 5n, 'MUL', 2n, 'ADD'], new Add(new Val(2n), new Mul(new Val(5n), new Val(3n))), new Val(17n), '0x2 + 0x5 * 0x3', 'add(0x2, mul(0x5, 0x3))'),

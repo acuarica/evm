@@ -58,6 +58,9 @@ describe('::mainnet', function () {
             checkEvents: false,
             skipSnapshot: true,
         }, {
+            name: 'OmniMerlin-0x234F534D322dF1a8a236a2F952d6657bf800F1FA',
+            members: [],
+        }, {
             name: 'ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3',
             members: [],
         }, {
