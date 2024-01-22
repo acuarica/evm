@@ -191,6 +191,7 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT}\`${hint}`, f
                     );
                 }
             } else {
+                this.timeout(5000);
                 this.test!.title += ' \u2713';
             }
 
