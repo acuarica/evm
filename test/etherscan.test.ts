@@ -5,7 +5,7 @@ import c from 'ansi-colors';
 import { expect } from 'chai';
 import { AlchemyProvider, CloudflareProvider, EtherscanProvider, InfuraProvider } from 'ethers';
 
-import { Contract, ERCIds, Shanghai, sol, type State } from 'sevm';
+import { Contract, ERCIds, type Opcode, Shanghai, sol, type State } from 'sevm';
 import type { StaticCall } from 'sevm/ast';
 import 'sevm/4bytedb';
 
@@ -162,12 +162,14 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
         }
     }();
 
-    const precompiledStats = new class {
-        counts = new Map<string, number>();
+    const hookStats = new class {
+        pcs = 0;
 
-        append(address: string) {
-            const count = this.counts.get(address) ?? 0;
-            this.counts.set(address, count + 1);
+        staticcalls = new Map<string, number>();
+
+        precompile(address: string) {
+            const count = this.staticcalls.get(address) ?? 0;
+            this.staticcalls.set(address, count + 1);
         }
     }();
 
@@ -207,12 +209,17 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
 
             const t0 = hrtime.bigint();
             let contract = new Contract(bytecode, new class extends Shanghai {
+                override PC = (state: State, opcode: Opcode) => {
+                    super.PC(state, opcode);
+                    hookStats.pcs++;
+                };
+
                 override STATICCALL = (state: State) => {
                     super.STATICCALL(state);
                     const call = state.stack.top as StaticCall;
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {
-                        precompiledStats.append(sol`${address}`);
+                        hookStats.precompile(sol`${address}`);
                     }
                 };
             }());
@@ -283,8 +290,10 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
         console.info(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
 
         console.info('\n  Precompiled Contract Stats');
-        for (const [address, count] of precompiledStats.counts) {
+        for (const [address, count] of hookStats.staticcalls) {
             console.info(`    • ${info(address)} ${count}`);
         }
+        console.info('\n  PC Stats');
+        console.info(`    • ${info('PCs')} ${hookStats.pcs}`);
     });
 });
