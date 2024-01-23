@@ -1,0 +1,23 @@
+name: Contract Dataset Test
+
+on: workflow_dispatch
+
+env:
+  FORCE_COLOR: 3
+
+jobs:
+  dataset-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn install --frozen-lockfile
+      - run: yarn test --grep ::dataset
+        env:
+          ENABLE_DATASET_TEST: 1

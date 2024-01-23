@@ -66,7 +66,6 @@ jobs:
         if: ${{ matrix.node > 16 }}
         run: echo "ENABLE_4BYTE_TEST=1" >> "$GITHUB_ENV"
       - run: yarn test
-      # - run: yarn test:smoke
 
   coverage:
     runs-on: ubuntu-latest
