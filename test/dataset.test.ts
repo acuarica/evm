@@ -1,9 +1,8 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { hrtime } from 'process';
 
 import c from 'ansi-colors';
 import { expect } from 'chai';
-import { AlchemyProvider, CloudflareProvider, EtherscanProvider, InfuraProvider } from 'ethers';
 
 import { Contract, ERCIds, type Opcode, Shanghai, sol, type State } from 'sevm';
 import type { StaticCall } from 'sevm/ast';
@@ -48,61 +47,27 @@ const CONTRACT = process.env['CONTRACT'];
  */
 const BAIL = process.env['BAIL'];
 
-const ENABLE_ETHERSCAN_TEST = process.env['ENABLE_ETHERSCAN_TEST'];
-const hint = !ENABLE_ETHERSCAN_TEST ? ' (enable it by setting `ENABLE_ETHERSCAN_TEST`)' : '';
+const ENABLE_DATASET_TEST = process.env['ENABLE_DATASET_TEST'];
+const hint = !ENABLE_DATASET_TEST ? ' (enable it by setting `ENABLE_DATASET_TEST`)' : '';
 
-describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, function () {
+describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, function () {
     if (BAIL) this.bail();
 
-    if (!ENABLE_ETHERSCAN_TEST) {
-        it('(Etherscan test must be manually enabled) ', function () {
+    if (!ENABLE_DATASET_TEST) {
+        it('(Contract dataset test must be manually enabled) ', function () {
             this.skip();
         });
         return;
     };
 
-    const BASE_PATH = '.etherscan';
+    const BASE_PATH = '.dataset';
 
-    const csvPath = `${BASE_PATH}/.export-verified-contractaddress-opensource-license.csv`;
-    let csv: string;
-    try {
-        /**
-         * Needs to be manually downloaded from
-         * https://etherscan.io/exportData?type=open-source-contract-codes
-         */
-        csv = readFileSync(csvPath, 'utf8');
-    } catch {
-        it(`Addresses CSV \`${csvPath}\` not found, skipping`, function () {
-            this.skip();
-        });
-        return;
-    }
+    const csvPath = `${BASE_PATH}/export-verified-contractaddress-opensource-license.csv`;
+    const csv = readFileSync(csvPath, 'utf8');
 
     const error = c.red;
     const warn = c.yellow;
     const info = c.blue;
-
-    const provider = new class {
-        providers = [
-            new InfuraProvider(),
-            new EtherscanProvider(),
-            new CloudflareProvider(),
-        ];
-        current = 0;
-
-        constructor() {
-            try {
-                const apiKey = readFileSync('.etherscan/.ALCHEMY_KEY', 'utf-8');
-                this.providers.push(new AlchemyProvider(undefined, apiKey));
-            } catch { }
-        }
-
-        async getCode(address: string): Promise<string> {
-            this.current = (this.current + 1) % this.providers.length;
-            const code = await this.providers[this.current].getCode(address);
-            return code;
-        }
-    }();
 
     const errorsByContract: Map<string, Contract['errors']> = new Map();
     const metadataStats = new class {
@@ -177,29 +142,14 @@ describe(`::etherscan | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(','))
-        .map(([_tx, name, address]) => [name, address])
         .filter(([name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT))
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined);
 
     contracts.forEach(([address, name]) => {
-        it(`should decompile ${name} ${address}`, async function () {
-            const path = `${BASE_PATH}/${name}-${address}.bytecode`;
-            if (!existsSync(path)) {
-                this.timeout(10000);
-                this.test!.title += c.yellow(' \u2913');
-                try {
-                    const code = await provider.getCode(address);
-                    writeFileSync(path, code);
-                } catch (err) {
-                    console.info(
-                        error((err as { message: string }).message),
-                        provider.providers[provider.current]
-                    );
-                }
-            } else {
-                this.timeout(5000);
-                this.test!.title += ' \u2713';
-            }
+        it(`should decompile ${name} ${address}`, function () {
+            this.timeout(5000);
+
+            const path = `${BASE_PATH}/1/${name}-${address}.bytecode`;
 
             const bytecode = readFileSync(path, 'utf8');
             if (bytecode === '0x') {
