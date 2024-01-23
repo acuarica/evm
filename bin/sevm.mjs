@@ -97,7 +97,7 @@ async function getBytecode(pathOrAddress) {
             try {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 json = JSON.parse(text);
-            } catch (_err) {
+            } catch {
                 return text;
             }
             const { deployedBytecode, bytecode } = json;
