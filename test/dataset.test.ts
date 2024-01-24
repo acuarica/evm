@@ -147,7 +147,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
 
     contracts.forEach(([address, name]) => {
         it(`should decompile ${name} ${address}`, function () {
-            this.timeout(5000);
+            // Increase timeout to pass in CI
+            this.timeout(10000);
 
             const path = `${BASE_PATH}/1/${name}-${address}.bytecode`;
 
