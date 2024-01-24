@@ -385,7 +385,7 @@ describe('::step', function () {
             state.stack.push(size);
             state.stack.push(offset);
             state.stack.push(new Val(4n));
-            step.CODECOPY(state, new Opcode(0, 0, 'codecopy'), bytecode);
+            step.CODECOPY(state, new Opcode(0, 0, 'codecopy'), { bytecode });
 
             expect(state.memory).to.be.deep.equal({
                 '4': new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5))
@@ -581,7 +581,7 @@ describe('::step', function () {
         it('should halt when `JUMP` step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(new Val(2n));
-            step.JUMP(state, new Opcode(1, 0xa, 'jump'), Buffer.from('ff005b', 'hex'));
+            step.JUMP(state, new Opcode(1, 0xa, 'jump'), { bytecode: Buffer.from('ff005b', 'hex') });
 
             const offset = new Val(2n);
             offset.jumpDest = 2;
@@ -593,7 +593,7 @@ describe('::step', function () {
             const state = new State<Inst, Expr>();
             state.stack.push(Props['block.gaslimit']);
             state.stack.push(new Val(4n));
-            step.JUMPI(state, new Opcode(1, 0xa, 'jumpi'), Buffer.from('ff0001025b', 'hex'));
+            step.JUMPI(state, new Opcode(1, 0xa, 'jumpi'), { bytecode: Buffer.from('ff0001025b', 'hex') });
 
             const offset = new Val(4n);
             offset.jumpDest = 4;
@@ -608,7 +608,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(Props['block.number']);
-                expect(() => step[inst](state, new Opcode(1, 0xa, 'jump'), Buffer.from([])))
+                expect(() => step[inst](state, new Opcode(1, 0xa, 'jump'), { bytecode: Buffer.from([]) }))
                     .to.throw(ExecError, `jump(0xa)@1 offset should be numeric but found \`number()\``);
             });
 
@@ -616,7 +616,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(1n));
-                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), { bytecode: Buffer.from([0xff, 0xff]) }))
                     .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@1 but found '0xff'`);
             });
 
@@ -624,7 +624,7 @@ describe('::step', function () {
                 const state = new State<Inst, Expr>();
                 if (inst === 'JUMPI') state.stack.push(Props['block.chainid']);
                 state.stack.push(new Val(2n));
-                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), Buffer.from([0xff, 0xff])))
+                expect(() => step[inst](state, new Opcode(8, 0xa, 'jump'), { bytecode: Buffer.from([0xff, 0xff]) }))
                     .to.throw(ExecError, `jump(0xa)@8 destination should be JUMPDEST@2 but '2' is out-of-bounds`);
             });
         });

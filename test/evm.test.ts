@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import type { Operand, Ram } from 'sevm';
+import type { Operand } from 'sevm';
 import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
 import type { Create, DataCopy, Expr, Inst, Log } from 'sevm/ast';
 import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val, type SStore, Shl } from 'sevm/ast';
@@ -352,12 +352,12 @@ describe('::evm', function () {
                     const bytecode = (state.stack.top as Create).bytecode!;
 
                     new EVM(bytecode, new class extends London {
-                        override CODECOPY = ({ stack, memory }: Ram<Expr>, _: unknown, bytecode: Uint8Array) => {
-                            const dest = stack.top?.eval();
-                            super.CODECOPY({ stack, memory }, _, bytecode);
+                        override CODECOPY = (state: State<Inst, Expr>, _opcode: Opcode, evm: { bytecode: Uint8Array }) => {
+                            const dest = state.stack.top?.eval();
+                            super.CODECOPY(state, _opcode, evm);
 
                             if (dest?.isVal()) {
-                                const m = memory[Number(dest.val)] as DataCopy;
+                                const m = state.memory[Number(dest.val)] as DataCopy;
                                 tokenBytecode = m.bytecode;
                             }
                         };

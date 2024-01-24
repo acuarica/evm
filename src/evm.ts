@@ -189,7 +189,7 @@ export class EVM<M extends string> {
 
             try {
                 if (!state.halted) {
-                    this.step[mnemonic](state, opcode, this.bytecode);
+                    this.step[mnemonic](state, opcode, this);
                     entry.stack = state.stack.clone();
                 }
             } catch (error) {

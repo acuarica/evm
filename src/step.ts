@@ -197,14 +197,18 @@ export class Undef<M extends string> extends Members {
 }
 
 /**
+ * The step transition function.
  * 
+ * The `EVM` executes a `StepFn` transition for each `opcode` found in the `evm.bytecode`.
+ * It should change the `state` accordingly to the `opcode` found.
  */
-export type StepFn = (state: State<Inst, Expr>, opcode: Opcode, bytecode: Uint8Array) => void;
+export type StepFn = (state: State<Inst, Expr>, opcode: Opcode, evm: { bytecode: Uint8Array }) => void;
 
 /**
- * 
+ * A collection of `StepFn` transition functions augmented with decoding information.
+ * It is indexed by the `mnemonic` of the `opcode` it should decode.
  */
-type Step = { readonly [m in string]: readonly [
+type Step = { readonly [mnemonic in string]: readonly [
     number | { opcode: number, size?: number, halts?: true },
     step: StepFn,
 ] };
@@ -326,7 +330,7 @@ const datacopy = (kind: DataCopy['kind']) => function datacopy({ stack, memory }
 
 const DATACOPY = {
     CALLDATACOPY: [0x37, state => datacopy('calldatacopy')(state)],
-    CODECOPY: [0x39, function codecopy({ stack, memory }, _opcode, bytecode) {
+    CODECOPY: [0x39, function codecopy({ stack, memory }, _opcode, { bytecode }) {
         const dest = stack.pop().eval();
         const offset = stack.pop();
         const size = stack.pop();
@@ -348,7 +352,7 @@ const DATACOPY = {
         datacopy('extcodecopy')(state, address);
     }],
     RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
-} satisfies { [m: string]: readonly [opcode: number, (state: Ram<Expr>, _opcode: unknown, bytecode: Uint8Array) => void] };
+} satisfies Step;
 
 function memArgs<T>(
     { stack, memory }: Ram<Expr>,
@@ -678,13 +682,13 @@ const FrontierStep = {
 
     /* Flow operations */
     JUMPDEST: [JUMPDEST, _state => { }],
-    JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, bytecode) {
+    JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const destpc = getJumpDest(offset, opcode, bytecode);
         const destBranch = Branch.make(destpc, state);
         state.halt(new ast.Jump(offset, destBranch));
     }],
-    JUMPI: [{ opcode: 0x57, halts: true }, function (this: Members, state, opcode, bytecode) {
+    JUMPI: [{ opcode: 0x57, halts: true }, function (this: Members, state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const cond = state.stack.pop();
         const destpc = getJumpDest(offset, opcode, bytecode);

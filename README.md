@@ -211,7 +211,7 @@ A contract might embed another contract it creates and deploys.
 Using hooks you can extract the embedded contract.
 
 ```ts examples/Advanced-Hooks.ts
-import { Contract, type Ram, Shanghai, type State } from 'sevm';
+import { Contract, type Opcode, Shanghai, type State } from 'sevm';
 import type { DataCopy, Create } from 'sevm/ast';
 import 'sevm/4bytedb';
 
@@ -235,12 +235,12 @@ const testContract = new Contract(bytecode, new class extends Shanghai {
         const bytecode = (state.stack.top as Create).bytecode!;
 
         constructorContract = new Contract(bytecode, new class extends Shanghai {
-            override CODECOPY = ({ stack, memory }: Ram, _: unknown, bytecode: Uint8Array) => {
-                const dest = stack.top?.eval();
-                super.CODECOPY({ stack, memory }, _, bytecode);
+            override CODECOPY = (state: State, _opcode: Opcode, evm: { bytecode: Uint8Array }) => {
+                const dest = state.stack.top?.eval();
+                super.CODECOPY(state, _opcode, evm);
 
                 if (dest?.isVal()) {
-                    const m = memory[Number(dest.val)] as DataCopy;
+                    const m = state.memory[Number(dest.val)] as DataCopy;
                     tokenContract = new Contract(m.bytecode!);
                 }
             };
