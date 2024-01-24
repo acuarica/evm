@@ -1,4 +1,11 @@
-import {} from 'sevm';
+import { } from 'sevm';
+
+/**
+ * 
+ */
+type Hashes = { [hash: string]: string[] };
+
+type Lookup = { function: Hashes, event: Hashes };
 
 declare module 'sevm' {
     interface Contract {
@@ -7,7 +14,11 @@ declare module 'sevm' {
          *
          * When a matching `function` or `event` is found,
          * it patches the `function` or `event` with the corresponding signature.
+         * 
+         * https://docs.openchain.xyz/#/default/get_signature_database_v1_lookup
+         * 
+         * @param lookup 
          */
-        patch(): Promise<this>;
+        patch(lookup: Partial<Lookup> = {}): Promise<this>;
     }
 }

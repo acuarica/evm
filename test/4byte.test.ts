@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 
 import { Contract } from 'sevm';
+import type { Lookup } from 'sevm/4byte';
 
 const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 const hint = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
@@ -26,7 +27,22 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
             ['4f1ef286', undefined]
         ]);
 
-        contract = await contract.patch();
+        const lookup = {} as Lookup;
+        contract = await contract.patch(lookup);
+
+        expect(lookup).to.be.deep.equal({
+            function: {
+                '0x3659cfe6': ['upgradeTo(address)'],
+                '0x4f1ef286': ['upgradeToAndCall(address,bytes)'],
+                '0x5c60da1b': ['implementation()'],
+                '0x8f283970': ['changeAdmin(address)'],
+                '0xf851a440': ['admin()']
+            },
+            event: {
+                '0x7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f': ['AdminChanged(address,address)'],
+                '0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b': ['Upgraded(address)']
+            }
+        });
 
         selectors = Object.entries(contract.functions).map(([s, f]) => [s, f.label]);
         expect(selectors).to.be.deep.equal([
