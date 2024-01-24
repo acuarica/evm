@@ -49,7 +49,7 @@ title: if-else-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0)
+    s_0[["pc @0 (s_0) #0
 =|0x0
 memory[0x40] = 0x80;
 when block.number != 0x7 goto 22 or fall 15
@@ -58,21 +58,21 @@ when block.number != 0x7 goto 22 or fall 15
     style s_0 fill:#471C21
   end
   subgraph cluster_15 ["pc @15"]
-    s_1("pc @15 (s_1)
+    s_1("pc @15 (s_1) #1
 =|0x3
 goto :[J]0x1b branch:27
 ")
     class s_1 state
   end
   subgraph cluster_27 ["pc @27"]
-    s_2("pc @27 (s_2)
+    s_2("pc @27 (s_2) #2
 =|
 undefined local0 = 0x3; // #refs 1
 var_1 = local0;
 return;
 ")
     class s_2 state
-    s_3("pc @27 (s_3)
+    s_3("pc @27 (s_3) #4
 =|
 undefined local0 = 0x5; // #refs 1
 var_1 = local0;
@@ -81,7 +81,7 @@ return;
     class s_3 state
   end
   subgraph cluster_22 ["pc @22"]
-    s_4("pc @22 (s_4)
+    s_4("pc @22 (s_4) #3
 =|0x5
 fall: 27:
 ")
@@ -143,7 +143,7 @@ title: if-else-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0)
+    s_0[["pc @0 (s_0) #0
 =|0x0
 memory[0x40] = 0x80;
 when 0x7 != block.number goto 21 or fall 15
@@ -152,20 +152,20 @@ when 0x7 != block.number goto 21 or fall 15
     style s_0 fill:#471C21
   end
   subgraph cluster_15 ["pc @15"]
-    s_1("pc @15 (s_1)
+    s_1("pc @15 (s_1) #1
 =|0x3
 goto :[J]0x19 branch:25
 ")
     class s_1 state
   end
   subgraph cluster_25 ["pc @25"]
-    s_2("pc @25 (s_2)
+    s_2("pc @25 (s_2) #2
 =|
 var_1 = 0x3;
 return;
 ")
     class s_2 state
-    s_3("pc @25 (s_3)
+    s_3("pc @25 (s_3) #4
 =|
 var_1 = 0x5;
 return;
@@ -173,7 +173,7 @@ return;
     class s_3 state
   end
   subgraph cluster_21 ["pc @21"]
-    s_4("pc @21 (s_4)
+    s_4("pc @21 (s_4) #3
 =|0x5
 fall: 25:
 ")

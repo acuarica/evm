@@ -48,7 +48,7 @@ contracts('empty', (compile, fallback, version) => {
         expect(contract.bytecode[block.pcend - 1]).to.be.equal(new Shanghai().opcodes().REVERT);
 
         expect(block.states).to.be.of.length(1);
-        const state = block.states[0]!;
+        const [, state] = block.states[0]!;
         expect(state.last?.eval())
             .to.be.deep.equal(new Revert(new Val(0n, true), new Val(0n, true), []));
 

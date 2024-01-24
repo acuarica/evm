@@ -156,7 +156,7 @@ title: infinite for-loop-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0)
+    s_0[["pc @0 (s_0) #0
 =|0x0
 memory[0x40] = 0x80;
 fall: 7:
@@ -165,65 +165,65 @@ fall: 7:
     style s_0 fill:#471C21
   end
   subgraph cluster_7 ["pc @7"]
-    s_1("pc @7 (s_1)
+    s_1("pc @7 (s_1) #1
 =|local0
 undefined local0 = 0x0; // #refs 21
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_1 state
-    s_2("pc @7 (s_2)
+    s_2("pc @7 (s_2) #3
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_2 state
-    s_3("pc @7 (s_3)
+    s_3("pc @7 (s_3) #5
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_3 state
-    s_4("pc @7 (s_4)
+    s_4("pc @7 (s_4) #7
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_4 state
-    s_5("pc @7 (s_5)
+    s_5("pc @7 (s_5) #9
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_5 state
-    s_6("pc @7 (s_6)
+    s_6("pc @7 (s_6) #11
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_6 state
-    s_7("pc @7 (s_7)
+    s_7("pc @7 (s_7) #13
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_7 state
-    s_8("pc @7 (s_8)
+    s_8("pc @7 (s_8) #15
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_8 state
-    s_9("pc @7 (s_9)
+    s_9("pc @7 (s_9) #17
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_9 state
-    s_10("pc @7 (s_10)
+    s_10("pc @7 (s_10) #19
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_10 state
-    s_11("pc @7 (s_11)
+    s_11("pc @7 (s_11) #21
 =|local0
 when (local0 < block.number) == 0 goto 73 or fall 15
 ")
     class s_11 state
   end
   subgraph cluster_15 ["pc @15"]
-    s_12("pc @15 (s_12)
+    s_12("pc @15 (s_12) #2
 =|local0
 undefined local1 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -232,7 +232,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_12 state
-    s_13("pc @15 (s_13)
+    s_13("pc @15 (s_13) #4
 =|local0
 undefined local3 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -241,7 +241,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_13 state
-    s_14("pc @15 (s_14)
+    s_14("pc @15 (s_14) #6
 =|local0
 undefined local5 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -250,7 +250,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_14 state
-    s_15("pc @15 (s_15)
+    s_15("pc @15 (s_15) #8
 =|local0
 undefined local7 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -259,7 +259,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_15 state
-    s_16("pc @15 (s_16)
+    s_16("pc @15 (s_16) #10
 =|local0
 undefined local9 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -268,7 +268,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_16 state
-    s_17("pc @15 (s_17)
+    s_17("pc @15 (s_17) #12
 =|local0
 undefined local11 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -277,7 +277,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_17 state
-    s_18("pc @15 (s_18)
+    s_18("pc @15 (s_18) #14
 =|local0
 undefined local13 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -286,7 +286,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_18 state
-    s_19("pc @15 (s_19)
+    s_19("pc @15 (s_19) #16
 =|local0
 undefined local15 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -295,7 +295,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_19 state
-    s_20("pc @15 (s_20)
+    s_20("pc @15 (s_20) #18
 =|local0
 undefined local17 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -304,7 +304,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_20 state
-    s_21("pc @15 (s_21)
+    s_21("pc @15 (s_21) #20
 =|local0
 undefined local19 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -313,7 +313,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_21 state
-    s_22("pc @15 (s_22)
+    s_22("pc @15 (s_22) #22
 =|local0
 undefined local21 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -324,57 +324,57 @@ goto :[J]0x7 branch:7
     class s_22 state
   end
   subgraph cluster_73 ["pc @73"]
-    s_23("pc @73 (s_23)
+    s_23("pc @73 (s_23) #23
 =|
 return;
 ")
     class s_23 state
-    s_24("pc @73 (s_24)
+    s_24("pc @73 (s_24) #24
 =|
 return;
 ")
     class s_24 state
-    s_25("pc @73 (s_25)
+    s_25("pc @73 (s_25) #25
 =|
 return;
 ")
     class s_25 state
-    s_26("pc @73 (s_26)
+    s_26("pc @73 (s_26) #26
 =|
 return;
 ")
     class s_26 state
-    s_27("pc @73 (s_27)
+    s_27("pc @73 (s_27) #27
 =|
 return;
 ")
     class s_27 state
-    s_28("pc @73 (s_28)
+    s_28("pc @73 (s_28) #28
 =|
 return;
 ")
     class s_28 state
-    s_29("pc @73 (s_29)
+    s_29("pc @73 (s_29) #29
 =|
 return;
 ")
     class s_29 state
-    s_30("pc @73 (s_30)
+    s_30("pc @73 (s_30) #30
 =|
 return;
 ")
     class s_30 state
-    s_31("pc @73 (s_31)
+    s_31("pc @73 (s_31) #31
 =|
 return;
 ")
     class s_31 state
-    s_32("pc @73 (s_32)
+    s_32("pc @73 (s_32) #32
 =|
 return;
 ")
     class s_32 state
-    s_33("pc @73 (s_33)
+    s_33("pc @73 (s_33) #33
 =|
 return;
 ")
@@ -588,7 +588,7 @@ title: infinite for-loop-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0)
+    s_0[["pc @0 (s_0) #0
 =|0x0
 memory[0x40] = 0x80;
 fall: 7:
@@ -597,65 +597,65 @@ fall: 7:
     style s_0 fill:#471C21
   end
   subgraph cluster_7 ["pc @7"]
-    s_1("pc @7 (s_1)
+    s_1("pc @7 (s_1) #1
 =|local0
 undefined local0 = 0x0; // #refs 10
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_1 state
-    s_2("pc @7 (s_2)
+    s_2("pc @7 (s_2) #3
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_2 state
-    s_3("pc @7 (s_3)
+    s_3("pc @7 (s_3) #5
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_3 state
-    s_4("pc @7 (s_4)
+    s_4("pc @7 (s_4) #7
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_4 state
-    s_5("pc @7 (s_5)
+    s_5("pc @7 (s_5) #9
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_5 state
-    s_6("pc @7 (s_6)
+    s_6("pc @7 (s_6) #11
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_6 state
-    s_7("pc @7 (s_7)
+    s_7("pc @7 (s_7) #13
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_7 state
-    s_8("pc @7 (s_8)
+    s_8("pc @7 (s_8) #15
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_8 state
-    s_9("pc @7 (s_9)
+    s_9("pc @7 (s_9) #17
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_9 state
-    s_10("pc @7 (s_10)
+    s_10("pc @7 (s_10) #19
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_10 state
-    s_11("pc @7 (s_11)
+    s_11("pc @7 (s_11) #21
 =|local0
 when (local0 < block.number) == 0 goto 69 or fall 15
 ")
     class s_11 state
   end
   subgraph cluster_15 ["pc @15"]
-    s_12("pc @15 (s_12)
+    s_12("pc @15 (s_12) #2
 =|local0
 undefined local1 = 0x40; // #refs 0
 undefined local2 = memory[0x40]; // #refs -1
@@ -665,7 +665,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_12 state
-    s_13("pc @15 (s_13)
+    s_13("pc @15 (s_13) #4
 =|local0
 undefined local4 = 0x40; // #refs 0
 undefined local5 = memory[0x40]; // #refs -1
@@ -675,7 +675,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_13 state
-    s_14("pc @15 (s_14)
+    s_14("pc @15 (s_14) #6
 =|local0
 undefined local7 = 0x40; // #refs 0
 undefined local8 = memory[0x40]; // #refs -1
@@ -685,7 +685,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_14 state
-    s_15("pc @15 (s_15)
+    s_15("pc @15 (s_15) #8
 =|local0
 undefined local10 = 0x40; // #refs 0
 undefined local11 = memory[0x40]; // #refs -1
@@ -695,7 +695,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_15 state
-    s_16("pc @15 (s_16)
+    s_16("pc @15 (s_16) #10
 =|local0
 undefined local13 = 0x40; // #refs 0
 undefined local14 = memory[0x40]; // #refs -1
@@ -705,7 +705,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_16 state
-    s_17("pc @15 (s_17)
+    s_17("pc @15 (s_17) #12
 =|local0
 undefined local16 = 0x40; // #refs 0
 undefined local17 = memory[0x40]; // #refs -1
@@ -715,7 +715,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_17 state
-    s_18("pc @15 (s_18)
+    s_18("pc @15 (s_18) #14
 =|local0
 undefined local19 = 0x40; // #refs 0
 undefined local20 = memory[0x40]; // #refs -1
@@ -725,7 +725,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_18 state
-    s_19("pc @15 (s_19)
+    s_19("pc @15 (s_19) #16
 =|local0
 undefined local22 = 0x40; // #refs 0
 undefined local23 = memory[0x40]; // #refs -1
@@ -735,7 +735,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_19 state
-    s_20("pc @15 (s_20)
+    s_20("pc @15 (s_20) #18
 =|local0
 undefined local25 = 0x40; // #refs 0
 undefined local26 = memory[0x40]; // #refs -1
@@ -745,7 +745,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_20 state
-    s_21("pc @15 (s_21)
+    s_21("pc @15 (s_21) #20
 =|local0
 undefined local28 = 0x40; // #refs 0
 undefined local29 = memory[0x40]; // #refs -1
@@ -755,7 +755,7 @@ emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
     class s_21 state
-    s_22("pc @15 (s_22)
+    s_22("pc @15 (s_22) #22
 =|local0
 undefined local31 = 0x40; // #refs 0
 undefined local32 = memory[0x40]; // #refs -1
@@ -767,57 +767,57 @@ goto :[J]0x7 branch:7
     class s_22 state
   end
   subgraph cluster_69 ["pc @69"]
-    s_23("pc @69 (s_23)
+    s_23("pc @69 (s_23) #23
 =|
 return;
 ")
     class s_23 state
-    s_24("pc @69 (s_24)
+    s_24("pc @69 (s_24) #24
 =|
 return;
 ")
     class s_24 state
-    s_25("pc @69 (s_25)
+    s_25("pc @69 (s_25) #25
 =|
 return;
 ")
     class s_25 state
-    s_26("pc @69 (s_26)
+    s_26("pc @69 (s_26) #26
 =|
 return;
 ")
     class s_26 state
-    s_27("pc @69 (s_27)
+    s_27("pc @69 (s_27) #27
 =|
 return;
 ")
     class s_27 state
-    s_28("pc @69 (s_28)
+    s_28("pc @69 (s_28) #28
 =|
 return;
 ")
     class s_28 state
-    s_29("pc @69 (s_29)
+    s_29("pc @69 (s_29) #29
 =|
 return;
 ")
     class s_29 state
-    s_30("pc @69 (s_30)
+    s_30("pc @69 (s_30) #30
 =|
 return;
 ")
     class s_30 state
-    s_31("pc @69 (s_31)
+    s_31("pc @69 (s_31) #31
 =|
 return;
 ")
     class s_31 state
-    s_32("pc @69 (s_32)
+    s_32("pc @69 (s_32) #32
 =|
 return;
 ")
     class s_32 state
-    s_33("pc @69 (s_33)
+    s_33("pc @69 (s_33) #33
 =|
 return;
 ")

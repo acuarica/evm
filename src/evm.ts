@@ -16,10 +16,17 @@ export interface Block<M extends string> {
      * The `Opcode`s decoded from `bytecode` augmented with its `Stack` trace.
      */
     readonly opcodes: {
+        /**
+         * The `Opcode` decoded and executed from `bytecode`.
+         */
         readonly opcode: Opcode<M>,
+
+        /**
+         * The `Stack` trace **after** executing this `opcode`.
+         */
         stack?: Stack<Expr>
     }[];
-    readonly states: State<Inst, Expr>[];
+    readonly states: [index: number, state: State<Inst, Expr>][];
 }
 
 /**
@@ -51,6 +58,8 @@ export class EVM<M extends string> {
      * The bytecode buffer that represents a Contract or Library.
      */
     readonly bytecode: Uint8Array;
+
+    readonly _ordered = new Ordered<State<Inst, Expr>>();
 
     constructor(
         bytecode: Parameters<typeof arrayify>[0],
@@ -97,7 +106,7 @@ export class EVM<M extends string> {
          */
         content: Opcode<M>[] | Uint8Array,
 
-        states?: State<Inst, Expr>[]
+        states?: [index: number, state: State<Inst, Expr>][]
     }[] {
         let lastPc = 0;
 
@@ -166,6 +175,8 @@ export class EVM<M extends string> {
     }
 
     exec(pc0: number, state: State<Inst, Expr>): void {
+        const indexOf = this._ordered.push(state);
+
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
         const opcodes = [];
@@ -207,9 +218,9 @@ export class EVM<M extends string> {
 
         const block = this.blocks.get(pc0);
         if (block === undefined) {
-            this.blocks.set(pc0, { pcend: opcode.nextpc, opcodes, states: [state] });
+            this.blocks.set(pc0, { pcend: opcode.nextpc, opcodes, states: [[indexOf, state]] });
         } else {
-            block.states.push(state);
+            block.states.push([indexOf, state]);
         }
     }
 
@@ -231,7 +242,7 @@ export class EVM<M extends string> {
         const chunk = this.blocks.get(b.pc);
 
         if (chunk !== undefined) {
-            for (const s of chunk.states) {
+            for (const [, s] of chunk.states) {
                 if (cmp(b.state, s)) {
                     return s;
                 }
@@ -258,4 +269,18 @@ function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
         }
     }
     return true;
+}
+
+class Ordered<T> {
+
+    readonly _enum: T[] = [];
+    readonly _set = new Set<T>();
+
+    push(elem: T) {
+        if (!this._set.has(elem)) {
+            this._set.add(elem);
+            this._enum.push(elem);
+        }
+        return this._enum.indexOf(elem);
+    }
 }

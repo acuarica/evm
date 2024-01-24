@@ -167,7 +167,7 @@ function cfg(evm: Contract, title: string) {
     const ids = new WeakMap<State<Inst, Expr>, string>();
     let id = 0;
     for (const block of evm.blocks.values()) {
-        for (const state of block.states) {
+        for (const [, state] of block.states) {
             assert(!ids.has(state));
 
             if (!ids.has(state)) {
@@ -190,8 +190,8 @@ function cfg(evm: Contract, title: string) {
     for (const [pc, block] of evm.blocks) {
         write(`  subgraph cluster_${pc} ["pc @${pc}"]`);
 
-        for (const state of block.states) {
-            writeNode(pc, state, pc === 0 || fnEntries[pc] === true);
+        for (const [indexOf, state] of block.states) {
+            writeNode(pc, indexOf, state, pc === 0 || fnEntries[pc] === true);
             switch (state.last?.name) {
                 case 'Jumpi':
                     writeEdge(state, state.last.destBranch, '- jumpi -');
@@ -214,9 +214,9 @@ function cfg(evm: Contract, title: string) {
     output += edges;
     return output;
 
-    function writeNode(pc: number, state: State<Inst, Expr>, entry: boolean) {
+    function writeNode(pc: number, indexOf: number, state: State<Inst, Expr>, entry: boolean) {
         const id = ids.get(state);
-        let label = `pc @${pc} (${id})`;
+        let label = `pc @${pc} (${id}) #${indexOf}`;
         label += '\n';
         label += '=|' + state.stack.values.map(elem => yul`${elem}`).join('|');
         label += '\n';
