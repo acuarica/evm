@@ -190,6 +190,35 @@ describe('::contracts', function () {
                 function setWithNoModifier(uint256 value) external { _value = value + 1; }
                 function setWithModifier(uint256 value) external onlyOwner { _value = value + 3; }
             }`),
+
+            _('modifier-no-inline', `contract Test {
+                event Deposit(uint256);
+                modifier onlyOwner(uint256 m) {
+                    // require(block.timestamp == 5);
+                    // uint256 n = block.number;
+                    // for (uint256 i = 0; i < block.number; i++) {
+                        // m += block.number * i;
+                    // }
+                    // n += gasleft();
+                    require(m == 9);
+                    _;
+                 }
+
+                function _get(uint256 n) internal view returns (uint256) {
+                    for (uint256 i = 0; i < 1; i++) {
+                        n += block.number;
+                    }
+                    return n;
+                }
+
+                function name(uint256 n) external onlyOwner(n) {
+                    emit Deposit(_get(n));
+                }
+
+                function symbol(uint256 m) external view onlyOwner(m) returns (uint256) {
+                    return _get(m);
+                }
+            }`),
         ],
         system: [
             _('selfdestruct', `contract Test {

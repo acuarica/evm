@@ -45,43 +45,6 @@ describe('::evm', function () {
         expect(gasPrice).to.be.equal(Props['tx.gasprice']);
     });
 
-    it('should create ', function () {
-        const src = `contract Test {
-            event Deposit(uint256);
-                modifier onlyOwner(uint256 m) {
-                    // require(block.timestamp == 5);
-                    // uint256 n = block.number;
-                    for (uint256 i = 0; i < block.number; i++) {
-                        m += block.number * i;
-                    }
-                    // n += gasleft();
-                    require(m == 9);
-                    _;
-                 }
-
-                function _get(uint256 n) internal view returns (uint256) {
-                    for (uint256 i = 0; i < block.number; i++) {
-                        n += block.number;
-                    }
-                    return n;
-                }
-
-                function name(uint256 n) external onlyOwner(n) {
-                    emit Deposit(_get(n));
-                }
-
-                function symbol(uint256 m) external view onlyOwner(m) returns (uint256) {
-                    return _get(m);
-                }
-            }`;
-
-        const evm = EVM.new(compile(src, '0.7.6', this, {
-            optimizer: { enabled: true }
-        }).bytecode);
-        evm.start();
-        // expect(evm.functionBranches).to.have.keys(fnselector('name()'), fnselector('symbol()'));
-    });
-
     it.skip('should detect unbounded loop', function () {
         const src = `contract Test {
             // event Deposit(uint256);
