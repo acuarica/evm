@@ -80,9 +80,18 @@ jobs:
       - run: yarn coverage
         env:
           ENABLE_4BYTE_TEST: 1
-      - run: yarn c8 report >> $GITHUB_STEP_SUMMARY
+      - run: yarn --silent c8 report > ./coverage/coverage.txt
         env:
           FORCE_COLOR: 0
+      - uses: fingerprintjs/action-coverage-report-md@v1
+        id: coverage
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: ${{ steps.coverage.outputs.markdownReport }}
+      - name: Add coverage report to the job summary
+        run: |
+          echo "## Code Coverage `c8`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.coverage.outputs.markdownReport }}" >> $GITHUB_STEP_SUMMARY
 
   examples:
     runs-on: ubuntu-latest
