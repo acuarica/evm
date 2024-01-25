@@ -24,7 +24,7 @@ jobs:
     if: inputs.confirm == 'yes'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Enable `git push --tags` to trigger other workflows
           # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
