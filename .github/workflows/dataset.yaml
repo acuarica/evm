@@ -21,3 +21,11 @@ jobs:
       - run: yarn test --grep ::dataset
         env:
           ENABLE_DATASET_TEST: 1
+          MAX: 50
+      - name: Include dataset summary
+        run: |
+          echo "## Contract Dataset Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
+          cat dist/dataset-summary.txt >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

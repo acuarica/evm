@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { hrtime } from 'process';
 
 import c from 'ansi-colors';
@@ -204,47 +204,58 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
     });
 
     after(function () {
-        console.info(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
-        for (const [id, errors] of errorsByContract.entries()) {
-            console.info(warn(`    • ${id} - ${errors.length} error(s)`));
-            const errorsByReason: Map<string, number> = new Map();
-            errors.forEach(({ err }) => {
-                const count = errorsByReason.get(err.reason) ?? 0;
-                errorsByReason.set(err.reason, count + 1);
-            });
-            for (const [reason, count] of errorsByReason) {
-                console.info(
-                    '        ' + error('x'),
-                    reason,
-                    count === 1 ? '' : warn(`(x${count})`)
-                );
+        function getSummary(enableColors: boolean) {
+            const enabled = c.enabled;
+
+            c.enabled = enableColors;
+
+            let summary = '';
+            const write = (text: string) => summary += text + '\n';
+
+            write(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
+            for (const [id, errors] of errorsByContract.entries()) {
+                write(warn(`    • ${id} - ${errors.length} error(s)`));
+                const errorsByReason: Map<string, number> = new Map();
+                errors.forEach(({ err }) => {
+                    const count = errorsByReason.get(err.reason) ?? 0;
+                    errorsByReason.set(err.reason, count + 1);
+                });
+                for (const [reason, count] of errorsByReason) {
+                    write(`        ${error('x')} ${reason} ${count === 1 ? '' : warn(`(x${count})`)}`);
+                }
             }
+
+            const cc = ([k, v]: [string, number]) => `${k}(${v})`;
+            write('\n  Metadata Stats');
+            write(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
+            write(`    • ${info('Protocols')} ${[...metadataStats.protocols.entries()].map(cc).join('|')}`);
+            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs.entries()].map(cc).join('|')}`);
+
+            write('\n  Selector Stats');
+            write(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
+            write(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
+
+            write('\n  ERCs Stats');
+            for (const [erc, count] of ercsStats.counts) {
+                write(`    • ${info(erc)} ${count}`);
+            }
+
+            write('\n  Bench Stats');
+            write(`    • ${info('Total')} ${warn(`${benchStats.total / 1_000_000n} ms`)}`);
+            write(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
+
+            write('\n  Precompiled Contract Stats');
+            for (const [address, count] of hookStats.staticcalls) {
+                write(`    • ${info(address)} ${count}`);
+            }
+            write('\n  PC Stats');
+            write(`    • ${info('PCs')} ${hookStats.pcs}`);
+
+            c.enabled = enabled;
+            return summary;
         }
 
-        const cc = ([k, v]: [string, number]) => `${k}(${v})`;
-        console.info('\n  Metadata Stats');
-        console.info(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-        console.info(`    • ${info('Protocols')} ${[...metadataStats.protocols.entries()].map(cc).join('|')}`);
-        console.info(`    • ${info('SOLC versions')} ${[...metadataStats.solcs.entries()].map(cc).join('|')}`);
-
-        console.info('\n  Selector Stats');
-        console.info(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
-        console.info(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
-
-        console.info('\n  ERCs Stats');
-        for (const [erc, count] of ercsStats.counts) {
-            console.info(`    • ${info(erc)} ${count}`);
-        }
-
-        console.info('\n  Bench Stats');
-        console.info(`    • ${info('Total')} ${warn(`${benchStats.total / 1_000_000n} ms`)}`);
-        console.info(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
-
-        console.info('\n  Precompiled Contract Stats');
-        for (const [address, count] of hookStats.staticcalls) {
-            console.info(`    • ${info(address)} ${count}`);
-        }
-        console.info('\n  PC Stats');
-        console.info(`    • ${info('PCs')} ${hookStats.pcs}`);
+        console.info(getSummary(true));
+        writeFileSync(`dist/dataset-summary.txt`, getSummary(false).trimStart(), 'utf-8');
     });
 });
