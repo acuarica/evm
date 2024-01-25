@@ -769,6 +769,9 @@ event ${eventSelector(unknownEventSig)};
         });
 
         it('should not find `selfdestruct` in `opcodes` reachable from metadata', function () {
+            // Increase timeout to make it pass on Windows/Node 16
+            this.timeout(5000);
+
             const SELFDESTRUCT = new Shanghai().opcodes().SELFDESTRUCT;
             const includesFF = (hash: string) => Buffer.from(hash, 'hex').includes(SELFDESTRUCT);
 
