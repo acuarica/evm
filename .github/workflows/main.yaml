@@ -81,6 +81,8 @@ jobs:
         env:
           ENABLE_4BYTE_TEST: 1
       - run: yarn c8 report >> $GITHUB_STEP_SUMMARY
+        env:
+          FORCE_COLOR: 0
 
   examples:
     runs-on: ubuntu-latest
