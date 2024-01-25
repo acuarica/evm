@@ -212,7 +212,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
             let summary = '';
             const write = (text: string) => summary += text + '\n';
 
-            write(`\n  Errors (${warn(`${errorsByContract.size}`)} contracts)`);
+            write(`\n  Symbolic Execution Errors (${warn(`${errorsByContract.size}`)} contracts)`);
             for (const [id, errors] of errorsByContract.entries()) {
                 write(warn(`    • ${id} - ${errors.length} error(s)`));
                 const errorsByReason: Map<string, number> = new Map();
