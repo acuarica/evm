@@ -338,6 +338,12 @@ This allows the user to create a bundle without the lookup database provided the
 
 ## Contributing
 
+### `.dataset`
+
+This folder contains a dataset of contract bytecodes deployed in a public network.
+It is used in [`test/dataset.test.ts`](./test/dataset.test.ts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
+This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
+
 ### `examples`
 
 The [`examples`](./examples/) folder contains code examples that showcase `sevm` features.
