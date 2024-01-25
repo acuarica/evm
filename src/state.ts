@@ -101,6 +101,14 @@ export class State<S = Inst, E = Expr> {
     readonly stmts: S[] = [];
 
     /**
+     * The unique identifier of this `State` when it has been executed by the `EVM`.
+     * The `id` is `undefined` when this `State` has not been executed yet.
+     * 
+     * The `id`s are assigned incrementally by the `EVM` in the order they are executed.
+     */
+    id: number | undefined;
+
+    /**
      *
      * @param stack
      * @param memory

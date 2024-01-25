@@ -112,7 +112,7 @@ title: symbols-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|local0
 memory[0x40] = 0x80;
 undefined local0 = msg.value; // #refs 0
@@ -122,7 +122,7 @@ when msg.value == 0 goto 16 or fall 12
     style s_0 fill:#471C21
   end
   subgraph cluster_12 ["pc @12"]
-    s_1("pc @12 (s_1) #1
+    s_1("pc @12 (#s_1)
 =|local0
 undefined local1 = 0x0; // #refs 0
 revert();
@@ -130,14 +130,14 @@ revert();
     class s_1 state
   end
   subgraph cluster_16 ["pc @16"]
-    s_2("pc @16 (s_2) #2
+    s_2("pc @16 (#s_2)
 =|
 when msg.data.length < 0x4 goto 65 or fall 26
 ")
     class s_2 state
   end
   subgraph cluster_26 ["pc @26"]
-    s_3("pc @26 (s_3) #3
+    s_3("pc @26 (#s_3)
 =|local1
 undefined local1 = msg.data >>> 0xe0; // #refs 2
 case when msg.sig == 9663f88f goto [J]0x46 or fall 43
@@ -145,27 +145,27 @@ case when msg.sig == 9663f88f goto [J]0x46 or fall 43
     class s_3 state
   end
   subgraph cluster_43 ["pc @43"]
-    s_4("pc @43 (s_4) #4
+    s_4("pc @43 (#s_4)
 =|local1
 case when msg.sig == b8368615 goto [J]0x64 or fall 54
 ")
     class s_4 state
   end
   subgraph cluster_54 ["pc @54"]
-    s_5("pc @54 (s_5) #5
+    s_5("pc @54 (#s_5)
 =|local1
 case when msg.sig == f8b2cb4f goto [J]0x98 or fall 65
 ")
     class s_5 state
   end
   subgraph cluster_65 ["pc @65"]
-    s_6("pc @65 (s_6) #6
+    s_6("pc @65 (#s_6)
 =|local1
 undefined local2 = 0x0; // #refs 0
 revert();
 ")
     class s_6 state
-    s_7("pc @65 (s_7) #7
+    s_7("pc @65 (#s_7)
 =|
 undefined local1 = 0x0; // #refs 0
 revert();
@@ -173,7 +173,7 @@ revert();
     class s_7 state
   end
   subgraph cluster_70 ["pc @70"]
-    s_8[["pc @70 (s_8) #8
+    s_8[["pc @70 (#s_8)
 =|[J]0x4e|local1
 goto :[J]0xf0 branch:240
 "]]
@@ -181,14 +181,14 @@ goto :[J]0xf0 branch:240
     style s_8 fill:#5F021F
   end
   subgraph cluster_240 ["pc @240"]
-    s_9("pc @240 (s_9) #9
+    s_9("pc @240 (#s_9)
 =|blockhash(0x7)|local1
 goto :[J]0x4e branch:78
 ")
     class s_9 state
   end
   subgraph cluster_78 ["pc @78"]
-    s_10("pc @78 (s_10) #10
+    s_10("pc @78 (#s_10)
 =|local1
 undefined local2 = memory[0x40]; // #refs 0
 bytes32 local3 = blockhash(0x7); // #refs -1
@@ -199,7 +199,7 @@ return blockhash(0x7);
     class s_10 state
   end
   subgraph cluster_100 ["pc @100"]
-    s_11[["pc @100 (s_11) #11
+    s_11[["pc @100 (#s_11)
 =|[J]0x6c|local1
 goto :[J]0xfa branch:250
 "]]
@@ -207,14 +207,14 @@ goto :[J]0xfa branch:250
     style s_11 fill:#5F021F
   end
   subgraph cluster_250 ["pc @250"]
-    s_12("pc @250 (s_12) #12
+    s_12("pc @250 (#s_12)
 =|address(this)()|local1
 goto :[J]0x6c branch:108
 ")
     class s_12 state
   end
   subgraph cluster_108 ["pc @108"]
-    s_13("pc @108 (s_13) #13
+    s_13("pc @108 (#s_13)
 =|local1
 undefined local2 = memory[0x40]; // #refs 0
 address local3 = address(this); // #refs 0
@@ -225,7 +225,7 @@ return address(this);
     class s_13 state
   end
   subgraph cluster_152 ["pc @152"]
-    s_14[["pc @152 (s_14) #14
+    s_14[["pc @152 (#s_14)
 =|local3|local2|[J]0xda|local1
 undefined local2 = 0x4; // #refs 3
 undefined local3 = msg.data.length - local2; // #refs 0
@@ -235,7 +235,7 @@ when (msg.data.length - local2 < 0x20) == 0 goto 174 or fall 170
     style s_14 fill:#5F021F
   end
   subgraph cluster_170 ["pc @170"]
-    s_15("pc @170 (s_15) #15
+    s_15("pc @170 (#s_15)
 =|local3|local2|[J]0xda|local1
 undefined local4 = 0x0; // #refs 0
 revert();
@@ -243,14 +243,14 @@ revert();
     class s_15 state
   end
   subgraph cluster_174 ["pc @174"]
-    s_16("pc @174 (s_16) #16
+    s_16("pc @174 (#s_16)
 =|and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2))|[J]0xda|local1
 goto :[J]0x102 branch:258
 ")
     class s_16 state
   end
   subgraph cluster_258 ["pc @258"]
-    s_17("pc @258 (s_17) #17
+    s_17("pc @258 (#s_17)
 =|and(0xffffffffffffffffffffffffffffffffffffffff, local4).balance|local1
 undefined local4 = 0xffffffffffffffffffffffffffffffffffffffff & msg.data[local2]; // #refs 0
 goto :[J]0xda branch:218
@@ -258,7 +258,7 @@ goto :[J]0xda branch:218
     class s_17 state
   end
   subgraph cluster_218 ["pc @218"]
-    s_18("pc @218 (s_18) #18
+    s_18("pc @218 (#s_18)
 =|local1
 undefined local5 = memory[0x40]; // #refs 0
 uint256 local6 = 0xffffffffffffffffffffffffffffffffffffffff & 0xffffffffffffffffffffffffffffffffffffffff & msg.data[local2].balance; // #refs -1
@@ -268,21 +268,24 @@ return _arg0.balance;
 ")
     class s_18 state
   end
-  s_0 -- jumpi --> s_2;
-  s_0 -. fall .-> s_1;
-  s_2 -- jumpi --> s_7;
-  s_2 -. fall .-> s_3;
-  s_3 -. fall .-> s_4;
-  s_4 -. fall .-> s_5;
-  s_5 -. fall .-> s_6;
-  s_8 -- jump --> s_9;
-  s_9 -- jump --> s_10;
-  s_11 -- jump --> s_12;
-  s_12 -- jump --> s_13;
-  s_14 -- jumpi --> s_16;
-  s_14 -. fall .-> s_15;
-  s_16 -- jump --> s_17;
-  s_17 -- jump --> s_18;
+  s_0 == jumpi0_0 ==> s_2;
+  s_0 -- fall --> s_1;
+  s_2 == jumpi2_2 ==> s_7;
+  s_2 -- fall --> s_3;
+  s_3 -- fall --> s_4;
+  s_4 -- fall --> s_5;
+  s_5 -- fall --> s_6;
+  s_8 == jump8_8 ==> s_9;
+  s_9 == jump8_9 ==> s_10;
+  s_8 -...- s_9;
+  s_11 == jump11_11 ==> s_12;
+  s_12 == jump11_12 ==> s_13;
+  s_11 -...- s_12;
+  s_14 == jumpi14_14 ==> s_16;
+  s_14 -- fall --> s_15;
+  s_16 == jump16_16 ==> s_17;
+  s_17 == jump14_17 ==> s_18;
+  s_14 -...- s_17;
 
 ```
 
@@ -400,7 +403,7 @@ title: symbols-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|local0
 memory[0x40] = 0x80;
 undefined local0 = msg.value; // #refs 0
@@ -410,7 +413,7 @@ when msg.value == 0 goto 15 or fall 11
     style s_0 fill:#471C21
   end
   subgraph cluster_11 ["pc @11"]
-    s_1("pc @11 (s_1) #1
+    s_1("pc @11 (#s_1)
 =|local0
 undefined local1 = 0x0; // #refs 0
 revert();
@@ -418,14 +421,14 @@ revert();
     class s_1 state
   end
   subgraph cluster_15 ["pc @15"]
-    s_2("pc @15 (s_2) #2
+    s_2("pc @15 (#s_2)
 =|
 when msg.data.length < 0x4 goto 60 or fall 24
 ")
     class s_2 state
   end
   subgraph cluster_24 ["pc @24"]
-    s_3("pc @24 (s_3) #3
+    s_3("pc @24 (#s_3)
 =|local1
 undefined local1 = msg.data >>> 0xe0; // #refs 2
 case when msg.sig == 9663f88f goto [J]0x41 or fall 40
@@ -433,27 +436,27 @@ case when msg.sig == 9663f88f goto [J]0x41 or fall 40
     class s_3 state
   end
   subgraph cluster_40 ["pc @40"]
-    s_4("pc @40 (s_4) #4
+    s_4("pc @40 (#s_4)
 =|local1
 case when msg.sig == b8368615 goto [J]0x59 or fall 50
 ")
     class s_4 state
   end
   subgraph cluster_50 ["pc @50"]
-    s_5("pc @50 (s_5) #5
+    s_5("pc @50 (#s_5)
 =|local1
 case when msg.sig == f8b2cb4f goto [J]0x7b or fall 60
 ")
     class s_5 state
   end
   subgraph cluster_60 ["pc @60"]
-    s_6("pc @60 (s_6) #6
+    s_6("pc @60 (#s_6)
 =|local1
 undefined local2 = 0x0; // #refs 0
 revert();
 ")
     class s_6 state
-    s_7("pc @60 (s_7) #7
+    s_7("pc @60 (#s_7)
 =|
 undefined local1 = 0x0; // #refs 0
 revert();
@@ -461,7 +464,7 @@ revert();
     class s_7 state
   end
   subgraph cluster_65 ["pc @65"]
-    s_8[["pc @65 (s_8) #8
+    s_8[["pc @65 (#s_8)
 =|[J]0x47|local1
 goto :[J]0x9e branch:158
 "]]
@@ -469,14 +472,14 @@ goto :[J]0x9e branch:158
     style s_8 fill:#5F021F
   end
   subgraph cluster_158 ["pc @158"]
-    s_9("pc @158 (s_9) #9
+    s_9("pc @158 (#s_9)
 =|blockhash(0x7)|local1
 goto :[J]0x47 branch:71
 ")
     class s_9 state
   end
   subgraph cluster_71 ["pc @71"]
-    s_10("pc @71 (s_10) #10
+    s_10("pc @71 (#s_10)
 =|local1
 undefined local2 = 0x40; // #refs 0
 undefined local3 = memory[0x40]; // #refs -1
@@ -485,7 +488,7 @@ undefined local4 = memory[0x40]; // #refs 0
 return blockhash(0x7);
 ")
     class s_10 state
-    s_11("pc @71 (s_11) #18
+    s_18("pc @71 (#s_18)
 =|local1
 undefined local4 = 0x40; // #refs 0
 undefined local5 = memory[0x40]; // #refs -1
@@ -493,25 +496,25 @@ memory[memory[0x40]] = (0x1 << 0xa0) - 0x1 & (0x1 << 0xa0) - 0x1 & msg.data[0x4]
 undefined local6 = memory[0x40]; // #refs 0
 return _arg0.balance;
 ")
-    class s_11 state
+    class s_18 state
   end
   subgraph cluster_89 ["pc @89"]
-    s_12[["pc @89 (s_12) #11
+    s_11[["pc @89 (#s_11)
 =|[J]0x5f|local1
 goto :[J]0xa4 branch:164
 "]]
-    class s_12 state
-    style s_12 fill:#5F021F
+    class s_11 state
+    style s_11 fill:#5F021F
   end
   subgraph cluster_164 ["pc @164"]
-    s_13("pc @164 (s_13) #12
+    s_12("pc @164 (#s_12)
 =|address(this)()|local1
 goto :[J]0x5f branch:95
 ")
-    class s_13 state
+    class s_12 state
   end
   subgraph cluster_95 ["pc @95"]
-    s_14("pc @95 (s_14) #13
+    s_13("pc @95 (#s_13)
 =|local1
 undefined local2 = 0x40; // #refs 0
 undefined local3 = memory[0x40]; // #refs -1
@@ -519,55 +522,58 @@ memory[memory[0x40]] = address(this) & (0x1 << 0xa0) - 0x1;
 undefined local4 = memory[0x40]; // #refs 0
 return address(this);
 ")
-    class s_14 state
+    class s_13 state
   end
   subgraph cluster_123 ["pc @123"]
-    s_15[["pc @123 (s_15) #14
+    s_14[["pc @123 (#s_14)
 =|local3|local2|[J]0x47|local1
 undefined local2 = 0x4; // #refs 0
 undefined local3 = msg.data.length - 0x4; // #refs 0
 when (msg.data.length - 0x4 < 0x20) == 0 goto 143 or fall 139
 "]]
-    class s_15 state
-    style s_15 fill:#5F021F
+    class s_14 state
+    style s_14 fill:#5F021F
   end
   subgraph cluster_139 ["pc @139"]
-    s_16("pc @139 (s_16) #15
+    s_15("pc @139 (#s_15)
 =|local3|local2|[J]0x47|local1
 undefined local4 = 0x0; // #refs 0
 revert();
 ")
-    class s_16 state
+    class s_15 state
   end
   subgraph cluster_143 ["pc @143"]
-    s_17("pc @143 (s_17) #16
+    s_16("pc @143 (#s_16)
 =|and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))|[J]0x47|local1
 goto :[J]0xa8 branch:168
 ")
-    class s_17 state
+    class s_16 state
   end
   subgraph cluster_168 ["pc @168"]
-    s_18("pc @168 (s_18) #17
+    s_17("pc @168 (#s_17)
 =|and(sub(shl(0x1, 0xa0), 0x1), and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))).balance|local1
 goto :[J]0x47 branch:71
 ")
-    class s_18 state
+    class s_17 state
   end
-  s_0 -- jumpi --> s_2;
-  s_0 -. fall .-> s_1;
-  s_2 -- jumpi --> s_7;
-  s_2 -. fall .-> s_3;
-  s_3 -. fall .-> s_4;
-  s_4 -. fall .-> s_5;
-  s_5 -. fall .-> s_6;
-  s_8 -- jump --> s_9;
-  s_9 -- jump --> s_10;
-  s_12 -- jump --> s_13;
-  s_13 -- jump --> s_14;
-  s_15 -- jumpi --> s_17;
-  s_15 -. fall .-> s_16;
-  s_17 -- jump --> s_18;
-  s_18 -- jump --> s_11;
+  s_0 == jumpi0_0 ==> s_2;
+  s_0 -- fall --> s_1;
+  s_2 == jumpi2_2 ==> s_7;
+  s_2 -- fall --> s_3;
+  s_3 -- fall --> s_4;
+  s_4 -- fall --> s_5;
+  s_5 -- fall --> s_6;
+  s_8 == jump8_8 ==> s_9;
+  s_9 == jump8_9 ==> s_10;
+  s_8 -...- s_9;
+  s_11 == jump11_11 ==> s_12;
+  s_12 == jump11_12 ==> s_13;
+  s_11 -...- s_12;
+  s_14 == jumpi14_14 ==> s_16;
+  s_14 -- fall --> s_15;
+  s_16 == jump16_16 ==> s_17;
+  s_17 == jump14_17 ==> s_18;
+  s_14 -...- s_17;
 
 ```
 

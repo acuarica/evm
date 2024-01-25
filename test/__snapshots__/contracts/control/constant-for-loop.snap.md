@@ -106,7 +106,7 @@ title: constant for-loop-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|0x0
 memory[0x40] = 0x80;
 fall: 7:
@@ -115,75 +115,75 @@ fall: 7:
     style s_0 fill:#471C21
   end
   subgraph cluster_7 ["pc @7"]
-    s_1("pc @7 (s_1) #1
+    s_1("pc @7 (#s_1)
 =|local0
 undefined local0 = 0x0; // #refs 3
 when (local0 < 0xa) == 0 goto 82 or fall 16
 ")
     class s_1 state
-    s_2("pc @7 (s_2) #3
+    s_3("pc @7 (#s_3)
 =|local3
 undefined local3 = 0x1 + local0; // #refs 3
 when (local3 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_2 state
-    s_3("pc @7 (s_3) #5
+    class s_3 state
+    s_5("pc @7 (#s_5)
 =|local6
 undefined local6 = 0x1 + local3; // #refs 3
 when (local6 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_3 state
-    s_4("pc @7 (s_4) #7
+    class s_5 state
+    s_7("pc @7 (#s_7)
 =|local9
 undefined local9 = 0x1 + local6; // #refs 3
 when (local9 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_4 state
-    s_5("pc @7 (s_5) #9
+    class s_7 state
+    s_9("pc @7 (#s_9)
 =|local12
 undefined local12 = 0x1 + local9; // #refs 3
 when (local12 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_5 state
-    s_6("pc @7 (s_6) #11
+    class s_9 state
+    s_11("pc @7 (#s_11)
 =|local15
 undefined local15 = 0x1 + local12; // #refs 3
 when (local15 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_6 state
-    s_7("pc @7 (s_7) #13
+    class s_11 state
+    s_13("pc @7 (#s_13)
 =|local18
 undefined local18 = 0x1 + local15; // #refs 3
 when (local18 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_7 state
-    s_8("pc @7 (s_8) #15
+    class s_13 state
+    s_15("pc @7 (#s_15)
 =|local21
 undefined local21 = 0x1 + local18; // #refs 3
 when (local21 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_8 state
-    s_9("pc @7 (s_9) #17
+    class s_15 state
+    s_17("pc @7 (#s_17)
 =|local24
 undefined local24 = 0x1 + local21; // #refs 3
 when (local24 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_9 state
-    s_10("pc @7 (s_10) #19
+    class s_17 state
+    s_19("pc @7 (#s_19)
 =|local27
 undefined local27 = 0x1 + local24; // #refs 3
 when (local27 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_10 state
-    s_11("pc @7 (s_11) #21
+    class s_19 state
+    s_21("pc @7 (#s_21)
 =|local30
 undefined local30 = 0x1 + local27; // #refs 0
 when (0x1 + local27 < 0xa) == 0 goto 82 or fall 16
 ")
-    class s_11 state
+    class s_21 state
   end
   subgraph cluster_16 ["pc @16"]
-    s_12("pc @16 (s_12) #2
+    s_2("pc @16 (#s_2)
 =|add(0x1, local0)
 undefined local1 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local0;
@@ -191,8 +191,8 @@ undefined local2 = memory[0x40]; // #refs 0
 emit Deposit(local0);
 goto :[J]0x7 branch:7
 ")
-    class s_12 state
-    s_13("pc @16 (s_13) #4
+    class s_2 state
+    s_4("pc @16 (#s_4)
 =|add(0x1, local3)
 undefined local4 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local3;
@@ -200,8 +200,8 @@ undefined local5 = memory[0x40]; // #refs 0
 emit Deposit(local3);
 goto :[J]0x7 branch:7
 ")
-    class s_13 state
-    s_14("pc @16 (s_14) #6
+    class s_4 state
+    s_6("pc @16 (#s_6)
 =|add(0x1, local6)
 undefined local7 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local6;
@@ -209,8 +209,8 @@ undefined local8 = memory[0x40]; // #refs 0
 emit Deposit(local6);
 goto :[J]0x7 branch:7
 ")
-    class s_14 state
-    s_15("pc @16 (s_15) #8
+    class s_6 state
+    s_8("pc @16 (#s_8)
 =|add(0x1, local9)
 undefined local10 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local9;
@@ -218,8 +218,8 @@ undefined local11 = memory[0x40]; // #refs 0
 emit Deposit(local9);
 goto :[J]0x7 branch:7
 ")
-    class s_15 state
-    s_16("pc @16 (s_16) #10
+    class s_8 state
+    s_10("pc @16 (#s_10)
 =|add(0x1, local12)
 undefined local13 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local12;
@@ -227,8 +227,8 @@ undefined local14 = memory[0x40]; // #refs 0
 emit Deposit(local12);
 goto :[J]0x7 branch:7
 ")
-    class s_16 state
-    s_17("pc @16 (s_17) #12
+    class s_10 state
+    s_12("pc @16 (#s_12)
 =|add(0x1, local15)
 undefined local16 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local15;
@@ -236,8 +236,8 @@ undefined local17 = memory[0x40]; // #refs 0
 emit Deposit(local15);
 goto :[J]0x7 branch:7
 ")
-    class s_17 state
-    s_18("pc @16 (s_18) #14
+    class s_12 state
+    s_14("pc @16 (#s_14)
 =|add(0x1, local18)
 undefined local19 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local18;
@@ -245,8 +245,8 @@ undefined local20 = memory[0x40]; // #refs 0
 emit Deposit(local18);
 goto :[J]0x7 branch:7
 ")
-    class s_18 state
-    s_19("pc @16 (s_19) #16
+    class s_14 state
+    s_16("pc @16 (#s_16)
 =|add(0x1, local21)
 undefined local22 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local21;
@@ -254,8 +254,8 @@ undefined local23 = memory[0x40]; // #refs 0
 emit Deposit(local21);
 goto :[J]0x7 branch:7
 ")
-    class s_19 state
-    s_20("pc @16 (s_20) #18
+    class s_16 state
+    s_18("pc @16 (#s_18)
 =|add(0x1, local24)
 undefined local25 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local24;
@@ -263,8 +263,8 @@ undefined local26 = memory[0x40]; // #refs 0
 emit Deposit(local24);
 goto :[J]0x7 branch:7
 ")
-    class s_20 state
-    s_21("pc @16 (s_21) #20
+    class s_18 state
+    s_20("pc @16 (#s_20)
 =|add(0x1, local27)
 undefined local28 = memory[0x40]; // #refs 0
 memory[memory[0x40]] = local27;
@@ -272,48 +272,48 @@ undefined local29 = memory[0x40]; // #refs 0
 emit Deposit(local27);
 goto :[J]0x7 branch:7
 ")
-    class s_21 state
+    class s_20 state
   end
   subgraph cluster_82 ["pc @82"]
-    s_22("pc @82 (s_22) #22
+    s_22("pc @82 (#s_22)
 =|
 return;
 ")
     class s_22 state
   end
-  s_0 -. jumpdest .-> s_1;
-  s_1 -- jumpi --> undefined;
-  s_1 -. fall .-> s_12;
-  s_2 -- jumpi --> undefined;
-  s_2 -. fall .-> s_13;
-  s_3 -- jumpi --> undefined;
-  s_3 -. fall .-> s_14;
-  s_4 -- jumpi --> undefined;
-  s_4 -. fall .-> s_15;
-  s_5 -- jumpi --> undefined;
-  s_5 -. fall .-> s_16;
-  s_6 -- jumpi --> undefined;
-  s_6 -. fall .-> s_17;
-  s_7 -- jumpi --> undefined;
-  s_7 -. fall .-> s_18;
-  s_8 -- jumpi --> undefined;
-  s_8 -. fall .-> s_19;
-  s_9 -- jumpi --> undefined;
-  s_9 -. fall .-> s_20;
-  s_10 -- jumpi --> undefined;
-  s_10 -. fall .-> s_21;
-  s_11 -- jumpi --> s_22;
-  s_11 -. fall .-> undefined;
-  s_12 -- jump --> s_2;
-  s_13 -- jump --> s_3;
-  s_14 -- jump --> s_4;
-  s_15 -- jump --> s_5;
-  s_16 -- jump --> s_6;
-  s_17 -- jump --> s_7;
-  s_18 -- jump --> s_8;
-  s_19 -- jump --> s_9;
-  s_20 -- jump --> s_10;
-  s_21 -- jump --> s_11;
+  s_0 -- jumpdest --> s_1;
+  s_1 == jumpi1_1 ==> s_undefined;
+  s_1 -- fall --> s_2;
+  s_3 == jumpi3_3 ==> s_undefined;
+  s_3 -- fall --> s_4;
+  s_5 == jumpi5_5 ==> s_undefined;
+  s_5 -- fall --> s_6;
+  s_7 == jumpi7_7 ==> s_undefined;
+  s_7 -- fall --> s_8;
+  s_9 == jumpi9_9 ==> s_undefined;
+  s_9 -- fall --> s_10;
+  s_11 == jumpi11_11 ==> s_undefined;
+  s_11 -- fall --> s_12;
+  s_13 == jumpi13_13 ==> s_undefined;
+  s_13 -- fall --> s_14;
+  s_15 == jumpi15_15 ==> s_undefined;
+  s_15 -- fall --> s_16;
+  s_17 == jumpi17_17 ==> s_undefined;
+  s_17 -- fall --> s_18;
+  s_19 == jumpi19_19 ==> s_undefined;
+  s_19 -- fall --> s_20;
+  s_21 == jumpi21_21 ==> s_22;
+  s_21 -- fall --> s_undefined;
+  s_2 == jump2_2 ==> s_3;
+  s_4 == jump4_4 ==> s_5;
+  s_6 == jump6_6 ==> s_7;
+  s_8 == jump8_8 ==> s_9;
+  s_10 == jump10_10 ==> s_11;
+  s_12 == jump12_12 ==> s_13;
+  s_14 == jump14_14 ==> s_15;
+  s_16 == jump16_16 ==> s_17;
+  s_18 == jump18_18 ==> s_19;
+  s_20 == jump20_20 ==> s_21;
 
 ```
 
@@ -427,7 +427,7 @@ title: constant for-loop-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|0x0
 memory[0x40] = 0x80;
 fall: 7:
@@ -436,75 +436,75 @@ fall: 7:
     style s_0 fill:#471C21
   end
   subgraph cluster_7 ["pc @7"]
-    s_1("pc @7 (s_1) #1
+    s_1("pc @7 (#s_1)
 =|local0
 undefined local0 = 0x0; // #refs 0
 when (0x0 < 0xa) == 0 goto 73 or fall 16
 ")
     class s_1 state
-    s_2("pc @7 (s_2) #3
+    s_3("pc @7 (#s_3)
 =|local4
 undefined local4 = 0x1 + 0x0; // #refs 0
 when (0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_2 state
-    s_3("pc @7 (s_3) #5
+    class s_3 state
+    s_5("pc @7 (#s_5)
 =|local8
 undefined local8 = 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_3 state
-    s_4("pc @7 (s_4) #7
+    class s_5 state
+    s_7("pc @7 (#s_7)
 =|local12
 undefined local12 = 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_4 state
-    s_5("pc @7 (s_5) #9
+    class s_7 state
+    s_9("pc @7 (#s_9)
 =|local16
 undefined local16 = 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_5 state
-    s_6("pc @7 (s_6) #11
+    class s_9 state
+    s_11("pc @7 (#s_11)
 =|local20
 undefined local20 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_6 state
-    s_7("pc @7 (s_7) #13
+    class s_11 state
+    s_13("pc @7 (#s_13)
 =|local24
 undefined local24 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_7 state
-    s_8("pc @7 (s_8) #15
+    class s_13 state
+    s_15("pc @7 (#s_15)
 =|local28
 undefined local28 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_8 state
-    s_9("pc @7 (s_9) #17
+    class s_15 state
+    s_17("pc @7 (#s_17)
 =|local32
 undefined local32 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_9 state
-    s_10("pc @7 (s_10) #19
+    class s_17 state
+    s_19("pc @7 (#s_19)
 =|local36
 undefined local36 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_10 state
-    s_11("pc @7 (s_11) #21
+    class s_19 state
+    s_21("pc @7 (#s_21)
 =|local40
 undefined local40 = 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0; // #refs 0
 when (0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0 < 0xa) == 0 goto 73 or fall 16
 ")
-    class s_11 state
+    class s_21 state
   end
   subgraph cluster_16 ["pc @16"]
-    s_12("pc @16 (s_12) #2
+    s_2("pc @16 (#s_2)
 =|add(0x1, local0)
 undefined local1 = 0x40; // #refs 0
 undefined local2 = memory[0x40]; // #refs -1
@@ -513,8 +513,8 @@ undefined local3 = memory[0x40]; // #refs 0
 emit Deposit(0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_12 state
-    s_13("pc @16 (s_13) #4
+    class s_2 state
+    s_4("pc @16 (#s_4)
 =|add(0x1, local4)
 undefined local5 = 0x40; // #refs 0
 undefined local6 = memory[0x40]; // #refs -1
@@ -523,8 +523,8 @@ undefined local7 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_13 state
-    s_14("pc @16 (s_14) #6
+    class s_4 state
+    s_6("pc @16 (#s_6)
 =|add(0x1, local8)
 undefined local9 = 0x40; // #refs 0
 undefined local10 = memory[0x40]; // #refs -1
@@ -533,8 +533,8 @@ undefined local11 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_14 state
-    s_15("pc @16 (s_15) #8
+    class s_6 state
+    s_8("pc @16 (#s_8)
 =|add(0x1, local12)
 undefined local13 = 0x40; // #refs 0
 undefined local14 = memory[0x40]; // #refs -1
@@ -543,8 +543,8 @@ undefined local15 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_15 state
-    s_16("pc @16 (s_16) #10
+    class s_8 state
+    s_10("pc @16 (#s_10)
 =|add(0x1, local16)
 undefined local17 = 0x40; // #refs 0
 undefined local18 = memory[0x40]; // #refs -1
@@ -553,8 +553,8 @@ undefined local19 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_16 state
-    s_17("pc @16 (s_17) #12
+    class s_10 state
+    s_12("pc @16 (#s_12)
 =|add(0x1, local20)
 undefined local21 = 0x40; // #refs 0
 undefined local22 = memory[0x40]; // #refs -1
@@ -563,8 +563,8 @@ undefined local23 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_17 state
-    s_18("pc @16 (s_18) #14
+    class s_12 state
+    s_14("pc @16 (#s_14)
 =|add(0x1, local24)
 undefined local25 = 0x40; // #refs 0
 undefined local26 = memory[0x40]; // #refs -1
@@ -573,8 +573,8 @@ undefined local27 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_18 state
-    s_19("pc @16 (s_19) #16
+    class s_14 state
+    s_16("pc @16 (#s_16)
 =|add(0x1, local28)
 undefined local29 = 0x40; // #refs 0
 undefined local30 = memory[0x40]; // #refs -1
@@ -583,8 +583,8 @@ undefined local31 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_19 state
-    s_20("pc @16 (s_20) #18
+    class s_16 state
+    s_18("pc @16 (#s_18)
 =|add(0x1, local32)
 undefined local33 = 0x40; // #refs 0
 undefined local34 = memory[0x40]; // #refs -1
@@ -593,8 +593,8 @@ undefined local35 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_20 state
-    s_21("pc @16 (s_21) #20
+    class s_18 state
+    s_20("pc @16 (#s_20)
 =|add(0x1, local36)
 undefined local37 = 0x40; // #refs 0
 undefined local38 = memory[0x40]; // #refs -1
@@ -603,48 +603,48 @@ undefined local39 = memory[0x40]; // #refs 0
 emit Deposit(0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x1 + 0x0);
 goto :[J]0x7 branch:7
 ")
-    class s_21 state
+    class s_20 state
   end
   subgraph cluster_73 ["pc @73"]
-    s_22("pc @73 (s_22) #22
+    s_22("pc @73 (#s_22)
 =|
 return;
 ")
     class s_22 state
   end
-  s_0 -. jumpdest .-> s_1;
-  s_1 -- jumpi --> undefined;
-  s_1 -. fall .-> s_12;
-  s_2 -- jumpi --> undefined;
-  s_2 -. fall .-> s_13;
-  s_3 -- jumpi --> undefined;
-  s_3 -. fall .-> s_14;
-  s_4 -- jumpi --> undefined;
-  s_4 -. fall .-> s_15;
-  s_5 -- jumpi --> undefined;
-  s_5 -. fall .-> s_16;
-  s_6 -- jumpi --> undefined;
-  s_6 -. fall .-> s_17;
-  s_7 -- jumpi --> undefined;
-  s_7 -. fall .-> s_18;
-  s_8 -- jumpi --> undefined;
-  s_8 -. fall .-> s_19;
-  s_9 -- jumpi --> undefined;
-  s_9 -. fall .-> s_20;
-  s_10 -- jumpi --> undefined;
-  s_10 -. fall .-> s_21;
-  s_11 -- jumpi --> s_22;
-  s_11 -. fall .-> undefined;
-  s_12 -- jump --> s_2;
-  s_13 -- jump --> s_3;
-  s_14 -- jump --> s_4;
-  s_15 -- jump --> s_5;
-  s_16 -- jump --> s_6;
-  s_17 -- jump --> s_7;
-  s_18 -- jump --> s_8;
-  s_19 -- jump --> s_9;
-  s_20 -- jump --> s_10;
-  s_21 -- jump --> s_11;
+  s_0 -- jumpdest --> s_1;
+  s_1 == jumpi1_1 ==> s_undefined;
+  s_1 -- fall --> s_2;
+  s_3 == jumpi3_3 ==> s_undefined;
+  s_3 -- fall --> s_4;
+  s_5 == jumpi5_5 ==> s_undefined;
+  s_5 -- fall --> s_6;
+  s_7 == jumpi7_7 ==> s_undefined;
+  s_7 -- fall --> s_8;
+  s_9 == jumpi9_9 ==> s_undefined;
+  s_9 -- fall --> s_10;
+  s_11 == jumpi11_11 ==> s_undefined;
+  s_11 -- fall --> s_12;
+  s_13 == jumpi13_13 ==> s_undefined;
+  s_13 -- fall --> s_14;
+  s_15 == jumpi15_15 ==> s_undefined;
+  s_15 -- fall --> s_16;
+  s_17 == jumpi17_17 ==> s_undefined;
+  s_17 -- fall --> s_18;
+  s_19 == jumpi19_19 ==> s_undefined;
+  s_19 -- fall --> s_20;
+  s_21 == jumpi21_21 ==> s_22;
+  s_21 -- fall --> s_undefined;
+  s_2 == jump2_2 ==> s_3;
+  s_4 == jump4_4 ==> s_5;
+  s_6 == jump6_6 ==> s_7;
+  s_8 == jump8_8 ==> s_9;
+  s_10 == jump10_10 ==> s_11;
+  s_12 == jump12_12 ==> s_13;
+  s_14 == jump14_14 ==> s_15;
+  s_16 == jump16_16 ==> s_17;
+  s_18 == jump18_18 ==> s_19;
+  s_20 == jump20_20 ==> s_21;
 
 ```
 

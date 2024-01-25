@@ -289,15 +289,15 @@ describe('::step', function () {
 
     describe('PUSHES', function () {
         it('should PUSH value onto stack', function () {
-            const stack = new Stack<Expr>();
-            new London().PUSH1({ stack }, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
-            expect(stack.values).to.deep.equal([new Val(1n, true)]);
+            const state = new State<Inst, Expr>();
+            new London().PUSH1(state, new Opcode(0, 1, 'PUSH1', Buffer.from([1])));
+            expect(state.stack.values).to.deep.equal([new Val(1n, state.id)]);
         });
 
         it('should `PUSH0` (`Shanghai`) value onto stack', function () {
-            const stack = new Stack<Expr>();
-            new Shanghai().PUSH0({ stack });
-            expect(stack.values).to.deep.equal([new Val(0n, true)]);
+            const state = new State<Inst, Expr>();
+            new Shanghai().PUSH0(state);
+            expect(state.stack.values).to.deep.equal([new Val(0n, state.id)]);
         });
     });
 
@@ -580,26 +580,28 @@ describe('::step', function () {
 
         it('should halt when `JUMP` step', function () {
             const state = new State<Inst, Expr>();
-            state.stack.push(new Val(2n));
+            state.id = 0;
+            state.stack.push(new Val(2n, state.id));
             step.JUMP(state, new Opcode(1, 0xa, 'jump'), { bytecode: Buffer.from('ff005b', 'hex') });
 
-            const offset = new Val(2n);
+            const offset = new Val(2n, state.id);
             offset.jumpDest = 2;
             expect(state.halted).to.be.true;
-            expect(state.stmts).to.be.deep.equal([new Jump(offset, Branch.make(2, new State()))]);
+            expect(state.stmts).to.be.deep.equal([new Jump(offset, Branch.make(2, new State()), state.id)]);
         });
 
         it('should halt when `JUMPI` step', function () {
             const state = new State<Inst, Expr>();
+            state.id = 0;
             state.stack.push(Props['block.gaslimit']);
-            state.stack.push(new Val(4n));
+            state.stack.push(new Val(4n, state.id));
             step.JUMPI(state, new Opcode(1, 0xa, 'jumpi'), { bytecode: Buffer.from('ff0001025b', 'hex') });
 
-            const offset = new Val(4n);
+            const offset = new Val(4n, state.id);
             offset.jumpDest = 4;
             expect(state.halted).to.be.true;
             expect(state.stmts).to.be.deep.equal([
-                new Jumpi(Props['block.gaslimit'], offset, Branch.make(2, new State()), Branch.make(4, new State()))
+                new Jumpi(Props['block.gaslimit'], offset, Branch.make(2, new State()), Branch.make(4, new State()), state.id)
             ]);
         });
 

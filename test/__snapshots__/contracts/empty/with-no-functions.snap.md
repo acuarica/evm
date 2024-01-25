@@ -34,7 +34,7 @@ title: with no functions-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|
 memory[0x40] = 0x80;
 undefined local0 = 0x0; // #refs 0
@@ -84,7 +84,7 @@ title: with no functions-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|
 memory[0x40] = 0x80;
 undefined local0 = 0x0; // #refs 0

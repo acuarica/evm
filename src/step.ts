@@ -456,7 +456,7 @@ function parseSha3(sha: Sha3): [number | undefined, Expr[]] {
 
 export const JUMPDEST = 0x5b;
 
-function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number {
+function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array) {
     const unwrapVal = (expr: Expr): Val | undefined => expr.isVal()
         ? expr
         : expr.tag === 'Local' && expr.value.isVal()
@@ -476,8 +476,11 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array): number
     }
     const destpc = Number(offsetVal.val);
     if (bytecode[destpc] === JUMPDEST) {
+        // Checks whether `offsetVal` has actually been pushed onto the stack
+        // by a `PUSHn` instruction instead of having been `eval`uated.
+        if (offsetVal.pushStateId === undefined) throw new Error('offset `Val` should be a PUSHn');
         offsetVal.jumpDest = destpc;
-        return destpc;
+        return { destpc, pushStateId: offsetVal.pushStateId };
     } else {
         throw new ExecError(`${opcode.format()} destination should be JUMPDEST@${destpc} but ${bytecode[destpc] === undefined
             ? `'${destpc}' is out-of-bounds`
@@ -493,7 +496,7 @@ const FrontierStep = {
     POP: [0x50, ({ stack }: Operand<Expr>) => stack.pop()],
     ...zip([...Array(32).keys()].map(size => [`PUSH${(size + 1 as Size<32>)}`, [
         { opcode: 0x60 + size, size: size + 1 },
-        ({ stack }: Operand<Expr>, opcode: Opcode) => stack.push(new Val(BigInt('0x' + opcode.hexData()), true))
+        (state: State<Inst, Expr>, opcode: Opcode) => state.stack.push(new Val(BigInt('0x' + opcode.hexData()), state.id))
     ]] as const)),
     ...zip([...Array(16).keys()].map(position => [`DUP${(position + 1 as Size<16>)}`, [
         0x80 + position,
@@ -684,14 +687,14 @@ const FrontierStep = {
     JUMPDEST: [JUMPDEST, _state => { }],
     JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, { bytecode }) {
         const offset = state.stack.pop();
-        const destpc = getJumpDest(offset, opcode, bytecode);
+        const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);
         const destBranch = Branch.make(destpc, state);
-        state.halt(new ast.Jump(offset, destBranch));
+        state.halt(new ast.Jump(offset, destBranch, pushStateId));
     }],
     JUMPI: [{ opcode: 0x57, halts: true }, function (this: Members, state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const cond = state.stack.pop();
-        const destpc = getJumpDest(offset, opcode, bytecode);
+        const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);
 
         const fallBranch = Branch.make(opcode.pc + 1, state);
 
@@ -703,7 +706,7 @@ const FrontierStep = {
             });
             last = new SigCase(cond, offset, fallBranch);
         } else {
-            last = new ast.Jumpi(cond, offset, fallBranch, Branch.make(destpc, state));
+            last = new ast.Jumpi(cond, offset, fallBranch, Branch.make(destpc, state), pushStateId);
         }
         state.halt(last);
     }],
@@ -784,7 +787,7 @@ const ParisStep = {
 
 const ShanghaiStep = {
     ...ParisStep,
-    PUSH0: [0x5f, ({ stack }: Operand<Expr>) => stack.push(new Val(0n, true))],
+    PUSH0: [0x5f, (state: State<Inst, Expr>) => state.stack.push(new Val(0n, state.id))],
 } satisfies Step;
 
 /**

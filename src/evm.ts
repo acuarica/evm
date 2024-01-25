@@ -26,7 +26,7 @@ export interface Block<M extends string> {
          */
         stack?: Stack<Expr>
     }[];
-    readonly states: [index: number, state: State<Inst, Expr>][];
+    readonly states: State<Inst, Expr>[];
 }
 
 /**
@@ -59,7 +59,7 @@ export class EVM<M extends string> {
      */
     readonly bytecode: Uint8Array;
 
-    readonly _ordered = new Ordered<State<Inst, Expr>>();
+    readonly _ids = new Ids<State<Inst, Expr>>();
 
     constructor(
         bytecode: Parameters<typeof arrayify>[0],
@@ -106,7 +106,7 @@ export class EVM<M extends string> {
          */
         content: Opcode<M>[] | Uint8Array,
 
-        states?: [index: number, state: State<Inst, Expr>][]
+        states?: State<Inst, Expr>[]
     }[] {
         let lastPc = 0;
 
@@ -175,7 +175,7 @@ export class EVM<M extends string> {
     }
 
     exec(pc0: number, state: State<Inst, Expr>): void {
-        const indexOf = this._ordered.push(state);
+        this._ids.push(state);
 
         if (state.halted) throw new Error(`State at ${pc0} must be non-halted to be \`exec\``);
 
@@ -218,9 +218,9 @@ export class EVM<M extends string> {
 
         const block = this.blocks.get(pc0);
         if (block === undefined) {
-            this.blocks.set(pc0, { pcend: opcode.nextpc, opcodes, states: [[indexOf, state]] });
+            this.blocks.set(pc0, { pcend: opcode.nextpc, opcodes, states: [state] });
         } else {
-            block.states.push([indexOf, state]);
+            block.states.push(state);
         }
     }
 
@@ -242,7 +242,7 @@ export class EVM<M extends string> {
         const chunk = this.blocks.get(b.pc);
 
         if (chunk !== undefined) {
-            for (const [, s] of chunk.states) {
+            for (const s of chunk.states) {
                 if (cmp(b.state, s)) {
                     return s;
                 }
@@ -252,10 +252,9 @@ export class EVM<M extends string> {
     }
 }
 
-
 function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
     const cmpval = (lhs: Expr, rhs: Expr) =>
-        !(lhs.isVal() && lhs.isPush) || !(rhs.isVal() && rhs.isPush) || lhs.val === rhs.val;
+        !(lhs.isVal() && lhs.pushStateId) || !(rhs.isVal() && rhs.pushStateId) || lhs.val === rhs.val;
 
     // console.log('????', lhs.values, rhs.values);
     if (lhs.values.length !== rhs.values.length) {
@@ -271,16 +270,11 @@ function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
     return true;
 }
 
-class Ordered<T> {
+class Ids<T extends { id: number | undefined }> {
+    _count = 0;
 
-    readonly _enum: T[] = [];
-    readonly _set = new Set<T>();
-
-    push(elem: T) {
-        if (!this._set.has(elem)) {
-            this._set.add(elem);
-            this._enum.push(elem);
-        }
-        return this._enum.indexOf(elem);
+    push(elem: T): number {
+        if (elem.id === undefined) elem.id = this._count++;
+        return elem.id;
     }
 }

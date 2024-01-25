@@ -199,7 +199,7 @@ describe('::evm', function () {
         assert(stmt.name === 'Log');
         expect(stmt.args![0]).to.be.deep.equal(
             new And(
-                new Val(BigInt('0x' + 'ff'.repeat(16)), true),
+                new Val(BigInt('0x' + 'ff'.repeat(16)), state.id),
                 new Local(1, new Not(Props['block.number']))
             )
         );
@@ -264,7 +264,7 @@ describe('::evm', function () {
                 new Val(20n),
                 [
                     new And(
-                        new Shl(Props['msg.sender'], new Val(96n, true)),
+                        new Shl(Props['msg.sender'], new Val(96n)),
                         new Not(new Val(0xffffffffffffffffffffffffn)).eval()
                     )
                 ]
@@ -423,15 +423,15 @@ event ${eventSelector(unknownEventSig)};
 
             assert(stmts[0].name === 'Log');
             assert(stmts[0].args![0].tag === 'Local');
-            expect(stmts[0].args![0].value).to.be.deep.equal(new Val(1n, true));
+            expect(stmts[0].args![0].value).to.be.deep.equal(new Val(1n, state.id));
             expect(stmts[0].eventName).to.be.deep.equal('Deposit');
 
             assert(stmts[1].name === 'Log');
             assert(stmts[1].args?.every((e): e is Local => e.tag === 'Local'));
             expect(stmts[1].args?.map(e => e.value)).to.be.deep.equal([
-                new Val(2n, true),
-                new Val(3n, true),
-                new Val(4n, true),
+                new Val(2n, state.id),
+                new Val(3n, state.id),
+                new Val(4n, state.id),
             ]);
 
             const topic = eventSelector(unknownEventSig);
@@ -578,15 +578,15 @@ event ${eventSelector(unknownEventSig)};
 
                 {
                     const size = new Add(
-                        new Val(32n, true),
-                        new Add(new Val(32n, true), new Val(0n, true))
+                        new Val(32n, state.id),
+                        new Add(new Val(32n, state.id), new Val(0n, state.id))
                     );
-                    const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(0n, true)]);
+                    const slot = new Sha3(new Val(0n, state.id), size, [Props['msg.sender'], new Val(0n, state.id)]);
                     expect(stmts[0]).to.be.deep.equal(
                         new MappingStore(slot, evm.step.mappings, 0, [Props['msg.sender']],
                             new Add(
                                 new MappingLoad(slot, evm.step.mappings, 0, [Props['msg.sender']]),
-                                new Val(3n, true)
+                                new Val(3n, state.id)
                             )
                         )
                     );
@@ -598,15 +598,15 @@ event ${eventSelector(unknownEventSig)};
 
                 {
                     const size = new Add(
-                        new Val(32n, true),
-                        new Add(new Val(32n, true), new Val(0n, true))
+                        new Val(32n, state.id),
+                        new Add(new Val(32n, state.id), new Val(0n, state.id))
                     );
-                    const slot = new Sha3(new Val(0n, true), size, [Props['msg.sender'], new Val(1n, true)]);
+                    const slot = new Sha3(new Val(0n, state.id), size, [Props['msg.sender'], new Val(1n, state.id)]);
                     expect(stmts[1]).to.be.deep.equal(
                         new MappingStore(slot, evm.step.mappings, 1, [Props['msg.sender']],
                             new Add(
                                 new MappingLoad(slot, evm.step.mappings, 1, [Props['msg.sender']]),
-                                new Val(5n, true)
+                                new Val(5n, state.id)
                             )
                         )
                     );
@@ -618,18 +618,18 @@ event ${eventSelector(unknownEventSig)};
 
                 {
                     const size = new Add(
-                        new Val(32n, true),
-                        new Add(new Val(32n, true), new Val(0n, true))
+                        new Val(32n, state.id),
+                        new Add(new Val(32n, state.id), new Val(0n, state.id))
                     );
-                    const slot = new Sha3(new Val(0n, true), size, [
+                    const slot = new Sha3(new Val(0n, state.id), size, [
                         Props['msg.sender'],
-                        new Sha3(new Val(0n, true), size, [Props['address(this)'], new Val(2n, true)]),
+                        new Sha3(new Val(0n, state.id), size, [Props['address(this)'], new Val(2n, state.id)]),
                     ]);
                     expect(state.stmts[2]).to.be.deep.equal(
                         new MappingStore(slot, evm.step.mappings, 2, [Props['address(this)'], Props['msg.sender']],
                             new Sub(
                                 new MappingLoad(slot, evm.step.mappings, 2, [Props['address(this)'], Props['msg.sender']]),
-                                new Val(11n, true)
+                                new Val(11n, state.id)
                             )
                         )
                     );
@@ -717,7 +717,7 @@ event ${eventSelector(unknownEventSig)};
             const evm = EVM.new('0x600160020100');
             evm.exec(0, state);
             expect(state.halted).to.be.true;
-            expect(state.stack.values).to.be.deep.equal([new Add(new Val(2n, true), new Val(1n, true))]);
+            expect(state.stack.values).to.be.deep.equal([new Add(new Val(2n, state.id), new Val(1n, state.id))]);
             expect(evm.errors).to.be.empty;
         });
 
@@ -732,7 +732,7 @@ event ${eventSelector(unknownEventSig)};
 
             state = state.clone();
             evm.exec(12, state);
-            expect(state.stack.top).to.be.deep.equal(new Val(BigInt('0xfffefd'), true));
+            expect(state.stack.top).to.be.deep.equal(new Val(BigInt('0xfffefd'), state.id));
             expect(state.last?.name).to.be.deep.equal('JumpDest');
             expect((state.last as JumpDest).fallBranch.pc).to.be.equal(17);
 

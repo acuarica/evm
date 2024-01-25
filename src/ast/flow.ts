@@ -7,7 +7,7 @@ import type { Sig } from './alu';
  * Represents a jump from one `State` to another from the given `pc`.
  */
 export class Branch {
-    constructor(readonly pc: number, public state: State<Inst, Expr>) {}
+    constructor(readonly pc: number, public state: State<Inst, Expr>) { }
 
     static make(pc: number, state: State<Inst, Expr>) {
         return new Branch(pc, state.clone());
@@ -16,7 +16,7 @@ export class Branch {
 
 export class Jump implements IInst {
     readonly name = 'Jump';
-    constructor(readonly offset: Expr, readonly destBranch: Branch) {}
+    constructor(readonly offset: Expr, readonly destBranch: Branch, readonly pushStateId: number) { }
 
     eval() {
         return this;
@@ -36,13 +36,14 @@ export class Jumpi implements IInst {
         readonly cond: Expr,
         readonly offset: Expr,
         readonly fallBranch: Branch,
-        readonly destBranch: Branch
+        readonly destBranch: Branch,
+        readonly pushStateId: number,
     ) {
         this.evalCond = cond.eval();
     }
 
     eval() {
-        return new Jumpi(this.cond.eval(), this.offset, this.fallBranch, this.destBranch);
+        return new Jumpi(this.cond.eval(), this.offset, this.fallBranch, this.destBranch, this.pushStateId);
     }
 
     next() {
@@ -56,7 +57,7 @@ export class Jumpi implements IInst {
 
 export class JumpDest implements IInst {
     readonly name = 'JumpDest';
-    constructor(readonly fallBranch: Branch) {}
+    constructor(readonly fallBranch: Branch) { }
     eval() {
         return this;
     }
@@ -68,7 +69,7 @@ export class JumpDest implements IInst {
 
 export class SigCase implements IInst {
     readonly name = 'SigCase';
-    constructor(readonly condition: Sig, readonly offset: Expr, readonly fallBranch: Branch) {}
+    constructor(readonly condition: Sig, readonly offset: Expr, readonly fallBranch: Branch) { }
     eval() {
         return this;
     }

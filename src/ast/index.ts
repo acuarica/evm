@@ -206,13 +206,13 @@ export class Val extends Tag {
 
     jumpDest: number | null = null;
 
-    constructor(readonly val: bigint, readonly isPush = false) {
+    constructor(readonly val: bigint, readonly pushStateId?: number) {
         if (val < 0 || val >= MOD_256) throw new Error(`Val is a not a valid unsigned 256-word: ${val}`);
         super();
     }
 
     override eval(): Expr {
-        return this;
+        return new Val(this.val);
     }
 }
 

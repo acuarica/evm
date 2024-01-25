@@ -6,10 +6,8 @@ import { CallDataLoad, Require, SStore, Stop, Val, Variable } from 'sevm/ast';
 import { fnselector } from '../utils/selector';
 import { contracts } from '../utils/solc';
 
-contracts('variables', (compile, _fallback, version) => {
+contracts('variables', (compile, _fallback) => {
     describe('with private variables in different locations', function () {
-        const isPush = version !== '0.8.16' && version !== '0.8.21';
-
         let contract: Contract;
 
         before(function () {
@@ -34,8 +32,8 @@ contracts('variables', (compile, _fallback, version) => {
                 expect(stmts.at(-3)).to.be.instanceOf(Require);
                 expect(stmts.at(-2)).to.be.deep.equal(
                     new SStore(
-                        new Val(value, true),
-                        new CallDataLoad(new Val(4n, isPush)),
+                        new Val(value),
+                        new CallDataLoad(new Val(4n)),
                         contract.variables.get(value)
                     )
                 );
@@ -47,10 +45,10 @@ contracts('variables', (compile, _fallback, version) => {
             const vars = [...contract.variables.values()];
             expect(vars).to.be.of.length(2);
             expect(vars[0]).to.be.deep.equal(
-                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], 1)
+                new Variable(null, [new CallDataLoad(new Val(4n))], 1)
             );
             expect(vars[1]).to.be.deep.equal(
-                new Variable(null, [new CallDataLoad(new Val(4n, isPush))], 2)
+                new Variable(null, [new CallDataLoad(new Val(4n))], 2)
             );
         });
 

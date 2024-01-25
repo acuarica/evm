@@ -47,7 +47,7 @@ title: no dedup local var-no-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|
 memory[0x40] = 0x80;
 uint local0 = block.number; // #refs 1
@@ -117,7 +117,7 @@ title: no dedup local var-opt
 flowchart TD
   classDef state text-align:left
   subgraph cluster_0 ["pc @0"]
-    s_0[["pc @0 (s_0) #0
+    s_0[["pc @0 (#s_0)
 =|
 undefined local0 = 0x80; // #refs -1
 memory[0x40] = 0x80;

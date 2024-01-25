@@ -56,7 +56,7 @@ function dis(contract, argv) {
         }
 
         if (argv['with-trace'] && chunk.states !== undefined) {
-            for (const [, state] of chunk.states) {
+            for (const state of chunk.states) {
                 console.info('state', '〒 ', state.stack.values.map(e => yul`${e}`).join(' | '));
                 state.stmts.forEach(stmt => console.info('  ', yul`${stmt}`));
             }
@@ -253,7 +253,7 @@ function cfg(contract) {
     const ids = new WeakMap();
     let id = 0;
     for (const block of contract.blocks.values()) {
-        for (const [, state] of block.states) {
+        for (const state of block.states) {
             assert(!ids.has(state));
 
             if (!ids.has(state)) {
@@ -284,7 +284,7 @@ function cfg(contract) {
         // }
         write(`  label = "${label}";`);
 
-        for (const [, state] of block.states) {
+        for (const state of block.states) {
             writeNode(pc, state);
             switch (state.last?.name) {
                 case 'Jumpi':
