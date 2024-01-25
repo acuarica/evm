@@ -1,4 +1,4 @@
-name: Main
+name: Main Test
 
 on:
   # We want to trigger these jobs in every branch but not tags
@@ -80,6 +80,7 @@ jobs:
       - run: yarn coverage
         env:
           ENABLE_4BYTE_TEST: 1
+      - run: yarn c8 report >> $GITHUB_STEP_SUMMARY
 
   examples:
     runs-on: ubuntu-latest
