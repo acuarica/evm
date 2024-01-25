@@ -12,7 +12,7 @@ import { fnselector } from './utils/selector';
 describe('::mainnet', function () {
     [
         {
-            name: 'big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB',
+            filename: 'big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB',
             members: [
                 /function Try\(string _arg0\) public payable/m,
                 /function question\(\) public/m,
@@ -20,7 +20,7 @@ describe('::mainnet', function () {
             ],
             selectors: ['bedf0f4a', 'c76de3e9'],
         }, {
-            name: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
+            filename: 'BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa',
             members: [
                 /function get_deposit_root\(\) public/m,
                 /function get_deposit_count\(\) public/m,
@@ -30,55 +30,55 @@ describe('::mainnet', function () {
             ercs: ['ERC165'] as const,
             skipSnapshot: true,
         }, {
-            name: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
+            filename: 'Compound-0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
             members: [],
             skipSnapshot: true,
         }, {
-            name: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467',
+            filename: 'Contract-0x60d20e0150F3A9717A7cb50d3F617Ebf6D953467',
             members: [],
             skipSnapshot: true,
         }, {
-            name: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
+            filename: 'CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d',
             members: [],
             ercs: ['ERC165'] as const,
             skipSnapshot: true,
         }, {
-            name: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
+            filename: 'DAI-0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
             members: [],
             ercs: ['ERC20'] as const,
             checkEvents: false,
         }, {
-            name: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
+            filename: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
             members: [],
             selectors: [],
         }, {
-            name: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
+            filename: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
             members: [],
             ercs: ['ERC721'] as const,
             checkEvents: false,
             skipSnapshot: true,
         }, {
-            name: 'OmniMerlin-0x234F534D322dF1a8a236a2F952d6657bf800F1FA',
+            filename: 'OmniMerlin-0x234F534D322dF1a8a236a2F952d6657bf800F1FA',
             members: [],
         }, {
-            name: 'ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3',
+            filename: 'ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3',
             members: [],
         }, {
-            name: 'SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe',
+            filename: 'SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe',
             members: [],
             skipSnapshot: true,
         }, {
-            name: 'SHA1Digest-0x9c9fcEa62bD0A723b62A2F1e98dE0Ee3df813619',
+            filename: 'SHA1Digest-0x9c9fcEa62bD0A723b62A2F1e98dE0Ee3df813619',
             members: [
                 /function verify\(bytes _arg0, bytes _arg1\) public/m,
             ],
         }, {
-            name: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
+            filename: 'SmithBotExecutor-0x000000000000Df8c944e775BDe7Af50300999283',
             members: [],
             selectors: ['00000000', '83197ef0', 'cc066bb8', 'f04f2707'],
             skipSnapshot: true,
         }, {
-            name: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+            filename: 'UnicornToken-0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
             members: [
                 /event Transfer\(address indexed _arg0, address indexed _arg1, uint256 _arg2\);$/m,
                 /event FrozenFunds\(address _arg0, bool _arg1\);$/m,
@@ -107,7 +107,7 @@ describe('::mainnet', function () {
              *
              * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
              */
-            name: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
+            filename: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
             members: [
                 /address public implementation;/m,
                 /address public admin;/m,
@@ -116,7 +116,7 @@ describe('::mainnet', function () {
                 /function changeAdmin\(address _arg0\) public {$/m,
             ],
         }, {
-            name: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            filename: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             members: [
                 /mapping \(address => unknown\) public balanceOf;$/m,
                 /mapping \(address => mapping \(address => uint256\)\) public allowance;$/m,
@@ -132,8 +132,10 @@ describe('::mainnet', function () {
             ],
             ercs: ['ERC20'] as const,
         },
-    ].forEach(({ name, members, ercs, checkEvents, selectors, skipSnapshot }) => {
-        describe(`${name}`, function () {
+    ].forEach(({ filename, members, ercs, checkEvents, selectors, skipSnapshot }) => {
+        const name = filename.split('-')[0];
+
+        describe(`${filename}`, function () {
             const defs = members.map(line =>
                 line.source
                     .replace(/\\/g, '')
@@ -171,7 +173,7 @@ describe('::mainnet', function () {
                 // This seems to be an issue on solidify SmithBot, which is around ~4.3M
                 this.timeout(10000);
 
-                const bytecode = readFileSync(`./test/mainnet/${name}.bytecode`, 'utf8');
+                const bytecode = readFileSync(`./test/mainnet/${filename}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patchdb();
                 text = contract.reduce().patchdb().solidify();
             });
