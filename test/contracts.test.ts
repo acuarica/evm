@@ -27,6 +27,7 @@ describe('::contracts', function () {
                 function get() external pure returns (uint256) { return 1; }
                 function getPayable() external payable returns (uint256) { return 1; }
             }`),
+
             _('symbols', `contract Test {
                 function getBlockHash() public view returns (bytes32) { return blockhash(7); }
                 function getBalance(address eoa) public view returns (uint256) { return eoa.balance; }
@@ -49,7 +50,39 @@ describe('::contracts', function () {
                 function setValue0(uint256 newValue) internal { value = newValue; }
             }`),
         ],
+
         control: [
+
+            _('if', `contract Test {
+                uint256 total = 7;
+                fallback() external payable {
+                    if (block.number == 8) {
+                        total = 3;
+                    }
+                    total += 5;
+                }
+            }`),
+
+            _('nested if', `contract Test {
+                uint256 total = 7;
+                fallback() external payable {
+                    if (block.number == 8) {
+                        uint256 x = total;
+                        x += 11;
+                        if (block.number == 9) {
+                            total = 3;
+                        }
+                        total += 7;
+                        if (block.number == 27) {
+                            total += 11;
+                        } else {
+                            total += 15;
+                        }
+                    }
+                    total += 5;
+                }
+            }`),
+
             _('if-else', `contract Test {
                 uint256 value;
                 fallback () external payable {
@@ -62,24 +95,78 @@ describe('::contracts', function () {
                     value = temp;
                 }
             }`),
+
             _('constant for-loop', `contract Test {
                 event Deposit(uint256);
                 fallback() external payable {
                     for (uint256 i = 0; i < 10; i++) emit Deposit(i);
                 }
             }`),
+
             _('bounded for-loop', `contract Test {
                 uint256 value;
                 fallback() external payable {
                     for (uint256 i = 0; i < block.number; i++) value = i;
                 }
             }`),
+
+            // _('bounded for-loop sum', `contract Test {
+            //     uint256 total = 0;
+            //     fallback() external payable {
+            //         uint256 sum = 0xa;
+            //         for (uint256 i = 9; i < block.number; i++) {
+            //             sum += i;
+            //         }
+
+            //         total = sum;
+            //     }
+            // }`),
+
             _('infinite for-loop', `contract Test {
                 event Deposit(uint256);
                 fallback() external payable {
                     for (uint256 i = 0; i < block.number; ) emit Deposit(i);
                 }
             }`),
+
+            // _('while-loop', `contract Test {
+            //     function loop(uint256 n) external pure returns (uint256) {
+            //         uint256 sum = 0;
+            //         uint256 i = 0;
+            //         while (i < n) {
+            //             sum += i;
+            //             i++;
+            //         }
+            //         return sum;
+            //     }
+            // }`),
+
+            // _('non-terminating while-loop', `contract Test {
+            //     function loop() external pure returns (uint256) {
+            //         uint256 sum = 0;
+            //         uint256 i = 0;
+            //         while (true) {
+            //             sum += i;
+            //             i++;
+            //         }
+            //         return sum;
+            //     }
+            // }`),
+
+            // _('for-if-else', `contract Test {
+            //     fallback() external payable {
+            //         uint256 sum = 0;
+            //         for (uint256 i = 9; i < block.number; i++) {
+            //             if (i == 300) {
+            //                 sum += 3;
+            //             } else {
+            //                 sum += 7;
+            //             }
+            //         }
+            //         sum += 5;
+            //     }
+            // }`),
+
             _('require', `contract Test {
                 mapping (address => uint256) private _allowances;
                 function approve(uint256 amount) external {
@@ -91,6 +178,7 @@ describe('::contracts', function () {
                     _allowances[owner] = amount;
                 }
             }`),
+
             _('modifier', `contract Test {
                 uint256 private _value;
                 address private _owner;
@@ -109,6 +197,7 @@ describe('::contracts', function () {
                     selfdestruct(payable(msg.sender));
                 }
             }`),
+
             _('create-codecopy', `contract Token {
                 event Deposit(uint256 value);
                 fallback() external payable {
