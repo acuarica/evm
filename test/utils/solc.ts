@@ -1,5 +1,3 @@
-/* eslint-disable mocha/no-exports */
-
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as path from 'path';
@@ -9,7 +7,7 @@ import wrapper from 'solc/wrapper';
 import { maskTitle } from './snapshot';
 import type { Runnable, Suite } from 'mocha';
 
-const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
+export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
 export type Version = (typeof VERSIONS)[number];
 
@@ -103,38 +101,4 @@ export function compile(
     writeCacheFn({ bytecode, abi, metadata });
 
     return { bytecode, abi, metadata };
-}
-
-function forVersion(
-    fn: (
-        compile_: (
-            content: string,
-            context: Mocha.Context,
-            opts?: Parameters<typeof compile>[3],
-        ) => ReturnType<typeof compile>,
-        fallback: 'fallback' | 'function',
-        version: Version
-    ) => void
-) {
-    VERSIONS.forEach(version => {
-        if (version.startsWith(process.env['SOLC'] ?? '')) {
-            // https://docs.soliditylang.org/en/latest/060-breaking-changes.html#semantic-and-syntactic-changes
-            // https://docs.soliditylang.org/en/latest/060-breaking-changes.html#how-to-update-your-code
-            const fallback = version.startsWith('0.5') ? 'function' : 'fallback';
-
-            describe(`solc-v${version}`, function () {
-                fn(
-                    (content, context, opts) => compile(content, version, context, opts),
-                    fallback,
-                    version
-                );
-            });
-        }
-    });
-}
-
-export function contracts(title: string, fn: Parameters<typeof forVersion>[0]) {
-    describe(`contracts::${title}`, function () {
-        forVersion(fn);
-    });
 }
