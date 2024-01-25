@@ -90,7 +90,6 @@
         "compile": "tsc",
         "lint": "eslint .",
         "test": "yarn compile && mocha",
-        "test:smoke": "mocha 'test/*.smoke.js'",
         "coverage": "yarn compile && c8 mocha",
         "bundle": "webpack --mode production",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
