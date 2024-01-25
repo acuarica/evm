@@ -59,7 +59,16 @@ export class EVM<M extends string> {
      */
     readonly bytecode: Uint8Array;
 
-    readonly _ids = new Ids<State<Inst, Expr>>();
+    /**
+     * 
+     */
+    readonly _ids = {
+        _count: 0,
+
+        push(elem: State) {
+            if (elem.id === undefined) elem.id = this._count++;
+        }
+    };
 
     constructor(
         bytecode: Parameters<typeof arrayify>[0],
@@ -268,13 +277,4 @@ function cmp({ stack: lhs }: Ram<Expr>, { stack: rhs }: Ram<Expr>) {
         }
     }
     return true;
-}
-
-class Ids<T extends { id: number | undefined }> {
-    _count = 0;
-
-    push(elem: T): number {
-        if (elem.id === undefined) elem.id = this._count++;
-        return elem.id;
-    }
 }
