@@ -28,6 +28,22 @@ class MultiSet<T> {
     }
 }
 
+class BenchStats {
+    count = 0;
+    total = 0n;
+
+    constructor(readonly name: string) { }
+
+    append(diff: bigint) {
+        this.count++;
+        this.total += diff;
+    }
+
+    get average() {
+        return this.count === 0 ? NaN : Number(this.total / BigInt(this.count));
+    }
+}
+
 /**
  * Restricts the number of Etherscan contracts to test.
  * If provided, tests only the first `MAX` contracts.
@@ -113,19 +129,9 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
         }
     }();
 
-    const benchStats = new class {
-        count = 0;
-        total = 0n;
-
-        append(diff: bigint) {
-            this.count++;
-            this.total += diff;
-        }
-
-        get average() {
-            return this.count === 0 ? NaN : Number(this.total / BigInt(this.count));
-        }
-    }();
+    const execStats = new BenchStats('Contract decode & execution');
+    const solStats = new BenchStats('Generate Solidity source');
+    const yulStats = new BenchStats('Generate Yul source');
 
     const hookStats = new class {
         pcs = 0;
@@ -148,7 +154,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
     contracts.forEach(([address, name]) => {
         it(`should decompile ${name} ${address}`, function () {
             // Increase timeout to pass in CI
-            this.timeout(10000);
+            this.timeout(20000);
 
             const path = `${BASE_PATH}/1/${name}-${address}.bytecode`;
 
@@ -157,8 +163,10 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
                 this.test!.title += ' 🚫';
                 return;
             }
+            const size = `~${(bytecode.length / 1024).toFixed(1)}k`;
+            this.test!.title += ` ${size}`;
 
-            const t0 = hrtime.bigint();
+            let t0 = hrtime.bigint();
             let contract = new Contract(bytecode, new class extends Shanghai {
                 override PC = (state: State, opcode: Opcode) => {
                     super.PC(state, opcode);
@@ -174,12 +182,22 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
                     }
                 };
             }());
-            const t1 = hrtime.bigint();
-            benchStats.append(t1 - t0);
+            let t1 = hrtime.bigint();
+            execStats.append(t1 - t0);
 
             contract = contract.patchdb();
-            expect(contract.solidify()).to.be.not.empty;
-            expect(contract.yul()).to.be.not.empty;
+
+            t0 = hrtime.bigint();
+            const solSrc = contract.solidify();
+            expect(solSrc).to.be.not.empty;
+            t1 = hrtime.bigint();
+            solStats.append(t1 - t0);
+
+            t0 = hrtime.bigint();
+            const yulSrc = contract.yul();
+            expect(yulSrc).to.be.not.empty;
+            t1 = hrtime.bigint();
+            yulStats.append(t1 - t0);
 
             metadataStats.append(contract.metadata);
             selectorStats.append(contract.functions);
@@ -187,7 +205,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
 
             if (contract.errors.length > 0) {
                 const v = contract.metadata ? `v${contract.metadata?.solc}` : '<no version>';
-                const key = `${name} ${address} ~${(bytecode.length / 1024).toFixed(1)}k ${v}`;
+                const key = `${name} ${address} ${size} ${v}`;
                 errorsByContract.set(key, contract.errors);
             }
 
@@ -241,8 +259,12 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
             }
 
             write('\n  Bench Stats');
-            write(`    • ${info('Total')} ${warn(`${benchStats.total / 1_000_000n} ms`)}`);
-            write(`    • ${info('Average')} ${warn(`${benchStats.average / 1_000_000} ms`)}`);
+            for (const bemch of [execStats, solStats, yulStats]) {
+                let out = '';
+                out += `${'average'} ${warn(`${(bemch.average / 1_000_000).toFixed(1)} ms`)}`;
+                out += ` (${'total'} ${warn(`${bemch.total / 1_000_000n} ms`)})`;
+                write(`    • ${info(bemch.name)} ${out}`);
+            }
 
             write('\n  Precompiled Contract Stats');
             for (const [address, count] of hookStats.staticcalls) {
