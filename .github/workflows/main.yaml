@@ -85,9 +85,6 @@ jobs:
           FORCE_COLOR: 0
       - uses: fingerprintjs/action-coverage-report-md@v1
         id: coverage
-      - uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          message: ${{ steps.coverage.outputs.markdownReport }}
       - name: Add coverage report to the job summary
         run: |
           echo "## Code Coverage" >> $GITHUB_STEP_SUMMARY
