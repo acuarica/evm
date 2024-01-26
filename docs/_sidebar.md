@@ -3,6 +3,7 @@
 - [Getting Started](README)
 - [Examples](examples)
 - [Guide](guide)
+- [Internals](internals)
 - **TypeScript Reference**
 - [API docs](https://acuarica.github.io/evm/tsdoc)
 - **Links**
