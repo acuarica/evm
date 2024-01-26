@@ -80,6 +80,25 @@ describe('::mainnet', function () {
                 '809864e1',
             ]
         }, {
+            filename: 'Leverage-0x13df570de8465f5319b6a2c60de21716400074e7',
+            members: [],
+            selectors: [
+                '150b7a02',
+                '32b89bec',
+                '628b2207',
+                '86401959',
+                '8da5cb5b',
+                '8fdbcbc8',
+                '903da4ed',
+                '94a2d3d5',
+                'a0c1d3fc',
+                'aaea9191',
+                'c4fc0674',
+                'c89f8a5c',
+                'f2fde38b',
+            ],
+            skipSnapshot: true,
+        }, {
             filename: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
             members: [],
             ercs: ['ERC721'] as const,
