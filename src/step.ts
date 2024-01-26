@@ -740,8 +740,12 @@ const ConstantinopleStep = {
                     ? new Sig(left.val.toString(16).padStart(8, '0'))
                     : undefined;
             };
-            const { left, right } = stack.pop() as ast.Eq;
-            stack.push(SHRsig(left, right) ?? SHRsig(right, left) ?? new ast.Eq(left, right));
+            const { left, right } = stack.top;
+            const sig = SHRsig(left, right) ?? SHRsig(right, left);
+            if (sig !== undefined) {
+                stack.pop();
+                stack.push(sig);
+            }
         }
     }],
     ISZERO: [FrontierStep.ISZERO[0], ({ stack }: Operand<Expr>) => {
@@ -802,7 +806,7 @@ export const VyperFunctionSelector = {
     XOR: [FrontierStep.XOR[0], ({ stack }: Operand<Expr>) => {
         FrontierStep.XOR[1]({ stack });
 
-        let top = stack.top;
+        const top = stack.top;
         if (top?.tag !== 'Xor') throw new Error('expected Xor');
 
         const XORsig = (left: Expr, right: Expr): Sig | undefined => {
@@ -812,10 +816,10 @@ export const VyperFunctionSelector = {
                 : undefined;
         };
         const { left, right } = top;
-        top = XORsig(left, right) ?? XORsig(right, left);
-        if (top !== undefined) {
+        const sig = XORsig(left, right) ?? XORsig(right, left);
+        if (sig !== undefined) {
             stack.pop();
-            stack.push(top);
+            stack.push(sig);
         }
     }],
 } satisfies Step;
