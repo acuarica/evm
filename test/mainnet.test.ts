@@ -52,6 +52,23 @@ describe('::mainnet', function () {
             members: [],
             selectors: [],
         }, {
+            filename: 'FundraisingGaugeFx-0x28ED637C5e3371c2678C2d346dF04Fb634ED832d',
+            members: [],
+            selectors: [
+                '4b820093',
+                'b4d8063e',
+                '90b22997',
+                '9c868ac0',
+                '180692d0',
+                'be5d1be9',
+                'f851a440',
+                'cd6dc687',
+                '09400707',
+                'a9a4a983',
+                'f7260d3e',
+                '809864e1',
+            ]
+        }, {
             filename: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
             members: [],
             ercs: ['ERC721'] as const,

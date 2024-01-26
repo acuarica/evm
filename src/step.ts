@@ -697,16 +697,18 @@ const FrontierStep = {
         const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);
 
         const fallBranch = Branch.make(opcode.pc + 1, state);
+        const destBranch = Branch.make(destpc, state);
 
         let last: SigCase | Jumpi;
         if (cond.tag === 'Sig') {
+            const [pc, contBranch] = cond.positive ? [destpc, fallBranch] : [opcode.pc + 1, destBranch];
             this.functionBranches.set(cond.selector, {
-                pc: destpc,
+                pc,
                 state: state.clone(),
             });
-            last = new SigCase(cond, offset, fallBranch);
+            last = new SigCase(cond, offset, contBranch);
         } else {
-            last = new ast.Jumpi(cond, offset, fallBranch, Branch.make(destpc, state), pushStateId);
+            last = new ast.Jumpi(cond, offset, fallBranch, destBranch, pushStateId);
         }
         state.halt(last);
     }],
@@ -790,6 +792,34 @@ const ShanghaiStep = {
     PUSH0: [0x5f, (state: State<Inst, Expr>) => state.stack.push(new Val(0n, state.id))],
 } satisfies Step;
 
+// TODO implement calldatacopy to ensure mload(0x0) is calldataload(0x0)
+// https://github.com/vyperlang/vyper/issues/1603#issuecomment-529238275
+const isSelectorMLoadCallData = (expr: Expr) =>
+    expr.tag === 'MLoad' &&
+    expr.location.isZero();
+
+export const VyperFunctionSelector = {
+    XOR: [FrontierStep.XOR[0], ({ stack }: Operand<Expr>) => {
+        FrontierStep.XOR[1]({ stack });
+
+        let top = stack.top;
+        if (top?.tag !== 'Xor') throw new Error('expected Xor');
+
+        const XORsig = (left: Expr, right: Expr): Sig | undefined => {
+            right = right.tag === 'Local' ? right.value : right;
+            return left.isVal() && isSelectorMLoadCallData(right)
+                ? new Sig(left.val.toString(16).padStart(8, '0'), false)
+                : undefined;
+        };
+        const { left, right } = top;
+        top = XORsig(left, right) ?? XORsig(right, left);
+        if (top !== undefined) {
+            stack.pop();
+            stack.push(top);
+        }
+    }],
+} satisfies Step;
+
 /**
  * 
  */
@@ -847,4 +877,4 @@ export const Paris = ForkFactory(ParisStep);
  * @see https://eips.ethereum.org/EIPS/eip-3855
  * @see https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/
  */
-export const Shanghai = ForkFactory(ShanghaiStep);
+export const Shanghai = ForkFactory({ ...ShanghaiStep, ...VyperFunctionSelector });

@@ -618,3 +618,7 @@
   }
 ]
 ```
+
+```errors FundraisingGaugeFx-0x28ED637C5e3371c2678C2d346dF04Fb634ED832d/detect-errors
+[]
+```
