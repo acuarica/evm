@@ -150,7 +150,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined);
 
     contracts.forEach(([address, name]) => {
-        it(`should decompile ${name} ${address}`, function () {
+        it(`${name} ${address}`, function () {
             // Increase timeout to pass in CI
             this.timeout(20000);
 
@@ -208,12 +208,16 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
                 this.test!.title += c.yellow(' ⧧\u2717');
             } else {
                 const abiPath = `${BASE_PATH}/1/${name}-${address}.abi.json`;
-                const abi = JSON.parse(readFileSync(abiPath, 'utf8')) as ABI;
-                const selectors = abi
-                    .filter(m => m.type === 'function')
-                    .map(fn => fnselector(fn));
-                expect(Object.keys(contract.functions)).to.have.members(selectors);
-                this.test!.title += ` {}\u2713`;
+                const abi = JSON.parse(readFileSync(abiPath, 'utf8')) as ABI | null;
+                if (abi !== null) {
+                    const selectors = abi
+                        .filter(m => m.type === 'function')
+                        .map(fn => fnselector(fn));
+                    expect(Object.keys(contract.functions).sort()).to.have.members(selectors.sort());
+                    this.test!.title += ` {}\u2713`;
+                } else {
+                    this.test!.title += c.yellow(' {}-');
+                }
             }
 
             const externals = [
