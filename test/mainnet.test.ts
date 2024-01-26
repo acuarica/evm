@@ -48,6 +48,17 @@ describe('::mainnet', function () {
             ercs: ['ERC20'] as const,
             checkEvents: false,
         }, {
+            filename: 'Disperse-0x000000000049f44766dc8540e40a2ed29b636319',
+            members: [],
+            selectors: [
+                '0000004a',
+                '000000c9',
+                '000000df',
+                '00000088',
+                '0000004b',
+                '00000092',
+            ],
+        }, {
             filename: 'ENS-0x314159265dD8dbb310642f98f50C066173C1259b',
             members: [],
             selectors: [],

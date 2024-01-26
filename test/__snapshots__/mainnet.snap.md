@@ -622,3 +622,7 @@
 ```errors FundraisingGaugeFx-0x28ED637C5e3371c2678C2d346dF04Fb634ED832d/detect-errors
 []
 ```
+
+```errors Disperse-0x000000000049f44766dc8540e40a2ed29b636319/detect-errors
+[]
+```
