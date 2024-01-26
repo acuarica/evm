@@ -802,7 +802,27 @@ const isSelectorMLoadCallData = (expr: Expr) =>
     expr.tag === 'MLoad' &&
     expr.location.isZero();
 
-export const VyperFunctionSelector = {
+const VyperFunctionSelector = {
+    ISZERO: [ConstantinopleStep.ISZERO[0], ({ stack }: Operand<Expr>) => {
+        ConstantinopleStep.ISZERO[1]({ stack });
+
+        const top = stack.top;
+        if (top?.tag === 'IsZero' && top.value.tag === 'Eq') {
+            const sel = (left: Expr, right: Expr): Sig | undefined => {
+                right = right.tag === 'Local' ? right.value : right;
+                return left.isVal() && isSelectorMLoadCallData(right)
+                    ? new Sig(left.val.toString(16).padStart(8, '0'), false)
+                    : undefined;
+            };
+            const { left, right } = top.value;
+            const sig = sel(left, right) ?? sel(right, left);
+            if (sig !== undefined) {
+                stack.pop();
+                stack.push(sig);
+            }
+        }
+    }],
+
     XOR: [FrontierStep.XOR[0], ({ stack }: Operand<Expr>) => {
         FrontierStep.XOR[1]({ stack });
 
@@ -811,7 +831,7 @@ export const VyperFunctionSelector = {
 
         const XORsig = (left: Expr, right: Expr): Sig | undefined => {
             right = right.tag === 'Local' ? right.value : right;
-            return left.isVal() && isSelectorMLoadCallData(right)
+            return left.isVal() && (isSelectorMLoadCallData(right) || isSelectorCallData(right))
                 ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                 : undefined;
         };
@@ -824,7 +844,7 @@ export const VyperFunctionSelector = {
     }],
 } satisfies Step;
 
-export const SubFunctionSelector = {
+const SubFunctionSelector = {
     SUB: [FrontierStep.SUB[0], ({ stack }: Operand<Expr>) => {
         FrontierStep.SUB[1]({ stack });
 

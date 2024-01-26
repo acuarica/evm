@@ -163,6 +163,21 @@ describe('::mainnet', function () {
                 /function changeAdmin\(address _arg0\) public {$/m,
             ],
         }, {
+            filename: 'VotingEscrowDelegationProxy-0x9B12C90BAd388B7e417271eb20678D1a7759507c',
+            members: [],
+            selectors: [
+                'bbf7408a',
+                '4b74efb7',
+                'f4b446a3',
+                'e3a8d3ab',
+                '61893921',
+                'df5cf723',
+                '680c7783',
+                '47c8715f',
+                '5866507a',
+                '3c2fcbf4',
+            ],
+        }, {
             filename: 'WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             members: [
                 /mapping \(address => unknown\) public balanceOf;$/m,

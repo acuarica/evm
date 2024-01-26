@@ -630,3 +630,7 @@
 ```errors Leverage-0x13df570de8465f5319b6a2c60de21716400074e7/detect-errors
 []
 ```
+
+```errors VotingEscrowDelegationProxy-0x9B12C90BAd388B7e417271eb20678D1a7759507c/detect-errors
+[]
+```
