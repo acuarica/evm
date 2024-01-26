@@ -824,6 +824,28 @@ export const VyperFunctionSelector = {
     }],
 } satisfies Step;
 
+export const SubFunctionSelector = {
+    SUB: [FrontierStep.SUB[0], ({ stack }: Operand<Expr>) => {
+        FrontierStep.SUB[1]({ stack });
+
+        const top = stack.top;
+        if (top?.tag !== 'Sub') throw new Error('expected Sub');
+
+        const SUBsig = (left: Expr, right: Expr): Sig | undefined => {
+            right = right.tag === 'Local' ? right.value : right;
+            return left.isVal() && isSelectorCallData(right.eval())
+                ? new Sig(left.val.toString(16).padStart(8, '0'), false)
+                : undefined;
+        };
+        const { left, right } = top;
+        const sig = SUBsig(left, right) ?? SUBsig(right, left);
+        if (sig !== undefined) {
+            stack.pop();
+            stack.push(sig);
+        }
+    }],
+} satisfies Step;
+
 /**
  * 
  */
@@ -881,4 +903,4 @@ export const Paris = ForkFactory(ParisStep);
  * @see https://eips.ethereum.org/EIPS/eip-3855
  * @see https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/
  */
-export const Shanghai = ForkFactory({ ...ShanghaiStep, ...VyperFunctionSelector });
+export const Shanghai = ForkFactory({ ...ShanghaiStep, ...VyperFunctionSelector, ...SubFunctionSelector });

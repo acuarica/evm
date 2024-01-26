@@ -626,3 +626,7 @@
 ```errors Disperse-0x000000000049f44766dc8540e40a2ed29b636319/detect-errors
 []
 ```
+
+```errors Leverage-0x13df570de8465f5319b6a2c60de21716400074e7/detect-errors
+[]
+```
