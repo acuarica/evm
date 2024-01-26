@@ -246,7 +246,7 @@ export class Sar extends Shift {
 
 export class Sig extends Tag {
     readonly tag = 'Sig';
-    constructor(readonly selector: string) {
+    constructor(readonly selector: string, readonly positive = true) {
         super();
     }
     eval(): Expr {
