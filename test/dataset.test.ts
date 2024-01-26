@@ -3,10 +3,12 @@ import { hrtime } from 'process';
 
 import c from 'ansi-colors';
 import { expect } from 'chai';
+import type { ABI } from 'solc';
 
-import { Contract, ERCIds, type Opcode, Shanghai, sol, type State } from 'sevm';
-import type { StaticCall } from 'sevm/ast';
+import { Contract, ERCIds, Shanghai, sol, type Opcode, type State } from 'sevm';
 import 'sevm/4bytedb';
+import type { StaticCall } from 'sevm/ast';
+import { fnselector } from './utils/selector';
 
 /**
  * 
@@ -80,10 +82,6 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
 
     const csvPath = `${BASE_PATH}/export-verified-contractaddress-opensource-license.csv`;
     const csv = readFileSync(csvPath, 'utf8');
-
-    const error = c.red;
-    const warn = c.yellow;
-    const info = c.blue;
 
     const errorsByContract: Map<string, Contract['errors']> = new Map();
     const metadataStats = new class {
@@ -207,6 +205,15 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
                 const v = contract.metadata ? `v${contract.metadata?.solc}` : '<no version>';
                 const key = `${name} ${address} ${size} ${v}`;
                 errorsByContract.set(key, contract.errors);
+                this.test!.title += c.yellow(' ⧧\u2717');
+            } else {
+                const abiPath = `${BASE_PATH}/1/${name}-${address}.abi.json`;
+                const abi = JSON.parse(readFileSync(abiPath, 'utf8')) as ABI;
+                const selectors = abi
+                    .filter(m => m.type === 'function')
+                    .map(fn => fnselector(fn));
+                expect(Object.keys(contract.functions)).to.have.members(selectors);
+                this.test!.title += ` {}\u2713`;
             }
 
             const externals = [
@@ -222,6 +229,10 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
     });
 
     after(function () {
+        const error = c.red;
+        const warn = c.yellow;
+        const info = c.cyan;
+
         function getSummary(enableColors: boolean) {
             const enabled = c.enabled;
 
@@ -261,8 +272,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
             write('\n  Bench Stats');
             for (const bemch of [execStats, solStats, yulStats]) {
                 let out = '';
-                out += `${'average'} ${warn(`${(bemch.average / 1_000_000).toFixed(1)} ms`)}`;
-                out += ` (${'total'} ${warn(`${bemch.total / 1_000_000n} ms`)})`;
+                out += `${'average'} ${c.magenta(`${(bemch.average / 1_000_000).toFixed(1)} ms`)}`;
+                out += ` (${'total'} ${c.magenta(`${bemch.total / 1_000_000n} ms`)})`;
                 write(`    • ${info(bemch.name)} ${out}`);
             }
 

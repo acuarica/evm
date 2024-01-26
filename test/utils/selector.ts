@@ -1,7 +1,7 @@
 import { EventFragment, FunctionFragment } from 'ethers';
 import { Contract } from 'sevm';
 
-export function fnselector(sig: string): string {
+export function fnselector(sig: string | object): string {
     return FunctionFragment.from(sig).selector.substring(2);
 }
 
