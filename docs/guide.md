@@ -5,8 +5,8 @@
 Use methods `getFunctions` and `getEvents` to get functions and events respectively.
 
 ```typescript
-import { Contract } from '@acuarica/evm';
-import '@acuarica/evm/selector';
+import { Contract } from 'sevm';
+import 'sevm/4bytedb';
 
 const contract = new Contract(bytecode).patchdb();
 console.log(contract.getFunctions());
