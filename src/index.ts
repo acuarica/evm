@@ -101,7 +101,9 @@ export class Contract {
         (contract as { payable: unknown }).payable = !requiresNoValue(contract.main);
         (contract as { functions: unknown }).functions = {};
         for (const [selector, fn] of Object.entries(this.functions)) {
-            contract.functions[selector] = new PublicFunction(contract, reduce(fn.stmts), selector as string, fn.payable);
+            const newfn = new PublicFunction(contract, reduce(fn.stmts), selector as string, fn.payable);
+            newfn.label = fn.label;
+            contract.functions[selector] = newfn;
         }
 
         return contract;

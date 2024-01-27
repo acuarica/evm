@@ -237,7 +237,7 @@ describe('::mainnet', function () {
 
                 const bytecode = readFileSync(`./test/mainnet/${filename}.bytecode`, 'utf8');
                 contract = new Contract(bytecode).patchdb();
-                text = contract.reduce().patchdb().solidify();
+                text = contract.reduce().solidify();
             });
 
             it('should match `chunks` coverage snapshot', function () {
