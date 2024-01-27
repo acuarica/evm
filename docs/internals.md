@@ -1,13 +1,16 @@
 # Internals
 
+In this document we describe how compilers emit EVM bytecode in certain situations.
+This helps understand the specific patterns `sevm` needs to look for.
+
 ## Detection of Function Selectors
 
 The first four bytes of the call data for a function call specifies the function to be called.
 See <https://docs.soliditylang.org/en/latest/abi-spec.html#function-selector> for more details.
-In Yul it is represented as `calldataload(0x0)` and some additional machinery is needed to get only the first four bytes.
 
+It is represented as `calldataload(0x0)` (using [Yul](https://docs.soliditylang.org/en/latest/yul.html) syntax). Some additional machinery is needed to get only the first four bytes.
 Once the first four bytes are obtained,
-the function selector is compared against each method's function selector to decide which branch to jump to.
+the function selector is compared against each method's function selectors to decide which branch to take to continue the bytecode execution.
 
 ### Solidity
 
@@ -20,13 +23,23 @@ eq(shr(calldataload(0x0), 0xe0), 0x01234567)
 ```
 
 If this condition evaluates to `1`, then the program counter jumps to the beginning of the contract's method indicated by the function selector.
+This is the most used current vast majority of contracts are deployed using this schema to dispatch the contract's selected method.
 
 There is a special case when the contract is compiled with optimizations enabled and the contract selector to match is `0x00000000`.
-In this case, instead of using the schema described above it uses a simple comparison
+In this case, instead of using the schema described above it uses the `iszero` instruction
 
 ```yul
 iszero(shr(calldataload(0x0), 0xe0))
 ```
+
+However, when the bytecode is placed in a way that it is better to take the fall-through branch (the function gets selected when this condition is `false`),
+the following schema is used
+
+```yul
+sub(0x01234567, shr(calldataload(0x0), 0xe0))
+```
+
+_see for example <https://etherscan.io/address/0x13df570de8465f5319b6a2c60de21716400074e7#code>_
 
 **<v0.5.5**.
 
@@ -42,8 +55,8 @@ This was because [bitwise shifting instructions in the EVM](https://eips.ethereu
 
 Instead of masking `calldataload(0x0)`, [Vyper](https://docs.vyperlang.org/en/stable/) uses a different strategy to obtain the function selector.
 It loads `calldataload(0x0)` carefully into memory such that afterwards a simple `mload(0x0)` can retrieve the function selector.
-It achieve this goal in two similar ways.
-The first one using `MSTORE` in the following sequence of mnemonics
+It achieves this goal in two similar ways.
+The first one is using `MSTORE` in the following sequence of mnemonics
 
 ```mnemonic
 PUSH0
@@ -60,39 +73,48 @@ the rest of the memory is empty thus returning `0`s.
 A later `mload(0x0)` pushes onto the stack the first memory word,
 effectively returning `calldataload(0x0)`.
 
-**vyper:0.2.15**.
+The second one is using `CALLDATACOPY` to achieve the same result
 
-<https://etherscan.io/address/0x9B12C90BAd388B7e417271eb20678D1a7759507c#code>
-
-```yul
-iszero(eq(mload(0x0), 0xbbf7408a))`
+```mnemonic
+PUSH1 0x04
+PUSH1 0x00
+PUSH1 0x1c
+CALLDATACOPY
 ```
 
-fall-through
+_see it in actions in [evm.codes](https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0x01234567&codeType=Mnemonic&code='~04z~00z~1czCALLDATACOPYz'~PUSH1%200xz%5Cn%01z~_)_
 
-```txt
-28  PUSH4 0xbbf7408a    〒 0xbbf7408a|mload(0x0)
-33  DUP2                〒 local0|0xbbf7408a|local0
-34  EQ                  〒 eq(local0, 0xbbf7408a)|local0
-35  ISZERO              〒 iszero(eq(local0, 0xbbf7408a))|local0
-36  PUSH2   0x00cd      〒 [J]0xcd|iszero(eq(local0, 0xbbf7408a))|local0
-39  JUMPI               〒 local0
-```
+> **The list of Vyper versions below is not exhaustive.**
+> **It is based solely on contracts deployed on Ethereum mainnet.**
 
 **vyper:0.3.3**.
 
-<https://etherscan.io/address/0xa2E88993a0f0dc6e6020431477f3A70c86109bBf#code>
+It uses the following pattern taking the fall-through branch when the function selector matches the call data
 
 ```yul
-xor(shr(calldataload(0x0), 0xe0), 0xa2114cdb)
+xor(shr(calldataload(0x0), 0xe0), 0x01234567)
 ```
 
-fall-through
+> Note that the function selector is obtained by masking `calldataload(0x0)` and not from memory using `mload(0x0)`.
 
-```txt
-25  PUSH4 0xa2114cdb    〒 0xa2114cdb|shr(calldataload(0x0), 0xe0)
-30  DUP2                〒 local0|0xa2114cdb|local0
-31  XOR                 〒 xor(local0, 0xa2114cdb)|local0
-32  PUSH2 0x002d        〒 [J]0x2d|xor(local0, 0xa2114cdb)|local0
-35  JUMPI               〒 local0
+_see for example <https://etherscan.io/address/0xa2E88993a0f0dc6e6020431477f3A70c86109bBf#code>_
+
+**vyper:0.3.1**.
+
+It uses the following pattern taking the fall-through branch when the function selector matches the call data
+
+```yul
+xor(mload(0x0), 0x01234567)
 ```
+
+_see for example <https://etherscan.io/address/0x28ED637C5e3371c2678C2d346dF04Fb634ED832d#code>_
+
+**vyper:0.2.15**.
+
+It uses the following pattern taking the fall-through branch when the function selector matches the call data
+
+```yul
+iszero(eq(mload(0x0), 0x01234567))`
+```
+
+_see for example <https://etherscan.io/address/0x9B12C90BAd388B7e417271eb20678D1a7759507c#code>_
