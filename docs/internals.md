@@ -82,10 +82,10 @@ PUSH1 0x1c
 CALLDATACOPY
 ```
 
-_see it in actions in [evm.codes](https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0x01234567&codeType=Mnemonic&code='~04z~00z~1czCALLDATACOPYz'~PUSH1%200xz%5Cn%01z~_)_
+_see it in action in [evm.codes](https://www.evm.codes/playground?fork=shanghai&unit=Wei&callData=0x01234567&codeType=Mnemonic&code='~04z~00z~1czCALLDATACOPYz'~PUSH1%200xz%5Cn%01z~_)_
 
 > **The list of Vyper versions below is not exhaustive.**
-> **It is based solely on contracts deployed on Ethereum mainnet.**
+> **It is based solely on contracts found deployed on Ethereum mainnet.**
 
 **vyper:0.3.3**.
 
