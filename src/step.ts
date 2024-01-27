@@ -796,21 +796,31 @@ const ShanghaiStep = {
     PUSH0: [0x5f, (state: State<Inst, Expr>) => state.stack.push(new Val(0n, state.id))],
 } satisfies Step;
 
-// TODO implement calldatacopy to ensure mload(0x0) is calldataload(0x0)
 // https://github.com/vyperlang/vyper/issues/1603#issuecomment-529238275
-const isSelectorMLoadCallData = (expr: Expr) =>
+const isSelectorMLoadCallData = (expr: Expr, memory: Ram<Expr>['memory']) =>
     expr.tag === 'MLoad' &&
-    expr.location.isZero();
+    expr.location.isZero() &&
+    memory[0x0] === undefined && (
+        (
+            memory[0x1c].tag === 'CallDataLoad' &&
+            memory[0x1c].location.isZero()
+        ) || (
+            memory[0x1c].tag === 'DataCopy' &&
+            memory[0x1c].kind === 'calldatacopy' &&
+            memory[0x1c].offset.isZero() &&
+            memory[0x1c].size.isVal() && memory[0x1c].size.val === 0x4n
+        )
+    );
 
 const VyperFunctionSelector = {
-    ISZERO: [ConstantinopleStep.ISZERO[0], ({ stack }: Operand<Expr>) => {
+    ISZERO: [ConstantinopleStep.ISZERO[0], ({ stack, memory }: Ram<Expr>) => {
         ConstantinopleStep.ISZERO[1]({ stack });
 
         const top = stack.top;
         if (top?.tag === 'IsZero' && top.value.tag === 'Eq') {
             const sel = (left: Expr, right: Expr): Sig | undefined => {
                 right = right.tag === 'Local' ? right.value : right;
-                return left.isVal() && isSelectorMLoadCallData(right)
+                return left.isVal() && isSelectorMLoadCallData(right, memory)
                     ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                     : undefined;
             };
@@ -823,7 +833,7 @@ const VyperFunctionSelector = {
         }
     }],
 
-    XOR: [FrontierStep.XOR[0], ({ stack }: Operand<Expr>) => {
+    XOR: [FrontierStep.XOR[0], ({ stack, memory }: Ram<Expr>) => {
         FrontierStep.XOR[1]({ stack });
 
         const top = stack.top;
@@ -831,7 +841,7 @@ const VyperFunctionSelector = {
 
         const XORsig = (left: Expr, right: Expr): Sig | undefined => {
             right = right.tag === 'Local' ? right.value : right;
-            return left.isVal() && (isSelectorMLoadCallData(right) || isSelectorCallData(right))
+            return left.isVal() && (isSelectorMLoadCallData(right, memory) || isSelectorCallData(right))
                 ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                 : undefined;
         };
