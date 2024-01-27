@@ -1,10 +1,17 @@
 
 /**
- * Represents an `Error` that occurs during decoding.
+ * Converts `data` into a suitable `Uint8Array` representation.
+ * When `data` is a `string`, it must be a hexadecimal string.
+ * The hexadecimal string may optionally start with `0x`.
  * 
- * position The position in the bytecode where the error occurred.
- * @param data the hexadecimal string to convert to `Uint8Array`
- * @returns the `Uint8Array` representation of `hexstr`
+ * When `data` is an `ArrayLike<number>`, it is converted to a `Uint8Array`.
+ * If `data` is a `Uint8Array`, it is returned as-is.
+ * 
+ * If `data` is a `string` and it is not a valid hexadecimal string,
+ * it throws an `Error`.
+ * 
+ * @param data the data to convert to `Uint8Array`
+ * @returns the `Uint8Array` representation of `data`
  */
 export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Array {
     if (data instanceof Uint8Array) return data;
@@ -28,6 +35,12 @@ export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Ar
     return buffer;
 }
 
+/**
+ * Converts `data` into a hexadecimal string without the `0x` prefix.
+ * 
+ * @param data the `Uint8Array` to convert to a hexadecimal string
+ * @returns the hexadecimal string representation of `data`
+ */
 export function hexlify(data: Uint8Array): string {
     return data.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
 }

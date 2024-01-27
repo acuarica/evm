@@ -2,18 +2,9 @@ import CBOR from 'cbor-js';
 import { arrayify, hexlify } from './.bytes';
 
 /**
- * https://docs.soliditylang.org/en/v0.5.8/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
- * 
- * https://docs.soliditylang.org/en/v0.5.9/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
- * https://blog.soliditylang.org/2019/05/28/solidity-0.5.9-release-announcement/
- * 
- * v0.6.2 ends with `0x00 0x33` but v0.6.1 ends with `0x00 0x32`
- * https://blog.soliditylang.org/2019/12/17/solidity-0.6.0-release-announcement/
- * https://docs.soliditylang.org/en/v0.6.2/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
- */
-
-/**
  * Represents the metadata hash protocols embedded in bytecode by `solc`.
+ * 
+ * See https://docs.soliditylang.org/en/latest/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode.
  */
 export class Metadata {
     [key: string]: string | Uint8Array | undefined | boolean | number;
@@ -33,16 +24,26 @@ export class Metadata {
 }
 
 /**
- * Splits the `buffer` into executable bytecode and the embedded metadata hash
- * placed by the Solidity compiler if present in the `bytecode`.
- *
- * If `metadata` contains an IPFS hash, it is encoded using base 58.[^1]
+ * Splits `buffer` into the executable EVM bytecode and the embedded metadata hash.
+ * The metadata hash may be placed by the 
+ * [Solidity compiler](https://docs.soliditylang.org/en/latest/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode)
+ * as a [compilation fingerprint](https://docs.sourcify.dev/blog/talk-about-onchain-metadata-hash/#introduction).
+ * It may include the 
+ * [compiler version](https://blog.soliditylang.org/2019/05/28/solidity-0.5.9-release-announcement/)
+ * and the hash of the compilation input, _i.e._ the source code and compilation settings.
  * 
- * @param buffer the contract or library `bytecode` to test for metadata hash.
+ * The bytecode might have been compiled with no metadata or with a different language that does not include metadata.
+ * In this case the `metadata` property is `undefined` and the `bytecode` property is the original `buffer`.
+ *
+ * The metadata hash is placed at the end of the EVM bytecode and encoded using [CBOR](https://cbor.io/).
+ * We use [`cbor-js`](https://github.com/paroga/cbor-js) to decode the metadata hash.
+ * If `metadata` contains an IPFS hash, it is encoded using base 58.
+ * We use [`base58-js`](https://github.com/pur3miish/base58-js) to encode the IPFS hash.
+ * If metadata contains a Swarm hash, _i.e._ `bzzr0` or `bzzr1`, it is encoded using hexadecimal.
+ * 
+ * @param buffer the contract or library bytecode to test for metadata hash.
  * @returns An object where the `bytecode` is the executable code and
  * `metadata` is the metadata hash when the metadata is present.
- * 
- * [^1]: https://github.com/pur3miish/base58-js
  */
 export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
     /**
@@ -53,6 +54,8 @@ export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
 
     /**
      * The metadata if present. Otherwise `undefined`.
+     * 
+     * See https://docs.soliditylang.org/en/latest/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode.
      */
     metadata: Metadata | undefined
 } {
