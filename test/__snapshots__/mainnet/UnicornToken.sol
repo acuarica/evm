@@ -16,7 +16,7 @@ contract Contract {
     unknown var5__5; // Slot #2
 
     function() external payable {
-        if (~msg.data.length == 0) {
+        if (msg.data.length) {
             if (msg.sig == 06fdde03) {
                 $06fdde03();
             } else {
@@ -83,63 +83,63 @@ contract Contract {
     }
 
     function name() public payable {
-        if (~((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
-            if (~(0x1f < (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+        if ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
+            if (0x1f >= (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
                 return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+(var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0xa0)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0xa0) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
                 return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+(var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0xc0)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0xc0) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
                 return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+(var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0xe0)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0xe0) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
                 return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+(var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x100)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x100) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
                 return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+(var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x120)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x120) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                     return memory[0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20:(0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20+0x20 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x20 + 0x20 + 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20 - (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) - 0x80 + 0x20 * ((var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 + 0x1f) / 0x20)];
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x140)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x140) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x160)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x160) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x180)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x180) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x1a0)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x1a0) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x1c0)) {
-                if (~(0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) == 0) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x1c0) {
+                if (0x1f & (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2) {
                 }
             }
-            if (~(0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 > 0x1e0)) {
+            if (0x80 + (var_1 & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff + 0x100 * (0x1 & var_1) == 0) / 0x2 <= 0x1e0) {
             }
         }
     }
@@ -154,16 +154,16 @@ contract Contract {
     }
 
     function transferFrom(address _arg0, address _arg1, uint256 _arg2) public payable returns (uint256) {
-        if (~(balanceOf[_arg0] >= _arg2)) {
+        if (balanceOf[_arg0] < _arg2) {
             throw('JUMP(0x56)@402 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~(balanceOf[_arg1] + _arg2 >= balanceOf[_arg1])) {
+        if (balanceOf[_arg1] + _arg2 < balanceOf[_arg1]) {
             throw('JUMP(0x56)@1448 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~frozenAccount[_arg0] == 0) {
+        if (frozenAccount[_arg0]) {
             throw('JUMP(0x56)@1483 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~(_arg2 + spentAllowance[_arg0][msg.sender] <= allowance[_arg0][msg.sender])) {
+        if (_arg2 + spentAllowance[_arg0][msg.sender] > allowance[_arg0][msg.sender]) {
             throw('JUMP(0x56)@1549 destination should be JUMPDEST@2 but found '0x60'');
         }
         storage[keccak256(_arg0, 0x5)] -= _arg2;
@@ -182,7 +182,7 @@ contract Contract {
     }
 
     function mintToken(address _arg0, uint256 _arg1) public payable {
-        if (~(owner == msg.sender)) {
+        if (owner != msg.sender) {
             throw('JUMP(0x56)@474 destination should be JUMPDEST@2 but found '0x60'');
         }
         storage[keccak256(_arg0, 0x5)] += _arg1;
@@ -196,20 +196,20 @@ contract Contract {
     }
 
     function symbol() public payable {
-        if (~((var_5 & 0x100 * (var_5 & 0x1) == 0 + 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) / 0x2) == 0) {
-            if (~(0x1f < (var_5 & 0x100 * (var_5 & 0x1) == 0 + 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) / 0x2)) {
+        if ((var_5 & 0x100 * (var_5 & 0x1) == 0 + 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) / 0x2) {
+            if (0x1f >= (var_5 & 0x100 * (var_5 & 0x1) == 0 + 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) / 0x2) {
             }
         }
     }
 
     function transfer(address _arg0, uint256 _arg1) public payable {
-        if (~(balanceOf[msg.sender] >= _arg1)) {
+        if (balanceOf[msg.sender] < _arg1) {
             throw('JUMP(0x56)@628 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~(_arg1 + balanceOf[_arg0] >= balanceOf[_arg0])) {
+        if (_arg1 + balanceOf[_arg0] < balanceOf[_arg0]) {
             throw('JUMP(0x56)@1029 destination should be JUMPDEST@2 but found '0x60'');
         }
-        if (~frozenAccount[msg.sender] == 0) {
+        if (frozenAccount[msg.sender]) {
             throw('JUMP(0x56)@1067 destination should be JUMPDEST@2 but found '0x60'');
         }
         storage[keccak256(msg.sender, 0x5)] -= _arg1;
@@ -231,7 +231,7 @@ contract Contract {
     }
 
     function freezeAccount(address _arg0, bool _arg1) public payable {
-        if (~(owner == msg.sender)) {
+        if (owner != msg.sender) {
             throw('JUMP(0x56)@765 destination should be JUMPDEST@2 but found '0x60'');
         }
         storage[keccak256(_arg0, 0x6)] = _arg1 | 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00 & storage[keccak256(_arg0, 0x6)];
@@ -240,7 +240,7 @@ contract Contract {
     }
 
     function transferOwnership(address _arg0) public payable {
-        if (~(owner == msg.sender)) {
+        if (owner != msg.sender) {
             throw('JUMP(0x56)@798 destination should be JUMPDEST@2 but found '0x60'');
         }
         owner = _arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner;

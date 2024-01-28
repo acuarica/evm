@@ -13,7 +13,7 @@ contract Contract {
 
     function() external payable {
         require(msg.data.length >= 0x4);
-        if (~msg.value) {
+        if (msg.value == 0) {
             if (msg.sig == bbf7408a) {
                 $bbf7408a();
             } else {
@@ -68,18 +68,18 @@ contract Contract {
     }
 
     function bbf7408a() public payable returns (unknown) {
-        if (~(_arg0 >>> 0xa0)) {
-            if (~delegation) {
-                if (~staticcall(gasleft(),0xa9337caea9cf6930cdc576789a8258365c38adbc,0x17c,0x24,0x1e0,0x20) == 0) {
-                    if (~(returndatasize() <= 0x1f)) {
+        if ((_arg0 >>> 0xa0) == 0) {
+            if (delegation == 0) {
+                if (staticcall(gasleft(),0xa9337caea9cf6930cdc576789a8258365c38adbc,0x17c,0x24,0x1e0,0x20)) {
+                    if (returndatasize() > 0x1f) {
                         return memory[0x1e0];
                     }
                     revert();
                 }
                 revert();
             }
-            if (~staticcall(gasleft(),memory[0x140],0x17c,0x24,0x1e0,0x20) == 0) {
-                if (~(returndatasize() <= 0x1f)) {
+            if (staticcall(gasleft(),memory[0x140],0x17c,0x24,0x1e0,0x20)) {
+                if (returndatasize() > 0x1f) {
                     return memory[0x1e0];
                 }
                 revert();
@@ -90,70 +90,70 @@ contract Contract {
     }
 
     function 4b74efb7() public payable {
-        if (~msg.sender != var_2) {
+        if (msg.sender == var_2) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
         require(0x2 != 0x1);
-        if (~msg.sender != var_3) {
+        if (msg.sender == var_3) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
         require(0x2 != 0x2);
-        if (~msg.sender != memory[0x1a0]) {
+        if (msg.sender == memory[0x1a0]) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
         require(0x2 != 0x3);
-        if (~msg.sender != memory[0x1c0]) {
+        if (msg.sender == memory[0x1c0]) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
         require(0x2 != 0x4);
-        if (~msg.sender != memory[0x1e0]) {
+        if (msg.sender == memory[0x1e0]) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
         require(0x2 != 0x5);
-        if (~msg.sender != memory[0x200]) {
+        if (msg.sender == memory[0x200]) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
             return;
         }
-        if (~0x2 != 0x6) {
+        if (0x2 == 0x6) {
         }
-        if (~msg.sender != memory[0x220]) {
+        if (msg.sender == memory[0x220]) {
         }
-        if (~0x2 != 0x7) {
+        if (0x2 == 0x7) {
         }
-        if (~msg.sender != memory[0x240]) {
+        if (msg.sender == memory[0x240]) {
         }
-        if (~0x2 != 0x8) {
+        if (0x2 == 0x8) {
         }
-        if (~msg.sender != memory[0x260]) {
+        if (msg.sender == memory[0x260]) {
         }
-        if (~0x2 != 0x9) {
+        if (0x2 == 0x9) {
         }
-        if (~msg.sender != memory[0x280]) {
+        if (msg.sender == memory[0x280]) {
         }
-        if (~0x2 != 0xa) {
+        if (0x2 == 0xa) {
         }
-        if (~msg.sender != memory[0x2a0]) {
+        if (msg.sender == memory[0x2a0]) {
         }
-        if (~0x2 != 0xb) {
+        if (0x2 == 0xb) {
         }
     }
 
     function f4b446a3() public payable {
-        if (~(_arg0 >>> 0xa0)) {
-            if (~msg.sender != var_2) {
-                if (~staticcall(gasleft(),_arg0,0x15c,0x24,0x1c0,0x20) == 0) {
-                    if (~(returndatasize() <= 0x1f)) {
+        if ((_arg0 >>> 0xa0) == 0) {
+            if (msg.sender == var_2) {
+                if (staticcall(gasleft(),_arg0,0x15c,0x24,0x1c0,0x20)) {
+                    if (returndatasize() > 0x1f) {
                         delegation = _arg0;
                         log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, _arg0);
                         return;
@@ -164,8 +164,8 @@ contract Contract {
     }
 
     function e3a8d3ab() public payable {
-        if (~(_arg0 >>> 0xa0)) {
-            if (~(_arg1 >>> 0xa0)) {
+        if ((_arg0 >>> 0xa0) == 0) {
+            if ((_arg1 >>> 0xa0) == 0) {
                 require(msg.sender == var_2, memory[0x15c], memory[0x17c], memory[0x19c], memory[0x1bc]);
                 var_4 = _arg0;
                 var_5 = _arg1;
