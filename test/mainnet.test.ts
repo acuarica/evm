@@ -312,7 +312,7 @@ describe('::mainnet', function () {
 
             const trunc = (s: string): string => (s.length < 50 ? s : s.substring(0, 50) + '...');
             members.forEach(member =>
-                it(`should match decompiled bytecode to '${trunc(member.source)}'`, function () {
+                it(`should find '${trunc(member.source)}' in decompiled bytecode`, function () {
                     expect(text).to.match(member);
                 })
             );
