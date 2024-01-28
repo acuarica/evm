@@ -262,6 +262,10 @@ console.log(tokenContract!.patchdb().solidify());
 
 `sevm` comes with a CLI tool to examine bytecode from the command line.
 
+> The CLI tool is completely independent from the rest of the library.
+> This means that if you intend to use `sevm` as part of your application as a bundle,
+> you won't include the CLI tool nor any of its dependencies.
+
 ### `sevm --help`
 
 ```console !sevm=bin/sevm.mjs --help
@@ -340,13 +344,14 @@ This allows the user to create a bundle without the lookup database provided the
 
 ## Contributing
 
-### `.dataset`
+### [`.dataset`](./.dataset/)
 
-This folder contains a dataset of contract bytecodes deployed in a public network.
-It is used in [`test/dataset.test.ts`](./test/dataset.test.ts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
+This folder contains a [dataset](https://github.com/acuarica/contract-dataset) of contract bytecodes deployed in a public network.
+
+It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](./test/dataset.test.ts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
 This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
 
-### `examples`
+### [`examples`](./examples/)
 
 The [`examples`](./examples/) folder contains code examples that showcase `sevm` features.
 These code examples are the ones embedded in this document.
@@ -355,7 +360,7 @@ To ensure these examples don't get outdated,
 [`test/examples.test.ts`](./test/examples.test.ts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
 Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](./test/__snapshots__/examples.snap.md) and compared against in subsequent tests.
 
-### `scripts`
+### [`scripts`](./scripts/)
 
 Contains utility scripts that automates the development process.
 
@@ -363,6 +368,40 @@ Contains utility scripts that automates the development process.
 - [`ercs.mjs`](./scripts/ercs.mjs) Generates ERCs function and event definitions from [`scripts/ercs.sol`](./scripts/ercs.sol).
 - [`help.mjs`](./scripts/help.mjs) Embeds [`examples`](#examples) and `sevm --help` into [`README`](./README.md)
 - [`solc.mjs`](./scripts/solc.mjs) Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compilers used in tests. It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
+
+### [`test`](./test/)
+
+Tests run using _Mocha_ and can be executed with
+
+```console
+yarn test
+```
+
+Each top-level test name begins with `::` so it is easier to filter out tests (using _Mocha_'s `-f/--fgrep` or `-g/--grep` flags).
+For example, to run _only_ tests for the `step` module use
+
+```console
+yarn test -g ::step
+```
+
+#### [`__snapshots__`](./test/__snapshots__/)
+
+To ensure the test output does not change unexpectedly,
+we use an ad-hoc snapshot testing solution similar to [_Jest_'s](https://jestjs.io/docs/snapshot-testing).
+The snapshots are stored in [`test/__snapshots__`](./test/__snapshots__/).
+
+To re-generate the snapshot artifacts after an intentional implementation change you can run
+
+```console
+UPDATE_SNAPSHOTS=1 yarn test -g ::mainnet
+```
+
+> It is usually best to filter (`-f`/`-g` flags) which snapshot test cases get re-generated to avoid any unwanted unintentional updates.
+
+### `types`
+
+This folder contains _vendor_ types to refine or declare types of libraries.
+It is used either in tests or internally in the library, _i.e._, these types are not re-exported and hence not part of the public library API.
 
 ## Detached Fork
 
