@@ -396,7 +396,24 @@ To re-generate the snapshot artifacts after an intentional implementation change
 UPDATE_SNAPSHOTS=1 yarn test -g ::mainnet
 ```
 
-> It is usually best to filter (`-f`/`-g` flags) which snapshot test cases get re-generated to avoid any unwanted unintentional updates.
+> It is usually better to filter (`-f`/`-g` flags) which snapshot test cases
+> get re-generated to avoid any unwanted unintentional updates.
+
+When a test is creating or re-generating a snapshot,
+the indicator icon `📸` is appended to the test title.
+For example
+
+```out
+        ✔ should match Solidity snapshot 📸
+```
+
+On the other hand, when a test is comparing against a previously created snapshot,
+the indicator icon `🎞️` is appended to the test title.
+For example
+
+```out
+        ✔ should match Solidity snapshot 🎞️
+```
 
 ### `types`
 
