@@ -10,7 +10,6 @@ describe(`::forversion`, function () {
     forVersion('empty', (compile, fallback, version) => {
         let contract: Contract;
 
-        // eslint-disable-next-line mocha/no-top-level-hooks
         before(function () {
             const src = 'contract Empty { }';
             contract = new Contract(compile(src, this).bytecode);
