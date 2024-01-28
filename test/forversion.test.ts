@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Contract, Shanghai } from 'sevm';
-import { Add, CallDataLoad, Props, Require, Return, Revert, SLoad, SStore, Sha3, Stop, Val, Variable } from 'sevm/ast';
+import { Add, CallDataLoad, MappingLoad, MappingStore, Props, Require, Return, Revert, SStore, Sha3, Stop, Val, Variable } from 'sevm/ast';
 
 import { eventSelector, fnselector } from './utils/selector';
 import { VERSIONS, type Version, compile } from './utils/solc';
@@ -167,16 +167,27 @@ describe(`::forversion`, function () {
             ].forEach(({ sig, value }) => {
                 const selector = fnselector(sig);
 
-                it.skip(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
+                it(`should find \`SStore\`s in \`#${selector}\`\`${sig}\` blocks`, function () {
+                    const evalm = (expr: MappingStore) => {
+                        return new MappingStore(expr.slot.eval(), expr.mappings, expr.location, expr.items, expr.data.eval(), expr.structlocation);
+                    };
+
                     const fn = contract.functions[selector];
 
                     expect(fn).to.not.be.undefined;
 
-                    expect(fn.stmts.at(-2)).to.be.deep.equal(
-                        new SStore(
-                            new Sha3(new Val(-1n), new Val(-1n), [Props['msg.sender'], new Val(0n)]),
+                    expect(evalm(fn.stmts.at(-2) as MappingStore)).to.be.deep.equal(
+                        new MappingStore(
+                            new Sha3(
+                                new Val(0n),
+                                new Val(64n),
+                                [Props['msg.sender'], new Val(0n)]
+                            ),
+                            contract.mappings,
+                            0,
+                            [Props['msg.sender']],
                             new Add(new CallDataLoad(new Val(4n)), new Val(value)),
-                            undefined
+
                         )
                     );
                     expect(fn.stmts.at(-1)).to.be.deep.equal(new Stop());
@@ -221,17 +232,22 @@ describe(`::forversion`, function () {
             ].forEach(({ sig, value }) => {
                 const selector = fnselector(sig);
 
-                it.skip('should find `SLoad`s in blocks', function () {
+                it('should find `SLoad`s in blocks', function () {
                     const stmts = contract.functions[selector].stmts;
                     expect(stmts.length).to.be.at.least(1);
 
-                    stmts.slice(0, -1).forEach(stmt => expect(stmt).to.be.instanceOf(Require));
+                    const stmt = stmts.at(-1) as Return & { args: [MappingLoad] };
+                    stmt.args[0].eval = function () {
+                        return new MappingLoad(this.slot.eval(), this.mappings, this.location, this.items, this.structlocation);
+                    };
 
-                    expect(stmts.at(-1)).to.be.deep.equal(
-                        new Return(new Val(-1n), new Val(-1n), [
-                            new SLoad(
-                                new Sha3(new Val(-1n), new Val(-1n), [value, new Val(0n)]),
-                                undefined
+                    expect(stmts.at(-1)?.eval()).to.be.deep.equal(
+                        new Return(new Val(128n), new Val(32n), [
+                            new MappingLoad(
+                                new Sha3(new Val(0n), new Val(64n), [value, new Val(0n)]),
+                                contract.mappings,
+                                0,
+                                [value],
                             ),
                         ])
                     );
