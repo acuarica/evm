@@ -1,5 +1,5 @@
 import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce, MStore } from './ast';
-import { Not } from './ast/alu';
+import { IsZero } from './ast/alu';
 import type { IEvents } from './ast/log';
 import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
 import type { Return, Revert } from './ast/system';
@@ -376,7 +376,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                             ),
                             ...trueBlock,
                         ]
-                        : [new If(new Not(last.cond), falseBlock), ...trueBlock]),
+                        : [new If(new IsZero(last.cond), falseBlock), ...trueBlock]),
                 ];
             }
             case 'SigCase': {

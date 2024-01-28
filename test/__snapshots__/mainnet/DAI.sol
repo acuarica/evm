@@ -18,7 +18,7 @@ contract Contract {
     unknown public symbol; // Slot #5
 
     function() external payable {
-        if (~(msg.data.length < 0x4)) {
+        if (msg.data.length >= 0x4) {
             if (msg.sig == 06fdde03) {
                 $06fdde03();
             } else {
@@ -131,12 +131,12 @@ contract Contract {
 
     function stop() public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
             log([object Object], [object Object], [object Object], [object Object], memory[0x60:0xc0 + msg.data.length - 0x60 ]ii);
             owner = 0x10000000000000000000000000000000000000000 | 0xffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff & owner;
             return;
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
             log([object Object], [object Object], [object Object], [object Object], memory[0x60:0xc0 + msg.data.length - 0x60 ]ii);
             owner = 0x10000000000000000000000000000000000000000 | 0xffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff & owner;
             return;
@@ -159,12 +159,12 @@ contract Contract {
 
     function setOwner(address _arg0) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
             owner = _arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner;
             emit LogSetOwner(_arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner);
             return;
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
             owner = _arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner;
             emit LogSetOwner(_arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner);
             return;
@@ -185,8 +185,8 @@ contract Contract {
     function transferFrom(address _arg0, address _arg1, uint256 _arg2) public {
         require(msg.value == 0);
         require((owner / 0x10000000000000000000000000000000000000000) == 0);
-        if (~(_arg0 == msg.sender)) {
-            if (~(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == allowance[_arg0][msg.sender])) {
+        if (_arg0 != msg.sender) {
+            if (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff != allowance[_arg0][msg.sender]) {
                 require(allowance[_arg0][msg.sender] - _arg2 <= allowance[_arg0][msg.sender]);
                 allowance[_arg0][msg.sender] -= _arg2;
                 require(balanceOf[_arg0] - _arg2 <= balanceOf[_arg0]);
@@ -195,7 +195,7 @@ contract Contract {
             }
             require(balanceOf[_arg0] - _arg2 <= balanceOf[_arg0]);
         }
-        if (~(_arg0 == msg.sender)) {
+        if (_arg0 != msg.sender) {
             require(allowance[_arg0][msg.sender] - _arg2 <= allowance[_arg0][msg.sender]);
         }
         require(balanceOf[_arg0] - _arg2 <= balanceOf[_arg0]);
@@ -208,11 +208,11 @@ contract Contract {
 
     function mint(address _arg0, uint256 _arg1) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
@@ -220,11 +220,11 @@ contract Contract {
 
     function burn(uint256 _arg0) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local10,0x0,local8,0x64 + local6 - local8,local8,0x20));
@@ -232,11 +232,11 @@ contract Contract {
 
     function setName(bytes32 _arg0) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
@@ -254,11 +254,11 @@ contract Contract {
 
     function setAuthority(address _arg0) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
@@ -276,11 +276,11 @@ contract Contract {
 
     function burn(address _arg0, uint256 _arg1) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
@@ -288,11 +288,11 @@ contract Contract {
 
     function mint(uint256 _arg0) public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local10,0x0,local8,0x64 + local6 - local8,local8,0x20));
@@ -301,13 +301,13 @@ contract Contract {
     function transfer(address _arg0, uint256 _arg1) public {
         require(msg.value == 0);
         require((owner / 0x10000000000000000000000000000000000000000) == 0);
-        if (~(msg.sender == msg.sender)) {
-            if (~(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == allowance[msg.sender][msg.sender])) {
+        if (msg.sender != msg.sender) {
+            if (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff != allowance[msg.sender][msg.sender]) {
                 require(allowance[msg.sender][msg.sender] - _arg1 <= allowance[msg.sender][msg.sender]);
             }
             require(balanceOf[msg.sender] - _arg1 <= balanceOf[msg.sender]);
         }
-        if (~(msg.sender == msg.sender)) {
+        if (msg.sender != msg.sender) {
             require(allowance[msg.sender][msg.sender] - _arg1 <= allowance[msg.sender][msg.sender]);
         }
         require(balanceOf[msg.sender] - _arg1 <= balanceOf[msg.sender]);
@@ -316,34 +316,34 @@ contract Contract {
     function push(address _arg0, uint256 _arg1) public {
         require(msg.value == 0);
         require((owner / 0x10000000000000000000000000000000000000000) == 0);
-        if (~(msg.sender == msg.sender)) {
-            if (~(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == allowance[msg.sender][msg.sender])) {
+        if (msg.sender != msg.sender) {
+            if (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff != allowance[msg.sender][msg.sender]) {
                 require(allowance[msg.sender][msg.sender] - _arg1 <= allowance[msg.sender][msg.sender]);
             }
             require(balanceOf[msg.sender] - _arg1 <= balanceOf[msg.sender]);
         }
-        if (~(msg.sender == msg.sender)) {
+        if (msg.sender != msg.sender) {
         }
     }
 
     function move(address _arg0, address _arg1, uint256 _arg2) public {
         require(msg.value == 0);
         require((owner / 0x10000000000000000000000000000000000000000) == 0);
-        if (~(_arg0 == msg.sender)) {
-            if (~(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == allowance[_arg0][msg.sender])) {
+        if (_arg0 != msg.sender) {
+            if (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff != allowance[_arg0][msg.sender]) {
             }
         }
-        if (~(_arg0 == msg.sender)) {
+        if (_arg0 != msg.sender) {
         }
     }
 
     function start() public {
         require(msg.value == 0);
-        if (~msg.sender != address(this)) {
+        if (msg.sender == address(this)) {
         }
-        if (~owner != msg.sender) {
+        if (owner == msg.sender) {
         }
-        if (~authority) {
+        if (authority == 0) {
         }
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
@@ -369,11 +369,11 @@ contract Contract {
     function pull(address _arg0, uint256 _arg1) public {
         require(msg.value == 0);
         require((owner / 0x10000000000000000000000000000000000000000) == 0);
-        if (~(_arg0 == msg.sender)) {
-            if (~(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == allowance[_arg0][msg.sender])) {
+        if (_arg0 != msg.sender) {
+            if (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff != allowance[_arg0][msg.sender]) {
             }
         }
-        if (~(_arg0 == msg.sender)) {
+        if (_arg0 != msg.sender) {
         }
     }
 

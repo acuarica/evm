@@ -17,8 +17,8 @@ contract Contract {
 
     fallback() external payable {
         require(msg.value == 0);
-        if (~(msg.data.length < 0x4)) {
-            if (~(0x70a08231 > msg.data >>> 0xe0)) {
+        if (msg.data.length >= 0x4) {
+            if (0x70a08231 <= msg.data >>> 0xe0) {
                 if (msg.sig == 70a08231) {
                     $70a08231();
                 } else {
@@ -87,107 +87,107 @@ contract Contract {
     }
 
     function symbol() public {
-        if (~(var_1 & 0x1)) {
+        if ((var_1 & 0x1) == 0) {
             require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_1 & 0x1)) {
+            if ((var_1 & 0x1) == 0) {
                 require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-                if (~(var_1 >>> 0x1 & 0x7f) == 0) {
-                    if (~(0x1f < (var_1 >>> 0x1 & 0x7f))) {
-                        if (~(0x0 >= (var_1 >>> 0x1 & 0x7f))) {
-                            if (~(0x20 >= (var_1 >>> 0x1 & 0x7f))) {
-                                if (~(0x40 >= (var_1 >>> 0x1 & 0x7f))) {
-                                    if (~(0x60 >= (var_1 >>> 0x1 & 0x7f))) {
-                                        if (~(0x80 >= (var_1 >>> 0x1 & 0x7f))) {
-                                            if (~(0xa0 >= (var_1 >>> 0x1 & 0x7f))) {
-                                                if (~(0xc0 >= (var_1 >>> 0x1 & 0x7f))) {
-                                                    if (~(0xe0 >= (var_1 >>> 0x1 & 0x7f))) {
-                                                        if (~(0x100 >= (var_1 >>> 0x1 & 0x7f))) {
-                                                            if (~(0x120 >= (var_1 >>> 0x1 & 0x7f))) {
-                                                                if (~(0x140 >= (var_1 >>> 0x1 & 0x7f))) {
+                if (var_1 >>> 0x1 & 0x7f) {
+                    if (0x1f >= (var_1 >>> 0x1 & 0x7f)) {
+                        if (0x0 < (var_1 >>> 0x1 & 0x7f)) {
+                            if (0x20 < (var_1 >>> 0x1 & 0x7f)) {
+                                if (0x40 < (var_1 >>> 0x1 & 0x7f)) {
+                                    if (0x60 < (var_1 >>> 0x1 & 0x7f)) {
+                                        if (0x80 < (var_1 >>> 0x1 & 0x7f)) {
+                                            if (0xa0 < (var_1 >>> 0x1 & 0x7f)) {
+                                                if (0xc0 < (var_1 >>> 0x1 & 0x7f)) {
+                                                    if (0xe0 < (var_1 >>> 0x1 & 0x7f)) {
+                                                        if (0x100 < (var_1 >>> 0x1 & 0x7f)) {
+                                                            if (0x120 < (var_1 >>> 0x1 & 0x7f)) {
+                                                                if (0x140 < (var_1 >>> 0x1 & 0x7f)) {
                                                                 }
-                                                                if (~(0x140 <= (var_1 >>> 0x1 & 0x7f))) {
+                                                                if (0x140 > (var_1 >>> 0x1 & 0x7f)) {
                                                                     return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                                 }
                                                                 return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                             }
-                                                            if (~(0x120 <= (var_1 >>> 0x1 & 0x7f))) {
+                                                            if (0x120 > (var_1 >>> 0x1 & 0x7f)) {
                                                                 return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                             }
                                                             return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                         }
-                                                        if (~(0x100 <= (var_1 >>> 0x1 & 0x7f))) {
+                                                        if (0x100 > (var_1 >>> 0x1 & 0x7f)) {
                                                             return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                         }
                                                         return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                     }
-                                                    if (~(0xe0 <= (var_1 >>> 0x1 & 0x7f))) {
+                                                    if (0xe0 > (var_1 >>> 0x1 & 0x7f)) {
                                                         return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                     }
                                                     return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                 }
-                                                if (~(0xc0 <= (var_1 >>> 0x1 & 0x7f))) {
+                                                if (0xc0 > (var_1 >>> 0x1 & 0x7f)) {
                                                     return memory[0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20:(0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20+0x40 + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & 0x1f + (var_1 >>> 0x1 & 0x7f)) + 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20 - 0x80 + 0x20 + (0x1f + (var_1 >>> 0x1 & 0x7f)) / 0x20 * 0x20)];
                                                 }
                                             }
-                                            if (~(0xa0 <= (var_1 >>> 0x1 & 0x7f))) {
+                                            if (0xa0 > (var_1 >>> 0x1 & 0x7f)) {
                                             }
                                         }
-                                        if (~(0x80 <= (var_1 >>> 0x1 & 0x7f))) {
+                                        if (0x80 > (var_1 >>> 0x1 & 0x7f)) {
                                         }
                                     }
-                                    if (~(0x60 <= (var_1 >>> 0x1 & 0x7f))) {
+                                    if (0x60 > (var_1 >>> 0x1 & 0x7f)) {
                                     }
                                 }
-                                if (~(0x40 <= (var_1 >>> 0x1 & 0x7f))) {
+                                if (0x40 > (var_1 >>> 0x1 & 0x7f)) {
                                 }
                             }
-                            if (~(0x20 <= (var_1 >>> 0x1 & 0x7f))) {
+                            if (0x20 > (var_1 >>> 0x1 & 0x7f)) {
                             }
                         }
-                        if (~(0x0 <= (var_1 >>> 0x1 & 0x7f))) {
+                        if (0x0 > (var_1 >>> 0x1 & 0x7f)) {
                         }
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0xc0)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0xc0) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0xe0)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0xe0) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x100)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x100) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x120)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x120) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x140)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x140) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x160)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x160) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x180)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x180) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x1a0)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x1a0) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x1c0)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x1c0) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x1e0)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x1e0) {
                     }
-                    if (~(0xa0 + (var_1 >>> 0x1 & 0x7f) > 0x200)) {
+                    if (0xa0 + (var_1 >>> 0x1 & 0x7f) <= 0x200) {
                     }
                 }
             }
             require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_1 >>> 0x1) == 0) {
-                if (~(0x1f < var_1 >>> 0x1)) {
+            if (var_1 >>> 0x1) {
+                if (0x1f >= var_1 >>> 0x1) {
                 }
             }
         }
         require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-        if (~(var_1 & 0x1)) {
+        if ((var_1 & 0x1) == 0) {
             require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_1 >>> 0x1 & 0x7f) == 0) {
-                if (~(0x1f < (var_1 >>> 0x1 & 0x7f))) {
+            if (var_1 >>> 0x1 & 0x7f) {
+                if (0x1f >= (var_1 >>> 0x1 & 0x7f)) {
                 }
             }
         }
         require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-        if (~(var_1 >>> 0x1) == 0) {
-            if (~(0x1f < var_1 >>> 0x1)) {
+        if (var_1 >>> 0x1) {
+            if (0x1f >= var_1 >>> 0x1) {
             }
         }
     }
@@ -207,24 +207,24 @@ contract Contract {
         require(_arg1 == _arg1);
         require(_arg4 == _arg4);
         require(_arg3 >= block.timestamp, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
-        if (~(block.chainid == 0x1)) {
-            if (~(var_2 & 0x1)) {
+        if (block.chainid != 0x1) {
+            if ((var_2 & 0x1) == 0) {
                 require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-                if (~(var_2 & 0x1) == 0) {
-                    if (~((var_2 & 0x1) == 0x1)) {
+                if (var_2 & 0x1) {
+                    if ((var_2 & 0x1) != 0x1) {
                         throw('Memory size too large creating Sha3: 115792089237316195423570985008687907853269984665640564039457584007913129639808 in `sub(local12, local21)`');
                     }
-                    if (~(0x0 >= (var_2 >>> 0x1 & 0x7f))) {
-                        if (~(0x20 >= (var_2 >>> 0x1 & 0x7f))) {
-                            if (~(0x40 >= (var_2 >>> 0x1 & 0x7f))) {
-                                if (~(0x60 >= (var_2 >>> 0x1 & 0x7f))) {
-                                    if (~(0x80 >= (var_2 >>> 0x1 & 0x7f))) {
-                                        if (~(0xa0 >= (var_2 >>> 0x1 & 0x7f))) {
-                                            if (~(0xc0 >= (var_2 >>> 0x1 & 0x7f))) {
-                                                if (~(0xe0 >= (var_2 >>> 0x1 & 0x7f))) {
-                                                    if (~(0x100 >= (var_2 >>> 0x1 & 0x7f))) {
-                                                        if (~(0x120 >= (var_2 >>> 0x1 & 0x7f))) {
-                                                            if (~(0x140 >= (var_2 >>> 0x1 & 0x7f))) {
+                    if (0x0 < (var_2 >>> 0x1 & 0x7f)) {
+                        if (0x20 < (var_2 >>> 0x1 & 0x7f)) {
+                            if (0x40 < (var_2 >>> 0x1 & 0x7f)) {
+                                if (0x60 < (var_2 >>> 0x1 & 0x7f)) {
+                                    if (0x80 < (var_2 >>> 0x1 & 0x7f)) {
+                                        if (0xa0 < (var_2 >>> 0x1 & 0x7f)) {
+                                            if (0xc0 < (var_2 >>> 0x1 & 0x7f)) {
+                                                if (0xe0 < (var_2 >>> 0x1 & 0x7f)) {
+                                                    if (0x100 < (var_2 >>> 0x1 & 0x7f)) {
+                                                        if (0x120 < (var_2 >>> 0x1 & 0x7f)) {
+                                                            if (0x140 < (var_2 >>> 0x1 & 0x7f)) {
                                                             }
                                                             storage[keccak256(_arg0, 0x5)] += 0x1;
                                                             require(staticcall(gasleft(),0x1,local65,0xa0 + local60 - local65,local65 - 0x20,0x20));
@@ -269,8 +269,8 @@ contract Contract {
                 }
             }
             require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_2 & 0x1) == 0) {
-                if (~((var_2 & 0x1) == 0x1)) {
+            if (var_2 & 0x1) {
+                if ((var_2 & 0x1) != 0x1) {
                 }
             }
         }
@@ -285,26 +285,26 @@ contract Contract {
     }
 
     function name() public {
-        if (~(var_2 & 0x1)) {
+        if ((var_2 & 0x1) == 0) {
             require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_2 & 0x1)) {
+            if ((var_2 & 0x1) == 0) {
                 require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-                if (~(var_2 >>> 0x1 & 0x7f) == 0) {
-                    if (~(0x1f < (var_2 >>> 0x1 & 0x7f))) {
+                if (var_2 >>> 0x1 & 0x7f) {
+                    if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                     }
                 }
             }
             require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_2 >>> 0x1) == 0) {
-                if (~(0x1f < var_2 >>> 0x1)) {
+            if (var_2 >>> 0x1) {
+                if (0x1f >= var_2 >>> 0x1) {
                 }
             }
         }
         require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-        if (~(var_2 & 0x1)) {
+        if ((var_2 & 0x1) == 0) {
             require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_2 >>> 0x1 & 0x7f) == 0) {
-                if (~(0x1f < (var_2 >>> 0x1 & 0x7f))) {
+            if (var_2 >>> 0x1 & 0x7f) {
+                if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                 }
             }
         }
@@ -324,7 +324,7 @@ contract Contract {
         require(msg.data.length - 0x4 >= 0x60);
         require(_arg0 == _arg0);
         require(_arg1 == _arg1);
-        if (~(mapping5[_arg0][msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)) {
+        if (mapping5[_arg0][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
             require(mapping5[_arg0][msg.sender] >= _arg2, 0x4e487b7100000000000000000000000000000000000000000000000000000000, keccak256(_arg0, 0x4));
             mapping5[_arg0][msg.sender] -= _arg2;
             require(storage[keccak256(_arg0, 0x3)] >= _arg2, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x3);
@@ -342,17 +342,17 @@ contract Contract {
     }
 
     function DOMAIN_SEPARATOR() public {
-        if (~(block.chainid == 0x1)) {
-            if (~(var_2 & 0x1)) {
+        if (block.chainid != 0x1) {
+            if ((var_2 & 0x1) == 0) {
                 require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-                if (~(var_2 & 0x1) == 0) {
-                    if (~((var_2 & 0x1) == 0x1)) {
+                if (var_2 & 0x1) {
+                    if ((var_2 & 0x1) != 0x1) {
                     }
                 }
             }
             require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-            if (~(var_2 & 0x1) == 0) {
-                if (~((var_2 & 0x1) == 0x1)) {
+            if (var_2 & 0x1) {
+                if ((var_2 & 0x1) != 0x1) {
                 }
             }
         }
