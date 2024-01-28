@@ -3,8 +3,8 @@ import { ExecError, type Operand, type Ram, type State } from './state';
 
 import * as ast from './ast';
 import { Local, Locali, MappingLoad, MappingStore, Val, Variable, type Expr, type IStore, type Inst } from './ast';
-import { Sar, Shl, Shr, Sig } from './ast/alu';
-import { Branch, type Jumpi, SigCase } from './ast/flow';
+import { Sar, Shl, Shr } from './ast/alu';
+import { Branch, type Jumpi, Sig, SigCase } from './ast/flow';
 import { type IEvents } from './ast/log';
 import { FNS, Fn, Prop, type Props, type DataCopy } from './ast/special';
 import { Sha3 } from './ast/system';
@@ -819,8 +819,7 @@ const VyperFunctionSelector = {
         const top = stack.top;
         if (top?.tag === 'IsZero' && top.value.tag === 'Eq') {
             const sel = (left: Expr, right: Expr): Sig | undefined => {
-                right = right.tag === 'Local' ? right.value : right;
-                return left.isVal() && isSelectorMLoadCallData(right, memory)
+                return left.isVal() && isSelectorMLoadCallData(right.unwrap(), memory)
                     ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                     : undefined;
             };
@@ -840,7 +839,7 @@ const VyperFunctionSelector = {
         if (top?.tag !== 'Xor') throw new Error('expected Xor');
 
         const XORsig = (left: Expr, right: Expr): Sig | undefined => {
-            right = right.tag === 'Local' ? right.value : right;
+            right = right.unwrap();
             return left.isVal() && (isSelectorMLoadCallData(right, memory) || isSelectorCallData(right))
                 ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                 : undefined;
@@ -862,7 +861,6 @@ const SubFunctionSelector = {
         if (top?.tag !== 'Sub') throw new Error('expected Sub');
 
         const SUBsig = (left: Expr, right: Expr): Sig | undefined => {
-            right = right.tag === 'Local' ? right.value : right;
             return left.isVal() && isSelectorCallData(right.eval())
                 ? new Sig(left.val.toString(16).padStart(8, '0'), false)
                 : undefined;

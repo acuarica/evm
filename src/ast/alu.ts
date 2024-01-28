@@ -243,13 +243,3 @@ export class Sar extends Shift {
         return val.isVal() && shift.isVal() ? new Val(val.val >> shift.val) : new Sar(val, shift);
     }
 }
-
-export class Sig extends Tag {
-    readonly tag = 'Sig';
-    constructor(readonly selector: string, readonly positive = true) {
-        super();
-    }
-    eval(): Expr {
-        return this;
-    }
-}

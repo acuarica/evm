@@ -1,7 +1,7 @@
 import type { Opcode } from '../step';
 import type { Type } from '../type';
 import type { Add, Div, Exp, Mod, Mul, Sub } from './alu';
-import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Sig, Xor } from './alu';
+import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Xor } from './alu';
 import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
 import type { MLoad, MStore } from './memory';
 import type {
@@ -20,7 +20,7 @@ import type {
     Stop,
 } from './system';
 import type { Log } from './log';
-import type { Branch, Jump, JumpDest, Jumpi, SigCase } from './flow';
+import type { Branch, Jump, JumpDest, Jumpi, Sig, SigCase } from './flow';
 import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
 
 /**
@@ -183,13 +183,6 @@ export abstract class Tag {
     }
 
     /**
-     * Indicates whether `this` is an instance of `Klass`.
-     */
-    is<T extends Tag>(Klass: new (...args: never[]) => T): this is T {
-        return (this instanceof Local ? this.value : this) instanceof Klass;
-    }
-
-    /**
      * Reduce `this` expression.
      */
     abstract eval(): Expr;
@@ -197,6 +190,20 @@ export abstract class Tag {
     children(): Expr[] {
         return Object.values(this).filter(value => value instanceof Tag) as Expr[];
     }
+
+    unwrap(): Expr {
+        return this as Expr;
+    }
+
+    // inline(): Expr {
+    //     const copy = Object.assign(Object.create(Object.getPrototypeOf(this) as object), this) as this;
+    //     for (const [key, value] of Object.entries(copy)) {
+    //         if (value instanceof Tag) {
+    //             (copy as { [key in keyof this]: Expr })[key] = value.inline();
+    //         }
+    //     }
+    //     return copy as Expr;
+    // }
 }
 
 export const MOD_256 = 1n << 0x100n;
@@ -214,6 +221,10 @@ export class Val extends Tag {
     override eval(): Expr {
         return new Val(this.val);
     }
+
+    // override inline(): Expr {
+    //     return this;
+    // }
 }
 
 export class Local extends Tag {
@@ -228,6 +239,14 @@ export class Local extends Tag {
     override eval(): Expr {
         return this.value.eval();
     }
+
+    override unwrap(): Expr {
+        return this.value;
+    }
+
+    // override inline(): Expr {
+    //     return this.value.inline();
+    // }
 }
 
 export class Locali implements IInst {

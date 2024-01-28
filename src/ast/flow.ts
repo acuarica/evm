@@ -1,7 +1,5 @@
 import type { State } from '../state';
-
-import type { Inst, Expr, IInst } from '.';
-import type { Sig } from './alu';
+import { type Inst, type Expr, type IInst, Tag } from '.';
 
 /**
  * Represents a jump from one `State` to another from the given `pc`.
@@ -64,6 +62,16 @@ export class JumpDest implements IInst {
 
     next() {
         return [this.fallBranch];
+    }
+}
+
+export class Sig extends Tag {
+    readonly tag = 'Sig';
+    constructor(readonly selector: string, readonly positive = true) {
+        super();
+    }
+    eval(): Expr {
+        return this;
     }
 }
 
