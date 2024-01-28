@@ -11,37 +11,37 @@ contract Contract {
 
     fallback() external payable {
         undefined local0 = 0x0; // #refs 4
-        if (~(local0 < block.number) == 0) {
+        if ((local0 < block.number) == 0 == 0) {
             var_1 = local0;
             undefined local1 = 0x1 + local0; // #refs 4
-            if (~(local1 < block.number) == 0) {
+            if ((local1 < block.number) == 0 == 0) {
                 var_1 = local1;
                 undefined local2 = 0x1 + local1; // #refs 4
-                if (~(local2 < block.number) == 0) {
+                if ((local2 < block.number) == 0 == 0) {
                     var_1 = local2;
                     undefined local3 = 0x1 + local2; // #refs 4
-                    if (~(local3 < block.number) == 0) {
+                    if ((local3 < block.number) == 0 == 0) {
                         var_1 = local3;
                         undefined local4 = 0x1 + local3; // #refs 4
-                        if (~(local4 < block.number) == 0) {
+                        if ((local4 < block.number) == 0 == 0) {
                             var_1 = local4;
                             undefined local5 = 0x1 + local4; // #refs 4
-                            if (~(local5 < block.number) == 0) {
+                            if ((local5 < block.number) == 0 == 0) {
                                 var_1 = local5;
                                 undefined local6 = 0x1 + local5; // #refs 4
-                                if (~(local6 < block.number) == 0) {
+                                if ((local6 < block.number) == 0 == 0) {
                                     var_1 = local6;
                                     undefined local7 = 0x1 + local6; // #refs 4
-                                    if (~(local7 < block.number) == 0) {
+                                    if ((local7 < block.number) == 0 == 0) {
                                         var_1 = local7;
                                         undefined local8 = 0x1 + local7; // #refs 4
-                                        if (~(local8 < block.number) == 0) {
+                                        if ((local8 < block.number) == 0 == 0) {
                                             var_1 = local8;
                                             undefined local9 = 0x1 + local8; // #refs 4
-                                            if (~(local9 < block.number) == 0) {
+                                            if ((local9 < block.number) == 0 == 0) {
                                                 var_1 = local9;
                                                 undefined local10 = 0x1 + local9; // #refs 4
-                                                if (~(local10 < block.number) == 0) {
+                                                if ((local10 < block.number) == 0 == 0) {
                                                     var_1 = local10;
                                                 }
                                                 return;
@@ -76,37 +76,37 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 = 0x0 // #refs 4
-        if (not(iszero(lt(local0, number())))) {
+        if (iszero(iszero(lt(local0, number())))) {
             sstore(0x0, local0)
             let local1 = add(0x1, local0) // #refs 4
-            if (not(iszero(lt(local1, number())))) {
+            if (iszero(iszero(lt(local1, number())))) {
                 sstore(0x0, local1)
                 let local2 = add(0x1, local1) // #refs 4
-                if (not(iszero(lt(local2, number())))) {
+                if (iszero(iszero(lt(local2, number())))) {
                     sstore(0x0, local2)
                     let local3 = add(0x1, local2) // #refs 4
-                    if (not(iszero(lt(local3, number())))) {
+                    if (iszero(iszero(lt(local3, number())))) {
                         sstore(0x0, local3)
                         let local4 = add(0x1, local3) // #refs 4
-                        if (not(iszero(lt(local4, number())))) {
+                        if (iszero(iszero(lt(local4, number())))) {
                             sstore(0x0, local4)
                             let local5 = add(0x1, local4) // #refs 4
-                            if (not(iszero(lt(local5, number())))) {
+                            if (iszero(iszero(lt(local5, number())))) {
                                 sstore(0x0, local5)
                                 let local6 = add(0x1, local5) // #refs 4
-                                if (not(iszero(lt(local6, number())))) {
+                                if (iszero(iszero(lt(local6, number())))) {
                                     sstore(0x0, local6)
                                     let local7 = add(0x1, local6) // #refs 4
-                                    if (not(iszero(lt(local7, number())))) {
+                                    if (iszero(iszero(lt(local7, number())))) {
                                         sstore(0x0, local7)
                                         let local8 = add(0x1, local7) // #refs 4
-                                        if (not(iszero(lt(local8, number())))) {
+                                        if (iszero(iszero(lt(local8, number())))) {
                                             sstore(0x0, local8)
                                             let local9 = add(0x1, local8) // #refs 4
-                                            if (not(iszero(lt(local9, number())))) {
+                                            if (iszero(iszero(lt(local9, number())))) {
                                                 sstore(0x0, local9)
                                                 let local10 = add(0x1, local9) // #refs 4
-                                                if (not(iszero(lt(local10, number())))) {
+                                                if (iszero(iszero(lt(local10, number())))) {
                                                     sstore(0x0, local10)
                                                 }
                                                 stop()
@@ -396,37 +396,37 @@ contract Contract {
 
     fallback() external payable {
         undefined local0 = 0x0; // #refs 1
-        if (~(local0 < block.number) == 0) {
+        if ((local0 < block.number) == 0 == 0) {
             var_1 = local0;
             undefined local1 = 0x1 + local0; // #refs 1
-            if (~(local1 < block.number) == 0) {
+            if ((local1 < block.number) == 0 == 0) {
                 var_1 = local1;
                 undefined local2 = 0x1 + local1; // #refs 1
-                if (~(local2 < block.number) == 0) {
+                if ((local2 < block.number) == 0 == 0) {
                     var_1 = local2;
                     undefined local3 = 0x1 + local2; // #refs 1
-                    if (~(local3 < block.number) == 0) {
+                    if ((local3 < block.number) == 0 == 0) {
                         var_1 = local3;
                         undefined local4 = 0x1 + local3; // #refs 1
-                        if (~(local4 < block.number) == 0) {
+                        if ((local4 < block.number) == 0 == 0) {
                             var_1 = local4;
                             undefined local5 = 0x1 + local4; // #refs 1
-                            if (~(local5 < block.number) == 0) {
+                            if ((local5 < block.number) == 0 == 0) {
                                 var_1 = local5;
                                 undefined local6 = 0x1 + local5; // #refs 1
-                                if (~(local6 < block.number) == 0) {
+                                if ((local6 < block.number) == 0 == 0) {
                                     var_1 = local6;
                                     undefined local7 = 0x1 + local6; // #refs 1
-                                    if (~(local7 < block.number) == 0) {
+                                    if ((local7 < block.number) == 0 == 0) {
                                         var_1 = local7;
                                         undefined local8 = 0x1 + local7; // #refs 1
-                                        if (~(local8 < block.number) == 0) {
+                                        if ((local8 < block.number) == 0 == 0) {
                                             var_1 = local8;
                                             undefined local9 = 0x1 + local8; // #refs 1
-                                            if (~(local9 < block.number) == 0) {
+                                            if ((local9 < block.number) == 0 == 0) {
                                                 var_1 = local9;
                                                 undefined local10 = 0x1 + local9; // #refs 1
-                                                if (~(local10 < block.number) == 0) {
+                                                if ((local10 < block.number) == 0 == 0) {
                                                     var_1 = local10;
                                                 }
                                                 return;
@@ -461,37 +461,37 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 = 0x0 // #refs 1
-        if (not(iszero(lt(local0, number())))) {
+        if (iszero(iszero(lt(local0, number())))) {
             sstore(0x0, local0)
             let local1 = add(0x1, local0) // #refs 1
-            if (not(iszero(lt(local1, number())))) {
+            if (iszero(iszero(lt(local1, number())))) {
                 sstore(0x0, local1)
                 let local2 = add(0x1, local1) // #refs 1
-                if (not(iszero(lt(local2, number())))) {
+                if (iszero(iszero(lt(local2, number())))) {
                     sstore(0x0, local2)
                     let local3 = add(0x1, local2) // #refs 1
-                    if (not(iszero(lt(local3, number())))) {
+                    if (iszero(iszero(lt(local3, number())))) {
                         sstore(0x0, local3)
                         let local4 = add(0x1, local3) // #refs 1
-                        if (not(iszero(lt(local4, number())))) {
+                        if (iszero(iszero(lt(local4, number())))) {
                             sstore(0x0, local4)
                             let local5 = add(0x1, local4) // #refs 1
-                            if (not(iszero(lt(local5, number())))) {
+                            if (iszero(iszero(lt(local5, number())))) {
                                 sstore(0x0, local5)
                                 let local6 = add(0x1, local5) // #refs 1
-                                if (not(iszero(lt(local6, number())))) {
+                                if (iszero(iszero(lt(local6, number())))) {
                                     sstore(0x0, local6)
                                     let local7 = add(0x1, local6) // #refs 1
-                                    if (not(iszero(lt(local7, number())))) {
+                                    if (iszero(iszero(lt(local7, number())))) {
                                         sstore(0x0, local7)
                                         let local8 = add(0x1, local7) // #refs 1
-                                        if (not(iszero(lt(local8, number())))) {
+                                        if (iszero(iszero(lt(local8, number())))) {
                                             sstore(0x0, local8)
                                             let local9 = add(0x1, local8) // #refs 1
-                                            if (not(iszero(lt(local9, number())))) {
+                                            if (iszero(iszero(lt(local9, number())))) {
                                                 sstore(0x0, local9)
                                                 let local10 = add(0x1, local9) // #refs 1
-                                                if (not(iszero(lt(local10, number())))) {
+                                                if (iszero(iszero(lt(local10, number())))) {
                                                     sstore(0x0, local10)
                                                 }
                                                 stop()

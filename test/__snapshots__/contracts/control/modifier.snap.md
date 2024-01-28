@@ -12,7 +12,7 @@ contract Contract {
 
     fallback() external payable {
         require(msg.value == 0);
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             undefined local1 = msg.data >>> 0xe0; // #refs 1
             if (msg.sig == 083c7624) {
                 $083c7624();
@@ -52,7 +52,7 @@ object "runtime" {
         mstore(0x40, 0x80)
         let local0 = callvalue() // #refs 0
         require(iszero(local0));
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 083c7624)) {
                 $083c7624();
@@ -315,7 +315,7 @@ contract Contract {
 
     fallback() external payable {
         require(msg.value == 0);
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             undefined local1 = msg.data >>> 0xe0; // #refs 1
             if (msg.sig == 083c7624) {
                 $083c7624();
@@ -353,7 +353,7 @@ object "runtime" {
         mstore(0x40, 0x80)
         let local0 = callvalue() // #refs 0
         require(iszero(local0));
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 083c7624)) {
                 $083c7624();

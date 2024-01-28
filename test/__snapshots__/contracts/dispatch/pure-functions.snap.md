@@ -8,7 +8,7 @@ pragma solidity 0.7.6;
 contract Contract {
 
     fallback() external payable {
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             undefined local0 = msg.data >>> 0xe0; // #refs 1
             if (msg.sig == 5d2c7ee6) {
                 $5d2c7ee6();
@@ -40,7 +40,7 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local0 = shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 5d2c7ee6)) {
                 $5d2c7ee6();
@@ -218,7 +218,7 @@ pragma solidity 0.7.6;
 contract Contract {
 
     fallback() external payable {
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             undefined local0 = msg.data >>> 0xe0; // #refs 1
             if (msg.sig == 5d2c7ee6) {
                 $5d2c7ee6();
@@ -250,7 +250,7 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local0 = shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 5d2c7ee6)) {
                 $5d2c7ee6();

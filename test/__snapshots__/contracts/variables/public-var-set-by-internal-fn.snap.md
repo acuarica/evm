@@ -11,7 +11,7 @@ contract Contract {
 
     fallback() external payable {
         require(msg.value == 0);
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             if (msg.sig == 3fa4f245) {
                 $3fa4f245();
             } else {
@@ -35,7 +35,7 @@ object "runtime" {
         mstore(0x40, 0x80)
         let local0 = callvalue() // #refs 0
         require(iszero(local0));
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, 3fa4f245)) {
                 $3fa4f245();
@@ -167,7 +167,7 @@ contract Contract {
 
     fallback() external payable {
         require(msg.value == 0);
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             if (msg.sig == 3fa4f245) {
                 $3fa4f245();
             } else {
@@ -191,7 +191,7 @@ object "runtime" {
         mstore(0x40, 0x80)
         let local0 = callvalue() // #refs 0
         require(iszero(local0));
-        if (not(lt(calldatasize(), 0x4))) {
+        if (iszero(lt(calldatasize(), 0x4))) {
             let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, 3fa4f245)) {
                 $3fa4f245();

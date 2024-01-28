@@ -10,11 +10,11 @@ contract Contract {
     unknown var1__1; // Slot #0
 
     fallback() external payable {
-        if (~block.number != 0x8) {
-            if (~block.number != 0x9) {
+        if (block.number != 0x8 == 0) {
+            if (block.number != 0x9 == 0) {
                 var_1 = 0x3;
                 var_1 += 0x7;
-                if (~block.number != 0x1b) {
+                if (block.number != 0x1b == 0) {
                     var_1 += 0xb;
                     var_1 += 0x5;
                     return;
@@ -24,7 +24,7 @@ contract Contract {
                 return;
             }
             var_1 += 0x7;
-            if (~block.number != 0x1b) {
+            if (block.number != 0x1b == 0) {
                 var_1 += 0xb;
                 var_1 += 0x5;
                 return;
@@ -45,17 +45,17 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(iszero(eq(number(), 0x8)))) {
+        if (iszero(iszero(eq(number(), 0x8)))) {
             let local0 = 0x0 // #refs 0
             let local1 = sload(local0) // #refs 0
-            if (not(iszero(eq(number(), 0x9)))) {
+            if (iszero(iszero(eq(number(), 0x9)))) {
                 let local2 = 0x3 // #refs 0
                 sstore(0x0, local2)
                 let local3 = 0x0 // #refs 0
                 let local4 = 0x7 // #refs 0
                 let local5 = add(sload(local3), local4) // #refs 0
                 sstore(local3, local5)
-                if (not(iszero(eq(number(), 0x1b)))) {
+                if (iszero(iszero(eq(number(), 0x1b)))) {
                     let local6 = 0x0 // #refs 0
                     let local7 = 0xb // #refs 0
                     let local8 = add(sload(local6), local7) // #refs 0
@@ -80,7 +80,7 @@ object "runtime" {
             let local3 = 0x7 // #refs 0
             let local4 = add(sload(local2), local3) // #refs 0
             sstore(local2, local4)
-            if (not(iszero(eq(number(), 0x1b)))) {
+            if (iszero(iszero(eq(number(), 0x1b)))) {
                 let local5 = 0x0 // #refs 0
                 let local6 = 0xb // #refs 0
                 let local7 = add(sload(local5), local6) // #refs 0
@@ -308,11 +308,11 @@ contract Contract {
     uint256 var1__1; // Slot #0
 
     fallback() external payable {
-        if (~0x8 != block.number) {
-            if (~block.number != 0x9) {
+        if (0x8 != block.number == 0) {
+            if (block.number != 0x9 == 0) {
                 var_1 = 0x3;
                 var_1 += 0x7;
-                if (~block.number != 0x1b) {
+                if (block.number != 0x1b == 0) {
                     var_1 += 0xb;
                     var_1 += 0x5;
                     return;
@@ -322,7 +322,7 @@ contract Contract {
                 return;
             }
             var_1 += 0x7;
-            if (~block.number != 0x1b) {
+            if (block.number != 0x1b == 0) {
                 var_1 += 0xb;
                 var_1 += 0x5;
                 return;
@@ -343,12 +343,12 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(iszero(eq(0x8, number())))) {
-            if (not(iszero(eq(number(), 0x9)))) {
+        if (iszero(iszero(eq(0x8, number())))) {
+            if (iszero(iszero(eq(number(), 0x9)))) {
                 sstore(0x0, 0x3)
                 let local0 = 0x0 // #refs -1
                 sstore(local0, add(0x7, sload(local0)))
-                if (not(iszero(eq(number(), 0x1b)))) {
+                if (iszero(iszero(eq(number(), 0x1b)))) {
                     let local1 = 0x0 // #refs -1
                     sstore(local1, add(0xb, sload(local1)))
                     let local2 = 0x0 // #refs -1
@@ -363,7 +363,7 @@ object "runtime" {
             }
             let local0 = 0x0 // #refs -1
             sstore(local0, add(0x7, sload(local0)))
-            if (not(iszero(eq(number(), 0x1b)))) {
+            if (iszero(iszero(eq(number(), 0x1b)))) {
                 let local1 = 0x0 // #refs -1
                 sstore(local1, add(0xb, sload(local1)))
                 let local2 = 0x0 // #refs -1

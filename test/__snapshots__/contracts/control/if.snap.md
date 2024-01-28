@@ -10,7 +10,7 @@ contract Contract {
     unknown var1__1; // Slot #0
 
     fallback() external payable {
-        if (~block.number != 0x8) {
+        if (block.number != 0x8 == 0) {
             var_1 = 0x3;
             var_1 += 0x5;
             return;
@@ -27,7 +27,7 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(iszero(eq(number(), 0x8)))) {
+        if (iszero(iszero(eq(number(), 0x8)))) {
             let local0 = 0x3 // #refs 0
             sstore(0x0, local0)
             let local1 = 0x0 // #refs 0
@@ -111,7 +111,7 @@ contract Contract {
     uint256 var1__1; // Slot #0
 
     fallback() external payable {
-        if (~0x8 != block.number) {
+        if (0x8 != block.number == 0) {
             var_1 = 0x3;
             var_1 += 0x5;
             return;
@@ -128,7 +128,7 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        if (not(iszero(eq(0x8, number())))) {
+        if (iszero(iszero(eq(0x8, number())))) {
             sstore(0x0, 0x3)
             let local0 = 0x0 // #refs -1
             sstore(local0, add(0x5, sload(local0)))

@@ -11,27 +11,27 @@ contract Contract {
 
     fallback() external payable {
         undefined local0 = 0x0; // #refs 21
-        if (~(local0 < block.number) == 0) {
+        if ((local0 < block.number) == 0 == 0) {
             emit Deposit(local0);
-            if (~(local0 < block.number) == 0) {
+            if ((local0 < block.number) == 0 == 0) {
                 emit Deposit(local0);
-                if (~(local0 < block.number) == 0) {
+                if ((local0 < block.number) == 0 == 0) {
                     emit Deposit(local0);
-                    if (~(local0 < block.number) == 0) {
+                    if ((local0 < block.number) == 0 == 0) {
                         emit Deposit(local0);
-                        if (~(local0 < block.number) == 0) {
+                        if ((local0 < block.number) == 0 == 0) {
                             emit Deposit(local0);
-                            if (~(local0 < block.number) == 0) {
+                            if ((local0 < block.number) == 0 == 0) {
                                 emit Deposit(local0);
-                                if (~(local0 < block.number) == 0) {
+                                if ((local0 < block.number) == 0 == 0) {
                                     emit Deposit(local0);
-                                    if (~(local0 < block.number) == 0) {
+                                    if ((local0 < block.number) == 0 == 0) {
                                         emit Deposit(local0);
-                                        if (~(local0 < block.number) == 0) {
+                                        if ((local0 < block.number) == 0 == 0) {
                                             emit Deposit(local0);
-                                            if (~(local0 < block.number) == 0) {
+                                            if ((local0 < block.number) == 0 == 0) {
                                                 emit Deposit(local0);
-                                                if (~(local0 < block.number) == 0) {
+                                                if ((local0 < block.number) == 0 == 0) {
                                                     emit Deposit(local0);
                                                 }
                                                 return;
@@ -66,57 +66,57 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 = 0x0 // #refs 21
-        if (not(iszero(lt(local0, number())))) {
+        if (iszero(iszero(lt(local0, number())))) {
             let local1 = mload(0x40) // #refs 0
             mstore(local1, local0)
             let local2 = mload(0x40) // #refs 0
             log1(local2, sub(add(0x20, local1), local2), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-            if (not(iszero(lt(local0, number())))) {
+            if (iszero(iszero(lt(local0, number())))) {
                 let local3 = mload(0x40) // #refs 0
                 mstore(local3, local0)
                 let local4 = mload(0x40) // #refs 0
                 log1(local4, sub(add(0x20, local3), local4), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                if (not(iszero(lt(local0, number())))) {
+                if (iszero(iszero(lt(local0, number())))) {
                     let local5 = mload(0x40) // #refs 0
                     mstore(local5, local0)
                     let local6 = mload(0x40) // #refs 0
                     log1(local6, sub(add(0x20, local5), local6), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                    if (not(iszero(lt(local0, number())))) {
+                    if (iszero(iszero(lt(local0, number())))) {
                         let local7 = mload(0x40) // #refs 0
                         mstore(local7, local0)
                         let local8 = mload(0x40) // #refs 0
                         log1(local8, sub(add(0x20, local7), local8), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                        if (not(iszero(lt(local0, number())))) {
+                        if (iszero(iszero(lt(local0, number())))) {
                             let local9 = mload(0x40) // #refs 0
                             mstore(local9, local0)
                             let local10 = mload(0x40) // #refs 0
                             log1(local10, sub(add(0x20, local9), local10), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                            if (not(iszero(lt(local0, number())))) {
+                            if (iszero(iszero(lt(local0, number())))) {
                                 let local11 = mload(0x40) // #refs 0
                                 mstore(local11, local0)
                                 let local12 = mload(0x40) // #refs 0
                                 log1(local12, sub(add(0x20, local11), local12), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                if (not(iszero(lt(local0, number())))) {
+                                if (iszero(iszero(lt(local0, number())))) {
                                     let local13 = mload(0x40) // #refs 0
                                     mstore(local13, local0)
                                     let local14 = mload(0x40) // #refs 0
                                     log1(local14, sub(add(0x20, local13), local14), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                    if (not(iszero(lt(local0, number())))) {
+                                    if (iszero(iszero(lt(local0, number())))) {
                                         let local15 = mload(0x40) // #refs 0
                                         mstore(local15, local0)
                                         let local16 = mload(0x40) // #refs 0
                                         log1(local16, sub(add(0x20, local15), local16), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                        if (not(iszero(lt(local0, number())))) {
+                                        if (iszero(iszero(lt(local0, number())))) {
                                             let local17 = mload(0x40) // #refs 0
                                             mstore(local17, local0)
                                             let local18 = mload(0x40) // #refs 0
                                             log1(local18, sub(add(0x20, local17), local18), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                            if (not(iszero(lt(local0, number())))) {
+                                            if (iszero(iszero(lt(local0, number())))) {
                                                 let local19 = mload(0x40) // #refs 0
                                                 mstore(local19, local0)
                                                 let local20 = mload(0x40) // #refs 0
                                                 log1(local20, sub(add(0x20, local19), local20), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                                if (not(iszero(lt(local0, number())))) {
+                                                if (iszero(iszero(lt(local0, number())))) {
                                                     let local21 = mload(0x40) // #refs 0
                                                     mstore(local21, local0)
                                                     let local22 = mload(0x40) // #refs 0
@@ -432,27 +432,27 @@ contract Contract {
 
     fallback() external payable {
         undefined local0 = 0x0; // #refs 10
-        if (~(local0 < block.number) == 0) {
+        if ((local0 < block.number) == 0 == 0) {
             emit Deposit(local0);
-            if (~(local0 < block.number) == 0) {
+            if ((local0 < block.number) == 0 == 0) {
                 emit Deposit(local0);
-                if (~(local0 < block.number) == 0) {
+                if ((local0 < block.number) == 0 == 0) {
                     emit Deposit(local0);
-                    if (~(local0 < block.number) == 0) {
+                    if ((local0 < block.number) == 0 == 0) {
                         emit Deposit(local0);
-                        if (~(local0 < block.number) == 0) {
+                        if ((local0 < block.number) == 0 == 0) {
                             emit Deposit(local0);
-                            if (~(local0 < block.number) == 0) {
+                            if ((local0 < block.number) == 0 == 0) {
                                 emit Deposit(local0);
-                                if (~(local0 < block.number) == 0) {
+                                if ((local0 < block.number) == 0 == 0) {
                                     emit Deposit(local0);
-                                    if (~(local0 < block.number) == 0) {
+                                    if ((local0 < block.number) == 0 == 0) {
                                         emit Deposit(local0);
-                                        if (~(local0 < block.number) == 0) {
+                                        if ((local0 < block.number) == 0 == 0) {
                                             emit Deposit(local0);
-                                            if (~(local0 < block.number) == 0) {
+                                            if ((local0 < block.number) == 0 == 0) {
                                                 emit Deposit(local0);
-                                                if (~(local0 < block.number) == 0) {
+                                                if ((local0 < block.number) == 0 == 0) {
                                                     emit Deposit(local0);
                                                 }
                                                 return;
@@ -487,67 +487,67 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 = 0x0 // #refs 10
-        if (not(iszero(lt(local0, number())))) {
+        if (iszero(iszero(lt(local0, number())))) {
             let local1 = 0x40 // #refs 0
             let local2 = mload(local1) // #refs -1
             mstore(local2, local0)
             let local3 = mload(local1) // #refs 0
             log1(local3, add(0x20, sub(local2, local3)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-            if (not(iszero(lt(local0, number())))) {
+            if (iszero(iszero(lt(local0, number())))) {
                 let local4 = 0x40 // #refs 0
                 let local5 = mload(local4) // #refs -1
                 mstore(local5, local0)
                 let local6 = mload(local4) // #refs 0
                 log1(local6, add(0x20, sub(local5, local6)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                if (not(iszero(lt(local0, number())))) {
+                if (iszero(iszero(lt(local0, number())))) {
                     let local7 = 0x40 // #refs 0
                     let local8 = mload(local7) // #refs -1
                     mstore(local8, local0)
                     let local9 = mload(local7) // #refs 0
                     log1(local9, add(0x20, sub(local8, local9)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                    if (not(iszero(lt(local0, number())))) {
+                    if (iszero(iszero(lt(local0, number())))) {
                         let local10 = 0x40 // #refs 0
                         let local11 = mload(local10) // #refs -1
                         mstore(local11, local0)
                         let local12 = mload(local10) // #refs 0
                         log1(local12, add(0x20, sub(local11, local12)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                        if (not(iszero(lt(local0, number())))) {
+                        if (iszero(iszero(lt(local0, number())))) {
                             let local13 = 0x40 // #refs 0
                             let local14 = mload(local13) // #refs -1
                             mstore(local14, local0)
                             let local15 = mload(local13) // #refs 0
                             log1(local15, add(0x20, sub(local14, local15)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                            if (not(iszero(lt(local0, number())))) {
+                            if (iszero(iszero(lt(local0, number())))) {
                                 let local16 = 0x40 // #refs 0
                                 let local17 = mload(local16) // #refs -1
                                 mstore(local17, local0)
                                 let local18 = mload(local16) // #refs 0
                                 log1(local18, add(0x20, sub(local17, local18)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                if (not(iszero(lt(local0, number())))) {
+                                if (iszero(iszero(lt(local0, number())))) {
                                     let local19 = 0x40 // #refs 0
                                     let local20 = mload(local19) // #refs -1
                                     mstore(local20, local0)
                                     let local21 = mload(local19) // #refs 0
                                     log1(local21, add(0x20, sub(local20, local21)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                    if (not(iszero(lt(local0, number())))) {
+                                    if (iszero(iszero(lt(local0, number())))) {
                                         let local22 = 0x40 // #refs 0
                                         let local23 = mload(local22) // #refs -1
                                         mstore(local23, local0)
                                         let local24 = mload(local22) // #refs 0
                                         log1(local24, add(0x20, sub(local23, local24)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                        if (not(iszero(lt(local0, number())))) {
+                                        if (iszero(iszero(lt(local0, number())))) {
                                             let local25 = 0x40 // #refs 0
                                             let local26 = mload(local25) // #refs -1
                                             mstore(local26, local0)
                                             let local27 = mload(local25) // #refs 0
                                             log1(local27, add(0x20, sub(local26, local27)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                            if (not(iszero(lt(local0, number())))) {
+                                            if (iszero(iszero(lt(local0, number())))) {
                                                 let local28 = 0x40 // #refs 0
                                                 let local29 = mload(local28) // #refs -1
                                                 mstore(local29, local0)
                                                 let local30 = mload(local28) // #refs 0
                                                 log1(local30, add(0x20, sub(local29, local30)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-                                                if (not(iszero(lt(local0, number())))) {
+                                                if (iszero(iszero(lt(local0, number())))) {
                                                     let local31 = 0x40 // #refs 0
                                                     let local32 = mload(local31) // #refs -1
                                                     mstore(local32, local0)
