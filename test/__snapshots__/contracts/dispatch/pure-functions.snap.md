@@ -59,7 +59,7 @@ object "runtime" {
         function __$5d2c7ee6(/*unknown*/) { // public payable
             let local1 := mload(0x40) // #refs 0
             let local2 := 0x1 // #refs -1
-            mstore(local1, local2)
+            mstore(local1/*=0x80*/, local2)
             let local3 := mload(0x40) // #refs 0
             return(local3, sub(add(0x20, local1), local3)) // 0x1
         }
@@ -69,7 +69,7 @@ object "runtime" {
             require(iszero(local1))
             let local2 := mload(0x40) // #refs 0
             let local3 := 0x1 // #refs -1
-            mstore(local2, local3)
+            mstore(local2/*=0x80*/, local3)
             let local4 := mload(0x40) // #refs 0
             return(local4, sub(add(0x20, local2), local4)) // 0x1
         }
@@ -269,7 +269,7 @@ object "runtime" {
         function __$5d2c7ee6(/*unknown*/) { // public payable
             let local1 := 0x40 // #refs 0
             let local2 := mload(local1) // #refs -1
-            mstore(local2, 0x1)
+            mstore(local2/*=0x80*/, 0x1)
             let local3 := mload(local1) // #refs 0
             return(local3, add(0x20, sub(local2, local3))) // 0x1
         }
@@ -279,7 +279,7 @@ object "runtime" {
             require(iszero(local1))
             let local2 := 0x40 // #refs 0
             let local3 := mload(local2) // #refs -1
-            mstore(local3, 0x1)
+            mstore(local3/*=0x80*/, 0x1)
             let local4 := mload(local2) // #refs 0
             return(local4, add(0x20, sub(local3, local4))) // 0x1
         }

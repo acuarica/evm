@@ -82,7 +82,7 @@ object "runtime" {
             let local7 := add(0x1, local6) // #refs 0
             let local8 := add(local4, number()) // #refs 0
             let local9 := mload(0x40) // #refs 0
-            mstore(local9, local8)
+            mstore(local9/*=0x80*/, local8)
             let local10 := mload(0x40) // #refs 0
             log1(local10, sub(add(0x20, local9), local10), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
             stop()
@@ -99,7 +99,7 @@ object "runtime" {
             let local7 := add(0x1, local6) // #refs 0
             let local8 := add(local4, number()) // #refs 0
             let local9 := mload(0x40) // #refs 0
-            mstore(local9, local8)
+            mstore(local9/*=0x80*/, local8)
             let local10 := mload(0x40) // #refs 0
             return(local10, sub(add(0x20, local9), local10)) // add(calldataload(0x4), number())
         }
@@ -490,7 +490,7 @@ object "runtime" {
             let local6 := add(0x1, local5) // #refs 0
             let local7 := 0x40 // #refs 0
             let local8 := mload(local7) // #refs -1
-            mstore(local8, add(number(), local4))
+            mstore(local8/*=0x80*/, add(number(), local4))
             let local9 := mload(local7) // #refs 0
             log1(local9, add(0x20, sub(local8, local9)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
             stop()
@@ -506,7 +506,7 @@ object "runtime" {
             let local6 := add(0x1, local5) // #refs 0
             let local7 := 0x40 // #refs 0
             let local8 := mload(local7) // #refs -1
-            mstore(local8, add(number(), local4))
+            mstore(local8/*=0x80*/, add(number(), local4))
             let local9 := mload(local7) // #refs 0
             return(local9, add(0x20, sub(local8, local9))) // add(number(), calldataload(0x4))
         }

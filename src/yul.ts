@@ -110,8 +110,10 @@ function yulInst(inst: Inst): string {
             return yul`log${inst.topics.length}(${[
                 inst.offset, inst.size, ...inst.topics
             ].map(yulExpr).join(', ')})`;
-        case 'MStore':
-            return yul`mstore(${inst.location}, ${inst.data})`;
+        case 'MStore': {
+            const location = inst.location.isVal() ? '' : yul`/*=${inst.location.eval()}*/`;
+            return yul`mstore(${inst.location}${location}, ${inst.data})`;
+        }
         case 'Stop':
             return 'stop()';
         case 'Return':

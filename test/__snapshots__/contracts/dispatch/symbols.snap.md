@@ -75,7 +75,7 @@ object "runtime" {
         function __$9663f88f(/*unknown*/) { // public
             let local2 := mload(0x40) // #refs 0
             let local3 := blockhash(0x7) // #refs -1
-            mstore(local2, local3)
+            mstore(local2/*=0x80*/, local3)
             let local4 := mload(0x40) // #refs 0
             return(local4, sub(add(0x20, local2), local4)) // blockhash(0x7)
         }
@@ -83,7 +83,7 @@ object "runtime" {
         function __$b8368615(/*unknown*/) { // public
             let local2 := mload(0x40) // #refs 0
             let local3 := address(this)() // #refs 0
-            mstore(local2, and(0xffffffffffffffffffffffffffffffffffffffff, local3))
+            mstore(local2/*=0x80*/, and(0xffffffffffffffffffffffffffffffffffffffff, local3))
             let local4 := mload(0x40) // #refs 0
             return(local4, sub(add(0x20, local2), local4)) // address(this)()
         }
@@ -95,7 +95,7 @@ object "runtime" {
             let local4 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs 0
             let local5 := mload(0x40) // #refs 0
             let local6 := and(0xffffffffffffffffffffffffffffffffffffffff, local4).balance // #refs -1
-            mstore(local5, local6)
+            mstore(local5/*=0x80*/, local6)
             let local7 := mload(0x40) // #refs 0
             return(local7, sub(add(0x20, local5), local7)) // calldataload(0x4).balance
         }
@@ -367,7 +367,7 @@ object "runtime" {
         function __$9663f88f(/*unknown*/) { // public
             let local2 := 0x40 // #refs 0
             let local3 := mload(local2) // #refs -1
-            mstore(local3, blockhash(0x7))
+            mstore(local3/*=0x80*/, blockhash(0x7))
             let local4 := mload(local2) // #refs 0
             return(local4, add(0x20, sub(local3, local4))) // blockhash(0x7)
         }
@@ -375,7 +375,7 @@ object "runtime" {
         function __$b8368615(/*unknown*/) { // public
             let local2 := 0x40 // #refs 0
             let local3 := mload(local2) // #refs -1
-            mstore(local3, and(address(this)(), sub(shl(0x1, 0xa0), 0x1)))
+            mstore(local3/*=0x80*/, and(address(this)(), sub(shl(0x1, 0xa0), 0x1)))
             let local4 := mload(local2) // #refs 0
             return(local4, add(0x20, sub(local3, local4))) // address(this)()
         }
@@ -386,7 +386,7 @@ object "runtime" {
             require(iszero(lt(local3, 0x20)))
             let local4 := 0x40 // #refs 0
             let local5 := mload(local4) // #refs -1
-            mstore(local5, and(sub(shl(0x1, 0xa0), 0x1), and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))).balance)
+            mstore(local5/*=0x80*/, and(sub(shl(0x1, 0xa0), 0x1), and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))).balance)
             let local6 := mload(local4) // #refs 0
             return(local6, add(0x20, sub(local5, local6))) // calldataload(0x4).balance
         }

@@ -51,7 +51,7 @@ object "runtime" {
             let local2 := [J]0x33 // #refs 0
             let local3 := mload(0x40) // #refs 0
             let local4 := sload(0x0) // #refs -1
-            mstore(local3, local4)
+            mstore(local3/*=0x80*/, local4)
             let local5 := mload(0x40) // #refs 0
             return(local5, sub(add(0x20, local3), local5)) // sload(0x0)
         }
@@ -207,7 +207,7 @@ object "runtime" {
             let local2 := [J]0x33 // #refs 0
             let local3 := 0x40 // #refs 0
             let local4 := mload(local3) // #refs -1
-            mstore(local4, sload(0x0))
+            mstore(local4/*=0x80*/, sload(0x0))
             let local5 := mload(local3) // #refs 0
             return(local5, add(0x20, sub(local4, local5))) // sload(0x0)
         }

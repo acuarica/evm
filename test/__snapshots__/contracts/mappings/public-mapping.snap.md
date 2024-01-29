@@ -65,16 +65,16 @@ object "runtime" {
         function getValue() { // public
             let local2 := 0x0 // #refs -1
             let local3 := 0x0 // #refs -1
-            mstore(local3, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
+            mstore(local3/*=0x0*/, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
             let local4 := add(0x20, local3) // #refs -1
-            mstore(local4, local2)
+            mstore(local4/*=0x20*/, local2)
             let local5 := 0x0 // #refs -1
-            mstore(local5, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
+            mstore(local5/*=0x0*/, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
             let local6 := add(0x20, local5) // #refs -1
-            mstore(local6, keccak256(0x0, add(0x20, local4) /*caller().0x0*/))
+            mstore(local6/*=0x20*/, keccak256(0x0, add(0x20, local4) /*caller().0x0*/))
             let local7 := mload(0x40) // #refs 0
             let local8 := sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/) // #refs -1
-            mstore(local7, local8)
+            mstore(local7/*=0x80*/, local8)
             let local9 := mload(0x40) // #refs 0
             return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
@@ -93,7 +93,7 @@ object "runtime" {
             let local7 := [J]0xbb // #refs 0
             let local8 := mload(0x40) // #refs 0
             let local9 := sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/) // #refs -1
-            mstore(local8, local9)
+            mstore(local8/*=0x80*/, local9)
             let local10 := mload(0x40) // #refs 0
             return(local10, sub(add(0x20, local8), local10)) // sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
         }
@@ -334,14 +334,14 @@ object "runtime" {
 
         function getValue() { // public
             let local2 := 0x0 // #refs 0
-            mstore(local2, caller())
+            mstore(local2/*=0x0*/, caller())
             let local3 := 0x20 // #refs -2
-            mstore(local3, local2)
+            mstore(local3/*=0x20*/, local2)
             let local4 := 0x40 // #refs 0
-            mstore(local3, keccak256(local2, local4 /*caller().0x0*/))
+            mstore(local3/*=0x20*/, keccak256(local2, local4 /*caller().0x0*/))
             let local5 := 0x40 // #refs 0
             let local6 := mload(local5) // #refs -1
-            mstore(local6, sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/))
+            mstore(local6/*=0x80*/, sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/))
             let local7 := mload(local5) // #refs 0
             return(local7, add(0x20, sub(local6, local7))) // sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
@@ -353,15 +353,15 @@ object "runtime" {
             let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
             let local5 := 0x0 // #refs 0
             let local6 := 0x20 // #refs -2
-            mstore(local6, local5)
-            mstore(local5, and(local4, calldataload(local2)))
+            mstore(local6/*=0x20*/, local5)
+            mstore(local5/*=0x0*/, and(local4, calldataload(local2)))
             let local7 := 0x40 // #refs 0
-            mstore(local6, keccak256(local5, local7 /*calldataload(0x4).0x0*/))
-            mstore(local5, and(calldataload(add(0x20, local2)), local4))
+            mstore(local6/*=0x20*/, keccak256(local5, local7 /*calldataload(0x4).0x0*/))
+            mstore(local5/*=0x0*/, and(calldataload(add(0x20, local2)), local4))
             let local8 := [J]0x3d // #refs 0
             let local9 := 0x40 // #refs 0
             let local10 := mload(local9) // #refs -1
-            mstore(local10, sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/))
+            mstore(local10/*=0x80*/, sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/))
             let local11 := mload(local9) // #refs 0
             return(local11, add(0x20, sub(local10, local11))) // sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
         }

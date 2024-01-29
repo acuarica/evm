@@ -63,9 +63,9 @@ object "runtime" {
             require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             let local6 := 0x0 // #refs -1
-            mstore(local6, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, local5)))
+            mstore(local6/*=0x0*/, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, local5)))
             let local7 := add(0x20, local6) // #refs -1
-            mstore(local7, local6)
+            mstore(local7/*=0x20*/, local6)
             sstore(keccak256(0x0, add(0x20, local7) /*caller().0x0*/), local4) /*0[caller()]*/
             stop()
         }
@@ -319,7 +319,7 @@ object "runtime" {
             require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             let local6 := 0x0 // #refs -1
-            mstore(local6, and(local5, sub(shl(0x1, 0xa0), 0x1)))
+            mstore(local6/*=0x0*/, and(local5, sub(shl(0x1, 0xa0), 0x1)))
             mstore(0x20, local6)
             sstore(keccak256(local6, 0x40 /*caller().0x0*/), local4) /*0[caller()]*/
             stop()
