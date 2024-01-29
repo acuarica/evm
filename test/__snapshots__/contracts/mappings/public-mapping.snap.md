@@ -45,7 +45,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 20965255)) {
@@ -82,7 +82,7 @@ object "runtime" {
         function allowance(address,address) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x40)));
+            require(iszero(lt(local3, 0x40)))
             let local4 := add(0x20, local2) // #refs 0
             mstore(0x20, 0x0)
             let local5 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs -1
@@ -315,7 +315,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 20965255)) {
@@ -349,7 +349,7 @@ object "runtime" {
         function allowance(address,address) { // public
             let local2 := 0x4 // #refs 1
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x40)));
+            require(iszero(lt(local3, 0x40)))
             let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
             let local5 := 0x0 // #refs 0
             let local6 := 0x20 // #refs -2

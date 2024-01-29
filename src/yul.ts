@@ -146,7 +146,7 @@ function yulStmt(stmt: Stmt): string {
         case 'CallSite':
             return yul`$${stmt.selector}();`;
         case 'Require':
-            return `require(${[stmt.condition, ...stmt.args].map(yulExpr).join(', ')});`;
+            return `require(${[stmt.condition, ...stmt.args].map(yulExpr).join(', ')})`;
         default:
             return yulInst(stmt);
     }

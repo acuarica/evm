@@ -51,7 +51,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 083c7624)) {
@@ -71,7 +71,7 @@ object "runtime" {
         function __$083c7624(/*unknown*/) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
+            require(iszero(lt(local3, 0x20)))
             let local4 := calldataload(local2) // #refs 0
             let local5 := add(local4, 0x1) // #refs 0
             sstore(0x0, local5)
@@ -81,8 +81,8 @@ object "runtime" {
         function __$d07c4b2d(/*unknown*/) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
-            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
+            require(iszero(lt(local3, 0x20)))
+            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             let local4 := calldataload(local2) // #refs 0
             let local5 := add(local4, 0x3) // #refs 0
             sstore(0x0, local5)
@@ -352,7 +352,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 083c7624)) {
@@ -372,7 +372,7 @@ object "runtime" {
         function __$083c7624(/*unknown*/) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
+            require(iszero(lt(local3, 0x20)))
             sstore(0x0, add(0x1, calldataload(local2)))
             stop()
         }
@@ -380,9 +380,9 @@ object "runtime" {
         function __$d07c4b2d(/*unknown*/) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
+            require(iszero(lt(local3, 0x20)))
             let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
-            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
+            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
             sstore(0x0, add(0x3, calldataload(local2)))
             stop()
         }

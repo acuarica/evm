@@ -51,7 +51,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 2
             if (eq(msg.sig, 9663f88f)) {
@@ -91,7 +91,7 @@ object "runtime" {
         function getBalance(address) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
+            require(iszero(lt(local3, 0x20)))
             let local4 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs 0
             let local5 := mload(0x40) // #refs 0
             let local6 := and(0xffffffffffffffffffffffffffffffffffffffff, local4).balance // #refs -1
@@ -343,7 +343,7 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         let local0 := callvalue() // #refs 0
-        require(iszero(local0));
+        require(iszero(local0))
         if (iszero(lt(calldatasize(), 0x4))) {
             let local1 := shr(calldataload(0x0), 0xe0) // #refs 2
             if (eq(msg.sig, 9663f88f)) {
@@ -383,7 +383,7 @@ object "runtime" {
         function getBalance(address) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
-            require(iszero(lt(local3, 0x20)));
+            require(iszero(lt(local3, 0x20)))
             let local4 := 0x40 // #refs 0
             let local5 := mload(local4) // #refs -1
             mstore(local5, and(sub(shl(0x1, 0xa0), 0x1), and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))).balance)

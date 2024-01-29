@@ -25,7 +25,7 @@ object "runtime" {
         let local2 := mload(0x40) // #refs 0
         let local3 := create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
         let local4 := iszero(local3) // #refs 0
-        require(iszero(local4));
+        require(iszero(local4))
         stop()
 
     }
@@ -119,7 +119,7 @@ object "runtime" {
         let local2 := mload(0x40) // #refs 0
         let local3 := create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
         let local4 := iszero(local3) // #refs 0
-        require(iszero(local4));
+        require(iszero(local4))
         stop()
 
     }

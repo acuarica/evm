@@ -66,7 +66,7 @@ object "runtime" {
 
         function get() { // public
             let local1 := callvalue() // #refs 0
-            require(iszero(local1));
+            require(iszero(local1))
             let local2 := mload(0x40) // #refs 0
             let local3 := 0x1 // #refs -1
             mstore(local2, local3)
@@ -276,7 +276,7 @@ object "runtime" {
 
         function get() { // public
             let local1 := callvalue() // #refs 0
-            require(iszero(local1));
+            require(iszero(local1))
             let local2 := 0x40 // #refs 0
             let local3 := mload(local2) // #refs -1
             mstore(local3, 0x1)
