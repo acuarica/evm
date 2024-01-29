@@ -415,7 +415,7 @@ For example
         ✔ should match Solidity snapshot 🎞️
 ```
 
-### `types`
+### [`types`](./types/)
 
 This folder contains _vendor_ types to refine or declare types of libraries.
 It is used either in tests or internally in the library, _i.e._, these types are not re-exported and hence not part of the public library API.
