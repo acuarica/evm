@@ -33,26 +33,26 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, 3fa4f245)) {
                 $3fa4f245();
             } else {
-                let local2 = 0x0 // #refs 0
+                let local2 := 0x0 // #refs 0
                 revert(local2, local2)
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function value() { // public
-            let local2 = [J]0x33 // #refs 0
-            let local3 = mload(0x40) // #refs 0
-            let local4 = sload(0x0) // #refs -1
+            let local2 := [J]0x33 // #refs 0
+            let local3 := mload(0x40) // #refs 0
+            let local4 := sload(0x0) // #refs -1
             mstore(local3, local4)
-            let local5 = mload(0x40) // #refs 0
+            let local5 := mload(0x40) // #refs 0
             return(local5, sub(add(0x20, local3), local5)) // sload(0x0)
         }
 
@@ -189,26 +189,26 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, 3fa4f245)) {
                 $3fa4f245();
             } else {
-                let local2 = 0x0 // #refs 0
+                let local2 := 0x0 // #refs 0
                 revert(local2, local2)
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function value() { // public
-            let local2 = [J]0x33 // #refs 0
-            let local3 = 0x40 // #refs 0
-            let local4 = mload(local3) // #refs -1
+            let local2 := [J]0x33 // #refs 0
+            let local3 := 0x40 // #refs 0
+            let local4 := mload(local3) // #refs -1
             mstore(local4, sload(0x0))
-            let local5 = mload(local3) // #refs 0
+            let local5 := mload(local3) // #refs 0
             return(local5, add(0x20, sub(local4, local5))) // sload(0x0)
         }
 

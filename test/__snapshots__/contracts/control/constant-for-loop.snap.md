@@ -41,57 +41,57 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x0 // #refs 3
-        let local1 = mload(0x40) // #refs 0
+        let local0 := 0x0 // #refs 3
+        let local1 := mload(0x40) // #refs 0
         mstore(local1, local0)
-        let local2 = mload(0x40) // #refs 0
+        let local2 := mload(0x40) // #refs 0
         log1(local2, sub(add(0x20, local1), local2), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local3 = add(0x1, local0) // #refs 3
-        let local4 = mload(0x40) // #refs 0
+        let local3 := add(0x1, local0) // #refs 3
+        let local4 := mload(0x40) // #refs 0
         mstore(local4, local3)
-        let local5 = mload(0x40) // #refs 0
+        let local5 := mload(0x40) // #refs 0
         log1(local5, sub(add(0x20, local4), local5), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local6 = add(0x1, local3) // #refs 3
-        let local7 = mload(0x40) // #refs 0
+        let local6 := add(0x1, local3) // #refs 3
+        let local7 := mload(0x40) // #refs 0
         mstore(local7, local6)
-        let local8 = mload(0x40) // #refs 0
+        let local8 := mload(0x40) // #refs 0
         log1(local8, sub(add(0x20, local7), local8), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local9 = add(0x1, local6) // #refs 3
-        let local10 = mload(0x40) // #refs 0
+        let local9 := add(0x1, local6) // #refs 3
+        let local10 := mload(0x40) // #refs 0
         mstore(local10, local9)
-        let local11 = mload(0x40) // #refs 0
+        let local11 := mload(0x40) // #refs 0
         log1(local11, sub(add(0x20, local10), local11), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local12 = add(0x1, local9) // #refs 3
-        let local13 = mload(0x40) // #refs 0
+        let local12 := add(0x1, local9) // #refs 3
+        let local13 := mload(0x40) // #refs 0
         mstore(local13, local12)
-        let local14 = mload(0x40) // #refs 0
+        let local14 := mload(0x40) // #refs 0
         log1(local14, sub(add(0x20, local13), local14), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local15 = add(0x1, local12) // #refs 3
-        let local16 = mload(0x40) // #refs 0
+        let local15 := add(0x1, local12) // #refs 3
+        let local16 := mload(0x40) // #refs 0
         mstore(local16, local15)
-        let local17 = mload(0x40) // #refs 0
+        let local17 := mload(0x40) // #refs 0
         log1(local17, sub(add(0x20, local16), local17), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local18 = add(0x1, local15) // #refs 3
-        let local19 = mload(0x40) // #refs 0
+        let local18 := add(0x1, local15) // #refs 3
+        let local19 := mload(0x40) // #refs 0
         mstore(local19, local18)
-        let local20 = mload(0x40) // #refs 0
+        let local20 := mload(0x40) // #refs 0
         log1(local20, sub(add(0x20, local19), local20), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local21 = add(0x1, local18) // #refs 3
-        let local22 = mload(0x40) // #refs 0
+        let local21 := add(0x1, local18) // #refs 3
+        let local22 := mload(0x40) // #refs 0
         mstore(local22, local21)
-        let local23 = mload(0x40) // #refs 0
+        let local23 := mload(0x40) // #refs 0
         log1(local23, sub(add(0x20, local22), local23), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local24 = add(0x1, local21) // #refs 3
-        let local25 = mload(0x40) // #refs 0
+        let local24 := add(0x1, local21) // #refs 3
+        let local25 := mload(0x40) // #refs 0
         mstore(local25, local24)
-        let local26 = mload(0x40) // #refs 0
+        let local26 := mload(0x40) // #refs 0
         log1(local26, sub(add(0x20, local25), local26), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local27 = add(0x1, local24) // #refs 3
-        let local28 = mload(0x40) // #refs 0
+        let local27 := add(0x1, local24) // #refs 3
+        let local28 := mload(0x40) // #refs 0
         mstore(local28, local27)
-        let local29 = mload(0x40) // #refs 0
+        let local29 := mload(0x40) // #refs 0
         log1(local29, sub(add(0x20, local28), local29), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local30 = add(0x1, local27) // #refs 0
+        let local30 := add(0x1, local27) // #refs 0
         stop()
 
     }
@@ -352,67 +352,67 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x0 // #refs 0
-        let local1 = 0x40 // #refs 0
-        let local2 = mload(local1) // #refs -1
+        let local0 := 0x0 // #refs 0
+        let local1 := 0x40 // #refs 0
+        let local2 := mload(local1) // #refs -1
         mstore(local2, local0)
-        let local3 = mload(local1) // #refs 0
+        let local3 := mload(local1) // #refs 0
         log1(local3, add(0x20, sub(local2, local3)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local4 = add(0x1, local0) // #refs 0
-        let local5 = 0x40 // #refs 0
-        let local6 = mload(local5) // #refs -1
+        let local4 := add(0x1, local0) // #refs 0
+        let local5 := 0x40 // #refs 0
+        let local6 := mload(local5) // #refs -1
         mstore(local6, local4)
-        let local7 = mload(local5) // #refs 0
+        let local7 := mload(local5) // #refs 0
         log1(local7, add(0x20, sub(local6, local7)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local8 = add(0x1, local4) // #refs 0
-        let local9 = 0x40 // #refs 0
-        let local10 = mload(local9) // #refs -1
+        let local8 := add(0x1, local4) // #refs 0
+        let local9 := 0x40 // #refs 0
+        let local10 := mload(local9) // #refs -1
         mstore(local10, local8)
-        let local11 = mload(local9) // #refs 0
+        let local11 := mload(local9) // #refs 0
         log1(local11, add(0x20, sub(local10, local11)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local12 = add(0x1, local8) // #refs 0
-        let local13 = 0x40 // #refs 0
-        let local14 = mload(local13) // #refs -1
+        let local12 := add(0x1, local8) // #refs 0
+        let local13 := 0x40 // #refs 0
+        let local14 := mload(local13) // #refs -1
         mstore(local14, local12)
-        let local15 = mload(local13) // #refs 0
+        let local15 := mload(local13) // #refs 0
         log1(local15, add(0x20, sub(local14, local15)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local16 = add(0x1, local12) // #refs 0
-        let local17 = 0x40 // #refs 0
-        let local18 = mload(local17) // #refs -1
+        let local16 := add(0x1, local12) // #refs 0
+        let local17 := 0x40 // #refs 0
+        let local18 := mload(local17) // #refs -1
         mstore(local18, local16)
-        let local19 = mload(local17) // #refs 0
+        let local19 := mload(local17) // #refs 0
         log1(local19, add(0x20, sub(local18, local19)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local20 = add(0x1, local16) // #refs 0
-        let local21 = 0x40 // #refs 0
-        let local22 = mload(local21) // #refs -1
+        let local20 := add(0x1, local16) // #refs 0
+        let local21 := 0x40 // #refs 0
+        let local22 := mload(local21) // #refs -1
         mstore(local22, local20)
-        let local23 = mload(local21) // #refs 0
+        let local23 := mload(local21) // #refs 0
         log1(local23, add(0x20, sub(local22, local23)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local24 = add(0x1, local20) // #refs 0
-        let local25 = 0x40 // #refs 0
-        let local26 = mload(local25) // #refs -1
+        let local24 := add(0x1, local20) // #refs 0
+        let local25 := 0x40 // #refs 0
+        let local26 := mload(local25) // #refs -1
         mstore(local26, local24)
-        let local27 = mload(local25) // #refs 0
+        let local27 := mload(local25) // #refs 0
         log1(local27, add(0x20, sub(local26, local27)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local28 = add(0x1, local24) // #refs 0
-        let local29 = 0x40 // #refs 0
-        let local30 = mload(local29) // #refs -1
+        let local28 := add(0x1, local24) // #refs 0
+        let local29 := 0x40 // #refs 0
+        let local30 := mload(local29) // #refs -1
         mstore(local30, local28)
-        let local31 = mload(local29) // #refs 0
+        let local31 := mload(local29) // #refs 0
         log1(local31, add(0x20, sub(local30, local31)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local32 = add(0x1, local28) // #refs 0
-        let local33 = 0x40 // #refs 0
-        let local34 = mload(local33) // #refs -1
+        let local32 := add(0x1, local28) // #refs 0
+        let local33 := 0x40 // #refs 0
+        let local34 := mload(local33) // #refs -1
         mstore(local34, local32)
-        let local35 = mload(local33) // #refs 0
+        let local35 := mload(local33) // #refs 0
         log1(local35, add(0x20, sub(local34, local35)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local36 = add(0x1, local32) // #refs 0
-        let local37 = 0x40 // #refs 0
-        let local38 = mload(local37) // #refs -1
+        let local36 := add(0x1, local32) // #refs 0
+        let local37 := 0x40 // #refs 0
+        let local38 := mload(local37) // #refs -1
         mstore(local38, local36)
-        let local39 = mload(local37) // #refs 0
+        let local39 := mload(local37) // #refs 0
         log1(local39, add(0x20, sub(local38, local39)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
-        let local40 = add(0x1, local36) // #refs 0
+        let local40 := add(0x1, local36) // #refs 0
         stop()
 
     }

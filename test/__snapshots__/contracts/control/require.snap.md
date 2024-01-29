@@ -40,31 +40,31 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, b759f954)) {
                 $b759f954();
             } else {
-                let local2 = 0x0 // #refs 0
+                let local2 := 0x0 // #refs 0
                 revert(local2, local2)
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function approve(uint256) { // public
-            let local2 = 0x4 // #refs 3
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 3
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 3
-            let local5 = caller() // #refs 1
+            let local4 := calldataload(local2) // #refs 3
+            let local5 := caller() // #refs 1
             require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
             require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
-            let local6 = 0x0 // #refs -1
+            let local6 := 0x0 // #refs -1
             mstore(local6, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, local5)))
-            let local7 = add(0x20, local6) // #refs -1
+            let local7 := add(0x20, local6) // #refs -1
             mstore(local7, local6)
             sstore(keccak256(0x0, add(0x20, local7) /*caller().0x0*/), local4) /*0[caller()]*/
             stop()
@@ -296,29 +296,29 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 0
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 0
             if (eq(msg.sig, b759f954)) {
                 $b759f954();
             } else {
-                let local2 = 0x0 // #refs 0
+                let local2 := 0x0 // #refs 0
                 revert(local2, local2)
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function approve(uint256) { // public
-            let local2 = 0x4 // #refs 0
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 0
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 1
-            let local5 = caller() // #refs 0
+            let local4 := calldataload(local2) // #refs 1
+            let local5 := caller() // #refs 0
             require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
             require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0));
-            let local6 = 0x0 // #refs -1
+            let local6 := 0x0 // #refs -1
             mstore(local6, and(local5, sub(shl(0x1, 0xa0), 0x1)))
             mstore(0x20, local6)
             sstore(keccak256(local6, 0x40 /*caller().0x0*/), local4) /*0[caller()]*/

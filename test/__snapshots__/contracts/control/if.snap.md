@@ -28,17 +28,17 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         if (iszero(iszero(eq(number(), 0x8)))) {
-            let local0 = 0x3 // #refs 0
+            let local0 := 0x3 // #refs 0
             sstore(0x0, local0)
-            let local1 = 0x0 // #refs 0
-            let local2 = 0x5 // #refs 0
-            let local3 = add(sload(local1), local2) // #refs 0
+            let local1 := 0x0 // #refs 0
+            let local2 := 0x5 // #refs 0
+            let local3 := add(sload(local1), local2) // #refs 0
             sstore(local1, local3)
             stop()
         }
-        let local0 = 0x0 // #refs 0
-        let local1 = 0x5 // #refs 0
-        let local2 = add(sload(local0), local1) // #refs 0
+        let local0 := 0x0 // #refs 0
+        let local1 := 0x5 // #refs 0
+        let local2 := add(sload(local0), local1) // #refs 0
         sstore(local0, local2)
         stop()
 
@@ -130,11 +130,11 @@ object "runtime" {
         mstore(0x40, 0x80)
         if (iszero(iszero(eq(0x8, number())))) {
             sstore(0x0, 0x3)
-            let local0 = 0x0 // #refs -1
+            let local0 := 0x0 // #refs -1
             sstore(local0, add(0x5, sload(local0)))
             stop()
         }
-        let local0 = 0x0 // #refs -1
+        let local0 := 0x0 // #refs -1
         sstore(local0, add(0x5, sload(local0)))
         stop()
 

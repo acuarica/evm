@@ -428,13 +428,13 @@ event ${eventSelector(unknownEventSig)};
 
             expect(yulStmts(state.stmts).trim().split('\n')).to.be.deep.equal([
                 'mstore(0x40, 0x80)',
-                'let local0 = 0x0 // #refs 0',
-                'let local1 = 0x3 // #refs 0',
-                'let local2 = add(sload(local0), local1) // #refs 0',
+                'let local0 := 0x0 // #refs 0',
+                'let local1 := 0x3 // #refs 0',
+                'let local2 := add(sload(local0), local1) // #refs 0',
                 'sstore(local0, local2)',
-                'let local3 = 0xb // #refs 0',
-                'let local4 = 0x1 // #refs -1',
-                'let local5 = add(sload(local4), local3) // #refs 0',
+                'let local3 := 0xb // #refs 0',
+                'let local4 := 0x1 // #refs -1',
+                'let local5 := add(sload(local4), local3) // #refs 0',
                 'sstore(local4, local5)',
                 'stop()',
             ]);

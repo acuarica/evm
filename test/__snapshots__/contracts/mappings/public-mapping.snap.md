@@ -44,57 +44,57 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 20965255)) {
                 $20965255();
             } else {
                 if (eq(msg.sig, dd62ed3e)) {
                     $dd62ed3e();
                 } else {
-                    let local2 = 0x0 // #refs 0
+                    let local2 := 0x0 // #refs 0
                     revert(local2, local2)
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function getValue() { // public
-            let local2 = 0x0 // #refs -1
-            let local3 = 0x0 // #refs -1
+            let local2 := 0x0 // #refs -1
+            let local3 := 0x0 // #refs -1
             mstore(local3, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
-            let local4 = add(0x20, local3) // #refs -1
+            let local4 := add(0x20, local3) // #refs -1
             mstore(local4, local2)
-            let local5 = 0x0 // #refs -1
+            let local5 := 0x0 // #refs -1
             mstore(local5, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, caller())))
-            let local6 = add(0x20, local5) // #refs -1
+            let local6 := add(0x20, local5) // #refs -1
             mstore(local6, keccak256(0x0, add(0x20, local4) /*caller().0x0*/))
-            let local7 = mload(0x40) // #refs 0
-            let local8 = sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/) // #refs -1
+            let local7 := mload(0x40) // #refs 0
+            let local8 := sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/) // #refs -1
             mstore(local7, local8)
-            let local9 = mload(0x40) // #refs 0
+            let local9 := mload(0x40) // #refs 0
             return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
         function allowance(address,address) { // public
-            let local2 = 0x4 // #refs 3
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 3
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x40)));
-            let local4 = add(0x20, local2) // #refs 0
+            let local4 := add(0x20, local2) // #refs 0
             mstore(0x20, 0x0)
-            let local5 = and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs -1
+            let local5 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs -1
             mstore(0x0, local5)
             mstore(0x20, keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/))
-            let local6 = and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local4)) // #refs -1
+            let local6 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local4)) // #refs -1
             mstore(0x0, local6)
-            let local7 = [J]0xbb // #refs 0
-            let local8 = mload(0x40) // #refs 0
-            let local9 = sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/) // #refs -1
+            let local7 := [J]0xbb // #refs 0
+            let local8 := mload(0x40) // #refs 0
+            let local9 := sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/) // #refs -1
             mstore(local8, local9)
-            let local10 = mload(0x40) // #refs 0
+            let local10 := mload(0x40) // #refs 0
             return(local10, sub(add(0x20, local8), local10)) // sload(keccak256(0x0, 0x40 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
         }
 
@@ -314,55 +314,55 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 20965255)) {
                 $20965255();
             } else {
                 if (eq(msg.sig, dd62ed3e)) {
                     $dd62ed3e();
                 } else {
-                    let local2 = 0x0 // #refs 0
+                    let local2 := 0x0 // #refs 0
                     revert(local2, local2)
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function getValue() { // public
-            let local2 = 0x0 // #refs 0
+            let local2 := 0x0 // #refs 0
             mstore(local2, caller())
-            let local3 = 0x20 // #refs -2
+            let local3 := 0x20 // #refs -2
             mstore(local3, local2)
-            let local4 = 0x40 // #refs 0
+            let local4 := 0x40 // #refs 0
             mstore(local3, keccak256(local2, local4 /*caller().0x0*/))
-            let local5 = 0x40 // #refs 0
-            let local6 = mload(local5) // #refs -1
+            let local5 := 0x40 // #refs 0
+            let local6 := mload(local5) // #refs -1
             mstore(local6, sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/))
-            let local7 = mload(local5) // #refs 0
+            let local7 := mload(local5) // #refs 0
             return(local7, add(0x20, sub(local6, local7))) // sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
         function allowance(address,address) { // public
-            let local2 = 0x4 // #refs 1
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 1
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x40)));
-            let local4 = sub(shl(0x1, 0xa0), 0x1) // #refs 0
-            let local5 = 0x0 // #refs 0
-            let local6 = 0x20 // #refs -2
+            let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
+            let local5 := 0x0 // #refs 0
+            let local6 := 0x20 // #refs -2
             mstore(local6, local5)
             mstore(local5, and(local4, calldataload(local2)))
-            let local7 = 0x40 // #refs 0
+            let local7 := 0x40 // #refs 0
             mstore(local6, keccak256(local5, local7 /*calldataload(0x4).0x0*/))
             mstore(local5, and(calldataload(add(0x20, local2)), local4))
-            let local8 = [J]0x3d // #refs 0
-            let local9 = 0x40 // #refs 0
-            let local10 = mload(local9) // #refs -1
+            let local8 := [J]0x3d // #refs 0
+            let local9 := 0x40 // #refs 0
+            let local10 := mload(local9) // #refs -1
             mstore(local10, sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/))
-            let local11 = mload(local9) // #refs 0
+            let local11 := mload(local9) // #refs 0
             return(local11, add(0x20, sub(local10, local11))) // sload(keccak256(local5, local7 /*calldataload(0x24).keccak256(0x0, 0x40 /*calldataload(0x4).0x0*/)*/)/*base0[calldataload(0x4)][calldataload(0x24)]*/)
         }
 

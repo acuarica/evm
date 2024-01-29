@@ -29,11 +29,11 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         if (iszero(iszero(eq(number(), 0x7)))) {
-            let local0 = 0x3 // #refs 1
+            let local0 := 0x3 // #refs 1
             sstore(0x0, local0)
             stop()
         }
-        let local0 = 0x5 // #refs 1
+        let local0 := 0x5 // #refs 1
         sstore(0x0, local0)
         stop()
 

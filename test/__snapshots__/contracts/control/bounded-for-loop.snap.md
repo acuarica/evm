@@ -75,37 +75,37 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x0 // #refs 4
+        let local0 := 0x0 // #refs 4
         if (iszero(iszero(lt(local0, number())))) {
             sstore(0x0, local0)
-            let local1 = add(0x1, local0) // #refs 4
+            let local1 := add(0x1, local0) // #refs 4
             if (iszero(iszero(lt(local1, number())))) {
                 sstore(0x0, local1)
-                let local2 = add(0x1, local1) // #refs 4
+                let local2 := add(0x1, local1) // #refs 4
                 if (iszero(iszero(lt(local2, number())))) {
                     sstore(0x0, local2)
-                    let local3 = add(0x1, local2) // #refs 4
+                    let local3 := add(0x1, local2) // #refs 4
                     if (iszero(iszero(lt(local3, number())))) {
                         sstore(0x0, local3)
-                        let local4 = add(0x1, local3) // #refs 4
+                        let local4 := add(0x1, local3) // #refs 4
                         if (iszero(iszero(lt(local4, number())))) {
                             sstore(0x0, local4)
-                            let local5 = add(0x1, local4) // #refs 4
+                            let local5 := add(0x1, local4) // #refs 4
                             if (iszero(iszero(lt(local5, number())))) {
                                 sstore(0x0, local5)
-                                let local6 = add(0x1, local5) // #refs 4
+                                let local6 := add(0x1, local5) // #refs 4
                                 if (iszero(iszero(lt(local6, number())))) {
                                     sstore(0x0, local6)
-                                    let local7 = add(0x1, local6) // #refs 4
+                                    let local7 := add(0x1, local6) // #refs 4
                                     if (iszero(iszero(lt(local7, number())))) {
                                         sstore(0x0, local7)
-                                        let local8 = add(0x1, local7) // #refs 4
+                                        let local8 := add(0x1, local7) // #refs 4
                                         if (iszero(iszero(lt(local8, number())))) {
                                             sstore(0x0, local8)
-                                            let local9 = add(0x1, local8) // #refs 4
+                                            let local9 := add(0x1, local8) // #refs 4
                                             if (iszero(iszero(lt(local9, number())))) {
                                                 sstore(0x0, local9)
-                                                let local10 = add(0x1, local9) // #refs 4
+                                                let local10 := add(0x1, local9) // #refs 4
                                                 if (iszero(iszero(lt(local10, number())))) {
                                                     sstore(0x0, local10)
                                                 }
@@ -460,37 +460,37 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x0 // #refs 1
+        let local0 := 0x0 // #refs 1
         if (iszero(iszero(lt(local0, number())))) {
             sstore(0x0, local0)
-            let local1 = add(0x1, local0) // #refs 1
+            let local1 := add(0x1, local0) // #refs 1
             if (iszero(iszero(lt(local1, number())))) {
                 sstore(0x0, local1)
-                let local2 = add(0x1, local1) // #refs 1
+                let local2 := add(0x1, local1) // #refs 1
                 if (iszero(iszero(lt(local2, number())))) {
                     sstore(0x0, local2)
-                    let local3 = add(0x1, local2) // #refs 1
+                    let local3 := add(0x1, local2) // #refs 1
                     if (iszero(iszero(lt(local3, number())))) {
                         sstore(0x0, local3)
-                        let local4 = add(0x1, local3) // #refs 1
+                        let local4 := add(0x1, local3) // #refs 1
                         if (iszero(iszero(lt(local4, number())))) {
                             sstore(0x0, local4)
-                            let local5 = add(0x1, local4) // #refs 1
+                            let local5 := add(0x1, local4) // #refs 1
                             if (iszero(iszero(lt(local5, number())))) {
                                 sstore(0x0, local5)
-                                let local6 = add(0x1, local5) // #refs 1
+                                let local6 := add(0x1, local5) // #refs 1
                                 if (iszero(iszero(lt(local6, number())))) {
                                     sstore(0x0, local6)
-                                    let local7 = add(0x1, local6) // #refs 1
+                                    let local7 := add(0x1, local6) // #refs 1
                                     if (iszero(iszero(lt(local7, number())))) {
                                         sstore(0x0, local7)
-                                        let local8 = add(0x1, local7) // #refs 1
+                                        let local8 := add(0x1, local7) // #refs 1
                                         if (iszero(iszero(lt(local8, number())))) {
                                             sstore(0x0, local8)
-                                            let local9 = add(0x1, local8) // #refs 1
+                                            let local9 := add(0x1, local8) // #refs 1
                                             if (iszero(iszero(lt(local9, number())))) {
                                                 sstore(0x0, local9)
-                                                let local10 = add(0x1, local9) // #refs 1
+                                                let local10 := add(0x1, local9) // #refs 1
                                                 if (iszero(iszero(lt(local10, number())))) {
                                                     sstore(0x0, local10)
                                                 }

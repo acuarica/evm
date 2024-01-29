@@ -20,11 +20,11 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x91 // #refs 0
-        let local1 = mload(0x40) // #refs 0
-        let local2 = mload(0x40) // #refs 0
-        let local3 = create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
-        let local4 = iszero(local3) // #refs 0
+        let local0 := 0x91 // #refs 0
+        let local1 := mload(0x40) // #refs 0
+        let local2 := mload(0x40) // #refs 0
+        let local3 := create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
+        let local4 := iszero(local3) // #refs 0
         require(iszero(local4));
         stop()
 
@@ -114,11 +114,11 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = 0x85 // #refs 0
-        let local1 = mload(0x40) // #refs 0
-        let local2 = mload(0x40) // #refs 0
-        let local3 = create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
-        let local4 = iszero(local3) // #refs 0
+        let local0 := 0x85 // #refs 0
+        let local1 := mload(0x40) // #refs 0
+        let local2 := mload(0x40) // #refs 0
+        let local3 := create(0x0, local2, sub(add(local0, local1), local2)) // #refs 0
+        let local4 := iszero(local3) // #refs 0
         require(iszero(local4));
         stop()
 

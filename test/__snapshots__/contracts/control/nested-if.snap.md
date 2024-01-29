@@ -46,64 +46,64 @@ object "runtime" {
     code {
         mstore(0x40, 0x80)
         if (iszero(iszero(eq(number(), 0x8)))) {
-            let local0 = 0x0 // #refs 0
-            let local1 = sload(local0) // #refs 0
+            let local0 := 0x0 // #refs 0
+            let local1 := sload(local0) // #refs 0
             if (iszero(iszero(eq(number(), 0x9)))) {
-                let local2 = 0x3 // #refs 0
+                let local2 := 0x3 // #refs 0
                 sstore(0x0, local2)
-                let local3 = 0x0 // #refs 0
-                let local4 = 0x7 // #refs 0
-                let local5 = add(sload(local3), local4) // #refs 0
+                let local3 := 0x0 // #refs 0
+                let local4 := 0x7 // #refs 0
+                let local5 := add(sload(local3), local4) // #refs 0
                 sstore(local3, local5)
                 if (iszero(iszero(eq(number(), 0x1b)))) {
-                    let local6 = 0x0 // #refs 0
-                    let local7 = 0xb // #refs 0
-                    let local8 = add(sload(local6), local7) // #refs 0
+                    let local6 := 0x0 // #refs 0
+                    let local7 := 0xb // #refs 0
+                    let local8 := add(sload(local6), local7) // #refs 0
                     sstore(local6, local8)
-                    let local9 = 0x0 // #refs 0
-                    let local10 = 0x5 // #refs 0
-                    let local11 = add(sload(local9), local10) // #refs 0
+                    let local9 := 0x0 // #refs 0
+                    let local10 := 0x5 // #refs 0
+                    let local11 := add(sload(local9), local10) // #refs 0
                     sstore(local9, local11)
                     stop()
                 }
-                let local6 = 0x0 // #refs 0
-                let local7 = 0xf // #refs 0
-                let local8 = add(sload(local6), local7) // #refs 0
+                let local6 := 0x0 // #refs 0
+                let local7 := 0xf // #refs 0
+                let local8 := add(sload(local6), local7) // #refs 0
                 sstore(local6, local8)
-                let local9 = 0x0 // #refs 0
-                let local10 = 0x5 // #refs 0
-                let local11 = add(sload(local9), local10) // #refs 0
+                let local9 := 0x0 // #refs 0
+                let local10 := 0x5 // #refs 0
+                let local11 := add(sload(local9), local10) // #refs 0
                 sstore(local9, local11)
                 stop()
             }
-            let local2 = 0x0 // #refs 0
-            let local3 = 0x7 // #refs 0
-            let local4 = add(sload(local2), local3) // #refs 0
+            let local2 := 0x0 // #refs 0
+            let local3 := 0x7 // #refs 0
+            let local4 := add(sload(local2), local3) // #refs 0
             sstore(local2, local4)
             if (iszero(iszero(eq(number(), 0x1b)))) {
-                let local5 = 0x0 // #refs 0
-                let local6 = 0xb // #refs 0
-                let local7 = add(sload(local5), local6) // #refs 0
+                let local5 := 0x0 // #refs 0
+                let local6 := 0xb // #refs 0
+                let local7 := add(sload(local5), local6) // #refs 0
                 sstore(local5, local7)
-                let local8 = 0x0 // #refs 0
-                let local9 = 0x5 // #refs 0
-                let local10 = add(sload(local8), local9) // #refs 0
+                let local8 := 0x0 // #refs 0
+                let local9 := 0x5 // #refs 0
+                let local10 := add(sload(local8), local9) // #refs 0
                 sstore(local8, local10)
                 stop()
             }
-            let local5 = 0x0 // #refs 0
-            let local6 = 0xf // #refs 0
-            let local7 = add(sload(local5), local6) // #refs 0
+            let local5 := 0x0 // #refs 0
+            let local6 := 0xf // #refs 0
+            let local7 := add(sload(local5), local6) // #refs 0
             sstore(local5, local7)
-            let local8 = 0x0 // #refs 0
-            let local9 = 0x5 // #refs 0
-            let local10 = add(sload(local8), local9) // #refs 0
+            let local8 := 0x0 // #refs 0
+            let local9 := 0x5 // #refs 0
+            let local10 := add(sload(local8), local9) // #refs 0
             sstore(local8, local10)
             stop()
         }
-        let local0 = 0x0 // #refs 0
-        let local1 = 0x5 // #refs 0
-        let local2 = add(sload(local0), local1) // #refs 0
+        let local0 := 0x0 // #refs 0
+        let local1 := 0x5 // #refs 0
+        let local2 := add(sload(local0), local1) // #refs 0
         sstore(local0, local2)
         stop()
 
@@ -346,37 +346,37 @@ object "runtime" {
         if (iszero(iszero(eq(0x8, number())))) {
             if (iszero(iszero(eq(number(), 0x9)))) {
                 sstore(0x0, 0x3)
-                let local0 = 0x0 // #refs -1
+                let local0 := 0x0 // #refs -1
                 sstore(local0, add(0x7, sload(local0)))
                 if (iszero(iszero(eq(number(), 0x1b)))) {
-                    let local1 = 0x0 // #refs -1
+                    let local1 := 0x0 // #refs -1
                     sstore(local1, add(0xb, sload(local1)))
-                    let local2 = 0x0 // #refs -1
+                    let local2 := 0x0 // #refs -1
                     sstore(local2, add(0x5, sload(local2)))
                     stop()
                 }
-                let local1 = 0x0 // #refs -1
+                let local1 := 0x0 // #refs -1
                 sstore(local1, add(0xf, sload(local1)))
-                let local2 = 0x0 // #refs -1
+                let local2 := 0x0 // #refs -1
                 sstore(local2, add(0x5, sload(local2)))
                 stop()
             }
-            let local0 = 0x0 // #refs -1
+            let local0 := 0x0 // #refs -1
             sstore(local0, add(0x7, sload(local0)))
             if (iszero(iszero(eq(number(), 0x1b)))) {
-                let local1 = 0x0 // #refs -1
+                let local1 := 0x0 // #refs -1
                 sstore(local1, add(0xb, sload(local1)))
-                let local2 = 0x0 // #refs -1
+                let local2 := 0x0 // #refs -1
                 sstore(local2, add(0x5, sload(local2)))
                 stop()
             }
-            let local1 = 0x0 // #refs -1
+            let local1 := 0x0 // #refs -1
             sstore(local1, add(0xf, sload(local1)))
-            let local2 = 0x0 // #refs -1
+            let local2 := 0x0 // #refs -1
             sstore(local2, add(0x5, sload(local2)))
             stop()
         }
-        let local0 = 0x0 // #refs -1
+        let local0 := 0x0 // #refs -1
         sstore(local0, add(0x5, sload(local0)))
         stop()
 

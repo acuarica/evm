@@ -50,10 +50,10 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 2
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 2
             if (eq(msg.sig, 9663f88f)) {
                 $9663f88f();
             } else {
@@ -63,40 +63,40 @@ object "runtime" {
                     if (eq(msg.sig, f8b2cb4f)) {
                         $f8b2cb4f();
                     } else {
-                        let local2 = 0x0 // #refs 0
+                        let local2 := 0x0 // #refs 0
                         revert(local2, local2)
                     }
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function __$9663f88f(/*unknown*/) { // public
-            let local2 = mload(0x40) // #refs 0
-            let local3 = blockhash(0x7) // #refs -1
+            let local2 := mload(0x40) // #refs 0
+            let local3 := blockhash(0x7) // #refs -1
             mstore(local2, local3)
-            let local4 = mload(0x40) // #refs 0
+            let local4 := mload(0x40) // #refs 0
             return(local4, sub(add(0x20, local2), local4)) // blockhash(0x7)
         }
 
         function __$b8368615(/*unknown*/) { // public
-            let local2 = mload(0x40) // #refs 0
-            let local3 = address(this)() // #refs 0
+            let local2 := mload(0x40) // #refs 0
+            let local3 := address(this)() // #refs 0
             mstore(local2, and(0xffffffffffffffffffffffffffffffffffffffff, local3))
-            let local4 = mload(0x40) // #refs 0
+            let local4 := mload(0x40) // #refs 0
             return(local4, sub(add(0x20, local2), local4)) // address(this)()
         }
 
         function getBalance(address) { // public
-            let local2 = 0x4 // #refs 3
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 3
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs 0
-            let local5 = mload(0x40) // #refs 0
-            let local6 = and(0xffffffffffffffffffffffffffffffffffffffff, local4).balance // #refs -1
+            let local4 := and(0xffffffffffffffffffffffffffffffffffffffff, calldataload(local2)) // #refs 0
+            let local5 := mload(0x40) // #refs 0
+            let local6 := and(0xffffffffffffffffffffffffffffffffffffffff, local4).balance // #refs -1
             mstore(local5, local6)
-            let local7 = mload(0x40) // #refs 0
+            let local7 := mload(0x40) // #refs 0
             return(local7, sub(add(0x20, local5), local7)) // calldataload(0x4).balance
         }
 
@@ -342,10 +342,10 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 2
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 2
             if (eq(msg.sig, 9663f88f)) {
                 $9663f88f();
             } else {
@@ -355,39 +355,39 @@ object "runtime" {
                     if (eq(msg.sig, f8b2cb4f)) {
                         $f8b2cb4f();
                     } else {
-                        let local2 = 0x0 // #refs 0
+                        let local2 := 0x0 // #refs 0
                         revert(local2, local2)
                     }
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function __$9663f88f(/*unknown*/) { // public
-            let local2 = 0x40 // #refs 0
-            let local3 = mload(local2) // #refs -1
+            let local2 := 0x40 // #refs 0
+            let local3 := mload(local2) // #refs -1
             mstore(local3, blockhash(0x7))
-            let local4 = mload(local2) // #refs 0
+            let local4 := mload(local2) // #refs 0
             return(local4, add(0x20, sub(local3, local4))) // blockhash(0x7)
         }
 
         function __$b8368615(/*unknown*/) { // public
-            let local2 = 0x40 // #refs 0
-            let local3 = mload(local2) // #refs -1
+            let local2 := 0x40 // #refs 0
+            let local3 := mload(local2) // #refs -1
             mstore(local3, and(address(this)(), sub(shl(0x1, 0xa0), 0x1)))
-            let local4 = mload(local2) // #refs 0
+            let local4 := mload(local2) // #refs 0
             return(local4, add(0x20, sub(local3, local4))) // address(this)()
         }
 
         function getBalance(address) { // public
-            let local2 = 0x4 // #refs 0
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 0
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = 0x40 // #refs 0
-            let local5 = mload(local4) // #refs -1
+            let local4 := 0x40 // #refs 0
+            let local5 := mload(local4) // #refs -1
             mstore(local5, and(sub(shl(0x1, 0xa0), 0x1), and(sub(shl(0x1, 0xa0), 0x1), calldataload(local2))).balance)
-            let local6 = mload(local4) // #refs 0
+            let local6 := mload(local4) // #refs 0
             return(local6, add(0x20, sub(local5, local6))) // calldataload(0x4).balance
         }
 

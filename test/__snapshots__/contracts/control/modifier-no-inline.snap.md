@@ -53,54 +53,54 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 00ad800c)) {
                 $00ad800c();
             } else {
                 if (eq(msg.sig, 4e41a1fb)) {
                     $4e41a1fb();
                 } else {
-                    let local2 = 0x0 // #refs 0
+                    let local2 := 0x0 // #refs 0
                     revert(local2, local2)
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function name(uint256) { // public
-            let local2 = 0x4 // #refs 3
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 3
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 3
+            let local4 := calldataload(local2) // #refs 3
             require(eq(local4, 0x9));
-            let local5 = 0x0 // #refs 0
-            let local6 = 0x0 // #refs 2
-            let local7 = add(0x1, local6) // #refs 0
-            let local8 = add(local4, number()) // #refs 0
-            let local9 = mload(0x40) // #refs 0
+            let local5 := 0x0 // #refs 0
+            let local6 := 0x0 // #refs 2
+            let local7 := add(0x1, local6) // #refs 0
+            let local8 := add(local4, number()) // #refs 0
+            let local9 := mload(0x40) // #refs 0
             mstore(local9, local8)
-            let local10 = mload(0x40) // #refs 0
+            let local10 := mload(0x40) // #refs 0
             log1(local10, sub(add(0x20, local9), local10), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
             stop()
         }
 
         function symbol(uint256) { // public
-            let local2 = 0x4 // #refs 3
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 3
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 3
+            let local4 := calldataload(local2) // #refs 3
             require(eq(local4, 0x9));
-            let local5 = 0x0 // #refs 0
-            let local6 = 0x0 // #refs 2
-            let local7 = add(0x1, local6) // #refs 0
-            let local8 = add(local4, number()) // #refs 0
-            let local9 = mload(0x40) // #refs 0
+            let local5 := 0x0 // #refs 0
+            let local6 := 0x0 // #refs 2
+            let local7 := add(0x1, local6) // #refs 0
+            let local8 := add(local4, number()) // #refs 0
+            let local9 := mload(0x40) // #refs 0
             mstore(local9, local8)
-            let local10 = mload(0x40) // #refs 0
+            let local10 := mload(0x40) // #refs 0
             return(local10, sub(add(0x20, local9), local10)) // add(calldataload(0x4), number())
         }
 
@@ -462,52 +462,52 @@ contract Contract {
 object "runtime" {
     code {
         mstore(0x40, 0x80)
-        let local0 = callvalue() // #refs 0
+        let local0 := callvalue() // #refs 0
         require(iszero(local0));
         if (iszero(lt(calldatasize(), 0x4))) {
-            let local1 = shr(calldataload(0x0), 0xe0) // #refs 1
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 1
             if (eq(msg.sig, 00ad800c)) {
                 $00ad800c();
             } else {
                 if (eq(msg.sig, 4e41a1fb)) {
                     $4e41a1fb();
                 } else {
-                    let local2 = 0x0 // #refs 0
+                    let local2 := 0x0 // #refs 0
                     revert(local2, local2)
                 }
             }
         }
-        let local1 = 0x0 // #refs 0
+        let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
         function name(uint256) { // public
-            let local2 = 0x4 // #refs 0
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 0
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 2
+            let local4 := calldataload(local2) // #refs 2
             require(eq(0x9, local4));
-            let local5 = 0x0 // #refs 1
-            let local6 = add(0x1, local5) // #refs 0
-            let local7 = 0x40 // #refs 0
-            let local8 = mload(local7) // #refs -1
+            let local5 := 0x0 // #refs 1
+            let local6 := add(0x1, local5) // #refs 0
+            let local7 := 0x40 // #refs 0
+            let local8 := mload(local7) // #refs -1
             mstore(local8, add(number(), local4))
-            let local9 = mload(local7) // #refs 0
+            let local9 := mload(local7) // #refs 0
             log1(local9, add(0x20, sub(local8, local9)), 0x4d6ce1e535dbade1c23defba91e23b8f791ce5edc0cc320257a2b364e4e38426)
             stop()
         }
 
         function symbol(uint256) { // public
-            let local2 = 0x4 // #refs 0
-            let local3 = sub(calldatasize(), local2) // #refs 0
+            let local2 := 0x4 // #refs 0
+            let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)));
-            let local4 = calldataload(local2) // #refs 2
+            let local4 := calldataload(local2) // #refs 2
             require(eq(0x9, local4));
-            let local5 = 0x0 // #refs 1
-            let local6 = add(0x1, local5) // #refs 0
-            let local7 = 0x40 // #refs 0
-            let local8 = mload(local7) // #refs -1
+            let local5 := 0x0 // #refs 1
+            let local6 := add(0x1, local5) // #refs 0
+            let local7 := 0x40 // #refs 0
+            let local8 := mload(local7) // #refs -1
             mstore(local8, add(number(), local4))
-            let local9 = mload(local7) // #refs 0
+            let local9 := mload(local7) // #refs 0
             return(local9, add(0x20, sub(local8, local9))) // add(number(), calldataload(0x4))
         }
 
