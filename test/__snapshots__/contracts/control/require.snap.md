@@ -26,8 +26,8 @@ contract Contract {
         require((msg.data.length - local2 < 0x20) == 0);
         undefined local4 = msg.data[local2]; // #refs 3
         address local5 = msg.sender; // #refs 1
-        require((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
-        require(local4 > 0x0, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+        require((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & 0x0), "approve");
+        require(local4 > 0x0, "approve address");
         mapping1[msg.sender] = local4;
         return;
     }
@@ -60,8 +60,8 @@ object "runtime" {
             require(iszero(lt(local3, 0x20)))
             let local4 := calldataload(local2) // #refs 3
             let local5 := caller() // #refs 1
-            require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
-            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
+            require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
+            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
             let local6 := 0x0 // #refs -1
             mstore(local6/*=0x0*/, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, local5)))
             let local7 := add(0x20, local6) // #refs -1
@@ -181,7 +181,7 @@ memory[0x20 + local7] = 0x7;
 undefined local9 = 0x20 + 0x20 + local7; // #refs 0
 memory[0x20 + 0x20 + local7] = 0x617070726f766500000000000000000000000000000000000000000000000000;
 undefined local10 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("approve");
 ")
     class s_11 state
   end
@@ -204,7 +204,7 @@ memory[0x20 + local7] = 0xf;
 undefined local9 = 0x20 + 0x20 + local7; // #refs 0
 memory[0x20 + 0x20 + local7] = 0x617070726f766520616464726573730000000000000000000000000000000000;
 undefined local10 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("approve address");
 ")
     class s_13 state
   end
@@ -282,8 +282,8 @@ contract Contract {
     function approve(uint256 _arg0) public {
         require((msg.data.length - 0x4 < 0x20) == 0);
         undefined local4 = msg.data[0x4]; // #refs 1
-        require(msg.sender & (0x1 << 0xa0) - 0x1, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
-        require(local4 > 0x0, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+        require(msg.sender & (0x1 << 0xa0) - 0x1, "approve");
+        require(local4 > 0x0, "approve address");
         mapping1[msg.sender] = local4;
         return;
     }
@@ -316,8 +316,8 @@ object "runtime" {
             require(iszero(lt(local3, 0x20)))
             let local4 := calldataload(local2) // #refs 1
             let local5 := caller() // #refs 0
-            require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
-            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
+            require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
+            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
             let local6 := 0x0 // #refs -1
             mstore(local6/*=0x0*/, and(local5, sub(shl(0x1, 0xa0), 0x1)))
             mstore(0x20, local6)
@@ -434,7 +434,7 @@ memory[local7 + 0x4] = 0x20;
 memory[local7 + 0x24] = 0x7;
 memory[local7 + 0x44] = 0x617070726f7665 << 0xc8;
 undefined local8 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("approve");
 ")
     class s_11 state
   end
@@ -455,7 +455,7 @@ memory[local7 + 0x4] = 0x20;
 memory[local7 + 0x24] = 0xf;
 memory[local7 + 0x44] = 0x617070726f76652061646472657373 << 0x88;
 undefined local8 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("approve address");
 ")
     class s_13 state
   end

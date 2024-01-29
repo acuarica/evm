@@ -206,7 +206,7 @@ contract Contract {
         require(_arg0 == _arg0);
         require(_arg1 == _arg1);
         require(_arg4 == _arg4);
-        require(_arg3 >= block.timestamp, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+        require(_arg3 >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         if (block.chainid != 0x1) {
             if ((var_2 & 0x1) == 0) {
                 require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
@@ -228,43 +228,43 @@ contract Contract {
                                                             }
                                                             storage[keccak256(_arg0, 0x5)] += 0x1;
                                                             require(staticcall(gasleft(),0x1,local65,0xa0 + local60 - local65,local65 - 0x20,0x20));
-                                                            revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                                            revert("INVALID_SIGNER");
                                                         }
                                                         storage[keccak256(_arg0, 0x5)] += 0x1;
                                                         require(staticcall(gasleft(),0x1,local63,0xa0 + local58 - local63,local63 - 0x20,0x20));
-                                                        revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                                        revert("INVALID_SIGNER");
                                                     }
                                                     storage[keccak256(_arg0, 0x5)] += 0x1;
                                                     require(staticcall(gasleft(),0x1,local61,0xa0 + local56 - local61,local61 - 0x20,0x20));
-                                                    revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                                    revert("INVALID_SIGNER");
                                                 }
                                                 storage[keccak256(_arg0, 0x5)] += 0x1;
                                                 require(staticcall(gasleft(),0x1,local59,0xa0 + local54 - local59,local59 - 0x20,0x20));
-                                                revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                                revert("INVALID_SIGNER");
                                             }
                                             storage[keccak256(_arg0, 0x5)] += 0x1;
                                             require(staticcall(gasleft(),0x1,local57,0xa0 + local52 - local57,local57 - 0x20,0x20));
-                                            revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                            revert("INVALID_SIGNER");
                                         }
                                         storage[keccak256(_arg0, 0x5)] += 0x1;
                                         require(staticcall(gasleft(),0x1,local55,0xa0 + local50 - local55,local55 - 0x20,0x20));
-                                        revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                        revert("INVALID_SIGNER");
                                     }
                                     storage[keccak256(_arg0, 0x5)] += 0x1;
                                     require(staticcall(gasleft(),0x1,local53,0xa0 + local48 - local53,local53 - 0x20,0x20));
-                                    revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                    revert("INVALID_SIGNER");
                                 }
                                 storage[keccak256(_arg0, 0x5)] += 0x1;
                                 require(staticcall(gasleft(),0x1,local51,0xa0 + local46 - local51,local51 - 0x20,0x20));
-                                revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                                revert("INVALID_SIGNER");
                             }
                             storage[keccak256(_arg0, 0x5)] += 0x1;
                             require(staticcall(gasleft(),0x1,local49,0xa0 + local44 - local49,local49 - 0x20,0x20));
-                            revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                            revert("INVALID_SIGNER");
                         }
                         storage[keccak256(_arg0, 0x5)] += 0x1;
                         require(staticcall(gasleft(),0x1,local47,0xa0 + local42 - local47,local47 - 0x20,0x20));
-                        revert(0x8c379a000000000000000000000000000000000000000000000000000000000, _arg4, _arg5, _arg6);
+                        revert("INVALID_SIGNER");
                     }
                 }
             }

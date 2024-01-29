@@ -37,7 +37,7 @@ contract Contract {
     function d07c4b2d() public {
         undefined local2 = 0x4; // #refs 3
         require((msg.data.length - local2 < 0x20) == 0);
-        require((0xffffffffffffffffffffffffffffffffffffffff & 0xffffffffffffffffffffffffffffffffffffffff & var_2 / 0x100 ** 0x0) == (0xffffffffffffffffffffffffffffffffffffffff & msg.sender), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+        require((0xffffffffffffffffffffffffffffffffffffffff & 0xffffffffffffffffffffffffffffffffffffffff & var_2 / 0x100 ** 0x0) == (0xffffffffffffffffffffffffffffffffffffffff & msg.sender), "Ownable: caller is not the owner");
         var_1 = msg.data[local2] + 0x3;
         return;
     }
@@ -82,7 +82,7 @@ object "runtime" {
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
-            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
+            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
             let local4 := calldataload(local2) // #refs 0
             let local5 := add(local4, 0x3) // #refs 0
             sstore(0x0, local5)
@@ -254,7 +254,7 @@ memory[0x20 + local5] = 0x20;
 undefined local7 = 0x20 + 0x20 + local5; // #refs 0
 memory[0x20 + 0x20 + local5] = 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572;
 undefined local8 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("Ownable: caller is not the owner");
 ")
     class s_18 state
   end
@@ -338,7 +338,7 @@ contract Contract {
 
     function d07c4b2d() public {
         require((msg.data.length - 0x4 < 0x20) == 0);
-        require((msg.sender & (0x1 << 0xa0) - 0x1) == ((0x1 << 0xa0) - 0x1 & var_2), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+        require((msg.sender & (0x1 << 0xa0) - 0x1) == ((0x1 << 0xa0) - 0x1 & var_2), "Ownable: caller is not the owner");
         var_1 = 0x3 + msg.data[0x4];
         return;
     }
@@ -382,7 +382,7 @@ object "runtime" {
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
             let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
-            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a000000000000000000000000000000000000000000000000000000000, mload(0xa0), mload(0xc0), mload(0xe0))
+            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
             sstore(0x0, add(0x3, calldataload(local2)))
             stop()
         }
@@ -555,7 +555,7 @@ memory[local6 + 0x4] = 0x20;
 memory[local6 + 0x24] = 0x20;
 memory[local6 + 0x44] = 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572;
 undefined local8 = memory[0x40]; // #refs 0
-revert(0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0]);
+revert("Ownable: caller is not the owner");
 ")
     class s_18 state
   end
