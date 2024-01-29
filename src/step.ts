@@ -365,11 +365,7 @@ function memArgs<T>(
 
     return new Klass(offset_, size_, ((offset, size) => {
         if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
-            const args = [];
-            for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-                args.push(i in memory ? memory[i].eval() : new ast.MLoad(new Val(BigInt(i))));
-            }
-            return args;
+            return new ArgsFetcher(memory).range(offset, size).args;
         } else {
             if (size.isVal() && size.val > MAXSIZE * 32) {
                 throw new ExecError(`Memory size too large creating ${Klass.name}: ${size.val} in \`${size_.yul()}\``);
@@ -486,6 +482,22 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array) {
             ? `'${destpc}' is out-of-bounds`
             : `found '0x${bytecode[destpc].toString(16)}'`
             }`);
+    }
+}
+
+class ArgsFetcher {
+    readonly args: Expr[] = [];
+    constructor(readonly memory: Ram<Expr>['memory']) { }
+
+    fetch(i: number) {
+        this.args.push(this.memory[i]?.eval() ?? new ast.MLoad(new Val(BigInt(i))));
+    }
+
+    range(offset: Val, size: Val) {
+        for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+            this.fetch(i);
+        }
+        return this;
     }
 }
 
@@ -639,7 +651,35 @@ const FrontierStep = {
         const retLen = stack.pop();
         stack.push(new ast.StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
     }],
-    REVERT: [{ opcode: 0xfd, halts: true }, state => state.halt(memArgs(state, ast.Revert))],
+
+    REVERT: [{ opcode: 0xfd, halts: true }, state => {
+        const MAXSIZE = 1024;
+        const offset_ = state.stack.pop();
+        const size_ = state.stack.pop();
+
+        state.halt(new ast.Revert(offset_, size_, function ({ memory }: Ram<Expr>, offset, size) {
+            if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
+                const fetcher = new ArgsFetcher(memory);
+
+                // https://docs.soliditylang.org/en/latest/control-structures.html#revert
+                if (size.val === 4n + 3n * 32n) {
+                    fetcher.fetch(Number(offset.val));
+                    for (let i = Number(offset.val) + 4; i < Number(offset.val + size.val); i += 32) {
+                        fetcher.fetch(i);
+                    }
+                    return fetcher.args;
+                }
+
+                return fetcher.range(offset, size).args;
+            } else {
+                if (size.isVal() && size.val > MAXSIZE * 32) {
+                    throw new ExecError(`Memory size too large creating Revert: ${size.val} in \`${size_.yul()}\``);
+                }
+                return undefined;
+            }
+        }(state, offset_.eval(), size_.eval())));
+    }],
+
     SELFDESTRUCT: [{ opcode: 0xff, halts: true }, function selfdestruct(state) {
         const address = state.stack.pop();
         state.halt(new ast.SelfDestruct(address));
