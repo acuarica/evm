@@ -175,7 +175,7 @@ contract Contract {
     unknown var3__3; // Slot #1
 
     function() external payable {
-        if (~(msg.data.length < 0x4)) {
+        if ((msg.data.length < 0x4) == 0) {
             undefined local0 = 0xffffffff & msg.data / 0x100000000000000000000000000000000000000000000000000000000; // #refs 10
             if (msg.sig == 06fdde03) {
                 $06fdde03();
@@ -235,133 +235,133 @@ contract Contract {
         undefined local1 = 0x0; // #refs 2
         undefined local5 = memory[0x40]; // #refs 34
         undefined local7 = (0x100 * (0x1 & var_1) == 0 - 0x1 & var_1) / 0x2; // #refs 1
-        if (~local7 == 0) {
-            if (~(0x1f < local7)) {
+        if (local7 == 0 == 0) {
+            if ((0x1f < local7) == 0) {
                 undefined local11 = memory[0x40]; // #refs 2
                 undefined local12 = 0x20 + local11; // #refs 1
                 undefined local13 = memory[local5]; // #refs 22
                 undefined local14 = 0x20 + local12; // #refs 11
                 undefined local15 = 0x20 + local5; // #refs 11
                 undefined local16 = 0x0; // #refs 3
-                if (~(local16 < local13) == 0) {
+                if ((local16 < local13) == 0 == 0) {
                     undefined local17 = local16 + 0x20; // #refs 3
-                    if (~(local17 < local13) == 0) {
+                    if ((local17 < local13) == 0 == 0) {
                         undefined local18 = local17 + 0x20; // #refs 3
-                        if (~(local18 < local13) == 0) {
+                        if ((local18 < local13) == 0 == 0) {
                             undefined local19 = local18 + 0x20; // #refs 3
-                            if (~(local19 < local13) == 0) {
+                            if ((local19 < local13) == 0 == 0) {
                                 undefined local20 = local19 + 0x20; // #refs 3
-                                if (~(local20 < local13) == 0) {
+                                if ((local20 < local13) == 0 == 0) {
                                     undefined local21 = local20 + 0x20; // #refs 3
-                                    if (~(local21 < local13) == 0) {
+                                    if ((local21 < local13) == 0 == 0) {
                                         undefined local22 = local21 + 0x20; // #refs 3
-                                        if (~(local22 < local13) == 0) {
+                                        if ((local22 < local13) == 0 == 0) {
                                             undefined local23 = local22 + 0x20; // #refs 3
-                                            if (~(local23 < local13) == 0) {
+                                            if ((local23 < local13) == 0 == 0) {
                                                 undefined local24 = local23 + 0x20; // #refs 3
-                                                if (~(local24 < local13) == 0) {
+                                                if ((local24 < local13) == 0 == 0) {
                                                     undefined local25 = local24 + 0x20; // #refs 3
-                                                    if (~(local25 < local13) == 0) {
+                                                    if ((local25 < local13) == 0 == 0) {
                                                         undefined local26 = local25 + 0x20; // #refs 3
-                                                        if (~(local26 < local13) == 0) {
+                                                        if ((local26 < local13) == 0 == 0) {
                                                         }
                                                         undefined local27 = 0x1f & local13; // #refs 2
-                                                        if (~local27 == 0) {
+                                                        if (local27 == 0 == 0) {
                                                             return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local27 - memory[0x40])];
                                                         }
                                                         return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                                     }
                                                     undefined local26 = 0x1f & local13; // #refs 2
-                                                    if (~local26 == 0) {
+                                                    if (local26 == 0 == 0) {
                                                         return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local26 - memory[0x40])];
                                                     }
                                                     return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                                 }
                                                 undefined local25 = 0x1f & local13; // #refs 2
-                                                if (~local25 == 0) {
+                                                if (local25 == 0 == 0) {
                                                     return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local25 - memory[0x40])];
                                                 }
                                                 return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                             }
                                             undefined local24 = 0x1f & local13; // #refs 2
-                                            if (~local24 == 0) {
+                                            if (local24 == 0 == 0) {
                                                 return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local24 - memory[0x40])];
                                             }
                                             return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                         }
                                         undefined local23 = 0x1f & local13; // #refs 2
-                                        if (~local23 == 0) {
+                                        if (local23 == 0 == 0) {
                                             return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local23 - memory[0x40])];
                                         }
                                         return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                     }
                                     undefined local22 = 0x1f & local13; // #refs 2
-                                    if (~local22 == 0) {
+                                    if (local22 == 0 == 0) {
                                         return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local22 - memory[0x40])];
                                     }
                                 }
                                 undefined local21 = 0x1f & local13; // #refs 2
-                                if (~local21 == 0) {
+                                if (local21 == 0 == 0) {
                                 }
                             }
                             undefined local20 = 0x1f & local13; // #refs 2
-                            if (~local20 == 0) {
+                            if (local20 == 0 == 0) {
                             }
                         }
                         undefined local19 = 0x1f & local13; // #refs 2
-                        if (~local19 == 0) {
+                        if (local19 == 0 == 0) {
                         }
                     }
                     undefined local18 = 0x1f & local13; // #refs 2
-                    if (~local18 == 0) {
+                    if (local18 == 0 == 0) {
                     }
                 }
                 undefined local17 = 0x1f & local13; // #refs 2
-                if (~local17 == 0) {
+                if (local17 == 0 == 0) {
                 }
             }
             undefined local11 = 0x20 + local5 + local7; // #refs 32
-            if (~(local11 > 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + local5) == 0) {
                 undefined local13 = memory[0x40]; // #refs 2
                 undefined local14 = 0x20 + local13; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local15 = memory[0x40]; // #refs 2
                 undefined local16 = 0x20 + local15; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local17 = memory[0x40]; // #refs 2
                 undefined local18 = 0x20 + local17; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local19 = memory[0x40]; // #refs 2
                 undefined local20 = 0x20 + local19; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local21 = memory[0x40]; // #refs 2
                 undefined local22 = 0x20 + local21; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local23 = memory[0x40]; // #refs 2
                 undefined local24 = 0x20 + local23; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local25 = memory[0x40]; // #refs 2
                 undefined local26 = 0x20 + local25; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local27 = memory[0x40]; // #refs 2
                 undefined local28 = 0x20 + local27; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local29 = memory[0x40]; // #refs 2
                 undefined local30 = 0x20 + local29; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local31 = memory[0x40]; // #refs 2
                 undefined local32 = 0x20 + local31; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
             }
         }
     }
@@ -387,8 +387,8 @@ contract Contract {
         undefined local4 = msg.data[0x20 + 0x20 + local1]; // #refs 26
         undefined local5 = 0xffffffffffffffffffffffffffffffffffffffff & msg.data[local1]; // #refs 14
         require((balanceOf[_arg0] < local4) == 0 == 0 == 0);
-        if (~(0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0) {
-            if (~allowance[_arg0][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == 0) {
+        if ((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0 == 0) {
+            if (allowance[_arg0][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == 0 == 0) {
                 require((allowance[_arg0][msg.sender] < local4) == 0 == 0 == 0);
                 storage[keccak256(msg.sender, keccak256(_arg0, 0x4))] -= _arg2;
                 storage[keccak256(_arg0, 0x3)] -= _arg2;
@@ -403,7 +403,7 @@ contract Contract {
             emit Transfer(0xffffffffffffffffffffffffffffffffffffffff & local5, 0xffffffffffffffffffffffffffffffffffffffff & local17, local4);
             return 0x1;
         }
-        if (~(0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0) {
+        if ((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0 == 0) {
             require((allowance[_arg0][msg.sender] < local4) == 0 == 0 == 0);
             storage[keccak256(msg.sender, keccak256(_arg0, 0x4))] -= _arg2;
             storage[keccak256(_arg0, 0x3)] -= _arg2;
@@ -447,133 +447,133 @@ contract Contract {
         undefined local1 = 0x1; // #refs 2
         undefined local5 = memory[0x40]; // #refs 34
         undefined local7 = (0x100 * (0x1 & var_3) == 0 - 0x1 & var_3) / 0x2; // #refs 1
-        if (~local7 == 0) {
-            if (~(0x1f < local7)) {
+        if (local7 == 0 == 0) {
+            if ((0x1f < local7) == 0) {
                 undefined local11 = memory[0x40]; // #refs 2
                 undefined local12 = 0x20 + local11; // #refs 1
                 undefined local13 = memory[local5]; // #refs 22
                 undefined local14 = 0x20 + local12; // #refs 11
                 undefined local15 = 0x20 + local5; // #refs 11
                 undefined local16 = 0x0; // #refs 3
-                if (~(local16 < local13) == 0) {
+                if ((local16 < local13) == 0 == 0) {
                     undefined local17 = local16 + 0x20; // #refs 3
-                    if (~(local17 < local13) == 0) {
+                    if ((local17 < local13) == 0 == 0) {
                         undefined local18 = local17 + 0x20; // #refs 3
-                        if (~(local18 < local13) == 0) {
+                        if ((local18 < local13) == 0 == 0) {
                             undefined local19 = local18 + 0x20; // #refs 3
-                            if (~(local19 < local13) == 0) {
+                            if ((local19 < local13) == 0 == 0) {
                                 undefined local20 = local19 + 0x20; // #refs 3
-                                if (~(local20 < local13) == 0) {
+                                if ((local20 < local13) == 0 == 0) {
                                     undefined local21 = local20 + 0x20; // #refs 3
-                                    if (~(local21 < local13) == 0) {
+                                    if ((local21 < local13) == 0 == 0) {
                                         undefined local22 = local21 + 0x20; // #refs 3
-                                        if (~(local22 < local13) == 0) {
+                                        if ((local22 < local13) == 0 == 0) {
                                             undefined local23 = local22 + 0x20; // #refs 3
-                                            if (~(local23 < local13) == 0) {
+                                            if ((local23 < local13) == 0 == 0) {
                                                 undefined local24 = local23 + 0x20; // #refs 3
-                                                if (~(local24 < local13) == 0) {
+                                                if ((local24 < local13) == 0 == 0) {
                                                     undefined local25 = local24 + 0x20; // #refs 3
-                                                    if (~(local25 < local13) == 0) {
+                                                    if ((local25 < local13) == 0 == 0) {
                                                         undefined local26 = local25 + 0x20; // #refs 3
-                                                        if (~(local26 < local13) == 0) {
+                                                        if ((local26 < local13) == 0 == 0) {
                                                         }
                                                         undefined local27 = 0x1f & local13; // #refs 2
-                                                        if (~local27 == 0) {
+                                                        if (local27 == 0 == 0) {
                                                             return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local27 - memory[0x40])];
                                                         }
                                                         return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                                     }
                                                     undefined local26 = 0x1f & local13; // #refs 2
-                                                    if (~local26 == 0) {
+                                                    if (local26 == 0 == 0) {
                                                         return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local26 - memory[0x40])];
                                                     }
                                                     return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                                 }
                                                 undefined local25 = 0x1f & local13; // #refs 2
-                                                if (~local25 == 0) {
+                                                if (local25 == 0 == 0) {
                                                     return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local25 - memory[0x40])];
                                                 }
                                                 return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                             }
                                             undefined local24 = 0x1f & local13; // #refs 2
-                                            if (~local24 == 0) {
+                                            if (local24 == 0 == 0) {
                                                 return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local24 - memory[0x40])];
                                             }
                                             return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                         }
                                         undefined local23 = 0x1f & local13; // #refs 2
-                                        if (~local23 == 0) {
+                                        if (local23 == 0 == 0) {
                                             return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local23 - memory[0x40])];
                                         }
                                         return memory[memory[0x40]:(memory[0x40]+local13 + local14 - memory[0x40])];
                                     }
                                     undefined local22 = 0x1f & local13; // #refs 2
-                                    if (~local22 == 0) {
+                                    if (local22 == 0 == 0) {
                                         return memory[memory[0x40]:(memory[0x40]+0x20 + local13 + local14 - local22 - memory[0x40])];
                                     }
                                 }
                                 undefined local21 = 0x1f & local13; // #refs 2
-                                if (~local21 == 0) {
+                                if (local21 == 0 == 0) {
                                 }
                             }
                             undefined local20 = 0x1f & local13; // #refs 2
-                            if (~local20 == 0) {
+                            if (local20 == 0 == 0) {
                             }
                         }
                         undefined local19 = 0x1f & local13; // #refs 2
-                        if (~local19 == 0) {
+                        if (local19 == 0 == 0) {
                         }
                     }
                     undefined local18 = 0x1f & local13; // #refs 2
-                    if (~local18 == 0) {
+                    if (local18 == 0 == 0) {
                     }
                 }
                 undefined local17 = 0x1f & local13; // #refs 2
-                if (~local17 == 0) {
+                if (local17 == 0 == 0) {
                 }
             }
             undefined local11 = 0x20 + local5 + local7; // #refs 32
-            if (~(local11 > 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + local5) == 0) {
                 undefined local13 = memory[0x40]; // #refs 2
                 undefined local14 = 0x20 + local13; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local15 = memory[0x40]; // #refs 2
                 undefined local16 = 0x20 + local15; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local17 = memory[0x40]; // #refs 2
                 undefined local18 = 0x20 + local17; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local19 = memory[0x40]; // #refs 2
                 undefined local20 = 0x20 + local19; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local21 = memory[0x40]; // #refs 2
                 undefined local22 = 0x20 + local21; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local23 = memory[0x40]; // #refs 2
                 undefined local24 = 0x20 + local23; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local25 = memory[0x40]; // #refs 2
                 undefined local26 = 0x20 + local25; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local27 = memory[0x40]; // #refs 2
                 undefined local28 = 0x20 + local27; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local29 = memory[0x40]; // #refs 2
                 undefined local30 = 0x20 + local29; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
                 undefined local31 = memory[0x40]; // #refs 2
                 undefined local32 = 0x20 + local31; // #refs 1
             }
-            if (~(local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5)) {
+            if ((local11 > 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + 0x20 + local5) == 0) {
             }
         }
     }
@@ -585,8 +585,8 @@ contract Contract {
         undefined local4 = msg.data[0x20 + local1]; // #refs 27
         address local5 = msg.sender; // #refs 14
         require((balanceOf[msg.sender] < local4) == 0 == 0 == 0);
-        if (~(0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0) {
-            if (~allowance[msg.sender][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == 0) {
+        if ((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0 == 0) {
+            if (allowance[msg.sender][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff == 0 == 0) {
                 require((allowance[msg.sender][msg.sender] < local4) == 0 == 0 == 0);
                 storage[keccak256(msg.sender, keccak256(msg.sender, 0x4))] -= _arg1;
                 storage[keccak256(msg.sender, 0x3)] -= _arg1;
@@ -599,7 +599,7 @@ contract Contract {
             emit Transfer(0xffffffffffffffffffffffffffffffffffffffff & local5, 0xffffffffffffffffffffffffffffffffffffffff & local3, local4);
             return 0x1;
         }
-        if (~(0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0) {
+        if ((0xffffffffffffffffffffffffffffffffffffffff & local5) != (0xffffffffffffffffffffffffffffffffffffffff & msg.sender) == 0 == 0) {
             require((allowance[msg.sender][msg.sender] < local4) == 0 == 0 == 0);
             storage[keccak256(msg.sender, keccak256(msg.sender, 0x4))] -= _arg1;
             storage[keccak256(msg.sender, 0x3)] -= _arg1;
