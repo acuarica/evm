@@ -348,7 +348,7 @@ This allows the user to create a bundle without the lookup database provided the
 
 This folder contains a [dataset](https://github.com/acuarica/contract-dataset) of contract bytecodes deployed in a public network.
 
-It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](./test/dataset.test.ts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
+It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](#datasettestts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
 This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
 
 ### [`examples`](./examples/)
@@ -357,7 +357,7 @@ The [`examples`](./examples/) folder contains code examples that showcase `sevm`
 These code examples are the ones embedded in this document.
 
 To ensure these examples don't get outdated,
-[`test/examples.test.ts`](./test/examples.test.ts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
+[`test/examples.test.ts`](#examplestestts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
 Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](./test/__snapshots__/examples.snap.md) and compared against in subsequent tests.
 
 ### [`scripts`](./scripts/)
@@ -390,7 +390,9 @@ To ensure the test output does not change unexpectedly,
 we use an ad-hoc snapshot testing solution similar to [_Jest_'s](https://jestjs.io/docs/snapshot-testing).
 The snapshots are stored in [`test/__snapshots__`](./test/__snapshots__/).
 
-To re-generate the snapshot artifacts after an intentional implementation change you can run
+To re-generate the snapshot artifacts in a test after an intentional implementation change,
+set the environment variable `UPDATE_SNAPSHOTS=1`.
+For example
 
 ```console
 UPDATE_SNAPSHOTS=1 yarn test -g ::mainnet
@@ -413,6 +415,40 @@ For example
 
 ```out
         ✔ should match Solidity snapshot 🎞️
+```
+
+#### [`4byte.test.ts`](./test/4byte.test.ts)
+
+This test needs to be manually enabled because it depends on a network connection (to query the [OpenChain API](https://openchain.xyz/signatures) to look for method signatures).
+
+Set the environment variable `ENABLE_4BYTE_TEST=1` to enable this test.
+When executing it, you may want to run _only_ this test, for example
+
+```console
+ENABLE_4BYTE_TEST=1 yarn test -g ::4byte
+```
+
+#### [`dataset.test.ts`](./test/dataset.test.ts)
+
+This test needs to be manually enabled because its take longer than the rest of test suite.
+It is not ergonomic to include it in the main test suite.
+
+Set the environment variable `ENABLE_DATASET_TEST=1` to enable this test.
+When executing it, you may want to run _only_ this test, for example
+
+```console
+ENABLE_DATASET_TEST=1 yarn test -g ::dataset
+```
+
+#### [`examples.test.ts`](./test/examples.test.ts)
+
+This test needs to be manually enabled because it depends on a network connection (to fetch code from a live network).
+
+Set the environment variable `ENABLE_EXAMPLES_TEST=1` to enable this test.
+When executing it, you may want to run _only_ this test, for example
+
+```console
+ENABLE_EXAMPLES_TEST=1 yarn test -g ::examples
 ```
 
 ### [`types`](./types/)
