@@ -16,6 +16,8 @@ describe(`::examples${hint}`, function () {
             if (!ENABLE_EXAMPLES_TEST) this.skip();
             this.timeout(10000);
 
+            // Node's colorized output needs to be disabled for snapshot testing when running in CI
+            // https://nodejs.org/api/cli.html#force_color1-2-3
             const env = { ...process.env, 'FORCE_COLOR': '0' };
             const cli = file.endsWith('.ts')
                 ? chaiExec('node', `dist/examples/${file.slice(0, -3)}.js`, { env })
