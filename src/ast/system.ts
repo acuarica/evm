@@ -1,9 +1,16 @@
 import { type IInst, Tag, type Expr, evalE } from '.';
 
+function info(...args: Expr[]): [depth: number, count: number] {
+    return [
+        Math.max(...args.map(e => e.depth)) + 1,
+        (args?.reduce((accum, curr) => accum + curr.count, 0) ?? 0) + 1
+    ];
+}
+
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';
     constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {
-        super();
+        super(...info(offset, size, ...args ?? []));
     }
 
     eval(): Sha3 {
@@ -33,7 +40,7 @@ export class Create extends Tag {
         readonly size: Expr,
         readonly bytecode: Uint8Array | null = null
     ) {
-        super();
+        super(...info(value, offset, size));
     }
 
     eval(): Expr {
@@ -54,7 +61,7 @@ export class Call extends Tag {
         readonly retStart: Expr,
         readonly retLen: Expr
     ) {
-        super();
+        super(...info(gas, address, value, argsStart, argsLen, retStart, retLen));
     }
 
     eval(): Expr {
@@ -68,7 +75,7 @@ export class ReturnData extends Tag {
     readonly wrapped = false;
 
     constructor(readonly retOffset: Expr, readonly retSize: Expr) {
-        super();
+        super(...info(retOffset, retSize));
     }
 
     eval(): Expr {
@@ -87,7 +94,7 @@ export class CallCode extends Tag {
         readonly outputStart: Expr,
         readonly outputLength: Expr
     ) {
-        super();
+        super(...info(gas, address, value, memoryStart, memoryLength, outputStart, outputLength));
     }
 
     eval(): Expr {
@@ -98,7 +105,7 @@ export class CallCode extends Tag {
 export class Create2 extends Tag {
     readonly tag = 'Create2';
     constructor(readonly offset: Expr, readonly size: Expr, readonly value: Expr) {
-        super();
+        super(...info(offset, size, value));
     }
 
     eval(): Expr {
@@ -116,7 +123,7 @@ export class StaticCall extends Tag {
         readonly outputStart: Expr,
         readonly outputLength: Expr
     ) {
-        super();
+        super(...info(gas, address, memoryStart, memoryLength, outputStart, outputLength));
     }
 
     eval(): Expr {
@@ -134,7 +141,7 @@ export class DelegateCall extends Tag {
         readonly outputStart: Expr,
         readonly outputLength: Expr
     ) {
-        super();
+        super(...info(gas, address, memoryStart, memoryLength, outputStart, outputLength));
     }
 
     eval(): Expr {

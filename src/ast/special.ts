@@ -10,7 +10,7 @@ export class Prop extends Tag {
     readonly tag = 'Prop';
 
     constructor(readonly symbol: string, override readonly type: Type) {
-        super();
+        super(0, 1);
     }
 
     eval(): Expr {
@@ -69,7 +69,7 @@ export const FNS = {
 export class Fn extends Tag {
     readonly tag = 'Fn';
     constructor(readonly mnemonic: keyof typeof FNS, readonly value: Expr) {
-        super();
+        super(value.depth + 1, value.count + 1);
         this.type = FNS[mnemonic][1];
     }
 
@@ -87,7 +87,9 @@ export class DataCopy extends Tag {
         readonly address?: Expr,
         readonly bytecode?: Uint8Array,
     ) {
-        super();
+        super(
+            Math.max(offset.depth, size.depth, address?.depth ?? 0) + 1,
+            offset.count + size.count + (address?.count ?? 0) + 1);
     }
 
     eval(): this {
@@ -100,6 +102,9 @@ export class DataCopy extends Tag {
  */
 export class CallValue extends Tag {
     readonly tag = 'CallValue';
+    constructor() {
+        super(0, 1);
+    }
     eval(): Expr {
         return this;
     }
@@ -108,7 +113,7 @@ export class CallValue extends Tag {
 export class CallDataLoad extends Tag {
     readonly tag = 'CallDataLoad';
     constructor(public location: Expr) {
-        super();
+        super(location.depth + 1, location.count + 1);
     }
     eval(): Expr {
         return new CallDataLoad(this.location.eval());

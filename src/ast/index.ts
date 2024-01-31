@@ -170,6 +170,8 @@ export abstract class Tag {
 
     type?: Type;
 
+    constructor(readonly depth: number, readonly count: number) { }
+
     isVal(): this is Val {
         return this.tag === 'Val';
     }
@@ -215,7 +217,7 @@ export class Val extends Tag {
 
     constructor(readonly val: bigint, readonly pushStateId?: number) {
         if (val < 0 || val >= MOD_256) throw new Error(`Val is a not a valid unsigned 256-word: ${val}`);
-        super();
+        super(0, 1);
     }
 
     override eval(): Expr {
@@ -235,7 +237,7 @@ export class Local extends Tag {
     #memo: Expr | undefined = undefined;
 
     constructor(readonly index: number, readonly value: Expr) {
-        super();
+        super(value.depth + 1, value.count + 1);
     }
 
     override eval(): Expr {
