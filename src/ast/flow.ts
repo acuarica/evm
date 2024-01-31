@@ -68,7 +68,7 @@ export class JumpDest implements IInst {
 export class Sig extends Tag {
     readonly tag = 'Sig';
     constructor(readonly selector: string, readonly positive = true) {
-        super();
+        super(0, 1);
     }
     eval(): Expr {
         return this;

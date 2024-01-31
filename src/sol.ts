@@ -58,7 +58,11 @@ function solExpr(expr: Expr): string {
         case 'Val':
             return `${expr.isJumpDest() ? '[J]' : ''}0x${expr.val.toString(16)}`;
         case 'Local':
-            return expr.nrefs > 0 ? `local${expr.index}` : sol`${expr.value}`;
+            return expr.nrefs > 0
+                ? `local${expr.index}`
+                : expr.count >= 1000
+                    ? `/*expression too big to decompile: ${expr.count} AST nodes*/local${expr.index}`
+                    : sol`${expr.value}`;
         case 'Add':
         case 'Mul':
         case 'Sub':

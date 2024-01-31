@@ -85,7 +85,10 @@ export class MappingLoad extends Tag {
         readonly items: Expr[],
         readonly structlocation?: bigint
     ) {
-        super();
+        super(
+            Math.max(slot.depth, ...items.map(e => e.depth)) + 1,
+            slot.count + items.reduce((accum, curr) => accum + curr.count, 0) + 1
+        );
         if (!(location in mappings)) {
             mappings[location] = {
                 name: undefined,
@@ -105,7 +108,7 @@ export class MappingLoad extends Tag {
 export class SLoad extends Tag {
     readonly tag = 'SLoad';
     constructor(readonly slot: Expr, readonly variable: Variable | undefined) {
-        super();
+        super(slot.depth + 1, slot.count + 1);
     }
     eval(): Expr {
         return new SLoad(this.slot.eval(), this.variable);

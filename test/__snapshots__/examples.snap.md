@@ -708,7 +708,13 @@ Metadata {
 ```
 
 ```out Simple-Hook.mjs
-top Prop { symbol: 'tx.gasprice', type: 'uint', tag: 'Prop' }
+top Prop {
+  depth: 0,
+  count: 1,
+  symbol: 'tx.gasprice',
+  type: 'uint',
+  tag: 'Prop'
+}
 
 ```
 

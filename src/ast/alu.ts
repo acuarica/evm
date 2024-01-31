@@ -2,7 +2,7 @@ import { type Expr, Tag, Val, MOD_256 } from './index';
 
 abstract class Bin extends Tag {
     constructor(readonly left: Expr, readonly right: Expr) {
-        super();
+        super(Math.max(left.depth, right.depth) + 1, left.count + right.count + 1);
     }
 }
 
@@ -98,19 +98,19 @@ export class Exp extends Bin {
 
 abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
-        super();
+        super(Math.max(left.depth, right.depth) + 1, left.count + right.count + 1);
     }
 }
 
 abstract class Unary extends Tag {
     constructor(readonly value: Expr) {
-        super();
+        super(value.depth + 1, value.count + 1);
     }
 }
 
 abstract class Shift extends Tag {
     constructor(readonly value: Expr, readonly shift: Expr) {
-        super();
+        super(Math.max(value.depth, shift.depth) + 1, value.count + shift.count + 1);
     }
 }
 
@@ -142,7 +142,7 @@ export class Eq extends Bin {
 export class IsZero extends Tag {
     readonly tag = 'IsZero';
     constructor(readonly value: Expr) {
-        super();
+        super(value.depth + 1, value.count + 1);
     }
     eval(): Expr {
         const val = this.value.eval();
@@ -206,7 +206,7 @@ export class Not extends Unary {
 export class Byte extends Tag {
     readonly tag = 'Byte';
     constructor(readonly pos: Expr, readonly data: Expr) {
-        super();
+        super(Math.max(pos.depth, data.depth) + 1, pos.count + data.count + 1);
     }
     eval(): Expr {
         const pos = this.pos.eval();
