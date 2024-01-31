@@ -181,11 +181,17 @@ void yargs(process.argv.slice(2))
         }
     }))
     .command('abi <contract>', 'Shows the ABI of the contract[2]', pos, make(contract => {
+        const functions = Object.values(contract.functions)
+            .map(fn => ['0x' + fn.selector, fn.label]);
+        const events = Object.entries(contract.events)
+            .map(([selector, event]) => ['0x' + selector, event.sig]);
+
+        const notfound = c.dim('<not found in db>');
         console.info(c.underline('Function Selectors'));
-        contract.getFunctions().forEach(sig => console.info(' ', c.blue(sig)));
+        functions.forEach(([selector, sig]) => console.info(' ', selector, sig !== undefined ? c.cyan(sig) : notfound));
         console.info();
         console.info(c.underline('Events'));
-        contract.getEvents().forEach(sig => console.info(' ', c.magenta(sig)));
+        events.forEach(([selector, sig]) => console.info(' ', selector, sig !== undefined ? c.magenta(sig) : notfound));
     }))
     .command('selectors <contract>', 'Shows the function selectors of the contract[3]', pos, make(contract => {
         for (const [selector, fn] of Object.entries(contract.functions)) {
