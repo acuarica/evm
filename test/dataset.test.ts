@@ -54,13 +54,6 @@ class BenchStats {
 const MAX = process.env['MAX'];
 
 /**
- * Filters the Etherscan contracts to test.
- * If provided, tests the contracts where their names matches `CONTRACT`.
- * Otherwise, tests all contracts.
- */
-const CONTRACT = process.env['CONTRACT'];
-
-/**
  * Enable this to make test bail after first error.
  */
 const BAIL = process.env['BAIL'];
@@ -68,7 +61,7 @@ const BAIL = process.env['BAIL'];
 const ENABLE_DATASET_TEST = process.env['ENABLE_DATASET_TEST'];
 const hint = !ENABLE_DATASET_TEST ? ' (enable it by setting `ENABLE_DATASET_TEST`)' : '';
 
-describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, function () {
+describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, function () {
     if (BAIL) this.bail();
 
     if (!ENABLE_DATASET_TEST) {
@@ -146,7 +139,6 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` CONTRACT=\`${CONTRACT ?? ''}\` BAIL=\
         .trimEnd()
         .split('\n')
         .map(entry => entry.trimEnd().replace(/"/g, '').split(','))
-        .filter(([name, address]) => CONTRACT === undefined || `${name} ${address}`.match(CONTRACT))
         .slice(0, MAX !== undefined ? parseInt(MAX) : undefined);
 
     contracts.forEach(([address, name]) => {
