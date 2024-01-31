@@ -10,8 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: yarn install --frozen-lockfile
+      - run: yarn compile
+      - run: yarn bundle
+
+      - run: echo "VERSION=`echo ${{ github.ref_name }} | cut -c2-`" >> "$GITHUB_ENV"
 
       # https://cli.github.com/manual/gh_release_create
-      - run: gh release create ${{ github.ref_name }} --draft --generate-notes --prerelease --verify-tag
+      - run: 
+          echo "You can find the NPM package published in https://www.npmjs.com/package/sevm/v/$VERSION" | gh release create ${{ github.ref_name }} './dist/sevm.js#sevm UMD minified bundle' --draft --generate-notes --notes-file - --prerelease --verify-tag
         env:
           GH_TOKEN: ${{ github.token }}
