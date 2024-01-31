@@ -4,14 +4,14 @@
 import c from 'ansi-colors';
 import assert from 'assert';
 import envPaths from 'env-paths';
-import { EtherscanProvider } from 'ethers';
+import { EtherscanProvider, keccak256 } from 'ethers';
 import { existsSync, mkdirSync, promises, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { debuglog } from 'util';
 import yargs from 'yargs';
 
 import { Contract, sol, yul } from 'sevm';
-import 'sevm/4bytedb';
+import 'sevm/4byte';
 
 const paths = envPaths('sevm');
 
@@ -144,11 +144,35 @@ function make(handler) {
             process.exit(3);
         } else {
             try {
-                const contract = new Contract(bytecode).patchdb();
+                let contract = new Contract(bytecode);
+
+                const hash = keccak256(contract.bytecode).substring(0, 20 + 2);
+                trace('Bytecode hash', hash);
+                const abisFolder = path.join(paths.cache, 'abis');
+                if (!existsSync(abisFolder)) {
+                    mkdirSync(abisFolder, { recursive: true });
+                }
+                const abiPath = path.join(abisFolder, `${hash}.abi.json`);
+                /** @type {object | undefined} */
+                let lookup;
+                if (existsSync(abiPath)) {
+                    trace('Found ABI cache %s', abiPath);
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    lookup = JSON.parse(readFileSync(abiPath, 'utf8'));
+                } else {
+                    trace('ABI cache %s not found', abiPath);
+                    lookup = {};
+                }
+
+                contract = await contract.patch(lookup);
+                if (!existsSync(abiPath)) {
+                    writeFileSync(abiPath, JSON.stringify(lookup, null, 2));
+                }
+
                 handler(contract, argv);
             } catch (err) {
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                console.error(warn(`${err}`));
+                console.error(err);
                 process.exit(1);
             }
         }
