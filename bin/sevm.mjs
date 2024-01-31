@@ -146,33 +146,35 @@ function make(handler) {
             try {
                 let contract = new Contract(bytecode);
 
-                const hash = keccak256(contract.bytecode).substring(0, 20 + 2);
-                trace('Bytecode hash', hash);
-                const abisFolder = path.join(paths.cache, 'abis');
-                if (!existsSync(abisFolder)) {
-                    mkdirSync(abisFolder, { recursive: true });
-                }
-                const abiPath = path.join(abisFolder, `${hash}.abi.json`);
-                /** @type {object | undefined} */
-                let lookup;
-                if (existsSync(abiPath)) {
-                    trace('Found ABI cache %s', abiPath);
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    lookup = JSON.parse(readFileSync(abiPath, 'utf8'));
-                } else {
-                    trace('ABI cache %s not found', abiPath);
-                    lookup = {};
-                }
+                if (argv['patch']) {
+                    const hash = keccak256(contract.bytecode).substring(0, 20 + 2);
+                    trace('Bytecode hash', hash);
+                    const abisFolder = path.join(paths.cache, 'abis');
+                    if (!existsSync(abisFolder)) {
+                        mkdirSync(abisFolder, { recursive: true });
+                    }
+                    const abiPath = path.join(abisFolder, `${hash}.abi.json`);
+                    /** @type {object | undefined} */
+                    let lookup;
+                    if (existsSync(abiPath)) {
+                        trace('Found ABI cache %s', abiPath);
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        lookup = JSON.parse(readFileSync(abiPath, 'utf8'));
+                    } else {
+                        trace('ABI cache %s not found', abiPath);
+                        lookup = {};
+                    }
 
-                contract = await contract.patch(lookup);
-                if (!existsSync(abiPath)) {
-                    writeFileSync(abiPath, JSON.stringify(lookup, null, 2));
+                    contract = await contract.patch(lookup);
+                    if (!existsSync(abiPath)) {
+                        writeFileSync(abiPath, JSON.stringify(lookup, null, 2));
+                    }
                 }
 
                 handler(contract, argv);
             } catch (err) {
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                console.error(err);
+                console.error(`${err}`);
                 process.exit(1);
             }
         }
@@ -210,7 +212,7 @@ void yargs(process.argv.slice(2))
         const events = Object.entries(contract.events)
             .map(([selector, event]) => ['0x' + selector, event.sig]);
 
-        const notfound = c.dim('<not found in db>');
+        const notfound = c.dim('<selector not found>');
         console.info(c.underline('Function Selectors'));
         functions.forEach(([selector, sig]) => console.info(' ', selector, sig !== undefined ? c.cyan(sig) : notfound));
         console.info();
@@ -249,7 +251,12 @@ void yargs(process.argv.slice(2))
     })
     .option('color', {
         type: 'boolean',
-        description: 'Display with colors, use `--no-color` to deactivate colors',
+        description: 'Displays with colors, use `--no-color` to deactivate colors',
+        default: true,
+    })
+    .option('patch', {
+        type: 'boolean',
+        description: 'Patches the Contract public functions and events with signatures from https://openchain.xyz/, use `--no-patch` to skip patching',
         default: true,
     })
     // .option('selector', {

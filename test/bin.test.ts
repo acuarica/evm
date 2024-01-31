@@ -39,7 +39,7 @@ describe('::bin', function () {
             "bytecode": "60806040525f80fdfea2646970667358221220213295e11660e0fa1851b6245c99f6d8ef0d1ad319b69a6483694b3a316c2dc564736f6c63430008150033",
             "abi": []
         }`;
-        const cli = chaiExec(sevm, ['metadata', '-', '--no-color'], { input });
+        const cli = chaiExec(sevm, ['metadata', '-', '--no-color', '--no-patch'], { input });
 
         expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
@@ -47,7 +47,7 @@ describe('::bin', function () {
     });
 
     it('should run `dis` command and find non-reacheable chunk', function () {
-        const cli = chaiExec(sevm, ['dis', '-', '--no-color'], { input: '0x6001600201600c56010203045b62fffefd5b00' });
+        const cli = chaiExec(sevm, ['dis', '-', '--no-color', '--no-patch'], { input: '0x6001600201600c56010203045b62fffefd5b00' });
 
         expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;

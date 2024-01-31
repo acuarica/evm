@@ -285,7 +285,10 @@ Commands:
 
 Options:
   --version  Show version number                                       [boolean]
-  --color    Display with colors, use `--no-color` to deactivate colors
+  --color    Displays with colors, use `--no-color` to deactivate colors
+                                                       [boolean] [default: true]
+  --patch    Patches the Contract public functions and events with signatures fr
+             om https://openchain.xyz/, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
@@ -320,7 +323,10 @@ Positionals:
 
 Options:
   --version     Show version number                                    [boolean]
-  --color       Display with colors, use `--no-color` to deactivate colors
+  --color       Displays with colors, use `--no-color` to deactivate colors
+                                                       [boolean] [default: true]
+  --patch       Patches the Contract public functions and events with signatures
+                 from https://openchain.xyz/, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
   --help        Show help                                              [boolean]
   --with-stack  Include the current stack next to each decoded opcode
