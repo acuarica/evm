@@ -3,17 +3,20 @@ import { readFileSync } from 'fs';
 
 import { Contract } from 'sevm';
 import type { Lookup } from 'sevm/4byte';
+import { compile } from './utils/solc';
 
 const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 const hint = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
 describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
-    it('should fetch function signatures', async function () {
+    before(async function () {
         if (!ENABLE_4BYTE_TEST) this.skip();
 
         // Use dynamic import to avoid failing when test is disabled and `fetch` is not defined.
         await import('sevm/4byte');
+    });
 
+    it('should fetch function signatures', async function () {
         const name = 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65';
         const bytecode = readFileSync(`./test/mainnet/${name}.bytecode`, 'utf8');
 
@@ -51,6 +54,26 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
             ['f851a440', 'admin()'],
             ['3659cfe6', 'upgradeTo(address)'],
             ['4f1ef286', 'upgradeToAndCall(address,bytes)']
+        ]);
+    });
+
+    it('should fetch function signatures partially', async function () {
+        const src = `contract Test {
+            function balanceOf(address) external pure returns (uint256) {
+                return 1;
+            }
+            function _thisShouldNotBeInTheLookup_801145594(address) external pure returns (uint256) {
+            }
+        }`;
+
+        const contract = new Contract(compile(src, '0.7.6', this).bytecode);
+        const lookup = {} as Lookup;
+        await contract.patch(lookup);
+
+        const selectors = Object.entries(contract.functions).map(([s, f]) => [s, f.label]);
+        expect(selectors).to.be.deep.equal([
+            ['70a08231', 'balanceOf(address)'],
+            ['fb210caa', undefined],
         ]);
     });
 });

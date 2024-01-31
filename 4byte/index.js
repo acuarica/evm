@@ -3,14 +3,14 @@
 
 const sevm = require('sevm');
 
-/** @typedef {{ [hash: string]: {name: string, filtered: boolean}[] }} HashesResponse */
+/** @typedef {{ [hash: string]: {name: string, filtered: boolean}[] | null }} HashesResponse */
 
 /**
  * @param {HashesResponse} hashes 
  * @returns {{ [hash: string]: string[] }}
  */
 const mapHashes = hashes => Object.fromEntries(
-    Object.entries(hashes).map(([hash, matches]) => [hash, matches.map(({ name }) => name)])
+    Object.entries(hashes).map(([hash, matches]) => [hash, matches?.map(({ name }) => name) ?? [] ])
 );
 
 sevm.Contract.prototype.patch = async function (/** @type {Partial<import('.').Lookup>} */lookup = {}) {
