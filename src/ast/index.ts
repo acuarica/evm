@@ -232,12 +232,16 @@ export class Local extends Tag {
 
     nrefs = 0;
 
+    #memo: Expr | undefined = undefined;
+
     constructor(readonly index: number, readonly value: Expr) {
         super();
     }
 
     override eval(): Expr {
-        return this.value.eval();
+        if (this.#memo === undefined)
+            this.#memo = this.value.eval();
+        return this.#memo;
     }
 
     override unwrap(): Expr {
