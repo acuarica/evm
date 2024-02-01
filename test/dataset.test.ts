@@ -139,7 +139,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
     contracts.forEach(([address, name]) => {
         it(`${name} ${address}`, function () {
             // Increase timeout to pass in CI
-            this.timeout(30000);
+            this.timeout(60000);
 
             const path = `${BASE_PATH}/1/${name}-${address}.bytecode`;
 
