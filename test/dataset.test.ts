@@ -7,7 +7,7 @@ import type { ABI } from 'solc';
 
 import { Contract, ERCIds, Shanghai, sol, type Opcode, type State } from 'sevm';
 import 'sevm/4bytedb';
-import type { StaticCall } from 'sevm/ast';
+import type { StaticCall, Revert } from 'sevm/ast';
 import { fnselector } from './utils/selector';
 
 /**
@@ -25,8 +25,12 @@ class MultiSet<T> {
         return this._map.get(key) ?? 0;
     }
 
-    entries() {
-        return this._map.entries();
+    sorted() {
+        return [...this._map.entries()].sort((x, y) => y[1] - x[1]);
+    }
+
+    [Symbol.iterator]() {
+        return this._map[Symbol.iterator]();
     }
 }
 
@@ -77,11 +81,10 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
     const csv = readFileSync(csvPath, 'utf8');
 
     const errorsByContract: Map<string, Contract['errors']> = new Map();
-    const metadataStats = new class {
-        noMetadata = 0;
-        protocols = new MultiSet<string>();
-        solcs = new MultiSet<string>();
-
+    const metadataStats = {
+        noMetadata: 0,
+        protocols: new MultiSet<string>(),
+        solcs: new MultiSet<string>(),
         append(metadata: Contract['metadata']) {
             if (metadata) {
                 this.protocols.add(metadata.protocol);
@@ -90,50 +93,42 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 this.noMetadata++;
             }
         }
-    }();
+    };
 
-    const selectorStats = new class {
-        hitSelectors = new Set<string>();
-        missedSelectors = new Set<string>();
-
+    const selectorStats = {
+        hitSelectors: new Set<string>(),
+        missedSelectors: new Set<string>(),
         append(functions: Contract['functions']) {
             for (const fn of Object.values(functions)) {
                 (fn.label !== undefined ? this.hitSelectors : this.missedSelectors).add(fn.selector);
             }
         }
-    }();
+    };
 
-    const ercsStats = new class {
-        counts = new Map<(typeof ERCIds)[number], number>();
-
+    const ercsStats = {
+        counts: new MultiSet<(typeof ERCIds)[number]>(),
         append(contract: Contract, ctx: Mocha.Context) {
             const ercs = [];
             for (const erc of ERCIds) {
                 if (contract.isERC(erc)) {
-                    const count = this.counts.get(erc) ?? 0;
-                    this.counts.set(erc, count + 1);
+                    this.counts.add(erc);
                     ercs.push(erc);
                 }
             }
             if (ercs.length > 0)
                 ctx.test!.title += ' ' + c.bold(`ERC:${ercs.map(erc => erc.substring(3)).join('|')}`);
         }
-    }();
+    };
 
     const execStats = new BenchStats('Contract decode & execution');
     const solStats = new BenchStats('Generate Solidity source');
     const yulStats = new BenchStats('Generate Yul source');
 
-    const hookStats = new class {
-        pcs = 0;
-
-        staticcalls = new Map<string, number>();
-
-        precompile(address: string) {
-            const count = this.staticcalls.get(address) ?? 0;
-            this.staticcalls.set(address, count + 1);
-        }
-    }();
+    const hookStats = {
+        pcs: 0,
+        precompiles: new MultiSet<string>(),
+        revertSelectors: new MultiSet<string>(),
+    };
 
     const contracts = csv
         .trimEnd()
@@ -168,7 +163,17 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                     const call = state.stack.top as StaticCall;
                     const address = call.address.eval();
                     if (address.tag === 'Val' && address.val <= 9n) {
-                        hookStats.precompile(sol`${address}`);
+                        hookStats.precompiles.add(sol`${address}`);
+                    }
+                };
+
+                override REVERT = (state: State) => {
+                    super.REVERT(state);
+                    const revert = state.last as Revert;
+                    if (revert.args !== undefined && revert.args[0]?.isVal()) {
+                        const val = revert.args[0].val;
+                        const selector = val % (1n << 224n) === 0n ? val >> 224n : val;
+                        hookStats.revertSelectors.add('0x' + selector.toString(16).padStart(8, '0'));
                     }
                 };
             }());
@@ -253,8 +258,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             const cc = ([k, v]: [string, number]) => `${k}(${v})`;
             write('\n  Metadata Stats');
             write(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-            write(`    • ${info('Protocols')} ${[...metadataStats.protocols.entries()].map(cc).join('|')}`);
-            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs.entries()].map(cc).join('|')}`);
+            write(`    • ${info('Protocols')} ${[...metadataStats.protocols].map(cc).join('|')}`);
+            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].map(cc).join('|')}`);
 
             write('\n  Selector Stats');
             write(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
@@ -274,9 +279,19 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             }
 
             write('\n  Precompiled Contract Stats');
-            for (const [address, count] of hookStats.staticcalls) {
+            for (const [address, count] of hookStats.precompiles) {
                 write(`    • ${info(address)} ${count}`);
             }
+
+            write('\n  Revert Selector Stats');
+            const revertSelectors = hookStats.revertSelectors.sorted();
+            const displayCount = 20;
+            for (const [selector, count] of revertSelectors.slice(0, displayCount)) {
+                write(`    • ${info(selector)} ${count}`);
+            }
+            if (revertSelectors.length > displayCount)
+                write(c.dim(`    ... ${revertSelectors.length - displayCount} more items`));
+
             write('\n  PC Stats');
             write(`    • ${info('PCs')} ${hookStats.pcs}`);
 
