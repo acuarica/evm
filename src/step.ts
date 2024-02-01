@@ -354,23 +354,22 @@ const DATACOPY = {
     RETURNDATACOPY: [0x3e, state => datacopy('returndatacopy')(state)],
 } satisfies Step;
 
+const MAXSIZE = 32 * 1024;
+
 function memArgs<T>(
     { stack, memory }: Ram<Expr>,
     Klass: new (offset: Expr, size: Expr, args?: Expr[]) => T
 ): T {
-    const MAXSIZE = 1024;
-
     const offset_ = stack.pop();
     const size_ = stack.pop();
 
     return new Klass(offset_, size_, ((offset, size) => {
-        if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
+        if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
             return new ArgsFetcher(memory).range(offset, size).args;
         } else {
-            if (size.isVal() && size.val > MAXSIZE * 32) {
+            if (size.isVal() && size.val > MAXSIZE) {
                 throw new ExecError(`Memory size too large creating ${Klass.name}: ${size.val} in \`${size_.yul()}\``);
             }
-
             return undefined;
         }
     })(offset_.eval(), size_.eval()));
@@ -653,12 +652,11 @@ const FrontierStep = {
     }],
 
     REVERT: [{ opcode: 0xfd, halts: true }, state => {
-        const MAXSIZE = 1024;
         const offset_ = state.stack.pop();
         const size_ = state.stack.pop();
 
         state.halt(new ast.Revert(offset_, size_, function ({ memory }: Ram<Expr>, offset, size) {
-            if (offset.isVal() && size.isVal() && size.val <= MAXSIZE * 32) {
+            if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
                 const fetcher = new ArgsFetcher(memory);
 
                 // https://docs.soliditylang.org/en/latest/control-structures.html#revert
@@ -672,7 +670,7 @@ const FrontierStep = {
 
                 return fetcher.range(offset, size).args;
             } else {
-                if (size.isVal() && size.val > MAXSIZE * 32) {
+                if (size.isVal() && size.val > MAXSIZE) {
                     throw new ExecError(`Memory size too large creating Revert: ${size.val} in \`${size_.yul()}\``);
                 }
                 return undefined;
@@ -689,8 +687,8 @@ const FrontierStep = {
     /* Log operations */
     ...zip(([0, 1, 2, 3, 4] as const).map(ntopics => [`LOG${ntopics}` as const, [
         0xa0 + ntopics, function log(this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
-            const offset = stack.pop();
-            const size = stack.pop();
+            const offset_ = stack.pop();
+            const size_ = stack.pop();
 
             const topics = [];
             for (let i = 0; i < ntopics; i++) {
@@ -707,17 +705,20 @@ const FrontierStep = {
                 }
             }
 
-            stmts.push(new ast.Log(event, offset, size, topics, function (offset, size) {
-                if (offset.isVal() && size.isVal()) {
+            stmts.push(new ast.Log(event, offset_, size_, topics, function (offset, size) {
+                if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
                     const args = [];
                     for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
                         args.push(i in memory ? memory[i] : new ast.MLoad(new Val(BigInt(i))));
                     }
                     return args;
                 } else {
+                    if (size.isVal() && size.val > MAXSIZE) {
+                        throw new ExecError(`Memory size too large creating Log: ${size.val} in \`${size_.yul()}\``);
+                    }
                     return undefined;
                 }
-            }(offset.eval(), size.eval())));
+            }(offset_.eval(), size_.eval())));
         }]
     ])),
 
