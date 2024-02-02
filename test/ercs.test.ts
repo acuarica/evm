@@ -1,4 +1,4 @@
-import { keccak_256 } from '@noble/hashes/sha3';
+import { keccak256 } from 'js-sha3';
 import { expect } from 'chai';
 
 import { Contract } from 'sevm';
@@ -9,7 +9,7 @@ describe('::ercs', function () {
     describe('erc165', function () {
         it('check `keccak_256` hash selector for `supportsInterface(bytes4)`', function () {
             const sig = 'supportsInterface(bytes4)';
-            const hash = Buffer.from(keccak_256(sig).slice(0, 4)).toString('hex');
+            const hash = keccak256(sig).slice(0, 8);
             expect(hash).to.be.equal('01ffc9a7');
         });
 
