@@ -1,6 +1,10 @@
 import js_sha3 from 'js-sha3';
 
 /**
+ * Implementation based on:
+ * - https://github.com/miguelmota/ethereum-checksum-address/blob/master/index.js
+ * - https://github.com/ethers-io/ethers.js/blob/main/lib.esm/address/address.js
+ * 
  * @param {string} address 
  * @returns {boolean}
  */
