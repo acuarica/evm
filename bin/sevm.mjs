@@ -4,14 +4,17 @@
 import c from 'ansi-colors';
 import assert from 'assert';
 import envPaths from 'env-paths';
-import { EtherscanProvider, keccak256 } from 'ethers';
 import { existsSync, mkdirSync, promises, readFileSync, writeFileSync } from 'fs';
+import js_sha3 from 'js-sha3';
 import path from 'path';
 import { debuglog } from 'util';
 import yargs from 'yargs';
 
 import { Contract, sol, yul } from 'sevm';
 import 'sevm/4byte';
+
+import { isValidAddress } from './.address.mjs';
+import { Provider } from './.provider.mjs';
 
 const paths = envPaths('sevm');
 
@@ -108,7 +111,8 @@ async function getBytecode(pathOrAddress) {
         },
         () => promises.readFile(cachePath, 'utf8'),
         async () => {
-            const provider = new EtherscanProvider();
+            const provider = new Provider('https://cloudflare-eth.com/');
+            if (!isValidAddress(pathOrAddress)) throw new Error('Invalid address, bad address checksum');
             const bytecode = await provider.getCode(pathOrAddress);
             if (!existsSync(cacheFolder)) {
                 mkdirSync(cacheFolder, { recursive: true });
@@ -147,7 +151,7 @@ function make(handler) {
                 let contract = new Contract(bytecode);
 
                 if (argv['patch']) {
-                    const hash = keccak256(contract.bytecode).substring(0, 20 + 2);
+                    const hash = '0x' + js_sha3.keccak256(contract.bytecode).substring(0, 20);
                     trace('Bytecode hash', hash);
                     const abisFolder = path.join(paths.cache, 'abis');
                     if (!existsSync(abisFolder)) {

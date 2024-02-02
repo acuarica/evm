@@ -4,8 +4,9 @@
 import c from 'ansi-colors';
 import { expect } from 'chai';
 import { createHash } from 'crypto';
-import { EventFragment, FunctionFragment, keccak256, toUtf8Bytes } from 'ethers';
+import { EventFragment, FunctionFragment } from 'ethers';
 import { readFileSync, writeFileSync } from 'fs';
+import js_sha3 from 'js-sha3';
 
 /** @typedef {{ [hash: string]: string }} Hashes */
 
@@ -66,7 +67,7 @@ function writeJson(fileName, hashes) {
  */
 const reduce = (entries, replacer) =>
     entries.reduce((/** @type {Hashes}*/ map, /** @type {string}*/ entry) => {
-        map[replacer(keccak256(toUtf8Bytes(entry)))] = entry;
+        map[replacer(js_sha3.keccak256(entry))] = entry;
         return map;
     }, {});
 
@@ -80,7 +81,7 @@ function main() {
         }
         expect(functions.length).to.be.equal(s.size);
     }, functions => {
-        const functionHashes = reduce(functions, s => s.substring(2, 10));
+        const functionHashes = reduce(functions, s => s.substring(0, 8));
         writeJson('functionHashes', functionHashes);
     });
 
@@ -93,7 +94,7 @@ function main() {
         }
         expect(events.length).to.be.equal(s.size);
     }, events => {
-        const eventHashes = reduce(events, s => s.substring(2));
+        const eventHashes = reduce(events, s => s);
         writeJson('eventHashes', eventHashes);
     });
 }

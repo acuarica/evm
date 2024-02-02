@@ -160,7 +160,7 @@ Error: Unable to decode, invalid hex byte 'ax' found at position '7'
 ```err log-debug-trace-when-NODE_DEBUG=sevm-is-set
 SEVM <pid>: ENOENT: no such file or directory, open <addr>
 SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: bad address checksum (argument="address", value="0x8Ba1f109551bD432803012645Ac136ddd64DBa72", code=INVALID_ARGUMENT, version=6.9.0)
+SEVM <pid>: Invalid address, bad address checksum
 Cannot find bytecode for contract 0x8Ba1f109551bD432803012645Ac136ddd64DBa72
 
 ```

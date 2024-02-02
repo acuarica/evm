@@ -72,7 +72,7 @@ describe('::bin', function () {
             'NODE_DEBUG': 'sevm',
             'FORCE_COLOR': '0',
         };
-        // address doesn't checksum, this is to avoid ethers making a request,
+        // address doesn't checksum, this is to avoid CLI making a request,
         // thus making the test more robust
         const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72'], { env });
 
