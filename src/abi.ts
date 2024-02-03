@@ -31,7 +31,7 @@ export function isElemType(type: string): type is Type {
     return (ELEM_TYPES as readonly string[]).includes(type);
 }
 
-export function getCanonicalType(type: string): string {
+function getCanonicalType(type: string): string {
     switch (type) {
         case 'uint': return 'uint256';
         case 'int': return 'int256';
@@ -129,9 +129,12 @@ class Tokens {
     }
 }
 
-type Ty = { type: string, components?: Ty[], arrayLength?: number | null, arrayType?: Ty };
+export type Ty = { type: string, components?: Ty[], arrayLength?: number | null, arrayType?: Ty };
 
-export function parseSig(sig: string) {
+export function parseSig(sig: string): {
+    name: string;
+    inputs: ({ name?: string; } & Ty)[];
+} {
     const tokens = new Tokens(sig);
     let [pos, kind, name] = tokens.next();
     if (name === 'function') [pos, kind, name] = tokens.next();
@@ -153,7 +156,7 @@ export function parseSig(sig: string) {
     function parseParam() {
         const ty = parseType();
         const [, kind, name] = tokens.peek();
-        if (kind !== 'ID') return { type: ty } as const;
+        if (kind !== 'ID') return { ...ty } as const;
         tokens.consume(name);
         return { ...ty, name } as const;
     }
@@ -201,20 +204,12 @@ export function parseSig(sig: string) {
         }
 
         return dims.reduce<Ty>((ty, size, i) => {
-            return  { 
-                // ...ty, 
+            return {
                 type: `${baseType.type}${dims.slice(0, i + 1).map(size => `[${size === null ? '' : size}]`).join('')}`,
                 // baseType: 'array',
                 arrayType: ty,
-                arrayLength: size } ;
-        }, baseType);
-
-        return dims.length === 0
-            ? baseType
-            : {
-                ...baseType,
-                type: `${baseType.type}${dims.map(size => `[${size === null ? '' : size}]`).join('')}`
+                arrayLength: size
             };
-        ;
+        }, baseType);
     }
 }

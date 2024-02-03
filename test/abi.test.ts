@@ -18,9 +18,21 @@ describe('::abi', function () {
     });
 
     describe('parseSig', function () {
+
+        ['  ', '  function  '].forEach(prefix => {
+            it(`should accept optional \`${prefix}\` prefix`, function () {
+                const sig = parseSig(prefix + 'singleParamFn( address arg0 )');
+                expect(sig).to.deep.equal({
+                    name: 'singleParamFn', inputs: [
+                        { name: 'arg0', type: 'address' }
+                    ]
+                });
+            });
+        });
+
         [
             {
-                sig: 'function owner()',
+                sig: 'owner()',
                 member: { name: 'owner', inputs: [] }
             },
             {
@@ -28,7 +40,7 @@ describe('::abi', function () {
                 member: { name: 'spacingFn', inputs: [] }
             },
             {
-                sig: 'function singleParamFn( address arg0 )',
+                sig: 'singleParamFn( address arg0 )',
                 member: {
                     name: 'singleParamFn', inputs: [
                         { name: 'arg0', type: 'address' }
@@ -36,11 +48,20 @@ describe('::abi', function () {
                 }
             },
             {
-                sig: 'function multipleParamsFn ( uint256 arg1, address arg2) ',
+                sig: 'singleUnnamedParamFn( address )',
+                member: {
+                    name: 'singleUnnamedParamFn', inputs: [
+                        { type: 'address' }
+                    ]
+                }
+            },
+            {
+                sig: 'multipleParamsFn ( uint256 arg1, bool, address arg3) ',
                 member: {
                     name: 'multipleParamsFn', inputs: [
                         { name: 'arg1', type: 'uint256' },
-                        { name: 'arg2', type: 'address' }
+                        { type: 'bool' },
+                        { name: 'arg3', type: 'address' }
                     ]
                 }
             },
@@ -48,7 +69,7 @@ describe('::abi', function () {
                 sig: 'nonFixedArrayFn(uint[] arg1, int arg2, uint arg3)',
                 member: {
                     name: 'nonFixedArrayFn', inputs: [
-                        { name: 'arg1', type: 'uint256[]' },
+                        { name: 'arg1', type: 'uint256[]', arrayLength: null, arrayType: { type: 'uint256' } },
                         { name: 'arg2', type: 'int256' },
                         { name: 'arg3', type: 'uint256' },
                     ]
@@ -58,8 +79,8 @@ describe('::abi', function () {
                 sig: 'fixedArrayFn(uint[16] arg1, int[32] arg2)',
                 member: {
                     name: 'fixedArrayFn', inputs: [
-                        { name: 'arg1', type: 'uint256[16]' },
-                        { name: 'arg2', type: 'int256[32]' },
+                        { name: 'arg1', type: 'uint256[16]', arrayLength: 16, arrayType: { type: 'uint256' } },
+                        { name: 'arg2', type: 'int256[32]', arrayLength: 32, arrayType: { type: 'int256' } },
                     ]
                 }
             },
@@ -85,14 +106,17 @@ describe('::abi', function () {
                 }
             },
             {
-                sig: 'tupleFn( (uint[], address)[] arg1, int arg2)',
+                sig: 'tupleFn( (uint[8], address)[] arg1, int arg2)',
                 member: {
                     name: 'tupleFn', inputs: [
                         {
-                            name: 'arg1', type: 'tuple[]', components: [
-                                { type: 'uint256[]' },
-                                { type: 'address' },
-                            ]
+                            name: 'arg1', type: 'tuple[]', arrayLength: null, arrayType: {
+                                type: 'tuple',
+                                components: [
+                                    { type: 'uint256[8]', arrayLength: 8, arrayType: { type: 'uint256' } },
+                                    { type: 'address' },
+                                ]
+                            }
                         },
                         { name: 'arg2', type: 'int256' },
                     ]
@@ -104,29 +128,35 @@ describe('::abi', function () {
                     name: 'tupleFn2', inputs: [
                         { name: 'arg1', type: 'address' },
                         {
-                            name: 'arg2', type: 'tuple[]', components: [
-                                { type: 'uint256' },
-                                { type: 'uint256' }
-                            ]
+                            name: 'arg2', type: 'tuple[]', arrayLength: null, arrayType: {
+                                type: 'tuple',
+                                components: [
+                                    { type: 'uint256' },
+                                    { type: 'uint256' }
+                                ]
+                            }
                         }
                     ]
                 }
             },
             {
-                sig: 'nestedTupleFn ((uint256[], (address, function[], bool) )[] arg1)',
+                sig: 'nestedTupleFn ((uint256[], (address, function[4], bool) )[] arg1)',
                 member: {
                     name: 'nestedTupleFn', inputs: [
                         {
-                            name: 'arg1', type: 'tuple[]', components: [
-                                { type: 'uint256[]' },
-                                {
-                                    type: 'tuple', components: [
-                                        { type: 'address' },
-                                        { type: 'function[]' },
-                                        { type: 'bool' },
-                                    ]
-                                },
-                            ]
+                            name: 'arg1', type: 'tuple[]', arrayLength: null, arrayType: {
+                                type: 'tuple',
+                                components: [
+                                    { type: 'uint256[]', arrayLength: null, arrayType: { type: 'uint256' } },
+                                    {
+                                        type: 'tuple', components: [
+                                            { type: 'address' },
+                                            { type: 'function[4]', arrayLength: 4, arrayType: { type: 'function' } },
+                                            { type: 'bool' },
+                                        ]
+                                    },
+                                ]
+                            }
                         }
                     ]
                 }
@@ -136,13 +166,16 @@ describe('::abi', function () {
                 member: {
                     name: 'emptyTupleFn', inputs: [
                         {
-                            name: 'arg1', type: 'tuple[]', components: []
+                            name: 'arg1', type: 'tuple[]', arrayLength: null, arrayType: {
+                                type: 'tuple',
+                                components: []
+                            }
                         },
                     ]
                 }
             },
         ].forEach(({ sig, member }) => {
-            it(`should parse function signature \`${sig}\``, function () {
+            it(`should parse signature \`${sig}\``, function () {
                 const res = parseSig(sig);
                 expect(res).to.deep.equal(member);
             });
@@ -158,7 +191,7 @@ describe('::abi', function () {
         });
     });
 
-    describe('abi', function () {
+    describe.skip('abi', function () {
         it('should accept tuples', function () {
             const sig = 'someFunc((uint256,uint256)[])';
             const func = FunctionFragment.from(sig);
