@@ -68,7 +68,7 @@ const ELEM_TYPES = [
     'function',
 ] as const;
 
-export class Tokenizer {
+class Tokenizer {
     readonly ID_REGEX = /^\w+\b/;
 
     position = 0;
@@ -131,10 +131,12 @@ class Tokens {
 
 export type Ty = { type: string, components?: Ty[], arrayLength?: number | null, arrayType?: Ty };
 
-export function parseSig(sig: string): {
-    name: string;
-    inputs: ({ name?: string; } & Ty)[];
-} {
+export type SigMember = {
+    name: string,
+    inputs: ({ name?: string; } & Ty)[],
+}
+
+export function parseSig(sig: string): SigMember {
     const tokens = new Tokens(sig);
     let [pos, kind, name] = tokens.next();
     if (name === 'function') [pos, kind, name] = tokens.next();
@@ -211,5 +213,26 @@ export function parseSig(sig: string): {
                 arrayLength: size
             };
         }, baseType);
+    }
+}
+
+/**
+ * 
+ * https://docs.soliditylang.org/en/develop/abi-spec.html#handling-tuple-types
+ * 
+ * @param member 
+ */
+export function sighash(member: ReturnType<typeof parseSig>): string {
+    return `${member.name}(${member.inputs.map(sighashType).join(',')})`;
+
+    function sighashType(ty: Ty): string {
+        if (ty.arrayType !== undefined) {
+            const len = ty.arrayLength === null ? '' : ty.arrayLength;
+            return `${sighashType(ty.arrayType)}[${len}]`;
+        } else if (ty.type === 'tuple') {
+            return `(${ty.components!.map(sighashType).join(',')})`;
+        } else {
+            return ty.type;
+        }
     }
 }
