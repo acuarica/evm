@@ -168,7 +168,22 @@ declare module 'solc' {
                     /**
                      * EVM-related outputs.
                      */
-                    evm: { bytecode: Bytecode; deployedBytecode: Bytecode };
+                    evm: {
+                        bytecode: Bytecode;
+                        deployedBytecode: Bytecode;
+
+                        /**
+                         * The list of function hashes.
+                         * For example
+                         * 
+                         * ```js
+                         * "methodIdentifiers": {
+                         *   "delegate(address)": "5c19a95c"
+                         * }
+                         * ```
+                         */
+                        methodIdentifiers: { [string]: string },
+                    };
                 };
             };
         };

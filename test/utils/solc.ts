@@ -27,7 +27,7 @@ export function compile(
     version: Version,
     ctx: Mocha.Context | null,
     options?: SolcInput['settings'] & { ignoreWarnings?: boolean }
-): { bytecode: string; abi: ABI; metadata: string } {
+): { bytecode: string; abi: ABI; metadata: string, evm: SolcOutput['contracts'][string][string]['evm'] } {
     const input = JSON.stringify({
         language: 'Solidity',
         sources: {
@@ -40,7 +40,7 @@ export function compile(
             metadata: options?.metadata,
             outputSelection: {
                 '*': {
-                    '*': ['abi', 'metadata', 'evm.deployedBytecode'],
+                    '*': ['abi', 'metadata', 'evm.deployedBytecode', 'evm.methodIdentifiers'],
                 },
             },
         },
@@ -98,7 +98,8 @@ export function compile(
     const bytecode = contract.evm.deployedBytecode.object;
     const abi = contract.abi;
     const metadata = contract.metadata;
-    writeCacheFn({ bytecode, abi, metadata });
+    const evm = contract.evm;
+    writeCacheFn({ bytecode, abi, metadata, evm });
 
-    return { bytecode, abi, metadata };
+    return { bytecode, abi, metadata, evm };
 }
