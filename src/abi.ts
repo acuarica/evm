@@ -14,8 +14,8 @@
  *
  * See also [2] for more information on Types.
  *
- * - [1] https://docs.soliditylang.org/en/v0.8.19/abi-spec.html#types
- * - [2] https://docs.soliditylang.org/en/v0.8.19/types.html
+ * - [1] https://docs.soliditylang.org/en/latest/abi-spec.html#types
+ * - [2] https://docs.soliditylang.org/en/latest/types.html
  */
 export type Type = (typeof ELEM_TYPES)[number];
 
@@ -218,7 +218,7 @@ export function parseSig(sig: string): SigMember {
 
 /**
  * 
- * https://docs.soliditylang.org/en/develop/abi-spec.html#handling-tuple-types
+ * https://docs.soliditylang.org/en/latest/abi-spec.html#handling-tuple-types
  * 
  * @param member 
  */
