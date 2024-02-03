@@ -200,7 +200,7 @@ declare module 'solc' {
      * https://docs.soliditylang.org/en/latest/abi-spec.html#json
      */
     interface Member {
-        type: 'function' | 'event' | 'constructor' | 'receive' | 'fallback';
+        type: 'function' | 'event' | 'constructor' | 'receive' | 'fallback' | 'error';
 
         /**
          * name: the name of the function or event;
