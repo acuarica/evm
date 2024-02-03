@@ -1,11 +1,9 @@
 import { expect } from 'chai';
+import { keccak256 } from 'js-sha3';
 
-import { type SigMember, isElemType, parseSig, sighash } from 'sevm';
-
-import { FunctionFragment } from 'ethers';
+import { isElemType, parseSig, sighash, type SigMember } from 'sevm';
 
 import { compile } from './utils/solc';
-import { inspect } from 'util';
 
 const sigs = ([
     {
@@ -33,13 +31,22 @@ const sigs = ([
             ]
         }
     }, {
-        sig: 'multipleParamsFn ( uint256 arg1, bool, address arg3) ',
+        sig: 'fnTy(function fn1)',
+        fmt: 'fnTy(function)',
+        sol: 'fnTy(function (uint) external fn1) ',
+        member: {
+            name: 'fnTy', inputs: [
+                { name: 'fn1', type: 'function' },
+            ]
+        }
+    }, {
+        sig: 'multipleParamsFn(uint256 arg1, bool, address arg3)',
         fmt: 'multipleParamsFn(uint256,bool,address)',
         member: {
             name: 'multipleParamsFn', inputs: [
                 { name: 'arg1', type: 'uint256' },
                 { type: 'bool' },
-                { name: 'arg3', type: 'address' }
+                { name: 'arg3', type: 'address' },
             ]
         }
     }, {
@@ -52,27 +59,29 @@ const sigs = ([
             ]
         }
     }, {
-        sig: 'nonFixedArrayFn(uint[] arg1, int arg2, uint arg3)',
-        fmt: 'nonFixedArrayFn(uint256[],int256,uint256)',
+        sig: 'nonFixedArrayFn(uint[] arg1, int arg2)',
+        fmt: 'nonFixedArrayFn(uint256[],int256)',
+        sol: 'nonFixedArrayFn(uint[] memory arg1, int arg2)',
         member: {
             name: 'nonFixedArrayFn', inputs: [
                 { name: 'arg1', type: 'uint256[]', arrayLength: null, arrayType: { type: 'uint256' } },
                 { name: 'arg2', type: 'int256' },
-                { name: 'arg3', type: 'uint256' },
             ]
         }
     }, {
-        sig: 'fixedArrayFn(uint[16] arg1, int[32] arg2)',
+        sig: 'fixedArrayFn(uint[16] x, int[32] y)',
         fmt: 'fixedArrayFn(uint256[16],int256[32])',
+        sol: 'fixedArrayFn(uint[16] memory x, int[32] memory y)',
         member: {
             name: 'fixedArrayFn', inputs: [
-                { name: 'arg1', type: 'uint256[16]', arrayLength: 16, arrayType: { type: 'uint256' } },
-                { name: 'arg2', type: 'int256[32]', arrayLength: 32, arrayType: { type: 'int256' } },
+                { name: 'x', type: 'uint256[16]', arrayLength: 16, arrayType: { type: 'uint256' } },
+                { name: 'y', type: 'int256[32]', arrayLength: 32, arrayType: { type: 'int256' } },
             ]
         }
     }, {
         sig: 'multiDimArray(uint[16][][32] arg1)',
         fmt: 'multiDimArray(uint256[16][][32])',
+        sol: 'multiDimArray(uint[16][][32] memory arg1)',
         member: {
             name: 'multiDimArray', inputs: [{
                 name: 'arg1',
@@ -92,6 +101,7 @@ const sigs = ([
     }, {
         sig: 'tupleFn( (uint[8], address)[] arg1, int arg2)',
         fmt: 'tupleFn((uint256[8],address)[],int256)',
+        sol: 'tupleFn(TtupleFn[] memory arg1, int arg2)',
         member: {
             name: 'tupleFn', inputs: [{
                 name: 'arg1', type: 'tuple[]', arrayLength: null, arrayType: {
@@ -108,6 +118,7 @@ const sigs = ([
     }, {
         sig: 'tupleFn2 ( address arg1,(uint256, uint256 )[] arg2)',
         fmt: 'tupleFn2(address,(uint256,uint256)[])',
+        sol: 'tupleFn2(address arg1, T2[] memory arg2)',
         member: {
             name: 'tupleFn2', inputs: [
                 { name: 'arg1', type: 'address' },
@@ -125,6 +136,7 @@ const sigs = ([
     }, {
         sig: 'nestedTupleFn((uint256[], (address, function[4], bool) )[] arg1)',
         fmt: 'nestedTupleFn((uint256[],(address,function[4],bool))[])',
+        sol: 'nestedTupleFn(TnestedTupleFn[] memory arg1)',
         member: {
             name: 'nestedTupleFn', inputs: [
                 {
@@ -147,6 +159,7 @@ const sigs = ([
     }, {
         sig: 'sameAsSighash((uint256,uint256)[])',
         fmt: 'sameAsSighash((uint256,uint256)[])',
+        sol: 'sameAsSighash(T2[] memory arg1)',
         member: {
             name: 'sameAsSighash', inputs: [{
                 type: 'tuple[]',
@@ -163,6 +176,7 @@ const sigs = ([
     }, {
         sig: 'emptyTupleFn( ()[] arg1)',
         fmt: 'emptyTupleFn(()[])',
+        sol: null,
         member: {
             name: 'emptyTupleFn', inputs: [
                 {
@@ -174,7 +188,7 @@ const sigs = ([
             ]
         }
     },
-] satisfies { sig: string, fmt: string, member: SigMember }[]);
+] satisfies { sig: string, fmt: string, sol?: string | null, member: SigMember }[]);
 
 describe('::abi', function () {
     describe('isElemType', function () {
@@ -223,25 +237,25 @@ describe('::abi', function () {
         });
     });
 
-    describe('abi', function () {
-        it('encode tuples types in public parameters', function () {
-            const src = `contract Test {
-            struct S { uint a; uint[] b; T[] c; }
-            struct T { uint x; uint y; }
-            function f(S memory, T memory, uint) public pure {}
-            function g(T[16][][32] memory arg1) public pure {}
-            function f((uint a ,uint a) memory arg1) public pure {}
-        }`;
-            const { abi, evm } = compile(src, '0.8.16', this);
-            console.log(evm.methodIdentifiers);
-            console.log(abi[1].inputs[0]);
-            const a = FunctionFragment.from(abi[1]);
-            console.log('abi', inspect(abi[1], { depth: 10 }));
-            console.log(inspect(a.inputs[0], { depth: 10 }));
-            // console.log(a.inputs[1]);
-            expect(FunctionFragment.from(abi[0]).format()).to.be.equal(
-                'f((uint256,uint256[],(uint256,uint256)[]),(uint256,uint256),uint256)'
-            );
+    describe('get function selector from ABI', function () {
+        sigs.forEach(({ sig, fmt, sol }) => {
+            if (sol === null) return;
+
+            it(`should find selector \`${sol ?? sig}`, function () {
+                const selector = keccak256(fmt).slice(0, 8);
+                this.test!.title += `#${selector}\``;
+
+                const src = `contract Test {
+                    struct T2 { uint x; uint y; }
+                    struct TtupleFn { uint[8] x; address y; }
+                    struct TnestedTupleFn_ { address a; function (uint) external [4] b; bool c; }
+                    struct TnestedTupleFn { uint[] x; TnestedTupleFn_ y; }
+
+                    function ${sol ?? sig} public pure {}
+                }`;
+                const { evm } = compile(src, '0.8.16', this);
+                expect(evm.methodIdentifiers).to.deep.equal({ [fmt]: selector });
+            });
         });
     });
 });
