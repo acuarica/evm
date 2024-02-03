@@ -9,7 +9,7 @@ import { EVM } from './evm';
 import { splitMetadataHash, type Metadata } from './metadata';
 import { State } from './state';
 import { Shanghai, type Members, type Opcode } from './step';
-import type { Type } from './type';
+import type { Type } from './abi';
 
 /**
  *
@@ -422,10 +422,10 @@ function requiresNoValue(stmts: Stmt[], allowMStoreInit = false): boolean {
     )(first.eval());
 }
 
+export * from './abi';
 export * from './evm';
 export * from './metadata';
 export * from './sol';
 export * from './state';
 export * from './step';
-export * from './type';
 export * from './yul';

@@ -1,5 +1,5 @@
 import type { Opcode } from '../step';
-import type { Type } from '../type';
+import type { Type } from '../abi';
 import type { Add, Div, Exp, Mod, Mul, Sub } from './alu';
 import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Xor } from './alu';
 import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
