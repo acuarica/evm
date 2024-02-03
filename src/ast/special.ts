@@ -1,5 +1,5 @@
 import { type Expr, Tag } from '.';
-import type { Type } from '../type';
+import type { Type } from '../abi';
 
 /**
  * Represents a global Solidity built-in property.
