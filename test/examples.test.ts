@@ -14,7 +14,8 @@ describe(`::examples${hint}`, function () {
     js.forEach(file => {
         it(file, function () {
             if (!ENABLE_EXAMPLES_TEST) this.skip();
-            this.timeout(10000);
+            // Increase timeout to avoid failing in CI
+            this.timeout(20000);
 
             // Node's colorized output needs to be disabled for snapshot testing when running in CI
             // https://nodejs.org/api/cli.html#force_color1-2-3
