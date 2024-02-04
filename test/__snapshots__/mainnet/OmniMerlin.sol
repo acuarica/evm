@@ -88,9 +88,9 @@ contract Contract {
 
     function symbol() public {
         if ((var_1 & 0x1) == 0) {
-            require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if ((var_1 & 0x1) == 0) {
-                require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+                assert((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if (var_1 >>> 0x1 & 0x7f) {
                     if (0x1f >= (var_1 >>> 0x1 & 0x7f)) {
                         if (0x0 < (var_1 >>> 0x1 & 0x7f)) {
@@ -171,21 +171,21 @@ contract Contract {
                     }
                 }
             }
-            require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x22);
             if (var_1 >>> 0x1) {
                 if (0x1f >= var_1 >>> 0x1) {
                 }
             }
         }
-        require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x22);
         if ((var_1 & 0x1) == 0) {
-            require((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_1 & 0x1) - ((var_1 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if (var_1 >>> 0x1 & 0x7f) {
                 if (0x1f >= (var_1 >>> 0x1 & 0x7f)) {
                 }
             }
         }
-        require((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert((var_1 & 0x1) - (var_1 >>> 0x1 < 0x20), 0x22);
         if (var_1 >>> 0x1) {
             if (0x1f >= var_1 >>> 0x1) {
             }
@@ -195,7 +195,7 @@ contract Contract {
     function transfer(address _arg0, uint256 _arg1) public {
         require(msg.data.length - 0x4 >= 0x40);
         require(_arg0 == _arg0);
-        require(storage[keccak256(msg.sender, 0x3)] >= _arg1, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x3);
+        assert(storage[keccak256(msg.sender, 0x3)] >= _arg1, 0x11);
         storage[keccak256(msg.sender, 0x3)] -= _arg1;
         storage[keccak256(_arg0, 0x3)] += _arg1;
         emit Transfer(msg.sender, _arg0, _arg1);
@@ -209,7 +209,7 @@ contract Contract {
         require(_arg3 >= block.timestamp, "PERMIT_DEADLINE_EXPIRED");
         if (block.chainid != 0x1) {
             if ((var_2 & 0x1) == 0) {
-                require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+                assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if (var_2 & 0x1) {
                     if ((var_2 & 0x1) != 0x1) {
                         throw('Memory size too large creating Sha3: 115792089237316195423570985008687907853269984665640564039457584007913129639808 in `sub(local12, local21)`');
@@ -268,7 +268,7 @@ contract Contract {
                     }
                 }
             }
-            require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
             if (var_2 & 0x1) {
                 if ((var_2 & 0x1) != 0x1) {
                 }
@@ -286,23 +286,23 @@ contract Contract {
 
     function name() public {
         if ((var_2 & 0x1) == 0) {
-            require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if ((var_2 & 0x1) == 0) {
-                require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+                assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if (var_2 >>> 0x1 & 0x7f) {
                     if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                     }
                 }
             }
-            require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
             if (var_2 >>> 0x1) {
                 if (0x1f >= var_2 >>> 0x1) {
                 }
             }
         }
-        require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
         if ((var_2 & 0x1) == 0) {
-            require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if (var_2 >>> 0x1 & 0x7f) {
                 if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                 }
@@ -325,14 +325,14 @@ contract Contract {
         require(_arg0 == _arg0);
         require(_arg1 == _arg1);
         if (mapping5[_arg0][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
-            require(mapping5[_arg0][msg.sender] >= _arg2, 0x4e487b7100000000000000000000000000000000000000000000000000000000, keccak256(_arg0, 0x4));
+            assert(mapping5[_arg0][msg.sender] >= _arg2, 0x11);
             mapping5[_arg0][msg.sender] -= _arg2;
-            require(storage[keccak256(_arg0, 0x3)] >= _arg2, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x3);
+            assert(storage[keccak256(_arg0, 0x3)] >= _arg2, 0x11);
             storage[keccak256(_arg0, 0x3)] -= _arg2;
             storage[keccak256(_arg1, 0x3)] += _arg2;
             emit Transfer(_arg0, _arg1, _arg2);
         }
-        require(storage[keccak256(_arg0, 0x3)] >= _arg2, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x3);
+        assert(storage[keccak256(_arg0, 0x3)] >= _arg2, 0x11);
         storage[keccak256(_arg0, 0x3)] -= _arg2;
         storage[keccak256(_arg1, 0x3)] += _arg2;
         emit Transfer(_arg0, _arg1, _arg2);
@@ -344,13 +344,13 @@ contract Contract {
     function DOMAIN_SEPARATOR() public {
         if (block.chainid != 0x1) {
             if ((var_2 & 0x1) == 0) {
-                require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+                assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if (var_2 & 0x1) {
                     if ((var_2 & 0x1) != 0x1) {
                     }
                 }
             }
-            require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
             if (var_2 & 0x1) {
                 if ((var_2 & 0x1) != 0x1) {
                 }

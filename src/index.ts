@@ -162,7 +162,7 @@ export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [...Inst[], Rev
         falseBlock.length >= 1 &&
         falseBlock.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
         falseBlock.at(-1)!.name === 'Revert' &&
-        (falseBlock.at(-1) as Revert).isRequire()
+        (falseBlock.at(-1) as Revert).isRequireOrAssert()
     );
 }
 
@@ -373,6 +373,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
                                 // last.cond.eval(),
                                 last.cond,
                                 // ((falseBlock.at(-1) as Revert).args ?? []).map(e => e.eval())
+                                (falseBlock.at(-1) as Revert).selector,
                                 (falseBlock.at(-1) as Revert).args ?? []
                             ),
                             ...trueBlock,

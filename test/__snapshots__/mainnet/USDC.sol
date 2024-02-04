@@ -22,7 +22,7 @@ contract Contract {
                         if (msg.sig == f851a440) {
                             $f851a440();
                         } else {
-                            require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+                            require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
                             if (delegatecall(gasleft(),implementation,0x0,msg.data.length,0x0,0x0)) {
                                 return memory[0x0:(0x0+returndatasize())];
                             }
@@ -37,7 +37,7 @@ contract Contract {
                 if (msg.sig == 4f1ef286) {
                     $4f1ef286();
                 } else {
-                    require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+                    require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
                     if (delegatecall(gasleft(),implementation,0x0,msg.data.length,0x0,0x0)) {
                         return memory[0x0:(0x0+returndatasize())];
                     }
@@ -45,7 +45,7 @@ contract Contract {
                 }
             }
         }
-        require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+        require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
         if (delegatecall(gasleft(),implementation,0x0,msg.data.length,0x0,0x0)) {
             return memory[0x0:(0x0+returndatasize())];
         }
@@ -61,12 +61,12 @@ contract Contract {
         require(msg.value == 0);
         require(msg.data.length - 0x4 >= 0x20);
         if (msg.sender == admin) {
-            require(_arg0, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+            require(_arg0, 0x8c379a0, 0x20, 0x36, this.code[0x696:(0x696+0x36)], memory[0xe4]);
             emit AdminChanged(admin, _arg0);
             admin = _arg0;
             return;
         }
-        require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+        require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
         if (delegatecall(gasleft(),implementation,0x0,msg.data.length,0x0,0x0)) {
             return memory[0x0:(0x0+returndatasize())];
         }
@@ -83,17 +83,17 @@ contract Contract {
         require(msg.data.length - 0x4 >= 0x20);
         if (msg.sender == admin) {
             if (0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code)) {
-                require(keccak256(address(_arg0).code), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+                require(keccak256(address(_arg0).code), 0x8c379a0, 0x20, 0x3b, this.code[0x6cc:(0x6cc+0x3b)], memory[0xe4]);
                 implementation = _arg0;
                 emit Upgraded(_arg0);
                 return;
             }
-            require(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+            require(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code), 0x8c379a0, 0x20, 0x3b, this.code[0x6cc:(0x6cc+0x3b)], memory[0xe4]);
             implementation = _arg0;
             emit Upgraded(_arg0);
             return;
         }
-        require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+        require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
         if (delegatecall(gasleft(),implementation,0x0,msg.data.length,0x0,0x0)) {
             return memory[0x0:(0x0+returndatasize())];
         }
@@ -107,7 +107,7 @@ contract Contract {
         require((msg.data[0x4 + _arg1] > 0x100000000 | 0x20 + 0x4 + _arg1 + msg.data[0x4 + _arg1] * 0x1 > 0x4 + msg.data.length - 0x4) == 0);
         if (msg.sender == admin) {
             if (0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code)) {
-                require(keccak256(address(_arg0).code), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+                require(keccak256(address(_arg0).code), 0x8c379a0, 0x20, 0x3b, this.code[0x6cc:(0x6cc+0x3b)], memory[0xe4]);
                 implementation = _arg0;
                 emit Upgraded(_arg0);
                 if (returndatasize() != 0x0) {
@@ -117,7 +117,7 @@ contract Contract {
                 require(call(gasleft(),0xffffffffffffffffffffffffffffffffffffffff & address(this),msg.value,local16,local15 + local6 - local16,local16,0x0));
                 return;
             }
-            require(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code), 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+            require(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != keccak256(address(_arg0).code), 0x8c379a0, 0x20, 0x3b, this.code[0x6cc:(0x6cc+0x3b)], memory[0xe4]);
             implementation = _arg0;
             emit Upgraded(_arg0);
             if (returndatasize() != 0x0) {
@@ -127,7 +127,7 @@ contract Contract {
             require(call(gasleft(),0xffffffffffffffffffffffffffffffffffffffff & address(this),msg.value,local16,local15 + local6 - local16,local16,0x0));
             return;
         }
-        require(msg.sender != admin, 0x8c379a000000000000000000000000000000000000000000000000000000000, memory[0xa0], memory[0xc0], memory[0xe0], memory[0x100]);
+        require(msg.sender != admin, 0x8c379a0, 0x20, 0x32, this.code[0x664:(0x664+0x32)], memory[0xe4]);
     }
 
 }

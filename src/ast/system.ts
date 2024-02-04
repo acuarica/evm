@@ -181,6 +181,8 @@ export class Revert implements IInst {
      */
     static readonly ERROR = '08c379a0';
 
+    static readonly PANIC = '4e487b71';
+
     /**
      * Stop the current context execution, revert the state changes (see `STATICCALL` for a list
      * of state changing opcodes) and return the unused gas to the caller.
@@ -200,8 +202,8 @@ export class Revert implements IInst {
         return new Revert(this.offset.eval(), this.size.eval(), this.selector, this.args?.map(evalE));
     }
 
-    isRequire(): boolean {
-        return this.selector === undefined || this.selector === Revert.ERROR;
+    isRequireOrAssert(): boolean {
+        return this.selector === undefined || this.selector === Revert.ERROR || this.selector === Revert.PANIC;
     }
 }
 
