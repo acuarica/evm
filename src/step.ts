@@ -660,7 +660,7 @@ const FrontierStep = {
                 const fetcher = new ArgsFetcher(memory);
 
                 // https://docs.soliditylang.org/en/latest/control-structures.html#revert
-                if (size.val === 4n + 3n * 32n) {
+                if (size.val % 32n === 4n) {
                     let selector: string | undefined;
                     const selectorVal = memory[Number(offset.val)]?.eval();
                     if (selectorVal?.isVal() && selectorVal.val % (1n << 224n) === 0n) {

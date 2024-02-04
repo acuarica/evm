@@ -42,8 +42,8 @@ contract Contract {
         require(msg.data.length - 0x4 >= 0x20);
         require(_arg0 <= 0xffffffffffffffff);
         require(0x4 + _arg0 + 0x1f < msg.data.length);
-        require(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
-        require((0x80 + (0x3f + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & msg.data[0x4 + _arg0] + 0x1f) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0) < 0x80 | 0x80 + (0x3f + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & msg.data[0x4 + _arg0] + 0x1f) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0) > 0xffffffffffffffff) == 0, 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x41);
+        assert((0x80 + (0x3f + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & msg.data[0x4 + _arg0] + 0x1f) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0) < 0x80 | 0x80 + (0x3f + (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & msg.data[0x4 + _arg0] + 0x1f) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0) > 0xffffffffffffffff) == 0, 0x41);
         require(0x4 + _arg0 + msg.data[0x4 + _arg0] + 0x20 <= msg.data.length);
         require(tx.origin == msg.sender);
         if (0x0 < msg.data[0x4 + _arg0]) {
@@ -137,9 +137,9 @@ contract Contract {
     function question() public {
         require(msg.value == 0);
         if ((var_2 & 0x1) == 0) {
-            require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if ((var_2 & 0x1) == 0) {
-                require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+                assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if (var_2 >>> 0x1 & 0x7f) {
                     if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                     }
@@ -167,21 +167,21 @@ contract Contract {
                     }
                 }
             }
-            require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
             if (var_2 >>> 0x1) {
                 if (0x1f >= var_2 >>> 0x1) {
                 }
             }
         }
-        require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
         if ((var_2 & 0x1) == 0) {
-            require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+            assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if (var_2 >>> 0x1 & 0x7f) {
                 if (0x1f >= (var_2 >>> 0x1 & 0x7f)) {
                 }
             }
         }
-        require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, memory[0x20]);
+        assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
         if (var_2 >>> 0x1) {
             if (0x1f >= var_2 >>> 0x1) {
             }
@@ -207,9 +207,9 @@ contract Contract {
         require(mapping3[msg.sender << 0x60 & 0xffffffffffffffffffffffffffffffffffffffff000000000000000000000000]);
         if ((0x0 - var_1) == 0) {
             var_1 = keccak256(memory[0xd4:(0xd4+(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 & msg.data[0x4 + _arg1] + 0x1f) + 0xd4 + 0x40 - 0xb4 + 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0)]);
-            require(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+            assert(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x41);
             if ((var_2 & 0x1) == 0) {
-                require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+                assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
                 if ((var_2 >>> 0x1 & 0x7f) > 0x1f) {
                     if (msg.data[0x4 + _arg0] < 0x20) {
                         if (keccak256(0x0) < keccak256(0x0) + ((var_2 >>> 0x1 & 0x7f) + 0x1f >>> 0x5)) {
@@ -380,7 +380,7 @@ contract Contract {
                     }
                 }
             }
-            require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+            assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
             if (var_2 >>> 0x1 > 0x1f) {
                 if (msg.data[0x4 + _arg0] < 0x20) {
                 }
@@ -395,15 +395,15 @@ contract Contract {
         require(msg.data[0x4 + _arg0] <= 0xffffffffffffffff);
         require(0x4 + _arg0 + msg.data[0x4 + _arg0] + 0x20 <= msg.data.length);
         require(mapping3[msg.sender << 0x60 & 0xffffffffffffffffffffffffffffffffffffffff000000000000000000000000]);
-        require(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+        assert(msg.data[0x4 + _arg0] <= 0xffffffffffffffff, 0x41);
         if ((var_2 & 0x1) == 0) {
-            require((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+            assert((var_2 & 0x1) - ((var_2 >>> 0x1 & 0x7f) < 0x20), 0x22);
             if ((var_2 >>> 0x1 & 0x7f) > 0x1f) {
                 if (msg.data[0x4 + _arg0] < 0x20) {
                 }
             }
         }
-        require((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x4e487b7100000000000000000000000000000000000000000000000000000000, 0x2);
+        assert((var_2 & 0x1) - (var_2 >>> 0x1 < 0x20), 0x22);
         if (var_2 >>> 0x1 > 0x1f) {
             if (msg.data[0x4 + _arg0] < 0x20) {
             }

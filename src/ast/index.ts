@@ -159,9 +159,9 @@ export class CallSite {
 
 export class Require {
     readonly name = 'Require';
-    constructor(readonly condition: Expr, readonly args: Expr[]) { }
+    constructor(readonly condition: Expr, readonly selector: string | undefined, readonly args: Expr[]) { }
     eval() {
-        return new Require(this.condition.eval(), this.args.map(evalE));
+        return new Require(this.condition.eval(), this.selector, this.args.map(evalE));
     }
 }
 

@@ -1,5 +1,5 @@
 import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt, Tag, evalE, Revert } from './ast';
+import { isInst, type Expr, type Inst, Val, isExpr, If, type Stmt, Tag, evalE, Revert } from './ast';
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
 import { Contract, type PublicFunction } from '.';
@@ -346,10 +346,14 @@ function solStmt(stmt: Stmt): string {
         case 'CallSite':
             return sol`$${stmt.selector}();`;
         case 'Require': {
+            const fnname = stmt.selector === Revert.PANIC ? 'assert' : 'require';
+            const args = stmt.selector === undefined || stmt.selector === Revert.PANIC
+                ? stmt.args
+                : [new Val(BigInt('0x' + stmt.selector)), ...stmt.args];
             const revertMsg = getRevertMsg(stmt, Revert.ERROR);
             return revertMsg !== undefined
-                ? sol`require(${stmt.condition}, ${revertMsg});`
-                : `require(${[stmt.condition, ...stmt.args].map(solExpr).join(', ')});`;
+                ? sol`${fnname}(${stmt.condition}, ${revertMsg});`
+                : `${fnname}(${[stmt.condition, ...args].map(solExpr).join(', ')});`;
         }
         default:
             return solInst(stmt);
