@@ -1,6 +1,6 @@
 import { Contract } from '.';
 import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast';
-import { FNS, Tag, isExpr, isInst } from './ast';
+import { FNS, Revert, Tag, Val, isExpr, isInst } from './ast';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either
@@ -147,8 +147,10 @@ function yulStmt(stmt: Stmt): string {
             return yul`(${stmt.condition})`;
         case 'CallSite':
             return yul`$${stmt.selector}();`;
-        case 'Require':
-            return `require(${[stmt.condition, ...stmt.args].map(yulExpr).join(', ')})`;
+        case 'Require': {
+            const args = stmt.args.length === 0 ? [] : [new Val(BigInt('0x' + Revert.ERROR)), ...stmt.args];
+            return `require(${[stmt.condition, ...args].map(yulExpr).join(', ')})`;
+        }
         default:
             return yulInst(stmt);
     }

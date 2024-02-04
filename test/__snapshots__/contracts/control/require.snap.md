@@ -60,8 +60,8 @@ object "runtime" {
             require(iszero(lt(local3, 0x20)))
             let local4 := calldataload(local2) // #refs 3
             let local5 := caller() // #refs 1
-            require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
-            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
+            require(iszero(eq(and(0xffffffffffffffffffffffffffffffffffffffff, local5), and(0xffffffffffffffffffffffffffffffffffffffff, 0x0))), 0x8c379a0, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
+            require(gt(local4, 0x0), 0x8c379a0, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
             let local6 := 0x0 // #refs -1
             mstore(local6/*=0x0*/, and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, local5)))
             let local7 := add(0x20, local6) // #refs -1
@@ -316,8 +316,8 @@ object "runtime" {
             require(iszero(lt(local3, 0x20)))
             let local4 := calldataload(local2) // #refs 1
             let local5 := caller() // #refs 0
-            require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
-            require(gt(local4, 0x0), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
+            require(and(local5, sub(shl(0x1, 0xa0), 0x1)), 0x8c379a0, 0x20, 0x7, 0x617070726f766500000000000000000000000000000000000000000000000000)
+            require(gt(local4, 0x0), 0x8c379a0, 0x20, 0xf, 0x617070726f766520616464726573730000000000000000000000000000000000)
             let local6 := 0x0 // #refs -1
             mstore(local6/*=0x0*/, and(local5, sub(shl(0x1, 0xa0), 0x1)))
             mstore(0x20, local6)

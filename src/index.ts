@@ -161,7 +161,8 @@ export function isRevertBlock(falseBlock: Stmt[]): falseBlock is [...Inst[], Rev
     return (
         falseBlock.length >= 1 &&
         falseBlock.slice(0, -1).every(stmt => stmt.name === 'Local' || stmt.name === 'MStore') &&
-        falseBlock.at(-1)!.name === 'Revert'
+        falseBlock.at(-1)!.name === 'Revert' &&
+        (falseBlock.at(-1) as Revert).isRequire()
     );
 }
 
