@@ -655,25 +655,37 @@ const FrontierStep = {
         const offset_ = state.stack.pop();
         const size_ = state.stack.pop();
 
-        state.halt(new ast.Revert(offset_, size_, function ({ memory }: Ram<Expr>, offset, size) {
+        state.halt(new ast.Revert(offset_, size_, ...function ({ memory }: Ram<Expr>, offset, size): [string | undefined, Expr[] | undefined] {
             if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
                 const fetcher = new ArgsFetcher(memory);
 
                 // https://docs.soliditylang.org/en/latest/control-structures.html#revert
                 if (size.val === 4n + 3n * 32n) {
-                    fetcher.fetch(Number(offset.val));
-                    for (let i = Number(offset.val) + 4; i < Number(offset.val + size.val); i += 32) {
-                        fetcher.fetch(i);
+                    let selector: string | undefined;
+                    const selectorVal = memory[Number(offset.val)]?.eval();
+                    if (selectorVal?.isVal() && selectorVal.val % (1n << 224n) === 0n) {
+                        selector = (selectorVal.val >> 224n).toString(16).padStart(8, '0');
+                    } else {
+                        const selectorVal = memory[Number(offset.val) - 28]?.eval();
+                        if (selectorVal?.isVal() && selectorVal.val <= 0xffffffff) {
+                            selector = selectorVal.val.toString(16).padStart(8, '0');
+                        }
                     }
-                    return fetcher.args;
+
+                    if (selector !== undefined) {
+                        for (let i = Number(offset.val) + 4; i < Number(offset.val + size.val); i += 32) {
+                            fetcher.fetch(i);
+                        }
+                        return [selector, fetcher.args];
+                    }
                 }
 
-                return fetcher.range(offset, size).args;
+                return [undefined, fetcher.range(offset, size).args];
             } else {
                 if (size.isVal() && size.val > MAXSIZE) {
                     throw new ExecError(`Memory size too large creating Revert: ${size.val} in \`${size_.yul()}\``);
                 }
-                return undefined;
+                return [undefined, undefined];
             }
         }(state, offset_.eval(), size_.eval())));
     }],

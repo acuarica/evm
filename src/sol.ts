@@ -1,5 +1,5 @@
 import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt, Tag, evalE } from './ast';
+import { isInst, type Expr, type Inst, type Val, isExpr, If, type Stmt, Tag, evalE, Revert } from './ast';
 import type { IEvents } from './ast/log';
 import type { IStore } from './ast/storage';
 import { Contract, type PublicFunction } from '.';
@@ -204,7 +204,7 @@ function solInst(inst: Inst): string {
                             ? sol`return ${inst.args[0]};`
                             : `return (${inst.args.map(solExpr).join(', ')});`;
         case 'Revert': {
-            const revertMsg = getRevertMsg(inst);
+            const revertMsg = inst.selector !== undefined ? getRevertMsg(inst, inst.selector) : undefined;
             return revertMsg !== undefined
                 ? `revert(${revertMsg});`
                 : inst.args === undefined
@@ -332,12 +332,11 @@ function hex2a(hexstr: string) {
     return str;
 }
 
-function getRevertMsg(stmt: { args?: Expr[] | undefined }): string | undefined {
-    const ERROR = 0x8c379a000000000000000000000000000000000000000000000000000000000n;
-    const error = stmt.args !== undefined ? stmt.args[0]?.eval() : undefined;
-    const args = stmt.args?.slice(1).map(evalE);
-    return error?.isVal() && error.val === ERROR && isStringReturn(args) && args[0].val === 32n ?
-        `"${hex2a(args[2].val.toString(16))}"` : undefined;
+function getRevertMsg({ args }: { args?: Expr[] | undefined }, selector: string): string | undefined {
+    args = args?.map(evalE);
+    return selector === Revert.ERROR && isStringReturn(args) && args[0].val === 32n
+        ? `"${hex2a(args[2].val.toString(16))}"`
+        : undefined;
 }
 
 function solStmt(stmt: Stmt): string {
@@ -347,7 +346,7 @@ function solStmt(stmt: Stmt): string {
         case 'CallSite':
             return sol`$${stmt.selector}();`;
         case 'Require': {
-            const revertMsg = getRevertMsg(stmt);
+            const revertMsg = getRevertMsg(stmt, Revert.ERROR);
             return revertMsg !== undefined
                 ? sol`require(${stmt.condition}, ${revertMsg});`
                 : `require(${[stmt.condition, ...stmt.args].map(solExpr).join(', ')});`;

@@ -60,7 +60,7 @@ contract Contract {
     }
 
     function 61893921() public payable {
-        require(msg.sender == var_2, memory[0x15c], 0x20, 0xd, 0x4163636573732064656e69656400000000000000000000000000000000000000);
+        require(msg.sender == var_2, "Access denied");
         var_2 = var_4;
         var_3 = var_5;
         log(0xe8d7597c306457cd1fa4eb0e165a1a4c3aea9808e274ea97c6b5d9f73a3c477f, var_4, var_5);
@@ -166,7 +166,7 @@ contract Contract {
     function e3a8d3ab() public payable {
         if ((_arg0 >>> 0xa0) == 0) {
             if ((_arg1 >>> 0xa0) == 0) {
-                require(msg.sender == var_2, memory[0x15c], 0x20, 0xd, 0x4163636573732064656e69656400000000000000000000000000000000000000);
+                require(msg.sender == var_2, "Access denied");
                 var_4 = _arg0;
                 var_5 = _arg1;
                 log(0x8f5425b30e6270c1011973f0ccf6d7795cc10623631523e4c45d2837d337d574, _arg0, _arg1);

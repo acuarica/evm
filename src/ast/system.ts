@@ -177,6 +177,11 @@ export class Revert implements IInst {
     readonly name = 'Revert';
 
     /**
+     * https://docs.soliditylang.org/en/latest/control-structures.html#panic-via-assert-and-error-via-require
+     */
+    static readonly ERROR = '08c379a0';
+
+    /**
      * Stop the current context execution, revert the state changes (see `STATICCALL` for a list
      * of state changing opcodes) and return the unused gas to the caller.
      *
@@ -189,10 +194,14 @@ export class Revert implements IInst {
      * @param size byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) { }
+    constructor(readonly offset: Expr, readonly size: Expr, readonly selector?: string, readonly args?: Expr[]) { }
 
     eval() {
-        return new Revert(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
+        return new Revert(this.offset.eval(), this.size.eval(), this.selector, this.args?.map(evalE));
+    }
+
+    isRequire(): boolean {
+        return this.selector === undefined || this.selector === Revert.ERROR;
     }
 }
 

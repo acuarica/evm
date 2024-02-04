@@ -82,7 +82,7 @@ object "runtime" {
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
-            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
+            require(eq(and(0xffffffffffffffffffffffffffffffffffffffff, and(0xffffffffffffffffffffffffffffffffffffffff, div(sload(0x1), exp(0x100, 0x0)))), and(0xffffffffffffffffffffffffffffffffffffffff, caller())), 0x8c379a0, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
             let local4 := calldataload(local2) // #refs 0
             let local5 := add(local4, 0x3) // #refs 0
             sstore(0x0, local5)
@@ -382,7 +382,7 @@ object "runtime" {
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
             let local4 := sub(shl(0x1, 0xa0), 0x1) // #refs 0
-            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a000000000000000000000000000000000000000000000000000000000, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
+            require(eq(and(caller(), local4), and(local4, sload(0x1))), 0x8c379a0, 0x20, 0x20, 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572)
             sstore(0x0, add(0x3, calldataload(local2)))
             stop()
         }
