@@ -51,11 +51,11 @@ describe(`::forversion`, function () {
             expect(block.states).to.be.of.length(1);
             const state = block.states[0]!;
             expect(state.last?.eval())
-                .to.be.deep.equal(new Revert(new Val(0n), new Val(0n), undefined, []));
+                .to.be.deep.equal(new Revert(new Val(0n), new Val(0n), undefined, undefined, []));
 
             expect(contract.main.length).to.be.at.least(1);
             expect(contract.main.at(-1)?.eval()).to.be.deep.equal(
-                new Revert(new Val(0n), new Val(0n), undefined, [])
+                new Revert(new Val(0n), new Val(0n), undefined, undefined, [])
             );
         });
 

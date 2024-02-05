@@ -634,3 +634,7 @@
 ```errors VotingEscrowDelegationProxy-0x9B12C90BAd388B7e417271eb20678D1a7759507c/detect-errors
 []
 ```
+
+```errors MobyToken-0x40a7dF3dF8b56147B781353D379cB960120211D7/detect-errors
+[]
+```

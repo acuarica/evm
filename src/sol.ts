@@ -1,8 +1,8 @@
-import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, Val, isExpr, If, type Stmt, Tag, evalE, Revert } from './ast';
-import type { IEvents } from './ast/log';
-import type { IStore } from './ast/storage';
 import { Contract, type PublicFunction } from '.';
+import { If, Revert, Tag, Val, evalE, isExpr, isInst, type Expr, type IReverts, type Inst, type Stmt } from './ast';
+import type { IEvents } from './ast/log';
+import { FNS } from './ast/special';
+import type { IStore } from './ast/storage';
 
 /**
  *
@@ -573,6 +573,20 @@ function solPublicFunction(self: PublicFunction, tab = '    '): string {
     return output;
 }
 
+function solReverts(reverts: IReverts): string {
+    let output = '';
+    for (const [selector, decl] of Object.entries(reverts) as [string, IReverts[string]][]) {
+        if (!Revert.isRequireOrAssert(selector)) {
+            if (decl.sig === undefined)
+                output += `    // error ${selector}\n`;
+            else
+                output += `    error ${decl.sig}; // ${selector}\n`;
+        }
+    }
+
+    return output;
+}
+
 function solContract(
     this: Contract,
     options: { license?: string | null; pragma?: boolean; contractName?: string } = {}
@@ -598,6 +612,7 @@ function solContract(
     text += solStructs(this.mappings);
     text += member(solMappings(this.mappings));
     text += member(solVars(this.variables));
+    text += member(solReverts(this.reverts));
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const fallback = this.metadata?.minor! >= 6 ? 'fallback' : 'function';

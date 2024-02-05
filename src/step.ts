@@ -1,13 +1,9 @@
 import { arrayify, hexlify } from './.bytes';
 import { ExecError, type Operand, type Ram, type State } from './state';
 
+import type { DataCopy, Expr, IReverts, IEvents, IStore, Inst, Jumpi, Props } from './ast';
 import * as ast from './ast';
-import { Local, Locali, MappingLoad, MappingStore, Val, Variable, type Expr, type IStore, type Inst } from './ast';
-import { Sar, Shl, Shr } from './ast/alu';
-import { Branch, type Jumpi, Sig, SigCase } from './ast/flow';
-import { type IEvents } from './ast/log';
-import { FNS, Fn, Prop, type Props, type DataCopy } from './ast/special';
-import { Sha3 } from './ast/system';
+import { Sha3, Val, Sig } from './ast';
 
 /**
  * Represents an opcode found in the bytecode augmented with
@@ -112,6 +108,21 @@ export class Members {
      * Store selectors', _i.e._, public and external `function`s program counter entry.
      */
     readonly functionBranches: Map<string, { pc: number, state: State<Inst, Expr> }> = new Map();
+
+    /**
+     * 
+     */
+    readonly reverts: IReverts = {};
+
+    getError(selector: string): IReverts[string] {
+        let error = this.reverts[selector];
+        if (error === undefined) {
+            error = {};
+            this.reverts[selector] = error;
+        }
+
+        return error;
+    }
 }
 
 /**
@@ -240,10 +251,10 @@ const ALU = {
         const left = stack.pop();
         const right = stack.pop();
         stack.push(left.isVal() && right.isVal()
-            ? new Val((right.val << (32n - left.val)) >> (32n - left.val))
+            ? new ast.Val((right.val << (32n - left.val)) >> (32n - left.val))
             : left.isVal()
-                ? new Sar(new Shl(right, new Val(32n - left.val)), new Val(32n - left.val))
-                : new Sar(new Shl(right, new ast.Sub(new Val(32n), left)), new ast.Sub(new Val(32n), left))
+                ? new ast.Sar(new ast.Shl(right, new ast.Val(32n - left.val)), new ast.Val(32n - left.val))
+                : new ast.Sar(new ast.Shl(right, new ast.Sub(new Val(32n), left)), new ast.Sub(new Val(32n), left))
         );
     }],
 
@@ -380,7 +391,7 @@ const getVar = (slot: Expr, values: Expr[], self: IStore) => {
     if (slot.isVal()) {
         variable = self.variables.get(slot.val);
         if (variable === undefined) {
-            variable = new Variable(null, values, self.variables.size + 1);
+            variable = new ast.Variable(null, values, self.variables.size + 1);
             self.variables.set(slot.val, variable);
         } else {
             variable.types.push(...values);
@@ -398,11 +409,11 @@ const STORAGE = {
             ([base, parts] = parseSha3(slot), base !== undefined && parts.length > 0);
 
         if (slot.tag === 'Sha3' && check(slot)) {
-            stack.push(new MappingLoad(slot, this.mappings, base!, parts!));
+            stack.push(new ast.MappingLoad(slot, this.mappings, base!, parts!));
         } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal() && check(slot.left)) {
-            stack.push(new MappingLoad(slot, this.mappings, base!, parts!, slot.right.val));
+            stack.push(new ast.MappingLoad(slot, this.mappings, base!, parts!, slot.right.val));
         } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3' && check(slot.right)) {
-            stack.push(new MappingLoad(slot, this.mappings, base!, parts!, slot.left.val));
+            stack.push(new ast.MappingLoad(slot, this.mappings, base!, parts!, slot.left.val));
         } else {
             stack.push(new ast.SLoad(slot, getVar(slot.eval(), [], this)));
         }
@@ -419,11 +430,11 @@ const STORAGE = {
             ([base, parts] = parseSha3(slot), base !== undefined && parts.length > 0);
 
         if (slot.tag === 'Sha3' && check(slot)) {
-            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value));
+            stmts.push(new ast.MappingStore(slot, this.mappings, base!, parts!, value));
         } else if (slot.tag === 'Add' && slot.left.tag === 'Sha3' && slot.right.isVal() && check(slot.left)) {
-            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value, slot.right.val));
+            stmts.push(new ast.MappingStore(slot, this.mappings, base!, parts!, value, slot.right.val));
         } else if (slot.tag === 'Add' && slot.left.isVal() && slot.right.tag === 'Sha3' && check(slot.right)) {
-            stmts.push(new MappingStore(slot, this.mappings, base!, parts!, value, slot.left.val));
+            stmts.push(new ast.MappingStore(slot, this.mappings, base!, parts!, value, slot.left.val));
         } else {
             stmts.push(new ast.SStore(slot, value, getVar(slot.eval(), [value], this)));
         }
@@ -518,9 +529,9 @@ const FrontierStep = {
 
             const expr = state.stack.values[position];
             if (expr.tag !== 'Local') {
-                const local = new Local(state.nlocals++, expr);
+                const local = new ast.Local(state.nlocals++, expr);
                 state.stack.values[position] = local;
-                state.stmts.push(new Locali(local));
+                state.stmts.push(new ast.Locali(local));
             } else {
                 expr.nrefs++;
             }
@@ -558,8 +569,8 @@ const FrontierStep = {
 
     ...SPECIAL,
     PC: [0x58, ({ stack }, op) => stack.push(new Val(BigInt(op.pc)))],
-    ...zip(Object.entries(FNS).map(([m, [, , o]]) => [m, [
-        o, ({ stack }) => stack.push(new Fn(m, stack.pop()))
+    ...zip(Object.entries(ast.FNS).map(([m, [, , o]]) => [m, [
+        o, ({ stack }) => stack.push(new ast.Fn(m, stack.pop()))
     ]])),
     ...DATACOPY,
 
@@ -589,7 +600,7 @@ const FrontierStep = {
             memory[Number(location.val)] = data;
         }
     }]])),
-    MSIZE: [0x59, ({ stack }: Operand<Expr>) => stack.push(new Prop('msize()', 'uint'))],
+    MSIZE: [0x59, ({ stack }: Operand<Expr>) => stack.push(new ast.Prop('msize()', 'uint'))],
 
     /* System operations */
     SHA3: [0x20, (state: Ram<Expr>) => state.stack.push(memArgs(state, Sha3))],
@@ -651,11 +662,11 @@ const FrontierStep = {
         stack.push(new ast.StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
     }],
 
-    REVERT: [{ opcode: 0xfd, halts: true }, state => {
+    REVERT: [{ opcode: 0xfd, halts: true }, function (this: Members, state) {
         const offset_ = state.stack.pop();
         const size_ = state.stack.pop();
 
-        state.halt(new ast.Revert(offset_, size_, ...function ({ memory }: Ram<Expr>, offset, size): [string | undefined, Expr[] | undefined] {
+        state.halt(new ast.Revert(offset_, size_, ...(({ memory }: Ram<Expr>, offset, size): [string | undefined, IReverts[string] | undefined, Expr[] | undefined] => {
             if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
                 const fetcher = new ArgsFetcher(memory);
 
@@ -676,18 +687,18 @@ const FrontierStep = {
                         for (let i = Number(offset.val) + 4; i < Number(offset.val + size.val); i += 32) {
                             fetcher.fetch(i);
                         }
-                        return [selector, fetcher.args];
+                        return [selector, this.getError(selector), fetcher.args];
                     }
                 }
 
-                return [undefined, fetcher.range(offset, size).args];
+                return [undefined, undefined, fetcher.range(offset, size).args];
             } else {
                 if (size.isVal() && size.val > MAXSIZE) {
                     throw new ExecError(`Memory size too large creating Revert: ${size.val} in \`${size_.yul()}\``);
                 }
-                return [undefined, undefined];
+                return [undefined, undefined, undefined];
             }
-        }(state, offset_.eval(), size_.eval())));
+        })(state, offset_.eval(), size_.eval())));
     }],
 
     SELFDESTRUCT: [{ opcode: 0xff, halts: true }, function selfdestruct(state) {
@@ -741,7 +752,7 @@ const FrontierStep = {
     JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);
-        const destBranch = Branch.make(destpc, state);
+        const destBranch = ast.Branch.make(destpc, state);
         state.halt(new ast.Jump(offset, destBranch, pushStateId));
     }],
     JUMPI: [{ opcode: 0x57, halts: true }, function (this: Members, state, opcode, { bytecode }) {
@@ -749,17 +760,17 @@ const FrontierStep = {
         const cond = state.stack.pop();
         const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);
 
-        const fallBranch = Branch.make(opcode.pc + 1, state);
-        const destBranch = Branch.make(destpc, state);
+        const fallBranch = ast.Branch.make(opcode.pc + 1, state);
+        const destBranch = ast.Branch.make(destpc, state);
 
-        let last: SigCase | Jumpi;
+        let last: ast.SigCase | Jumpi;
         if (cond.tag === 'Sig') {
             const [pc, contBranch] = cond.positive ? [destpc, fallBranch] : [opcode.pc + 1, destBranch];
             this.functionBranches.set(cond.selector, {
                 pc,
                 state: state.clone(),
             });
-            last = new SigCase(cond, offset, contBranch);
+            last = new ast.SigCase(cond, offset, contBranch);
         } else {
             last = new ast.Jumpi(cond, offset, fallBranch, destBranch, pushStateId);
         }
@@ -811,9 +822,9 @@ const ConstantinopleStep = {
     }],
 
     ...zip([
-        ['SHL', 0x1b, Shl] as const,
-        ['SHR', 0x1c, Shr] as const,
-        ['SAR', 0x1d, Sar] as const,
+        ['SHL', 0x1b, ast.Shl] as const,
+        ['SHR', 0x1c, ast.Shr] as const,
+        ['SAR', 0x1d, ast.Sar] as const,
     ].map(([mnemonic, opcode, Cons]) => [mnemonic, [opcode, ({ stack }: Operand<Expr>) => {
         const shift = stack.pop();
         const value = stack.pop();

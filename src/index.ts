@@ -2,7 +2,7 @@ import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val
 import { IsZero } from './ast/alu';
 import type { IEvents } from './ast/log';
 import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
-import type { Return, Revert } from './ast/system';
+import type { IReverts, Return, Revert } from './ast/system';
 import { arrayify } from './.bytes';
 import ERCs from './ercs';
 import { EVM } from './evm';
@@ -41,6 +41,7 @@ export class Contract {
     readonly variables: IStore['variables'] = new Map();
     readonly mappings: IStore['mappings'] = {};
     readonly functionBranches: Members['functionBranches'] = new Map();
+    readonly reverts: IReverts = {};
 
     /**
      * Symbolic execution `errors` found during interpretation of `this.bytecode`.
@@ -86,6 +87,7 @@ export class Contract {
         this.variables = evm.step.variables;
         this.mappings = evm.step.mappings;
         this.functionBranches = evm.step.functionBranches;
+        this.reverts = evm.step.reverts;
         this.metadata = splitMetadataHash(this.bytecode).metadata;
         this.errors = evm.errors;
 
