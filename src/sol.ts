@@ -1,4 +1,4 @@
-import { Contract, type PublicFunction } from '.';
+import { Contract, parseSig, type PublicFunction } from '.';
 import { If, Revert, Tag, Val, evalE, isExpr, isInst, type Expr, type IReverts, type Inst, type Stmt } from './ast';
 import type { IEvents } from './ast/log';
 import { FNS } from './ast/special';
@@ -185,6 +185,15 @@ function solExpr(expr: Expr): string {
     }
 }
 
+function sigName(sig: string | undefined): string | undefined {
+    if (sig === undefined) return undefined;
+    try {
+        return parseSig(sig).name;
+    } catch {
+        return sig;
+    }
+}
+
 function solInst(inst: Inst): string {
     switch (inst.name) {
         case 'Local':
@@ -209,7 +218,9 @@ function solInst(inst: Inst): string {
                 ? `revert(${revertMsg});`
                 : inst.args === undefined
                     ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
-                    : `revert(${inst.args.map(solExpr).join(', ')});`;
+                    : inst.selector !== undefined
+                        ? `revert ${sigName(inst.sig?.sig) ?? inst.selector}(${inst.args.map(solExpr).join(', ')});`
+                        : `revert(${inst.args.map(solExpr).join(', ')});`;
         }
         case 'SelfDestruct':
             return sol`selfdestruct(${inst.address});`;

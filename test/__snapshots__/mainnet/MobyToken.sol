@@ -14,12 +14,12 @@ contract Contract {
     unknown var2__2; // Slot #2
     unknown var3__3; // Slot #3
 
-    // error 96c6fd1e
-    // error ec442f05
-    // error e450d38c
-    // error e602df05
-    // error 94280d62
-    // error fb8f41b2
+    error ERC20InvalidSender(address); // 96c6fd1e
+    error ERC20InvalidReceiver(address); // ec442f05
+    error ERC20InsufficientBalance(address,uint256,uint256); // e450d38c
+    error ERC20InvalidApprover(address); // e602df05
+    error ERC20InvalidSpender(address); // 94280d62
+    error ERC20InsufficientAllowance(address,uint256,uint256); // fb8f41b2
 
     fallback() external payable {
         require(msg.value == 0);
@@ -166,10 +166,10 @@ contract Contract {
         require(msg.data.length - 0x4 >= 0x40);
         require(_arg0 == _arg0);
         if (msg.sender == 0) {
-            revert(0x0);
+            revert ERC20InvalidSender(0x0);
         }
         if (_arg0 == 0) {
-            revert(0x0);
+            revert ERC20InvalidReceiver(0x0);
         }
         if (msg.sender == 0) {
             assert(var_2 <= _arg1 + var_2, 0x11);
@@ -182,7 +182,7 @@ contract Contract {
             emit Transfer(msg.sender, _arg0, _arg1);
         }
         if (balanceOf[msg.sender] < _arg1) {
-            revert(msg.sender, balanceOf[msg.sender], _arg1);
+            revert ERC20InsufficientBalance(msg.sender, balanceOf[msg.sender], _arg1);
         }
         balanceOf[msg.sender] -= _arg1;
         if (_arg0 == 0) {
@@ -229,10 +229,10 @@ contract Contract {
         require(msg.data.length - 0x4 >= 0x40);
         require(_arg0 == _arg0);
         if (msg.sender == 0) {
-            revert(0x0);
+            revert ERC20InvalidApprover(0x0);
         }
         if (_arg0 == 0) {
-            revert(0x0);
+            revert ERC20InvalidSpender(0x0);
         }
         mapping2[msg.sender][_arg0] = _arg1;
         emit Approval(msg.sender, _arg0, _arg1);
@@ -247,20 +247,20 @@ contract Contract {
         require(_arg1 == _arg1);
         if (mapping2[_arg0][msg.sender] != 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
             if (mapping2[_arg0][msg.sender] < _arg2) {
-                revert(msg.sender, mapping2[_arg0][msg.sender], _arg2);
+                revert ERC20InsufficientAllowance(msg.sender, mapping2[_arg0][msg.sender], _arg2);
             }
             if (_arg0 == 0) {
-                revert(0x0);
+                revert ERC20InvalidApprover(0x0);
             }
             if (msg.sender == 0) {
-                revert(0x0);
+                revert ERC20InvalidSpender(0x0);
             }
             mapping2[_arg0][msg.sender] -= _arg2;
             if (_arg0 == 0) {
-                revert(0x0);
+                revert ERC20InvalidSender(0x0);
             }
             if (_arg1 == 0) {
-                revert(0x0);
+                revert ERC20InvalidReceiver(0x0);
             }
             if (_arg0 == 0) {
                 assert(var_2 <= _arg2 + var_2, 0x11);
@@ -273,7 +273,7 @@ contract Contract {
                 emit Transfer(_arg0, _arg1, _arg2);
             }
             if (balanceOf[_arg0] < _arg2) {
-                revert(_arg0, balanceOf[_arg0], _arg2);
+                revert ERC20InsufficientBalance(_arg0, balanceOf[_arg0], _arg2);
             }
             balanceOf[_arg0] -= _arg2;
             if (_arg1 == 0) {

@@ -170,10 +170,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 override REVERT = (state: State) => {
                     super.REVERT(state);
                     const revert = state.last as Revert;
-                    if (revert.args !== undefined && revert.args[0]?.isVal()) {
-                        const val = revert.args[0].val;
-                        const selector = val % (1n << 224n) === 0n ? val >> 224n : val;
-                        hookStats.revertSelectors.add('0x' + selector.toString(16).padStart(8, '0'));
+                    if (revert.selector !== undefined) {
+                        hookStats.revertSelectors.add(revert.selector);
                     }
                 };
             }());
