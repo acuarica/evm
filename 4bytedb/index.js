@@ -37,5 +37,11 @@ Contract.prototype.patchdb = function () {
         }
     }
 
+    for (const [selector, decl] of Object.entries(this.reverts)) {
+        if (selector in functionHashes) {
+            decl.sig = functionHashes[selector];
+        }
+    }
+
     return this;
 };

@@ -173,12 +173,21 @@ export class Return implements IInst {
     }
 }
 
+/**
+ * 
+ */
+export interface IReverts {
+    [selector: string]: {
+        /**
+         * 
+         */
+        sig?: string;
+    };
+}
+
 export class Revert implements IInst {
     readonly name = 'Revert';
 
-    /**
-     * https://docs.soliditylang.org/en/latest/control-structures.html#panic-via-assert-and-error-via-require
-     */
     static readonly ERROR = '08c379a0';
 
     static readonly PANIC = '4e487b71';
@@ -196,14 +205,21 @@ export class Revert implements IInst {
      * @param size byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly selector?: string, readonly args?: Expr[]) { }
+    constructor(readonly offset: Expr, readonly size: Expr, readonly selector?: string, readonly sig?: IReverts[string], readonly args?: Expr[]) { }
 
     eval() {
-        return new Revert(this.offset.eval(), this.size.eval(), this.selector, this.args?.map(evalE));
+        return new Revert(this.offset.eval(), this.size.eval(), this.selector, this.sig, this.args?.map(evalE));
+    }
+
+    /**
+     * https://docs.soliditylang.org/en/latest/control-structures.html#panic-via-assert-and-error-via-require
+     */
+    static isRequireOrAssert(selector: string | undefined): boolean {
+        return selector === undefined || selector === Revert.ERROR || selector === Revert.PANIC;
     }
 
     isRequireOrAssert(): boolean {
-        return this.selector === undefined || this.selector === Revert.ERROR || this.selector === Revert.PANIC;
+        return Revert.isRequireOrAssert(this.selector);
     }
 }
 

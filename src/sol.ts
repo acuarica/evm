@@ -1,8 +1,8 @@
-import { FNS } from './ast/special';
-import { isInst, type Expr, type Inst, Val, isExpr, If, type Stmt, Tag, evalE, Revert } from './ast';
+import { Contract, parseSig, type PublicFunction } from '.';
+import { If, Revert, Tag, Val, evalE, isExpr, isInst, type Expr, type IReverts, type Inst, type Stmt } from './ast';
 import type { IEvents } from './ast/log';
+import { FNS } from './ast/special';
 import type { IStore } from './ast/storage';
-import { Contract, type PublicFunction } from '.';
 
 /**
  *
@@ -185,6 +185,15 @@ function solExpr(expr: Expr): string {
     }
 }
 
+function sigName(sig: string | undefined): string | undefined {
+    if (sig === undefined) return undefined;
+    try {
+        return parseSig(sig).name;
+    } catch {
+        return sig;
+    }
+}
+
 function solInst(inst: Inst): string {
     switch (inst.name) {
         case 'Local':
@@ -209,7 +218,9 @@ function solInst(inst: Inst): string {
                 ? `revert(${revertMsg});`
                 : inst.args === undefined
                     ? sol`revert(memory[${inst.offset}:(${inst.offset}+${inst.size})]);`
-                    : `revert(${inst.args.map(solExpr).join(', ')});`;
+                    : inst.selector !== undefined
+                        ? `revert ${sigName(inst.sig?.sig) ?? inst.selector}(${inst.args.map(solExpr).join(', ')});`
+                        : `revert(${inst.args.map(solExpr).join(', ')});`;
         }
         case 'SelfDestruct':
             return sol`selfdestruct(${inst.address});`;
@@ -573,6 +584,20 @@ function solPublicFunction(self: PublicFunction, tab = '    '): string {
     return output;
 }
 
+function solReverts(reverts: IReverts): string {
+    let output = '';
+    for (const [selector, decl] of Object.entries(reverts) as [string, IReverts[string]][]) {
+        if (!Revert.isRequireOrAssert(selector)) {
+            if (decl.sig === undefined)
+                output += `    // error ${selector}\n`;
+            else
+                output += `    error ${decl.sig}; // ${selector}\n`;
+        }
+    }
+
+    return output;
+}
+
 function solContract(
     this: Contract,
     options: { license?: string | null; pragma?: boolean; contractName?: string } = {}
@@ -598,6 +623,7 @@ function solContract(
     text += solStructs(this.mappings);
     text += member(solMappings(this.mappings));
     text += member(solVars(this.variables));
+    text += member(solReverts(this.reverts));
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const fallback = this.metadata?.minor! >= 6 ? 'fallback' : 'function';

@@ -99,6 +99,19 @@ describe('::mainnet', function () {
             ],
             skipSnapshot: true,
         }, {
+            filename: 'MobyToken-0x40a7dF3dF8b56147B781353D379cB960120211D7',
+            members: [
+                /function decimals\(\) public view/m,
+                /function balanceOf\(address _arg0\) public/m,
+                /function symbol\(\) public/m,
+                /function transfer\(address _arg0, uint256 _arg1\) public/m,
+                /function allowance\(address _arg0, address _arg1\) public/m,
+                /function name\(\) public/m,
+                /function approve\(address _arg0, uint256 _arg1\) public/m,
+                /function totalSupply\(\) public/m,
+                /function transferFrom\(address _arg0, address _arg1, uint256 _arg2\) public/m,
+            ],
+        }, {
             filename: 'MSOW-0x07880D44b0f7b75464ad18fc2b980049c40A8bc3',
             members: [],
             ercs: ['ERC721'] as const,

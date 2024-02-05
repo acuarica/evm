@@ -1,4 +1,10 @@
 [
+    "ERC20InvalidSpender(address)",
+    "ERC20InvalidSender(address)",
+    "ERC20InsufficientBalance(address,uint256,uint256)",
+    "ERC20InvalidApprover(address)",
+    "ERC20InvalidReceiver(address)",
+    "ERC20InsufficientAllowance(address,uint256,uint256)",
     "get_deposit_root()",
     "get_deposit_count()",
     "deposit(bytes,bytes,bytes,bytes32)",
