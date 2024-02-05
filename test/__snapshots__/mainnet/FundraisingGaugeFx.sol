@@ -67,7 +67,7 @@ contract Contract {
         revert();
     }
 
-    function 4b820093() public payable returns (uint256) {
+    function 4b820093(/*no signature*/) public payable returns (uint256) {
         if ((_arg0 >>> 0xa0) == 0) {
             if ((block.timestamp ^ var_1) == 0) {
                 return 0x1;
@@ -480,7 +480,7 @@ contract Contract {
         }
     }
 
-    function b4d8063e() public payable {
+    function b4d8063e(/*no signature*/) public payable {
         if ((_arg0 >>> 0xa0) == 0) {
             if ((block.timestamp ^ var_1) == 0) {
             }
@@ -498,7 +498,7 @@ contract Contract {
         }
     }
 
-    function 90b22997() public payable {
+    function 90b22997(/*no signature*/) public payable {
         if ((_arg0 >>> 0x1) == 0) {
             if ((msg.sender ^ this.code[codesize() - 0x20:(codesize() - 0x20+0x20)]) == 0) {
                 if (_arg0 == 0) {
@@ -521,18 +521,18 @@ contract Contract {
         }
     }
 
-    function 9c868ac0() public payable returns (uint256) {
+    function 9c868ac0(/*no signature*/) public payable returns (uint256) {
         if ((mapping3[receiver] ^ var_3) == 0) {
             return 0x1;
         }
         return var_5;
     }
 
-    function 180692d0() public view payable returns (unknown) {
+    function 180692d0(/*no signature*/) public view payable returns (unknown) {
         return var_4 >>> 0x28;
     }
 
-    function be5d1be9() public view payable returns (unknown) {
+    function be5d1be9(/*no signature*/) public view payable returns (unknown) {
         return var_4;
     }
 
@@ -560,13 +560,13 @@ contract Contract {
         }
     }
 
-    function 09400707() public payable returns (unknown) {
+    function 09400707(/*no signature*/) public payable returns (unknown) {
         if ((_arg0 >>> 0xa0) == 0) {
             return mapping3[_arg0];
         }
     }
 
-    function a9a4a983() public view payable returns (unknown) {
+    function a9a4a983(/*no signature*/) public view payable returns (unknown) {
         return var_1;
     }
 
@@ -574,7 +574,7 @@ contract Contract {
         return receiver;
     }
 
-    function 809864e1() public view payable returns (unknown) {
+    function 809864e1(/*no signature*/) public view payable returns (unknown) {
         return var_3;
     }
 

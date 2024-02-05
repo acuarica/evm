@@ -201,7 +201,7 @@ contract Contract {
         emit Transfer(msg.sender, _arg0, _arg1);
     }
 
-    function d505accf() public {
+    function d505accf(/*no signature*/) public {
         require(msg.data.length - 0x4 >= 0xe0);
         require(_arg0 == _arg0);
         require(_arg1 == _arg1);

@@ -27,14 +27,14 @@ contract Contract {
         revert();
     }
 
-    function 083c7624() public {
+    function 083c7624(/*no signature*/) public {
         undefined local2 = 0x4; // #refs 3
         require((msg.data.length - local2 < 0x20) == 0);
         var_1 = msg.data[local2] + 0x1;
         return;
     }
 
-    function d07c4b2d() public {
+    function d07c4b2d(/*no signature*/) public {
         undefined local2 = 0x4; // #refs 3
         require((msg.data.length - local2 < 0x20) == 0);
         require((0xffffffffffffffffffffffffffffffffffffffff & 0xffffffffffffffffffffffffffffffffffffffff & var_2 / 0x100 ** 0x0) == (0xffffffffffffffffffffffffffffffffffffffff & msg.sender), "Ownable: caller is not the owner");
@@ -330,13 +330,13 @@ contract Contract {
         revert();
     }
 
-    function 083c7624() public {
+    function 083c7624(/*no signature*/) public {
         require((msg.data.length - 0x4 < 0x20) == 0);
         var_1 = 0x1 + msg.data[0x4];
         return;
     }
 
-    function d07c4b2d() public {
+    function d07c4b2d(/*no signature*/) public {
         require((msg.data.length - 0x4 < 0x20) == 0);
         require((msg.sender & (0x1 << 0xa0) - 0x1) == ((0x1 << 0xa0) - 0x1 & var_2), "Ownable: caller is not the owner");
         var_1 = 0x3 + msg.data[0x4];

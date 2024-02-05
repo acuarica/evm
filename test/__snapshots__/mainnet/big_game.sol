@@ -188,13 +188,13 @@ contract Contract {
         }
     }
 
-    function bedf0f4a() public payable {
+    function bedf0f4a(/*no signature*/) public payable {
         require(mapping3[msg.sender << 0x60 & 0xffffffffffffffffffffffffffffffffffffffff000000000000000000000000]);
         require(call(0x8fc * local7 == 0,msg.sender,local7,local8,0x0,local8,0x0));
         var_1 = 0x0;
     }
 
-    function c76de3e9() public payable {
+    function c76de3e9(/*no signature*/) public payable {
         require(msg.data.length - 0x4 >= 0x40);
         require(_arg0 <= 0xffffffffffffffff);
         require(0x4 + _arg0 + 0x1f < msg.data.length);
