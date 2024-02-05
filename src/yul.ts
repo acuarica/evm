@@ -1,4 +1,5 @@
 import { Contract } from '.';
+import { fnsig, parseSig } from './abi';
 import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast';
 import { FNS, Tag, Val, isExpr, isInst } from './ast';
 
@@ -204,7 +205,7 @@ Contract.prototype.yul = function (this: Contract) {
     text += '\n';
 
     for (const [selector, fn] of Object.entries(this.functions)) {
-        const name = fn.label ?? `__$${selector}(/*unknown*/)`;
+        const name = fn.label !== undefined ? fnsig(parseSig(fn.label)) : `__$${selector}(/*unknown*/)`;
         const view = fn.constant ? ' view' : '';
         const payable = fn.payable ? ' payable' : '';
         text += ' '.repeat(8) + `function ${name} { // public${view}${payable}\n`;

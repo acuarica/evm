@@ -224,15 +224,19 @@ export function parseSig(sig: string): SigMember {
  */
 export function sighash(member: ReturnType<typeof parseSig>): string {
     return `${member.name}(${member.inputs.map(sighashType).join(',')})`;
+}
 
-    function sighashType(ty: Ty): string {
-        if (ty.arrayType !== undefined) {
-            const len = ty.arrayLength === null ? '' : ty.arrayLength;
-            return `${sighashType(ty.arrayType)}[${len}]`;
-        } else if (ty.type === 'tuple') {
-            return `(${ty.components!.map(sighashType).join(',')})`;
-        } else {
-            return ty.type;
-        }
+function sighashType(ty: Ty): string {
+    if (ty.arrayType !== undefined) {
+        const len = ty.arrayLength === null ? '' : ty.arrayLength;
+        return `${sighashType(ty.arrayType)}[${len}]`;
+    } else if (ty.type === 'tuple') {
+        return `(${ty.components!.map(sighashType).join(',')})`;
+    } else {
+        return ty.type;
     }
+}
+
+export function fnsig(member: ReturnType<typeof parseSig>): string {
+    return `${member.name}(${member.inputs.map((param, i) => `${sighashType(param)} ${param.name ?? '_arg' + i}`).join(', ')})`;
 }
