@@ -59,7 +59,7 @@ contract Contract {
         revert();
     }
 
-    function 61893921() public payable {
+    function 61893921(/*no signature*/) public payable {
         require(msg.sender == var_2, "Access denied");
         var_2 = var_4;
         var_3 = var_5;
@@ -67,7 +67,7 @@ contract Contract {
         return;
     }
 
-    function bbf7408a() public payable returns (unknown) {
+    function bbf7408a(/*no signature*/) public payable returns (unknown) {
         if ((_arg0 >>> 0xa0) == 0) {
             if (delegation == 0) {
                 if (staticcall(gasleft(),0xa9337caea9cf6930cdc576789a8258365c38adbc,0x17c,0x24,0x1e0,0x20)) {
@@ -89,7 +89,7 @@ contract Contract {
         revert();
     }
 
-    function 4b74efb7() public payable {
+    function 4b74efb7(/*no signature*/) public payable {
         if (msg.sender == var_2) {
             delegation = 0x0;
             log(0x963001cf3a0c5cdcfc26b2710abe2fe859b3565482158b7cb34f59b6eaff5212, 0x0);
@@ -149,7 +149,7 @@ contract Contract {
         }
     }
 
-    function f4b446a3() public payable {
+    function f4b446a3(/*no signature*/) public payable {
         if ((_arg0 >>> 0xa0) == 0) {
             if (msg.sender == var_2) {
                 if (staticcall(gasleft(),_arg0,0x15c,0x24,0x1c0,0x20)) {
@@ -163,7 +163,7 @@ contract Contract {
         }
     }
 
-    function e3a8d3ab() public payable {
+    function e3a8d3ab(/*no signature*/) public payable {
         if ((_arg0 >>> 0xa0) == 0) {
             if ((_arg1 >>> 0xa0) == 0) {
                 require(msg.sender == var_2, "Access denied");
@@ -179,19 +179,19 @@ contract Contract {
         return delegation;
     }
 
-    function 680c7783() public view payable returns (unknown) {
+    function 680c7783(/*no signature*/) public view payable returns (unknown) {
         return var_3;
     }
 
-    function 47c8715f() public view payable returns (unknown) {
+    function 47c8715f(/*no signature*/) public view payable returns (unknown) {
         return var_2;
     }
 
-    function 5866507a() public view payable returns (unknown) {
+    function 5866507a(/*no signature*/) public view payable returns (unknown) {
         return var_5;
     }
 
-    function 3c2fcbf4() public view payable returns (unknown) {
+    function 3c2fcbf4(/*no signature*/) public view payable returns (unknown) {
         return var_4;
     }
 

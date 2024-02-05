@@ -28,11 +28,11 @@ contract Contract {
         revert();
     }
 
-    function 9663f88f() public returns (bytes32) {
+    function 9663f88f(/*no signature*/) public returns (bytes32) {
         return blockhash(0x7);
     }
 
-    function b8368615() public returns (address) {
+    function b8368615(/*no signature*/) public returns (address) {
         return address(this);
     }
 
@@ -321,11 +321,11 @@ contract Contract {
         revert();
     }
 
-    function 9663f88f() public returns (bytes32) {
+    function 9663f88f(/*no signature*/) public returns (bytes32) {
         return blockhash(0x7);
     }
 
-    function b8368615() public returns (address) {
+    function b8368615(/*no signature*/) public returns (address) {
         return address(this);
     }
 

@@ -23,7 +23,7 @@ contract Contract {
         revert();
     }
 
-    function 5d2c7ee6() public payable returns (uint256) {
+    function 5d2c7ee6(/*no signature*/) public payable returns (uint256) {
         return 0x1;
     }
 
@@ -233,7 +233,7 @@ contract Contract {
         revert();
     }
 
-    function 5d2c7ee6() public payable returns (uint256) {
+    function 5d2c7ee6(/*no signature*/) public payable returns (uint256) {
         return 0x1;
     }
 
