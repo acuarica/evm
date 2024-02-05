@@ -71,7 +71,7 @@ object "runtime" {
         let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
-        function name(uint256) { // public
+        function name(uint256 _arg0) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
@@ -88,7 +88,7 @@ object "runtime" {
             stop()
         }
 
-        function symbol(uint256) { // public
+        function symbol(uint256 _arg0) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
@@ -480,7 +480,7 @@ object "runtime" {
         let local1 := 0x0 // #refs 0
         revert(local1, local1)
 
-        function name(uint256) { // public
+        function name(uint256 _arg0) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
@@ -496,7 +496,7 @@ object "runtime" {
             stop()
         }
 
-        function symbol(uint256) { // public
+        function symbol(uint256 _arg0) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))

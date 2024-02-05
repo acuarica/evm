@@ -79,7 +79,7 @@ object "runtime" {
             return(local9, sub(add(0x20, local7), local9)) // sload(keccak256(0x0, add(0x20, local6) /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
-        function allowance(address,address) { // public
+        function allowance(address _arg0, address _arg1) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x40)))
@@ -346,7 +346,7 @@ object "runtime" {
             return(local7, add(0x20, sub(local6, local7))) // sload(keccak256(local2, local4 /*caller().keccak256(0x0, 0x40 /*caller().0x0*/)*/)/*base0[caller()][caller()]*/)
         }
 
-        function allowance(address,address) { // public
+        function allowance(address _arg0, address _arg1) { // public
             let local2 := 0x4 // #refs 1
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x40)))

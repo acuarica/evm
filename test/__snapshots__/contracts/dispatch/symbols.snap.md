@@ -88,7 +88,7 @@ object "runtime" {
             return(local4, sub(add(0x20, local2), local4)) // address(this)()
         }
 
-        function getBalance(address) { // public
+        function getBalance(address _arg0) { // public
             let local2 := 0x4 // #refs 3
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
@@ -380,7 +380,7 @@ object "runtime" {
             return(local4, add(0x20, sub(local3, local4))) // address(this)()
         }
 
-        function getBalance(address) { // public
+        function getBalance(address _arg0) { // public
             let local2 := 0x4 // #refs 0
             let local3 := sub(calldatasize(), local2) // #refs 0
             require(iszero(lt(local3, 0x20)))
