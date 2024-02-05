@@ -35,6 +35,7 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
 
         expect(lookup).to.be.deep.equal({
             function: {
+                '0x08c379a0': ['Error(string)'],
                 '0x3659cfe6': ['upgradeTo(address)'],
                 '0x4f1ef286': ['upgradeToAndCall(address,bytes)'],
                 '0x5c60da1b': ['implementation()'],
