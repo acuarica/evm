@@ -58,6 +58,7 @@ export function cfg(contract: Contract, title: string): string {
 
         const [open, close] = entry ? ['[[', ']]'] : ['(', ')'];
 
+        label = label.replace(/"/g, "'");
         write(`    ${s_id}${open}"${label}"${close}`);
         write(`    class ${s_id} state`);
         if (entry)

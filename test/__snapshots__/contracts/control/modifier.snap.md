@@ -254,7 +254,7 @@ memory[0x20 + local5] = 0x20;
 undefined local7 = 0x20 + 0x20 + local5; // #refs 0
 memory[0x20 + 0x20 + local5] = 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572;
 undefined local8 = memory[0x40]; // #refs 0
-revert("Ownable: caller is not the owner");
+revert('Ownable: caller is not the owner');
 ")
     class s_18 state
   end
@@ -555,7 +555,7 @@ memory[local6 + 0x4] = 0x20;
 memory[local6 + 0x24] = 0x20;
 memory[local6 + 0x44] = 0x4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572;
 undefined local8 = memory[0x40]; // #refs 0
-revert("Ownable: caller is not the owner");
+revert('Ownable: caller is not the owner');
 ")
     class s_18 state
   end

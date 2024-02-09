@@ -181,7 +181,7 @@ memory[0x20 + local7] = 0x7;
 undefined local9 = 0x20 + 0x20 + local7; // #refs 0
 memory[0x20 + 0x20 + local7] = 0x617070726f766500000000000000000000000000000000000000000000000000;
 undefined local10 = memory[0x40]; // #refs 0
-revert("approve");
+revert('approve');
 ")
     class s_11 state
   end
@@ -204,7 +204,7 @@ memory[0x20 + local7] = 0xf;
 undefined local9 = 0x20 + 0x20 + local7; // #refs 0
 memory[0x20 + 0x20 + local7] = 0x617070726f766520616464726573730000000000000000000000000000000000;
 undefined local10 = memory[0x40]; // #refs 0
-revert("approve address");
+revert('approve address');
 ")
     class s_13 state
   end
@@ -434,7 +434,7 @@ memory[local7 + 0x4] = 0x20;
 memory[local7 + 0x24] = 0x7;
 memory[local7 + 0x44] = 0x617070726f7665 << 0xc8;
 undefined local8 = memory[0x40]; // #refs 0
-revert("approve");
+revert('approve');
 ")
     class s_11 state
   end
@@ -455,7 +455,7 @@ memory[local7 + 0x4] = 0x20;
 memory[local7 + 0x24] = 0xf;
 memory[local7 + 0x44] = 0x617070726f76652061646472657373 << 0x88;
 undefined local8 = memory[0x40]; // #refs 0
-revert("approve address");
+revert('approve address');
 ")
     class s_13 state
   end
