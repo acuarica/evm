@@ -392,6 +392,36 @@ For example, to run _only_ tests for the `step` module use
 yarn test -g ::step
 ```
 
+#### [`solc` compiler](./test/utils/solc.ts)
+
+The [`solc-js`](https://github.com/ethereum/solc-js) compiler is used to compile Solidity contracts used throughout the test suite.
+The [`./test/utils/solc.ts`](./test/utils/solc.ts) wrapper loads the indicated `solc-js` version.
+
+To avoid re-compiling the same contract, and enable faster test times,
+compilation output is cached in the `.artifacts/` folder.
+Compilation output is stored by version, _e.g._, contracts compiled with `solc-0.8.21` will be stored in `.artifacts/v0.8.21`.
+
+Whenever there is cache match, _i.e._, the contract does not need compilation, the prefix of the MD5 hash of the compilation input is appended at the end of the test title
+
+```console
+    ✔ should find '0x00000000' method selector decoded as `ISZERO` #318d1e
+```
+
+However, if the contract in the test case needs to be compiled,
+the icon `🛠️` will be appended to the end of the test title
+
+```console
+    ✔ should find '0x00000000' method selector decoded as `ISZERO` #318d1e 🛠️
+```
+
+But if the compiler has not already been loaded (by a previous test case),
+the test title will have the version appended at the end of its title.
+For example
+
+```console
+    ✔ should not accept `PUSH0` as a valid opcode in Paris fork #97d6ca 🛠️--loads `solc-0.8.21` (307ms)
+```
+
 #### [`__snapshots__`](./test/__snapshots__/)
 
 To ensure the test output does not change unexpectedly,
