@@ -336,17 +336,19 @@ Options:
 
 ## EVM Bytecode Function and Event Signature Hashes
 
-`sevm` comes with a collection of Ethereum `function` and `event` signature hashes.
-They are available through the `sevm/4byte` module.
-It looks up in the signature and events database for matching hashes.
+`sevm` includes the `sevm/4byte` module to patch function and event signatures by looking up in the [OpenChain API](https://docs.openchain.xyz/#/default/get_signature_database_v1_lookup).
+Alternatively, `sevm` comes with an embedded database of Ethereum `function` and `event` signature hashes,
+available through the `sevm/4bytedb` module.
+These modules are mutually exclusive, _i.e._, you should use either _only_ one of them.
 
+The `sevm/4byte` and `sevm/4bytedb` modules look up in the function and events remote OpenChain and embedded database respectively for matching hashes.
 When a matching `function` or `event` is found in a `Contract`,
-it patches the `function` or `event` with the corresponding signature.
+they patch the `function` or `event` with the corresponding signature.
 
-The `sevm/4byte` is completely independent from the main module.
-It is not loaded by default in the main module.
-It needs to be `import`ed explicitly.
-This allows the user to create a bundle without the lookup database provided thet want to use another solution.
+Both `sevm/4byte` and `sevm/4bytedb` modules are completely independent from the main module, _i.e._,
+they are not loaded by default.
+They need to be `import`ed explicitly.
+This allows users to create a bundle without the `fetch` dependency or lookup database provided they want to use a custom solution.
 
 ## Contributing
 
@@ -425,7 +427,7 @@ For example
 
 #### [`4byte.test.ts`](./test/4byte.test.ts)
 
-This test needs to be manually enabled because it depends on a network connection (to query the [OpenChain API](https://openchain.xyz/signatures) to look for method signatures).
+This test needs to be manually enabled because it depends on a network connection (to query the [OpenChain API](https://docs.openchain.xyz/#/default/get_signature_database_v1_lookup) to look for method signatures).
 
 Set the environment variable `ENABLE_4BYTE_TEST=1` to enable this test.
 When executing it, you may want to run _only_ this test, for example
