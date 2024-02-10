@@ -403,14 +403,14 @@ Compilation output is stored by version, _e.g._, contracts compiled with `solc-0
 
 Whenever there is cache match, _i.e._, the contract does not need compilation, the prefix of the MD5 hash of the compilation input is appended at the end of the test title
 
-```console
+```out
     ✔ should find '0x00000000' method selector decoded as `ISZERO` #318d1e
 ```
 
 However, if the contract in the test case needs to be compiled,
 the icon `🛠️` will be appended to the end of the test title
 
-```console
+```out
     ✔ should find '0x00000000' method selector decoded as `ISZERO` #318d1e 🛠️
 ```
 
@@ -418,7 +418,7 @@ But if the compiler has not already been loaded (by a previous test case),
 the test title will have the version appended at the end of its title.
 For example
 
-```console
+```out
     ✔ should not accept `PUSH0` as a valid opcode in Paris fork #97d6ca 🛠️--loads `solc-0.8.21` (307ms)
 ```
 
