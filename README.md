@@ -352,31 +352,6 @@ This allows users to create a bundle without the `fetch` dependency or lookup da
 
 ## Contributing
 
-### [`.dataset`](./.dataset/)
-
-This folder contains a [dataset](https://github.com/acuarica/contract-dataset) of contract bytecodes deployed in a public network.
-
-It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](#datasettestts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
-This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
-
-### [`examples`](./examples/)
-
-The [`examples`](./examples/) folder contains code examples that showcase `sevm` features.
-These code examples are the ones embedded in this document.
-
-To ensure these examples don't get outdated,
-[`test/examples.test.ts`](#examplestestts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
-Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](./test/__snapshots__/examples.snap.md) and compared against in subsequent tests.
-
-### [`scripts`](./scripts/)
-
-Contains utility scripts that automates the development process.
-
-- [`4bytedb.mjs`](./scripts/4bytedb.mjs) Generates function and events lookup tables database in `json` format.
-- [`ercs.mjs`](./scripts/ercs.mjs) Generates ERCs function and event definitions from [`scripts/ercs.sol`](./scripts/ercs.sol).
-- [`help.mjs`](./scripts/help.mjs) Embeds [`examples`](#examples) and `sevm --help` into [`README`](./README.md)
-- [`solc.mjs`](./scripts/solc.mjs) Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compilers used in tests. It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
-
 ### [`test`](./test/)
 
 Tests run using _Mocha_ and can be executed with
@@ -493,6 +468,31 @@ ENABLE_EXAMPLES_TEST=1 yarn test -g ::examples
 
 This folder contains _vendor_ types to refine or declare types of libraries.
 It is used either in tests or internally in the library, _i.e._, these types are not re-exported and hence not part of the public library API.
+
+### [`scripts`](./scripts/)
+
+Contains utility scripts that automates the development process.
+
+- [`4bytedb.mjs`](./scripts/4bytedb.mjs) Generates function and events lookup tables database in `json` format.
+- [`ercs.mjs`](./scripts/ercs.mjs) Generates ERCs function and event definitions from [`scripts/ercs.sol`](./scripts/ercs.sol).
+- [`help.mjs`](./scripts/help.mjs) Embeds [`examples`](#examples) and `sevm --help` into [`README`](./README.md)
+- [`solc.mjs`](./scripts/solc.mjs) Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compilers used in tests. It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
+
+### [`examples`](./examples/)
+
+The [`examples`](./examples/) folder contains code examples that showcase `sevm` features.
+These code examples are the ones embedded in this document.
+
+To ensure these examples don't get outdated,
+[`test/examples.test.ts`](#examplestestts) runs every example script in the `examples` folder to verify they are compiled and executed properly.
+Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](./test/__snapshots__/examples.snap.md) and compared against in subsequent tests.
+
+### [`.dataset`](./.dataset/)
+
+This folder contains a [dataset](https://github.com/acuarica/contract-dataset) of contract bytecodes deployed in a public network.
+
+It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](#datasettestts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
+This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
 
 ## Detached Fork
 
