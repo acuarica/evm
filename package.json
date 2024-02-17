@@ -66,6 +66,7 @@
     },
     "devDependencies": {
         "@jsdevtools/chai-exec": "^2.1.1",
+        "@size-limit/file": "^11.0.2",
         "@types/chai": "^4.3.10",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.8.6",
@@ -79,6 +80,7 @@
         "eslint-plugin-mocha": "^10.1.0",
         "ethers": "^6.9.0",
         "mocha": "^10.0.1",
+        "size-limit": "^11.0.2",
         "solc": "^0.8.21",
         "typedoc": "^0.25.2",
         "typedoc-plugin-extras": "^3.0.0",
@@ -93,6 +95,7 @@
         "test": "yarn compile && mocha",
         "coverage": "yarn compile && c8 mocha",
         "bundle": "webpack --mode production",
+        "size": "size-limit",
         "make:ercs": "scripts/ercs.mjs > src/ercs.ts",
         "make:4bytedb": "node scripts/4bytedb.mjs",
         "make:help": "scripts/help.mjs README.md",

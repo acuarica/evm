@@ -1,0 +1,6 @@
+[
+    {
+        "path": "dist/sevm.js",
+        "limit": "20 kb"
+    }
+]
