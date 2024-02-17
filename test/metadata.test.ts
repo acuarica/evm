@@ -17,6 +17,18 @@ describe('::metadata', function () {
         expect(metadata).to.be.undefined;
     });
 
+    it('should return original bytecode when metadata is not an object', function () {
+        const { bytecode, metadata } = splitMetadataHash('0x001904D20003');
+        expect(bytecode).to.be.deep.equal(new Uint8Array([0, 0x19, 0x04, 0xD2, 0x00, 0x03]));
+        expect(metadata).to.be.undefined;
+    });
+
+    it('should split metadata when it is an array', function () {
+        const { bytecode, metadata } = splitMetadataHash('0x0084010203040005');
+        expect(bytecode).to.be.deep.equal(new Uint8Array([0]));
+        expect(metadata).to.be.deep.equal({ '0': 1, '1': 2, '2': 3, '3': 4, protocol: '', hash: '', solc: '' });
+    });
+
     it('should decode when `solc` property is found', function () {
         const { metadata } = splitMetadataHash(compile('contract Test {}', '0.8.21', this, {
             metadata: {

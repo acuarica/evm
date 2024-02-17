@@ -65,37 +65,38 @@ export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
     const data = new Uint8Array(bytecode.subarray(bytecode.length - 2 - dataLen, bytecode.length - 2));
     if (data.length !== dataLen) return { bytecode, metadata: undefined };
 
+    let obj;
     try {
-        const obj = cbor(data.buffer);
-        if (obj === null || typeof obj !== 'object') return { bytecode, metadata: undefined };
-
-        const metadata = new Metadata();
-
-        if ('ipfs' in obj && obj['ipfs'] instanceof Uint8Array) {
-            metadata.protocol = 'ipfs';
-            metadata.hash = bs58(obj['ipfs']);
-            delete obj['ipfs'];
-        } else if ('bzzr0' in obj && obj['bzzr0'] instanceof Uint8Array) {
-            metadata.protocol = 'bzzr0';
-            metadata.hash = hexlify(obj['bzzr0']);
-            delete obj['bzzr0'];
-        } else if ('bzzr1' in obj && obj['bzzr1'] instanceof Uint8Array) {
-            metadata.protocol = 'bzzr1';
-            metadata.hash = hexlify(obj['bzzr1']);
-            delete obj['bzzr1'];
-        }
-        if ('solc' in obj && obj['solc'] instanceof Uint8Array) {
-            metadata.solc = obj['solc'].join('.');
-            delete obj['solc'];
-        }
-
-        return {
-            bytecode: bytecode.subarray(0, bytecode.length - 2 - dataLen),
-            metadata: Object.assign(metadata, obj)
-        };
+        obj = cbor(data.buffer);
     } catch {
         return { bytecode, metadata: undefined };
     }
+    if (obj === null || typeof obj !== 'object') return { bytecode, metadata: undefined };
+
+    const metadata = new Metadata();
+
+    if ('ipfs' in obj && obj['ipfs'] instanceof Uint8Array) {
+        metadata.protocol = 'ipfs';
+        metadata.hash = bs58(obj['ipfs']);
+        delete obj['ipfs'];
+    } else if ('bzzr0' in obj && obj['bzzr0'] instanceof Uint8Array) {
+        metadata.protocol = 'bzzr0';
+        metadata.hash = hexlify(obj['bzzr0']);
+        delete obj['bzzr0'];
+    } else if ('bzzr1' in obj && obj['bzzr1'] instanceof Uint8Array) {
+        metadata.protocol = 'bzzr1';
+        metadata.hash = hexlify(obj['bzzr1']);
+        delete obj['bzzr1'];
+    }
+    if ('solc' in obj && obj['solc'] instanceof Uint8Array) {
+        metadata.solc = obj['solc'].join('.');
+        delete obj['solc'];
+    }
+
+    return {
+        bytecode: bytecode.subarray(0, bytecode.length - 2 - dataLen),
+        metadata: Object.assign(metadata, obj)
+    };
 }
 
 /**
@@ -144,7 +145,6 @@ function bs58(buffer: Uint8Array): string {
     }
 
     result.reverse();
-
     return String.fromCharCode(...result);
 }
 
@@ -324,22 +324,17 @@ function cbor(data: ArrayBufferLike): CBORItem {
                 return decodeItem();
             case 7:
                 switch (length) {
-                    case 20:
-                        return false;
-                    case 21:
-                        return true;
-                    case 22:
-                        return null;
-                    case 23:
-                        return undefined;
-                    default:
-                        return undefined;
+                    case 20: return false;
+                    case 21: return true;
+                    case 22: return null;
+                    case 23: return undefined;
+                    default: return undefined;
                 }
             default: throw new Error('Unrecognized major type');
         }
     }
 
     const item = decodeItem();
-    if (offset !== data.byteLength) throw "Remaining bytes";
+    if (offset !== data.byteLength) throw 'Remaining bytes';
     return item;
 }
