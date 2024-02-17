@@ -25,7 +25,7 @@ sevm.Contract.prototype.patch = async function (/** @type {Partial<import('.').L
         const resp = await fetch(url);
 
         if (!resp.ok) {
-            throw new Error(`error fetching signatures, url: ${url}`);
+            throw new Error(`Failed to fetch signatures from api.openchain.xyz, url: ${url}`);
         }
 
         const { result } = /** @type {{result: { function: HashesResponse, event: HashesResponse }}} */ (await resp.json());

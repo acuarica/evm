@@ -77,4 +77,31 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
             ['fb210caa', undefined],
         ]);
     });
+
+    it('should not fail when there are no functions nor events to patch', async function () {
+        const contract = new Contract('0x00');
+        await contract.patch();
+    });
+
+    it('should fail when there is an invalid response', async function () {
+        const _fetch = globalThis.fetch;
+
+        try {
+            globalThis.fetch = function (_input) {
+                return Promise.resolve({ ok: false });
+            } as typeof fetch;
+
+            const contract = new Contract('0x00');
+            try {
+                await contract.patch();
+                expect.fail('Expected to fail');
+            } catch (err) {
+                expect(err).to.be.deep.equal(
+                    new Error('Failed to fetch signatures from api.openchain.xyz, url: https://api.openchain.xyz/signature-database/v1/lookup?function=&event=')
+                );
+            }
+        } finally {
+            globalThis.fetch = _fetch;
+        }
+    });
 });
