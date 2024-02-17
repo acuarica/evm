@@ -87,6 +87,11 @@ jobs:
         run: |
           echo "## Code Coverage" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.coverage.outputs.markdownReport }}" >> $GITHUB_STEP_SUMMARY
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        env:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: acuarica/evm
 
   examples:
     runs-on: ubuntu-latest
