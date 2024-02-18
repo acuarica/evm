@@ -100,7 +100,7 @@ export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
 }
 
 /**
- * **Implementation from https://github.com/pur3miish/base58-js**
+ * Implementation from https://github.com/pur3miish/base58-js
  * 
  * Converts a Uint8Array into a base58 string.
  *
@@ -154,7 +154,7 @@ function bs58(buffer: Uint8Array): string {
 type CBORItem = number | boolean | Uint8Array | string | null | undefined | CBORItem[] | { [key: string]: CBORItem };
 
 /**
- * **Implementation from https://github.com/paroga/cbor-js**
+ * Implementation from https://github.com/paroga/cbor-js
  * 
  * Embedded it here to avoid including the encoder.
  */
