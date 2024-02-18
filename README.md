@@ -5,7 +5,7 @@
 ![splash preview](./splash.png?raw=true)
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/main.yml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/main.yml)
-![nycrc config on GitHub](https://img.shields.io/nycrc/acuarica/evm?config=.c8rc.json&style=flat-square)
+[![codecov](https://codecov.io/gh/acuarica/evm/graph/badge.svg?token=CHCTT3ABLL)](https://codecov.io/gh/acuarica/evm)
 [![npm](https://img.shields.io/npm/v/sevm?style=flat-square)](https://www.npmjs.com/package/sevm)
 ![npm](https://img.shields.io/npm/dt/sevm?style=flat-square)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/main/LICENSE)
