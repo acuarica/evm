@@ -464,6 +464,18 @@ When executing it, you may want to run _only_ this test, for example
 ENABLE_EXAMPLES_TEST=1 yarn test -g ::examples
 ```
 
+#### Coverage
+
+Run tests with coverage with
+
+```console
+yarn coverage
+```
+
+Coverage reports are uploaded to Codecov
+
+[![codecov Sunburst](https://codecov.io/gh/acuarica/evm/graphs/sunburst.svg?token=CHCTT3ABLL)](https://codecov.io/gh/acuarica/evm)
+
 ### [`types`](./types/)
 
 This folder contains _vendor_ types to refine or declare types of libraries.
