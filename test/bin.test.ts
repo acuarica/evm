@@ -4,6 +4,23 @@ import './utils/snapshot';
 
 chai.use(chaiExec);
 
+/**
+ * `FORCE_COLOR: 0` is set to remove colorized output coming from Node. 
+ * https://nodejs.org/api/cli.html#force_color1-2-3
+ */
+const sevmDebugEnv = {
+    ...process.env,
+    'NODE_DEBUG': 'sevm',
+    'FORCE_COLOR': '0',
+};
+
+/**
+ * Masks `<pid>` and `<addr>` so the test output remains the same between runs and OSes
+ */
+const maskStderrPidAndAddr = (cli: { stderr: string }, addr: string) => cli.stderr
+    .replace(/SEVM \d+:/g, 'SEVM <pid>:')
+    .replace(new RegExp("'.*" + addr + ".*'", 'g'), '<addr>');
+
 describe('::bin', function () {
     const sevm = 'bin/sevm.mjs';
 
@@ -100,27 +117,20 @@ describe('::bin', function () {
     });
 
     it('should log debug trace when `NODE_DEBUG=sevm` is set', function () {
-        /**
-         * `FORCE_COLOR: 0` is set to remove colorized output coming from Node. 
-         * https://nodejs.org/api/cli.html#force_color1-2-3
-         */
-        const env = {
-            ...process.env,
-            'NODE_DEBUG': 'sevm',
-            'FORCE_COLOR': '0',
-        };
         // address doesn't checksum, this is to avoid CLI making a request,
         // thus making the test more robust
-        const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72'], { env });
+        const cli = chaiExec(sevm, ['metadata', '0x8Ba1f109551bD432803012645Ac136ddd64DBa72'], { env: sevmDebugEnv });
 
         expect(cli.stdout).to.be.empty;
-        /**
-         * `<pid>` and `<addr>` are masked so the test output remains the same between runs and OSes.
-         */
-        const stderr = cli.stderr
-            .replace(/SEVM \d+:/g, 'SEVM <pid>:')
-            .replace(/'.*0x8Ba1f109551bD432803012645Ac136ddd64DBa72.*'/g, '<addr>');
-        expect(stderr).to.matchSnapshot('err', this);
+        expect(maskStderrPidAndAddr(cli, '0x8Ba1f109551bD432803012645Ac136ddd64DBa72')).to.matchSnapshot('err', this);
+        expect(cli).to.exit.with.code(2);
+    });
+
+    it('should fail to fetch to bytecode because of invalid Ethereum address', function () {
+        const cli = chaiExec(sevm, ['metadata', '0x8ba1'], { env: sevmDebugEnv });
+
+        expect(cli.stdout).to.be.empty;
+        expect(maskStderrPidAndAddr(cli, '0x8ba1')).to.matchSnapshot('err', this);
         expect(cli).to.exit.with.code(2);
     });
 

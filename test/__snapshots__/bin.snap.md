@@ -253,6 +253,14 @@ Cannot find bytecode for contract 0x8Ba1f109551bD432803012645Ac136ddd64DBa72
 
 ```
 
+```err fail-to-fetch-to-bytecode-because-of-invalid-Ethereum-address
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Invalid address, not an Ethereum address
+Cannot find bytecode for contract 0x8ba1
+
+```
+
 ```err catch-error-when-exec-self-destructed-contract
 Bytecode for contract - is '0x', might have been self-destructed
 
