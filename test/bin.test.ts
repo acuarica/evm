@@ -34,7 +34,7 @@ describe('::bin', function () {
         expect(cli).to.exit.with.not.code(0);
     });
 
-    it('should display metadata from JSON `bytecode`', function () {
+    it('should display `metadata` from JSON `bytecode`', function () {
         const input = `{
             "bytecode": "60806040525f80fdfea2646970667358221220213295e11660e0fa1851b6245c99f6d8ef0d1ad319b69a6483694b3a316c2dc564736f6c63430008150033",
             "abi": []
@@ -46,8 +46,45 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
+    it('should display no-`metadata` from `bytecode`', function () {
+        const input = '60806040525f80fdfe';
+        const cli = chaiExec(sevm, ['metadata', '-', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
+    it('should display `abi` from `bytecode`', function () {
+        const input = '6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000600590509056fe';
+        const cli = chaiExec(sevm, ['abi', '-', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
+    it('should display `selectors` from `bytecode`', function () {
+        const input = '6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000600590509056fe';
+        const cli = chaiExec(sevm, ['selectors', '-', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
     it('should run `dis` command and find non-reacheable chunk', function () {
-        const cli = chaiExec(sevm, ['dis', '-', '--no-color', '--no-patch'], { input: '0x6001600201600c56010203045b62fffefd5b00' });
+        const input = '0x6001600201600c56010203045b62fffefd5b00';
+        const cli = chaiExec(sevm, ['dis', '-', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
+    it('should display `cfg` from `bytecode`', function () {
+        const input = '6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000600590509056fe';
+        const cli = chaiExec(sevm, ['cfg', '-', '--no-color', '--no-patch'], { input });
 
         expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
