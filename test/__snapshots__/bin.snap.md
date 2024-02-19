@@ -133,6 +133,25 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
 
 ```
 
+```out display-no-metadata-from-bytecode
+Contract Metadata
+No metadata
+
+```
+
+```out display-abi-from-bytecode
+Function Selectors
+  0x6d4ce63c <selector not found>
+
+Events
+
+```
+
+```out display-selectors-from-bytecode
+0x6d4ce63c <no signature>
+
+```
+
 ```out run-dis-command-and-find-non-reacheable-chunk
    pc  opcode  push data (PUSHx)
 0 : 
@@ -149,6 +168,75 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
 17 : 
    17  JUMPDEST   
    18  STOP   
+
+```
+
+```out display-cfg-from-bytecode
+digraph G {    
+    color="#efefef";
+    #rankdir = LR;
+    #graph[fontsize=6];
+
+    node[shape=box style=filled fontsize=12 fontname="Verdana" fillcolor="#efefef"];
+    
+subgraph cluster_0 {
+  style=filled;
+  label = "pc 0\l";
+"id-0" [label="key:0 id-0\l=| msg.value\l64: 0x80\lmemory[0x40] = 0x80;\lundefined local0 = msg.value; // #refs 0\lwhen msg.value == 0 goto 15 or fall 11\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_11 {
+  style=filled;
+  label = "pc 11\l";
+"id-1" [label="key:11 id-1\l=| msg.value\l64: 0x80\lundefined local1 = 0x0; // #refs 0\lrevert();\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_15 {
+  style=filled;
+  label = "pc 15\l";
+"id-2" [label="key:15 id-2\l\l64: 0x80\lwhen msg.data.length < 0x4 goto 40 or fall 24\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_24 {
+  style=filled;
+  label = "pc 24\l";
+"id-3" [label="key:24 id-3\l=| msg.data >>> 0xe0\l64: 0x80\lundefined local1 = msg.data >>> 0xe0; // #refs 0\lcase when msg.sig == 6d4ce63c goto [J]0x2d or fall 40\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_40 {
+  style=filled;
+  label = "pc 40\l";
+"id-4" [label="key:40 id-4\l=| msg.data >>> 0xe0\l64: 0x80\lundefined local2 = 0x0; // #refs 0\lrevert();\l" fillcolor="#ffa500"];
+"id-5" [label="key:40 id-5\l\l64: 0x80\lundefined local1 = 0x0; // #refs 0\lrevert();\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_45 {
+  style=filled;
+  label = "pc 45\l";
+"id-6" [label="key:45 id-6\l=| 0x33=| msg.data >>> 0xe0\l64: 0x80\lgoto :[J]0x49 branch:73\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_73 {
+  style=filled;
+  label = "pc 73\l";
+"id-7" [label="key:73 id-7\l=| 0x5=| msg.data >>> 0xe0\l64: 0x80\lgoto :[J]0x33 branch:51\l" fillcolor="#ffa500"];
+}
+
+subgraph cluster_51 {
+  style=filled;
+  label = "pc 51\l";
+"id-8" [label="key:51 id-8\l=| msg.data >>> 0xe0\l64: 0x80\l128: 0x5\lundefined local2 = memory[0x40]; // #refs 0\lundefined local3 = 0x5; // #refs -1\lmemory[memory[0x40]] = 0x5;\lundefined local4 = memory[0x40]; // #refs 0\lreturn 0x5;\l" fillcolor="#ffa500"];
+}
+
+"id-0" -> "id-2";
+"id-0" -> "id-1";
+"id-2" -> "id-5";
+"id-2" -> "id-3";
+"id-3" -> "id-4";
+"id-6" -> "id-7";
+"id-7" -> "id-8";
+
+}
 
 ```
 
