@@ -14,38 +14,6 @@ export class Provider {
     }
 
     /**
-     * Returns the current block number.
-     * 
-     * See also https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_blocknumber.
-     * 
-     * @returns {Promise<number>} The current block number.
-     */
-    async blockNumber() {
-        return parseInt(await this.post('eth_blockNumber', []), 16);
-    }
-
-    /**
-     * Returns the current chain id.
-     * 
-     * See also https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_chainId
-     * 
-     * @returns {Promise<number>}
-     */
-    async chainId() {
-        return parseInt(await this.post('eth_chainId', []), 16);
-    }
-
-    /**
-     * Returns the receipts of a given block.
-     * 
-     * @param {number} blockNumber 
-     * @returns {Promise<{transactionHash: string, contractAddress?: string}[]>}
-     */
-    getBlockReceipts(blockNumber) {
-        return this.post('eth_getBlockReceipts', [blockNumber]);
-    }
-
-    /**
      * Returns the code at a given account address and block number.
      * 
      * See also https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getcode.
@@ -57,17 +25,6 @@ export class Provider {
      */
     getCode(address, blockNumber = 'latest') {
         return this.post('eth_getCode', [address, blockNumber]);
-    }
-
-    /**
-     * Returns the current client version.
-     * 
-     * See also https://ethereum.org/en/developers/docs/apis/json-rpc/#web3_clientversion.
-     * 
-     * @returns {Promise<string>} 
-     */
-    async clientVersion() {
-        return await this.post('web3_clientVersion', []);
     }
 
     /**
