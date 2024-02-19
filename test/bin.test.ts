@@ -141,4 +141,19 @@ describe('::bin', function () {
         expect(cli).stderr.to.matchSnapshot('err', this);
         expect(cli).to.exit.with.code(3);
     });
+
+    const ENABLE_BIN_PROVIDER_TEST = process.env['ENABLE_BIN_PROVIDER_TEST'];
+    const hint = !ENABLE_BIN_PROVIDER_TEST ? ' (enable it by setting `ENABLE_BIN_PROVIDER_TEST`)' : '';
+
+    describe(`::bin/provider ENABLE_BIN_PROVIDER_TEST=${ENABLE_BIN_PROVIDER_TEST}${hint}`, function () {
+        it('should get `bytecode` from default provider', function () {
+            if (!ENABLE_BIN_PROVIDER_TEST) this.skip();
+
+            const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color', '--no-patch']);
+
+            expect(cli.stdout).to.matchSnapshot('out', this);
+            expect(cli.stderr).to.matchSnapshot('err', this);
+            expect(cli).to.exit.with.code(0);
+        });
+    });
 });
