@@ -29,6 +29,8 @@ Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context, 
         .replace(/^should /, '')
         .replace(/ #[0-9a-f]{6}/, '')
         .replace(' 🛠️', '')
+        .replace(' 📸 ', '')
+        .replace(' 🎞️ ', '')
         .replace(/--loads `solc-.*`/, '')
     ).join('/'));
     const tag = '```' + `${ext} ${name}`;
