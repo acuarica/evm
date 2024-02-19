@@ -78,6 +78,7 @@ jobs:
       - run: yarn coverage
         env:
           ENABLE_4BYTE_TEST: 1
+          ENABLE_BIN_PROVIDER_TEST: 1
       - run: yarn --silent c8 report > ./coverage/coverage.txt
         env:
           FORCE_COLOR: 0
