@@ -262,6 +262,7 @@ console.log(tokenContract!.patchdb().solidify());
 
 `sevm` comes with a CLI tool to examine bytecode from the command line.
 
+> [!NOTE]
 > The CLI tool is completely independent from the rest of the library.
 > This means that if you intend to use `sevm` as part of your application as a bundle,
 > you won't include the CLI tool nor any of its dependencies.
@@ -411,6 +412,7 @@ For example
 UPDATE_SNAPSHOTS=1 yarn test -g ::mainnet
 ```
 
+> [!TIP]
 > It is usually better to filter (`-f`/`-g` flags) which snapshot test cases
 > get re-generated to avoid any unwanted unintentional updates.
 
