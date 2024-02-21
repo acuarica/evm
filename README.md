@@ -443,7 +443,11 @@ ENABLE_4BYTE_TEST=1 yarn test -g ::4byte
 
 #### [`dataset.test.ts`](./test/dataset.test.ts)
 
-This test needs to be manually enabled because its take longer than the rest of test suite.
+> [!IMPORTANT]
+> Make sure the [`.dataset`](#dataset) folder is checked out before running this test.
+
+This test is optional.
+It needs to be manually enabled because its take longer than the rest of test suite to run.
 It is not ergonomic to include it in the main test suite.
 
 Set the environment variable `ENABLE_DATASET_TEST=1` to enable this test.
@@ -503,8 +507,22 @@ Moreover, their output is recorded into [`test/__snapshots__/examples.snap.md`](
 
 This folder contains a [dataset](https://github.com/acuarica/contract-dataset) of contract bytecodes deployed in a public network.
 
-It is attached as a Git submodule and it is used in [`test/dataset.test.ts`](#datasettestts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
-This ensures that the analysis works on _real_ contracts and that is does not enter an infinite loop while interpreting a bytecode cycle.
+It is attached as a Git submodule.
+To check out the `.dataset` folder, `clone` this repo using the [`--recursive` option](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---recurse-submodulesltpathspecgt),
+which clones the repo and the `.dataset` submodule all at once.
+
+```console
+git clone --recursive https://github.com/acuarica/evm.git
+```
+
+Alternatively, if you have already cloned the repo, run the following to check out the `.dataset` folder
+
+```console
+git submodule update --init
+```
+
+The contract bytecodes dataset is used in [`test/dataset.test.ts`](#datasettestts), which loads every contract bytecode and runs the Solidity and Yul decompilation.
+This ensures that the analysis works on _real_ contracts and that is does not enter into an infinite loop while interpreting a bytecode cycle.
 
 ## Detached Fork
 
