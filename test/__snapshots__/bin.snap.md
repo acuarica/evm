@@ -281,3 +281,19 @@ Events
 ```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider
 
 ```
+
+```out bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider-and-patch-method-signatures
+Function Selectors
+  0x22895118 deposit(bytes,bytes,bytes,bytes32)
+  0x01ffc9a7 supportsInterface(bytes4)
+  0x621fd130 get_deposit_count()
+  0xc5f2892f get_deposit_root()
+
+Events
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 DepositEvent(bytes,bytes,bytes,bytes,bytes)
+
+```
+
+```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider-and-patch-method-signatures
+
+```
