@@ -404,6 +404,10 @@ To ensure the test output does not change unexpectedly,
 we use an ad-hoc snapshot testing solution similar to [_Jest_'s](https://jestjs.io/docs/snapshot-testing).
 The snapshots are stored in [`test/__snapshots__`](./test/__snapshots__/).
 
+> The [`.gitattributes`](./.gitattributes) file normalizes snapshot file endings,
+so that snapshot tests run properly on both Unix-like and Windows OSes.
+This is especially important for running snapshot tests in GitHub Actions.
+
 To re-generate the snapshot artifacts in a test after an intentional implementation change,
 set the environment variable `UPDATE_SNAPSHOTS=1`.
 For example
@@ -431,10 +435,6 @@ For example
 ```out
         ✔ should match Solidity snapshot 🎞️
 ```
-
-> The [`.gitattributes`](./.gitattributes) file normalizes snapshot file endings,
-so that snapshot tests run properly on both Unix-like and Windows OSes.
-This is especially important for running snapshot tests in GitHub Actions.
 
 #### [`4byte.test.ts`](./test/4byte.test.ts)
 
