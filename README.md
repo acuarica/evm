@@ -432,6 +432,10 @@ For example
         ✔ should match Solidity snapshot 🎞️
 ```
 
+> The [`.gitattributes`](./.gitattributes) file normalizes snapshot file endings,
+so that snapshot tests run properly on both Unix-like and Windows OSes.
+This is especially important for running snapshot tests in GitHub Actions.
+
 #### [`4byte.test.ts`](./test/4byte.test.ts)
 
 This test needs to be manually enabled because it depends on a network connection (to query the [OpenChain API](https://docs.openchain.xyz/#/default/get_signature_database_v1_lookup) to look for method signatures).
