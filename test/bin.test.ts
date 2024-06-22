@@ -159,7 +159,7 @@ describe('::bin', function () {
         it('should get `bytecode` from default provider and `patch` method signatures', function () {
             if (!ENABLE_BIN_PROVIDER_TEST) this.skip();
 
-            const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color'], { env: sevmDebugEnv });
+            const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color']);
 
             expect(cli.stderr).to.matchSnapshot('err', this);
             expect(cli.stdout).to.matchSnapshot('out', this);
