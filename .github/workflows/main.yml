@@ -82,7 +82,7 @@ jobs:
       - run: yarn --silent c8 report > ./coverage/coverage.txt
         env:
           FORCE_COLOR: 0
-      - uses: fingerprintjs/action-coverage-report-md@v1
+      - uses: fingerprintjs/action-coverage-report-md@v2
         id: coverage
       - name: Add coverage report to the job summary
         run: |
