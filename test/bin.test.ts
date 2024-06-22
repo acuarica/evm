@@ -151,8 +151,8 @@ describe('::bin', function () {
 
             const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color', '--no-patch']);
 
-            expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli.stderr).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
         });
 
@@ -161,8 +161,8 @@ describe('::bin', function () {
 
             const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color']);
 
-            expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli.stderr).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
         });
     });
