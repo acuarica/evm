@@ -54,7 +54,7 @@ describe('::bin', function () {
     it("should display users' config path using `config`", function () {
         const cli = chaiExec(sevm, ['config']);
 
-        expect(cli.stdout.trim()).to.match(/sevm-nodejs$/, `${cli.stdout} does not end in \`sevm-nodejs\``);
+        expect(cli.stdout.trim()).to.match(/[\/\\]sevm-nodejs/, `${cli.stdout} does not match in \`[/\\]sevm-nodejs\``);
         expect(cli).stderr.to.be.empty;
         expect(cli).to.exit.with.code(0);
     });
