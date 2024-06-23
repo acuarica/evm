@@ -158,7 +158,7 @@ function make(handler) {
             console.error(warn(`Cannot find bytecode for contract ${info(name)}`));
             process.exit(2);
         } else if (bytecode.toLowerCase() === '0x') {
-            console.error(warn(`Bytecode for contract ${info(name)} is '0x', might have been self-destructed`));
+            console.error(warn(`Bytecode for contract ${info(name)} is '0x', it might have been self-destructed or it is an EOA`));
             process.exit(3);
         } else {
             try {
