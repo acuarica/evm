@@ -211,6 +211,11 @@ const decompileOpts = argv => pos(argv).option('reduce', {
     description: `Simplify the contract by reducing statements and inlining expressions before decompiling ${warn('[experimental]')}`,
 });
 
+/**
+ * 
+ */
+const DEFAULT_RPC_URL = 'https://cloudflare-eth.com/';
+
 void yargs(process.argv.slice(2))
     .scriptName('sevm')
     .usage('$0 <cmd> <contract>\n\nCLI tool to analyze EVM bytecode')
@@ -285,8 +290,9 @@ void yargs(process.argv.slice(2))
     })
     .option('rpc-url', {
         type: 'string',
-        description: 'JSON-RPC network provider URL',
-        default: 'https://cloudflare-eth.com/',
+        description: 'JSON-RPC network provider URL. Alternatively, set the env variable `SEVM_RPC_URL` (the flag takes precedence over the env variable)',
+        default: process.env['SEVM_RPC_URL'] ?? DEFAULT_RPC_URL,
+        defaultDescription: `"${DEFAULT_RPC_URL}"`,
     })
     // .option('selector', {
     //     alias: 's',
