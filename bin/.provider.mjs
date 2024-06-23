@@ -52,7 +52,7 @@ export class Provider {
             }),
         });
 
-        if (resp.status !== 200) throw new Error(`Invalid status code: ${resp.status}, response: ${await resp.text()}`);
+        if (resp.status !== 200) throw new Error(`Invalid status code: ${resp.status}, response: "${await resp.text()}"`);
 
         const json = /** @type {JsonRpcResponse} */(await resp.json());
         if (json.jsonrpc === '2.0' && json.id === id && json.error === undefined)
