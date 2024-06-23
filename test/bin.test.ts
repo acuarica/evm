@@ -146,12 +146,18 @@ describe('::bin', function () {
     const hint = !ENABLE_BIN_PROVIDER_TEST ? ' (enable it by setting `ENABLE_BIN_PROVIDER_TEST`)' : '';
 
     describe(`::bin/provider ENABLE_BIN_PROVIDER_TEST=${ENABLE_BIN_PROVIDER_TEST}${hint}`, function () {
+        /**
+         * Beacon Deposit Contract
+         * https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa
+         */
+        const address = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
+
         it('should get `bytecode` from default provider', function () {
             if (!ENABLE_BIN_PROVIDER_TEST) this.skip();
 
-            const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color', '--no-patch']);
+            const cli = chaiExec(sevm, ['abi', address, '--no-color', '--no-patch', '--no-cache'], { env: sevmDebugEnv });
 
-            expect(cli.stderr).to.matchSnapshot('err', this);
+            expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
             expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
         });
@@ -159,9 +165,9 @@ describe('::bin', function () {
         it('should get `bytecode` from default provider and `patch` method signatures', function () {
             if (!ENABLE_BIN_PROVIDER_TEST) this.skip();
 
-            const cli = chaiExec(sevm, ['abi', '0x00000000219ab540356cBB839Cbe05303d7705Fa', '--no-color']);
+            const cli = chaiExec(sevm, ['abi', address, '--no-color', '--no-cache'], { env: sevmDebugEnv });
 
-            expect(cli.stderr).to.matchSnapshot('err', this);
+            expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
             expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
         });

@@ -52,8 +52,10 @@ export class Provider {
             }),
         });
 
+        if (resp.status !== 200) throw new Error(`Invalid status code: ${resp.status}, response: "${await resp.text()}"`);
+
         const json = /** @type {JsonRpcResponse} */(await resp.json());
-        if (resp.status === 200 && json.jsonrpc === '2.0' && json.id === id && json.error === undefined)
+        if (json.jsonrpc === '2.0' && json.id === id && json.error === undefined)
             return /** @type {T} */ (json.result);
         throw new Error(`Invalid JSON-RPC response: ${JSON.stringify(json)}`);
     }

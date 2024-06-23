@@ -23,6 +23,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -65,6 +68,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -109,6 +115,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -285,6 +294,9 @@ Events
 ```
 
 ```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
 
 ```
 
@@ -301,5 +313,10 @@ Events
 ```
 
 ```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider-and-patch-method-signatures
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
+SEVM <pid>: Bytecode keccak256 hash 0x6c029a231254fadb724d
+SEVM <pid>: Cache ABI disabled
 
 ```
