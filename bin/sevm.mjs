@@ -69,12 +69,10 @@ function dis(contract, argv) {
 
 /**
  * @param {string} pathOrAddress
+ * @param {boolean} cache
  * @returns {Promise<string | null>}
  */
-async function getBytecode(pathOrAddress) {
-    const cacheFolder = path.join(paths.cache, 'mainnet');
-    const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
-
+async function getBytecode(pathOrAddress, cache) {
     const readInputFile = async () => {
         if (pathOrAddress === '') {
             const buffer = readFileSync(process.stdin.fd, 'utf-8').trim();
@@ -109,16 +107,29 @@ async function getBytecode(pathOrAddress) {
                 return value;
             throw new Error('Cannot find `deployedBytecode`|`bytecode` in json file');
         },
-        () => promises.readFile(cachePath, 'utf8'),
         async () => {
-            const provider = new Provider('https://cloudflare-eth.com/');
-            if (!isValidAddress(pathOrAddress)) throw new Error('Invalid address, bad address checksum');
-            const bytecode = await provider.getCode(pathOrAddress);
-            if (!existsSync(cacheFolder)) {
-                mkdirSync(cacheFolder, { recursive: true });
+            const cacheFolder = path.join(paths.cache, 'mainnet');
+            const cachePath = path.join(cacheFolder, `${pathOrAddress}.bytecode`);
+
+            try {
+                if (!cache) throw new Error(`Cache to fetch contract bytecode disabled`);
+                return await promises.readFile(cachePath, 'utf8');
+            } catch (err) {
+                trace('%s', err instanceof Error ? err.message : err);
+                const provider = new Provider('https://cloudflare-eth.com/');
+                if (!isValidAddress(pathOrAddress)) throw new Error('Invalid address, bad address checksum');
+                const bytecode = await provider.getCode(pathOrAddress);
+                trace('Contract bytecode fetched from remote network');
+
+                if (cache) {
+                    if (!existsSync(cacheFolder)) {
+                        mkdirSync(cacheFolder, { recursive: true });
+                    }
+                    writeFileSync(cachePath, bytecode, 'utf8');
+                }
+
+                return bytecode;
             }
-            writeFileSync(cachePath, bytecode, 'utf8');
-            return bytecode;
         },
     ];
 
@@ -138,7 +149,8 @@ function make(handler) {
     /** @param {import('yargs').ArgumentsCamelCase} argv */
     return async argv => {
         const pathOrAddress = /** @type {string} */ (argv['contract']);
-        const bytecode = await getBytecode(pathOrAddress);
+        const cache = /**@type {boolean}*/(argv['cache']);
+        const bytecode = await getBytecode(pathOrAddress, cache);
         const name = pathOrAddress === '' ? '-' : pathOrAddress;
         if (bytecode === null) {
             console.error(warn(`Cannot find bytecode for contract ${info(name)}`));
@@ -152,25 +164,26 @@ function make(handler) {
 
                 if (argv['patch']) {
                     const hash = '0x' + js_sha3.keccak256(contract.bytecode).substring(0, 20);
-                    trace('Bytecode hash', hash);
+                    trace('Bytecode keccak256 hash', hash);
                     const abisFolder = path.join(paths.cache, 'abis');
-                    if (!existsSync(abisFolder)) {
-                        mkdirSync(abisFolder, { recursive: true });
-                    }
                     const abiPath = path.join(abisFolder, `${hash}.abi.json`);
                     /** @type {object | undefined} */
                     let lookup;
-                    if (existsSync(abiPath)) {
+                    if (cache && existsSync(abiPath)) {
                         trace('Found ABI cache %s', abiPath);
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         lookup = JSON.parse(readFileSync(abiPath, 'utf8'));
                     } else {
-                        trace('ABI cache %s not found', abiPath);
+                        if (cache) trace('ABI cache %s not found', abiPath);
+                        else trace('Cache ABI disabled');
                         lookup = {};
                     }
 
                     contract = await contract.patch(lookup);
-                    if (!existsSync(abiPath)) {
+                    if (cache && !existsSync(abiPath)) {
+                        if (!existsSync(abisFolder)) {
+                            mkdirSync(abisFolder, { recursive: true });
+                        }
                         writeFileSync(abiPath, JSON.stringify(lookup, null, 2));
                     }
                 }
@@ -263,6 +276,11 @@ void yargs(process.argv.slice(2))
         description: 'Patches the Contract public functions and events with signatures from https://openchain.xyz, use `--no-patch` to skip patching',
         default: true,
     })
+    .option('cache', {
+        type: 'boolean',
+        description: 'Enables cache of contracts fetched from remote networks, use `--no-cache` to skip catching',
+        default: true,
+    })
     // .option('selector', {
     //     alias: 's',
     //     type: 'string',
@@ -274,7 +292,7 @@ void yargs(process.argv.slice(2))
     .example('$0 abi 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', '')
     .example('$0 sol 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', '')
     .example('$0 sol --no-patch 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', '')
-    .example('echo 0x600160020160005500 | sevm yul -', 'Use `-` to read bytecode from stdin') 
+    .example('echo 0x600160020160005500 | sevm yul -', 'Use `-` to read bytecode from stdin')
     .epilog(
         `[1] See https://docs.soliditylang.org/en/latest/metadata.html for more information regarding Metadata generated by the Solidity compiler.
 [2] See https://docs.soliditylang.org/en/latest/abi-spec.html#abi-json for more information regarding the ABI specification.
