@@ -296,6 +296,8 @@ Options:
   --cache    Enables cache of contracts and ABIs fetched from remote networks an
              d https://openchain.xyz respectively, use `--no-cache` to skip catc
              hing                                      [boolean] [default: true]
+  --rpc-url  JSON-RPC network provider URL
+                               [string] [default: "https://cloudflare-eth.com/"]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -338,6 +340,8 @@ Options:
   --cache       Enables cache of contracts and ABIs fetched from remote networks
                  and https://openchain.xyz respectively, use `--no-cache` to ski
                 p catching                             [boolean] [default: true]
+  --rpc-url     JSON-RPC network provider URL
+                               [string] [default: "https://cloudflare-eth.com/"]
   --help        Show help                                              [boolean]
   --with-stack  Include the current stack next to each decoded opcode
   --with-trace  Include the trace of staments at the end of each basic block
