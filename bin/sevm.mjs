@@ -70,9 +70,10 @@ function dis(contract, argv) {
 /**
  * @param {string} pathOrAddress
  * @param {boolean} cache
+ * @param {string} rpcUrl
  * @returns {Promise<string | null>}
  */
-async function getBytecode(pathOrAddress, cache) {
+async function getBytecode(pathOrAddress, cache, rpcUrl) {
     const readInputFile = async () => {
         if (pathOrAddress === '') {
             const buffer = readFileSync(process.stdin.fd, 'utf-8').trim();
@@ -116,7 +117,7 @@ async function getBytecode(pathOrAddress, cache) {
                 return await promises.readFile(cachePath, 'utf8');
             } catch (err) {
                 trace('%s', err instanceof Error ? err.message : err);
-                const provider = new Provider('https://cloudflare-eth.com/');
+                const provider = new Provider(rpcUrl);
                 if (!isValidAddress(pathOrAddress)) throw new Error('Invalid address, bad address checksum');
                 const bytecode = await provider.getCode(pathOrAddress);
                 trace('Contract bytecode fetched from remote network');
@@ -150,7 +151,8 @@ function make(handler) {
     return async argv => {
         const pathOrAddress = /** @type {string} */ (argv['contract']);
         const cache = /**@type {boolean}*/(argv['cache']);
-        const bytecode = await getBytecode(pathOrAddress, cache);
+        const rpcUrl = /**@type {string}*/(argv['rpc-url']);
+        const bytecode = await getBytecode(pathOrAddress, cache, rpcUrl);
         const name = pathOrAddress === '' ? '-' : pathOrAddress;
         if (bytecode === null) {
             console.error(warn(`Cannot find bytecode for contract ${info(name)}`));
@@ -280,6 +282,11 @@ void yargs(process.argv.slice(2))
         type: 'boolean',
         description: 'Enables cache of contracts and ABIs fetched from remote networks and https://openchain.xyz respectively, use `--no-cache` to skip catching',
         default: true,
+    })
+    .option('rpc-url', {
+        type: 'string',
+        description: 'JSON-RPC network provider URL',
+        default: 'https://cloudflare-eth.com/',
     })
     // .option('selector', {
     //     alias: 's',

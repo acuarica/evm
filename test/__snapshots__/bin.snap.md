@@ -26,6 +26,8 @@ Options:
   --cache    Enables cache of contracts and ABIs fetched from remote networks an
              d https://openchain.xyz respectively, use `--no-cache` to skip catc
              hing                                      [boolean] [default: true]
+  --rpc-url  JSON-RPC network provider URL
+                               [string] [default: "https://cloudflare-eth.com/"]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -71,6 +73,8 @@ Options:
   --cache    Enables cache of contracts and ABIs fetched from remote networks an
              d https://openchain.xyz respectively, use `--no-cache` to skip catc
              hing                                      [boolean] [default: true]
+  --rpc-url  JSON-RPC network provider URL
+                               [string] [default: "https://cloudflare-eth.com/"]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -118,6 +122,8 @@ Options:
   --cache    Enables cache of contracts and ABIs fetched from remote networks an
              d https://openchain.xyz respectively, use `--no-cache` to skip catc
              hing                                      [boolean] [default: true]
+  --rpc-url  JSON-RPC network provider URL
+                               [string] [default: "https://cloudflare-eth.com/"]
   --help     Show help                                                 [boolean]
 
 Examples:
