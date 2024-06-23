@@ -290,9 +290,9 @@ void yargs(process.argv.slice(2))
     })
     .option('rpc-url', {
         type: 'string',
-        description: 'JSON-RPC network provider URL, or alternatively set environment variable `SEVM_RPC_URL` (the argument takes precedence over the env var)',
+        description: 'JSON-RPC network provider URL. Alternatively, set the env variable `SEVM_RPC_URL` (the flag takes precedence over the env variable)',
         default: process.env['SEVM_RPC_URL'] ?? DEFAULT_RPC_URL,
-        defaultDescription: `${DEFAULT_RPC_URL}`,
+        defaultDescription: `"${DEFAULT_RPC_URL}"`,
     })
     // .option('selector', {
     //     alias: 's',
