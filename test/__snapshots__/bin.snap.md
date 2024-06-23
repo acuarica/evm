@@ -326,3 +326,108 @@ SEVM <pid>: Bytecode keccak256 hash 0x6c029a231254fadb724d
 SEVM <pid>: Cache ABI disabled
 
 ```
+
+```out display-sol-from-bytecode
+// SPDX-License-Identifier: UNLICENSED
+contract Contract {
+
+    function() external payable {
+        require(msg.value == 0);
+        if ((msg.data.length < 0x4) == 0) {
+            if (msg.sig == 6d4ce63c) {
+                $6d4ce63c();
+            } else {
+                revert();
+            }
+        }
+        revert();
+    }
+
+    function 6d4ce63c(/*no signature*/) public returns (uint256) {
+        return 0x5;
+    }
+
+}
+
+
+```
+
+```out display-yul-from-bytecode
+object "runtime" {
+    code {
+        mstore(0x40, 0x80)
+        let local0 := callvalue() // #refs 0
+        require(iszero(local0))
+        if (iszero(lt(calldatasize(), 0x4))) {
+            let local1 := shr(calldataload(0x0), 0xe0) // #refs 0
+            if (eq(msg.sig, 6d4ce63c)) {
+                $6d4ce63c();
+            } else {
+                let local2 := 0x0 // #refs 0
+                revert(local2, local2)
+            }
+        }
+        let local1 := 0x0 // #refs 0
+        revert(local1, local1)
+
+        function __$6d4ce63c(/*unknown*/) { // public
+            let local2 := mload(0x40) // #refs 0
+            let local3 := 0x5 // #refs -1
+            mstore(local2/*=0x80*/, local3)
+            let local4 := mload(0x40) // #refs 0
+            return(local4, sub(add(0x20, local2), local4)) // 0x5
+        }
+
+    }
+}
+
+
+```
+
+```out display-sol---reduce-from-bytecode
+// SPDX-License-Identifier: UNLICENSED
+contract Contract {
+
+    function() external payable {
+        require(msg.value == 0);
+        if (msg.data.length >= 0x4) {
+            if (msg.sig == 6d4ce63c) {
+                $6d4ce63c();
+            } else {
+                revert();
+            }
+        }
+        revert();
+    }
+
+    function 6d4ce63c(/*no signature*/) public view returns (uint256) {
+        return 0x5;
+    }
+
+}
+
+
+```
+
+```out display-yul---reduce-from-bytecode
+object "runtime" {
+    code {
+        require(iszero(callvalue()))
+        if (gt(calldatasize(), 0x4)) {
+            if (eq(msg.sig, 6d4ce63c)) {
+                $6d4ce63c();
+            } else {
+                revert(0x0, 0x0)
+            }
+        }
+        revert(0x0, 0x0)
+
+        function __$6d4ce63c(/*unknown*/) { // public view
+            return(0x80, 0x20) // 0x5
+        }
+
+    }
+}
+
+
+```
