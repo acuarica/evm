@@ -11,7 +11,7 @@ changelog:
     - title: Breaking Changes 🛠
       labels:
         - breaking-change
-    - title: Dependency Upgrades ⤴️
+    - title: Dev & CLI Dependency Upgrades ⤴️
       labels:
         - dependencies
     - title: Internal Changes 🏠
