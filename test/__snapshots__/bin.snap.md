@@ -283,7 +283,7 @@ Cannot find bytecode for contract 0x8ba1
 ```
 
 ```err catch-error-when-exec-self-destructed-contract
-Bytecode for contract - is '0x', might have been self-destructed
+Bytecode for contract - is '0x', it might have been self-destructed or it is an EOA
 
 ```
 
