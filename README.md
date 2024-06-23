@@ -293,6 +293,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -332,6 +335,9 @@ Options:
   --patch       Patches the Contract public functions and events with signatures
                  from https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
+  --cache       Enables cache of contracts and ABIs fetched from remote networks
+                 and https://openchain.xyz respectively, use `--no-cache` to ski
+                p catching                             [boolean] [default: true]
   --help        Show help                                              [boolean]
   --with-stack  Include the current stack next to each decoded opcode
   --with-trace  Include the trace of staments at the end of each basic block

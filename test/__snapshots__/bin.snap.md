@@ -23,8 +23,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
-  --cache    Enables cache of contracts fetched from remote networks, use `--no-
-             cache` to skip catching                   [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -67,8 +68,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
-  --cache    Enables cache of contracts fetched from remote networks, use `--no-
-             cache` to skip catching                   [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:
@@ -113,8 +115,9 @@ Options:
   --patch    Patches the Contract public functions and events with signatures fr
              om https://openchain.xyz, use `--no-patch` to skip patching
                                                        [boolean] [default: true]
-  --cache    Enables cache of contracts fetched from remote networks, use `--no-
-             cache` to skip catching                   [boolean] [default: true]
+  --cache    Enables cache of contracts and ABIs fetched from remote networks an
+             d https://openchain.xyz respectively, use `--no-cache` to skip catc
+             hing                                      [boolean] [default: true]
   --help     Show help                                                 [boolean]
 
 Examples:

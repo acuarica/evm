@@ -278,7 +278,7 @@ void yargs(process.argv.slice(2))
     })
     .option('cache', {
         type: 'boolean',
-        description: 'Enables cache of contracts fetched from remote networks, use `--no-cache` to skip catching',
+        description: 'Enables cache of contracts and ABIs fetched from remote networks and https://openchain.xyz respectively, use `--no-cache` to skip catching',
         default: true,
     })
     // .option('selector', {
