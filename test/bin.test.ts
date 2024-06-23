@@ -98,15 +98,6 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
-    it('should run `dis` command and find non-reacheable chunk', function () {
-        const input = '0x6001600201600c56010203045b62fffefd5b00';
-        const cli = chaiExec(sevm, ['dis', '-', '--no-color', '--no-patch'], { input });
-
-        expect(cli.stdout).to.matchSnapshot('out', this);
-        expect(cli).stderr.to.be.empty;
-        expect(cli).to.exit.with.code(0);
-    });
-
     it('should display `cfg` from `bytecode`', function () {
         const input = '6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000600590509056fe';
         const cli = chaiExec(sevm, ['cfg', '-', '--no-color', '--no-patch'], { input });
@@ -146,6 +137,15 @@ describe('::bin', function () {
     it('should display `yul --reduce` from `bytecode`', function () {
         const input = '6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000600590509056fe';
         const cli = chaiExec(sevm, ['yul', '-', '--reduce', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
+    it('should run `dis` command and find non-reacheable chunk', function () {
+        const input = '0x6001600201600c56010203045b62fffefd5b00';
+        const cli = chaiExec(sevm, ['dis', '-', '--no-color', '--no-patch'], { input });
 
         expect(cli.stdout).to.matchSnapshot('out', this);
         expect(cli).stderr.to.be.empty;
