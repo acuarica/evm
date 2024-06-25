@@ -3,16 +3,6 @@
 
 const sevm = require('sevm');
 
-/** @typedef {{ [hash: string]: {name: string, filtered: boolean}[] | null }} HashesResponse */
-
-/**
- * @param {HashesResponse} hashes 
- * @returns {{ [hash: string]: string[] }}
- */
-const mapHashes = hashes => Object.fromEntries(
-    Object.entries(hashes).map(([hash, matches]) => [hash, matches?.map(({ name }) => name) ?? []])
-);
-
 sevm.Contract.prototype.patch = async function (/** @type {Partial<import('.').Lookup>} */lookup = {}) {
     const keys = Object.keys;
     /** @type {(selector: string) => string} */
@@ -28,7 +18,17 @@ sevm.Contract.prototype.patch = async function (/** @type {Partial<import('.').L
             throw new Error(`Failed to fetch signatures from api.openchain.xyz, url: ${url}`);
         }
 
+        /** @typedef {{ [hash: string]: {name: string, filtered: boolean}[] | null }} HashesResponse */
         const { result } = /** @type {{result: { function: HashesResponse, event: HashesResponse }}} */ (await resp.json());
+
+        /**
+         * @param {HashesResponse} hashes 
+         * @returns {{ [hash: string]: string[] }}
+         */
+        const mapHashes = hashes => Object.fromEntries(
+            Object.entries(hashes).map(([hash, matches]) => [hash, matches?.map(({ name }) => name) ?? []])
+        );
+
         lookup.function = mapHashes(result.function);
         lookup.event = mapHashes(result.event);
     }
