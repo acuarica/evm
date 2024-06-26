@@ -217,6 +217,15 @@ export class Byte extends Tag {
     }
 }
 
+/**
+ * Left shift operation. https://www.evm.codes/#1b
+ * 
+ * `eval` definition
+ * 
+ * ```txt
+ * µ'_s[0] ≡ (µ_s[1] × 2^µ_s[0]) mod 2^256
+ * ```
+ */
 export class Shl extends Shift {
     readonly tag = 'Shl';
     eval(): Expr {
