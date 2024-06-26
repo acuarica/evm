@@ -222,7 +222,9 @@ export class Shl extends Shift {
     eval(): Expr {
         const val = this.value.eval();
         const shift = this.shift.eval();
-        return val.isVal() && shift.isVal() ? new Val(val.val << shift.val) : new Shl(val, shift);
+        return val.isVal() && shift.isVal()
+            ? new Val(mod256(val.val << shift.val))
+            : new Shl(val, shift);
     }
 }
 
