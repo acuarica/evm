@@ -11,6 +11,9 @@ changelog:
     - title: Breaking Changes 🛠
       labels:
         - breaking-change
+    - title: Documentation 📝
+      labels:
+        - docs
     - title: Dev & CLI Dependency Upgrades ⤴️
       labels:
         - dependencies
