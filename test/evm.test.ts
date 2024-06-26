@@ -7,7 +7,7 @@ import path from 'path';
 import type { Operand } from 'sevm';
 import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
 import type { Create, DataCopy, Expr, Inst, Log } from 'sevm/ast';
-import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val, type SStore, Shl } from 'sevm/ast';
+import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val, type SStore, Shl, Revert } from 'sevm/ast';
 
 import { eventSelector, fnselector } from './utils/selector';
 import { compile, type Version } from './utils/solc';
@@ -205,7 +205,7 @@ describe('::evm', function () {
         expect(evm.step.functionBranches).to.have.keys('00000000');
     });
 
-    it('should find Sha3 with 256-bits overflow arithmetic', function () {
+    it('should find `Sha3` with 256-bits overflow arithmetic', function () {
         // https://etherscan.io/address/0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB#code
         const src = `contract big_game {
             bytes32 responseHash;
@@ -234,6 +234,14 @@ describe('::evm', function () {
             )
         );
         expect(evm.errors).to.be.empty;
+    });
+
+    it('should `Yul`ify bytecode with `SHL` 256-bits overflow arithmetic', function () {
+        // https://github.com/acuarica/evm/issues/125#issuecomment-2190710451
+        const evm = EVM.new('0x60016101111b5ffd');
+        const state = evm.start();
+        expect(state.stmts).to.have.length(1);
+        expect(state.stmts[0].eval()).to.be.deep.equal(new Revert(new Val(0n), new Val(0n), undefined, undefined, []));
     });
 
     describe('special', function () {
