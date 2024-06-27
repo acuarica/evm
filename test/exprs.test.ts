@@ -86,6 +86,7 @@ const $exprs = {
         t([2n, 3n, 'DIV', 1n, 'BYTE'], new Byte(new Val(1n), new Div(new Val(3n), new Val(2n))), new Val(0n), '(0x3 / 0x2 >> 0x1) & 1', 'byte(0x1, div(0x3, 0x2))'),
         t([2n, 3n, 'DIV', 2n, 'SHL'], new Shl(new Div(new Val(3n), new Val(2n)), new Val(2n)), new Val(4n), '0x3 / 0x2 << 0x2', 'shl(div(0x3, 0x2), 0x2)'),
 
+        t([0x100n, 0x2n, 'EXP'], new Exp(new Val(0x2n), new Val(0x100n)), new Val(0x0n), '0x2 ** 0x100', 'exp(0x2, 0x100)'),
         t([0x1n, 0x111n, 'SHL'], new Shl(new Val(0x1n), new Val(0x111n)), new Val(0x0n), '0x1 << 0x111', 'shl(0x1, 0x111)'),
     ],
     special: [

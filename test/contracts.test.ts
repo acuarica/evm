@@ -7,6 +7,18 @@ import { compile } from './utils/solc';
 
 describe('::contracts', function () {
 
+    it('should `Yul`ify bytecode with `EXP` 256-bits overflow arithmetic', function () {
+        const contract = new Contract('0x61010060020a5ffd');
+        expect(contract.yul()).to.be.equal(`object "runtime" {
+    code {
+        revert(0x0, exp(0x2, 0x100))
+
+    }
+}
+`);
+        expect(contract.errors).to.be.deep.equal([]);
+    });
+
     it('should `Yul`ify bytecode with `SHL` 256-bits overflow arithmetic', function () {
         // https://github.com/acuarica/evm/issues/125#issuecomment-2190710451
         const contract = new Contract('0x60016101111b5ffd');
