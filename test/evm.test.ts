@@ -254,6 +254,7 @@ describe('::evm', function () {
         const evm = EVM.new('0x60016101111b5ffd');
         const state = evm.start();
         expect(state.stmts).to.have.length(1);
+        expect(state.stmts[0]).to.be.deep.equal(new Revert(new Val(0n, 0), new Shl(new Val(1n, 0), new Val(0x111n, 0)), undefined, undefined, []));
         expect(state.stmts[0].eval()).to.be.deep.equal(new Revert(new Val(0n), new Val(0n), undefined, undefined, []));
     });
 
