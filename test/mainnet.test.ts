@@ -124,6 +124,9 @@ describe('::mainnet', function () {
             filename: 'ProxyForCoinTool-0x00000df4e8ed07e76c4d279e9937033cd555fad3',
             members: [],
         }, {
+            filename: 'RankedAuctionWETHGateway-0x47b24fDF2f8EC7b72ac879b124F90f3FC53b51cA',
+            members: [],
+        }, {
             filename: 'SEAWHALE-0x9DD0fEcBAa5D12948f522F17dedE8B599448Fbbe',
             members: [],
             skipSnapshot: true,
