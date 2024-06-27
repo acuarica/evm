@@ -84,17 +84,25 @@ export class Mod extends Bin {
     }
 }
 
+/**
+ * Represents the Exponential operation. https://www.evm.codes/#0a
+ * 
+ * `eval` definition
+ * 
+ * ```txt
+ * µ'_s[0] ≡ µ_s[0] ^ µ_s[1]
+ * ```
+ */
 export class Exp extends Bin {
     readonly tag = 'Exp';
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
         return left.isVal() && right.isVal() && right.val >= 0
-            ? new Val(left.val ** right.val)
+            ? new Val(mod256(left.val ** right.val))
             : new Exp(left, right);
     }
 }
-
 
 abstract class Cmp extends Tag {
     constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
@@ -218,7 +226,7 @@ export class Byte extends Tag {
 }
 
 /**
- * Left shift operation. https://www.evm.codes/#1b
+ * Represents the Left shift operation. https://www.evm.codes/#1b
  * 
  * `eval` definition
  * 
