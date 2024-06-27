@@ -638,3 +638,7 @@
 ```errors MobyToken-0x40a7dF3dF8b56147B781353D379cB960120211D7/detect-errors
 []
 ```
+
+```errors RankedAuctionWETHGateway-0x47b24fDF2f8EC7b72ac879b124F90f3FC53b51cA/detect-errors
+[]
+```
