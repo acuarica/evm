@@ -100,7 +100,7 @@ export class Memory<in out E> {
     }
 
     static new<E>(): Memory<E> {
-        return new Memory(new Map());
+        return new Memory<E>(new Map());
     }
 
     has(location: bigint): boolean {
