@@ -72,17 +72,17 @@ describe('::state', function () {
             const state = new State<number, number>();
             expect(state.halted).to.be.false;
             expect(state.stmts).to.be.empty;
-            expect(state.memory).to.be.empty;
+            expect(state.memory.size).to.be.equal(0);
             expect(state.nlocals).to.be.equal(0);
 
-            state.memory[0] = 1;
+            state.memory.set(0n, 1);
             state.nlocals += 3;
             const clone = state.clone();
 
-            state.memory[1] = 2;
+            state.memory.set(1n, 2);
 
-            expect(state.memory).to.have.keys([0, 1]);
-            expect(clone.memory).to.have.keys([0]);
+            expect([...state.memory.keys()]).to.have.keys([0, 1]);
+            expect([...clone.memory.keys()]).to.have.keys([0]);
             expect(clone.nlocals).to.be.equal(3);
         });
 
@@ -90,18 +90,18 @@ describe('::state', function () {
             const expr = { x: 'a' as 'a' | 'b' };
 
             const state = new State<never, { x: 'a' | 'b' }>();
-            state.memory[0] = expr;
+            state.memory.set(0n, expr);
             const clone = state.clone();
 
-            state.memory[1] = expr;
+            state.memory.set(1n, expr);
             expr.x = 'b';
 
-            expect(state.memory).to.have.keys([0, 1]);
-            expect(state.memory[0]).to.be.deep.equal({ x: 'b' });
-            expect(state.memory[1]).to.be.deep.equal({ x: 'b' });
+            expect([...state.memory.keys()]).to.have.members([0n, 1n]);
+            expect(state.memory.get(0n)).to.be.deep.equal({ x: 'b' });
+            expect(state.memory.get(1n)).to.be.deep.equal({ x: 'b' });
 
-            expect(clone.memory).to.have.keys([0]);
-            expect(state.memory[0]).to.be.deep.equal({ x: 'b' });
+            expect([...clone.memory.keys()]).to.have.keys([0n]);
+            expect(state.memory.get(0n)).to.be.deep.equal({ x: 'b' });
         });
     });
 });

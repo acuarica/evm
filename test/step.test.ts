@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash, yul } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash, yul, Memory } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, DataCopy, Sub, Variable } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Stop } from 'sevm/ast';
 import * as ast from 'sevm/ast';
@@ -387,9 +387,9 @@ describe('::step', function () {
             state.stack.push(new Val(4n));
             step.CODECOPY(state, new Opcode(0, 0, 'codecopy'), { bytecode });
 
-            expect(state.memory).to.be.deep.equal({
-                '4': new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5))
-            });
+            expect(state.memory).to.be.deep.equal(Memory.new()
+                .set(4n, new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5)))
+            );
             expect(state.stack.values).to.be.deep.equal([]);
         });
     });
@@ -404,7 +404,7 @@ describe('::step', function () {
             state.stack.push(new Val(4n));
             step.MSTORE(state);
 
-            expect(state.memory).to.be.deep.equal({ '4': Props['block.coinbase'] });
+            expect(state.memory).to.be.deep.equal(Memory.new().set(4n, Props['block.coinbase']));
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
         });
     });
@@ -443,7 +443,7 @@ describe('::step', function () {
             state.stack.push(new Val(0x10n));
             state.stack.push(new Val(0x1000n));
 
-            state.memory[0x10] = new DataCopy('codecopy', new Val(1n), new Val(2n), undefined, bytecode);
+            state.memory.set(0x10n, new DataCopy('codecopy', new Val(1n), new Val(2n), undefined, bytecode));
 
             step.CREATE(state);
             expect(state.stack.values).to.be.deep.equal([

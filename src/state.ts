@@ -77,12 +77,64 @@ export class Stack<in out E> {
     /**
      * Creates a shallow copy of this `Stack`.
      *
-     * @returns a new `Stack` with the same elements as this one.
+     * @returns a new `Stack` with the same elements as `this` one.
      */
     clone(): Stack<E> {
         const stack = new Stack<E>();
         stack.values.push(...this.values);
         return stack;
+    }
+}
+
+/**
+ * EVM memory is not persistent and is destroyed at the end of the call context.
+ * At the start of a call context, memory is initialized to `0`.
+ * Reading and Writing from memory is usually done with `MLOAD` and `MSTORE` instructions respectively,
+ * but can also be accessed by other instructions like `CREATE` or `EXTCODECOPY`.[1]
+ * 
+ * [1] https://www.evm.codes/about#memory
+ */
+export class Memory<in out E> {
+
+    private constructor(private readonly _map: Map<bigint, E>) {
+    }
+
+    static new<E>(): Memory<E> {
+        return new Memory(new Map());
+    }
+
+    has(location: bigint): boolean {
+        return this._map.has(location);
+    }
+
+    get(location: bigint): E | undefined {
+        return this._map.get(location);
+    }
+
+    set(location: bigint, value: E): this {
+        this._map.set(location, value);
+        return this;
+    }
+
+    /**
+     * Creates a shallow copy of this `Memory`.
+     *
+     * @returns a new `Memory` with the same elements as `this` one.
+     */
+    clone(): Memory<E> {
+        return new Memory(new Map(this._map));
+    }
+
+    get size(): number {
+        return this._map.size;
+    }
+
+    keys(): IterableIterator<bigint> {
+        return this._map.keys();
+    }
+
+    entries(): IterableIterator<[bigint, E]> {
+        return this._map.entries();
     }
 }
 
@@ -116,7 +168,7 @@ export class State<S = Inst, E = Expr> {
      */
     constructor(
         readonly stack = new Stack<E>(),
-        readonly memory: { [location: number]: E } = {},
+        readonly memory = Memory.new<E>(),
         public nlocals = 0
     ) { }
 
@@ -164,7 +216,7 @@ export class State<S = Inst, E = Expr> {
      * @returns a new `State` detached from this one.
      */
     clone(): State<S, E> {
-        return new State(this.stack.clone(), { ...this.memory }, this.nlocals);
+        return new State(this.stack.clone(), this.memory.clone(), this.nlocals);
     }
 }
 
