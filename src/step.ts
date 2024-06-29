@@ -730,11 +730,7 @@ const FrontierStep = {
 
             stmts.push(new ast.Log(event, offset_, size_, topics, function (offset, size) {
                 if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
-                    const args = [];
-                    for (let i = offset.val; i < offset.val + size.val; i += 32n) {
-                        args.push(memory.get(i) ?? new ast.MLoad(new Val((i))));
-                    }
-                    return args;
+                    return memory.range(offset.val, size.val, i => new ast.MLoad(new Val(i)))
                 } else {
                     if (size.isVal() && size.val > MAXSIZE) {
                         throw new ExecError(`Memory size too large creating Log: ${size.val} in \`${size_.yul()}\``);

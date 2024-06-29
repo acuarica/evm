@@ -166,6 +166,21 @@ export class Memory<in out E> {
     entries(): IterableIterator<[bigint, E]> {
         return this._map.entries();
     }
+
+    /**
+     * 
+     * @param offset 
+     * @param size 
+     * @param miss 
+     * @returns 
+     */
+    range(offset: bigint, size: bigint, miss: (location: bigint) => E) {
+        const args = [];
+        for (let i = offset; i < offset + size; i += 32n) {
+            args.push(this.get(i) ?? miss(i));
+        }
+        return args;
+    }
 }
 
 /**
