@@ -864,7 +864,7 @@ const ShanghaiStep = {
 const isSelectorMLoadCallData = (expr: Expr, memory: Ram<Expr>['memory']) =>
     expr.tag === 'MLoad' &&
     expr.location.isZero() &&
-    memory.get(0x0n) === undefined && (value =>
+    !memory.has(0x0n) && (value =>
         (
             value?.tag === 'CallDataLoad' &&
             value.location.isZero()
