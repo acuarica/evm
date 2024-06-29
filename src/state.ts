@@ -99,18 +99,39 @@ export class Memory<in out E> {
     private constructor(private readonly _map: Map<bigint, E>) {
     }
 
+    /**
+     * Creates a new `Memory` with no set locations.
+     * 
+     * @returns an empty `Memory`.
+     */
     static new<E>(): Memory<E> {
         return new Memory<E>(new Map());
     }
 
+    /**
+     * @returns `boolean` indicating whether a value in the specified `location` exists or not.
+     */
     has(location: bigint): boolean {
         return this._map.has(location);
     }
 
+    /**
+     * Returns a specified value from the `Memory` object.
+     * If the value stored at the provided `location` is an `object`,
+     * then you will get a reference to that `object` and any change made to that `object` will effectively modify it inside the `Memory`.
+     * 
+     * @returns Returns the value stored at the specified `location`. If no value is stored at the specified `location`, `undefined` is returned.
+     */
     get(location: bigint): E | undefined {
         return this._map.get(location);
     }
 
+    /**
+     * Sets the new `value` at the specified `location`.
+     * If a value at the same `location` already exists, the value will be updated.
+     * 
+     * @returns the `this` `Memory` so calls can be chained.
+     */
     set(location: bigint, value: E): this {
         this._map.set(location, value);
         return this;
@@ -125,14 +146,23 @@ export class Memory<in out E> {
         return new Memory(new Map(this._map));
     }
 
+    /**
+     * @returns the number of values stored in the `Memory`.
+     */
     get size(): number {
         return this._map.size;
     }
 
+    /**
+     * Returns an iterable of keys in the `Memory`.
+     */
     keys(): IterableIterator<bigint> {
         return this._map.keys();
     }
 
+    /**
+     * Returns an iterable of location, value pairs for every entry in the `Memory`.
+     */
     entries(): IterableIterator<[bigint, E]> {
         return this._map.entries();
     }
