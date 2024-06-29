@@ -677,8 +677,8 @@ const FrontierStep = {
                     if (selectorVal?.isVal() && selectorVal.val % (1n << 224n) === 0n) {
                         selector = (selectorVal.val >> 224n).toString(16).padStart(8, '0');
                     } else {
-                        const selectorVal = memory.get((offset.val) - 28n)?.eval();
-                        if (selectorVal?.isVal() && selectorVal.val <= 0xffffffff) {
+                        const selectorVal = memory.get(offset.val - 28n)?.eval();
+                        if (selectorVal?.isVal() && selectorVal.val <= 0xffffffffn) {
                             selector = selectorVal.val.toString(16).padStart(8, '0');
                         }
                     }
