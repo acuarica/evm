@@ -399,7 +399,8 @@ function cfg(contract) {
         label += '\\l';
         // label += inspect(state.memory);
         // label += '\\l';
-        Object.entries(state.memory).forEach(([k, v]) => (label += sol`${k}: ${v}\\l`));
+        for (const [k, v] of state.memory.entries())
+            label += sol`${k}: ${v}\\l`;
         label += state.stmts.map(stmt => sol`${stmt}`).join('\\l');
         label += '\\l';
 

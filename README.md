@@ -242,7 +242,7 @@ const testContract = new Contract(bytecode, new class extends Shanghai {
                 super.CODECOPY(state, _opcode, evm);
 
                 if (dest?.isVal()) {
-                    const m = state.memory[Number(dest.val)] as DataCopy;
+                    const m = state.memory.get(dest.val) as DataCopy;
                     tokenContract = new Contract(m.bytecode!);
                 }
             };

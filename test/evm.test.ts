@@ -342,7 +342,7 @@ describe('::evm', function () {
                             super.CODECOPY(state, _opcode, evm);
 
                             if (dest?.isVal()) {
-                                const m = state.memory[Number(dest.val)] as DataCopy;
+                                const m = state.memory.get(dest.val) as DataCopy;
                                 tokenBytecode = m.bytecode;
                             }
                         };

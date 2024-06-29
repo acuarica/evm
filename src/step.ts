@@ -334,7 +334,7 @@ const datacopy = (kind: DataCopy['kind']) => function datacopy({ stack, memory }
     if (!dest.isVal()) {
         // throw new Error('expected number in returndatacopy');
     } else {
-        memory[Number(dest.val)] = new ast.DataCopy(kind, offset, size, address);
+        memory.set(dest.val, new ast.DataCopy(kind, offset, size, address));
     }
     // stmts.push(new MStore(location, data));
 };
@@ -348,14 +348,14 @@ const DATACOPY = {
         if (!dest.isVal() || dest.val >= 1024 * 32) {
             throw new ExecError('Memory destination for CODECOPY is not reducible to Val');
         } else {
-            memory[Number(dest.val)] = new ast.DataCopy('codecopy', offset, size, undefined,
+            memory.set(dest.val, new ast.DataCopy('codecopy', offset, size, undefined,
                 ((offset, size) => {
                     if (offset.isVal() && size.isVal()) {
                         return bytecode.subarray(Number(offset.val), Number(offset.val + size.val));
                     }
                     return undefined;
                 })(offset.eval(), size.eval())
-            );
+            ));
         }
     }],
     EXTCODECOPY: [0x3c, state => {
@@ -499,12 +499,12 @@ class ArgsFetcher {
     readonly args: Expr[] = [];
     constructor(readonly memory: Ram<Expr>['memory']) { }
 
-    fetch(i: number) {
-        this.args.push(this.memory[i]?.eval() ?? new ast.MLoad(new Val(BigInt(i))));
+    fetch(i: bigint) {
+        this.args.push(this.memory.get(i)?.eval() ?? new ast.MLoad(new Val(i)));
     }
 
     range(offset: Val, size: Val) {
-        for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
+        for (let i = offset.val; i < offset.val + size.val; i += 32n) {
             this.fetch(i);
         }
         return this;
@@ -578,8 +578,8 @@ const FrontierStep = {
     MLOAD: [0x51, ({ stack, memory }: Ram<Expr>) => {
         const location = stack.pop();
         stack.push(new ast.MLoad(location, (location =>
-            location.isVal() && Number(location.val) in memory
-                ? memory[Number(location.val)]
+            location.isVal()
+                ? memory.get(location.val)
                 : undefined
         )(location.eval())));
     }],
@@ -597,7 +597,7 @@ const FrontierStep = {
 
         location = location.eval();
         if (location.isVal()) {
-            memory[Number(location.val)] = data;
+            memory.set(location.val, data);
         }
     }]])),
     MSIZE: [0x59, ({ stack }: Operand<Expr>) => stack.push(new ast.Prop('msize()', 'uint'))],
@@ -610,8 +610,8 @@ const FrontierStep = {
         const offset = stack.pop();
         const size = stack.pop();
         stack.push(new ast.Create(value, offset, size, ((offset, size) => {
-            if (offset.isVal() && size.isVal() && Number(offset.val) in memory) {
-                const data = memory[Number(offset.val)];
+            if (offset.isVal() && size.isVal() && memory.has(offset.val)) {
+                const data = memory.get(offset.val)!;
                 if (data.tag === 'DataCopy' && data.bytecode !== undefined && data.bytecode.length === Number(size.val)) {
                     return data.bytecode;
                 }
@@ -629,7 +629,7 @@ const FrontierStep = {
         const retLen = stack.pop();
         stack.push(new ast.Call(gas, address, value, argsStart, argsLen, retStart, retLen));
         if (retStart.isVal()) {
-            memory[Number(retStart.val)] = new ast.ReturnData(retStart, retLen);
+            memory.set(retStart.val, new ast.ReturnData(retStart, retLen));
         }
     }],
     CALLCODE: [0xf2, function callcode({ stack }) {
@@ -673,18 +673,18 @@ const FrontierStep = {
                 // https://docs.soliditylang.org/en/latest/control-structures.html#revert
                 if (size.val % 32n === 4n) {
                     let selector: string | undefined;
-                    const selectorVal = memory[Number(offset.val)]?.eval();
+                    const selectorVal = memory.get(offset.val)?.eval();
                     if (selectorVal?.isVal() && selectorVal.val % (1n << 224n) === 0n) {
                         selector = (selectorVal.val >> 224n).toString(16).padStart(8, '0');
                     } else {
-                        const selectorVal = memory[Number(offset.val) - 28]?.eval();
-                        if (selectorVal?.isVal() && selectorVal.val <= 0xffffffff) {
+                        const selectorVal = memory.get(offset.val - 28n)?.eval();
+                        if (selectorVal?.isVal() && selectorVal.val <= 0xffffffffn) {
                             selector = selectorVal.val.toString(16).padStart(8, '0');
                         }
                     }
 
                     if (selector !== undefined) {
-                        for (let i = Number(offset.val) + 4; i < Number(offset.val + size.val); i += 32) {
+                        for (let i = offset.val + 4n; i < offset.val + size.val; i += 32n) {
                             fetcher.fetch(i);
                         }
                         return [selector, this.getError(selector), fetcher.args];
@@ -730,11 +730,7 @@ const FrontierStep = {
 
             stmts.push(new ast.Log(event, offset_, size_, topics, function (offset, size) {
                 if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
-                    const args = [];
-                    for (let i = Number(offset.val); i < Number(offset.val + size.val); i += 32) {
-                        args.push(i in memory ? memory[i] : new ast.MLoad(new Val(BigInt(i))));
-                    }
-                    return args;
+                    return memory.range(offset.val, size.val, i => new ast.MLoad(new Val(i)))
                 } else {
                     if (size.isVal() && size.val > MAXSIZE) {
                         throw new ExecError(`Memory size too large creating Log: ${size.val} in \`${size_.yul()}\``);
@@ -864,17 +860,17 @@ const ShanghaiStep = {
 const isSelectorMLoadCallData = (expr: Expr, memory: Ram<Expr>['memory']) =>
     expr.tag === 'MLoad' &&
     expr.location.isZero() &&
-    memory[0x0] === undefined && (
+    !memory.has(0x0n) && (value =>
         (
-            memory[0x1c].tag === 'CallDataLoad' &&
-            memory[0x1c].location.isZero()
+            value?.tag === 'CallDataLoad' &&
+            value.location.isZero()
         ) || (
-            memory[0x1c].tag === 'DataCopy' &&
-            memory[0x1c].kind === 'calldatacopy' &&
-            memory[0x1c].offset.isZero() &&
-            memory[0x1c].size.isVal() && memory[0x1c].size.val === 0x4n
+            value?.tag === 'DataCopy' &&
+            value.kind === 'calldatacopy' &&
+            value.offset.isZero() &&
+            value.size.isVal() && value.size.val === 0x4n
         )
-    );
+    )(memory.get(0x1cn));
 
 const VyperFunctionSelector = {
     ISZERO: [ConstantinopleStep.ISZERO[0], ({ stack, memory }: Ram<Expr>) => {
