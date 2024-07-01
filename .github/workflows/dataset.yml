@@ -1,6 +1,10 @@
 name: Contract Dataset Test
 
-on: workflow_dispatch
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 env:
   FORCE_COLOR: 3
@@ -21,10 +25,18 @@ jobs:
       - run: yarn test --grep ::dataset
         env:
           ENABLE_DATASET_TEST: 1
-      - name: Include dataset summary
+      - name: Format dataset summary to Markdown
         run: |
-          echo "## Contract Dataset Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
-          cat dist/dataset-summary.txt >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## Contract Dataset Summary" >> dist/dataset-summary.md
+          echo "" >> dist/dataset-summary.md
+          echo "\`\`\`txt" >> dist/dataset-summary.md
+          cat dist/dataset-summary.txt >> dist/dataset-summary.md
+          echo "\`\`\`" >> dist/dataset-summary.md
+      - name: Include dataset summary
+        run: cat dist/dataset-summary.md >> $GITHUB_STEP_SUMMARY
+      - name: Add dataset summary PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: dist/dataset-summary.md
