@@ -289,16 +289,13 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
             write(heading('Selector Stats'));
-            write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)}`));
-            write(item(`${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)}`));
+            write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
 
             write(heading('ERCs Stats ' + emph(`(most used first)`)));
-            for (const [erc, count] of ercsStats.counts.sorted())
-                write(item(`${code(erc)} ${emph(`(${count})`)}`));
+            write(item(ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
 
             write(heading('Precompiled Contract Stats ' + emph(`(most used first)`)));
-            for (const [address, count] of hookStats.precompiles.sorted())
-                write(item(`${code(address)} ${emph(`(${count})`)}`));
+            write(item(hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
 
             write(heading('PC Stats'));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
@@ -306,8 +303,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
-            for (const [selector, count] of revertSelectors.slice(0, displayCount))
-                write(item(`${code(selector)} ${emph(`(${count})`)}`));
+            write(item(revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
             if (revertSelectors.length > displayCount)
                 write('    ' + emph(`...${revertSelectors.length - displayCount} more revert selectors`));
 
