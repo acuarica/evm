@@ -322,7 +322,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             c.magenta,
             s => s,
         ));
-        writeFileSync(`dist/dataset-summary.md`, getSummary(false,
+        writeFileSync(`dist/dataset-summary.md`, '## Contract Dataset Summary\n\n' + getSummary(false,
             s => `\n### ${s}`,
             s => `- ${s}`,
             s => `**${s}**`,

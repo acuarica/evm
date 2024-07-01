@@ -25,13 +25,6 @@ jobs:
       - run: yarn test --grep ::dataset
         env:
           ENABLE_DATASET_TEST: 1
-      - name: Format dataset summary to Markdown
-        run: |
-          echo "## Contract Dataset Summary" >> dist/dataset-summary.md
-          echo "" >> dist/dataset-summary.md
-          echo "\`\`\`txt" >> dist/dataset-summary.md
-          cat dist/dataset-summary.txt >> dist/dataset-summary.md
-          echo "\`\`\`" >> dist/dataset-summary.md
       - name: Include dataset summary
         run: cat dist/dataset-summary.md >> $GITHUB_STEP_SUMMARY
       - name: Add dataset summary PR comment
