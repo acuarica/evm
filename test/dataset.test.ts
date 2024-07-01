@@ -15,10 +15,12 @@ import { fnselector } from './utils/selector';
  */
 class MultiSet<T> {
     _map = new Map<T, number>();
+    total = 0;
 
     add(key: T) {
         const count = this._map.get(key) ?? 0;
         this._map.set(key, count + 1);
+        this.total++;
     }
 
     get(key: T): number {
@@ -80,7 +82,9 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
     const csvPath = `${BASE_PATH}/export-verified-contractaddress-opensource-license.csv`;
     const csv = readFileSync(csvPath, 'utf8');
 
-    const errorsByContract: Map<string, Contract['errors']> = new Map();
+    let errorsByReasonCount = 0;
+    const errorsByReason = new Map<string, MultiSet<string>>();
+    const errorsByContract = new Map<string, Contract['errors']>();
     const metadataStats = {
         noMetadata: 0,
         protocols: new MultiSet<string>(),
@@ -200,6 +204,22 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 const v = contract.metadata ? `v${contract.metadata?.solc}` : '<no version>';
                 const key = `${name} ${address} ${size} ${v}`;
                 errorsByContract.set(key, contract.errors);
+
+                errorsByReasonCount += contract.errors.length;
+                contract.errors.forEach(({ err }) => {
+                    const reason = err.reason
+                        // Mask PC in `JUMP` related errors.
+                        .replace(/^JUMP\(0x56\)@\d+ /, 'JUMP(0x56)@<pc> ')
+                        // Mask local variable indexes when an `Expr` is shown.
+                        .replace(/local\d+/g, 'local<n>');
+                    let errors;
+                    if ((errors = errorsByReason.get(reason)) === undefined) {
+                        errors = new MultiSet<string>();
+                        errorsByReason.set(reason, errors);
+                    }
+                    errors.add(key);
+                });
+
                 this.test!.title += c.yellow(' ⧧\u2717');
             } else {
                 const abiPath = `${BASE_PATH}/1/${name}-${address}.abi.json`;
@@ -240,32 +260,17 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             let summary = '';
             const write = (text: string) => summary += text + '\n';
 
-            write(`\n  Symbolic Execution Errors (${warn(`${errorsByContract.size}`)} contracts)`);
-            for (const [id, errors] of errorsByContract.entries()) {
-                write(warn(`    • ${id} - ${errors.length} error(s)`));
-                const errorsByReason: Map<string, number> = new Map();
-                errors.forEach(({ err }) => {
-                    const count = errorsByReason.get(err.reason) ?? 0;
-                    errorsByReason.set(err.reason, count + 1);
-                });
-                for (const [reason, count] of errorsByReason) {
-                    write(`        ${error('x')} ${reason} ${count === 1 ? '' : warn(`(x${count})`)}`);
+            const showErr = (count: number) => `${count === 1 ? '' : warn(`(x${count})`)}`;
+            write(`\n  Symbolic Execution Errors - ${warn(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${warn(`${errorsByContract.size}`)} contracts)`);
+            for (const [reason, addresses] of errorsByReason.entries()) {
+                write(`    ${error('x')} ${reason} - ${warn(`${addresses.total} error(s)`)}`);
+                const addrs = [...addresses];
+                const displayCount = 10;
+                for (const [contract, count] of addrs.slice(0, displayCount)) {
+                    write(`      ${warn('•')} ${`${contract} ${showErr(count)}`}`);
                 }
-            }
-
-            const cc = ([k, v]: [string, number]) => `${k}(${v})`;
-            write('\n  Metadata Stats');
-            write(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-            write(`    • ${info('Protocols')} ${[...metadataStats.protocols].map(cc).join('|')}`);
-            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].map(cc).join('|')}`);
-
-            write('\n  Selector Stats');
-            write(`    • ${info('Hit selectors')} ${selectorStats.hitSelectors.size}`);
-            write(`    • ${info('Missed selectors')} ${selectorStats.missedSelectors.size}`);
-
-            write('\n  ERCs Stats');
-            for (const [erc, count] of ercsStats.counts) {
-                write(`    • ${info(erc)} ${count}`);
+                if (addrs.length > displayCount)
+                    write(c.dim(`    ... ${addrs.length - displayCount} more contracts`));
             }
 
             write('\n  Bench Stats');
@@ -276,22 +281,31 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 write(`    • ${info(bemch.name)} ${out}`);
             }
 
-            write('\n  Precompiled Contract Stats');
-            for (const [address, count] of hookStats.precompiles) {
-                write(`    • ${info(address)} ${count}`);
-            }
+            const cc = ([k, v]: [string, number]) => `${k}(${v})`;
+            write('\n  Metadata Stats');
+            write(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
+            write(`    • ${info('Protocols')} ${[...metadataStats.protocols].map(cc).join('|')}`);
+            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].map(cc).join('|')}`);
 
-            write('\n  Revert Selector Stats');
+            write(`\n  Selector Stats`);
+            write(`    ${info('Hit selectors')}(${selectorStats.hitSelectors.size}) | ${info('Missed selectors')}(${selectorStats.missedSelectors.size})`);
+
+            write(`\n  ERCs Stats`);
+            write(`    ${[...ercsStats.counts].map(([erc, count]) => `${info(erc)}(${count})`).join(' | ')}`);
+
+            write(`\n  Precompiled Contract Stats`);
+            write(`    ${[...hookStats.precompiles].map(([address, count]) => `${info(address)}(${count})`).join(' | ')}`);
+
+            write(`\n  PC Stats`);
+            write(`    ${info('PCs')}(${hookStats.pcs})`);
+
+            write(`\n  Revert Selector Stats`);
             const revertSelectors = hookStats.revertSelectors.sorted();
-            const displayCount = 20;
-            for (const [selector, count] of revertSelectors.slice(0, displayCount)) {
-                write(`    • ${info(selector)} ${count}`);
-            }
+            const displayCount = 15;
+            const sels = revertSelectors.slice(0, displayCount).map(([selector, count]) =>  `${info(selector)}(${count})`).join(' | ');
+            write(`    ${sels}`);
             if (revertSelectors.length > displayCount)
-                write(c.dim(`    ... ${revertSelectors.length - displayCount} more items`));
-
-            write('\n  PC Stats');
-            write(`    • ${info('PCs')} ${hookStats.pcs}`);
+                write(c.dim(`    ... ${revertSelectors.length - displayCount} more revert selectors`));
 
             c.enabled = enabled;
             return summary;
