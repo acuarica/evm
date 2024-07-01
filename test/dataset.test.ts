@@ -248,11 +248,12 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
     });
 
     after(function () {
+        type Fun = (str: string) => string;
+
         const error = c.red;
         const warn = c.yellow;
-        const info = c.cyan;
 
-        function getSummary(enableColors: boolean) {
+        function getSummary(enableColors: boolean, heading: Fun, item: Fun, info: Fun, emph: Fun, code: Fun) {
             const enabled = c.enabled;
 
             c.enabled = enableColors;
@@ -261,7 +262,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             const write = (text: string) => summary += text + '\n';
 
             const showErr = (count: number) => `${count === 1 ? '' : warn(`(x${count})`)}`;
-            write(`\n  Symbolic Execution Errors - ${warn(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${warn(`${errorsByContract.size}`)} contracts)`);
+            write(heading(`Symbolic Execution Errors - ${emph(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${emph(`${errorsByContract.size}`)} contracts)`));
             for (const [reason, addresses] of errorsByReason.entries()) {
                 write(`    ${error('x')} ${reason} - ${warn(`${addresses.total} error(s)`)}`);
                 const addrs = [...addresses];
@@ -273,45 +274,56 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                     write(c.dim(`    ... ${addrs.length - displayCount} more contracts`));
             }
 
-            write('\n  Bench Stats');
-            for (const bemch of [execStats, solStats, yulStats]) {
+            write(heading('Bench Stats'));
+            for (const bench of [execStats, solStats, yulStats]) {
                 let out = '';
-                out += `${'average'} ${c.magenta(`${(bemch.average / 1_000_000).toFixed(1)} ms`)}`;
-                out += ` (${'total'} ${c.magenta(`${bemch.total / 1_000_000n} ms`)})`;
-                write(`    • ${info(bemch.name)} ${out}`);
+                out += `${'average'} ${emph(`${(bench.average / 1_000_000).toFixed(1)} ms`)}`;
+                out += ` (${'total'} ${emph(`${bench.total / 1_000_000n} ms`)})`;
+                write(item(`${info(bench.name)} ${out}`));
             }
 
-            const cc = ([k, v]: [string, number]) => `${k}(${v})`;
-            write('\n  Metadata Stats');
-            write(`    • ${info('No metadata')} ${metadataStats.noMetadata}`);
-            write(`    • ${info('Protocols')} ${[...metadataStats.protocols].map(cc).join('|')}`);
-            write(`    • ${info('SOLC versions')} ${[...metadataStats.solcs].map(cc).join('|')}`);
+            const cc = (def: string) => ([k, v]: [string, number]) => `${code(k !== '' ? k : def)}${emph(`(${v})`)}`;
+            write(heading('Metadata Stats'));
+            write(item(`${info('No metadata')} ${emph(`(${metadataStats.noMetadata})`)}`));
+            write(item(`${info('Protocols')} ${[...metadataStats.protocols.sorted()].map(cc('<no protocol>')).join(' ')}`));
+            write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
-            write(`\n  Selector Stats`);
-            write(`    ${info('Hit selectors')}(${selectorStats.hitSelectors.size}) | ${info('Missed selectors')}(${selectorStats.missedSelectors.size})`);
+            write(heading('Selector Stats'));
+            write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
 
-            write(`\n  ERCs Stats`);
-            write(`    ${[...ercsStats.counts].map(([erc, count]) => `${info(erc)}(${count})`).join(' | ')}`);
+            write(heading('ERCs Stats ' + emph(`(most used first)`)));
+            write(item(ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
 
-            write(`\n  Precompiled Contract Stats`);
-            write(`    ${[...hookStats.precompiles].map(([address, count]) => `${info(address)}(${count})`).join(' | ')}`);
+            write(heading('Precompiled Contract Stats ' + emph(`(most used first)`)));
+            write(item(hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
 
-            write(`\n  PC Stats`);
-            write(`    ${info('PCs')}(${hookStats.pcs})`);
+            write(heading('PC Stats'));
+            write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
 
-            write(`\n  Revert Selector Stats`);
+            write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
-            const sels = revertSelectors.slice(0, displayCount).map(([selector, count]) =>  `${info(selector)}(${count})`).join(' | ');
-            write(`    ${sels}`);
+            write(item(revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
             if (revertSelectors.length > displayCount)
-                write(c.dim(`    ... ${revertSelectors.length - displayCount} more revert selectors`));
+                write('    ' + emph(`...${revertSelectors.length - displayCount} more revert selectors`));
 
             c.enabled = enabled;
             return summary;
         }
 
-        console.info(getSummary(true));
-        writeFileSync(`dist/dataset-summary.txt`, getSummary(false).trimStart(), 'utf-8');
+        console.info(getSummary(true,
+            s => `\n  ${s}`,
+            s => `    • ${s}`,
+            c.cyan,
+            c.magenta,
+            s => s,
+        ));
+        writeFileSync(`dist/dataset-summary.md`, '## Contract Dataset Summary\n\n' + getSummary(false,
+            s => `\n### ${s}`,
+            s => `- ${s}`,
+            s => `**${s}**`,
+            s => `_${s}_`,
+            s => `\`${s}\``,
+        ).trimStart(), 'utf-8');
     });
 });
