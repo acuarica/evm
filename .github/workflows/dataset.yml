@@ -1,6 +1,10 @@
 name: Contract Dataset Test
 
-on: workflow_dispatch
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 env:
   FORCE_COLOR: 3
@@ -28,3 +32,9 @@ jobs:
           echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
           cat dist/dataset-summary.txt >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      - name: Add dataset summary PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: dist/dataset-summary.txt
