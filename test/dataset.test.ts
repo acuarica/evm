@@ -285,25 +285,25 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             const cc = (def: string) => ([k, v]: [string, number]) => `${code(k !== '' ? k : def)}${emph(`(${v})`)}`;
             write(heading('Metadata Stats'));
             write(item(`${info('No metadata')} ${emph(`(${metadataStats.noMetadata})`)}`));
-            write(item(`${info('Protocols')} ${[...metadataStats.protocols].map(cc('<no protocol>')).join(' ')}`));
-            write(item(`${info('SOLC versions')} ${[...metadataStats.solcs].map(cc('<no version>')).join(' ')}`));
+            write(item(`${info('Protocols')} ${[...metadataStats.protocols.sorted()].map(cc('<no protocol>')).join(' ')}`));
+            write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
             write(heading('Selector Stats'));
             write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)}`));
             write(item(`${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)}`));
 
-            write(heading('ERCs Stats'));
-            for (const [erc, count] of ercsStats.counts)
+            write(heading('ERCs Stats ' + emph(`(most used first)`)));
+            for (const [erc, count] of ercsStats.counts.sorted())
                 write(item(`${code(erc)} ${emph(`(${count})`)}`));
 
-            write(heading('Precompiled Contract Stats'));
-            for (const [address, count] of hookStats.precompiles)
+            write(heading('Precompiled Contract Stats ' + emph(`(most used first)`)));
+            for (const [address, count] of hookStats.precompiles.sorted())
                 write(item(`${code(address)} ${emph(`(${count})`)}`));
 
             write(heading('PC Stats'));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
 
-            write(heading('Revert Selector Stats'));
+            write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
             for (const [selector, count] of revertSelectors.slice(0, displayCount))
