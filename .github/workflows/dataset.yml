@@ -37,4 +37,4 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           recreate: true
-          path: dist/dataset-summary.txt
+          message: ${{ env.GITHUB_STEP_SUMMARY }}
