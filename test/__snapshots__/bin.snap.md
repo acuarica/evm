@@ -292,13 +292,13 @@ Bytecode for contract - is '0x', it might have been self-destructed or it is an 
 
 ```out bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider
 Function Selectors
-  0x22895118 <selector not found>
-  0x01ffc9a7 <selector not found>
-  0x621fd130 <selector not found>
-  0xc5f2892f <selector not found>
+  0x22895118 <signature not found>
+  0x01ffc9a7 <signature not found>
+  0x621fd130 <signature not found>
+  0xc5f2892f <signature not found>
 
 Events
-  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <selector not found>
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
 
 ```
 
