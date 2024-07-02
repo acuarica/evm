@@ -165,7 +165,7 @@ No metadata
 
 ```out display-abi-from-bytecode
 Function Selectors
-  0x6d4ce63c <selector not found>
+  0x6d4ce63c <signature not found>
 
 Events
 
