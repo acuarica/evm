@@ -236,7 +236,7 @@ void yargs(process.argv.slice(2))
         const events = Object.entries(contract.events)
             .map(([selector, event]) => ['0x' + selector, event.sig]);
 
-        const notfound = c.dim('<selector not found>');
+        const notfound = c.dim('<signature not found>');
         console.info(c.underline('Function Selectors'));
         functions.forEach(([selector, sig]) => console.info(' ', selector, sig !== undefined ? c.cyan(sig) : notfound));
         console.info();
