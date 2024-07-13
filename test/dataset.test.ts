@@ -5,7 +5,7 @@ import c from 'ansi-colors';
 import { expect } from 'chai';
 import type { ABI } from 'solc';
 
-import { Contract, ERCIds, Shanghai, sol, type Opcode, type State } from 'sevm';
+import { Contract, ERCIds, JUMPDEST, Shanghai, sol, type Opcode, type State } from 'sevm';
 import 'sevm/4bytedb';
 import type { StaticCall, Revert } from 'sevm/ast';
 import { fnselector } from './utils/selector';
@@ -233,6 +233,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 } else {
                     this.test!.title += c.yellow(' {}-');
                 }
+
+                coverage(contract, this);
             }
 
             const externals = [
@@ -327,3 +329,30 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
         ).trimStart(), 'utf-8');
     });
 });
+
+function coverage(contract: Contract, ctx: Mocha.Context) {
+    let nopcodes = 0;
+    let unreachableJumpDestChunks = 0;
+    let unreachableJumpDestSize = 0;
+    for (const chunk of contract.chunks()) {
+        if (chunk.content instanceof Uint8Array) {
+            expect(chunk.states === undefined);
+            expect(chunk.content.length > 0);
+            if (chunk.content[0] === JUMPDEST) {
+                unreachableJumpDestChunks++;
+                unreachableJumpDestSize += chunk.content.length;
+            }
+        } else {
+            const block = contract.blocks.get(chunk.pcbegin);
+            expect(chunk.states !== undefined);
+            expect(block !== undefined);
+            expect(block!.opcodes.length === chunk.content.length);
+            expect(chunk.content.length > 0);
+            nopcodes += chunk.content.length;
+        }
+    }
+
+    expect(nopcodes).to.be.equal(contract.opcodes().length);
+    if (unreachableJumpDestChunks > 0)
+        ctx.test!.title += ` \u{1F6A7}${unreachableJumpDestChunks}(${unreachableJumpDestSize}b)`;
+}
