@@ -308,10 +308,9 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
             write(item(`${info('Coverage')} \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
 
-            write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
-            write(item(revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`${info('Revert Selectors')} ${emph(`(most used first)`)} ` + revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
             if (revertSelectors.length > displayCount)
                 write('    ' + emph(`...${revertSelectors.length - displayCount} more revert selectors`));
 
