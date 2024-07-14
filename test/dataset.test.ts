@@ -302,11 +302,11 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
             write(heading('Bytecode Stats'));
-            write(item('Selectors ' + `${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
-            write(item(`ERCs ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
-            write(item(`Precompiled Contracts ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`${info('Selectors')} Missed selectors ${emph(`(${selectorStats.missedSelectors.size})`)} | Hit selectors ${emph(`(${selectorStats.hitSelectors.size})`)} `));
+            write(item(`${info('ERCs')} ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`${info('Precompiled Contracts')} ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
-            write(item(`Coverage \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
+            write(item(`${info('Coverage')} \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
 
             write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
