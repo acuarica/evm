@@ -9,6 +9,11 @@ on:
 env:
   FORCE_COLOR: 3
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   dataset-test:
     runs-on: ubuntu-latest

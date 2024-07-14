@@ -5,7 +5,7 @@ import c from 'ansi-colors';
 import { expect } from 'chai';
 import type { ABI } from 'solc';
 
-import { Contract, ERCIds, Shanghai, sol, type Opcode, type State } from 'sevm';
+import { Contract, ERCIds, JUMPDEST, Shanghai, sol, type Opcode, type State } from 'sevm';
 import 'sevm/4bytedb';
 import type { StaticCall, Revert } from 'sevm/ast';
 import { fnselector } from './utils/selector';
@@ -134,6 +134,17 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
         revertSelectors: new MultiSet<string>(),
     };
 
+    const coverageStats = {
+        unreachableJumpDestChunks: 0,
+        unreachableJumpDestSize: 0,
+        nchunks: 0,
+        append({ unreachableJumpDestChunks, unreachableJumpDestSize, nchunks }: ReturnType<typeof coverage>) {
+            this.unreachableJumpDestChunks += unreachableJumpDestChunks;
+            this.unreachableJumpDestSize += unreachableJumpDestSize;
+            this.nchunks += nchunks;
+        },
+    };
+
     const contracts = csv
         .trimEnd()
         .split('\n')
@@ -233,6 +244,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                 } else {
                     this.test!.title += c.yellow(' {}-');
                 }
+
+                coverageStats.append(coverage(contract, this));
             }
 
             const externals = [
@@ -262,7 +275,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             const write = (text: string) => summary += text + '\n';
 
             const showErr = (count: number) => `${count === 1 ? '' : warn(`(x${count})`)}`;
-            write(heading(`Symbolic Execution Errors - ${emph(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${emph(`${errorsByContract.size}`)} contracts)`));
+            write(heading(`\u{26A0}\u{FE0F} Symbolic Execution Errors - ${emph(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${emph(`${errorsByContract.size}`)} contracts)`));
             for (const [reason, addresses] of errorsByReason.entries()) {
                 write(`    ${error('x')} ${reason} - ${warn(`${addresses.total} error(s)`)}`);
                 const addrs = [...addresses];
@@ -274,7 +287,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                     write(c.dim(`    ... ${addrs.length - displayCount} more contracts`));
             }
 
-            write(heading('Bench Stats'));
+            write(heading('\u{26A1} Bench Stats'));
             for (const bench of [execStats, solStats, yulStats]) {
                 let out = '';
                 out += `${'average'} ${emph(`${(bench.average / 1_000_000).toFixed(1)} ms`)}`;
@@ -283,27 +296,21 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             }
 
             const cc = (def: string) => ([k, v]: [string, number]) => `${code(k !== '' ? k : def)}${emph(`(${v})`)}`;
-            write(heading('Metadata Stats'));
+            write(heading('\u{1F3F7} \u{FE0F} Metadata Stats'));
             write(item(`${info('No metadata')} ${emph(`(${metadataStats.noMetadata})`)}`));
             write(item(`${info('Protocols')} ${[...metadataStats.protocols.sorted()].map(cc('<no protocol>')).join(' ')}`));
             write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
-            write(heading('Selector Stats'));
-            write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
-
-            write(heading('ERCs Stats ' + emph(`(most used first)`)));
-            write(item(ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
-
-            write(heading('Precompiled Contract Stats ' + emph(`(most used first)`)));
-            write(item(hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
-
-            write(heading('PC Stats'));
+            write(heading('\u{1F4DC} Bytecode Stats'));
+            write(item(`${info('Selectors')} Missed selectors ${emph(`(${selectorStats.missedSelectors.size})`)} | Hit selectors ${emph(`(${selectorStats.hitSelectors.size})`)} `));
+            write(item(`${info('ERCs')} ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`${info('Precompiled Contracts')} ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
+            write(item(`${info('Coverage')} \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
 
-            write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
-            write(item(revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`${info('Revert Selectors')} ${emph(`(most used first)`)} ` + revertSelectors.slice(0, displayCount).map(([selector, count]) => `${code(selector)}${emph(`(${count})`)}`).join(' | ')));
             if (revertSelectors.length > displayCount)
                 write('    ' + emph(`...${revertSelectors.length - displayCount} more revert selectors`));
 
@@ -327,3 +334,48 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
         ).trimStart(), 'utf-8');
     });
 });
+
+/**
+ * Determines bytecode coverage for `contract`.
+ * 
+ * @param contract the `Contract` to get coverage information from.
+ * @param ctx The Mocha context to update running test `title`.
+ * @returns 
+ */
+function coverage(contract: Contract, ctx: Mocha.Context): {
+    unreachableJumpDestChunks: number,
+    unreachableJumpDestSize: number,
+    nchunks: number,
+} {
+    let nopcodes = 0;
+    let unreachableJumpDestChunks = 0;
+    let unreachableJumpDestSize = 0;
+    const chunks = contract.chunks();
+    for (const chunk of chunks) {
+        if (chunk.content instanceof Uint8Array) {
+            expect(chunk.states).to.be.undefined;
+            expect(chunk.content.length).to.be.above(0);
+            if (chunk.content[0] === JUMPDEST) {
+                unreachableJumpDestChunks++;
+                unreachableJumpDestSize += chunk.content.length;
+            }
+        } else {
+            const block = contract.blocks.get(chunk.pcbegin);
+            expect(chunk.states).to.not.be.undefined;
+            expect(block).to.not.be.undefined;
+            expect(block!.opcodes.length).to.be.equal(chunk.content.length);
+            expect(chunk.content.length).to.be.above(0);
+            nopcodes += chunk.content.length;
+        }
+    }
+
+    expect(nopcodes).to.be.equal(contract.opcodes().length);
+    if (unreachableJumpDestChunks > 0)
+        ctx.test!.title += ` \u{1F6A7}${fmt(unreachableJumpDestChunks)}/${fmt(chunks.length)} (${unreachableJumpDestSize}b)`;
+
+    return { unreachableJumpDestChunks, unreachableJumpDestSize, nchunks: chunks.length };
+}
+
+function fmt(value: number) {
+    return new Intl.NumberFormat("en-US").format(value);
+}
