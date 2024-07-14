@@ -134,6 +134,17 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
         revertSelectors: new MultiSet<string>(),
     };
 
+    const coverageStats = {
+        unreachableJumpDestChunks: 0,
+        unreachableJumpDestSize: 0,
+        nchunks: 0,
+        append({ unreachableJumpDestChunks, unreachableJumpDestSize, nchunks }: ReturnType<typeof coverage>) {
+            this.unreachableJumpDestChunks += unreachableJumpDestChunks;
+            this.unreachableJumpDestSize += unreachableJumpDestSize;
+            this.nchunks += nchunks;
+        },
+    };
+
     const contracts = csv
         .trimEnd()
         .split('\n')
@@ -234,7 +245,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                     this.test!.title += c.yellow(' {}-');
                 }
 
-                coverage(contract, this);
+                coverageStats.append(coverage(contract, this));
             }
 
             const externals = [
@@ -290,17 +301,12 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(item(`${info('Protocols')} ${[...metadataStats.protocols.sorted()].map(cc('<no protocol>')).join(' ')}`));
             write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
-            write(heading('Selector Stats'));
-            write(item(`${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
-
-            write(heading('ERCs Stats ' + emph(`(most used first)`)));
-            write(item(ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
-
-            write(heading('Precompiled Contract Stats ' + emph(`(most used first)`)));
-            write(item(hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
-
-            write(heading('PC Stats'));
+            write(heading('Bytecode Stats'));
+            write(item('Selectors ' + `${info('Missed selectors')} ${emph(`(${selectorStats.missedSelectors.size})`)} | ${info('Hit selectors')} ${emph(`(${selectorStats.hitSelectors.size})`)} `));
+            write(item(`ERCs ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
+            write(item(`Precompiled Contracts ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
+            write(item(`Coverage \u{1F6A7} ${coverageStats.unreachableJumpDestChunks}/${coverageStats.nchunks} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
 
             write(heading('Revert Selector Stats ' + emph(`(most used first)`)));
             const revertSelectors = hookStats.revertSelectors.sorted();
@@ -330,11 +336,23 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
     });
 });
 
-function coverage(contract: Contract, ctx: Mocha.Context) {
+/**
+ * Determines bytecode coverage for `contract`.
+ * 
+ * @param contract the `Contract` to get coverage information from.
+ * @param ctx The Mocha context to update running test `title`.
+ * @returns 
+ */
+function coverage(contract: Contract, ctx: Mocha.Context): {
+    unreachableJumpDestChunks: number,
+    unreachableJumpDestSize: number,
+    nchunks: number,
+} {
     let nopcodes = 0;
     let unreachableJumpDestChunks = 0;
     let unreachableJumpDestSize = 0;
-    for (const chunk of contract.chunks()) {
+    const chunks = contract.chunks();
+    for (const chunk of chunks) {
         if (chunk.content instanceof Uint8Array) {
             expect(chunk.states === undefined);
             expect(chunk.content.length > 0);
@@ -354,5 +372,7 @@ function coverage(contract: Contract, ctx: Mocha.Context) {
 
     expect(nopcodes).to.be.equal(contract.opcodes().length);
     if (unreachableJumpDestChunks > 0)
-        ctx.test!.title += ` \u{1F6A7}${unreachableJumpDestChunks}(${unreachableJumpDestSize}b)`;
+        ctx.test!.title += ` \u{1F6A7}${unreachableJumpDestChunks}/${chunks.length} (${unreachableJumpDestSize}b)`;
+
+    return { unreachableJumpDestChunks, unreachableJumpDestSize, nchunks: chunks.length };
 }
