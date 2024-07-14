@@ -354,18 +354,18 @@ function coverage(contract: Contract, ctx: Mocha.Context): {
     const chunks = contract.chunks();
     for (const chunk of chunks) {
         if (chunk.content instanceof Uint8Array) {
-            expect(chunk.states === undefined);
-            expect(chunk.content.length > 0);
+            expect(chunk.states).to.be.undefined;
+            expect(chunk.content.length).to.be.above(0);
             if (chunk.content[0] === JUMPDEST) {
                 unreachableJumpDestChunks++;
                 unreachableJumpDestSize += chunk.content.length;
             }
         } else {
             const block = contract.blocks.get(chunk.pcbegin);
-            expect(chunk.states !== undefined);
-            expect(block !== undefined);
-            expect(block!.opcodes.length === chunk.content.length);
-            expect(chunk.content.length > 0);
+            expect(chunk.states).to.not.be.undefined;
+            expect(block).to.not.be.undefined;
+            expect(block!.opcodes.length).to.be.equal(chunk.content.length);
+            expect(chunk.content.length).to.be.above(0);
             nopcodes += chunk.content.length;
         }
     }
