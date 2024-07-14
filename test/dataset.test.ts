@@ -275,7 +275,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             const write = (text: string) => summary += text + '\n';
 
             const showErr = (count: number) => `${count === 1 ? '' : warn(`(x${count})`)}`;
-            write(heading(`Symbolic Execution Errors - ${emph(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${emph(`${errorsByContract.size}`)} contracts)`));
+            write(heading(`\u{26A0}\u{FE0F} Symbolic Execution Errors - ${emph(`${errorsByReasonCount} errors of ${errorsByReason.size} kinds`)} (in ${emph(`${errorsByContract.size}`)} contracts)`));
             for (const [reason, addresses] of errorsByReason.entries()) {
                 write(`    ${error('x')} ${reason} - ${warn(`${addresses.total} error(s)`)}`);
                 const addrs = [...addresses];
@@ -287,7 +287,7 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
                     write(c.dim(`    ... ${addrs.length - displayCount} more contracts`));
             }
 
-            write(heading('Bench Stats'));
+            write(heading('\u{26A1} Bench Stats'));
             for (const bench of [execStats, solStats, yulStats]) {
                 let out = '';
                 out += `${'average'} ${emph(`${(bench.average / 1_000_000).toFixed(1)} ms`)}`;
@@ -296,12 +296,12 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             }
 
             const cc = (def: string) => ([k, v]: [string, number]) => `${code(k !== '' ? k : def)}${emph(`(${v})`)}`;
-            write(heading('Metadata Stats'));
+            write(heading('\u{1F3F7} \u{FE0F} Metadata Stats'));
             write(item(`${info('No metadata')} ${emph(`(${metadataStats.noMetadata})`)}`));
             write(item(`${info('Protocols')} ${[...metadataStats.protocols.sorted()].map(cc('<no protocol>')).join(' ')}`));
             write(item(`${info('SOLC versions')} ${[...metadataStats.solcs.sorted()].map(cc('<no version>')).join(' ')}`));
 
-            write(heading('Bytecode Stats'));
+            write(heading('\u{1F4DC} Bytecode Stats'));
             write(item(`${info('Selectors')} Missed selectors ${emph(`(${selectorStats.missedSelectors.size})`)} | Hit selectors ${emph(`(${selectorStats.hitSelectors.size})`)} `));
             write(item(`${info('ERCs')} ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${info('Precompiled Contracts')} ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
