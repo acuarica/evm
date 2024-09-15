@@ -76,7 +76,6 @@ describe('::contracts', function () {
                 function setValue0(uint256 newValue) internal { value = newValue; }
             }`),
         ],
-
         control: [
 
             _('if', `contract Test {
@@ -245,6 +244,16 @@ describe('::contracts', function () {
                     return _get(m);
                 }
             }`),
+        ],
+        memory: [
+            // Based on https://etherscan.io/address/0xEC702942609FaD2afC1489277d918611f0e17ceb#code
+            // https://github.com/acuarica/evm/issues/129
+            _('invalidate-memory-args', `interface IERC20 { function decimals() external view returns (uint256); }
+                contract Test {
+                    function valueFromDecimals() external view returns (uint256) {
+                        return 10**IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7).decimals();
+                    }
+                }`),
         ],
         system: [
             _('selfdestruct', `contract Test {
