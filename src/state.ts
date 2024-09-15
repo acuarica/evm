@@ -1,6 +1,11 @@
 import type { Expr, Inst } from "./ast";
 
 /**
+ * Represents an `Error` due to an invalid symbolic state execution.
+ */
+export class ExecError extends Error { }
+
+/**
  * Represents the EVM stack of expressions `E`.
  * The stack is a list of expressions `E` elements used to store smart contract instruction inputs and outputs.
  * `E` represents the type of the symbolic elements in the stack.
@@ -16,6 +21,17 @@ import type { Expr, Inst } from "./ast";
  */
 export class Stack<in out E> {
     readonly values: E[] = [];
+
+    /**
+     * Creates a shallow copy of this `Stack`.
+     *
+     * @returns a new `Stack` with the same elements as `this` one.
+     */
+    clone(): Stack<E> {
+        const stack = new Stack<E>();
+        stack.values.push(...this.values);
+        return stack;
+    }
 
     /**
      * Returns the element at the top of the stack without removing it.
@@ -73,17 +89,6 @@ export class Stack<in out E> {
         this.values[0] = secondValue;
         this.values[secondPosition] = firstValue;
     }
-
-    /**
-     * Creates a shallow copy of this `Stack`.
-     *
-     * @returns a new `Stack` with the same elements as `this` one.
-     */
-    clone(): Stack<E> {
-        const stack = new Stack<E>();
-        stack.values.push(...this.values);
-        return stack;
-    }
 }
 
 /**
@@ -106,6 +111,17 @@ export class Memory<in out E> {
      */
     static new<E>(): Memory<E> {
         return new Memory<E>(new Map());
+    }
+
+    /**
+     * Creates a shallow copy of this `Memory`.
+     * That is, the `keys` are copied but the `values` are kept the same
+     * for both `this` Memory and the `clone`d one.
+     *
+     * @returns a new `Memory` with the same elements as `this` one.
+     */
+    clone(): Memory<E> {
+        return new Memory(new Map(this._map));
     }
 
     /**
@@ -135,15 +151,6 @@ export class Memory<in out E> {
     set(location: bigint, value: E): this {
         this._map.set(location, value);
         return this;
-    }
-
-    /**
-     * Creates a shallow copy of this `Memory`.
-     *
-     * @returns a new `Memory` with the same elements as `this` one.
-     */
-    clone(): Memory<E> {
-        return new Memory(new Map(this._map));
     }
 
     /**
@@ -180,6 +187,31 @@ export class Memory<in out E> {
             args.push(this.get(i) ?? miss(i));
         }
         return args;
+    }
+
+    /**
+     * 
+     */
+    invalidateAll(): void {
+        this._map.clear();
+    }
+
+    /**
+     * 
+     * @param offset 
+     * @param size 
+     * @param invalidateAll 
+     */
+    invalidateRange(offset: Expr, size: Expr, invalidateAll = true) {
+        offset = offset.eval();
+        size = size.eval();
+        if (offset.isVal() && size.isVal()) {
+            for (let i = offset.val; i < offset.val + size.val; i += 32n) {
+                this._map.delete(i);
+            }
+        } else if (invalidateAll) {
+            this.invalidateAll();
+        }
     }
 }
 
@@ -274,10 +306,3 @@ export type Operand<E = Expr> = Pick<State<never, E>, 'stack'>;
  * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
  */
 export type Ram<E = Expr> = Pick<State<never, E>, 'stack' | 'memory'>;
-
-/**
- * Represents an error due to an invalid symbolic state execution.
- */
-export class ExecError extends Error {
-
-}
