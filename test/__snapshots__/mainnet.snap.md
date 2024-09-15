@@ -640,5 +640,16 @@
 ```
 
 ```errors RankedAuctionWETHGateway-0x47b24fDF2f8EC7b72ac879b124F90f3FC53b51cA/detect-errors
-[]
+[
+  {
+    "reason": "Memory destination for CODECOPY is not reducible to Val",
+    "opcode": {
+      "pc": 2246,
+      "opcode": 57,
+      "mnemonic": "CODECOPY",
+      "data": null
+    },
+    "name": "Throw"
+  }
+]
 ```

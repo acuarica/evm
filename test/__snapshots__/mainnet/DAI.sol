@@ -144,6 +144,7 @@ contract Contract {
         require(authority);
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
+        require(memory[0x60]);
         log([object Object], [object Object], [object Object], [object Object], memory[0x60:0xc0 + msg.data.length - 0x60 ]ii);
         owner = 0x10000000000000000000000000000000000000000 | 0xffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff & owner;
         return;
@@ -172,6 +173,7 @@ contract Contract {
         require(authority);
         require(address(authority).code.length);
         require(call(gasleft() - 0x2c6,local9,0x0,local7,0x64 + local5 - local7,local7,0x20));
+        require(memory[0x60]);
         owner = _arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner;
         emit LogSetOwner(_arg0 | 0xffffffffffffffffffffffff0000000000000000000000000000000000000000 & owner);
         return;

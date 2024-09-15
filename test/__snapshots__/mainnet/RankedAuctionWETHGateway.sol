@@ -76,10 +76,30 @@ contract Contract {
         require(address(0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2).code.length);
         require(call(gasleft(),local41,0x0,local39,0x20 + 0x4 + memory[0x40] - local39,local39,0x20));
         require(returndatasize() >= 0x20);
+        if (memory[0x80] > memory[0x80]) {
+            require(address(0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2).code.length);
+            require(call(gasleft(),local53,0x0,local51,local48 - local51 + 0x24,local51,0x0));
+            if (returndatasize() != 0x0) {
+                require(call(gasleft(),msg.sender & (0x1 << 0xa0) - 0x1,local49,local66,local61 + local60 - local66,local66,0x0));
+                require(address(0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2).code.length);
+                require(call(gasleft(),local78,0x0,local76,0x20 + 0x4 + memory[0x40] - local76,local76,0x20));
+                require(returndatasize() >= 0x20);
+                if (memory[memory[0x40]] != memory[0x80]) {
+                    throw('Memory destination for CODECOPY is not reducible to Val');
+                }
+                return;
+            }
+            require(call(gasleft(),msg.sender & (0x1 << 0xa0) - 0x1,local49,local66,local61 + local60 - local66,local66,0x0), "ETH_TRANSFER_FAILED");
+            require(address(0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2).code.length);
+            require(call(gasleft(),local77,0x0,local75,0x20 + 0x4 + memory[0x40] - local75,local75,0x20));
+            require(returndatasize() >= 0x20);
+            require(memory[0xa0] == memory[0x80], 0x8c379a0, 0x20, 0x2c, this.code[0xb99:(0xb99+0x2c)], memory[0x104]);
+            return;
+        }
         require(address(0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2).code.length);
         require(call(gasleft(),local53,0x0,local51,0x20 + 0x4 + memory[0x40] - local51,local51,0x20));
         require(returndatasize() >= 0x20);
-        require(0x70a0823100000000000000000000000000000000000000000000000000000000 == 0x70a0823100000000000000000000000000000000000000000000000000000000, 0x8c379a0, 0x20, 0x2c, this.code[0xb99:(0xb99+0x2c)], memory[0xe4]);
+        require(memory[0x80] == memory[0x80], 0x8c379a0, 0x20, 0x2c, this.code[0xb99:(0xb99+0x2c)], memory[0xe4]);
         return;
     }
 
