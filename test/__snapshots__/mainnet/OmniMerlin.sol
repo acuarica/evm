@@ -228,43 +228,98 @@ contract Contract {
                                                             }
                                                             storage[keccak256(_arg0, 0x5)] += 0x1;
                                                             require(staticcall(gasleft(),0x1,local65,0xa0 + local60 - local65,local65 - 0x20,0x20));
-                                                            revert("INVALID_SIGNER");
+                                                            if (memory[0x282]) {
+                                                                require(memory[0x282] == _arg0, "INVALID_SIGNER");
+                                                                mapping5[memory[0x282]][_arg1] = _arg2;
+                                                                emit Approval(_arg0, _arg1, _arg2);
+                                                                return;
+                                                            }
+                                                            require(memory[0x282], "INVALID_SIGNER");
+                                                            mapping5[memory[0x282]][_arg1] = _arg2;
+                                                            emit Approval(_arg0, _arg1, _arg2);
+                                                            return;
                                                         }
                                                         storage[keccak256(_arg0, 0x5)] += 0x1;
                                                         require(staticcall(gasleft(),0x1,local63,0xa0 + local58 - local63,local63 - 0x20,0x20));
-                                                        revert("INVALID_SIGNER");
+                                                        if (memory[0x282]) {
+                                                            require(memory[0x282] == _arg0, "INVALID_SIGNER");
+                                                            mapping5[memory[0x282]][_arg1] = _arg2;
+                                                            emit Approval(_arg0, _arg1, _arg2);
+                                                            return;
+                                                        }
+                                                        require(memory[0x282], "INVALID_SIGNER");
+                                                        mapping5[memory[0x282]][_arg1] = _arg2;
+                                                        emit Approval(_arg0, _arg1, _arg2);
+                                                        return;
                                                     }
                                                     storage[keccak256(_arg0, 0x5)] += 0x1;
                                                     require(staticcall(gasleft(),0x1,local61,0xa0 + local56 - local61,local61 - 0x20,0x20));
-                                                    revert("INVALID_SIGNER");
+                                                    if (memory[0x282]) {
+                                                        require(memory[0x282] == _arg0, "INVALID_SIGNER");
+                                                        mapping5[memory[0x282]][_arg1] = _arg2;
+                                                        emit Approval(_arg0, _arg1, _arg2);
+                                                        return;
+                                                    }
+                                                    require(memory[0x282], "INVALID_SIGNER");
+                                                    mapping5[memory[0x282]][_arg1] = _arg2;
+                                                    emit Approval(_arg0, _arg1, _arg2);
+                                                    return;
                                                 }
                                                 storage[keccak256(_arg0, 0x5)] += 0x1;
                                                 require(staticcall(gasleft(),0x1,local59,0xa0 + local54 - local59,local59 - 0x20,0x20));
-                                                revert("INVALID_SIGNER");
+                                                if (memory[0x282]) {
+                                                    require(memory[0x282] == _arg0, "INVALID_SIGNER");
+                                                    mapping5[memory[0x282]][_arg1] = _arg2;
+                                                    emit Approval(_arg0, _arg1, _arg2);
+                                                    return;
+                                                }
+                                                require(memory[0x282], "INVALID_SIGNER");
+                                                mapping5[memory[0x282]][_arg1] = _arg2;
+                                                emit Approval(_arg0, _arg1, _arg2);
+                                                return;
                                             }
                                             storage[keccak256(_arg0, 0x5)] += 0x1;
                                             require(staticcall(gasleft(),0x1,local57,0xa0 + local52 - local57,local57 - 0x20,0x20));
-                                            revert("INVALID_SIGNER");
+                                            if (memory[0x282]) {
+                                                require(memory[0x282] == _arg0, "INVALID_SIGNER");
+                                                mapping5[memory[0x282]][_arg1] = _arg2;
+                                                emit Approval(_arg0, _arg1, _arg2);
+                                                return;
+                                            }
+                                            require(memory[0x282], "INVALID_SIGNER");
+                                            mapping5[memory[0x282]][_arg1] = _arg2;
+                                            emit Approval(_arg0, _arg1, _arg2);
+                                            return;
                                         }
                                         storage[keccak256(_arg0, 0x5)] += 0x1;
                                         require(staticcall(gasleft(),0x1,local55,0xa0 + local50 - local55,local55 - 0x20,0x20));
-                                        revert("INVALID_SIGNER");
+                                        if (memory[0x282]) {
+                                            if (memory[0x282] != _arg0) {
+                                            }
+                                            mapping5[memory[0x282]][_arg1] = _arg2;
+                                            emit Approval(_arg0, _arg1, _arg2);
+                                            return;
+                                        }
                                     }
                                     storage[keccak256(_arg0, 0x5)] += 0x1;
                                     require(staticcall(gasleft(),0x1,local53,0xa0 + local48 - local53,local53 - 0x20,0x20));
-                                    revert("INVALID_SIGNER");
+                                    if (memory[0x282]) {
+                                    }
                                 }
                                 storage[keccak256(_arg0, 0x5)] += 0x1;
                                 require(staticcall(gasleft(),0x1,local51,0xa0 + local46 - local51,local51 - 0x20,0x20));
-                                revert("INVALID_SIGNER");
+                                if (memory[0x282]) {
+                                }
                             }
                             storage[keccak256(_arg0, 0x5)] += 0x1;
                             require(staticcall(gasleft(),0x1,local49,0xa0 + local44 - local49,local49 - 0x20,0x20));
-                            revert("INVALID_SIGNER");
+                            if (memory[0x282]) {
+                            }
                         }
                         storage[keccak256(_arg0, 0x5)] += 0x1;
                         require(staticcall(gasleft(),0x1,local47,0xa0 + local42 - local47,local47 - 0x20,0x20));
-                        revert("INVALID_SIGNER");
+                        if (memory[0x282]) {
+                        }
                     }
                 }
             }
@@ -276,6 +331,8 @@ contract Contract {
         }
         storage[keccak256(_arg0, 0x5)] += 0x1;
         require(staticcall(gasleft(),0x1,local30,0xa0 + local25 - local30,local30 - 0x20,0x20));
+        if (memory[0x1c2]) {
+        }
     }
 
     function allowance(address _arg0, address _arg1) public {

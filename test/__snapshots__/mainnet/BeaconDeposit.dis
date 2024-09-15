@@ -1,4 +1,4 @@
-3126 opcodes in bytecode
+3143 opcodes in bytecode
 @0: ⟪8⟫ 1〒
 @13: ⟪9⟫ 1〒
 @30: ⟪5⟫ 1〒
@@ -112,7 +112,7 @@
 @3143: ⟪3⟫ 11〒
 @3147: ⟪29⟫ 11〒
 @3180: ⟪6⟫ 11〒
-@3189: unreachable (52 bytes in buffer) 805182527fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe09092019160209182019101610c[..]
+@3189: ⟪17⟫ 11〒
 @3241: ⟪77⟫ 11〒
 @3345: ⟪6⟫ 11〒
 @3354: ⟪17⟫ 11〒
