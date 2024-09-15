@@ -190,17 +190,23 @@ export class Memory<in out E> {
     }
 
     /**
+     * Invalidates the whole memory region.
      * 
+     * That is, after `invalidateAll`, `get` with any argument will return `undefined`.
      */
     invalidateAll(): void {
         this._map.clear();
     }
 
     /**
+     * Tries to invalidate the memory range indicated by `[offset, offset + size]`.
+     * It can do so when both `offset` and `size` are reducible to `Val`.
      * 
-     * @param offset 
-     * @param size 
-     * @param invalidateAll 
+     * Otherwise, when `invalidateAll` is set clears the whole memory.
+     * 
+     * @param offset the offset in memory to invalidate.
+     * @param size the size to invalidate.
+     * @param invalidateAll indicates to clear the whole memory in case neither `offset` nor `size` are not reducible to `Val`.
      */
     invalidateRange(offset: Expr, size: Expr, invalidateAll = true) {
         offset = offset.eval();
