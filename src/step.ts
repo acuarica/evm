@@ -349,12 +349,10 @@ const DATACOPY = {
             throw new ExecError('Memory destination for CODECOPY is not reducible to Val');
         } else {
             memory.set(dest.val, new ast.DataCopy('codecopy', offset, size, undefined,
-                ((offset, size) => {
-                    if (offset.isVal() && size.isVal()) {
-                        return bytecode.subarray(Number(offset.val), Number(offset.val + size.val));
-                    }
-                    return undefined;
-                })(offset.eval(), size.eval())
+                ((offset, size) => offset.isVal() && size.isVal()
+                    ? bytecode.subarray(Number(offset.val), Number(offset.val + size.val))
+                    : undefined
+                )(offset.eval(), size.eval())
             ));
         }
     }],
@@ -628,11 +626,12 @@ const FrontierStep = {
         const retStart = stack.pop();
         const retLen = stack.pop();
         stack.push(new ast.Call(gas, address, value, argsStart, argsLen, retStart, retLen));
+        memory.invalidateRange(retStart, retLen);
         if (retStart.isVal()) {
             memory.set(retStart.val, new ast.ReturnData(retStart, retLen));
         }
     }],
-    CALLCODE: [0xf2, function callcode({ stack }) {
+    CALLCODE: [0xf2, function callcode({ stack, memory }) {
         const gas = stack.pop();
         const address = stack.pop();
         const value = stack.pop();
@@ -641,9 +640,10 @@ const FrontierStep = {
         const retStart = stack.pop();
         const retLen = stack.pop();
         stack.push(new ast.CallCode(gas, address, value, argsStart, argsLen, retStart, retLen));
+        memory.invalidateRange(retStart, retLen);
     }],
     RETURN: [{ opcode: 0xf3, halts: true }, state => state.halt(memArgs(state, ast.Return))],
-    DELEGATECALL: [0xf4, function delegatecall({ stack }) {
+    DELEGATECALL: [0xf4, function delegatecall({ stack, memory }) {
         const gas = stack.pop();
         const address = stack.pop();
         const argsStart = stack.pop();
@@ -651,8 +651,9 @@ const FrontierStep = {
         const retStart = stack.pop();
         const retLen = stack.pop();
         stack.push(new ast.DelegateCall(gas, address, argsStart, argsLen, retStart, retLen));
+        memory.invalidateRange(retStart, retLen);
     }],
-    STATICCALL: [0xfa, function staticcall({ stack }) {
+    STATICCALL: [0xfa, function staticcall({ stack, memory }) {
         const gas = stack.pop();
         const address = stack.pop();
         const argsStart = stack.pop();
@@ -660,6 +661,7 @@ const FrontierStep = {
         const retStart = stack.pop();
         const retLen = stack.pop();
         stack.push(new ast.StaticCall(gas, address, argsStart, argsLen, retStart, retLen));
+        memory.invalidateRange(retStart, retLen);
     }],
 
     REVERT: [{ opcode: 0xfd, halts: true }, function (this: Members, state) {
@@ -730,7 +732,7 @@ const FrontierStep = {
 
             stmts.push(new ast.Log(event, offset_, size_, topics, function (offset, size) {
                 if (offset.isVal() && size.isVal() && size.val <= MAXSIZE) {
-                    return memory.range(offset.val, size.val, i => new ast.MLoad(new Val(i)))
+                    return memory.range(offset.val, size.val, i => new ast.MLoad(new Val(i)));
                 } else {
                     if (size.isVal() && size.val > MAXSIZE) {
                         throw new ExecError(`Memory size too large creating Log: ${size.val} in \`${size_.yul()}\``);
