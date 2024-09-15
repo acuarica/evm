@@ -387,7 +387,7 @@ describe('::step', function () {
             state.stack.push(new Val(4n));
             step.CODECOPY(state, new Opcode(0, 0, 'codecopy'), { bytecode });
 
-            expect(state.memory).to.be.deep.equal(Memory.new()
+            expect(state.memory).to.be.deep.equal(new Memory()
                 .set(4n, new DataCopy('codecopy', offset, size, undefined, bytecode.subarray(2, 5)))
             );
             expect(state.stack.values).to.be.deep.equal([]);
@@ -404,7 +404,7 @@ describe('::step', function () {
             state.stack.push(new Val(4n));
             step.MSTORE(state);
 
-            expect(state.memory).to.be.deep.equal(Memory.new().set(4n, Props['block.coinbase']));
+            expect(state.memory).to.be.deep.equal(new Memory().set(4n, Props['block.coinbase']));
             expect(state.stmts).to.be.deep.equal([new MStore(new Val(4n), Props['block.coinbase'])]);
         });
     });
