@@ -24,7 +24,7 @@ describe(`::examples${hint}`, function () {
                 ? chaiExec('node', `dist/examples/${file.slice(0, -3)}.js`, { env })
                 : chaiExec(`examples/${file}`, { env });
 
-            expect(cli).stderr.to.be.empty;
+            expect(cli, cli.stderr).stderr.to.be.empty;
             expect(cli).stdout.to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
         });
