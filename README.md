@@ -121,12 +121,13 @@ These examples use the `import` syntax and [`ethers.js`](https://docs.ethers.org
 ### Decode Bytecode into Opcodes
 
 ```js examples/Decode-Bytecode-into-Opcodes.mjs
-import { EtherscanProvider as Provider } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 import { Contract } from 'sevm';
 
+const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
 // CryptoKitties Contract
 // https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
-const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
+const bytecode = await provider.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 const contract = new Contract(bytecode);
 const opcodes = contract.opcodes();
 console.log(opcodes.map(opcode => opcode.format()));
@@ -135,13 +136,14 @@ console.log(opcodes.map(opcode => opcode.format()));
 ### Decompile a Contract
 
 ```js examples/Decompile-a-Contract.mjs
-import { EtherscanProvider as Provider } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 import { Contract } from 'sevm';
 import 'sevm/4bytedb';
 
+const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
 // WETH Contract
 // https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-const bytecode = await new Provider().getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
+const bytecode = await provider.getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
 
 const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
 console.log(contract.solidify()); //Decompile bytecode to Solidity
@@ -152,13 +154,14 @@ You can use the `contract.yul()` method to decompile the bytecode into Yul-like 
 ### Detect Functions, Events and ERC compliance
 
 ```js examples/Detect-Functions-Events-ERCs.mjs
-import { EtherscanProvider as Provider } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 import { Contract } from 'sevm';
 import 'sevm/4bytedb';
 
+const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
 // CryptoKitties Contract
 // https://etherscan.io/address/0x06012c8cf97BEaD5deAe237070F9587f8E7A266d#code
-const bytecode = await new Provider().getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
+const bytecode = await provider.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A266d');
 
 const contract = new Contract(bytecode).patchdb();
 console.log('functions', contract.getFunctions());
