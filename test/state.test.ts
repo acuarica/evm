@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { ExecError, Stack, State } from 'sevm';
+import { ExecError, Memory, Stack, State } from 'sevm';
 
 describe('::state', function () {
     describe('Stack', function () {
@@ -67,8 +67,57 @@ describe('::state', function () {
         });
     });
 
+    describe('Memory', function () {
+        it('should create a `new` instance which is empty', function () {
+            const memory = Memory.new();
+            expect(memory.size).to.be.equal(0);
+        });
+
+        it('should `get` entries after `set`ting them', function () {
+            const memory = Memory.new();
+            memory.set(32n, 2);
+            memory.set(64n, 3);
+
+            expect(memory.size).to.be.equal(2);
+            expect(memory.get(32n)).to.be.equal(2);
+            expect(memory.get(64n)).to.be.equal(3);
+            expect([...memory.entries()]).to.be.deep.equal([[32n, 2], [64n, 3]]);
+        });
+
+        it('should `clone` an instance without aliasing its keys', function () {
+            const memory = Memory.new();
+            memory.set(32n, 2);
+            memory.set(64n, 3);
+
+            const clone = memory.clone();
+            clone.set(32n, 0);
+            clone.set(96n, 4);
+
+            expect(memory.size).to.be.equal(2);
+            expect(memory.get(32n)).to.be.equal(2);
+            expect(memory.get(64n)).to.be.equal(3);
+            expect([...memory.entries()]).to.be.deep.equal([[32n, 2], [64n, 3]]);
+
+            expect(clone.size).to.be.equal(3);
+            expect(clone.get(32n)).to.be.equal(0);
+            expect(clone.get(64n)).to.be.equal(3);
+            expect(clone.get(96n)).to.be.equal(4);
+            expect([...clone.entries()]).to.be.deep.equal([[32n, 0], [64n, 3], [96n, 4]]);
+        });
+
+        it('should `clone` an instance aliasing its values', function () {
+            const memory = Memory.new<{ x: number }>();
+            memory.set(32n, { x: 1 });
+
+            const clone = memory.clone();
+            clone.get(32n)!.x = 2;
+
+            expect(memory.get(32n)).to.be.deep.equal({ x: 2 });
+        });
+    });
+
     describe('State', function () {
-        it('should `clone` a state without aliasing with its source', function () {
+        it('should `clone` an instance without aliasing its keys', function () {
             const state = new State<number, number>();
             expect(state.halted).to.be.false;
             expect(state.stmts).to.be.empty;
@@ -86,7 +135,7 @@ describe('::state', function () {
             expect(clone.nlocals).to.be.equal(3);
         });
 
-        it('should `clone` a state while aliasing its contents', function () {
+        it('should `clone` an instance aliasing its values', function () {
             const expr = { x: 'a' as 'a' | 'b' };
 
             const state = new State<never, { x: 'a' | 'b' }>();
