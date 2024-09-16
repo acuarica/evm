@@ -4,7 +4,7 @@ import { join } from 'path';
 import { JsonRpcProvider } from 'ethers';
 import { Provider } from '../bin/.provider.mjs';
 
-import {Contract} from 'sevm';
+import { Contract } from 'sevm';
 import 'sevm/4byte';
 import 'sevm/4bytedb';
 
@@ -33,8 +33,12 @@ function getCode(address) {
     return Promise.resolve(bytecode);
 }
 
+// Patch the following to avoid requests in `::examples` tests 
 JsonRpcProvider.prototype.getCode = getCode;
+
+// Patch the following to avoid requests in `::bin/provider` tests 
 Provider.prototype.getCode = getCode;
 
-// @ts-ignore
-Contract.prototype.patch = Contract.prototype.patchdb;
+Contract.prototype.patch = function () {
+    return Promise.resolve(this.patchdb());
+}
