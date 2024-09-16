@@ -146,7 +146,7 @@ const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
 const bytecode = await provider.getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
 
 const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
-console.log(contract.solidify()); //Decompile bytecode to Solidity
+console.log(contract.solidify()); // Decompile bytecode to Solidity
 ```
 
 You can use the `contract.yul()` method to decompile the bytecode into Yul-like format.
@@ -166,7 +166,7 @@ const bytecode = await provider.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A2
 const contract = new Contract(bytecode).patchdb();
 console.log('functions', contract.getFunctions());
 console.log('events', contract.getEvents());
-console.log('isERC 165', contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+console.log('isERC 165', contract.isERC('ERC165')); // Detect whether contract is ERC165-compliant
 ```
 
 ### Extract Contract Metadata
