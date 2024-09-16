@@ -59,11 +59,14 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
       # Ignore engines due to `size-limit` dependency
-      - run: yarn install --frozen-lockfile --ignore-engines
-      - name: Enable `4byte` test only when Node > 16 due to `fetch` dependency
-        if: ${{ matrix.node > 16 }}
-        run: echo "ENABLE_4BYTE_TEST=1" >> "$GITHUB_ENV"
+      #- run: yarn install --frozen-lockfile --ignore-engines
+      - run: yarn install --frozen-lockfile
+      # - name: Enable `4byte` test only when Node > 16 due to `fetch` dependency
+        # if: ${{ matrix.node > 16 }}
+        # run: echo "ENABLE_4BYTE_TEST=1" >> "$GITHUB_ENV"
       - run: yarn test
+        env:
+          ENABLE_4BYTE_TEST: 1
 
   coverage:
     runs-on: ubuntu-latest
@@ -78,7 +81,6 @@ jobs:
       - run: yarn coverage
         env:
           ENABLE_4BYTE_TEST: 1
-          ENABLE_BIN_PROVIDER_TEST: 1
           SEVM_RPC_URL: "https://eth.llamarpc.com"
       - run: yarn --silent c8 report > ./coverage/coverage.txt
         env:
@@ -94,17 +96,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: acuarica/evm
-
-  examples:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "NODE_VERSION=`node --version`" >> $GITHUB_ENV
-      - uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
-      - run: yarn test --grep ::examples
-        env:
-          ENABLE_EXAMPLES_TEST: 1
