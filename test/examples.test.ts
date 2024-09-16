@@ -1,28 +1,28 @@
+import { strict as assert } from 'assert';
 import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
 import { readdirSync } from 'fs';
+import { extname } from 'path';
 
 chai.use(chaiExec);
 
-const ENABLE_EXAMPLES_TEST = process.env['ENABLE_EXAMPLES_TEST'];
-const hint = !ENABLE_EXAMPLES_TEST ? ' (enable it by setting `ENABLE_EXAMPLES_TEST`)' : '';
-
-describe(`::examples${hint}`, function () {
-    const js = readdirSync('./examples')
-        .filter(f => f.endsWith('.mjs') || f.endsWith('.js') || f.endsWith('.ts'));
-
-    js.forEach(file => {
+describe(`::examples`, function () {
+    readdirSync('./examples').filter(f => !f.endsWith('.html')).forEach(file => {
         it(file, function () {
-            if (!ENABLE_EXAMPLES_TEST) this.skip();
+            const ext = extname(file);
+            assert(['.js', '.ts', '.mjs', '.mts'].includes(ext), `Invalid file extension \`${file}\``);
+
             // Increase timeout to avoid failing in CI
-            this.timeout(30000);
+            // this.timeout(10000);
 
             // Node's colorized output needs to be disabled for snapshot testing when running in CI
             // https://nodejs.org/api/cli.html#force_color1-2-3
             const env = { ...process.env, 'FORCE_COLOR': '0' };
-            const cli = file.endsWith('.ts')
-                ? chaiExec('node', `dist/examples/${file.slice(0, -3)}.js`, { env })
-                : chaiExec(`examples/${file}`, { env });
+            const program = ['.ts', '.mts'].includes(ext)
+                ? `dist/examples/${file.slice(0, -ext.length)}${ext.replace('t', 'j')}`
+                : `examples/${file}`;
+            const mock = '--import=./scripts/mock.mjs';
+            const cli = chaiExec('node', mock, program, { env });
 
             expect(cli, cli.stderr).stderr.to.be.empty;
             expect(cli).stdout.to.matchSnapshot('out', this);

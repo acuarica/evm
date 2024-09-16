@@ -101,17 +101,15 @@ export class Stack<in out E> {
  */
 export class Memory<in out E> {
 
-    private constructor(private readonly _map: Map<bigint, E>) {
-    }
+    /**
+     * Defines the maximun size allowed to invalidate.
+     */
+    readonly maxInvalidateSizeAllowed: bigint = 32n * 1024n;
 
     /**
-     * Creates a new `Memory` with no set locations.
-     * 
-     * @returns an empty `Memory`.
+     * Creates a new `Memory` with no locations set.
      */
-    static new<E>(): Memory<E> {
-        return new Memory<E>(new Map());
-    }
+    constructor(private readonly _map: Map<bigint, E> = new Map()) { }
 
     /**
      * Creates a shallow copy of this `Memory`.
@@ -120,8 +118,8 @@ export class Memory<in out E> {
      *
      * @returns a new `Memory` with the same elements as `this` one.
      */
-    clone(): Memory<E> {
-        return new Memory(new Map(this._map));
+    clone(): this {
+        return new (this.constructor as new (map: Map<bigint, E>) => this)(new Map(this._map));
     }
 
     /**
@@ -200,7 +198,9 @@ export class Memory<in out E> {
 
     /**
      * Tries to invalidate the memory range indicated by `[offset, offset + size]`.
-     * It can do so when both `offset` and `size` are reducible to `Val`.
+     * It can do so when both `offset` and `size` are reducible to `Val`,
+     * and `size` is no greater than `maxInvalidateSizeAllowed`.
+     * This last restriction is to avoid iterating over a large range.
      * 
      * Otherwise, when `invalidateAll` is set clears the whole memory.
      * 
@@ -211,7 +211,7 @@ export class Memory<in out E> {
     invalidateRange(offset: Expr, size: Expr, invalidateAll = true) {
         offset = offset.eval();
         size = size.eval();
-        if (offset.isVal() && size.isVal()) {
+        if (offset.isVal() && size.isVal() && size.val <= this.maxInvalidateSizeAllowed) {
             for (let i = offset.val; i < offset.val + size.val; i += 32n) {
                 this._map.delete(i);
             }
@@ -251,9 +251,25 @@ export class State<S = Inst, E = Expr> {
      */
     constructor(
         readonly stack = new Stack<E>(),
-        readonly memory = Memory.new<E>(),
+        readonly memory = new Memory<E>(),
         public nlocals = 0
     ) { }
+
+    /**
+     * Creates a detached clone from this `State`.
+     * The cloned state only shallow copies both `stack` and `memory`,
+     * while `stmts` will be empty and `halted` false.
+     *
+     * Note however the shallow copy means the structure of both `stack` and `memory` are cloned,
+     * not their contents.
+     * This means that any expression `E` in either the `stack` or `memory`
+     * will be shared across instances if they are references.
+     *
+     * @returns a new `State` detached from this one.
+     */
+    clone(): State<S, E> {
+        return new State(this.stack.clone(), this.memory.clone(), this.nlocals);
+    }
 
     /**
      * Indicates whether this `State` has been halted.
@@ -284,22 +300,6 @@ export class State<S = Inst, E = Expr> {
 
         this.stmts.push(last);
         this._halted = true;
-    }
-
-    /**
-     * Creates a detached clone from this `State`.
-     * The cloned state only shallow copies both `stack` and `memory`,
-     * while `stmts` will be empty and `halted` false.
-     *
-     * Note however the shallow copy means the structure of both `stack` and `memory` are cloned,
-     * not their contents.
-     * This means that any expression `E` in either the `stack` or `memory`
-     * will be shared across instances if they are references.
-     *
-     * @returns a new `State` detached from this one.
-     */
-    clone(): State<S, E> {
-        return new State(this.stack.clone(), this.memory.clone(), this.nlocals);
     }
 }
 

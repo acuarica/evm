@@ -176,25 +176,6 @@ Events
 
 ```
 
-```out run-dis-command-and-find-non-reacheable-chunk
-   pc  opcode  push data (PUSHx)
-0 : 
-    0  PUSH1   0x01 
-    2  PUSH1   0x02 
-    4  ADD   
-    5  PUSH1   0x0c 
-    7  JUMP   
-8 : unreachable
-01020304
-12 : 
-   12  JUMPDEST   
-   13  PUSH3   0xfffefd 
-17 : 
-   17  JUMPDEST   
-   18  STOP   
-
-```
-
 ```out display-cfg-from-bytecode
 digraph G {    
     color="#efefef";
@@ -261,72 +242,6 @@ subgraph cluster_51 {
 "id-7" -> "id-8";
 
 }
-
-```
-
-```err catch-error-when-input-is-not-a-valid-hex-string
-Error: Unable to decode, invalid hex byte 'ax' found at position '7'
-
-```
-
-```err log-debug-trace-when-NODE_DEBUG=sevm-is-set
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: Invalid address, bad address checksum
-Cannot find bytecode for contract 0x8Ba1f109551bD432803012645Ac136ddd64DBa72
-
-```
-
-```err fail-to-fetch-to-bytecode-because-of-invalid-Ethereum-address
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: Invalid address, not an Ethereum address
-Cannot find bytecode for contract 0x8ba1
-
-```
-
-```err catch-error-when-exec-self-destructed-contract
-Bytecode for contract - is '0x', it might have been self-destructed or it is an EOA
-
-```
-
-```out bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider
-Function Selectors
-  0x22895118 <signature not found>
-  0x01ffc9a7 <signature not found>
-  0x621fd130 <signature not found>
-  0xc5f2892f <signature not found>
-
-Events
-  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
-
-```
-
-```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: Cache to fetch contract bytecode disabled
-SEVM <pid>: Contract bytecode fetched from remote network
-
-```
-
-```out bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider-and-patch-method-signatures
-Function Selectors
-  0x22895118 deposit(bytes,bytes,bytes,bytes32)
-  0x01ffc9a7 supportsInterface(bytes4)
-  0x621fd130 get_deposit_count()
-  0xc5f2892f get_deposit_root()
-
-Events
-  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 DepositEvent(bytes,bytes,bytes,bytes,bytes)
-
-```
-
-```err bin/provider-ENABLE_BIN_PROVIDER_TEST=1/get-bytecode-from-default-provider-and-patch-method-signatures
-SEVM <pid>: ENOENT: no such file or directory, open <addr>
-SEVM <pid>: Cache to fetch contract bytecode disabled
-SEVM <pid>: Contract bytecode fetched from remote network
-SEVM <pid>: Bytecode keccak256 hash 0x6c029a231254fadb724d
-SEVM <pid>: Cache ABI disabled
 
 ```
 
@@ -432,5 +347,92 @@ object "runtime" {
     }
 }
 
+
+```
+
+```out run-dis-command-and-find-non-reacheable-chunk
+   pc  opcode  push data (PUSHx)
+0 : 
+    0  PUSH1   0x01 
+    2  PUSH1   0x02 
+    4  ADD   
+    5  PUSH1   0x0c 
+    7  JUMP   
+8 : unreachable
+01020304
+12 : 
+   12  JUMPDEST   
+   13  PUSH3   0xfffefd 
+17 : 
+   17  JUMPDEST   
+   18  STOP   
+
+```
+
+```err catch-error-when-input-is-not-a-valid-hex-string
+Error: Unable to decode, invalid hex byte 'ax' found at position '7'
+
+```
+
+```err log-debug-trace-when-NODE_DEBUG=sevm-is-set
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Invalid address, bad address checksum
+Cannot find bytecode for contract 0x8Ba1f109551bD432803012645Ac136ddd64DBa72
+
+```
+
+```err fail-to-fetch-to-bytecode-because-of-invalid-Ethereum-address
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Invalid address, not an Ethereum address
+Cannot find bytecode for contract 0x8ba1
+
+```
+
+```err catch-error-when-exec-self-destructed-contract
+Bytecode for contract - is '0x', it might have been self-destructed or it is an EOA
+
+```
+
+```err bin/provider/get-bytecode-from-default-provider
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
+
+```
+
+```out bin/provider/get-bytecode-from-default-provider
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+Function Selectors
+  0x22895118 <signature not found>
+  0x01ffc9a7 <signature not found>
+  0x621fd130 <signature not found>
+  0xc5f2892f <signature not found>
+
+Events
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
+
+```
+
+```err bin/provider/get-bytecode-from-default-provider-and-patch-method-signatures
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
+SEVM <pid>: Bytecode keccak256 hash 0x6c029a231254fadb724d
+SEVM <pid>: Cache ABI disabled
+
+```
+
+```out bin/provider/get-bytecode-from-default-provider-and-patch-method-signatures
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+Function Selectors
+  0x22895118 deposit(bytes,bytes,bytes,bytes32)
+  0x01ffc9a7 supportsInterface(bytes4)
+  0x621fd130 get_deposit_count()
+  0xc5f2892f get_deposit_root()
+
+Events
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 DepositEvent(bytes,bytes,bytes,bytes,bytes)
 
 ```

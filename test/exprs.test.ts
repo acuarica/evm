@@ -10,7 +10,7 @@ const id = <E>(expr: E): E => expr;
 type FilterFn<T, F> = { [k in keyof T]: T[k] extends F ? k : never }[keyof T];
 
 type StackStep = bigint | FilterFn<InstanceType<typeof Shanghai>, (state: Ram<Expr>) => void>;
-const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), solstr: string, yulstr: string, memory = Memory.new<Expr>()) => ({
+const t = <E>(insts: StackStep[], expr: E, val: Expr | ((expr: E) => Expr), solstr: string, yulstr: string, memory = new Memory<E>()) => ({
     insts,
     expr,
     val: typeof val === 'function' ? val(expr) : val,
@@ -122,7 +122,7 @@ const $exprs = {
             new MLoad(new Add(new Val(4n), new Val(8n)), Props['block.chainid']),
             Props['block.chainid'],
             'memory[0x4 + 0x8]', 'mload(add(0x4, 0x8))',
-            Memory.new<Expr>().set(12n, Props['block.chainid'])
+            new Memory<Expr>().set(12n, Props['block.chainid'])
         ),
         t(['MSIZE'], new Prop('msize()', 'uint'), id, 'msize()', 'msize()'),
     ],
@@ -135,7 +135,7 @@ const $exprs = {
             id,
             'keccak256(msg.value)',
             'keccak256(0x40, 0x20 /*callvalue()*/)',
-            Memory.new<Expr>().set(0x40n, new CallValue())
+            new Memory<Expr>().set(0x40n, new CallValue())
         ),
     ],
 };

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { ExecError, Memory, Stack, State } from 'sevm';
+import { Val } from 'sevm/ast';
 
 describe('::state', function () {
     describe('Stack', function () {
@@ -69,12 +70,12 @@ describe('::state', function () {
 
     describe('Memory', function () {
         it('should create a `new` instance which is empty', function () {
-            const memory = Memory.new();
+            const memory = new Memory<never>();
             expect(memory.size).to.be.equal(0);
         });
 
         it('should `get` entries after `set`ting them', function () {
-            const memory = Memory.new();
+            const memory = new Memory<number>();
             memory.set(32n, 2);
             memory.set(64n, 3);
 
@@ -85,7 +86,7 @@ describe('::state', function () {
         });
 
         it('should `clone` an instance without aliasing its keys', function () {
-            const memory = Memory.new();
+            const memory = new Memory<number>();
             memory.set(32n, 2);
             memory.set(64n, 3);
 
@@ -106,13 +107,31 @@ describe('::state', function () {
         });
 
         it('should `clone` an instance aliasing its values', function () {
-            const memory = Memory.new<{ x: number }>();
+            const memory = new Memory<{ x: number }>();
             memory.set(32n, { x: 1 });
 
             const clone = memory.clone();
             clone.get(32n)!.x = 2;
 
             expect(memory.get(32n)).to.be.deep.equal({ x: 2 });
+        });
+
+        it('should invalidate valid range', function() {
+            const memory = new Memory<string>();
+            memory.set(48n, 'x');
+            memory.invalidateRange(new Val(16n), new Val(96n), false);
+
+            expect(memory.get(48n)).to.be.undefined;
+        });
+
+        it('should be extensible', function() {
+            const memory = new class extends Memory<string> {
+                override maxInvalidateSizeAllowed = 64n;
+            }().clone();
+            memory.set(48n, 'x');
+            memory.invalidateRange(new Val(16n), new Val(96n), false);
+
+            expect(memory.get(48n)).to.be.equal('x');
         });
     });
 

@@ -13,4 +13,4 @@ const bytecode = await provider.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A2
 const contract = new Contract(bytecode).patchdb();
 console.log('functions', contract.getFunctions());
 console.log('events', contract.getEvents());
-console.log('isERC 165', contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+console.log('isERC 165', contract.isERC('ERC165')); // Detect whether contract is ERC165-compliant

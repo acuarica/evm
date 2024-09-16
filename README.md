@@ -146,7 +146,7 @@ const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
 const bytecode = await provider.getCode('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
 
 const contract = new Contract(bytecode).patchdb(); // Lookup for 4byte matches
-console.log(contract.solidify()); //Decompile bytecode to Solidity
+console.log(contract.solidify()); // Decompile bytecode to Solidity
 ```
 
 You can use the `contract.yul()` method to decompile the bytecode into Yul-like format.
@@ -166,7 +166,7 @@ const bytecode = await provider.getCode('0x06012c8cf97BEaD5deAe237070F9587f8E7A2
 const contract = new Contract(bytecode).patchdb();
 console.log('functions', contract.getFunctions());
 console.log('events', contract.getEvents());
-console.log('isERC 165', contract.isERC('ERC165')); /* Detect whether contract is ERC165-compliant */
+console.log('isERC 165', contract.isERC('ERC165')); // Detect whether contract is ERC165-compliant
 ```
 
 ### Extract Contract Metadata
@@ -259,6 +259,30 @@ console.log('// Token contract -- constructor');
 console.log(constructorContract!.solidify());
 console.log('// Token contract -- deployed bytecode');
 console.log(tokenContract!.patchdb().solidify());
+```
+
+It is also possible to hook onto the `State` of a contract, and in turn onto `Stack` and `Memory`.
+The following example creates a subclass of `Memory` to hook into the `invalidateRange` method.
+In this particular example there is a range where the `size` is to large to be invalidated.
+
+```ts examples/State-Hook.mts
+import { JsonRpcProvider } from 'ethers';
+import { Contract, Memory, Shanghai, Stack, State } from 'sevm';
+import type { Expr } from 'sevm/ast';
+
+const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
+// https://etherscan.io/address/0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA#code
+const bytecode = await provider.getCode('0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA');
+
+new Contract(bytecode, new Shanghai(), new State(new Stack(), new class extends Memory<Expr> {
+    override invalidateRange(offset: Expr, size: Expr, invalidateAll?: boolean): void {
+        super.invalidateRange(offset, size, invalidateAll);
+        size = size.eval();
+        if (size.isVal() && size.val > this.maxInvalidateSizeAllowed) {
+            console.log(size);
+        }
+    }
+}));
 ```
 
 ## CLI Tool

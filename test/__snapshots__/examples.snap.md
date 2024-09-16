@@ -49,6 +49,7 @@ contract Contract {
 ```
 
 ```out Decode-Bytecode-into-Opcodes.mjs
+[DEBUG mock.mjs] 0x06012c8cf97BEaD5deAe237070F9587f8E7A266d test/mainnet/CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d.bytecode
 [
   'PUSH1(0x60)@0 0x60 (96)',
   'PUSH1(0x60)@2 0x40 (64)',
@@ -156,6 +157,7 @@ contract Contract {
 ```
 
 ```out Decompile-a-Contract.mjs
+[DEBUG mock.mjs] 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 test/mainnet/WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.bytecode
 // SPDX-License-Identifier: UNLICENSED
 // Metadata bzzr0://deb4c2ccab3c2fdca32ab3f46728389c2fe2c165d5fafa07661e4e004f6c344a
 pragma solidity ;
@@ -631,6 +633,7 @@ contract Contract {
 ```
 
 ```out Detect-Functions-Events-ERCs.mjs
+[DEBUG mock.mjs] 0x06012c8cf97BEaD5deAe237070F9587f8E7A266d test/mainnet/CryptoKitties-0x06012c8cf97BEaD5deAe237070F9587f8E7A266d.bytecode
 functions [
   'createPromoKitty(uint256,address)',
   'setNewAddress(address)',
@@ -699,6 +702,7 @@ isERC 165 true
 ```
 
 ```out Extract-Contract-Metadata.mjs
+[DEBUG mock.mjs] 0x5425890298aed601595a70AB815c96711a31Bc65 test/mainnet/USDC-0x5425890298aed601595a70AB815c96711a31Bc65.bytecode
 Metadata {
   protocol: 'ipfs',
   hash: 'QmVH44HYS7Kxd5z769QYrhS9tzM4cYcXAeq1h6wcEBEqVK',
@@ -741,5 +745,18 @@ contract Contract {
 
 }
 
+
+```
+
+```out State-Hook.mts
+[DEBUG mock.mjs] 0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA test/mainnet/GovernanceRouter-0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA.bytecode
+Val {
+  depth: 0,
+  count: 1,
+  val: 79228162514264337593543950335n,
+  pushStateId: undefined,
+  tag: 'Val',
+  jumpDest: null
+}
 
 ```
