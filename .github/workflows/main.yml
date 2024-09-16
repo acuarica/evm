@@ -58,12 +58,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-modules-${{ hashFiles('**/yarn.lock') }}
-      # Ignore engines due to `size-limit` dependency
-      #- run: yarn install --frozen-lockfile --ignore-engines
       - run: yarn install --frozen-lockfile
-      # - name: Enable `4byte` test only when Node > 16 due to `fetch` dependency
-        # if: ${{ matrix.node > 16 }}
-        # run: echo "ENABLE_4BYTE_TEST=1" >> "$GITHUB_ENV"
       - run: yarn test
         env:
           ENABLE_4BYTE_TEST: 1
