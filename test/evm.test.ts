@@ -331,28 +331,29 @@ describe('::evm', function () {
             }`;
 
             let tokenBytecode: Uint8Array | undefined = undefined;
-            const step = new class extends Shanghai {
-                override CREATE = (state: State<Inst, Expr>) => {
-                    super.CREATE(state);
-                    const bytecode = (state.stack.top as Create).bytecode!;
-
-                    new EVM(bytecode, new class extends London {
-                        override CODECOPY = (state: State<Inst, Expr>, _opcode: Opcode, evm: { bytecode: Uint8Array }) => {
-                            const dest = state.stack.top?.eval();
-                            super.CODECOPY(state, _opcode, evm);
-
-                            if (dest?.isVal()) {
-                                const m = state.memory.get(dest.val) as DataCopy;
-                                tokenBytecode = m.bytecode;
-                            }
-                        };
-                    }()).start();
-                };
-            }();
-
-            const evm = new EVM(compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode, step);
             const state = new State<Inst, Expr>();
-            evm.run(0, state);
+            new EVM(
+                compile(src, '0.8.16', this, { optimizer: { enabled: true } }).bytecode,
+                new class extends Shanghai {
+                    override CREATE = (state: State<Inst, Expr>) => {
+                        super.CREATE(state);
+                        const bytecode = (state.stack.top as Create).bytecode!;
+
+                        new EVM(bytecode, new class extends London {
+                            override CODECOPY = (state: State<Inst, Expr>, _opcode: Opcode, evm: { bytecode: Uint8Array }) => {
+                                const dest = state.stack.top?.eval();
+                                super.CODECOPY(state, _opcode, evm);
+
+                                if (dest?.isVal()) {
+                                    const m = state.memory.get(dest.val) as DataCopy;
+                                    tokenBytecode = m.bytecode;
+                                }
+                            };
+                        }()).start();
+                    };
+                }()
+            ).run(0, state);
+
             const stmts = build(state);
             expect(sol`${stmts[6].eval()}`).to.be.deep.equal(
                 'require(new Contract(memory[0x80..0x80+0x85]).value(0x0).address);'
