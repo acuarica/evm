@@ -6,19 +6,14 @@ import { extname } from 'path';
 
 chai.use(chaiExec);
 
-const ENABLE_EXAMPLES_TEST = process.env['ENABLE_EXAMPLES_TEST'];
-const hint = !ENABLE_EXAMPLES_TEST ? ' (enable it by setting `ENABLE_EXAMPLES_TEST`)' : '';
-
-describe(`::examples${hint}`, function () {
+describe(`::examples`, function () {
     readdirSync('./examples').filter(f => !f.endsWith('.html')).forEach(file => {
         it(file, function () {
-            if (!ENABLE_EXAMPLES_TEST) this.skip();
-
             const ext = extname(file);
             assert(['.js', '.ts', '.mjs', '.mts'].includes(ext), `Invalid file extension \`${file}\``);
 
             // Increase timeout to avoid failing in CI
-            this.timeout(30000);
+            // this.timeout(10000);
 
             // Node's colorized output needs to be disabled for snapshot testing when running in CI
             // https://nodejs.org/api/cli.html#force_color1-2-3
