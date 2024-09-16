@@ -18,7 +18,7 @@ JsonRpcProvider.prototype.getCode = function (/** @type {string} */ address) {
     const file = resolve[address.toLowerCase()];
     assert(file, `unable to find bytecode for address ${address}`);
     const bytecodePath = join(BYTECODE_PATH, file);
-    // console.log(address, bytecodePath);
+    console.info('[DEBUG mock.mjs]', address, bytecodePath);
     const bytecode = readFileSync(bytecodePath, 'utf-8');
     return Promise.resolve(bytecode);
 }
