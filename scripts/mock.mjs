@@ -23,7 +23,8 @@ function getCode(address) {
     const file = resolve[address.toLowerCase()];
     assert(file, `unable to find bytecode for address ${address}`);
     const bytecodePath = join(BYTECODE_PATH, file);
-    console.info('[DEBUG mock.mjs]', address, bytecodePath);
+    // Normalize path so snapshot are the same in both Windows and *nixes
+    console.info('[DEBUG mock.mjs]', address, bytecodePath.replace('\\', '/'));
     const bytecode = readFileSync(bytecodePath, 'utf-8');
     return Promise.resolve(bytecode);
 }
