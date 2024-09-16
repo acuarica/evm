@@ -15,7 +15,11 @@ for (const file of readdirSync(BYTECODE_PATH)) {
     resolve[address.toLowerCase()] = file;
 }
 
-function getCode(/** @type {string} */ address) {
+/**
+ * @param {string} address 
+ * @returns {Promise<string>}
+ */
+function getCode(address) {
     const file = resolve[address.toLowerCase()];
     assert(file, `unable to find bytecode for address ${address}`);
     const bytecodePath = join(BYTECODE_PATH, file);
