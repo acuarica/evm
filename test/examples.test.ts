@@ -13,7 +13,7 @@ describe(`::examples`, function () {
             assert(['.js', '.ts', '.mjs', '.mts'].includes(ext), `Invalid file extension \`${file}\``);
 
             // Increase timeout to avoid failing in CI
-            // this.timeout(10000);
+            this.timeout(5000);
 
             // Node's colorized output needs to be disabled for snapshot testing when running in CI
             // https://nodejs.org/api/cli.html#force_color1-2-3

@@ -4,6 +4,10 @@ import { join } from 'path';
 import { JsonRpcProvider } from 'ethers';
 import { Provider } from '../bin/.provider.mjs';
 
+import { Contract } from 'sevm';
+import 'sevm/4byte';
+import 'sevm/4bytedb';
+
 const BYTECODE_PATH = './test/mainnet';
 /** @type {{[address_: string]: string}} */
 const resolve = {};
@@ -23,10 +27,18 @@ function getCode(address) {
     const file = resolve[address.toLowerCase()];
     assert(file, `unable to find bytecode for address ${address}`);
     const bytecodePath = join(BYTECODE_PATH, file);
-    console.info('[DEBUG mock.mjs]', address, bytecodePath);
+    // Normalize path so snapshot are the same in both Windows and *nixes
+    console.info('[DEBUG mock.mjs]', address, bytecodePath.replace(/\\/g, '/'));
     const bytecode = readFileSync(bytecodePath, 'utf-8');
     return Promise.resolve(bytecode);
 }
 
+// Patch the following to avoid requests in `::examples` tests 
 JsonRpcProvider.prototype.getCode = getCode;
+
+// Patch the following to avoid requests in `::bin/provider` tests 
 Provider.prototype.getCode = getCode;
+
+Contract.prototype.patch = function () {
+    return Promise.resolve(this.patchdb());
+}

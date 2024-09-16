@@ -1,4 +1,5 @@
 [
+    "DepositEvent(bytes,bytes,bytes,bytes,bytes)",
     "__collect(uint256,bytes32)",
     "__createMarket(uint256,uint256,uint256,uint256,bytes32)",
     "__dispute(uint256,uint256,uint256,bytes32)",
