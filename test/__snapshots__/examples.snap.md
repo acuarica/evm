@@ -743,3 +743,15 @@ contract Contract {
 
 
 ```
+
+```out State-Hook.mts
+Val {
+  depth: 0,
+  count: 1,
+  val: 79228162514264337593543950335n,
+  pushStateId: undefined,
+  tag: 'Val',
+  jumpDest: null
+}
+
+```
