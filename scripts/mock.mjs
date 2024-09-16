@@ -4,6 +4,10 @@ import { join } from 'path';
 import { JsonRpcProvider } from 'ethers';
 import { Provider } from '../bin/.provider.mjs';
 
+import {Contract} from 'sevm';
+import 'sevm/4byte';
+import 'sevm/4bytedb';
+
 const BYTECODE_PATH = './test/mainnet';
 /** @type {{[address_: string]: string}} */
 const resolve = {};
@@ -31,3 +35,6 @@ function getCode(address) {
 
 JsonRpcProvider.prototype.getCode = getCode;
 Provider.prototype.getCode = getCode;
+
+// @ts-ignore
+Contract.prototype.patch = Contract.prototype.patchdb;
