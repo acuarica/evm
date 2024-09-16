@@ -261,6 +261,30 @@ console.log('// Token contract -- deployed bytecode');
 console.log(tokenContract!.patchdb().solidify());
 ```
 
+It is also possible to hook onto the `State` of a contract, and in turn onto `Stack` and `Memory`.
+The following example creates a subclass of `Memory` to hook into the `invalidateRange` method.
+In this particular example there is a range where the `size` is to large to be invalidated.
+
+```ts examples/State-Hook.mts
+import { JsonRpcProvider } from 'ethers';
+import { Contract, Memory, Shanghai, Stack, State } from 'sevm';
+import type { Expr } from 'sevm/ast';
+
+const provider = new JsonRpcProvider('https://cloudflare-eth.com/');
+// https://etherscan.io/address/0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA#code
+const bytecode = await provider.getCode('0x16A2D238d35e51Dd41Cf101dbb536E2cb9E233DA');
+
+new Contract(bytecode, new Shanghai(), new State(new Stack(), new class extends Memory<Expr> {
+    override invalidateRange(offset: Expr, size: Expr, invalidateAll?: boolean): void {
+        super.invalidateRange(offset, size, invalidateAll);
+        size = size.eval();
+        if (size.isVal() && size.val > this.maxInvalidateSizeAllowed) {
+            console.log(size);
+        }
+    }
+}));
+```
+
 ## CLI Tool
 
 `sevm` comes with a CLI tool to examine bytecode from the command line.
