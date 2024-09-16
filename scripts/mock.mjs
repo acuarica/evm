@@ -2,6 +2,7 @@ import { strict as assert } from 'assert';
 import { readFileSync, readdirSync } from "fs";
 import { join } from 'path';
 import { JsonRpcProvider } from 'ethers';
+import { Provider } from '../bin/.provider.mjs';
 
 const BYTECODE_PATH = './test/mainnet';
 /** @type {{[address_: string]: string}} */
@@ -14,7 +15,7 @@ for (const file of readdirSync(BYTECODE_PATH)) {
     resolve[address.toLowerCase()] = file;
 }
 
-JsonRpcProvider.prototype.getCode = function (/** @type {string} */ address) {
+function getCode(/** @type {string} */ address) {
     const file = resolve[address.toLowerCase()];
     assert(file, `unable to find bytecode for address ${address}`);
     const bytecodePath = join(BYTECODE_PATH, file);
@@ -22,3 +23,6 @@ JsonRpcProvider.prototype.getCode = function (/** @type {string} */ address) {
     const bytecode = readFileSync(bytecodePath, 'utf-8');
     return Promise.resolve(bytecode);
 }
+
+JsonRpcProvider.prototype.getCode = getCode;
+Provider.prototype.getCode = getCode;
