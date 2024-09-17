@@ -28,7 +28,7 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
             ['4f1ef286', undefined]
         ]);
 
-        const lookup = {} as Lookup;
+        const lookup: Partial<Lookup> = {};
         contract = await contract.patch(lookup);
 
         expect(lookup).to.be.deep.equal({
@@ -66,7 +66,7 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
         }`;
 
         const contract = new Contract(compile(src, '0.7.6', this).bytecode);
-        const lookup = {} as Lookup;
+        const lookup: Partial<Lookup> = {};
         await contract.patch(lookup);
 
         const selectors = Object.entries(contract.functions).map(([s, f]) => [s, f.label]);
@@ -79,6 +79,16 @@ describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
     it('should not fail when there are no functions nor events to patch', async function () {
         const contract = new Contract('0x00');
         await contract.patch();
+    });
+
+    it('should perform signature lookup even when lookup object is partially filled', async function () {
+        const contract = new Contract('0x00');
+        const lookup: Partial<Lookup> = { function: { '0x1': [] } };
+        await contract.patch(lookup);
+        expect(lookup).to.be.deep.equal({
+            function: {},
+            event: {},
+        });
     });
 
     it('should fail when there is an invalid response', async function () {
