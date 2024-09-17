@@ -282,7 +282,7 @@ new Contract(bytecode, new Shanghai(), new State(new Stack(), new class extends 
             console.log(size);
         }
     }
-}));
+}()));
 ```
 
 ## CLI Tool
