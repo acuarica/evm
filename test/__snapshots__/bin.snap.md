@@ -439,3 +439,24 @@ Events
   0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 DepositEvent(bytes,bytes,bytes,bytes,bytes)
 
 ```
+
+```err bin/provider/get-bytecode-from-SEVM_RPC_URL-provider
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
+
+```
+
+```out bin/provider/get-bytecode-from-SEVM_RPC_URL-provider
+[DEBUG mock.mjs] url='http://some-rpc-provider' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cBB839Cbe05303d7705Fa\",\"latest\"],\"id\":1}"}
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+Function Selectors
+  0x22895118 <signature not found>
+  0x01ffc9a7 <signature not found>
+  0x621fd130 <signature not found>
+  0xc5f2892f <signature not found>
+
+Events
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
+
+```
