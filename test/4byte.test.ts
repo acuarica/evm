@@ -4,16 +4,14 @@ import { readFileSync } from 'fs';
 import { Contract } from 'sevm';
 import type { Lookup } from 'sevm/4byte';
 import { compile } from './utils/solc';
+import 'sevm/4byte';
 
 const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 const hint = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
 describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
-    before(async function () {
+    before(function () {
         if (!ENABLE_4BYTE_TEST) this.skip();
-
-        // Use dynamic import to avoid failing when test is disabled and `fetch` is not defined.
-        await import('sevm/4byte');
     });
 
     it('should fetch function signatures', async function () {
