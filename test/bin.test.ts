@@ -152,12 +152,40 @@ describe('::bin', function () {
             expect(cli).to.exit.with.code(0);
         });
 
+        it('should get `bytecode` from default provider with lowercase address', function () {
+            const cli = chaiExec('node', [mock, sevm, 'abi', address.toLowerCase(), '--no-color', '--no-patch', '--no-cache'], { env: sevmDebugEnv });
+
+            expect(maskStderrPidAndAddr(cli, address.toLowerCase())).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
+            expect(cli).to.exit.with.code(0);
+        });
+
         it('should get `bytecode` from default provider and `patch` method signatures', function () {
             const cli = chaiExec('node', [mock, sevm, 'abi', address, '--no-color', '--no-cache'], { env: sevmDebugEnv });
 
             expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
             expect(cli.stdout).to.matchSnapshot('out', this);
             expect(cli).to.exit.with.code(0);
+        });
+
+        it('should get `bytecode` from `SEVM_RPC_URL` provider', function () {
+            const cli = chaiExec('node', [mock, sevm, 'abi', address, '--no-color', '--no-patch', '--no-cache'], {
+                env: { ...sevmDebugEnv, SEVM_RPC_URL: 'http://some-rpc-provider' }
+            });
+
+            expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
+            expect(cli).to.exit.with.code(0);
+        });
+
+        it('should not get `bytecode` when provider is invalid', function () {
+            const cli = chaiExec('node', [mock, sevm, 'abi', address, '--no-color', '--no-patch', '--no-cache'], {
+                env: { ...sevmDebugEnv, SEVM_RPC_URL: 'error://some-rpc-provider' }
+            });
+
+            expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
+            expect(cli).to.exit.with.code(2);
         });
     });
 });
