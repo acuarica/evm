@@ -222,8 +222,23 @@ describe('::abi', function () {
         [
             ['function ()', 'Expected function name'],
             ['function function()', 'Expected function name'],
+            ['function', 'next: reached end of input'],
+            ['function fn [', `Expected '(' but got '['`],
+            ['function fn (', 'peek: reached end of input'],
         ].forEach(([sig, error]) => {
             it(`should raise error '${error}' for function signature \`${sig}\``, function () {
+                expect(() => parseSig(sig)).to.throw(error);
+            });
+        });
+
+        [
+            (sig => [
+                sig,
+                `Invalid elementary type found: \`Math\` at position 14 in \`${sig}\``,
+                'https://openchain.xyz/signatures?query=0x20ddd255'
+            ])('log2(uint256,Math.EstimationMode)')
+        ].forEach(([sig, error, req]) => {
+            it(`should raise error '${error.split(':')[0]}' for function signature \`${sig}\` from '${req}'`, function () {
                 expect(() => parseSig(sig)).to.throw(error);
             });
         });

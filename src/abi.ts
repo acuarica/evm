@@ -114,12 +114,12 @@ class Tokens {
     }
 
     peek() {
-        if (this.#tokens.length === 0) throw new Error('Reached end of input.');
+        if (this.#tokens.length === 0) throw new Error('peek: reached end of input');
         return this.#tokens[0];
     }
 
     next() {
-        if (this.#tokens.length === 0) throw new Error('Reached end of input.');
+        if (this.#tokens.length === 0) throw new Error('next: reached end of input');
         return this.#tokens.shift()!;
     }
 
@@ -185,7 +185,7 @@ export function parseSig(sig: string): SigMember {
                 tokens.next();
                 return { type: getCanonicalType(ty) } as const;
             } else {
-                throw new Error(`Invalid type ${ty}: ${pos}`);
+                throw new Error(`Invalid elementary type found: \`${ty}\` at position ${pos} in \`${sig}\``);
             }
         }();
 
