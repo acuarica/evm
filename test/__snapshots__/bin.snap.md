@@ -417,7 +417,7 @@ Events
 ```
 
 ```err bin/provider/get-bytecode-from-default-provider-with-lowercase-address
-SEVM <pid>: ENOENT: no such file or directory, open '0x00000000219ab540356cbb839cbe05303d7705fa'
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
 SEVM <pid>: Cache to fetch contract bytecode disabled
 SEVM <pid>: Contract bytecode fetched from remote network
 
