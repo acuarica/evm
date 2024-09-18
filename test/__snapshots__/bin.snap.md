@@ -460,3 +460,16 @@ Events
   0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
 
 ```
+
+```err bin/provider/not-get-bytecode-when-provider-is-invalid
+SEVM <pid>: ENOENT: no such file or directory, open <addr>
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Invalid status code: 0, response: ""
+Cannot find bytecode for contract 0x00000000219ab540356cBB839Cbe05303d7705Fa
+
+```
+
+```out bin/provider/not-get-bytecode-when-provider-is-invalid
+[DEBUG mock.mjs] url='error://some-rpc-provider' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cBB839Cbe05303d7705Fa\",\"latest\"],\"id\":1}"}
+
+```

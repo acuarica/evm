@@ -44,6 +44,10 @@ global.fetch = async function (url, payload) {
         assert(id);
         assert(jsonrpc === '2.0');
         assert(method === 'eth_getCode');
+
+        if (url.startsWith('error://')) 
+            return Response.error();
+
         const [address] = params;
 
         const code = await getCode(address);
@@ -51,6 +55,7 @@ global.fetch = async function (url, payload) {
         return Promise.resolve(new Response(resp, payload));
     }
 
+    assert(payload === undefined);
     assert(url.startsWith('https://api.openchain.xyz/signature-database/v1/lookup?'));
     url = new URL(url);
 
