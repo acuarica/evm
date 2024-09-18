@@ -10,6 +10,10 @@ const ENABLE_4BYTE_TEST = process.env['ENABLE_4BYTE_TEST'];
 const hint = !ENABLE_4BYTE_TEST ? ' (enable it by setting `ENABLE_4BYTE_TEST`)' : '';
 
 describe(`::4byte ENABLE_4BYTE_TEST=${ENABLE_4BYTE_TEST}${hint}`, function () {
+
+    // Increase timeout to support Node 22 on Windows in CI.
+    this.timeout(5000);
+
     before(function () {
         if (!ENABLE_4BYTE_TEST) this.skip();
     });
