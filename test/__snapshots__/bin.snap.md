@@ -416,6 +416,27 @@ Events
 
 ```
 
+```err bin/provider/get-bytecode-from-default-provider-with-lowercase-address
+SEVM <pid>: ENOENT: no such file or directory, open '0x00000000219ab540356cbb839cbe05303d7705fa'
+SEVM <pid>: Cache to fetch contract bytecode disabled
+SEVM <pid>: Contract bytecode fetched from remote network
+
+```
+
+```out bin/provider/get-bytecode-from-default-provider-with-lowercase-address
+[DEBUG mock.mjs] url='https://cloudflare-eth.com/' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cbb839cbe05303d7705fa\",\"latest\"],\"id\":1}"}
+[DEBUG mock.mjs] 0x00000000219ab540356cbb839cbe05303d7705fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+Function Selectors
+  0x22895118 <signature not found>
+  0x01ffc9a7 <signature not found>
+  0x621fd130 <signature not found>
+  0xc5f2892f <signature not found>
+
+Events
+  0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5 <signature not found>
+
+```
+
 ```err bin/provider/get-bytecode-from-default-provider-and-patch-method-signatures
 SEVM <pid>: ENOENT: no such file or directory, open <addr>
 SEVM <pid>: Cache to fetch contract bytecode disabled

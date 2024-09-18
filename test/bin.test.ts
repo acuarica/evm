@@ -152,6 +152,14 @@ describe('::bin', function () {
             expect(cli).to.exit.with.code(0);
         });
 
+        it('should get `bytecode` from default provider with lowercase address', function () {
+            const cli = chaiExec('node', [mock, sevm, 'abi', address.toLowerCase(), '--no-color', '--no-patch', '--no-cache'], { env: sevmDebugEnv });
+
+            expect(maskStderrPidAndAddr(cli, address)).to.matchSnapshot('err', this);
+            expect(cli.stdout).to.matchSnapshot('out', this);
+            expect(cli).to.exit.with.code(0);
+        });
+
         it('should get `bytecode` from default provider and `patch` method signatures', function () {
             const cli = chaiExec('node', [mock, sevm, 'abi', address, '--no-color', '--no-cache'], { env: sevmDebugEnv });
 
