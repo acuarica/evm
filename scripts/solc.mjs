@@ -9,7 +9,7 @@ import https from 'https';
  * @param {string} url 
  * @returns {Promise<string>}
  */
-function get(url) {
+export function get(url) {
     return new Promise((resolve, reject) => {
         const req = https.request(url, function (res) {
             /** @type {Uint8Array | null} */
@@ -57,8 +57,8 @@ export async function mochaGlobalSetup() {
             const ret = /** @type {Releases} */(JSON.parse(readFileSync(path, 'utf-8')));
             return ret;
         } catch (_err) {
-            const resp = await get('https://binaries.soliditylang.org/bin/list.json');
-            const { releases } = /** @type {{releases: Releases}} */(JSON.parse(resp));
+            const resp = await fetch('https://binaries.soliditylang.org/bin/list.json');
+            const { releases } = /** @type {{releases: Releases}} */(await resp.json());
             writeFileSync(path, JSON.stringify(releases, null, 2));
             return releases;
         }
@@ -71,8 +71,8 @@ export async function mochaGlobalSetup() {
         if (existsSync(path)) {
             process.stdout.write(c.green('\u2713 '));
         } else {
-            const resp = await get(`https://binaries.soliditylang.org/bin/${releases[version]}`);
-            writeFileSync(path, resp);
+            const resp = await fetch(`https://binaries.soliditylang.org/bin/${releases[version]}`);
+            writeFileSync(path, await resp.text());
             process.stdout.write(c.yellow('\u2913 '));
         }
     }
