@@ -142,7 +142,7 @@ describe('::bin', function () {
          * https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa
          */
         const address = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
-        const mock = '--import=./scripts/mock.mjs';
+        const mock = '--import=./test/scripts/mock.mjs';
 
         it('should get `bytecode` from default provider', function () {
             const cli = chaiExec('node', [mock, sevm, 'abi', address, '--no-color', '--no-patch', '--no-cache'], { env: sevmDebugEnv });
