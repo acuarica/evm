@@ -6,6 +6,6 @@
     "exclude": [
         ".solc/soljson-v*.js",
         "dist/test/",
-        "scripts/solc.mjs"
+        "test/scripts/solc.mjs"
     ]
 }

@@ -547,8 +547,14 @@ Embeds [`examples`](#examples) and `sevm --help` into [`README`](./README.md).
 Mocks network requests to avoid brittle **CLI** tests, _i.e._, `::examples` and `::bin` tests.
 Both `ethers`' JSON-RPC provider `eth_getCode` method and, `function` and `event` signatures from [OpenChain API](https://openchain.xyz/signatures) will be mocked.
 It is loaded using Node's flag [`--import=./scripts/mock.mjs`](https://nodejs.org/api/cli.html#--importmodule).
-- [`solc.mjs`](./scripts/solc.mjs)
-Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compiler versions used in tests. It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
+
+### [`test/scripts`](./test/scripts/)
+
+Contains utility scripts that complements the test process.
+
+- [`solc.mjs`](./test/scripts/solc.mjs)
+Downloads and caches [`solc-js`](https://github.com/ethereum/solc-js) compiler versions used in tests.
+It is invoked via Mocha's [_Global Setup Fixtures_](https://mochajs.org/#global-setup-fixtures).
 
 ### [`examples`](./examples/)
 
