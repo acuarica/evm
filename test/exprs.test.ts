@@ -3,7 +3,7 @@ import util from 'util';
 
 import { Shanghai, sol, yul, type Ram, State, Memory } from 'sevm';
 import type { Expr } from 'sevm/ast';
-import { Add, Byte, CallDataLoad, CallValue, Div, Eq, Exp, IsZero, MLoad, Mod, Mul, Not, Prop, Props, Sha3, Shl, Sig, Sub, Val } from 'sevm/ast';
+import { Add, Byte, CallDataLoad, CallValue, Div, Eq, Exp, IsZero, MLoad, Mod, Mul, Not, Prop, Props, Sha3, Shl, Sig, Sub, Val, Xor } from 'sevm/ast';
 
 const id = <E>(expr: E): E => expr;
 
@@ -88,6 +88,8 @@ const $exprs = {
 
         t([0x100n, 0x2n, 'EXP'], new Exp(new Val(0x2n), new Val(0x100n)), new Val(0x0n), '0x2 ** 0x100', 'exp(0x2, 0x100)'),
         t([0x1n, 0x111n, 'SHL'], new Shl(new Val(0x1n), new Val(0x111n)), new Val(0x0n), '0x1 << 0x111', 'shl(0x1, 0x111)'),
+
+        t([0x10n, 0x101n, 'XOR'], new Xor(new Val(0x101n), new Val(0x010n)), new Val(0x111n), '0x101 ^ 0x10', 'xor(0x101, 0x10)'),
     ],
     special: [
         t(['BASEFEE'], Props['block.basefee'], id, 'block.basefee', 'basefee()'),

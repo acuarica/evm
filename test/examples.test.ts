@@ -21,7 +21,7 @@ describe(`::examples`, function () {
             const program = ['.ts', '.mts'].includes(ext)
                 ? `dist/examples/${file.slice(0, -ext.length)}${ext.replace('t', 'j')}`
                 : `examples/${file}`;
-            const mock = '--import=./scripts/mock.mjs';
+            const mock = '--import=./test/scripts/mock.mjs';
             const cli = chaiExec('node', mock, program, { env });
 
             expect(cli, cli.stderr).stderr.to.be.empty;
