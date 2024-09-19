@@ -3,50 +3,15 @@
 
 import c from 'ansi-colors';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import https from 'https';
-
-/** 
- * @param {string} url 
- * @returns {Promise<string>}
- */
-export function get(url) {
-    return new Promise((resolve, reject) => {
-        const req = https.request(url, function (res) {
-            /** @type {Uint8Array | null} */
-            let body = null;
-
-            res.on('data', (/** @type {Uint8Array} */chunk) => {
-                if (body == null) {
-                    body = chunk;
-                } else {
-                    const newBody = new Uint8Array(body.length + chunk.length);
-                    newBody.set(body, 0);
-                    newBody.set(chunk, body.length);
-                    body = newBody;
-                }
-            });
-
-            res.on('end', () => {
-                resolve(Buffer.from(/** @type {Uint8Array} */(body)).toString('utf8'));
-            });
-        });
-
-        req.on('error', err => {
-            reject(err);
-        });
-
-        req.end();
-    });
-}
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'];
 
-/** @typedef {{ [key: string]: string }} Releases */
-
 /**
- * Fetch and cache `solc` compilers used in tests
+ * Fetch and cache `solc` compilers used in tests.
  */
 export async function mochaGlobalSetup() {
+    /** @typedef {{ [key: string]: string }} Releases */
+
     // `recursive` ensures dir is created instead of failing with 'file already exists'
     mkdirSync('.solc', { recursive: true });
     process.stdout.write(c.magenta('> setup solc-js compilers '));
@@ -58,6 +23,8 @@ export async function mochaGlobalSetup() {
             return ret;
         } catch (_err) {
             const resp = await fetch('https://binaries.soliditylang.org/bin/list.json');
+            // Serializes only `releases` property to avoid including `builds`
+            // property which is unnecessary and clutters the file.
             const { releases } = /** @type {{releases: Releases}} */(await resp.json());
             writeFileSync(path, JSON.stringify(releases, null, 2));
             return releases;
