@@ -17,6 +17,15 @@ abstract class Bin extends Tag {
  */
 const mod256 = (n: bigint) => ((n % MOD_256) + MOD_256) % MOD_256;
 
+function withinMaxBigintRange(fn: () => bigint): bigint | null {
+    try {
+        return fn();
+    } catch {
+        // `RangeError: Maximum BigInt size exceeded`
+        return null;
+    }
+}
+
 export class Add extends Bin {
     readonly tag = 'Add';
     eval(): Expr {
@@ -98,9 +107,13 @@ export class Exp extends Bin {
     eval(): Expr {
         const left = this.left.eval();
         const right = this.right.eval();
-        return left.isVal() && right.isVal() && right.val >= 0
-            ? new Val(mod256(left.val ** right.val))
-            : new Exp(left, right);
+        if (left.isVal() && right.isVal() && right.val >= 0) {
+            const value = withinMaxBigintRange(() => left.val ** right.val);
+            if (value !== null) {
+                return new Val(mod256(value));
+            }
+        }
+        return new Exp(left, right);
     }
 }
 
@@ -239,9 +252,13 @@ export class Shl extends Shift {
     eval(): Expr {
         const val = this.value.eval();
         const shift = this.shift.eval();
-        return val.isVal() && shift.isVal()
-            ? new Val(mod256(val.val << shift.val))
-            : new Shl(val, shift);
+        if (val.isVal() && shift.isVal()) {
+            const value = withinMaxBigintRange(() => val.val << shift.val);
+            if (value !== null) {
+                return new Val(mod256(value));
+            }
+        }
+        return new Shl(val, shift);
     }
 }
 
