@@ -164,12 +164,6 @@ describe('::mainnet', function () {
             ercs: ['ERC20'] as const,
             checkEvents: false,
         }, {
-            /**
-             * Bytecode of USDC _proxy_ contract.
-             * Fetched with this RPC provider https://api.avax-test.network/ext/bc/C/rpc.
-             *
-             * See it on Snowtrace https://testnet.snowtrace.io/address/0x5425890298aed601595a70AB815c96711a31Bc65.
-             */
             filename: 'USDC-0x5425890298aed601595a70AB815c96711a31Bc65',
             members: [
                 /address public implementation;/,
