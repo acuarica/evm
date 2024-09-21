@@ -404,7 +404,7 @@ SEVM <pid>: Contract bytecode fetched from remote network
 
 ```out bin/provider/get-bytecode-from-default-provider
 [DEBUG mock.mjs] url='https://cloudflare-eth.com/' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cBB839Cbe05303d7705Fa\",\"latest\"],\"id\":1}"}
-[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.json
 Function Selectors
   0x22895118 <signature not found>
   0x01ffc9a7 <signature not found>
@@ -425,7 +425,7 @@ SEVM <pid>: Contract bytecode fetched from remote network
 
 ```out bin/provider/get-bytecode-from-default-provider-with-lowercase-address
 [DEBUG mock.mjs] url='https://cloudflare-eth.com/' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cbb839cbe05303d7705fa\",\"latest\"],\"id\":1}"}
-[DEBUG mock.mjs] 0x00000000219ab540356cbb839cbe05303d7705fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+[DEBUG mock.mjs] 0x00000000219ab540356cbb839cbe05303d7705fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.json
 Function Selectors
   0x22895118 <signature not found>
   0x01ffc9a7 <signature not found>
@@ -448,7 +448,7 @@ SEVM <pid>: Cache ABI disabled
 
 ```out bin/provider/get-bytecode-from-default-provider-and-patch-method-signatures
 [DEBUG mock.mjs] url='https://cloudflare-eth.com/' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cBB839Cbe05303d7705Fa\",\"latest\"],\"id\":1}"}
-[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.json
 [DEBUG mock.mjs] url='https://api.openchain.xyz/signature-database/v1/lookup?function=0x22895118,0x01ffc9a7,0x621fd130,0xc5f2892f,0x08c379a0&event=0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5' payload=undefined
 Function Selectors
   0x22895118 deposit(bytes,bytes,bytes,bytes32)
@@ -470,7 +470,7 @@ SEVM <pid>: Contract bytecode fetched from remote network
 
 ```out bin/provider/get-bytecode-from-SEVM_RPC_URL-provider
 [DEBUG mock.mjs] url='http://some-rpc-provider' payload={"method":"POST","headers":{"Content-Type":"application/json"},"body":"{\"jsonrpc\":\"2.0\",\"method\":\"eth_getCode\",\"params\":[\"0x00000000219ab540356cBB839Cbe05303d7705Fa\",\"latest\"],\"id\":1}"}
-[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.bytecode
+[DEBUG mock.mjs] 0x00000000219ab540356cBB839Cbe05303d7705Fa test/mainnet/BeaconDeposit-0x00000000219ab540356cBB839Cbe05303d7705Fa.json
 Function Selectors
   0x22895118 <signature not found>
   0x01ffc9a7 <signature not found>
