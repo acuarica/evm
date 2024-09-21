@@ -657,3 +657,7 @@
 ```errors big_game-0xe29945D03AE99e8fa285F0D53e72C7C04567A5fB/detect-errors
 []
 ```
+
+```errors Math-0xa4846160bdcd18f9de4d434d09399bc6f6231fa4/detect-errors
+[]
+```
