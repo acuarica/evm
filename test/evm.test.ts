@@ -258,6 +258,28 @@ describe('::evm', function () {
         expect(state.stmts[0].eval()).to.be.deep.equal(new Revert(new Val(0n), new Val(0n), undefined, undefined, []));
     });
 
+    it('should not fail when `EXP.eval` BigInt size exceeded', function () {
+        //                      PS 5 PS 4  - PS 2 ** PS 0 MS PS20 PS 0 RT
+        const evm = EVM.new('0x 6005 6004 03 6002 0a 6000 52 6020 6000 f3'.replace(/ /g, ''));
+        const state = evm.start();
+        console.log(yulStmts(state.stmts));
+        expect(state.stmts.map(s => yul`${s}`)).to.be.deep.equal([
+            'mstore(0x0, exp(0x2, sub(0x4, 0x5)))',
+            'return(0x0, 0x20) // exp(0x2, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)',
+        ]);
+    });
+
+    it('should not fail when `SHL.eval` BigInt size exceeded', function () {
+        //                      PS 2 PS 5 PS 4  - << PS 0 MS PS20 PS 0 RT
+        const evm = EVM.new('0x 6002 6005 6004 03 1b 6000 52 6020 6000 f3'.replace(/ /g, ''));
+        const state = evm.start();
+        console.log(yulStmts(state.stmts));
+        expect(state.stmts.map(s => yul`${s}`)).to.be.deep.equal([
+            'mstore(0x0, shl(0x2, sub(0x4, 0x5)))',
+            'return(0x0, 0x20) // shl(0x2, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)',
+        ]);
+    });
+
     describe('special', function () {
         Object.values(Props).forEach(prop => {
             it(`should get \`${prop.symbol}\` from compiled code`, function () {
