@@ -24,7 +24,7 @@ describe('::mainnet', function () {
                 checkEvents?: boolean;
             }
         }))
-        .map(e => (console.log(e.filename), { ...e, members: (e.members ?? []).map(line => new RegExp(line)) }))
+        .map(e => ({ ...e, members: (e.members ?? []).map(line => new RegExp(line)) }))
     )('./test/mainnet').forEach(({ filename, bytecode, members, ercs, checkEvents, selectors, skipSnapshot }) => {
         const name = filename.split('-')[0];
 
