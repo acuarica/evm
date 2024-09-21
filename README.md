@@ -373,7 +373,7 @@ Options:
                 le)            [string] [default: "https://cloudflare-eth.com/"]
   --help        Show help                                              [boolean]
   --with-stack  Include the current stack next to each decoded opcode
-  --with-trace  Include the trace of staments at the end of each basic block
+  --with-trace  Include the trace of statements at the end of each basic block
 
 ```
 
