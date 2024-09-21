@@ -17,6 +17,12 @@ abstract class Bin extends Tag {
  */
 const mod256 = (n: bigint) => ((n % MOD_256) + MOD_256) % MOD_256;
 
+/**
+ * Ensures the operation indicated by `fn` is not out of `BigInt`'s maximum size range.
+ * 
+ * @param fn the operation to perform. Should be `exp` or `shl`.
+ * @returns the value computed by `fn` or `null` if `fn` throws `RangeError`.
+ */
 function withinMaxBigintRange(fn: () => bigint): bigint | null {
     try {
         return fn();
