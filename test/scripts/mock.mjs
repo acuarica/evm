@@ -8,8 +8,8 @@ const BYTECODE_PATH = './test/mainnet';
 const resolve = {};
 
 for (const file of readdirSync(BYTECODE_PATH)) {
-    assert(file.endsWith('.bytecode'));
-    const [, address] = file.replace('.bytecode', '').split('-');
+    assert(file.endsWith('.json'));
+    const [, address] = file.replace('.json', '').split('-');
     assert(address, `Unable to register address with file \`${file}\``);
     resolve[address.toLowerCase()] = file;
 }
@@ -24,7 +24,7 @@ function getCode(address) {
     const bytecodePath = join(BYTECODE_PATH, file);
     // Normalize path so snapshot are the same in both Windows and *nixes
     console.info('[DEBUG mock.mjs]', address, bytecodePath.replace(/\\/g, '/'));
-    const bytecode = readFileSync(bytecodePath, 'utf-8');
+    const { bytecode } = JSON.parse(readFileSync(bytecodePath, 'utf-8'));
     return Promise.resolve(bytecode);
 }
 
@@ -45,7 +45,7 @@ global.fetch = async function (url, payload) {
         assert(jsonrpc === '2.0');
         assert(method === 'eth_getCode');
 
-        if (url.startsWith('error://')) 
+        if (url.startsWith('error://'))
             return Response.error();
 
         const [address] = params;
