@@ -4,7 +4,7 @@ import { FunctionFragment } from 'ethers';
 import { readdirSync, readFileSync } from 'fs';
 import { inspect } from 'util';
 
-import { Contract, ERCIds } from 'sevm';
+import { Contract, type ERCIds } from 'sevm';
 import 'sevm/4bytedb';
 
 import { fnselector } from './utils/selector';
