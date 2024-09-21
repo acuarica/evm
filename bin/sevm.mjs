@@ -256,7 +256,7 @@ void yargs(process.argv.slice(2))
             description: 'Include the current stack next to each decoded opcode',
         })
         .option('with-trace', {
-            description: 'Include the trace of staments at the end of each basic block',
+            description: 'Include the trace of statements at the end of each basic block',
         }), make(dis))
     .command('cfg <contract>', 'Writes the cfg of the selected function in `dot` format into standard output', pos, make(cfg))
     .command('sol <contract>', "Decompile the contract into Solidity-like source", decompileOpts, make((contract, argv) => {
