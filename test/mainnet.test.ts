@@ -13,9 +13,8 @@ describe('::mainnet', function () {
 
     (base => readdirSync(base)
         .filter(f => f.endsWith('.json'))
-        .map(f => f.replace('.json', ''))
         .map(f => ({
-            filename: f, ...JSON.parse(readFileSync(`${base}/${f}.json`, 'utf-8')) as {
+            filename: f.replace('.json', ''), ...JSON.parse(readFileSync(`${base}/${f}`, 'utf-8')) as {
                 bytecode: string,
                 members?: string[];
                 selectors?: string[];
