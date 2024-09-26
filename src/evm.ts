@@ -223,7 +223,11 @@ export class EVM<M extends string> {
 
         if (opcode === undefined) throw new Error(`Executing block at ${pc0} cannot be empty`);
 
-        if (!state.halted) throw new Error(`State must be halted after executing block at ${pc0}..${opcode.pc}`);
+        if (!state.halted) {
+            const err = new Throw(`State must be halted after executing block at ${pc0}..${opcode.pc}`, opcode);
+            state.halt(err);
+            this.errors.push({ err, state });
+        }
 
         const block = this.blocks.get(pc0);
         if (block === undefined) {
