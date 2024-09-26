@@ -700,10 +700,20 @@ event ${eventSelector(unknownEventSig)};
             expect(() => evm.exec(2, state)).to.throw('Executing block at 2 cannot be empty');
         });
 
-        it('should throw when finishing exec non-`halted` state', function () {
+        it('should append error when finishing exec in non-`halted` state', function () {
             const state = new State<Inst, Expr>();
             const evm = EVM.new('0x6001600201');
-            expect(() => evm.exec(0, state)).to.throw('State must be halted after executing block at 0..4');
+            evm.exec(0, state);
+            const err = new Throw('State must be halted after executing block at 0..4', new Opcode(4, 0x1, 'ADD'));
+            expect(evm.errors).to.be.deep.equal([{ err, state }]);
+        });
+
+        it('should append error when finishing exec in non-`halted` state by a single opcode', function () {
+            const state = new State<Inst, Expr>();
+            const evm = EVM.new('0x5b');
+            evm.exec(0, state);
+            const err = new Throw('State must be halted after executing block at 0..0', new Opcode(0, 0x5b, 'JUMPDEST'));
+            expect(evm.errors).to.be.deep.equal([{ err, state }]);
         });
 
         it('should halt when `exec` invalid opcode & state', function () {

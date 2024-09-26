@@ -661,3 +661,48 @@
 ```errors Math-0xa4846160bdcd18f9de4d434d09399bc6f6231fa4/detect-errors
 []
 ```
+
+```errors ZapStEth-0x4a7B05aEf57516A0C181d3108437dEC2CD0a6cfd/detect-errors
+[
+  {
+    "reason": "State must be halted after executing block at 1468..1468",
+    "opcode": {
+      "pc": 1468,
+      "opcode": 91,
+      "mnemonic": "JUMPDEST",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "State must be halted after executing block at 1468..1468",
+    "opcode": {
+      "pc": 1468,
+      "opcode": 91,
+      "mnemonic": "JUMPDEST",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "State must be halted after executing block at 1468..1468",
+    "opcode": {
+      "pc": 1468,
+      "opcode": 91,
+      "mnemonic": "JUMPDEST",
+      "data": null
+    },
+    "name": "Throw"
+  },
+  {
+    "reason": "State must be halted after executing block at 1468..1468",
+    "opcode": {
+      "pc": 1468,
+      "opcode": 91,
+      "mnemonic": "JUMPDEST",
+      "data": null
+    },
+    "name": "Throw"
+  }
+]
+```
