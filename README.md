@@ -263,7 +263,7 @@ console.log(tokenContract!.patchdb().solidify());
 
 It is also possible to hook onto the `State` of a contract, and in turn onto `Stack` and `Memory`.
 The following example creates a subclass of `Memory` to hook into the `invalidateRange` method.
-In this particular example there is a range where the `size` is to large to be invalidated.
+In this particular example there is a range where the `size` is very large so it will be printed to `stdout`.
 
 ```ts examples/State-Hook.mts
 import { JsonRpcProvider } from 'ethers';
