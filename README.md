@@ -345,6 +345,14 @@ garding Yul.
 
 ```
 
+You can also use bytecode downloaded with other tools, for example using [Foundry's `cast`](https://book.getfoundry.sh/cast/)
+
+```console
+$ cast code --rpc-url https://cloudflare-eth.com 0xD4039ECC40AedA0582036437cf3ec02845DA4C13 > 
+KrakenETHStaking.bytecode
+$ sevm abi KrakenETHStaking.bytecode
+```
+
 ### `dis`
 
 ```console !sevm=bin/sevm.mjs dis --help
