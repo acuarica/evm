@@ -10,7 +10,7 @@ import path from 'path';
 import { debuglog } from 'util';
 import yargs from 'yargs';
 
-import { Contract, sol, yul } from 'sevm';
+import { Contract, sol, yul, ERCIds } from 'sevm';
 import 'sevm/4byte';
 
 import { isValidAddress } from './.address.mjs';
@@ -265,8 +265,31 @@ void yargs(process.argv.slice(2))
     .command('yul <contract>', "Decompile the contract into Yul-like source[4]", decompileOpts, make((contract, argv) => {
         console.info((argv['reduce'] ? contract.reduce() : contract).yul());
     }))
+    .command('ercs <contract>', 'Try to detect supported ERCs in the bytecode contract based on function and events selectors', argv => pos(argv)
+        .option('check-events', {
+            description: 'Check for events when detecting ERCs, use `--no-check-events` to only use function selectors when detect ERC',
+            default: true,
+        }),
+        make((contract, argv) => {
+            const checkEvents = !!argv['checkEvents'];
+            const ercs = [];
+            for (const erc of ERCIds) {
+                if (contract.isERC(erc, checkEvents)) {
+                    ercs.push(erc);
+                }
+            }
+            if (ercs.length === 0) {
+                console.info(c.dim('No supported ERCs detected in this contract'));
+            } else {
+                console.info('Detected ERCs');
+                ercs.forEach(erc => console.info(`  - ${c.magenta(erc)}`));
+            }
+        }))
     .command('config', 'Shows cache path used to store downloaded bytecode', {}, () =>
         console.info(paths.cache)
+    )
+    .command('supported-ercs', 'Shows supported ERCs that can be detected', {}, () => 
+        ERCIds.forEach(erc => console.info(erc))
     )
     .middleware(argv => {
         if (!argv['color']) {

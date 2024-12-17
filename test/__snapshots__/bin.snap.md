@@ -14,7 +14,10 @@ Commands:
                              rmat into standard output
   sevm sol <contract>        Decompile the contract into Solidity-like source
   sevm yul <contract>        Decompile the contract into Yul-like source[4]
+  sevm ercs <contract>       Try to detect supported ERCs in the bytecode contra
+                             ct based on function and events selectors
   sevm config                Shows cache path used to store downloaded bytecode
+  sevm supported-ercs        Shows supported ERCs that can be detected
 
 Options:
   --version  Show version number                                       [boolean]
@@ -62,7 +65,10 @@ Commands:
                              rmat into standard output
   sevm sol <contract>        Decompile the contract into Solidity-like source
   sevm yul <contract>        Decompile the contract into Yul-like source[4]
+  sevm ercs <contract>       Try to detect supported ERCs in the bytecode contra
+                             ct based on function and events selectors
   sevm config                Shows cache path used to store downloaded bytecode
+  sevm supported-ercs        Shows supported ERCs that can be detected
 
 Options:
   --version  Show version number                                       [boolean]
@@ -112,7 +118,10 @@ Commands:
                              rmat into standard output
   sevm sol <contract>        Decompile the contract into Solidity-like source
   sevm yul <contract>        Decompile the contract into Yul-like source[4]
+  sevm ercs <contract>       Try to detect supported ERCs in the bytecode contra
+                             ct based on function and events selectors
   sevm config                Shows cache path used to store downloaded bytecode
+  sevm supported-ercs        Shows supported ERCs that can be detected
 
 Options:
   --version  Show version number                                       [boolean]
@@ -145,6 +154,19 @@ for more information regarding Function Selectors
 garding Yul.
 
 Unknown argument: unknowncommand
+
+```
+
+```out display-supported-ERCs-using-supported-ercs
+ERC1155
+ERC1155MetadataURI
+ERC165
+ERC173
+ERC20
+ERC20Metadata
+ERC721
+ERC721Enumerable
+ERC721Metadata
 
 ```
 
@@ -397,6 +419,18 @@ Cannot find bytecode for contract 0x8ba1
 
 ```err catch-error-when-exec-self-destructed-contract
 Bytecode for contract - is '0x', it might have been self-destructed or it is an EOA
+
+```
+
+```out detect-no-ERCs
+No supported ERCs detected in this contract
+
+```
+
+```out detect-supported-ERCs-in-WETH
+Detected ERCs
+  - ERC20
+  - ERC20Metadata
 
 ```
 

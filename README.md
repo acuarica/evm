@@ -311,7 +311,10 @@ Commands:
                              rmat into standard output
   sevm sol <contract>        Decompile the contract into Solidity-like source
   sevm yul <contract>        Decompile the contract into Yul-like source[4]
+  sevm ercs <contract>       Try to detect supported ERCs in the bytecode contra
+                             ct based on function and events selectors
   sevm config                Shows cache path used to store downloaded bytecode
+  sevm supported-ercs        Shows supported ERCs that can be detected
 
 Options:
   --version  Show version number                                       [boolean]
