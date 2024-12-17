@@ -157,6 +157,11 @@ url ipfs://QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2
 
 ```
 
+```out display-Cannot-find-bytecode-for-contract---when-there-is-no-stdin-attached
+Cannot find bytecode for contract -
+
+```
+
 ```out display-no-metadata-from-bytecode
 Contract Metadata
 No metadata
