@@ -59,6 +59,14 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
+    it("should display supported ERCs using `supported-ercs`", function () {
+        const cli = chaiExec(sevm, ['supported-ercs']);
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
     it('should display `metadata` from JSON `bytecode`', function () {
         const input = `{
             "bytecode": "60806040525f80fdfea2646970667358221220213295e11660e0fa1851b6245c99f6d8ef0d1ad319b69a6483694b3a316c2dc564736f6c63430008150033",
@@ -142,6 +150,23 @@ describe('::bin', function () {
         expect(cli.stdout).to.be.empty;
         expect(cli).stderr.to.matchSnapshot('err', this);
         expect(cli).to.exit.with.code(3);
+    });
+
+    it('should detect no ERCs', function () {
+        const input = '60806040525f80fdfe';
+        const cli = chaiExec(sevm, ['ercs', '-', '--no-color', '--no-patch'], { input });
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
+    });
+
+    it('should detect supported ERCs in WETH', function () {
+        const cli = chaiExec(sevm, ['ercs', './test/mainnet/WETH-0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.json', '--no-color', '--no-patch']);
+
+        expect(cli.stdout).to.matchSnapshot('out', this);
+        expect(cli).stderr.to.be.empty;
+        expect(cli).to.exit.with.code(0);
     });
 
     describe(`::bin/provider`, function () {
