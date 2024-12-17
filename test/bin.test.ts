@@ -71,6 +71,14 @@ describe('::bin', function () {
         expect(cli).to.exit.with.code(0);
     });
 
+    it('should display `Cannot find bytecode for contract -` when there is no `stdin` attached', function () {
+        const cli = chaiExec(sevm, ['metadata', '-', '--no-color', '--no-patch']);
+
+        expect(cli).stdout.to.be.empty;
+        expect(cli.stderr).to.matchSnapshot('out', this);
+        expect(cli).to.exit.with.code(2);
+    });
+
     it('should display no-`metadata` from `bytecode`', function () {
         const input = '60806040525f80fdfe';
         const cli = chaiExec(sevm, ['metadata', '-', '--no-color', '--no-patch'], { input });
