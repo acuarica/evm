@@ -306,7 +306,8 @@ describe(`::dataset | MAX=\`${MAX ?? ''}\` BAIL=\`${BAIL ?? ''}\`${hint}`, funct
             write(item(`${info('ERCs')} ${emph(`(most used first)`)} ` + ercsStats.counts.sorted().map(([erc, count]) => `${code(erc)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${info('Precompiled Contracts')} ${emph(`(most used first)`)} ` + hookStats.precompiles.sorted().map(([address, count]) => `${code(address)}${emph(`(${count})`)}`).join(' | ')));
             write(item(`${code('PC')}s ${emph(`(${hookStats.pcs})`)}`));
-            write(item(`${info('Coverage')} \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} unreacheable chunks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}k)`)}`));
+            const percentage = (coverageStats.unreachableJumpDestChunks / coverageStats.nchunks) * 100;
+            write(item(`${info('Coverage')} \u{1F6A7} ${fmt(coverageStats.unreachableJumpDestChunks)}/${fmt(coverageStats.nchunks)} ${emph(`(${percentage.toFixed(1)} %)`)} unreacheable blocks ${emph(`(${(coverageStats.unreachableJumpDestSize / 1024).toFixed(1)}kb)`)}`));
 
             const revertSelectors = hookStats.revertSelectors.sorted();
             const displayCount = 15;
@@ -370,12 +371,14 @@ function coverage(contract: Contract, ctx: Mocha.Context): {
     }
 
     expect(nopcodes).to.be.equal(contract.opcodes().length);
-    if (unreachableJumpDestChunks > 0)
-        ctx.test!.title += ` \u{1F6A7}${fmt(unreachableJumpDestChunks)}/${fmt(chunks.length)} (${unreachableJumpDestSize}b)`;
+    if (unreachableJumpDestChunks > 0) {
+        const perc = (unreachableJumpDestChunks / chunks.length) * 100;
+        ctx.test!.title += ` \u{1F6A7} ${fmt(unreachableJumpDestChunks)}/${fmt(chunks.length)} (${perc.toFixed(1)} %) (${unreachableJumpDestSize}b)`;
+    }
 
     return { unreachableJumpDestChunks, unreachableJumpDestSize, nchunks: chunks.length };
 }
 
 function fmt(value: number) {
-    return new Intl.NumberFormat("en-US").format(value);
+    return new Intl.NumberFormat('en-US').format(value);
 }
