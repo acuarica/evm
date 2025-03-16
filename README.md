@@ -4,10 +4,10 @@
 
 ![splash preview](./splash.png?raw=true)
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/test.yml?style=flat-square)](https://github.com/acuarica/evm/actions/workflows/test.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/acuarica/evm/test.yml?style=flat-square&logo=githubactions)](https://github.com/acuarica/evm/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/acuarica/evm/graph/badge.svg?token=CHCTT3ABLL)](https://codecov.io/gh/acuarica/evm)
-[![npm](https://img.shields.io/npm/v/sevm?style=flat-square)](https://www.npmjs.com/package/sevm)
-![npm](https://img.shields.io/npm/dt/sevm?style=flat-square)
+[![npm](https://img.shields.io/npm/v/sevm?style=flat-square&logo=npm)](https://www.npmjs.com/package/sevm)
+![npm](https://img.shields.io/npm/dt/sevm?style=flat-square&logo=npm)
 [![GitHub](https://img.shields.io/github/license/acuarica/evm?style=flat-square)](https://github.com/acuarica/evm/blob/main/LICENSE)
 [![install size](https://packagephobia.com/badge?p=sevm)](https://packagephobia.com/result?p=sevm)
 [![Demo](https://img.shields.io/badge/demo-acuarica.github.io%2Fevm-informational?style=flat-square)](https://acuarica.github.io/evm)
