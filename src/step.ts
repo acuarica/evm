@@ -1,9 +1,9 @@
-import { arrayify, hexlify } from './.bytes';
-import { ExecError, type Operand, type Ram, type State } from './state';
+import { arrayify, hexlify } from './bytes.ts';
+import { ExecError, type Operand, type Ram, type State } from './state.ts';
 
-import type { DataCopy, Expr, IReverts, IEvents, IStore, Inst, Jumpi, Props } from './ast';
-import * as ast from './ast';
-import { Sha3, Val, Sig } from './ast';
+import type { DataCopy, Expr, IReverts, IEvents, IStore, Inst, Jumpi, Props } from './ast/index.ts';
+import * as ast from './ast/index.ts';
+import { Sha3, Val, Sig } from './ast/index.ts';
 
 /**
  * Represents an opcode found in the bytecode augmented with
@@ -21,6 +21,11 @@ import { Sha3, Val, Sig } from './ast';
  */
 export class Opcode<M extends string = string> {
 
+    readonly pc: number;
+    readonly opcode: number;
+    readonly mnemonic: M;
+    readonly data: null | Uint8Array = null;
+
     constructor(
         /**
          * This is the offset in the bytecode where this `Opcode` was found.
@@ -32,13 +37,13 @@ export class Opcode<M extends string = string> {
          * The Program Counter of this `Opcode`.
          * The index in the `Opcode[]` where this `Opcode` is inserted.
          */
-        readonly pc: number,
+        pc: number,
 
         /**
          * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
          * The `opcode` may not be a valid opcode.
          */
-        readonly opcode: number,
+        opcode: number,
 
         /**
          * Represents a valid opcode.
@@ -50,7 +55,7 @@ export class Opcode<M extends string = string> {
          * 
          * A `PUSHn` opcode only permits a `PUSHn` opcode.
          */
-        readonly mnemonic: M,
+        mnemonic: M,
 
         /**
          * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
@@ -58,8 +63,13 @@ export class Opcode<M extends string = string> {
          * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
          * then it contains the data attached to this instruction.
          */
-        readonly data: null | Uint8Array = null
-    ) { }
+        data: null | Uint8Array = null,
+    ) {
+        this.pc = pc;
+        this.opcode = opcode;
+        this.mnemonic = mnemonic;
+        this.data = data;
+    }
 
     /**
      * Where the next opcode should be located at.
@@ -495,7 +505,12 @@ function getJumpDest(offset: Expr, opcode: Opcode, bytecode: Uint8Array) {
 
 class ArgsFetcher {
     readonly args: Expr[] = [];
-    constructor(readonly memory: Ram<Expr>['memory']) { }
+
+    readonly memory: Ram<Expr>['memory'];
+
+    constructor(memory: Ram<Expr>['memory']) {
+        this.memory = memory;
+    }
 
     fetch(i: bigint) {
         this.args.push(this.memory.get(i)?.eval() ?? new ast.MLoad(new Val(i)));
@@ -746,7 +761,7 @@ const FrontierStep = {
     ...STORAGE,
 
     /* Flow operations */
-    JUMPDEST: [JUMPDEST, _state => { }],
+    JUMPDEST: [JUMPDEST, () => { }],
     JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);

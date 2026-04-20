@@ -5,33 +5,45 @@
         "lib": [
             "es2020"
         ],
-        "rootDir": ".",
-        "outDir": "dist",
-        "checkJs": true,
-        "incremental": true,
+        // "rootDir": ".",
+        "outDir": "dist-d.ts",
+        // "checkJs": false,
+        // "incremental": true,
+        // "noEmit": true,
+        "emitDeclarationOnly": true,
         "sourceMap": true,
         "isolatedModules": true,
         "declaration": true,
+
         "strict": true,
+        "verbatimModuleSyntax": true,
+        "rewriteRelativeImportExtensions": true,
+        "erasableSyntaxOnly": true,
+
+        "noUncheckedSideEffectImports": true,
+        "moduleDetection": "force",
         "skipLibCheck": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
+        "strictFunctionTypes": true,
         "noImplicitAny": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "noPropertyAccessFromIndexSignature": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        // "allowImportingTsExtensions": true,
+        // "noUncheckedIndexedAccess": true,
     },
-    "include": [
-        "./4byte",
-        "./4bytedb",
-        "./bin",
-        "./examples",
-        "./scripts",
-        "./src",
-        "./test",
-        "./types"
-    ]
+    // "include": [
+    //     "./4byte",
+    //     "./4bytedb",
+    //     "./bin",
+    //     "./examples",
+    //     "./scripts",
+    //     "./src",
+    //     "./test",
+    //     "./types"
+    // ]
 }

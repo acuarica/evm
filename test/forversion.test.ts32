@@ -1,10 +1,10 @@
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 
 import { Contract, Shanghai } from 'sevm';
 import { Add, CallDataLoad, MappingLoad, MappingStore, Props, Require, Return, Revert, SStore, Sha3, Stop, Val, Variable } from 'sevm/ast';
 
-import { eventSelector, fnselector } from './utils/selector';
-import { VERSIONS, type Version, compile } from './utils/solc';
+import { eventSelector, fnselector } from './utils/selector.ts';
+import { VERSIONS, type Version, compile } from './utils/solc.ts';
 
 describe(`::forversion`, function () {
     forVersion('empty', (compile, fallback, version) => {

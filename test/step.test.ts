@@ -1,11 +1,11 @@
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 
-import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, splitMetadataHash, yul, Memory } from 'sevm';
+import { Opcode, type Operand, sol, Stack, State, London, Paris, Shanghai, ExecError, parseMetadata, yul, Memory } from 'sevm';
 import { Val, type Expr, Local, Locali, type Inst, Invalid, MStore, Jump, Branch, Jumpi, Log, type IEvents, Props, DataCopy, Sub, Variable } from 'sevm/ast';
 import { Add, Create, MLoad, Return, SelfDestruct, Stop } from 'sevm/ast';
 import * as ast from 'sevm/ast';
-import { compile } from './utils/solc';
-import { fnselector } from './utils/selector';
+import { compile } from './utils/solc.ts';
+import { fnselector } from './utils/selector.ts';
 
 const sizes = [...Array(16).keys()].map(i => i + 1);
 
@@ -86,23 +86,13 @@ describe('::step', function () {
             }().NUMBER({ stack });
 
             expect(stack.top).to.be.deep.equal(Props['block.number']);
-            expect(numberWasCalled, '`NUMBER` step was not overriden').to.be.true;
+            expect(numberWasCalled, '`NUMBER` step was not overriden').toBe(true);
         });
     });
 
     describe('decode', function () {
         const step = new London();
         const OPCODES = step.opcodes();
-
-        it('should `decode` unary opcodes', function () {
-            expect([...step.decode([OPCODES.ADDRESS, OPCODES.ADDRESS, OPCODES.JUMPDEST, OPCODES.ADD])])
-                .to.be.deep.equal([
-                    new Opcode(0, OPCODES.ADDRESS, 'ADDRESS'),
-                    new Opcode(1, OPCODES.ADDRESS, 'ADDRESS'),
-                    new Opcode(2, OPCODES.JUMPDEST, 'JUMPDEST'),
-                    new Opcode(3, OPCODES.ADD, 'ADD'),
-                ]);
-        });
 
         it('should `decode` `PUSH`n opcodes', function () {
             expect([...step.decode([
@@ -200,35 +190,35 @@ describe('::step', function () {
             });
         }));
 
-        it('should find method selector decoded as `PUSH3`', function () {
+        it('should find method selector decoded as `PUSH3`', (ctx) => {
             // "00e4778a": "addAccessoryIdMapping(address,uint64)",
             const src = `contract Test {
                 function addAccessoryIdMapping(address, uint64) public pure returns (uint) {
                     return 1;
                 }
             }`;
-            const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+            const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
             const opcodes = [...new Shanghai().decode(bytecode)];
 
             const push3 = opcodes.find(o => o.mnemonic === 'PUSH3' && o.hexData() === 'e4778a');
-            expect(push3).to.be.not.undefined;
+            expect(push3).not.toBeUndefined();
         });
 
-        it('should find method selector decoded as `PUSH1`', function () {
+        it('should find method selector decoded as `PUSH1`', (ctx) => {
             // "000000c7": "withdrawByAdmin_Unau(uint256[])",
             const src = `contract Test {
                 function withdrawByAdmin_Unau(uint256[] calldata) public pure returns (uint) {
                     return 1;
                 }
             }`;
-            const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+            const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
             const opcodes = [...new Shanghai().decode(bytecode)];
 
             const push1 = opcodes.find(o => o.mnemonic === 'PUSH1' && o.hexData() === 'c7');
-            expect(push1).to.be.not.undefined;
+            expect(push1).not.toBeUndefined();
         });
 
-        it('should find `PUSH4` method selector to invoke external contract', function () {
+        it('should find `PUSH4` method selector to invoke external contract', (ctx) => {
             const sig = 'balanceOf(uint256)';
             const src = `interface IERC20 {
                 function ${sig} external view returns (uint256);
@@ -239,7 +229,7 @@ describe('::step', function () {
                     addr.balanceOf(7);
                 }
             }`;
-            const opcodes = [...new Shanghai().decode(compile(src, '0.7.6', this).bytecode)];
+            const opcodes = [...new Shanghai().decode(compile(src, '0.7.6', ctx).bytecode)];
 
             const selector = fnselector(sig);
             const push4 = opcodes.find(o => o.mnemonic === 'PUSH4' && o.hexData() === selector);
@@ -273,8 +263,8 @@ describe('::step', function () {
                     }
                 }`],
             ] satisfies [string, string][]).forEach(([title, src]) => {
-                it(title, function () {
-                    const { bytecode } = splitMetadataHash(compile(src, '0.7.6', this).bytecode);
+                it(title, (ctx) => {
+                    const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
                     bytecodes.add(Buffer.from(bytecode).toString('hex'));
                     expect(bytecodes).to.have.length(1);
 

@@ -2,19 +2,6 @@ import { describe, test, expect } from 'vitest';
 
 import { arrayify, hexlify } from '../src/bytes.ts';
 
-// /**
-//  * @template {[...unknown[]]} A
-//  * @param {{ [K in keyof A]: A[K][] }} args
-//  * @returns {A[]}
-//  */
-// function xprod(...args) {
-//     return /** @type {A[]} */ (args.reduce(
-//         /** @param {unknown[][]} prev */
-//         (prev, curr) => prev.flatMap(x => curr.map(y => [...x, y])),
-//         /** @type {unknown[][]} */([[]]),
-//     ));
-// }
-
 describe('::bytes', () => {
     describe('arrayify', () => {
         test.each([

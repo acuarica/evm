@@ -1,16 +1,16 @@
 import { strict as assert } from 'assert';
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
 import type { Operand } from 'sevm';
-import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, splitMetadataHash, yul, yulStmts } from 'sevm';
+import { EVM, London, Opcode, Paris, Shanghai, State, build, sol, solEvents, solStmts, parseMetadata, yul, yulStmts } from 'sevm';
 import type { Create, DataCopy, Expr, Inst, Log } from 'sevm/ast';
 import { Add, And, Local, Invalid, Jump, JumpDest, Jumpi, MappingLoad, MappingStore, Not, Props, Sha3, Sig, Stop, Sub, Throw, Val, type SStore, Shl, Revert, Exp } from 'sevm/ast';
 
-import { eventSelector, fnselector } from './utils/selector';
-import { compile, type Version } from './utils/solc';
+import { eventSelector, fnselector } from './utils/selector.ts';
+import { compile, type Version } from './utils/solc.ts';
 
 describe('::evm', function () {
     it('should attach `STEP` hooks', function () {
@@ -839,13 +839,13 @@ event ${eventSelector(unknownEventSig)};
                 randomData = fs.readFileSync(randomDataPath, 'utf8');
                 const src = solTemplate.replace('[randomData]', randomData);
                 bytecode = compile(src, version, this).bytecode;
-                metadata = splitMetadataHash(bytecode).metadata!;
+                metadata = parseMetadata(bytecode).metadata!;
             } catch {
                 do {
                     randomData = crypto.randomBytes(16).toString('hex');
                     const src = solTemplate.replace('[randomData]', randomData);
                     bytecode = compile(src, version, null).bytecode;
-                    metadata = splitMetadataHash(bytecode).metadata!;
+                    metadata = parseMetadata(bytecode).metadata!;
                 } while (!includesFF(metadata.hash));
                 fs.writeFileSync(randomDataPath, randomData);
             }

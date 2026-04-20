@@ -1,9 +1,9 @@
 import { keccak256 } from 'js-sha3';
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 
 import { Contract } from 'sevm';
 
-import { compile } from './utils/solc';
+import { compile } from './utils/solc.ts';
 
 describe('::ercs', function () {
     describe('erc165', function () {

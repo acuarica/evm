@@ -71,8 +71,12 @@ const ELEM_TYPES = [
 class Tokenizer {
     readonly ID_REGEX = /^\w+\b/;
 
+    readonly input: string;
     position = 0;
-    constructor(readonly input: string) { }
+    constructor(input: string) {
+        this.input = input;
+    }
+
     next(): [pos: number, kind: 'ID' | 'LIT' | 'TYPE' | 'OP' | null, token: string | null] {
         while (this.input[this.position] === ' ') this.position++;
 
@@ -109,7 +113,10 @@ class Tokenizer {
 class Tokens {
     readonly #tokens: [pos: number, kind: 'ID' | 'LIT' | 'TYPE' | 'OP', token: string][] = [];
 
-    constructor(readonly sig: string) {
+    readonly sig: string;
+
+    constructor(sig: string) {
+        this.sig = sig;
         this.#tokens = [...new Tokenizer(sig)];
     }
 

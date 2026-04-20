@@ -1,6 +1,7 @@
 import chaiExec from '@jsdevtools/chai-exec';
 import chai, { expect } from 'chai';
-import './utils/snapshot';
+import { describe, it } from 'vitest';
+import './utils/snapshot.ts';
 
 chai.use(chaiExec);
 

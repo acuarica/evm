@@ -1,9 +1,9 @@
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 import { keccak256 } from 'js-sha3';
 
 import { isElemType, parseSig, sighash, type SigMember } from 'sevm';
 
-import { compile } from './utils/solc';
+import { compile } from './utils/solc.ts';
 
 const sigs = ([
     {
@@ -193,10 +193,10 @@ const sigs = ([
 describe('::abi', function () {
     describe('isElemType', function () {
         it('should determine `uint/function` as elem types', function () {
-            expect(isElemType('uint')).to.be.true;
-            expect(isElemType('function')).to.be.true;
-            expect(isElemType('owner')).to.be.false;
-            expect(isElemType('event')).to.be.false;
+            expect(isElemType('uint')).toBe(true);
+            expect(isElemType('function')).toBe(true);
+            expect(isElemType('owner')).toBe(false);
+            expect(isElemType('event')).toBe(false);
         });
     });
 
@@ -256,9 +256,10 @@ describe('::abi', function () {
         sigs.forEach(({ sig, fmt, sol }) => {
             if (sol === null) return;
 
-            it(`should find selector \`${sol ?? sig}`, function () {
+            it(`should find selector \`${sol ?? sig}`, (ctx) => {
                 const selector = keccak256(fmt).slice(0, 8);
-                this.test!.title += `#${selector}\``;
+                // this.test!.title += `#${selector}\``;
+                ctx.annotate(`#${selector}\``);
 
                 const src = `contract Test {
                     struct T2 { uint x; uint y; }
@@ -268,7 +269,7 @@ describe('::abi', function () {
 
                     function ${sol ?? sig} public pure {}
                 }`;
-                const { evm } = compile(src, '0.8.16', this);
+                const { evm } = compile(src, '0.8.16', ctx);
                 expect(evm.methodIdentifiers).to.deep.equal({ [fmt]: selector });
             });
         });

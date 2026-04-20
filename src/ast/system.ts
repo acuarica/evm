@@ -1,4 +1,4 @@
-import { type IInst, Tag, type Expr, evalE } from '.';
+import { type IInst, Tag, type Expr, evalE } from './index.ts';
 
 function info(...args: Expr[]): [depth: number, count: number] {
     return [
@@ -9,8 +9,15 @@ function info(...args: Expr[]): [depth: number, count: number] {
 
 export class Sha3 extends Tag {
     readonly tag = 'Sha3';
-    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) {
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly args?: Expr[] | undefined;
+
+    constructor(offset: Expr, size: Expr, args?: Expr[]) {
         super(...info(offset, size, ...args ?? []));
+        this.offset = offset;
+        this.size = size;
+        this.args = args;
     }
 
     eval(): Sha3 {
@@ -34,13 +41,22 @@ export class Create extends Tag {
      * @param size Byte size to copy (size of the initialisation code).
      * @param bytecode 
      */
+    readonly value: Expr;
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly bytecode: Uint8Array | null;
+
     constructor(
-        readonly value: Expr,
-        readonly offset: Expr,
-        readonly size: Expr,
-        readonly bytecode: Uint8Array | null = null
+        value: Expr,
+        offset: Expr,
+        size: Expr,
+        bytecode: Uint8Array | null = null
     ) {
         super(...info(value, offset, size));
+        this.value = value;
+        this.offset = offset;
+        this.size = size;
+        this.bytecode = bytecode;
     }
 
     eval(): Expr {
@@ -52,16 +68,31 @@ export class Call extends Tag {
     readonly tag = 'Call';
     throwOnFail = false;
 
+    readonly gas: Expr;
+    readonly address: Expr;
+    readonly value: Expr;
+    readonly argsStart: Expr;
+    readonly argsLen: Expr;
+    readonly retStart: Expr;
+    readonly retLen: Expr;
+
     constructor(
-        readonly gas: Expr,
-        readonly address: Expr,
-        readonly value: Expr,
-        readonly argsStart: Expr,
-        readonly argsLen: Expr,
-        readonly retStart: Expr,
-        readonly retLen: Expr
+        gas: Expr,
+        address: Expr,
+        value: Expr,
+        argsStart: Expr,
+        argsLen: Expr,
+        retStart: Expr,
+        retLen: Expr
     ) {
         super(...info(gas, address, value, argsStart, argsLen, retStart, retLen));
+        this.gas = gas;
+        this.address = address;
+        this.value = value;
+        this.argsStart = argsStart;
+        this.argsLen = argsLen;
+        this.retStart = retStart;
+        this.retLen = retLen;
     }
 
     eval(): Expr {
@@ -73,9 +104,13 @@ export class ReturnData extends Tag {
     readonly tag = 'ReturnData';
     override readonly type = 'bytes';
     readonly wrapped = false;
+    readonly retOffset: Expr;
+    readonly retSize: Expr;
 
-    constructor(readonly retOffset: Expr, readonly retSize: Expr) {
+    constructor(retOffset: Expr, retSize: Expr) {
         super(...info(retOffset, retSize));
+        this.retOffset = retOffset;
+        this.retSize = retSize;
     }
 
     eval(): Expr {
@@ -85,16 +120,32 @@ export class ReturnData extends Tag {
 
 export class CallCode extends Tag {
     readonly tag = 'CallCode';
+
+    readonly gas: Expr;
+    readonly address: Expr;
+    readonly value: Expr;
+    readonly memoryStart: Expr;
+    readonly memoryLength: Expr;
+    readonly outputStart: Expr;
+    readonly outputLength: Expr;
+
     constructor(
-        readonly gas: Expr,
-        readonly address: Expr,
-        readonly value: Expr,
-        readonly memoryStart: Expr,
-        readonly memoryLength: Expr,
-        readonly outputStart: Expr,
-        readonly outputLength: Expr
+        gas: Expr,
+        address: Expr,
+        value: Expr,
+        memoryStart: Expr,
+        memoryLength: Expr,
+        outputStart: Expr,
+        outputLength: Expr
     ) {
         super(...info(gas, address, value, memoryStart, memoryLength, outputStart, outputLength));
+        this.gas = gas;
+        this.address = address;
+        this.value = value;
+        this.memoryStart = memoryStart;
+        this.memoryLength = memoryLength;
+        this.outputStart = outputStart;
+        this.outputLength = outputLength;
     }
 
     eval(): Expr {
@@ -104,8 +155,15 @@ export class CallCode extends Tag {
 
 export class Create2 extends Tag {
     readonly tag = 'Create2';
-    constructor(readonly offset: Expr, readonly size: Expr, readonly value: Expr) {
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly value: Expr;
+
+    constructor(offset: Expr, size: Expr, value: Expr) {
         super(...info(offset, size, value));
+        this.offset = offset;
+        this.size = size;
+        this.value = value;
     }
 
     eval(): Expr {
@@ -115,15 +173,28 @@ export class Create2 extends Tag {
 
 export class StaticCall extends Tag {
     readonly tag = 'StaticCall';
+    readonly gas: Expr;
+    readonly address: Expr;
+    readonly memoryStart: Expr;
+    readonly memoryLength: Expr;
+    readonly outputStart: Expr;
+    readonly outputLength: Expr;
+    
     constructor(
-        readonly gas: Expr,
-        readonly address: Expr,
-        readonly memoryStart: Expr,
-        readonly memoryLength: Expr,
-        readonly outputStart: Expr,
-        readonly outputLength: Expr
+        gas: Expr,
+        address: Expr,
+        memoryStart: Expr,
+        memoryLength: Expr,
+        outputStart: Expr,
+        outputLength: Expr
     ) {
         super(...info(gas, address, memoryStart, memoryLength, outputStart, outputLength));
+        this.gas = gas;
+        this.address = address;
+        this.memoryStart = memoryStart;
+        this.memoryLength = memoryLength;
+        this.outputStart = outputStart;
+        this.outputLength = outputLength;
     }
 
     eval(): Expr {
@@ -133,15 +204,28 @@ export class StaticCall extends Tag {
 
 export class DelegateCall extends Tag {
     readonly tag = 'DelegateCall';
+    readonly gas: Expr;
+    readonly address: Expr;
+    readonly memoryStart: Expr;
+    readonly memoryLength: Expr;
+    readonly outputStart: Expr;
+    readonly outputLength: Expr;
+    
     constructor(
-        readonly gas: Expr,
-        readonly address: Expr,
-        readonly memoryStart: Expr,
-        readonly memoryLength: Expr,
-        readonly outputStart: Expr,
-        readonly outputLength: Expr
+        gas: Expr,
+        address: Expr,
+        memoryStart: Expr,
+        memoryLength: Expr,
+        outputStart: Expr,
+        outputLength: Expr
     ) {
         super(...info(gas, address, memoryStart, memoryLength, outputStart, outputLength));
+        this.gas = gas;
+        this.address = address;
+        this.memoryStart = memoryStart;
+        this.memoryLength = memoryLength;
+        this.outputStart = outputStart;
+        this.outputLength = outputLength;
     }
 
     eval(): Expr {
@@ -158,6 +242,9 @@ export class Stop implements IInst {
 
 export class Return implements IInst {
     readonly name = 'Return';
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly args?: Expr[] | undefined;
 
     /**
      * Exits the current context successfully.
@@ -166,7 +253,11 @@ export class Return implements IInst {
      * @param size Byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly args?: Expr[]) { }
+    constructor(offset: Expr, size: Expr, args?: Expr[]) {
+        this.offset = offset;
+        this.size = size;
+        this.args = args;
+    }
 
     eval() {
         return new Return(this.offset.eval(), this.size.eval(), this.args?.map(evalE));
@@ -192,6 +283,12 @@ export class Revert implements IInst {
 
     static readonly PANIC = '4e487b71';
 
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly selector?: string | undefined;
+    readonly sig?: IReverts[string] | undefined;
+    readonly args?: Expr[] | undefined;
+
     /**
      * Stop the current context execution, revert the state changes (see `STATICCALL` for a list
      * of state changing opcodes) and return the unused gas to the caller.
@@ -205,7 +302,13 @@ export class Revert implements IInst {
      * @param size byte size to copy (size of the return data).
      * @param args
      */
-    constructor(readonly offset: Expr, readonly size: Expr, readonly selector?: string, readonly sig?: IReverts[string], readonly args?: Expr[]) { }
+    constructor(offset: Expr, size: Expr, selector?: string, sig?: IReverts[string], args?: Expr[]) {
+        this.offset = offset;
+        this.size = size;
+        this.selector = selector;
+        this.sig = sig;
+        this.args = args;
+    }
 
     eval() {
         return new Revert(this.offset.eval(), this.size.eval(), this.selector, this.sig, this.args?.map(evalE));
@@ -225,7 +328,10 @@ export class Revert implements IInst {
 
 export class Invalid implements IInst {
     readonly name = 'Invalid';
-    constructor(readonly opcode: number) { }
+    readonly opcode: number;
+    constructor(opcode: number) {
+        this.opcode = opcode;
+    }
     eval() {
         return this;
     }
@@ -233,7 +339,10 @@ export class Invalid implements IInst {
 
 export class SelfDestruct implements IInst {
     readonly name = 'SelfDestruct';
-    constructor(readonly address: Expr) { }
+    readonly address: Expr;
+    constructor(address: Expr) {
+        this.address = address;
+    }
     eval() {
         return this;
     }

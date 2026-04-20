@@ -5,7 +5,9 @@ import { basename } from 'path';
 import { EventFragment, FunctionFragment } from 'ethers';
 import { readFileSync } from 'fs';
 
-import solc from 'solc';
+import solc, { type SolcOutput } from 'solc';
+
+type Table = { [hash: string]: string; };
 
 function main() {
     const input = {
@@ -14,21 +16,16 @@ function main() {
         settings: { outputSelection: { '*': { '*': ['abi'] } } },
     };
     const output = solc.compile(JSON.stringify(input));
-    /** @type {import('solc').SolcOutput} */
-    const { errors, contracts } = JSON.parse(output);
+    const { errors, contracts }: SolcOutput = JSON.parse(output);
     if (errors) {
         console.error(errors);
         process.exit(1);
     }
 
-    /** @typedef {{[hash: string]: string}} Table */
-    /** @type {{[name: string]: {selectors: string[], topics: string[], functions: Table, events: Table}}} */
-    const src = {};
+    const src: { [name: string]: { selectors: string[]; topics: string[]; functions: Table; events: Table; }; } = {};
     for (const [name, { abi }] of Object.entries(contracts['ercs.sol'])) {
-        /** @type {Table} */
-        const functions = {};
-        /** @type {Table} */
-        const events = {};
+        const functions: Table = {};
+        const events: Table = {};
         for (const member of abi) {
             if (member.type === 'function') {
                 const fn = FunctionFragment.from(member);

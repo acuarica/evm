@@ -1,9 +1,9 @@
-import { Contract, type PublicFunction } from '.';
-import { fnsig, parseSig } from './abi';
-import { If, Revert, Tag, Val, evalE, isExpr, isInst, type Expr, type IReverts, type Inst, type Stmt } from './ast';
-import type { IEvents } from './ast/log';
-import { FNS } from './ast/special';
-import type { IStore } from './ast/storage';
+import { Contract, type PublicFunction } from './index.ts';
+import { fnsig, parseSig } from './abi.ts';
+import { If, Revert, Tag, Val, evalE, isExpr, isInst, type Expr, type IReverts, type Inst, type Stmt } from './ast/index.ts';
+import type { IEvents } from './ast/log.ts';
+import { FNS } from './ast/special.ts';
+import type { IStore } from './ast/storage.ts';
 
 /**
  *
@@ -614,7 +614,7 @@ function solContract(
     return text;
 }
 
-declare module '.' {
+declare module './index.ts' {
     interface Contract {
         /**
          * Decompiles the `Contract` into Solidity-like source code.
@@ -623,7 +623,7 @@ declare module '.' {
     }
 }
 
-declare module './ast' {
+declare module './ast/index.ts' {
     interface Tag {
         /**
          */

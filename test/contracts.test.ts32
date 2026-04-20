@@ -1,9 +1,9 @@
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 
 import { Contract } from 'sevm';
 
-import { cfg } from './utils/cfg';
-import { compile } from './utils/solc';
+import { cfg } from './utils/cfg.ts';
+import { compile } from './utils/solc.ts';
 
 describe('::contracts', function () {
 

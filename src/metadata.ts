@@ -1,4 +1,4 @@
-import { arrayify, hexlify } from './.bytes';
+import { arrayify, hexlify } from './bytes.ts';
 
 /**
  * Represents the metadata hash protocols embedded in bytecode by `solc`.
@@ -23,7 +23,7 @@ export class Metadata {
 }
 
 /**
- * Splits `buffer` into the executable EVM bytecode and the embedded metadata hash.
+ * Parses `buffer` into the executable EVM bytecode and the embedded metadata hash.
  * The metadata hash may be placed by the 
  * [Solidity compiler](https://docs.soliditylang.org/en/latest/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode)
  * as a [compilation fingerprint](https://docs.sourcify.dev/blog/talk-about-onchain-metadata-hash/#introduction).
@@ -44,7 +44,7 @@ export class Metadata {
  * @returns An object where the `bytecode` is the executable code and
  * `metadata` is the metadata hash when the metadata is present.
  */
-export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
+export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
     /**
      * The executable code without metadata when it is present.
      * Otherwise, the original `bytecode`.
@@ -59,11 +59,13 @@ export function splitMetadataHash(buffer: Parameters<typeof arrayify>[0]): {
     metadata: Metadata | undefined
 } {
     const bytecode = arrayify(buffer);
-    if (bytecode.length <= 2) return { bytecode, metadata: undefined };
+    if (bytecode.length <= 2)
+        return { bytecode, metadata: undefined };
 
     const dataLen = (bytecode.at(-2)! << 8) + bytecode.at(-1)!;
     const data = new Uint8Array(bytecode.subarray(bytecode.length - 2 - dataLen, bytecode.length - 2));
-    if (data.length !== dataLen) return { bytecode, metadata: undefined };
+    if (data.length !== dataLen)
+        return { bytecode, metadata: undefined };
 
     let obj;
     try {

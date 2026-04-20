@@ -1,4 +1,4 @@
-import type { Expr, Inst } from "./ast";
+import type { Expr, Inst } from "./ast/index.ts";
 
 /**
  * Represents an `Error` due to an invalid symbolic state execution.
@@ -107,9 +107,16 @@ export class Memory<in out E> {
     readonly maxInvalidateSizeAllowed: bigint = 32n * 1024n;
 
     /**
+     * 
+     */
+    readonly #_mem: Map<bigint, E>;
+
+    /**
      * Creates a new `Memory` with no locations set.
      */
-    constructor(private readonly _map: Map<bigint, E> = new Map()) { }
+    constructor(mem: Map<bigint, E> = new Map()) {
+        this.#_mem = mem;
+    }
 
     /**
      * Creates a shallow copy of this `Memory`.
@@ -119,14 +126,14 @@ export class Memory<in out E> {
      * @returns a new `Memory` with the same elements as `this` one.
      */
     clone(): this {
-        return new (this.constructor as new (map: Map<bigint, E>) => this)(new Map(this._map));
+        return new (this.constructor as new (map: Map<bigint, E>) => this)(new Map(this.#_mem));
     }
 
     /**
      * @returns `boolean` indicating whether a value in the specified `location` exists or not.
      */
     has(location: bigint): boolean {
-        return this._map.has(location);
+        return this.#_mem.has(location);
     }
 
     /**
@@ -137,7 +144,7 @@ export class Memory<in out E> {
      * @returns Returns the value stored at the specified `location`. If no value is stored at the specified `location`, `undefined` is returned.
      */
     get(location: bigint): E | undefined {
-        return this._map.get(location);
+        return this.#_mem.get(location);
     }
 
     /**
@@ -147,7 +154,7 @@ export class Memory<in out E> {
      * @returns the `this` `Memory` so calls can be chained.
      */
     set(location: bigint, value: E): this {
-        this._map.set(location, value);
+        this.#_mem.set(location, value);
         return this;
     }
 
@@ -155,21 +162,21 @@ export class Memory<in out E> {
      * @returns the number of values stored in the `Memory`.
      */
     get size(): number {
-        return this._map.size;
+        return this.#_mem.size;
     }
 
     /**
      * Returns an iterable of keys in the `Memory`.
      */
     keys(): IterableIterator<bigint> {
-        return this._map.keys();
+        return this.#_mem.keys();
     }
 
     /**
      * Returns an iterable of location, value pairs for every entry in the `Memory`.
      */
     entries(): IterableIterator<[bigint, E]> {
-        return this._map.entries();
+        return this.#_mem.entries();
     }
 
     /**
@@ -193,7 +200,7 @@ export class Memory<in out E> {
      * That is, after `invalidateAll`, `get` with any argument will return `undefined`.
      */
     invalidateAll(): void {
-        this._map.clear();
+        this.#_mem.clear();
     }
 
     /**
@@ -213,7 +220,7 @@ export class Memory<in out E> {
         size = size.eval();
         if (offset.isVal() && size.isVal() && size.val <= this.maxInvalidateSizeAllowed) {
             for (let i = offset.val; i < offset.val + size.val; i += 32n) {
-                this._map.delete(i);
+                this.#_mem.delete(i);
             }
         } else if (invalidateAll) {
             this.invalidateAll();
@@ -243,6 +250,9 @@ export class State<S = Inst, E = Expr> {
      */
     id: number | undefined;
 
+        readonly stack = new Stack<E>();
+        readonly memory = new Memory<E>();
+        public nlocals = 0;
     /**
      *
      * @param stack
@@ -250,10 +260,14 @@ export class State<S = Inst, E = Expr> {
      * @param nlocals
      */
     constructor(
-        readonly stack = new Stack<E>(),
-        readonly memory = new Memory<E>(),
-        public nlocals = 0
-    ) { }
+        stack = new Stack<E>(),
+        memory = new Memory<E>(),
+        nlocals = 0
+    ) {
+        this.stack = stack;
+        this.memory = memory;
+        this.nlocals = nlocals;
+    }
 
     /**
      * Creates a detached clone from this `State`.

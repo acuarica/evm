@@ -2,16 +2,15 @@
     "name": "sevm",
     "version": "0.7.4",
     "description": "A Symbolic Ethereum Virtual Machine (EVM) bytecode decompiler & analyzer library & CLI",
+    "type": "module",
     "main": "./dist/src/index.js",
     "types": "./dist/src/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/src/index.d.ts",
-            "default": "./dist/src/index.js"
+            "import": "./src/index.ts"
         },
         "./ast": {
-            "types": "./dist/src/ast/index.d.ts",
-            "default": "./dist/src/ast/index.js"
+            "import": "./src/ast/index.ts"
         },
         "./4byte": {
             "types": "./4byte/index.d.ts",
@@ -66,34 +65,23 @@
     "devDependencies": {
         "@jsdevtools/chai-exec": "^2.1.1",
         "@size-limit/file": "^11.0.2",
-        "@types/chai": "^4.3.10",
-        "@types/mocha": "^10.0.1",
-        "@types/node": "^20.8.6",
+        "@types/node": "^22.19.17",
         "@types/yargs": "^17.0.32",
-        "@typescript-eslint/eslint-plugin": "^6.7.5",
-        "@typescript-eslint/parser": "^6.7.5",
-        "c8": "^9.1.0",
-        "chai": "^4.3.10",
-        "eslint": "^8.51.0",
-        "eslint-plugin-chai-expect": "^3.0.0",
-        "eslint-plugin-mocha": "^10.1.0",
+        "@vitest/coverage-v8": "^4.1.4",
+        "eslint": "^10.2.0",
         "ethers": "^6.13.1",
-        "mocha": "^10.0.1",
         "size-limit": "^11.0.2",
         "solc": "^0.8.21",
-        "typedoc": "^0.25.2",
-        "typedoc-plugin-extras": "^3.0.0",
-        "typedoc-plugin-missing-exports": "^2.3.0",
-        "typescript": "^5.2.2",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
+        "typescript": "^6.0.2",
+        "typescript-eslint": "^8.58.1",
+        "vitest": "^4.1.4"
     },
     "scripts": {
         "prepare": "node scripts/4bytedb.mjs",
-        "compile": "tsc",
-        "lint": "eslint .",
-        "test": "yarn compile && mocha",
-        "coverage": "yarn compile && c8 mocha",
+        "typecheck": "tsc",
+        "lint": "eslint",
+        "test": "vitest --run",
+        "coverage": "vitest run --coverage",
         "bundle": "webpack --mode production",
         "size": "size-limit",
         "make:4bytedb": "node scripts/4bytedb.mjs",
@@ -104,6 +92,7 @@
         "clean": "rm -r .artifacts/"
     },
     "engines": {
-        "node": ">=16.6.0"
+        "node": ">=22.18.0",
+        "npm": ">=11.10.0"
     }
 }

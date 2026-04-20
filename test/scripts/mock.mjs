@@ -14,6 +14,7 @@ for (const file of readdirSync(BYTECODE_PATH)) {
     resolve[address.toLowerCase()] = file;
 }
 
+
 /**
  * @param {string} address 
  * @returns {Promise<string>}

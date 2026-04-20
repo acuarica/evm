@@ -4,8 +4,8 @@ import * as path from 'path';
 
 import type { ABI, SolcInput, SolcOutput } from 'solc';
 import wrapper from 'solc/wrapper';
-import { maskTitle } from './snapshot';
-import type { Runnable, Suite } from 'mocha';
+import { maskTitle } from './snapshot.ts';
+import type { TestContext } from 'vitest';
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
@@ -25,7 +25,7 @@ const versionsLoaded = new Set<Version>();
 export function compile(
     content: string,
     version: Version,
-    ctx: Mocha.Context | null,
+    ctx: TestContext | null,
     options?: SolcInput['settings'] & { ignoreWarnings?: boolean }
 ): { bytecode: string; abi: ABI; metadata: string, evm: SolcOutput['contracts'][string][string]['evm'] } {
     const input = JSON.stringify({
@@ -48,15 +48,21 @@ export function compile(
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (ctx !== null) {
-        const title = (test: Runnable | Suite | undefined): string =>
-            test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
+        // const title = (test: Runnable | Suite | undefined): string =>
+        //     test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
         const updateTitle = (text: string) => {
-            if (ctx.test) ctx.test.title += text;
+            // console.log(ctx, typeof ctx === 'function');
+            // if ('annotate' in ctx) 
+            ctx.annotate(text);
+            // if (ctx.test) ctx.test.title += text;
         };
 
-        const fileName = maskTitle(title(ctx.test))
+        const fileName = maskTitle(ctx.task.fullTestName
+            .replace(' > should ', ' > ')
+            .replace(/ > /g, '.')
             .replace(`solc-v${version}.`, '')
-            .replace(/\."before-all"-hook-for-"[\w-#]+"/, '');
+            .replace(/\."before-all"-hook-for-"[\w-#]+"/, '')
+        );
 
         const basePath = `.artifacts/v${version}`;
         if (!existsSync(basePath)) {
@@ -64,28 +70,28 @@ export function compile(
         }
 
         const hash = createHash('md5').update(input).digest('hex').substring(0, 6);
-        const path = `${basePath}/${fileName}-${hash}`;
-
-        updateTitle(` #${hash}`);
+        const path = `${basePath}/${fileName}-${hash}.json`;
 
         try {
-            return JSON.parse(readFileSync(`${path}.json`, 'utf8')) as ReturnType<typeof compile>;
+            const result = JSON.parse(readFileSync(path, 'utf8')) as ReturnType<typeof compile>;
+            updateTitle(`✓ Cached ${path}`);
+            return result;
         } catch {
-            updateTitle(' 🛠️');
+            updateTitle(`🛠️ Compiled ${path}`);
 
             if (!versionsLoaded.has(version)) {
-                ctx.timeout(ctx.timeout() + 5000);
-                updateTitle(`--loads \`solc-${version}\``);
+                // ctx.timeout(ctx.timeout() + 5000);
+                updateTitle(`⚙️ Loads \`solc-${version}\``);
             }
-            writeCacheFn = output => writeFileSync(`${path}.json`, JSON.stringify(output, null, 2));
+            writeCacheFn = output => writeFileSync(path, JSON.stringify(output, null, 2));
         }
     } else {
-        writeCacheFn = _output => { };
+        writeCacheFn = () => { };
     }
 
     versionsLoaded.add(version);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.js`)));
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const solc = wrapper(require(path.resolve('.solc', `soljson-v${version}.cjs`)));
     const { errors, contracts } = JSON.parse(solc.compile(input)) as SolcOutput;
 
     if (errors !== undefined && (!options?.ignoreWarnings || errors.some(err => err.severity === 'error'))) {

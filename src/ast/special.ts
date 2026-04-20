@@ -1,5 +1,5 @@
-import { type Expr, Tag } from '.';
-import type { Type } from '../abi';
+import { type Expr, Tag } from './index.ts';
+import type { Type } from '../abi.ts';
 
 /**
  * Represents a global Solidity built-in property.
@@ -9,8 +9,12 @@ import type { Type } from '../abi';
 export class Prop extends Tag {
     readonly tag = 'Prop';
 
-    constructor(readonly symbol: string, override readonly type: Type) {
+    readonly symbol: string;
+    override readonly type: Type;
+    constructor(symbol: string, type: Type) {
         super(0, 1);
+        this.symbol = symbol;
+        this.type = type;
     }
 
     eval(): Expr {
@@ -68,8 +72,13 @@ export const FNS = {
 
 export class Fn extends Tag {
     readonly tag = 'Fn';
-    constructor(readonly mnemonic: keyof typeof FNS, readonly value: Expr) {
+    readonly mnemonic: keyof typeof FNS;
+    readonly value: Expr;
+    constructor(mnemonic: keyof typeof FNS, value: Expr) {
         super(value.depth + 1, value.count + 1);
+
+        this.mnemonic = mnemonic;
+        this.value = value;
         this.type = FNS[mnemonic][1];
     }
 
@@ -80,16 +89,28 @@ export class Fn extends Tag {
 
 export class DataCopy extends Tag {
     readonly tag = 'DataCopy';
+
+    readonly kind: 'calldatacopy' | 'codecopy' | 'extcodecopy' | 'returndatacopy';
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly address?: Expr | undefined;
+    readonly bytecode?: Uint8Array | undefined;
+
     constructor(
-        readonly kind: 'calldatacopy' | 'codecopy' | 'extcodecopy' | 'returndatacopy',
-        readonly offset: Expr,
-        readonly size: Expr,
-        readonly address?: Expr,
-        readonly bytecode?: Uint8Array,
+        kind: DataCopy['kind'],
+        offset: Expr,
+        size: Expr,
+        address?: Expr,
+        bytecode?: Uint8Array,
     ) {
         super(
             Math.max(offset.depth, size.depth, address?.depth ?? 0) + 1,
             offset.count + size.count + (address?.count ?? 0) + 1);
+        this.kind = kind;
+        this.offset = offset;
+        this.size = size;
+        this.address = address;
+        this.bytecode = bytecode;
     }
 
     eval(): this {
@@ -112,9 +133,13 @@ export class CallValue extends Tag {
 
 export class CallDataLoad extends Tag {
     readonly tag = 'CallDataLoad';
-    constructor(public location: Expr) {
+
+    public location: Expr;
+    constructor(location: Expr) {
         super(location.depth + 1, location.count + 1);
+        this.location = location;
     }
+
     eval(): Expr {
         return new CallDataLoad(this.location.eval());
         // this.location = this.location.eval();

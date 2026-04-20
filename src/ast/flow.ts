@@ -1,11 +1,16 @@
-import type { State } from '../state';
-import { type Inst, type Expr, type IInst, Tag } from '.';
+import type { State } from '../state.ts';
+import { type Inst, type Expr, type IInst, Tag } from './index.ts';
 
 /**
  * Represents a jump from one `State` to another from the given `pc`.
  */
 export class Branch {
-    constructor(readonly pc: number, public state: State<Inst, Expr>) { }
+    readonly pc: number;
+    public state: State<Inst, Expr>;
+    constructor(pc: number, state: State<Inst, Expr>) {
+        this.pc = pc;
+        this.state = state;
+    }
 
     static make(pc: number, state: State<Inst, Expr>) {
         return new Branch(pc, state.clone());
@@ -14,7 +19,16 @@ export class Branch {
 
 export class Jump implements IInst {
     readonly name = 'Jump';
-    constructor(readonly offset: Expr, readonly destBranch: Branch, readonly pushStateId: number) { }
+
+    readonly offset: Expr;
+    readonly destBranch: Branch;
+    readonly pushStateId: number;
+
+    constructor(offset: Expr, destBranch: Branch, pushStateId: number) {
+        this.offset = offset;
+        this.destBranch = destBranch;
+        this.pushStateId = pushStateId;
+    }
 
     eval() {
         return this;
@@ -30,13 +44,25 @@ export class Jumpi implements IInst {
 
     readonly evalCond: Expr;
 
+    readonly cond: Expr;
+    readonly offset: Expr;
+    readonly fallBranch: Branch;
+    readonly destBranch: Branch;
+    readonly pushStateId: number;
+
     constructor(
-        readonly cond: Expr,
-        readonly offset: Expr,
-        readonly fallBranch: Branch,
-        readonly destBranch: Branch,
-        readonly pushStateId: number,
+        cond: Expr,
+        offset: Expr,
+        fallBranch: Branch,
+        destBranch: Branch,
+        pushStateId: number,
     ) {
+        this.cond = cond;
+        this.offset = offset;
+        this.fallBranch = fallBranch;
+        this.destBranch = destBranch;
+        this.pushStateId = pushStateId;
+
         this.evalCond = cond.eval();
     }
 
@@ -55,7 +81,13 @@ export class Jumpi implements IInst {
 
 export class JumpDest implements IInst {
     readonly name = 'JumpDest';
-    constructor(readonly fallBranch: Branch) { }
+
+    readonly fallBranch: Branch;
+
+    constructor(fallBranch: Branch) {
+        this.fallBranch = fallBranch;
+    }
+
     eval() {
         return this;
     }
@@ -67,8 +99,15 @@ export class JumpDest implements IInst {
 
 export class Sig extends Tag {
     readonly tag = 'Sig';
-    constructor(readonly selector: string, readonly positive = true) {
+
+    readonly selector: string;
+    readonly positive: boolean;
+
+    constructor(selector: string, positive = true) {
         super(0, 1);
+
+        this.selector = selector;
+        this.positive = positive;
     }
     eval(): Expr {
         return this;
@@ -77,7 +116,17 @@ export class Sig extends Tag {
 
 export class SigCase implements IInst {
     readonly name = 'SigCase';
-    constructor(readonly condition: Sig, readonly offset: Expr, readonly fallBranch: Branch) { }
+
+    readonly condition: Sig;
+    readonly offset: Expr;
+    readonly fallBranch: Branch;
+
+    constructor(condition: Sig, offset: Expr, fallBranch: Branch) {
+        this.condition = condition;
+        this.offset = offset;
+        this.fallBranch = fallBranch;
+    }
+
     eval() {
         return this;
     }

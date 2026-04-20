@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 import util from 'util';
 
 import { Shanghai, sol, yul, type Ram, State, Memory } from 'sevm';

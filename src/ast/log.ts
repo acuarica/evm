@@ -1,4 +1,4 @@
-import { evalE, type Expr, type IInst } from '.';
+import { evalE, type Expr, type IInst } from './index.ts';
 
 /**
  * Events found through `LOG` instructions.
@@ -27,13 +27,19 @@ export interface IEvents {
 export class Log implements IInst {
     readonly name = 'Log';
 
-    constructor(
-        readonly event: IEvents[string] | undefined,
-        readonly offset: Expr,
-        readonly size: Expr,
-        readonly topics: Expr[],
-        readonly args?: Expr[]
-    ) {}
+    readonly event: IEvents[string] | undefined;
+    readonly offset: Expr;
+    readonly size: Expr;
+    readonly topics: Expr[];
+    readonly args?: Expr[] | undefined;
+
+    constructor(event: IEvents[string] | undefined, offset: Expr, size: Expr, topics: Expr[], args?: Expr[]) {
+        this.event = event;
+        this.offset = offset;
+        this.size = size;
+        this.topics = topics;
+        this.args = args;
+    }
 
     get eventName(): string | undefined {
         if (this.event !== undefined && this.event.sig !== undefined) {

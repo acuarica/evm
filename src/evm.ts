@@ -1,7 +1,7 @@
-import { arrayify } from './.bytes';
-import { Branch, JumpDest, Throw, type Expr, type IInst, type Inst } from './ast';
-import { ExecError, State, type Ram, type Stack } from './state';
-import { JUMPDEST, Shanghai, type Opcode, type StepFn, type Undef } from './step';
+import { arrayify } from './bytes.ts';
+import { Branch, JumpDest, Throw, type Expr, type IInst, type Inst } from './ast/index.ts';
+import { ExecError, State, type Ram, type Stack } from './state.ts';
+import { JUMPDEST, Shanghai, type Opcode, type StepFn, type Undef } from './step.ts';
 
 /**
  * Represent a reacheable basic block.
@@ -70,22 +70,24 @@ export class EVM<M extends string> {
         }
     };
 
+    /**
+     * The `STEP` function that updates the `State`
+     * after executing the opcode pointed by `pc`.
+     *
+     * Maps `mnemonic` keys of `STEP` to their corresponding `opcode`
+     * in the byte range, _i.e._, `0-255`.
+     *
+     * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
+     * `INVALID` is used instead.
+     */
+    readonly step: Undef<M> & { readonly [m in M]: StepFn };
+
     constructor(
         bytecode: Parameters<typeof arrayify>[0],
-
-        /**
-         * The `STEP` function that updates the `State`
-         * after executing the opcode pointed by `pc`.
-         *
-         * Maps `mnemonic` keys of `STEP` to their corresponding `opcode`
-         * in the byte range, _i.e._, `0-255`.
-         *
-         * For elements in the range `0-255` that do not have a corresponding `mnemonic`,
-         * `INVALID` is used instead.
-         */
-        readonly step: Undef<M> & { readonly [m in M]: StepFn }
+        step: Undef<M> & { readonly [m in M]: StepFn },
     ) {
         this.bytecode = arrayify(bytecode);
+        this.step = step;
     }
 
     /**

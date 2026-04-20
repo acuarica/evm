@@ -1,15 +1,15 @@
-import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce, MStore } from './ast';
-import { IsZero } from './ast/alu';
-import type { IEvents } from './ast/log';
-import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage';
-import type { IReverts, Return, Revert } from './ast/system';
-import { arrayify } from './.bytes';
-import ERCs from './ercs';
-import { EVM } from './evm';
-import { splitMetadataHash, type Metadata } from './metadata';
-import { State } from './state';
-import { Shanghai, type Members, type Opcode } from './step';
-import type { Type } from './abi';
+import { CallSite, If, Require, Throw, type Expr, type Inst, type Stmt, type Val, reduce, MStore } from './ast/index.ts';
+import { IsZero } from './ast/alu.ts';
+import type { IEvents } from './ast/log.ts';
+import { Variable, type IStore, type MappingLoad, type SLoad } from './ast/storage.ts';
+import type { IReverts, Return, Revert } from './ast/system.ts';
+import { arrayify } from './bytes.ts';
+import ERCs from './ercs.ts';
+import { EVM } from './evm.ts';
+import { parseMetadata, type Metadata } from './metadata.ts';
+import { State } from './state.ts';
+import { Shanghai, type Members, type Opcode } from './step.ts';
+import type { Type } from './abi.ts';
 
 /**
  *
@@ -87,7 +87,7 @@ export class Contract {
         this.mappings = evm.step.mappings;
         this.functionBranches = evm.step.functionBranches;
         this.reverts = evm.step.reverts;
-        this.metadata = splitMetadataHash(this.bytecode).metadata;
+        this.metadata = parseMetadata(this.bytecode).metadata;
         this.errors = evm.errors;
 
         this.blocks = evm.blocks;
@@ -176,13 +176,19 @@ export class PublicFunction {
     readonly visibility: string;
     readonly constant: boolean;
     readonly returns: string[] = [];
+    readonly contract: Contract;
+    readonly stmts: Stmt[];
+    readonly selector: string;
 
     constructor(
-        readonly contract: Contract,
-        readonly stmts: Stmt[],
-        readonly selector: string,
+        contract: Contract,
+        stmts: Stmt[],
+        selector: string,
         payable?: boolean,
     ) {
+        this.contract = contract;
+        this.stmts = stmts;
+        this.selector = selector;
         this.visibility = 'public';
 
         if (payable === undefined) {
@@ -425,10 +431,10 @@ function requiresNoValue(stmts: Stmt[], allowMStoreInit = false): boolean {
     )(first.eval());
 }
 
-export * from './abi';
-export * from './evm';
-export * from './metadata';
-export * from './sol';
-export * from './state';
-export * from './step';
-export * from './yul';
+export * from './abi.ts';
+export * from './evm.ts';
+export * from './metadata.ts';
+export * from './sol.ts';
+export * from './state.ts';
+export * from './step.ts';
+export * from './yul.ts';

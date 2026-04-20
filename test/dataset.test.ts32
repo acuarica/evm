@@ -2,13 +2,13 @@ import { readFileSync, writeFileSync } from 'fs';
 import { hrtime } from 'process';
 
 import c from 'ansi-colors';
-import { expect } from 'chai';
+import { describe, it, expect } from 'vitest';
 import type { ABI } from 'solc';
 
 import { Contract, ERCIds, JUMPDEST, Shanghai, sol, type Opcode, type State } from 'sevm';
 import 'sevm/4bytedb';
 import type { StaticCall, Revert } from 'sevm/ast';
-import { fnselector } from './utils/selector';
+import { fnselector } from './utils/selector.ts';
 
 /**
  * 

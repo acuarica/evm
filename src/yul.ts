@@ -1,7 +1,7 @@
-import { Contract } from '.';
-import { fnsig, parseSig } from './abi';
-import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast';
-import { FNS, Tag, Val, isExpr, isInst } from './ast';
+import { Contract } from './index.ts';
+import { fnsig, parseSig } from './abi.ts';
+import type { Expr, Inst, MappingLoad, MappingStore, Stmt } from './ast/index.ts';
+import { FNS, Tag, Val, isExpr, isInst } from './ast/index.ts';
 
 /**
  * Returns the Yul `string` representation of `nodes` that are either
@@ -187,7 +187,7 @@ export function yulStmts(stmts: Stmt[], spaces = 0): string {
     return text;
 }
 
-declare module '.' {
+declare module './index.ts' {
     interface Contract {
         /**
          * @returns
@@ -220,7 +220,7 @@ Contract.prototype.yul = function (this: Contract) {
     return text;
 };
 
-declare module './ast' {
+declare module './ast/index.ts' {
     interface Tag {
         /**
          */

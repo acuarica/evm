@@ -1,8 +1,12 @@
-import { type Expr, Tag, Val, MOD_256 } from './index';
+import { type Expr, Tag, Val, MOD_256 } from './index.ts';
 
 abstract class Bin extends Tag {
-    constructor(readonly left: Expr, readonly right: Expr) {
+    readonly left: Expr;
+    readonly right: Expr;
+    constructor(left: Expr, right: Expr) {
         super(Math.max(left.depth, right.depth) + 1, left.count + right.count + 1);
+        this.left = left;
+        this.right = right;
     }
 }
 
@@ -124,20 +128,32 @@ export class Exp extends Bin {
 }
 
 abstract class Cmp extends Tag {
-    constructor(readonly left: Expr, readonly right: Expr, readonly equal: boolean = false) {
+    readonly left: Expr;
+    readonly right: Expr;
+    readonly equal: boolean = false;
+    constructor(left: Expr, right: Expr, equal: boolean = false) {
         super(Math.max(left.depth, right.depth) + 1, left.count + right.count + 1);
+        this.left = left;
+        this.right = right;
+        this.equal = equal;
     }
 }
 
 abstract class Unary extends Tag {
-    constructor(readonly value: Expr) {
+    readonly value: Expr;
+    constructor(value: Expr) {
         super(value.depth + 1, value.count + 1);
+        this.value = value;
     }
 }
 
 abstract class Shift extends Tag {
-    constructor(readonly value: Expr, readonly shift: Expr) {
+    readonly value: Expr;
+    readonly shift: Expr;
+    constructor(value: Expr, shift: Expr) {
         super(Math.max(value.depth, shift.depth) + 1, value.count + shift.count + 1);
+        this.value = value;
+        this.shift = shift;
     }
 }
 
@@ -168,9 +184,13 @@ export class Eq extends Bin {
 
 export class IsZero extends Tag {
     readonly tag = 'IsZero';
-    constructor(readonly value: Expr) {
+    readonly value: Expr;
+
+    constructor(value: Expr) {
         super(value.depth + 1, value.count + 1);
+        this.value = value;
     }
+
     eval(): Expr {
         const val = this.value.eval();
         return val.isVal()
@@ -232,9 +252,16 @@ export class Not extends Unary {
 
 export class Byte extends Tag {
     readonly tag = 'Byte';
-    constructor(readonly pos: Expr, readonly data: Expr) {
+
+    readonly pos: Expr;
+    readonly data: Expr;
+
+    constructor(pos: Expr, data: Expr) {
         super(Math.max(pos.depth, data.depth) + 1, pos.count + data.count + 1);
+        this.pos = pos;
+        this.data = data;
     }
+
     eval(): Expr {
         const pos = this.pos.eval();
         const data = this.data.eval();

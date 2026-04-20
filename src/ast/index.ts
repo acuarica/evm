@@ -1,9 +1,9 @@
-import type { Opcode } from '../step';
-import type { Type } from '../abi';
-import type { Add, Div, Exp, Mod, Mul, Sub } from './alu';
-import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Xor } from './alu';
-import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special';
-import type { MLoad, MStore } from './memory';
+import type { Opcode } from '../step.ts';
+import type { Type } from '../abi.ts';
+import type { Add, Div, Exp, Mod, Mul, Sub } from './alu.ts';
+import type { And, Byte, Eq, Gt, IsZero, Lt, Not, Or, Sar, Shl, Shr, Xor } from './alu.ts';
+import type { DataCopy, Prop, CallDataLoad, CallValue, Fn } from './special.ts';
+import type { MLoad, MStore } from './memory.ts';
 import type {
     Call,
     CallCode,
@@ -18,10 +18,10 @@ import type {
     Sha3,
     StaticCall,
     Stop,
-} from './system';
-import type { Log } from './log';
-import type { Branch, Jump, JumpDest, Jumpi, Sig, SigCase } from './flow';
-import type { MappingLoad, MappingStore, SLoad, SStore } from './storage';
+} from './system.ts';
+import type { Log } from './log.ts';
+import type { Branch, Jump, JumpDest, Jumpi, Sig, SigCase } from './flow.ts';
+import type { MappingLoad, MappingStore, SLoad, SStore } from './storage.ts';
 
 /**
  *
@@ -109,8 +109,13 @@ export type Inst =
 
 export class Throw implements IInst {
     readonly name = 'Throw';
+    readonly reason: string;
+    readonly opcode: Opcode<string>;
 
-    constructor(readonly reason: string, readonly opcode: Opcode<string>) { }
+    constructor(reason: string, opcode: Opcode<string>) {
+        this.reason = reason;
+        this.opcode = opcode;
+    }
 
     eval() {
         return this;
@@ -135,11 +140,20 @@ export type Stmt = Inst | If | CallSite | Require;
 
 export class If {
     readonly name = 'If';
+
+    readonly condition: Expr;
+    readonly trueBlock?: Stmt[] | undefined;
+    readonly falseBlock?: Stmt[] | undefined;
+
     constructor(
-        readonly condition: Expr,
-        readonly trueBlock?: Stmt[],
-        readonly falseBlock?: Stmt[],
-    ) { }
+        condition: Expr,
+        trueBlock?: Stmt[],
+        falseBlock?: Stmt[],
+    ) {
+        this.condition = condition;
+        this.trueBlock = trueBlock;
+        this.falseBlock = falseBlock;
+    }
     eval() {
         return new If(
             this.condition.eval(),
@@ -151,7 +165,10 @@ export class If {
 
 export class CallSite {
     readonly name = 'CallSite';
-    constructor(readonly selector: string) { }
+    readonly selector: string;
+    constructor(selector: string) {
+        this.selector = selector;
+    }
     eval() {
         return this;
     }
@@ -159,7 +176,14 @@ export class CallSite {
 
 export class Require {
     readonly name = 'Require';
-    constructor(readonly condition: Expr, readonly selector: string | undefined, readonly args: Expr[]) { }
+    readonly condition: Expr;
+    readonly selector: string | undefined;
+    readonly args: Expr[];
+    constructor(condition: Expr, selector: string | undefined, args: Expr[]) {
+        this.condition = condition;
+        this.selector = selector;
+        this.args = args;
+    }
     eval() {
         return new Require(this.condition.eval(), this.selector, this.args.map(evalE));
     }
@@ -169,8 +193,13 @@ export abstract class Tag {
     abstract readonly tag: string;
 
     type?: Type;
+    readonly depth: number;
+    readonly count: number;
 
-    constructor(readonly depth: number, readonly count: number) { }
+    constructor(depth: number, count: number) {
+        this.depth = depth;
+        this.count = count;
+    }
 
     isVal(): this is Val {
         return this.tag === 'Val';
@@ -215,9 +244,14 @@ export class Val extends Tag {
 
     jumpDest: number | null = null;
 
-    constructor(readonly val: bigint, readonly pushStateId?: number) {
+    readonly val: bigint;
+    readonly pushStateId?: number | undefined;
+
+    constructor(val: bigint, pushStateId?: number) {
         if (val < 0 || val >= MOD_256) throw new Error(`Val is a not a valid unsigned 256-word: ${val}`);
         super(0, 1);
+        this.val = val;
+        this.pushStateId = pushStateId;
     }
 
     override eval(): Expr {
@@ -236,8 +270,13 @@ export class Local extends Tag {
 
     #memo: Expr | undefined = undefined;
 
-    constructor(readonly index: number, readonly value: Expr) {
+    readonly index: number;
+    readonly value: Expr;
+
+    constructor(index: number, value: Expr) {
         super(value.depth + 1, value.count + 1);
+        this.index = index;
+        this.value = value;
     }
 
     override eval(): Expr {
@@ -257,8 +296,11 @@ export class Local extends Tag {
 
 export class Locali implements IInst {
     readonly name = 'Local';
+    readonly local: Local;
 
-    constructor(readonly local: Local) { }
+    constructor(local: Local) {
+        this.local = local;
+    }
 
     eval() {
         return this;
@@ -314,10 +356,10 @@ export function mem(stmts: Stmt[]): Stmt[] {
     }
 }
 
-export * from './alu';
-export * from './flow';
-export * from './log';
-export * from './memory';
-export * from './special';
-export * from './storage';
-export * from './system';
+export * from './alu.ts';
+export * from './flow.ts';
+export * from './log.ts';
+export * from './memory.ts';
+export * from './special.ts';
+export * from './storage.ts';
+export * from './system.ts';
