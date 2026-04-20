@@ -1,4 +1,3 @@
-
 /**
  * Converts `data` into a suitable `Uint8Array` representation.
  * When `data` is a `string`, it must be a hexadecimal string.
@@ -17,20 +16,21 @@ export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Ar
     if (data instanceof Uint8Array) return data;
     if (typeof data !== 'string') return new Uint8Array(data);
 
-    if (data.length % 2 !== 0) {
+    if (data.length % 2 !== 0)
         throw new Error(`Unable to decode, input should have even length, but got length '${data.length}'`);
-    }
 
     const start = data.slice(0, 2).toLowerCase() === '0x' ? 2 : 0;
     const buffer = new Uint8Array((data.length - start) / 2);
     for (let i = start, j = 0; i < data.length; i += 2, j++) {
         const byte = data.slice(i, i + 2);
-        const value = Number('0x' + byte);
-        if (value >= 0) {
-            buffer[j] = value;
-        } else {
+        if (byte.trim().length !== 2)
             throw new Error(`Unable to decode, invalid hex byte '${byte}' found at position '${i + 1}'`);
-        }
+
+        const value = Number('0x' + byte);
+        if (Number.isNaN(value))
+            throw new Error(`Unable to decode, invalid hex byte '${byte}' found at position '${i + 1}'`);
+
+        buffer[j] = value;
     }
     return buffer;
 }
