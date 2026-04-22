@@ -172,7 +172,6 @@ export function parseSig(sig: string): SigMember {
 
     function parseType(): Ty {
         const baseType = function () {
-            // eslint-disable-next-line prefer-const
             let [pos, , ty] = tokens.peek();
             if (ty === '(') {
                 const components = [];

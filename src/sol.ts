@@ -14,7 +14,6 @@ import type { IStore } from './ast/storage.ts';
 export function sol(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const str = isExpr(node) ? solExpr(node) : isInst(node) ? solStmt(node) : `${node}`;
         result.push(str, strings[i + 1]);
     });

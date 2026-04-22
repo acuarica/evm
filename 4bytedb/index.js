@@ -10,9 +10,6 @@
  *
  * @packageDocumentation
  */
-/* eslint-env node */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 const { Contract } = require('sevm');
 

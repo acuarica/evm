@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { keccak256 } from 'js-sha3';
 
-import { isElemType, parseSig, sighash, type SigMember } from 'sevm';
+import { isElemType, parseSig, sighash, type SigMember } from '../src/abi.ts';
 
 import { compile } from './utils/solc.ts';
 
@@ -259,7 +259,7 @@ describe('::abi', function () {
             it(`should find selector \`${sol ?? sig}`, (ctx) => {
                 const selector = keccak256(fmt).slice(0, 8);
                 // this.test!.title += `#${selector}\``;
-                ctx.annotate(`#${selector}\``);
+                // ctx.annotate(`#${selector}\``);
 
                 const src = `contract Test {
                     struct T2 { uint x; uint y; }

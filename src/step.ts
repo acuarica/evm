@@ -761,7 +761,7 @@ const FrontierStep = {
     ...STORAGE,
 
     /* Flow operations */
-    JUMPDEST: [JUMPDEST, () => { }],
+    JUMPDEST: [JUMPDEST, _state => { }],
     JUMP: [{ opcode: 0x56, halts: true }, function (state, opcode, { bytecode }) {
         const offset = state.stack.pop();
         const { destpc, pushStateId } = getJumpDest(offset, opcode, bytecode);

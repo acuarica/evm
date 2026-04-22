@@ -79,7 +79,7 @@
     "scripts": {
         "prepare": "node scripts/4bytedb.mjs",
         "typecheck": "tsc",
-        "lint": "eslint",
+        "lint": "eslint .",
         "test": "vitest --run",
         "coverage": "vitest run --coverage",
         "bundle": "webpack --mode production",

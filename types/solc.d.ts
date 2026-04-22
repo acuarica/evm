@@ -240,6 +240,5 @@ declare module 'solc' {
 }
 
 declare module 'solc/wrapper' {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     export default function wrapper(soljson: unknown): typeof import('solc');
 }

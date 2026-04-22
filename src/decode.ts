@@ -1,6 +1,91 @@
 import { arrayify, hexlify } from './bytes.ts';
 
 /**
+ * Represents an opcode found in the bytecode augmented with
+ * offset and operand information as defined by the EVM.
+ *
+ * It can be either a unary opcode, _which does not take any operand data_,
+ * or either a `PUSHn` mnemonic augmented with its push `data`.
+ * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
+ *
+ * `PUSHn` `n >= 1` opcodes takes an `n`-byte argument from the bytecode.
+ * Note that `PUSH0`[^1] does not take any data argument from the bytecode (just pushes `0` onto the `Stack`).
+ * Thus it can be considered as an unary opcode.
+ * 
+ * [^1]: https://eips.ethereum.org/EIPS/eip-3855
+ */
+export interface IOpcode<M> {
+
+    /**
+     * This is the offset in the bytecode where this `Opcode` was found.
+     * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
+     * expects a stack operand referencing this `offset` in the bytecode.
+     *
+     * The Program Counter of this `Opcode`.
+     * The index in the `Opcode[]` where this `Opcode` is inserted.
+     */
+    readonly pc: number;
+
+    /**
+     * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
+     * The `opcode` may not be a valid opcode according to the decoder definition.
+     */
+    readonly opcode: number;
+
+    /**
+     * Represents a valid opcode.
+     *
+     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
+     *
+     * If the `opcode` given is not a valid opcode,
+     * you can provide `INVALID` as `mnemonic`.
+     * 
+     * A `PUSHn` opcode only permits a `PUSHn` opcode.
+     */
+    readonly mnemonic: M;
+
+    /**
+     * Where the next opcode should be located at.
+     */
+    readonly nextpc: number;
+
+    /**
+     * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
+     * 
+     * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
+     * then it contains the data attached to this instruction.
+     */
+    // readonly data: null;
+
+    /**
+     * Returns the hexadecimal representation of `this.data`.
+     */
+    // hexData(): string | undefined;
+}
+
+/**
+ * 
+ */
+export interface IPushOpcode<M> extends IOpcode<M> {
+
+    /**
+     * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
+     * 
+     * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
+     * then it contains the data attached to this instruction.
+     */
+    readonly data: Uint8Array;
+
+    /**
+     * Returns the hexadecimal representation of `this.data`.
+     */
+    hexData(): string;
+};
+
+type Table = { readonly [k: string]: number | { opcode: number, size: number } };
+type KeysOf<T extends Table, V> = { [X in keyof T]: T[X] extends V ? X : never }[keyof T] & string;
+
+/**
  * This module is used to `decode` bytecode into `Opcode`.
  * 
  * Maps numeric opcodes (byte between `0` and `255`) to decode configuration and string mnemonic.
@@ -9,49 +94,58 @@ import { arrayify, hexlify } from './bytes.ts';
  * `halts` indicates where the step associated with this `opcode` should `halt` the EVM `State`.
  * `mnemonic` indicates the step the `EVM` should execute.
  */
-export class Opcodes<M extends string = 'UNDEF'> {
+export class Opcodes<U extends string, P extends string> {
 
     /**
      * 
      */
-    #opcodes: { size: number, mnemonic: M }[];
+    #opcodes: { size: number, mnemonic: U | P }[];
 
     /**
+     * Copy constructor.
      * 
+     * @private
      */
-    constructor() {
-        this.#opcodes = [...Array(256).keys()].map(() => ({ size: 0, mnemonic: 'UNDEF' as M }));
-
-        Object.assign(this,
-            Object.fromEntries([...Array(256).keys()].map(k => [k, [0, 'UNDEF']]))
-        );
-        this.Opcode.prototype._decode = this;
+    private constructor(opcodes: { size: number, mnemonic: U | P }[]) {
+        this.#opcodes = [...opcodes];
     }
 
     /**
      * 
-     * @param k 
+     * @param nodef 
      * @returns 
      */
-    build<N extends string>(k: { readonly [k in N]: number | { opcode: number, size: number } }): Opcodes<M | N> {
-        const vals = new Set(Object.values(k));
-        if (vals.size !== Object.entries(k).length)
+    static new<T extends string>(nodef: T): Opcodes<T, never> {
+        const opcodes = [...Array(256).keys()].map(() => ({ size: 0, mnemonic: nodef }));
+        return new Opcodes<T, never>(opcodes);
+    }
+
+    /**
+     * 
+     * @param opcodesTable 
+     * @returns 
+     */
+    build<T extends Table>(opcodesTable: T): Opcodes<U | KeysOf<T, number>, P | KeysOf<T, object>> {
+        const vals = new Set(Object.values(opcodesTable).map(e => typeof e === 'number' ? e : e.opcode));
+        if (vals.size !== Object.entries(opcodesTable).length)
             throw new Error('duplicate opcode');
 
-        const xs = Object.entries(k).map(([mnemonic, b]) => typeof b === 'number' ? [b, { size: 0, mnemonic }] : [b.opcode, { size: b.size, mnemonic }]);
-        Object.assign(this.#opcodes, Object.fromEntries(xs));
+        const xs = Object.entries(opcodesTable).map(([mnemonic, b]) => typeof b === 'number' ? [b, { size: 0, mnemonic }] : [b.opcode, { size: b.size, mnemonic }]);
+        const other = new Opcodes<U | KeysOf<T, number>, P | KeysOf<T, object>>(this.#opcodes);
+        // Object.assign(other.#opcodes, this.#opcodes);
+        Object.assign(other.#opcodes, Object.fromEntries(xs));
 
-        // TODO: review
-        return this as Opcodes<M | N>;
+        return other;
+        // return this as Opcodes<U | KeysOf<T, number>, P | KeysOf<T, object>>;
     }
 
     /**
      * Retrieves the opcodes by mnemonic.
      */
-    get opcodes(): { readonly [m in M]: number } {
+    get opcodes(): { readonly [m in U | P]: number } {
         return Object.fromEntries([...Array(256).keys()]
             .map(o => [this.#opcodes[o].mnemonic, o] as const)
-            .filter(([mnemonic,]) => mnemonic !== 'UNDEF')
+            .filter(([mnemonic,]) => mnemonic !== 'NULL')
         );
     }
 
@@ -71,26 +165,82 @@ export class Opcodes<M extends string = 'UNDEF'> {
      * defaults to `0` if not provided.
      * @returns a generator of the decoded `Opcode`s found in `bytecode`.
      */
-    // *decode(bytecode: Parameters<typeof arrayify>[0], begin = 0): Generator<this['Opcode'], void, unknown> {
-    *decode(bytecode: Parameters<typeof arrayify>[0], begin = 0) {
+    // *decode(bytecode: Parameters<typeof arrayify>[0], begin = 0) {
+    //     const buffer = arrayify(bytecode);
+
+    //     for (let pc = begin; pc < buffer.length; pc++) {
+    //         const opcode = buffer[pc];
+    //         const { size, mnemonic } = this.#opcodes[opcode];
+    //         yield new this.Opcode(
+    //             pc,
+    //             mnemonic,
+    //             size === 0 ? null : (() => {
+    //                 const data = buffer.subarray(pc + 1, pc + size + 1);
+    //                 if (data.length !== size) {
+    //                     const op = new this.Opcode(pc, mnemonic, data).format(false);
+    //                     throw new Error(`Trying to get \`${size}\` bytes but got only \`${data.length}\` while decoding \`${op}\` before reaching the end of bytecode`);
+    //                 }
+    //                 pc += size;
+    //                 return data;
+    //             })(),
+    //         );
+    //     }
+    // }
+
+    *decode(bytecode: Parameters<typeof arrayify>[0], begin = 0): Generator<IOpcode<U> | IPushOpcode<P>, void, unknown> {
+        const Opcode = class <M> implements IOpcode<M> {
+            readonly pc: number;
+            readonly opcode: number;
+            readonly mnemonic: M;
+            constructor(pc: number, opcode: number, mnemonic: M) {
+                this.pc = pc;
+                this.opcode = opcode;
+                this.mnemonic = mnemonic;
+            }
+
+            get nextpc(): number {
+                return this.pc + 1;
+            }
+
+            toString() {
+                const pc = this.pc.toString().padStart(2, '0');
+                const opcode = this.opcode.toString(16).padStart(2, '0');
+                return `${pc}: <${opcode}>${this.mnemonic}`;
+            }
+        };
+        const PushOpcode = class <M> extends Opcode<M> implements IPushOpcode<M> {
+            readonly data: Uint8Array;
+            constructor(pc: number, opcode: number, mnemonic: M, data: Uint8Array) {
+                super(pc, opcode, mnemonic);
+                this.data = data;
+            }
+            override get nextpc(): number {
+                return super.nextpc + this.data.length;
+            }
+            hexData(): string {
+                return hexlify(this.data);
+            }
+            override toString() {
+                return super.toString() + ` (${parseInt(this.hexData()!, 16)})`;
+            }
+        };
+
         const buffer = arrayify(bytecode);
 
         for (let pc = begin; pc < buffer.length; pc++) {
             const opcode = buffer[pc];
             const { size, mnemonic } = this.#opcodes[opcode];
-            yield new this.Opcode(
-                pc,
-                mnemonic,
-                size === 0 ? null : (() => {
-                    const data = buffer.subarray(pc + 1, pc + size + 1);
-                    if (data.length !== size) {
-                        const op = new this.Opcode(pc, mnemonic, data).format(false);
-                        throw new Error(`Trying to get \`${size}\` bytes but got only \`${data.length}\` while decoding \`${op}\` before reaching the end of bytecode`);
-                    }
-                    pc += size;
-                    return data;
-                })(),
-            );
+            if (size === 0) {
+                yield new Opcode(pc, opcode, mnemonic as U);
+            } else {
+                const data = buffer.subarray(pc + 1, pc + size + 1);
+                const op = new PushOpcode(pc, opcode, mnemonic as P, data);
+                if (data.length !== size) {
+                    throw new Error(`Trying to get \`${size}\` bytes but got only \`${data.length}\` while decoding \`${op}\` before reaching the end of bytecode`);
+                }
+                yield op;
+                pc += size;
+            }
         }
     }
 
@@ -108,12 +258,12 @@ export class Opcodes<M extends string = 'UNDEF'> {
      * 
      * [^1]: https://eips.ethereum.org/EIPS/eip-3855
      */
-    Opcode = class {
+    Opcode1 = class Op2<X extends U | P> {
 
         /**
          * 
          */
-        _decode!: Opcodes<M>;
+        _decode!: Opcodes<U, P>;
 
         /**
          * This is the offset in the bytecode where this `Opcode` was found.
@@ -135,7 +285,7 @@ export class Opcodes<M extends string = 'UNDEF'> {
          * 
          * A `PUSHn` opcode only permits a `PUSHn` opcode.
          */
-        readonly mnemonic: M;
+        readonly mnemonic: X;
 
         /**
          * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
@@ -145,7 +295,7 @@ export class Opcodes<M extends string = 'UNDEF'> {
          */
         readonly data: null | Uint8Array = null;
 
-        constructor(pc: number, mnemonic: M, data: null | Uint8Array = null) {
+        constructor(pc: number, mnemonic: X, data: null | Uint8Array = null) {
             this.pc = pc;
             this.mnemonic = mnemonic;
             this.data = data;
@@ -173,6 +323,10 @@ export class Opcodes<M extends string = 'UNDEF'> {
             return this.data === null ? undefined : hexlify(this.data);
         }
 
+        // is<T extends X>(mnemonic: T): this is Op2<T & (U | P)> {
+        //     return this.mnemonic === mnemonic;
+        // }
+
         /**
          * Returns a `string` representation of `this` `Opcode`.
          * Usually used for debugging purposes.
@@ -188,6 +342,13 @@ export class Opcodes<M extends string = 'UNDEF'> {
                 : '';
 
             return `${this.mnemonic}(0x${this.opcode.toString(16)})@${this.pc}${pushData}`;
+        }
+
+        toString() {
+            const pc = this.pc.toString().padStart(2, '0');
+            const opcode = this.opcode.toString(16).padStart(2, '0');
+            const pushData = this.data ? ` (${parseInt(this.hexData()!, 16)})` : '';
+            return `${pc}: <${opcode}>${this.mnemonic}${pushData}`;
         }
     }
 }

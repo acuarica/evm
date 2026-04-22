@@ -58,7 +58,7 @@ export class Stack<in out E> {
      * Removes the top element from the stack and returns it.
      *
      * @returns the top element of the stack.
-     * @throws `Error` when the stack is empty.
+     * @throws `ExecError` when the stack is empty.
      */
     pop(): E | never {
         if (this.values.length === 0) {
@@ -72,6 +72,37 @@ export class Stack<in out E> {
     }
 
     /**
+     * Pops `n` elements from the stack and returns them.
+     * 
+     * @param n the number of elements to pop from the stack.
+     * @returns 
+     * @throws `ExecError` is the stack does not contain at least `n` elements.
+     */
+    popn(n: number): E[] | never {
+        const args = [];
+        for (; n > 0; n--) {
+            args.push(this.pop());
+        }
+        // while (n > 0) {
+        //     const elem = this.pop();
+        //     args.push(elem);
+        //     n--;
+        // }
+        return args;
+    }
+
+    /**
+     * 
+     * @param position 
+     */
+    dup(position: number): void {
+        if (position < 0 || position > 15)
+            throw new ExecError('Unsupported position for `dup` operation ' + position);
+
+        this.push(this.values[position]);
+    }
+
+    /**
      * Swaps the element at `position` with the top element of the stack.
      *
      * @param secondPosition the position of the element to be swapped.
@@ -81,13 +112,24 @@ export class Stack<in out E> {
         if (secondPosition < 1 || secondPosition > 16) {
             throw new ExecError('Unsupported position for swap operation');
         } else if (!(secondPosition in this.values)) {
-            throw new ExecError('Position not found for swap operation,');
+            throw new ExecError('Position not found for swap operation,' + secondPosition);
         }
 
         const firstValue = this.values[0]!;
         const secondValue = this.values[secondPosition]!;
         this.values[0] = secondValue;
         this.values[secondPosition] = firstValue;
+    }
+
+    /**
+     * Returns the `string` representation of this `Stack`.
+     * Useful for debugging purposes.
+     * The top of the stack is the leftmost element.
+     * 
+     * @returns 
+     */
+    toString() {
+        return this.values.map(elem => `${elem}`).join(' | ');
     }
 }
 
@@ -250,9 +292,9 @@ export class State<S = Inst, E = Expr> {
      */
     id: number | undefined;
 
-        readonly stack = new Stack<E>();
-        readonly memory = new Memory<E>();
-        public nlocals = 0;
+    readonly stack = new Stack<E>();
+    readonly memory = new Memory<E>();
+    public nlocals = 0;
     /**
      *
      * @param stack

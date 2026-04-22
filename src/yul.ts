@@ -12,7 +12,6 @@ import { FNS, Tag, Val, isExpr, isInst } from './ast/index.ts';
 export function yul(strings: TemplateStringsArray, ...nodes: unknown[]): string {
     const result = [strings[0]];
     nodes.forEach((node, i) => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const str = isExpr(node) ? yulExpr(node) : isInst(node) ? yulInst(node) : `${node}`;
         result.push(str, strings[i + 1]);
     });

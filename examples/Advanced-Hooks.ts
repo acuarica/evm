@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
 
 import { Contract, type Opcode, Shanghai, type State } from 'sevm';
 import type { DataCopy, Create } from 'sevm/ast';
