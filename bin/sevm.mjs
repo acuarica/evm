@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-env node */
 
 import c from 'ansi-colors';
 import assert from 'assert';
@@ -173,7 +172,6 @@ function make(handler) {
                     let lookup;
                     if (cache && existsSync(abiPath)) {
                         trace('Found ABI cache %s', abiPath);
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         lookup = JSON.parse(readFileSync(abiPath, 'utf8'));
                     } else {
                         if (cache) trace('ABI cache %s not found', abiPath);
@@ -192,7 +190,6 @@ function make(handler) {
 
                 handler(contract, argv);
             } catch (err) {
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                 console.error(`${err}`);
                 process.exit(1);
             }
@@ -367,7 +364,7 @@ function cfg(contract) {
     for (const [pc, block] of contract.blocks) {
         write(`subgraph cluster_${pc} {`);
         write(`  style=filled;`);
-        let label = `pc ${pc}\\l`;
+        const label = `pc ${pc}\\l`;
 
         // for (let i = pc; i < chunk.pcend; i++) {
         //     const opcode = evm.opcodes[i];

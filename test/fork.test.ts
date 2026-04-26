@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-import { run } from '../src/forks.ts';
+import { run } from '../src/fork.ts';
 import { parseMetadata } from '../src/metadata.ts';
 
 import { compile } from './utils/solc.ts';
@@ -55,6 +55,7 @@ describe('::forks', () => {
                 return 11 * a;
             }
         }`;
+        // const opts = { optimizer: { enabled: true } };
         const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
         run(bytecode);
     });

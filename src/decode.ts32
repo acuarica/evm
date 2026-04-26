@@ -1,84 +1,13 @@
 import { arrayify, hexlify } from './bytes.ts';
 
-/**
- * Represents an opcode found in the bytecode augmented with
- * offset and operand information as defined by the EVM.
- *
- * It can be either a unary opcode, _which does not take any operand data_,
- * or either a `PUSHn` mnemonic augmented with its push `data`.
- * That is, all but `PUSHn` `n >= 1` opcodes are unary opcodes.
- *
- * `PUSHn` `n >= 1` opcodes takes an `n`-byte argument from the bytecode.
- * Note that `PUSH0`[^1] does not take any data argument from the bytecode (just pushes `0` onto the `Stack`).
- * Thus it can be considered as an unary opcode.
- * 
- * [^1]: https://eips.ethereum.org/EIPS/eip-3855
- */
-export interface IOpcode<M> {
-
-    /**
-     * This is the offset in the bytecode where this `Opcode` was found.
-     * Both jump instructions, _i.e._, `JUMP` and `JUMPI`,
-     * expects a stack operand referencing this `offset` in the bytecode.
-     *
-     * The Program Counter of this `Opcode`.
-     * The index in the `Opcode[]` where this `Opcode` is inserted.
-     */
-    readonly pc: number;
-
-    /**
-     * Any byte number, _i.e._, between 0 and 255 representing the opcode byte.
-     * The `opcode` may not be a valid opcode according to the decoder definition.
-     */
+export interface IOpcode<M = string> {
     readonly opcode: number;
-
-    /**
-     * Represents a valid opcode.
-     *
-     * In https://www.evm.codes/ you can find an overview of each EVM opcode.
-     *
-     * If the `opcode` given is not a valid opcode,
-     * you can provide `INVALID` as `mnemonic`.
-     * 
-     * A `PUSHn` opcode only permits a `PUSHn` opcode.
-     */
     readonly mnemonic: M;
-
-    /**
-     * Where the next opcode should be located at.
-     */
     readonly nextpc: number;
-
-    /**
-     * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
-     * 
-     * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
-     * then it contains the data attached to this instruction.
-     */
-    // readonly data: null;
-
-    /**
-     * Returns the hexadecimal representation of `this.data`.
-     */
-    // hexData(): string | undefined;
 }
 
-/**
- * 
- */
-export interface IPushOpcode<M> extends IOpcode<M> {
-
-    /**
-     * A `Unary` opcode does not include any `data`. For these opcodes `data` is `null`.
-     * 
-     * If this `Opcode` is a `PUSHn` instruction or contains any operand data,
-     * then it contains the data attached to this instruction.
-     */
+export interface IPushOpcode<M = string> extends IOpcode<M> {
     readonly data: Uint8Array;
-
-    /**
-     * Returns the hexadecimal representation of `this.data`.
-     */
     hexData(): string;
 };
 
@@ -309,46 +238,11 @@ export class Opcodes<U extends string, P extends string> {
             return this._decode.opcodes[this.mnemonic];
         }
 
-        /**
-         * Where the next opcode should be located at.
-         */
-        get nextpc(): number {
-            return this.pc + (this.data?.length ?? 0) + 1;
-        }
-
-        /**
-         * Returns the hexadecimal representation of `this.data`.
-         */
-        hexData(): string | undefined {
-            return this.data === null ? undefined : hexlify(this.data);
-        }
 
         // is<T extends X>(mnemonic: T): this is Op2<T & (U | P)> {
         //     return this.mnemonic === mnemonic;
         // }
 
-        /**
-         * Returns a `string` representation of `this` `Opcode`.
-         * Usually used for debugging purposes.
-         * 
-         * @param includeDataAsNumeric whether to include `data` as numeric.
-         * @returns the `string` representation of `this` `Opcode`.
-         */
-        format(includeDataAsNumeric = true): string {
-            const pushData = this.data
-                ? ` 0x${this.hexData()}` + (includeDataAsNumeric
-                    ? ` (${parseInt(this.hexData()!, 16)})`
-                    : '')
-                : '';
 
-            return `${this.mnemonic}(0x${this.opcode.toString(16)})@${this.pc}${pushData}`;
-        }
-
-        toString() {
-            const pc = this.pc.toString().padStart(2, '0');
-            const opcode = this.opcode.toString(16).padStart(2, '0');
-            const pushData = this.data ? ` (${parseInt(this.hexData()!, 16)})` : '';
-            return `${pc}: <${opcode}>${this.mnemonic}${pushData}`;
-        }
     }
 }

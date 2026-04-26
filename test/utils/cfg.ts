@@ -53,7 +53,7 @@ export function cfg(contract: Contract, title: string): string {
         label += '\n';
         label += '=|' + state.stack.values.map(elem => yul`${elem}`).join('|');
         label += '\n';
-        label += state.stmts.map(stmt => sol`${stmt}`).join('\n');
+        label += state.insts.map(stmt => sol`${stmt}`).join('\n');
         label += '\n';
 
         const [open, close] = entry ? ['[[', ']]'] : ['(', ')'];

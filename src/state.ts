@@ -83,11 +83,6 @@ export class Stack<in out E> {
         for (; n > 0; n--) {
             args.push(this.pop());
         }
-        // while (n > 0) {
-        //     const elem = this.pop();
-        //     args.push(elem);
-        //     n--;
-        // }
         return args;
     }
 
@@ -282,7 +277,7 @@ export class State<S = Inst, E = Expr> {
     /**
      * The statements executed that lead to this `State`.
      */
-    readonly stmts: S[] = [];
+    readonly insts: S[] = [];
 
     /**
      * The unique identifier of this `State` when it has been executed by the `EVM`.
@@ -292,9 +287,10 @@ export class State<S = Inst, E = Expr> {
      */
     id: number | undefined;
 
-    readonly stack = new Stack<E>();
-    readonly memory = new Memory<E>();
-    public nlocals = 0;
+    readonly stack;
+    readonly memory;
+    public nlocals;
+
     /**
      *
      * @param stack
@@ -340,7 +336,7 @@ export class State<S = Inst, E = Expr> {
      * The last statement in this `State`.
      */
     get last(): S | undefined {
-        return this.stmts.at(-1);
+        return this.insts.at(-1);
     }
 
     /**
@@ -354,7 +350,7 @@ export class State<S = Inst, E = Expr> {
             throw new ExecError('State already halted');
         }
 
-        this.stmts.push(last);
+        this.insts.push(last);
         this._halted = true;
     }
 }

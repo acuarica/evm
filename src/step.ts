@@ -427,7 +427,7 @@ const STORAGE = {
         }
     }],
 
-    SSTORE: [0x55, function sstore(this: IStore, { stack, stmts }) {
+    SSTORE: [0x55, function sstore(this: IStore, { stack, insts: stmts }) {
         const slot = stack.pop();
         const value = stack.pop();
 
@@ -544,7 +544,7 @@ const FrontierStep = {
             if (expr.tag !== 'Local') {
                 const local = new ast.Local(state.nlocals++, expr);
                 state.stack.values[position] = local;
-                state.stmts.push(new ast.Locali(local));
+                state.insts.push(new ast.Locali(local));
             } else {
                 expr.nrefs++;
             }
@@ -599,7 +599,7 @@ const FrontierStep = {
     ...zip([
         ['MSTORE', 0x52] as const,
         ['MSTORE8', 0x53] as const,
-    ].map(([m, o]) => [m, [o, ({ stack, memory, stmts }: State<Inst, Expr>) => {
+    ].map(([m, o]) => [m, [o, ({ stack, memory, insts: stmts }: State<Inst, Expr>) => {
         let location = stack.pop();
         const data = stack.pop();
 
@@ -726,7 +726,7 @@ const FrontierStep = {
 
     /* Log operations */
     ...zip(([0, 1, 2, 3, 4] as const).map(ntopics => [`LOG${ntopics}` as const, [
-        0xa0 + ntopics, function log(this: Members, { stack, memory, stmts }: State<Inst, Expr>) {
+        0xa0 + ntopics, function log(this: Members, { stack, memory, insts: stmts }: State<Inst, Expr>) {
             const offset_ = stack.pop();
             const size_ = stack.pop();
 

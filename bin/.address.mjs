@@ -17,7 +17,7 @@ export function isValidAddress(address) {
     const keccakHash = js_sha3.keccak256(address_);
 
     for (let i = 0; i < address_.length; i++) {
-        let output = parseInt(keccakHash[i], 16) >= 8
+        const output = parseInt(keccakHash[i], 16) >= 8
             ? address_[i].toUpperCase()
             : address_[i]
         if (address[i] !== output) return false

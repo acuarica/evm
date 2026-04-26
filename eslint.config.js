@@ -1,8 +1,16 @@
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-    tseslint.configs.recommended,
+    globalIgnores([
+        '.solc/',
+        'coverage/',
+    ]),
+     tseslint.configs.recommended,
+    // tseslint.configs.recommendedTypeChecked,
+    // tseslint.configs.strict,
+    // tseslint.configs.strictTypeChecked,
+    // tseslint.configs.stylisticTypeChecked,
     {
         rules: {
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: "^_" }],

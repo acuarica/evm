@@ -356,7 +356,7 @@ export function build(state: State<Inst, Expr>): Stmt[] {
         const last = state.last!;
         if (last === undefined) return [];
 
-        for (let i = 0; i < state.stmts.length; i++) {
+        for (let i = 0; i < state.insts.length; i++) {
             // state.stmts[i] = state.stmts[i].eval();
         }
 
@@ -364,16 +364,16 @@ export function build(state: State<Inst, Expr>): Stmt[] {
             case 'Jumpi': {
                 if (last.evalCond.isVal()) {
                     if (last.evalCond.val === 0n) {
-                        return [...state.stmts.slice(0, -1), ...buildState(last.fallBranch.state)];
+                        return [...state.insts.slice(0, -1), ...buildState(last.fallBranch.state)];
                     } else {
-                        return [...state.stmts.slice(0, -1), ...buildState(last.destBranch.state)];
+                        return [...state.insts.slice(0, -1), ...buildState(last.destBranch.state)];
                     }
                 }
 
                 const trueBlock = buildState(last.destBranch.state);
                 const falseBlock = buildState(last.fallBranch.state);
                 return [
-                    ...state.stmts.slice(0, -1),
+                    ...state.insts.slice(0, -1),
                     ...(isRevertBlock(falseBlock)
                         ? [
                             new Require(
@@ -391,16 +391,16 @@ export function build(state: State<Inst, Expr>): Stmt[] {
             case 'SigCase': {
                 const falseBlock = buildState(last.fallBranch.state);
                 return [
-                    ...state.stmts.slice(0, -1),
+                    ...state.insts.slice(0, -1),
                     new If(last.condition, [new CallSite(last.condition.selector)], falseBlock),
                 ];
             }
             case 'Jump':
-                return [...state.stmts.slice(0, -1), ...buildState(last.destBranch.state)];
+                return [...state.insts.slice(0, -1), ...buildState(last.destBranch.state)];
             case 'JumpDest':
-                return [...state.stmts.slice(0, -1), ...buildState(last.fallBranch.state)];
+                return [...state.insts.slice(0, -1), ...buildState(last.fallBranch.state)];
             default:
-                return state.stmts;
+                return state.insts;
         }
     }
 }

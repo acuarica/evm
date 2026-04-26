@@ -139,7 +139,7 @@ describe('::state', function () {
         it('should `clone` an instance without aliasing its keys', function () {
             const state = new State<number, number>();
             expect(state.halted).toBe(false);
-            expect(state.stmts).toStrictEqual([]);
+            expect(state.insts).toStrictEqual([]);
             expect(state.memory.size).to.be.equal(0);
             expect(state.nlocals).to.be.equal(0);
 
