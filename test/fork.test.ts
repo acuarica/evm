@@ -36,6 +36,25 @@ describe('::forks', () => {
         run(bytecode);
     });
 
+    it('if-else-dif-stacks', (ctx) => {
+        const src = `contract Test {
+            uint total = 7;
+            fallback() external payable {
+                uint value;
+                if (block.number == 11) {
+                    uint sum = msg.value ;
+                    value = 17 * sum * sum;
+                } else {
+                    value = 19;
+                }
+                total += value;
+            }
+        }`;
+        const opts = { optimizer: { enabled: true } };
+        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx, opts).bytecode);
+        run(bytecode);
+    });
+
     it('dynamic', (ctx) => {
         const src = `contract Test {
             uint total = 7;
@@ -47,16 +66,17 @@ describe('::forks', () => {
                 total += 5;
             }
             function f(bool opt) internal returns (uint) {
-                flag = 2;
-                if (opt) flag += g(7);
-                return 1;
+                flag = 9;
+                uint val = 11;
+                if (opt) val += g(7);
+                return val;
             }
             function g(uint a) internal pure returns (uint) {
                 return 11 * a;
             }
         }`;
-        // const opts = { optimizer: { enabled: true } };
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
+        const opts = { optimizer: { enabled: true } };
+        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx, opts).bytecode);
         run(bytecode);
     });
 });

@@ -1,22 +1,24 @@
 import { strict as assert } from "assert";
 import { arrayify } from "./bytes.ts";
 import { Dispatch, type Opcode } from "./dispatch.ts";
-import { Stack, State } from "./state.ts";
+import { Stack } from "./state.ts";
 
 const zip = Object.fromEntries;
 const range = (n: number) => [...Array(n).keys()];
 
-function addLocal({ insts, stack }: State<Inst, Local>, expr: SExpr, pc: number) {
+type State = { insts: Inst[], stack: Stack<Local> };
+
+function addLocal({ insts, stack }: State, expr: SExpr, pc: number) {
     const local = new Local(insts.length, expr);
     insts.push(new Def(local, pc));
     stack.push(local);
 }
 
-const sexpr = (inputs: number) => function (state: State<Inst, Local>, op: Opcode) {
+const sexpr = (inputs: number) => function (state: State, op: Opcode) {
     addLocal(state, new SExpr(op.mnemonic.toLowerCase(), state.stack.popn(inputs)), op.pc);
 }
 
-const sinst = (inputs: number) => function ({ insts, stack }: State<Inst, Local>, op: Opcode) {
+const sinst = (inputs: number) => function ({ insts, stack }: State, op: Opcode) {
     insts.push(new Inst(op.mnemonic.toLowerCase(), stack.popn(inputs), op.pc));
 }
 
@@ -116,7 +118,7 @@ export const Frontier = new Dispatch({}).fork({
     [m: string]: {
         op: number,
         size?: number,
-        step: (state: State<Inst, Local>, opcode: Opcode) => void
+        step: (state: State, opcode: Opcode) => void,
     }
 });
 
@@ -164,7 +166,7 @@ class Printer {
         else if (expr instanceof SExpr)
             return `${this.c.cyan(expr.ex + '(')}${expr.args.map(e => this.strExpr(e)).join(', ')}` + this.c.cyan(')');
         else if (expr instanceof Param)
-            return `$${expr.id}_${expr.trigger}${expr.index}` + (expr.jumpdest ? '*jd' : '');
+            return `$${expr.id}_${expr.trigger}${expr.index}` + (expr.jumpdest ? '*jd' : '') + (expr.arg === undefined ? '' : `:${this.strExpr(expr.arg)}`)
         else if (expr instanceof Local)
             return this.c.cyan(`%${expr.id}`) + (expr.copies === 1 ? `:${this.strExpr(expr.expr)}` : '');
         else
@@ -249,18 +251,18 @@ function halts(mnemonic: string): boolean {
     return ['STOP', 'RETURN', 'REVERT', 'INVALID', 'SELFDESTRUCT'].includes(mnemonic);
 }
 
-class PhantomStack extends Stack<Local> {
+class ParamStack extends Stack<Local> {
     readonly params: Param[] = [];
-    readonly args: Local[];
+    readonly args: Stack<Local>;
 
-    constructor(args: Local[]) {
+    constructor(args: Stack<Local>) {
         super();
         this.args = args;
     }
 
     override pop(): Local {
         if (this.values.length === 0) {
-            const param = new Param(this.params.length, 'pop', 0, this.args.shift());
+            const param = new Param(this.params.length, 'pop', 0, this.args.pop());
             this.params.push(param);
             super.push(param);
         }
@@ -290,20 +292,26 @@ class PhantomStack extends Stack<Local> {
 
     private newParams(pos: number, trigger: 'dup' | 'swap'): Param[] {
         return range(pos - this.values.length)
-            .map(i => new Param(this.params.length + i, trigger, i + this.values.length + 1, this.args.shift()));
+            .map(i => new Param(this.params.length + i, trigger, i + this.values.length + 1, this.args.pop()));
     }
 };
 
 class Block {
+    private readonly state;
     readonly pcend: number;
-    readonly state: State<Inst, Local>;
-    readonly params: Param[];
     readonly targets: number[];
-    constructor(pcend: number, state: State<Inst, Local>, params: Param[], targets: number[]) {
+    constructor(pcend: number, state: { insts: Inst[], stack: ParamStack }, targets: number[]) {
         this.pcend = pcend;
         this.state = state;
-        this.params = params;
         this.targets = targets;
+    }
+
+    get insts(): Inst[] {
+        return this.state.insts;
+    }
+
+    get params(): Param[] {
+        return this.state.stack.params;
     }
 
     get outs(): Local[] {
@@ -311,8 +319,7 @@ class Block {
     }
 
     get unused(): Local[] {
-        // TODO fix downcast
-        return (this.state.stack as PhantomStack).args;
+        return this.state.stack.args.values;
     }
 }
 
@@ -325,125 +332,148 @@ function findHeaderPc(pc: number, blocks: number[]) {
     return blocks[i - 1];
 }
 
-export function exec(bytecode: Parameters<typeof arrayify>[0], pc0: number, args: Local[], blocks: Map<number, Block>) {
-    // let prevop = undefined;
-    const buf = arrayify(bytecode);
-    const stack = new PhantomStack(args);
-    const state = new State<Inst, Local>(stack);
+/**
+ * 
+ */
+export class Sevm {
+    /**
+     * 
+     */
+    readonly bytecode: Uint8Array;
 
-    // https://stackoverflow.com/questions/72659865/in-typescript-why-is-an-empty-array-inferred-as-any-when-noimplicitany-is-t
+    /**
+     * 
+     */
+    readonly blocks = new Map<number, Block[]>();
 
-    const targets: number[] = [];
-    let op;
-    for (op of Frontier.decode(buf, pc0)) {
-        // if (op.mnemonic === 'JUMP' || op.mnemonic === 'JUMPI') {
-        //     if (prevop?.data === undefined) {
-        //         console.log('dynamic jump', `${op}`);
-        //     }
-        // }
-        // prevop = op;
+    constructor(bytecode: Parameters<typeof arrayify>[0]) {
+        this.bytecode = arrayify(bytecode);
+    }
 
-        const { step } = Frontier.def[op.mnemonic as keyof typeof Frontier.def];
-        step(state, op)
-        console.log(`${op} |= ${state.stack}`);
-        // insts.push(op);
+    exec(pc0: number, args: Stack<Local>): Block {
+        // let prevop = undefined;
+        const state = { insts: [] as Inst[], stack: new ParamStack(args) } satisfies State;
 
-        if (halts(op.mnemonic)) {
-            break;
-        } else if (op.mnemonic === 'JUMP' || op.mnemonic === 'JUMPI') {
-            const last = state.last;
-            assert(last !== undefined);
-            assert(last.fn === 'jumpi' || last.fn === 'jump', `got ${last.fn}`);
-            const [local] = last.args;
-            assert(local !== undefined);
-            // last.
-            // console.log(state.last);
-            // assert(state.last!.args);
-            // const { args: [local] } = state.last!;
-            // assert(local instanceof Local);
-            if (local.expr instanceof Lit) {
-                const dest = local.expr.value;
-                console.log(dest);
-                // TODO dest is in range and less than has valid jump type
-                targets.push(Number(dest));
-            } else {
-                assert(local instanceof Param);
-                local.jumpdest = true;
-                console.log('dyn jump', local);
-                assert(local.arg !== undefined);
-                if (true) 1; else
-                if (local.arg.expr instanceof Lit) {
-                    const t = Number(local.arg.expr.value);
-                    console.log('to', t);
-                    local.arg.rettarget = true;
+        // https://stackoverflow.com/questions/72659865/in-typescript-why-is-an-empty-array-inferred-as-any-when-noimplicitany-is-t
+
+        const targets: number[] = [];
+        let op;
+        for (op of Frontier.decode(this.bytecode, pc0)) {
+            // if (op.mnemonic === 'JUMP' || op.mnemonic === 'JUMPI') {
+            //     if (prevop?.data === undefined) {
+            //         console.log('dynamic jump', `${op}`);
+            //     }
+            // }
+            // prevop = op;
+
+            const { step } = Frontier.def[op.mnemonic as keyof typeof Frontier.def];
+            step(state, op)
+            // console.log(`${op} |= ${state.stack}`);
+            // insts.push(op);
+
+            if (halts(op.mnemonic)) {
+                break;
+            } else if (op.mnemonic === 'JUMP' || op.mnemonic === 'JUMPI') {
+                const last = state.insts.at(-1);
+                assert(last !== undefined);
+                assert(last.fn === 'jumpi' || last.fn === 'jump', `got ${last.fn}`);
+                const [local] = last.args;
+                assert(local !== undefined);
+                // last.
+                // console.log(state.last);
+                // assert(state.last!.args);
+                // const { args: [local] } = state.last!;
+                // assert(local instanceof Local);
+                if (local.expr instanceof Lit) {
+                    const dest = local.expr.value;
+                    // console.log(dest);
                     // TODO dest is in range and less than has valid jump type
-                    targets.push(t);
-                    const h = findHeaderPc(local.arg.pc, [...blocks.keys()]);
-                    console.log(h);
-                    const { pcend } = blocks.get(h)!;
-                    console.log(pcend);
-                    if (pcend === t) {
-                        console.log('ret');
-                        last.isret = true;
+                    targets.push(Number(dest));
+                } else {
+                    assert(local instanceof Param);
+                    local.jumpdest = true;
+                    // console.log('dyn jump', local);
+                    // break;
+                    assert(local.arg !== undefined);
+                    // console.log('local arg', local.arg);
+                    if (local.arg.expr instanceof Lit) {
+                        const t = Number(local.arg.expr.value);
+                        // console.log('to', t);
+                        local.arg.rettarget = true;
+                        // TODO dest is in range and less than has valid jump type
+                        targets.push(t);
+                        const h = findHeaderPc(local.arg.pc, [...this.blocks.keys()]);
+                        console.log('header', h);
+                        const [{ pcend }] = this.blocks.get(h)!;
+                        console.log(pcend);
+                        if (pcend === t) {
+                            console.log('ret');
+                            last.isret = true;
+                        }
                     }
                 }
+                if (op.mnemonic === 'JUMPI') {
+                    // TODO check target pc is within bytecode boundaries
+                    targets.push(op.pc + 1);
+                }
+                break;
+            } else if (this.bytecode[op.nextpc] === Frontier.def.JUMPDEST.op) {
+                targets.push(op.nextpc);
+                break;
             }
-            if (op.mnemonic === 'JUMPI') {
-                // TODO check target pc is within bytecode boundaries
-                targets.push(op.pc + 1);
-            }
-            break;
-        } else if (buf[op.nextpc] === Frontier.def.JUMPDEST.op) {
-            targets.push(op.nextpc);
-            break;
-            // console.log('--- bb ---')
-            // bbs.push({ insts, state, pc: insts[0].pc });
-            // insts = [];
-            // state = new LocalState(new PStack());
         }
-    }
-    assert(op !== undefined, 'empty block not allowed');
-    const block = new Block(op.nextpc, state, stack.params, targets);
-    return block;
-}
-
-function run0(bytecode: Parameters<typeof arrayify>[0]) {
-    const blocks = new Map<number, Block>();
-    const visits = new Map<number, { count: number }>();
-    const frames = [{ pc: 0, args: [] as Local[] }];
-
-    while (frames.length > 0) {
-        const { pc, args } = frames.pop()!;
-        const block = exec(bytecode, pc, args, blocks);
-        if (visits.get(pc) === undefined) {
-            visits.set(pc, { count: 0 });
-        }
-        visits.get(pc)!.count++;
-        blocks.set(pc, block);
-        // TODO avoid cycling on loops
-        // TODO bubble up used args
-        frames.push(...block.targets.map(pc => ({ pc, args: [...block.outs, ...block.unused] })));
+        assert(op !== undefined, 'empty block not allowed');
+        return new Block(op.nextpc, state, targets);
     }
 
-    const p = new Printer();
-    for (const [pc, block] of blocks.entries()) {
-        console.log(p.c.yellow('block_' + pc), '(' + block.params.map(e => p.strExpr(e)).join(', ') + ')');
-        console.log('visited', visits.get(pc)!.count)
-        for (const inst of block.state.insts) {
-            console.log(`  ${p.strInst(inst)}`);
+    run(): Map<number, Block[]> {
+        // class ArgsStack extends Stack<Local> {
+
+        // }
+
+        const frames = [{ pc: 0, args: new Stack<Local>() }];
+
+        while (frames.length > 0) {
+            const { pc, args } = frames.pop()!;
+            console.log('visiting', pc);
+            const block = this.exec(pc, args);
+            {
+                let clones = this.blocks.get(pc);
+                if (clones === undefined) {
+                    clones = [];
+                    this.blocks.set(pc, clones);
+                }
+                clones.push(block);
+            }
+
+            // TODO avoid cycling on loops
+            // TODO back-propagate used args
+            frames.push(...block.targets.map(pc => ({ pc, args: new Stack([...block.outs, ...block.unused]) })));
         }
-        const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
-        console.log('  ->', block.targets, '|= outs', `${block.outs.map(e => p.strExpr(e)).join(' | ')}`, un);
-        for (const pcdest of block.targets) {
-            const t = blocks.get(pcdest);
-            assert(t !== undefined);
-            // if (t.params.length > block.outs.length) {
-            //     console.log('  not enough args');
-            // }
-        }
+
+        return this.blocks;
     }
 }
 
 export function run(bytecode: Parameters<typeof arrayify>[0]) {
-    run0(bytecode);
+    const bbs = new Sevm(bytecode).run();
+    const p = new Printer();
+    for (const [pc, blocks] of bbs.entries()) {
+        for (const block of blocks) {
+            console.log(p.c.yellow('block_' + pc), block.params.length, '|= ' + block.params.map(e => p.strExpr(e)).join(' | ') + '');
+            // console.log('visited', visits.get(pc)!.count)
+            for (const inst of block.insts) {
+                console.log(`  ${p.strInst(inst)}`);
+            }
+            const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
+            console.log('  ->', block.targets, '|= outs', `${block.outs.map(e => p.strExpr(e)).join(' | ')}`, un);
+            for (const pcdest of block.targets) {
+                const t = bbs.get(pcdest);
+                assert(t !== undefined);
+                // if (t.params.length > block.outs.length) {
+                //     console.log('  not enough args');
+                // }
+            }
+        }
+    }
 }

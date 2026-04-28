@@ -20,7 +20,11 @@ export class ExecError extends Error { }
  * [^1]: https://www.evm.codes/about#stack
  */
 export class Stack<in out E> {
-    readonly values: E[] = [];
+    readonly values: E[];
+
+    constructor(values: E[] = []) {
+        this.values = values;
+    }
 
     /**
      * Creates a shallow copy of this `Stack`.
