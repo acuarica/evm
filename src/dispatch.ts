@@ -89,6 +89,7 @@ export class Opcode {
         return `${pc}: <${opcode}>${this.mnemonic}${pushData}`;
     }
 }
+
 /**
  * 
  */

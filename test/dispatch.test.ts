@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { Opcodes } from '../src/decode.ts';
+import { Opcode, Dispatch } from '../src/dispatch.ts';
 import { parseMetadata } from '../src/metadata.ts';
 
 import { compile } from './utils/solc.ts';
@@ -9,7 +9,7 @@ import { compile } from './utils/solc.ts';
 
 describe('::decode', function () {
     describe('Opcode', () => {
-        const ops = Opcodes.new('nodef').build({
+        const ops = Dispatch.new('nodef').build({
             STOP: 0,
             ADD: 1,
             MUL: 2,
@@ -17,7 +17,9 @@ describe('::decode', function () {
         });
 
         it.each([
-            'STOP', 'ADD', 'MUL',
+            'STOP',
+            'ADD',
+            'MUL',
         ] as const)('should convert unary opcode $0 nulled-`data` to hex format', function (mnemonic) {
             expect(new ops.Opcode(0, mnemonic).hexData()).toBeUndefined();
         });
@@ -46,7 +48,7 @@ describe('::decode', function () {
             [1, 'PUSH4' as const, new Uint8Array([1, 2, 3, 4]), 'PUSH4(0x63)@1 0x01020304 (16909060)'],
             [0, 'INVALID' as const, undefined, 'INVALID(0xb0)@0'],
         ])('should `format` opcodes', (pc, mnemonic, data, expected) => {
-            const ops = Opcodes.new('nodef').build({
+            const ops = Dispatch.new('nodef').build({
                 STOP: 0,
                 ADD: 1,
                 MUL: 2,
@@ -67,7 +69,7 @@ describe('::decode', function () {
     describe('Opcodes', function () {
         describe('build', () => {
             it('should `build` a table with unary opcodes', function () {
-                const ops = Opcodes.new('nodef').build({
+                const ops = Dispatch.new('nodef').build({
                     A: 0,
                     B: 1,
                 });
@@ -75,7 +77,7 @@ describe('::decode', function () {
             });
 
             it('should `build` an opcodes table based on another instance', function () {
-                const ops1 = Opcodes.new('nodef').build({
+                const ops1 = Dispatch.new('nodef').build({
                     A: 0,
                     B: 1,
                 });
@@ -91,27 +93,27 @@ describe('::decode', function () {
 
         describe('decode', function () {
             it('should `decode` unary opcodes', function () {
-                const ops = Opcodes.new('nodef').build({
-                    STOP: 0,
-                    ADD: 1,
-                    MUL: 2,
-                    SUB: 3,
+                const ops = new Dispatch({
+                    STOP: { op: 0 },
+                    ADD: { op: 1 },
+                    MUL: { op: 2 },
+                    SUB: { op: 3 },
                 });
 
                 expect([...ops.decode('0x00010203020300')])
                     .to.be.deep.equal([
-                        new ops.Opcode(0, 'STOP'),
-                        new ops.Opcode(1, 'ADD'),
-                        new ops.Opcode(2, 'MUL'),
-                        new ops.Opcode(3, 'SUB'),
-                        new ops.Opcode(4, 'MUL'),
-                        new ops.Opcode(5, 'SUB'),
-                        new ops.Opcode(6, 'STOP'),
+                        new Opcode(0, 0, 'STOP'),
+                        new Opcode(1, 1, 'ADD'),
+                        new Opcode(2, 2, 'MUL'),
+                        new Opcode(3, 3, 'SUB'),
+                        new Opcode(4, 2, 'MUL'),
+                        new Opcode(5, 3, 'SUB'),
+                        new Opcode(6, 0, 'STOP'),
                     ]);
             });
 
             it('should `decode` unary opcodes 2', function () {
-                const ops = Opcodes.new('nodef').build({
+                const ops = Dispatch.new('nodef').build({
                     STOP: 0,
                     ADD: 1,
                     MUL: 2,
@@ -146,7 +148,7 @@ describe('::decode', function () {
                 }
             });
 
-            const ops = Opcodes.new('NODEF').build({
+            const ops = Dispatch.new('NODEF').build({
                 STOP: 0x00,
                 ADD: 0x01,
                 MUL: 0x02,

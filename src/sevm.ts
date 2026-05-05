@@ -1,4 +1,5 @@
-import { strict as assert } from "assert";
+import { strict as assert } from "node:assert";
+
 import { arrayify } from "./bytes.ts";
 import { Dispatch, type Opcode } from "./dispatch.ts";
 import { Stack } from "./state.ts";
@@ -146,7 +147,7 @@ export const London = Istanbul.fork({
 //     PUSH0: [0x5F, 1, 0],
 // });
 
-class Printer {
+export class Printer {
     // https://gist.github.com/leommoore/4526808
     // https://en.wikipedia.org/wiki/ANSI_escape_code
     c = Object.fromEntries(Object.entries({
@@ -158,7 +159,17 @@ class Printer {
         blue: 34,
         magenta: 35,
         cyan: 36,
-    }).map(([name, color]) => [name, (text: unknown) => `\x1b[${color}m${text}\x1b[0m`]));
+        // }).map(([name, color]) => [name, (text: unknown) => `\x1b[${color}m${text}\x1b[0m`]));
+    }).map(([name, color]) => [name, (text: unknown) => text]));
+
+    readonly #opts;
+    constructor(opts: {
+        expandSingleCopyLocal?: true,
+        expandArgParam?: true,
+        showPcNumber?: true,
+    } = {}) {
+        this.#opts = opts;
+    }
 
     strExpr(expr: unknown): string {
         if (expr instanceof Lit)
@@ -166,15 +177,17 @@ class Printer {
         else if (expr instanceof SExpr)
             return `${this.c.cyan(expr.ex + '(')}${expr.args.map(e => this.strExpr(e)).join(', ')}` + this.c.cyan(')');
         else if (expr instanceof Param)
-            return `$${expr.id}_${expr.trigger}${expr.index}` + (expr.jumpdest ? '*jd' : '') + (expr.arg === undefined ? '' : `:${this.strExpr(expr.arg)}`)
+            return `$${expr.id}_${expr.trigger}${expr.index}` + (expr.jumpdest ? '*jd' : '') + (this.#opts.expandArgParam && expr.arg !== undefined ? `:${this.strExpr(expr.arg)}` : '')
         else if (expr instanceof Local)
-            return this.c.cyan(`%${expr.id}`) + (expr.copies === 1 ? `:${this.strExpr(expr.expr)}` : '');
+            return this.c.cyan(`%${expr.id}`) + (this.#opts.expandSingleCopyLocal && expr.copies === 1 ? `:${this.strExpr(expr.expr)}` : '');
         else
             return `${expr}`;
     }
 
     strInst(inst: unknown): string {
-        const pc = () => this.c.dim(' // :' + (inst as Inst).pc);
+        const pc = this.#opts.showPcNumber
+            ? () => this.c.dim(' // :' + (inst as Inst).pc)
+            : () => '';
         if (inst instanceof Def) {
             const t = (inst.local.rettarget ? 'rettarget' : '');
             return this.c.cyan(`%${inst.local.id}`) + this.c.dim(`|${inst.local.copies}:${inst.local.uses}`) + ` := ${this.strExpr(inst.local.expr)};${pc()}` + t;
@@ -187,7 +200,7 @@ class Printer {
     }
 }
 
-export class SExpr {
+class SExpr {
     readonly ex: string;
     readonly args: Local[];
     constructor(ex: string, args: Local[]) {
@@ -296,14 +309,18 @@ class ParamStack extends Stack<Local> {
     }
 };
 
-class Block {
+export class Block {
     private readonly state;
     readonly pcend: number;
-    readonly targets: number[];
-    constructor(pcend: number, state: { insts: Inst[], stack: ParamStack }, targets: number[]) {
+    readonly targets;
+    constructor(pcend: number, state: { insts: Inst[], stack: ParamStack }, targets: { pc: number, pushpc: number, dynamic: boolean }[]) {
         this.pcend = pcend;
         this.state = state;
         this.targets = targets;
+    }
+
+    get id() {
+        return this.state.stack.args.id;
     }
 
     get insts(): Inst[] {
@@ -350,13 +367,16 @@ export class Sevm {
         this.bytecode = arrayify(bytecode);
     }
 
+    id = 0;
+
     exec(pc0: number, args: Stack<Local>): Block {
         // let prevop = undefined;
         const state = { insts: [] as Inst[], stack: new ParamStack(args) } satisfies State;
+        state.stack.args.id = this.id++;
 
         // https://stackoverflow.com/questions/72659865/in-typescript-why-is-an-empty-array-inferred-as-any-when-noimplicitany-is-t
 
-        const targets: number[] = [];
+        const targets: { pc: number, pushpc: number, dynamic: boolean }[] = [];
         let op;
         for (op of Frontier.decode(this.bytecode, pc0)) {
             // if (op.mnemonic === 'JUMP' || op.mnemonic === 'JUMPI') {
@@ -388,7 +408,7 @@ export class Sevm {
                     const dest = local.expr.value;
                     // console.log(dest);
                     // TODO dest is in range and less than has valid jump type
-                    targets.push(Number(dest));
+                    targets.push({ pc: Number(dest), pushpc: op.pc, dynamic: false });
                 } else {
                     assert(local instanceof Param);
                     local.jumpdest = true;
@@ -401,24 +421,24 @@ export class Sevm {
                         // console.log('to', t);
                         local.arg.rettarget = true;
                         // TODO dest is in range and less than has valid jump type
-                        targets.push(t);
                         const h = findHeaderPc(local.arg.pc, [...this.blocks.keys()]);
-                        console.log('header', h);
+                        // console.log('header', h);
                         const [{ pcend }] = this.blocks.get(h)!;
-                        console.log(pcend);
+                        // console.log(pcend);
                         if (pcend === t) {
-                            console.log('ret');
+                            // console.log('ret');
                             last.isret = true;
                         }
+                        targets.push({ pc: t, pushpc: local.arg.pc, dynamic: true });
                     }
                 }
                 if (op.mnemonic === 'JUMPI') {
                     // TODO check target pc is within bytecode boundaries
-                    targets.push(op.pc + 1);
+                    targets.push({ pc: op.pc + 1, pushpc: pc0, dynamic: false });
                 }
                 break;
             } else if (this.bytecode[op.nextpc] === Frontier.def.JUMPDEST.op) {
-                targets.push(op.nextpc);
+                targets.push({ pc: op.nextpc, pushpc: pc0, dynamic: false });
                 break;
             }
         }
@@ -431,11 +451,12 @@ export class Sevm {
 
         // }
 
-        const frames = [{ pc: 0, args: new Stack<Local>() }];
+        const frames = [{ pc: 0, args: new Stack<Local>(), path: [0] }];
 
+        console.log('flowchart TD');
         while (frames.length > 0) {
-            const { pc, args } = frames.pop()!;
-            console.log('visiting', pc);
+            const { pc, args, path } = frames.pop()!;
+            // console.log('visiting', pc);
             const block = this.exec(pc, args);
             {
                 let clones = this.blocks.get(pc);
@@ -448,7 +469,17 @@ export class Sevm {
 
             // TODO avoid cycling on loops
             // TODO back-propagate used args
-            frames.push(...block.targets.map(pc => ({ pc, args: new Stack([...block.outs, ...block.unused]) })));
+            for (const destpc of block.targets) {
+                destpc.args = new Stack([...block.outs, ...block.unused]);
+                // const arrow = `${pc}->${destpc.pc}`;
+                const d = destpc.dynamic ? '==' : '--';
+                console.log('  pc' + pc, ` ${d}${destpc.pushpc}${d}> `, 'pc' + destpc.pc);
+                const p = destpc.dynamic ? [] : path;
+                if (!p.includes(destpc.pc)) {
+                    frames.push({ pc: destpc.pc, args: destpc.args, path: [...p, destpc.pc] });
+                }
+            }
+            // frames.push(...block.targets.map(({ pc }) => ({ pc, args: new Stack([...block.outs, ...block.unused]) })));
         }
 
         return this.blocks;
@@ -461,6 +492,7 @@ export function run(bytecode: Parameters<typeof arrayify>[0]) {
     for (const [pc, blocks] of bbs.entries()) {
         for (const block of blocks) {
             console.log(p.c.yellow('block_' + pc), block.params.length, '|= ' + block.params.map(e => p.strExpr(e)).join(' | ') + '');
+            console.log('  ', block.id)
             // console.log('visited', visits.get(pc)!.count)
             for (const inst of block.insts) {
                 console.log(`  ${p.strInst(inst)}`);
@@ -468,7 +500,7 @@ export function run(bytecode: Parameters<typeof arrayify>[0]) {
             const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
             console.log('  ->', block.targets, '|= outs', `${block.outs.map(e => p.strExpr(e)).join(' | ')}`, un);
             for (const pcdest of block.targets) {
-                const t = bbs.get(pcdest);
+                const t = bbs.get(pcdest.pc);
                 assert(t !== undefined);
                 // if (t.params.length > block.outs.length) {
                 //     console.log('  not enough args');
@@ -476,4 +508,6 @@ export function run(bytecode: Parameters<typeof arrayify>[0]) {
             }
         }
     }
+
+    return bbs;
 }

@@ -1,9 +1,10 @@
-// import { Assertion, expect } from 'chai';
-// import { expect,  } from 'vitest';
-// import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-// import { dirname } from 'path';
+import { expect } from 'vitest';
 
-// const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
+// import { Assertion, expect } from 'chai';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
+
+const UPDATE_SNAPSHOTS = process.env['UPDATE_SNAPSHOTS'];
 
 export const maskTitle = (title: string) => title
     .replace(/^\.\./, '')
@@ -13,63 +14,90 @@ export const maskTitle = (title: string) => title
     .replace(/[:^'()|]/g, '_');
 
 // Assertion.addMethod('matchSnapshot', function (ext: string, ctx: Mocha.Context, titlePath?: string[]) {
-//     const actual = this._obj as unknown;
-//     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
-//     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
+expect.extend({
+    matchSnapshotmd(received, ext: string) {
 
-//     const write = (line: string) => (output += line + '\n');
-//     const writeSnapshot = () => {
-//         write(tag);
-//         write(actual);
-//         write('```');
-//         ctx.test!.title += ` 📸 `;
-//     };
+        // const actual = this._obj as unknown;
+        if (typeof received !== 'string') throw new TypeError('Actual value should be a string');
+        console.log(this.currentTestName)
+        // if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
 
-//     const [root, ...titles] = titlePath ?? ctx.test.titlePath();
-//     const name = maskTitle(titles.map(t => t
-//         .replace(/^should /, '')
-//         .replace(/ #[0-9a-f]{6}/, '')
-//         .replace(' 🛠️', '')
-//         .replace(' 📸 ', '')
-//         .replace(' 🎞️ ', '')
-//         .replace(/--loads `solc-.*`/, '')
-//     ).join('/'));
-//     const tag = '```' + `${ext} ${name}`;
+        const write = (line: string) => (output += line + '\n');
+        const writeSnapshot = () => {
+            write(tag);
+            write(received);
+            write('```');
+            this.task?.context.annotate('📸 Snapshot taken')
+            // ctx.test!.title += ` 📸 `;
+        };
 
-//     const snapshotFile = `./test/__snapshots__/${maskTitle(root)}.snap.md`;
-//     const dir = dirname(snapshotFile);
-//     mkdirSync(dir, { recursive: true });
+        // console.log(this);
 
-//     const content = existsSync(snapshotFile) ? readFileSync(snapshotFile, 'utf8') : `# ${root}\n`;
-//     let marker: 'NOT_SEEN' | 'OPEN' | 'CLOSED' = 'NOT_SEEN';
-//     let output = '';
-//     let snapshot: string | undefined = undefined;
-//     for (const line of content.split('\n')) {
-//         if (line === tag && marker === 'NOT_SEEN') {
-//             marker = 'OPEN';
-//             snapshot = '';
-//         } else if (marker === 'OPEN' && line === '```') {
-//             if (UPDATE_SNAPSHOTS) {
-//                 writeSnapshot();
-//                 marker = 'CLOSED';
-//             } else {
-//                 ctx.test.title += ` 🎞️ `;
-//                 expect(actual + '\n', `Snapshot: ${name}`).to.be.equal(snapshot);
-//                 return;
-//             }
-//         } else if (marker === 'OPEN') {
-//             snapshot += line + '\n';
-//         } else {
-//             write(line);
-//         }
-//     }
+        // @ts-expect-error Property '_updateSnapshot' is private and only accessible within class 'SnapshotState'
+        const updateSnapshot = this.snapshotState._updateSnapshot === 'all';
+        // console.log(updateSnapshot);
+        const h1 = this.task?.file.name;
+        // const titlePath = this.currentTestName;
+        // const [root, ...titles] = titlePath ;//?? ctx.test.titlePath();
+        // const name2 = maskTitle(titles.map(t => t
+        //     .replace(/^should /, '')
+        //     .replace(/ #[0-9a-f]{6}/, '')
+        //     .replace(' 🛠️', '')
+        //     .replace(' 📸 ', '')
+        //     .replace(' 🎞️ ', '')
+        //     .replace(/--loads `solc-.*`/, '')
+        // ).join('/'));
+        const name = this.currentTestName;
+        const tag = '```' + `${ext} ${name}`;
 
-//     if (marker === 'NOT_SEEN') {
-//         writeSnapshot();
-//     }
+        // const snapshotFile = `./test/__snapshots__/${maskTitle(root)}.snap.md`;
+        const snapshotFile = this.snapshotState.snapshotPath + '.md';
+        const dir = dirname(snapshotFile);
+        mkdirSync(dir, { recursive: true });
 
-//     writeFileSync(snapshotFile, output.trimEnd() + '\n');
-// });
+        const content = existsSync(snapshotFile) ? readFileSync(snapshotFile, 'utf8') : `# ${h1}\n`;
+        let marker: 'NOT_SEEN' | 'OPEN' | 'CLOSED' = 'NOT_SEEN';
+        let output = '';
+        let snapshot: string | undefined = undefined;
+        for (const line of content.split('\n')) {
+            if (line === tag && marker === 'NOT_SEEN') {
+                marker = 'OPEN';
+                snapshot = '';
+            } else if (marker === 'OPEN' && line === '```') {
+                if (UPDATE_SNAPSHOTS || updateSnapshot) {
+                    writeSnapshot();
+                    marker = 'CLOSED';
+                } else {
+                    this.task?.context.annotate('🎞️ Snapshot found')
+                    // ctx.test.title += ` 🎞️ `;
+                    // expect(received + '\n', `Snapshot: ${name}`).to.be.equal(snapshot);
+                    const pass = received + '\n' === snapshot;
+                    return {
+                        pass,
+                        message: pass ? () => '' : () => 'Snapshot as',
+                        actual: received + '\n',
+                        expected: snapshot,
+                    };
+                }
+            } else if (marker === 'OPEN') {
+                snapshot += line + '\n';
+            } else {
+                write(line);
+            }
+        }
+
+        if (marker === 'NOT_SEEN') {
+            writeSnapshot();
+        }
+
+        writeFileSync(snapshotFile, output.trimEnd() + '\n');
+
+        return {
+            message: () => '',
+            pass: true,
+        }
+    }
+});
 
 // Assertion.addMethod('matchFile', function (path: string, ctx: Mocha.Context) {
 //     const actual = this._obj as unknown;
@@ -98,3 +126,11 @@ export const maskTitle = (title: string) => title
 //         }
 //     }
 // }
+
+
+declare module 'vitest' {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    interface Assertion<T = any> {
+        matchSnapshotmd: (ext: string) => T,
+    }
+}
