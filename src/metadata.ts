@@ -1,4 +1,4 @@
-import { arrayify, hexlify } from './bytes.ts';
+import { hexlify } from './bytes.ts';
 
 /**
  * Represents the metadata hash protocols embedded in bytecode by `solc`.
@@ -7,18 +7,16 @@ import { arrayify, hexlify } from './bytes.ts';
  */
 export class Metadata {
     [key: string]: string | Uint8Array | undefined | boolean | number;
-    protocol: 'bzzr0' | 'bzzr1' | 'ipfs' | '' = '';
-    hash = '';
-    solc = '';
+    protocol?: 'bzzr0' | 'bzzr1' | 'ipfs';
+    hash?: string;
+    solc?: string;
+    minor?: number;
     experimental?: boolean;
 
-    get url(): string {
-        return `${this.protocol}://${this.hash}`;
-    }
-
-    get minor(): number | undefined {
-        const field = /^0\.(\d+)\./.exec(this.solc)?.[1];
-        return field ? parseInt(field) : undefined;
+    get url(): string | undefined {
+        return this.protocol === undefined
+            ? undefined
+            : `${this.protocol}://${this.hash}`;
     }
 }
 
@@ -44,7 +42,7 @@ export class Metadata {
  * @returns An object where the `bytecode` is the executable code and
  * `metadata` is the metadata hash when the metadata is present.
  */
-export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
+export function parseMetadata(bytecode: Uint8Array): {
     /**
      * The executable code without metadata when it is present.
      * Otherwise, the original `bytecode`.
@@ -58,7 +56,6 @@ export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
      */
     metadata: Metadata | undefined
 } {
-    const bytecode = arrayify(buffer);
     if (bytecode.length <= 2)
         return { bytecode, metadata: undefined };
 
@@ -73,7 +70,8 @@ export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
     } catch {
         return { bytecode, metadata: undefined };
     }
-    if (obj === null || typeof obj !== 'object') return { bytecode, metadata: undefined };
+    if (obj === null || typeof obj !== 'object')
+        return { bytecode, metadata: undefined };
 
     const metadata = new Metadata();
 
@@ -91,7 +89,10 @@ export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
         delete obj['bzzr1'];
     }
     if ('solc' in obj && obj['solc'] instanceof Uint8Array) {
-        metadata.solc = obj['solc'].join('.');
+        const solcv = obj['solc'];
+        metadata.solc = solcv.join('.');
+        if (solcv.length > 1)
+            metadata.minor = solcv[1];
         delete obj['solc'];
     }
 
@@ -115,7 +116,7 @@ export function parseMetadata(buffer: Parameters<typeof arrayify>[0]): {
  * console.log(str)
  * ```
  *
- * Logged output will be 6MRy.
+ * Logged output will be `6MRy`.
  */
 function bs58(buffer: Uint8Array): string {
     /** Base58 characters include numbers `123456789`, uppercase `ABCDEFGHJKLMNPQRSTUVWXYZ` and lowercase `abcdefghijkmnopqrstuvwxyz` */
@@ -211,7 +212,7 @@ function cbor(data: ArrayBufferLike): CBORItem {
         if (additionalInformation === 26) return readUint32();
         if (additionalInformation === 27) return readUint64();
         if (additionalInformation === 31) return -1;
-        throw "Invalid length encoding";
+        throw 'Invalid length encoding';
     }
     function readIndefiniteStringLength(majorType: number) {
         const initialByte = readUint8();
@@ -219,7 +220,7 @@ function cbor(data: ArrayBufferLike): CBORItem {
             return -1;
         const length = readLength(initialByte & 0x1f);
         if (length < 0 || (initialByte >> 5) !== majorType)
-            throw "Invalid indefinite length element";
+            throw 'Invalid indefinite length element';
         return length;
     }
 
@@ -337,6 +338,7 @@ function cbor(data: ArrayBufferLike): CBORItem {
     }
 
     const item = decodeItem();
-    if (offset !== data.byteLength) throw 'Remaining bytes';
+    if (offset !== data.byteLength)
+        throw 'Remaining bytes';
     return item;
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+
 import c from 'ansi-colors';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'];
 
@@ -9,7 +10,7 @@ type Releases = { [key: string]: string; };
 
 /**
  * It fetches and caches `solc` compilers used in tests.
- * 
+ *
  * See https://vitest.dev/config/globalsetup for more info.
  */
 export async function setup() {
@@ -32,7 +33,7 @@ export async function setup() {
 
     for (const version of VERSIONS) {
         process.stdout.write(`${c.cyan('v' + version)}`);
-        // Use `cjs` extension given compilers are CommonJS files.
+        // Use `cjs` extension because compilers are CommonJS files.
         const path = `./.solc/soljson-v${version}.cjs`;
 
         if (existsSync(path)) {
