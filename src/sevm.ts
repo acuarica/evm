@@ -56,10 +56,10 @@ export class Printer {
         if (inst instanceof Def) {
             const g = inst.local.props['global'] !== undefined ? `_${inst.local.props['global']}` : '';
             const t = (inst.local.props['rettarget'] ? 'rettarget' : '');
-            return `%${inst.local.id}${g}` + `|${inst.local.copies}:${inst.local.uses}` + ` := ${this.strExpr(inst.local.expr)};${pc()}` + t;
+            return `%${inst.local.id}${g}` + `|${inst.local.copies}:${inst.local.uses}` + ` := ${this.strExpr(inst.local.expr)}${pc()}` + t;
         } else if (inst instanceof Inst) {
             const r = inst.props['isret'] ? ' ret' : '';
-            return `${inst.fn}(` + inst.args.map(e => this.strExpr(e)).join(', ') + ')' + `;${pc()}` + r;
+            return `${inst.fn}(` + inst.args.map(e => this.strExpr(e)).join(', ') + ')' + `${pc()}` + r;
         } else {
             return `${inst}`;
         }

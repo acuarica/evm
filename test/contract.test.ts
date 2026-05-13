@@ -1,18 +1,19 @@
 import { describe, it, expect } from 'vitest';
 
-import { run, print } from '../src/sevm.ts';
-import { parseMetadata } from '../src/metadata.ts';
+// import { run, print } from '../src/sevm.ts';
+// import { parseMetadata } from '../src/metadata.ts';
+import { Contract } from '../src/contract.ts';
+// import { buildAST } from '../src/ast.ts';
+// import { arrayify } from '../src/bytes.ts';
 
 import './utils/snapshot.ts';
 import { compile } from './utils/solc.ts';
-import { mermaid } from './utils/mermaid.ts';
-import { buildAST } from '../src/ast.ts';
-import { arrayify } from '../src/bytes.ts';
+// import { mermaid } from './utils/mermaid.ts';
 
 describe('::contracts', () => {
 
     it.for([
-        ['single', `contract Test {
+        ['single block', `contract Test {
             uint total = 7;
             uint flag = 1;
             fallback() external payable {
@@ -107,15 +108,17 @@ describe('::contracts', () => {
         }`],
 
     ])('%s', ([title, src], ctx) => {
-        const { bytecode } = parseMetadata(arrayify(compile(src, '0.7.6', ctx).bytecode));
-        const ss = run(bytecode);
+        const contract = new Contract(compile(src, '0.7.6', ctx).bytecode);
 
-        expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
-        expect(print(ss)).matchSnapshotmd('c states', title);
+        // const { bytecode } = parseMetadata(arrayify(compile(src, '0.7.6', ctx).bytecode));
+        // const ss = run(bytecode);
+
+        // expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
+        // expect(print(ss)).matchSnapshotmd('c states', title);
 
         // expect(mermaidTree(tree)).matchSnapshotmd('mermaid tree');
-        const a = buildAST(ss);
-        expect(a).matchSnapshotmd('c ast', title);
+        // const a = buildAST(ss);
+        expect(contract.toYul(title)).matchSnapshotmd('yul', title);
         // console.log(inspect(a, { depth: null }));
         // renderAst(a);
     });

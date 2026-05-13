@@ -1,5 +1,8 @@
 import { arrayify } from './bytes.ts';
-import { Metadata, parseMetadata } from './metadata.ts';
+import { type Metadata, parseMetadata } from './metadata.ts';
+import { run } from './sevm.ts';
+import { buildAST } from './ast.ts';
+import { yul } from './yul.ts';
 
 export class Contract {
 
@@ -20,13 +23,16 @@ export class Contract {
     constructor(bytecode: Parameters<typeof arrayify>[0]) {
         this.bytecode = arrayify(bytecode);
         this.metadata = parseMetadata(this.bytecode).metadata;
+
     }
 
     /**
-     * 
+     * https://docs.soliditylang.org/en/latest/yul.html
      */
-    toYul(): string {
-        throw 'todo';
+    toYul(name: string = 'runtime'): string {
+        const ss = run(this.bytecode);
+        const a = buildAST(ss);
+        return yul(a, name);
     }
 
     /**

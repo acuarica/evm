@@ -54,15 +54,6 @@ export function compile(
 
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (ctx !== null) {
-        // const title = (test: Runnable | Suite | undefined): string =>
-        //     test ? title(test.parent) + '.' + test.title.replace(/^should /, '') : '';
-        const updateTitle = (text: string) => {
-            // console.log(ctx, typeof ctx === 'function');
-            // if ('annotate' in ctx) 
-            ctx.annotate(text);
-            // if (ctx.test) ctx.test.title += text;
-        };
-
         const fileName = maskTitle(ctx.task.fullTestName
             .replace(' > should ', ' > ')
             .replace(/ > /g, '.')
@@ -80,14 +71,13 @@ export function compile(
 
         try {
             const result = JSON.parse(readFileSync(path, 'utf8')) as ReturnType<typeof compile>;
-            updateTitle(`✓ Cached ${path}`);
+            ctx.annotate(`✓ Cached ${path}`);
             return result;
         } catch {
-            updateTitle(`🛠️ Compiled ${path}`);
+            ctx.annotate(`🛠️ Compiled ${path}`);
 
             if (!versionsLoaded.has(version)) {
-                // ctx.timeout(ctx.timeout() + 5000);
-                updateTitle(`⚙️ Loads \`solc-${version}\``);
+                ctx.annotate(`⚙️ Loads \`solc-${version}\``);
             }
             writeCacheFn = output => writeFileSync(path, JSON.stringify(output, null, 2));
         }
