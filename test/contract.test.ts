@@ -1,17 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
-import { Printer, run } from '../src/fork.ts';
+import { run, print } from '../src/sevm.ts';
 import { parseMetadata } from '../src/metadata.ts';
 
+import './utils/snapshot.ts';
 import { compile } from './utils/solc.ts';
-import { domTree, f, mermaid, mermaid2, mermaidTree } from './utils/mermaid.ts';
-import { strict as assert } from 'assert';
-import { inspect } from 'util';
+import { mermaid } from './utils/mermaid.ts';
+import { buildAST } from '../src/ast.ts';
+import { arrayify } from '../src/bytes.ts';
 
-describe('::sevm', () => {
+describe('::contracts', () => {
 
-    it('single', (ctx) => {
-        const src = `contract Test {
+    it.for([
+        ['single', `contract Test {
             uint total = 7;
             uint flag = 1;
             fallback() external payable {
@@ -20,29 +21,18 @@ describe('::sevm', () => {
                 uint val = flag;
                 total += 11 + val * val;
             }
-        }`;
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
-        run(bytecode);
-    });
+        }`],
 
-    it('if-only', (ctx) => {
-        const src = `contract Test {
+        ['if-then', `contract Test {
             uint total = 7;
             fallback() external payable {
                 uint value;
                 if (block.number == 11) value = 17;
                 total += value;
             }
-        }`;
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
-        const bbs = run(bytecode);
-        const diagram = mermaid(bbs, 'dfdfskjsdjksdkjdf');
+        }` ],
 
-        expect(diagram).matchSnapshotmd('mermaid');
-    });
-
-    it('if-else', (ctx) => {
-        const src = `contract Test {
+        ['if-else', `contract Test {
             uint total = 7;
             fallback() external payable {
                 uint value;
@@ -50,16 +40,9 @@ describe('::sevm', () => {
                 else value = 19;
                 total += value;
             }
-        }`;
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
-        const bbs = run(bytecode);
-        const diagram = mermaid(bbs, 'dfdfskjsdjksdkjdf');
+        }` ],
 
-        expect(diagram).matchSnapshotmd('mermaid');
-    });
-
-    it('nested-if-else-dif-stacks', (ctx) => {
-        const src = `contract Test {
+        ['nested-if-dif-stacks', `contract Test {
             uint total = 7;
             fallback() external payable {
                 uint value;
@@ -78,27 +61,9 @@ describe('::sevm', () => {
                 }
                 total += value;
             }
-        }`;
-        const opts = { optimizer: { enabled: true } };
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx, opts).bytecode);
-        const bbs = run(bytecode);
-        const diagram = mermaid(bbs, 'dfdfskjsdjksdkjdf');
+        }` ],
 
-        expect(diagram).matchSnapshotmd('mermaid states');
-
-        const preds = f(bbs);
-        console.log('preds', preds);
-        const { doms, tree } = domTree(preds);
-        console.log('doms', doms);
-        expect(mermaidTree(tree)).matchSnapshotmd('mermaid tree');
-
-        const a = ast(0);
-        console.log(inspect(a, { depth: null }));
-        renderAst(a);
-    });
-
-    it('loop', (ctx) => {
-        const src = `contract Test {
+        ['for-loop', `contract Test {
             uint total = 7;
             fallback() external payable {
                 uint value = 0;
@@ -107,16 +72,9 @@ describe('::sevm', () => {
                 }
                 total += value;
             }
-        }`;
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx).bytecode);
-        run(bytecode);
-    });
+        }`],
 
-    it('dynamic', (ctx) => {
-        // ctx.expect.getState().snapshotState.snapshotUpdateState
-        // ctx.task.suite?.
-        // ctx.expect.addSnapshotSerializer()
-        const src = `contract Test {
+        ['dynamic', `contract Test {
             uint total = 7;
             uint flag = 1;
             fallback() external payable {
@@ -140,13 +98,26 @@ describe('::sevm', () => {
                 }
                 return 11 * value;
             }
-        }`;
-        const opts = { optimizer: { enabled: true } };
-        const { bytecode } = parseMetadata(compile(src, '0.7.6', ctx, opts).bytecode);
-        const bbs = run(bytecode);
+        }`],
 
-        const diagram = mermaid(bbs, 'dfdfskjsdjksd');
+        ['external method', `contract Test {
+            function method(address, uint64) external pure returns (uint) {
+                return 1;
+            }
+        }`],
 
-        expect(diagram).matchSnapshotmd('mermaid');
+    ])('%s', ([title, src], ctx) => {
+        const { bytecode } = parseMetadata(arrayify(compile(src, '0.7.6', ctx).bytecode));
+        const ss = run(bytecode);
+
+        expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
+        expect(print(ss)).matchSnapshotmd('c states', title);
+
+        // expect(mermaidTree(tree)).matchSnapshotmd('mermaid tree');
+        const a = buildAST(ss);
+        expect(a).matchSnapshotmd('c ast', title);
+        // console.log(inspect(a, { depth: null }));
+        // renderAst(a);
     });
+
 });

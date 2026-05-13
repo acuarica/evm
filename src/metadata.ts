@@ -38,7 +38,7 @@ export class Metadata {
  * We use [`base58-js`](https://github.com/pur3miish/base58-js) to encode the IPFS hash.
  * If metadata contains a Swarm hash, _i.e._ `bzzr0` or `bzzr1`, it is encoded using hexadecimal.
  * 
- * @param buffer the contract or library bytecode to test for metadata hash.
+ * @param bytecode the contract or library bytecode to test for metadata hash.
  * @returns An object where the `bytecode` is the executable code and
  * `metadata` is the metadata hash when the metadata is present.
  */

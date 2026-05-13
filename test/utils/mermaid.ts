@@ -1,4 +1,4 @@
-import { Block, Printer } from '../../src/fork.ts';
+import { Block, Printer } from '../../src/sevm.ts';
 
 export function mermaid(bbs: Map<number, Block[]>, title: string): string {
     const m = new Mermaid(title);
@@ -10,13 +10,17 @@ export function mermaid(bbs: Map<number, Block[]>, title: string): string {
             const entry = pc === 0;
             const [open, close] = entry ? ['[[', ']]'] : ['(', ')'];
             const sid = 's_' + b.id;
-            const label = `id ${sid}`// + b.insts.map(i => p.strInst(i)).join('\n');
+            const params = b.params.map(e => p.strExpr(e)).join(' | ');
+            const un = '|= unused ' + `${b.unused.map(e => p.strExpr(e)).join(' | ')}`;
+            const outs = `${b.outs.map(e => p.strExpr(e)).join(' | ')}`;
+            const label = `${sid}(${params})\n${outs} || ${un}`;
+
             sg.line(`    ${sid}${open}"${label}"${close}`);
             sg.line(`    class ${sid} state`);
 
             for (const t of b.targets) {
                 const d = t.dynamic ? '==' : '--';
-                m.link(sid, `${d}${t.pushpc}${d}>`, 's_' + t.args.id);
+                m.link(sid, `${d}${t.pushpc}${d}>`, 's_' + t.args!.id);
             }
         }
     }
@@ -54,25 +58,6 @@ export function mermaidTree(tree: Map<number, number[]>): string {
     }
 
     return m.diagram();
-}
-
-export function f(bbs: Map<number, Block[]>) {
-    const cfg = new Map<number, Set<number>>();
-
-    for (const [pc, bs] of bbs.entries()) {
-        for (const b of bs) {
-            for (const t of b.targets) {
-                let entry = cfg.get(t.pc);
-                if (entry === undefined) {
-                    entry = new Set();
-                    cfg.set(t.pc, entry);
-                }
-                entry.add(pc);
-            }
-        }
-    }
-
-    return cfg;
 }
 
 class Mermaid {
@@ -134,82 +119,5 @@ class Subgraph {
 
     get(): string {
         return this.#output;
-    }
-}
-
-export function domTree(cfg: Map<number, Set<number>>) {
-    const doms = new Map<number, Set<number>>();
-    doms.set(0, new Set([0]))
-
-    for (const pc of cfg.keys()) {
-        if (pc !== 0) {
-            doms.set(pc, new Set(cfg.keys()));
-        }
-    }
-
-    let changed = true;
-    while (changed) {
-        changed = false;
-        for (const [key] of cfg.entries()) {
-            if (key !== 0) {
-                if (cfg.get(key) === undefined)
-                    continue;
-
-                const ds = union(
-                    new Set([key]),
-                    intersect([...cfg.get(key)!].map(pred => doms.get(pred)!))
-                );
-                if (!equal(ds, doms.get(key)!)) {
-                    doms.set(key, ds);
-                    changed = true;
-                }
-            }
-        }
-    }
-
-    {
-        const xss = [...doms.entries()];
-        xss.sort(([, xs], [, ys]) => xs.size - ys.size);
-        const tree = new Map<number, number[]>();
-
-        const seen = [];
-        for (const [x, xs] of xss) {
-            for (const s of seen) {
-                if (xs.has(s)) {
-                    let node = tree.get(s);
-                    if (node === undefined) {
-                        node = [];
-                        tree.set(s, node);
-                    }
-                    node.push(x);
-                    break;
-                }
-            }
-            seen.unshift(x);
-        }
-        console.log(xss);
-        console.log(tree);
-
-        return { doms, tree };
-    }
-
-    function union<T>(left: Set<T>, right: Set<T>) {
-        return new Set([...left, ...right]);
-    }
-
-    function intersect<T>(sets: Set<T>[]) {
-        let result = sets[0];
-        for (let i = 1; i < sets.length; i++) {
-            result = _intersect(result, sets[i]);
-        }
-        return result;
-    }
-
-    function _intersect<T>(left: Set<T>, right: Set<T>) {
-        return new Set([...left].filter(elem => right.has(elem)));
-    }
-
-    function equal<T>(left: Set<T>, right: Set<T>) {
-        return left.size === right.size && [...left].every(elem => right.has(elem));
     }
 }

@@ -1,5 +1,3 @@
-import type { Expr, Inst } from "./ast/index.ts";
-
 /**
  * Represents an `Error` due to an invalid symbolic state execution.
  */
@@ -256,32 +254,33 @@ export class Memory<in out E> {
      * @param size the size to invalidate.
      * @param invalidateAll indicates to clear the whole memory in case neither `offset` nor `size` are not reducible to `Val`.
      */
-    invalidateRange(offset: Expr, size: Expr, invalidateAll = true) {
-        offset = offset.eval();
-        size = size.eval();
-        if (offset.isVal() && size.isVal() && size.val <= this.maxInvalidateSizeAllowed) {
-            for (let i = offset.val; i < offset.val + size.val; i += 32n) {
-                this.#_mem.delete(i);
-            }
-        } else if (invalidateAll) {
-            this.invalidateAll();
-        }
-    }
+    // invalidateRange(offset: Expr, size: Expr, invalidateAll = true) {
+    //     offset = offset.eval();
+    //     size = size.eval();
+    //     if (offset.isVal() && size.isVal() && size.val <= this.maxInvalidateSizeAllowed) {
+    //         for (let i = offset.val; i < offset.val + size.val; i += 32n) {
+    //             this.#_mem.delete(i);
+    //         }
+    //     } else if (invalidateAll) {
+    //         this.invalidateAll();
+    //     }
+    // }
 }
 
 /**
  * Represents the state of an EVM run with statements `S` and expressions `E`.
  */
-export class State<S = Inst, E = Expr> {
+export class State<I, E> {
+
     /**
      * Indicates whether this `State` has been halted.
      */
-    private _halted = false;
+    #halted = false;
 
     /**
      * The statements executed that lead to this `State`.
      */
-    readonly insts: S[] = [];
+    readonly insts: I[] = [];
 
     /**
      * The unique identifier of this `State` when it has been executed by the `EVM`.
@@ -291,40 +290,22 @@ export class State<S = Inst, E = Expr> {
      */
     id: number | undefined;
 
-    readonly stack;
-    readonly memory;
-    public nlocals;
+    readonly stack: Stack<E>;
+    // readonly memory;
+    // public nlocals;
 
     /**
      *
      * @param stack
-     * @param memory
-     * @param nlocals
+    //  * @param memory
+    //  * @param nlocals
      */
     constructor(
         stack = new Stack<E>(),
-        memory = new Memory<E>(),
-        nlocals = 0
+        // memory = new Memory<E>(),
     ) {
         this.stack = stack;
-        this.memory = memory;
-        this.nlocals = nlocals;
-    }
-
-    /**
-     * Creates a detached clone from this `State`.
-     * The cloned state only shallow copies both `stack` and `memory`,
-     * while `stmts` will be empty and `halted` false.
-     *
-     * Note however the shallow copy means the structure of both `stack` and `memory` are cloned,
-     * not their contents.
-     * This means that any expression `E` in either the `stack` or `memory`
-     * will be shared across instances if they are references.
-     *
-     * @returns a new `State` detached from this one.
-     */
-    clone(): State<S, E> {
-        return new State(this.stack.clone(), this.memory.clone(), this.nlocals);
+        // this.memory = memory;
     }
 
     /**
@@ -333,38 +314,26 @@ export class State<S = Inst, E = Expr> {
      * When `true`, no more execution should be allowed against this `State`.
      */
     get halted(): boolean {
-        return this._halted;
+        return this.#halted;
     }
 
     /**
      * The last statement in this `State`.
      */
-    get last(): S | undefined {
+    get last(): I | undefined {
         return this.insts.at(-1);
     }
 
     /**
      * Halts this `State`.
-     * It adds `last` to `stmts` and sets `halted` to `true`.
-     *
-     * @param last The `S` that halts this `State`.
+     * It sets `halted` to `true`.
+     * 
+     * @throws `ExecError` if this `State` is alredy halted.
      */
-    halt(last: S): void {
-        if (this._halted) {
+    halt(): void {
+        if (this.#halted)
             throw new ExecError('State already halted');
-        }
 
-        this.insts.push(last);
-        this._halted = true;
+        this.#halted = true;
     }
 }
-
-/**
- * Represents the operand `stack` of the `State`.
- */
-export type Operand<E = Expr> = Pick<State<never, E>, 'stack'>;
-
-/**
- * Represents the volatile memory of the `State`, _i.e._, its `stack` and `memory`.
- */
-export type Ram<E = Expr> = Pick<State<never, E>, 'stack' | 'memory'>;

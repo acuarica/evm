@@ -1,42 +1,53 @@
+import { Def, Printer, type Block } from "./sevm.ts";
 
+export function buildAST(bbs: Map<number, Block[]>) {
+    const preds = f(bbs);
+    const { tree } = domTree(preds);
+    const a = ast(0, tree, preds);
+    return renderAst(a);
 
-
-function renderBlock(pc: number, indent: number) {
-    const p = new Printer();
-    const [block] = bbs.get(pc)!;
-    console.log(' '.repeat(indent) + p.c.yellow('block_' + pc), block.params.length, '|= ' + block.params.map(e => p.strExpr(e)).join(' | ') + '');
-    // console.log('  ', block.id)
-    // console.log('visited', visits.get(pc)!.count)
-    for (const inst of block.insts) {
-        console.log(' '.repeat(indent) + `${p.strInst(inst)}`);
-    }
-    const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
-    // console.log('  ->', block.targets, '|= outs', `${block.outs.map(e => p.strExpr(e)).join(' | ')}`, un);
-    for (const pcdest of block.targets) {
-        const t = bbs.get(pcdest.pc);
-        assert(t !== undefined);
-        // if (t.params.length > block.outs.length) {
-        //     console.log('  not enough args');
-        // }
-    }
-}
-
-function renderAst(blocks: { pc: number }[], indent = 0) {
-
-    for (const b of blocks) {
-        renderBlock(b.pc, indent);
-        if ('inst' in b && b.inst === 'if') {
-            if ('tb' in b)
-                renderAst(b.tb, indent + 2);
-            if ('fb' in b) {
-                console.log(' '.repeat(indent) + 'else');
-                renderAst(b.fb, indent + 2);
+    function renderAst(blocks: { pc: number }[], indent = 0) {
+        let out = '';
+        for (const b of blocks) {
+            out += renderBlock(b.pc, indent);
+            if ('inst' in b && b.inst === 'if') {
+                if ('tb' in b)
+                    out += renderAst(b.tb, indent + 2);
+                if ('fb' in b) {
+                    out += ' '.repeat(indent) + 'else';
+                    out += renderAst(b.fb, indent + 2);
+                }
             }
         }
+        return out;
+    }
+
+    function renderBlock(pc: number, indent: number) {
+        const p = new Printer({ inlineSingleUseLocal: true });
+        const [block] = bbs.get(pc)!;
+        let out = ''
+        // out += ' '.repeat(indent) + 'block_' + pc + '|= ' + block.params.map(e => p.strExpr(e)).join(' | ') + '\n';
+        for (const inst of block.insts) {
+            if (inst instanceof Def) {
+                if (inst.local.copies === 1 && inst.local.uses === 1) {
+                    continue;
+                }
+            }
+            if (inst.fn === 'jumpdest' || inst.fn === 'jump')
+                continue;
+
+            out += ' '.repeat(indent) + `${p.strInst(inst)}` + '\n';
+        }
+        // const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
+        // for (const pcdest of block.targets) {
+        // const t = bbs.get(pcdest.pc);
+        // assert(t !== undefined);
+        // }
+        return out;
     }
 }
 
-function part(xs: number[]) {
+function part(xs: number[], preds: Map<number, Set<number>>) {
     const cont = [];
     const nested = [];
     for (const x of xs) {
@@ -49,22 +60,114 @@ function part(xs: number[]) {
     return { nested, cont };
 }
 
-function ast(node: number): unknown[] {
+function ast(node: number, tree: Map<number, number[]>, preds: Map<number, Set<number>>): unknown[] {
     const xs = tree.get(node);
     if (xs === undefined) {
         return [{ inst: node, pc: node }];
     }
-    const { nested, cont } = part(xs);
+    const { nested, cont } = part(xs, preds);
     const blocks = [];
     if (nested.length === 1) {
-        blocks.push({ inst: 'if', pc: node, tb: ast(nested[0]) });
+        blocks.push({ inst: 'if', pc: node, tb: ast(nested[0], tree, preds) });
     } else if (nested.length === 2) {
-        blocks.push({ inst: 'if', pc: node, tb: ast(nested[0]), fb: ast(nested[1]) });
+        blocks.push({ inst: 'if', pc: node, tb: ast(nested[0], tree, preds), fb: ast(nested[1], tree, preds) });
     }
     if (cont.length > 0) {
-        blocks.push(...ast(cont[0]));
+        blocks.push(...ast(cont[0], tree, preds));
     }
     return blocks;
 }
 
+function domTree(cfg: Map<number, Set<number>>) {
+    const doms = new Map<number, Set<number>>();
+    doms.set(0, new Set([0]))
 
+    for (const pc of cfg.keys()) {
+        if (pc !== 0) {
+            doms.set(pc, new Set(cfg.keys()));
+        }
+    }
+
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const [key] of cfg.entries()) {
+            if (key !== 0) {
+                if (cfg.get(key) === undefined)
+                    continue;
+
+                const ds = union(
+                    new Set([key]),
+                    intersect([...cfg.get(key)!].map(pred => doms.get(pred)!))
+                );
+                if (!equal(ds, doms.get(key)!)) {
+                    doms.set(key, ds);
+                    changed = true;
+                }
+            }
+        }
+    }
+
+    {
+        const xss = [...doms.entries()];
+        xss.sort(([, xs], [, ys]) => xs.size - ys.size);
+        const tree = new Map<number, number[]>();
+
+        const seen = [];
+        for (const [x, xs] of xss) {
+            for (const s of seen) {
+                if (xs.has(s)) {
+                    let node = tree.get(s);
+                    if (node === undefined) {
+                        node = [];
+                        tree.set(s, node);
+                    }
+                    node.push(x);
+                    break;
+                }
+            }
+            seen.unshift(x);
+        }
+
+        return { doms, tree };
+    }
+
+    function union<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left, ...right]);
+    }
+
+    function intersect<T>(sets: Set<T>[]) {
+        let result = sets[0];
+        for (let i = 1; i < sets.length; i++) {
+            result = _intersect(result, sets[i]);
+        }
+        return result;
+    }
+
+    function _intersect<T>(left: Set<T>, right: Set<T>) {
+        return new Set([...left].filter(elem => right.has(elem)));
+    }
+
+    function equal<T>(left: Set<T>, right: Set<T>) {
+        return left.size === right.size && [...left].every(elem => right.has(elem));
+    }
+}
+
+function f(bbs: Map<number, Block[]>) {
+    const cfg = new Map<number, Set<number>>();
+
+    for (const [pc, bs] of bbs.entries()) {
+        for (const b of bs) {
+            for (const t of b.targets) {
+                let entry = cfg.get(t.pc);
+                if (entry === undefined) {
+                    entry = new Set();
+                    cfg.set(t.pc, entry);
+                }
+                entry.add(pc);
+            }
+        }
+    }
+
+    return cfg;
+}
