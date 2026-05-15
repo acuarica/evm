@@ -1,8 +1,14 @@
 import { arrayify } from './bytes.ts';
 import { type Metadata, parseMetadata } from './metadata.ts';
-import { run } from './sevm.ts';
-import { buildAST } from './ast.ts';
-import { yul } from './yul.ts';
+import { type Block, Sevm } from './sevm.ts';
+import { Shanghai } from './forks.ts';
+// import { buildAST } from './ast.ts';
+// import { yul } from './yul.ts';
+import { Selectors } from './selectors.ts';
+
+// export function x(bytecode: Uint8Array) {
+//     return sevm(bytecode, 0, undefined as unknown as State, new Frontier());
+// }
 
 export class Contract {
 
@@ -16,6 +22,8 @@ export class Contract {
      */
     readonly metadata: Metadata | undefined;
 
+    readonly states: Map<number, Block[]>;
+
     /**
      *
      * @param bytecode the Contract's bytecode to analyze.
@@ -23,16 +31,21 @@ export class Contract {
     constructor(bytecode: Parameters<typeof arrayify>[0]) {
         this.bytecode = arrayify(bytecode);
         this.metadata = parseMetadata(this.bytecode).metadata;
+        this.states = new Sevm(new (Selectors(Shanghai))(), this.bytecode).run();
 
+        // const K = Selectors(Shanghai);
+        // const s = new K();
+        // s.decode()
+        // s.publicBranches
     }
 
     /**
      * https://docs.soliditylang.org/en/latest/yul.html
      */
-    toYul(name: string = 'runtime'): string {
-        const ss = run(this.bytecode);
-        const a = buildAST(ss);
-        return yul(a, name);
+    toYul(_name: string = 'runtime'): string {
+        throw 'todo';
+        // const a = buildAST(this.ss);
+        // return yul(a, name);
     }
 
     /**

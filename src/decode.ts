@@ -88,8 +88,8 @@ export class Dispatch<M extends string> {
         this.ops = mapValues(opcodes, entry => entry.op);
     }
 
-    *decode(bytecode: Uint8Array, begin: number) {
-        for (let pc = begin; pc < bytecode.length;) {
+    *decode(bytecode: Uint8Array, pc0: number) {
+        for (let pc = pc0; pc < bytecode.length;) {
             const op = bytecode[pc];
             const { mnemonic, size } = this.#opcodes[op];
 

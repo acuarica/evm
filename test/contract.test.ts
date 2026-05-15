@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
-// import { run, print } from '../src/sevm.ts';
-// import { parseMetadata } from '../src/metadata.ts';
+import { print } from '../src/sevm.ts';
 import { Contract } from '../src/contract.ts';
-// import { buildAST } from '../src/ast.ts';
-// import { arrayify } from '../src/bytes.ts';
 
 import './utils/snapshot.ts';
 import { compile } from './utils/solc.ts';
-// import { mermaid } from './utils/mermaid.ts';
+import { mermaid } from './utils/mermaid.ts';
 
 describe('::contracts', () => {
 
@@ -79,9 +76,10 @@ describe('::contracts', () => {
             uint total = 7;
             uint flag = 1;
             fallback() external payable {
-                // if (block.number >= 8) {
-                //     total = f(block.number == 8) + 3;
-                // }
+                if (block.number >= 8) {
+                    // total = f(block.number == 8) + 3;
+                    total += 3;
+                }
                 total += g(5);
                 total += g(7);
                 total += 17;
@@ -101,24 +99,23 @@ describe('::contracts', () => {
             }
         }`],
 
-        ['external method', `contract Test {
-            function method(address, uint64) external pure returns (uint) {
-                return 1;
-            }
+        ['external methods', `contract Test {
+            function method1(address, uint64) external pure returns (uint) { return 5; }
+            function method2(uint256) external pure returns (uint) { return 7; }
         }`],
 
     ])('%s', ([title, src], ctx) => {
         const contract = new Contract(compile(src, '0.7.6', ctx).bytecode);
 
         // const { bytecode } = parseMetadata(arrayify(compile(src, '0.7.6', ctx).bytecode));
-        // const ss = run(bytecode);
+        const ss = contract.states;
 
-        // expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
-        // expect(print(ss)).matchSnapshotmd('c states', title);
+        expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
+        expect(print(ss)).matchSnapshotmd('cpp states', title);
 
         // expect(mermaidTree(tree)).matchSnapshotmd('mermaid tree');
         // const a = buildAST(ss);
-        expect(contract.toYul(title)).matchSnapshotmd('yul', title);
+        // expect(contract.toYul(title)).matchSnapshotmd('yul', title);
         // console.log(inspect(a, { depth: null }));
         // renderAst(a);
     });

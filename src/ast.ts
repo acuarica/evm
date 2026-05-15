@@ -1,50 +1,9 @@
-import { Def, Printer, type Block } from "./sevm.ts";
+import type { Block } from './sevm.ts';
 
 export function buildAST(bbs: Map<number, Block[]>) {
     const preds = f(bbs);
     const { tree } = domTree(preds);
-    const a = ast(0, tree, preds);
-    return renderAst(a);
-
-    function renderAst(blocks: { pc: number }[], indent = 0) {
-        let out = '';
-        for (const b of blocks) {
-            out += renderBlock(b.pc, indent);
-            if ('inst' in b && b.inst === 'if') {
-                if ('tb' in b)
-                    out += renderAst(b.tb, indent + 2);
-                if ('fb' in b) {
-                    out += ' '.repeat(indent) + 'else';
-                    out += renderAst(b.fb, indent + 2);
-                }
-            }
-        }
-        return out;
-    }
-
-    function renderBlock(pc: number, indent: number) {
-        const p = new Printer({ inlineSingleUseLocal: true });
-        const [block] = bbs.get(pc)!;
-        let out = ''
-        // out += ' '.repeat(indent) + 'block_' + pc + '|= ' + block.params.map(e => p.strExpr(e)).join(' | ') + '\n';
-        for (const inst of block.insts) {
-            if (inst instanceof Def) {
-                if (inst.local.copies === 1 && inst.local.uses === 1) {
-                    continue;
-                }
-            }
-            if (inst.fn === 'jumpdest' || inst.fn === 'jump')
-                continue;
-
-            out += ' '.repeat(indent) + `${p.strInst(inst)}` + '\n';
-        }
-        // const un = '|= unused ' + `${block.unused.map(e => p.strExpr(e)).join(' | ')}`;
-        // for (const pcdest of block.targets) {
-        // const t = bbs.get(pcdest.pc);
-        // assert(t !== undefined);
-        // }
-        return out;
-    }
+    return ast(0, tree, preds);
 }
 
 function part(xs: number[], preds: Map<number, Set<number>>) {
