@@ -1,123 +1,122 @@
 import { describe, it, expect } from 'vitest';
 
-import { print } from '../src/sevm.ts';
 import { Contract } from '../src/contract.ts';
+import { print } from '../src/sevm.ts';
 
-import './utils/snapshot.ts';
+// import './utils/snapshot.ts';
 import { compile } from './utils/solc.ts';
 import { mermaid } from './utils/mermaid.ts';
 
 describe('::contracts', () => {
 
-    it.for([
-        ['single block', `contract Test {
-            uint total = 7;
-            uint flag = 1;
-            fallback() external payable {
-                total = block.number + msg.value + 3;
-                flag = 5 * 7;
-                uint val = flag;
-                total += 11 + val * val;
-            }
-        }`],
+    describe.each([
+        ['no opt', undefined],
+        ['opt', { optimizer: { enabled: true } }]
+    ])('%s', (suffix, options) => {
 
-        ['if-then', `contract Test {
-            uint total = 7;
-            fallback() external payable {
-                uint value;
-                if (block.number == 11) value = 17;
-                total += value;
-            }
-        }` ],
+        it.for([
+            ['single block', `contract Test {
+                uint total = 7;
+                uint flag = 1;
+                fallback() external payable {
+                    total = block.number + msg.value + 3;
+                    flag = 5 * 7;
+                    uint val = flag;
+                    total += 11 + val * val;
+                }
+            }`],
 
-        ['if-else', `contract Test {
-            uint total = 7;
-            fallback() external payable {
-                uint value;
-                if (block.number == 11) value = 17;
-                else value = 19;
-                total += value;
-            }
-        }` ],
+            ['if then', `contract Test {
+                uint total = 7;
+                fallback() external payable {
+                    uint value;
+                    if (block.number == 11) value = 17;
+                    total += value;
+                }
+            }`],
 
-        ['nested-if-dif-stacks', `contract Test {
-            uint total = 7;
-            fallback() external payable {
-                uint value;
-                if (block.number == 11) {
-                    uint sum = msg.value;
-                    if (msg.value > 123) {
-                        value = 17 * sum * sum;
+            ['if else', `contract Test {
+                uint total = 7;
+                fallback() external payable {
+                    uint value;
+                    if (block.number == 11) value = 17;
+                    else value = 19;
+                    total += value;
+                }
+            }`],
+
+            ['nested if dif stacks', `contract Test {
+                uint total = 7;
+                fallback() external payable {
+                    uint value;
+                    if (block.number == 11) {
+                        uint sum = msg.value;
+                        if (msg.value > 123) {
+                            value = 17 * sum * sum;
+                        } else {
+                            value = 19 * sum;
+                        }
+                        if (msg.value > 1234) {
+                            value *= 23;
+                        }
                     } else {
-                        value = 19 * sum;
+                        value = 19;
                     }
-                    if (msg.value > 1234) {
-                        value *= 23;
+                    total += value;
+                }
+            }`],
+
+            ['for loop', `contract Test {
+                uint total = 7;
+                fallback() external payable {
+                    uint value = 0;
+                    for (uint i = 0; i < msg.value; i++) {
+                        value *= 3 + i;
                     }
-                } else {
-                    value = 19;
+                    total += value;
                 }
-                total += value;
-            }
-        }` ],
+            }`],
 
-        ['for-loop', `contract Test {
-            uint total = 7;
-            fallback() external payable {
-                uint value = 0;
-                for (uint i = 0; i < msg.value; i++) {
-                    value *= 3 + i;
+            ['dynamic', `contract Test {
+                uint total = 7;
+                uint flag = 1;
+                fallback() external payable {
+                    if (block.number >= 8) {
+                        total = f(block.number == 8) + 3;
+                        total += 3;
+                    }
+                    total += g(5);
+                    total += g(7);
+                    total += 17;
                 }
-                total += value;
-            }
-        }`],
-
-        ['dynamic', `contract Test {
-            uint total = 7;
-            uint flag = 1;
-            fallback() external payable {
-                if (block.number >= 8) {
-                    // total = f(block.number == 8) + 3;
-                    total += 3;
+                function f(bool opt) internal returns (uint) {
+                    flag = 9;
+                    uint val = 11;
+                    if (opt) val += g(7);
+                    return val;
                 }
-                total += g(5);
-                total += g(7);
-                total += 17;
-            }
-            function f(bool opt) internal returns (uint) {
-                flag = 9;
-                uint val = 11;
-                if (opt) val += g(7);
-                return val;
-            }
-            function g(uint a) internal pure returns (uint) {
-                uint value = 0;
-                for (uint i = 0; i < a; i++) {
-                    value *= 3 + i;
+                function g(uint a) internal pure returns (uint) {
+                    uint value = 0;
+                    for (uint i = 0; i < a; i++) {
+                        value *= 3 + i;
+                    }
+                    return 11 * value;
                 }
-                return 11 * value;
-            }
-        }`],
+            }`],
 
-        ['external methods', `contract Test {
-            function method1(address, uint64) external pure returns (uint) { return 5; }
-            function method2(uint256) external pure returns (uint) { return 7; }
-        }`],
+            ['external pure methods', `contract Test {
+                function method1(address, uint64) external pure returns (uint) { return 5; }
+                function method2(uint256) external pure returns (uint) { return 7; }
+            }`],
 
-    ])('%s', ([title, src], ctx) => {
-        const contract = new Contract(compile(src, '0.7.6', ctx).bytecode);
+        ])('%s', ([title, src], ctx) => {
+            const path = `${title} ${suffix}`;
 
-        // const { bytecode } = parseMetadata(arrayify(compile(src, '0.7.6', ctx).bytecode));
-        const ss = contract.states;
+            const contract = new Contract(compile(src, '0.7.6', ctx, options).bytecode);
 
-        expect(mermaid(ss, title)).matchSnapshotmd('mermaid', title);
-        expect(print(ss)).matchSnapshotmd('cpp states', title);
-
-        // expect(mermaidTree(tree)).matchSnapshotmd('mermaid tree');
-        // const a = buildAST(ss);
-        // expect(contract.toYul(title)).matchSnapshotmd('yul', title);
-        // console.log(inspect(a, { depth: null }));
-        // renderAst(a);
+            expect(mermaid(contract.states, title)).to.matchSnapshotmd('mermaid', path);
+            expect(print(contract.states)).to.matchSnapshotmd('cpp states', path);
+            // expect(contract.selectors).matchSnapshotmd('json selectors', path);
+        });
     });
-
 });

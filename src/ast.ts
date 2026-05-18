@@ -1,6 +1,6 @@
-import type { Block } from './sevm.ts';
+import type { State } from './sevm.ts';
 
-export function buildAST(bbs: Map<number, Block[]>) {
+export function buildAST(bbs: Map<number, State[]>) {
     const preds = f(bbs);
     const { tree } = domTree(preds);
     return ast(0, tree, preds);
@@ -112,12 +112,12 @@ function domTree(cfg: Map<number, Set<number>>) {
     }
 }
 
-function f(bbs: Map<number, Block[]>) {
+function f(bbs: Map<number, State[]>) {
     const cfg = new Map<number, Set<number>>();
 
     for (const [pc, bs] of bbs.entries()) {
         for (const b of bs) {
-            for (const t of b.targets) {
+            for (const t of b.branches) {
                 let entry = cfg.get(t.pc);
                 if (entry === undefined) {
                     entry = new Set();

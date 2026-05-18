@@ -1,41 +1,41 @@
 import { mapValues, range, zip } from './lib/object.ts';
-import { hexlify } from './bytes.ts';
+import { bigintify } from './bytes.ts';
 import { Dispatch, type Opcode } from './decode.ts';
 import { Inst, Local, Lit, SExpr, Def } from './sexpr.ts';
 import type { State, StepFn, Step } from './sevm.ts';
 
-function addLocal({ insts, stack }: State, expr: SExpr, pc: number) {
-    const local = new Local(insts.length, expr);
-    insts.push(new Def(local, pc));
-    stack.push(local);
+const sexpr = (inputs: number) => function (this: IAddLocal, state: State, op: Opcode) {
+    return this.addLocal(state, new SExpr(op.mnemonic.toLowerCase(), state.stack.popn(inputs)), op.pc);
 }
 
-const sexpr = (inputs: number) => function (state: State, op: Opcode) {
-    addLocal(state, new SExpr(op.mnemonic.toLowerCase(), state.stack.popn(inputs)), op.pc);
+const sinst = (inputs: number) => function (state: State, op: Opcode) {
+    return new Inst(op.mnemonic.toLowerCase(), state.stack.popn(inputs), op.pc);
 }
 
-const sinst = (inputs: number) => function ({ insts, stack }: State, op: Opcode) {
-    insts.push(new Inst(op.mnemonic.toLowerCase(), stack.popn(inputs), op.pc));
+interface IAddLocal {
+    addLocal(state: State, expr: SExpr, pc: number): Inst;
 }
 
 function ForkFactory<M extends string>(
     def: { [m in M]: { op: number, size?: number, step: StepFn } },
     invalid: NoInfer<M>,
 ): new () => Dispatch<M> & Step<M> {
-    class Fork extends Dispatch<M> {
+    class Fork extends Dispatch<M> implements IAddLocal {
+        readonly #locals = new WeakMap<State, number>();
+
         constructor() {
             super(def, invalid);
         }
 
-        decode1() {
-            return this.decode(null as unknown as Uint8Array, 0);
+        addLocal(state: State, expr: SExpr, pc: number) {
+            const id = this.#locals.get(state) ?? 0;
+            this.#locals.set(state, id + 1);
+
+            const local = new Local(state.pcbegin, id, expr);
+            state.stack.push(local);
+            // state.insts.push(new Def(local, pc));
+            return new Def(local, pc);
         }
-        *decode2() {
-            yield this.decode(null as unknown as Uint8Array, 0);
-        }
-        // *decode3(pc0: number): Generator<Opcode & {mnemonic: number}, void, unknown> {
-        //     yield* this.decode(null as unknown as Uint8Array, pc0);
-        // }
     }
     Object.assign(Fork.prototype, mapValues(def, op => op.step));
     return Fork as (new () => Dispatch<M> & Step<M>);
@@ -48,15 +48,20 @@ const FlowDef = {
     JUMPDEST: { op: 0x5B, step: sinst(0) },
     ...zip(range(32).map(i => [
         `PUSH${i + 1 as Size<32>}`,
-        { op: 0x60 + i, size: i + 1, step: (state, op) => addLocal(state, new Lit(BigInt('0x' + hexlify(op.data!))), op.pc) }
+        {
+            op: 0x60 + i, size: i + 1, step: function (this: IAddLocal, state, op) {
+                // return this.addLocal(state, new Lit(BigInt('0x' + hexlify(op.data!))), op.pc);
+                return this.addLocal(state, new Lit(bigintify(op.data!)), op.pc);
+            }
+        }
     ] as const)),
     ...zip(range(16).map(i => [
         `DUP${i + 1 as Size<16>}`,
-        { op: 0x80 + i, step: ({ stack }) => stack.dup(i) }
+        { op: 0x80 + i, step: ({ stack }) => (stack.dup(i), undefined) }
     ] as const)),
     ...zip(range(16).map(i => [
         `SWAP${i + 1 as Size<16>}`,
-        { op: 0x90 + i, step: ({ stack }) => stack.swap(i + 1) }
+        { op: 0x90 + i, step: ({ stack }) => (stack.swap(i + 1), undefined) }
     ] as const)),
     INVALID: { op: 0xfe, step: sinst(0) },
 } satisfies Parameters<typeof ForkFactory>[0];
@@ -157,7 +162,11 @@ const ParisDef = {
 
 const ShanghaiDef = {
     ...ParisDef,
-    PUSH0: { op: 0x5F, step: (state, op) => addLocal(state, new Lit(0n), op.pc) },
+    PUSH0: {
+        op: 0x5F, step: function (this: IAddLocal, state, op) {
+            this.addLocal(state, new Lit(0n), op.pc)
+        }
+    },
 } satisfies Parameters<typeof ForkFactory>[0];
 
 export const Flow = ForkFactory(FlowDef, 'INVALID');

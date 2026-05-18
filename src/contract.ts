@@ -1,10 +1,10 @@
 import { arrayify } from './bytes.ts';
 import { type Metadata, parseMetadata } from './metadata.ts';
-import { type Block, Sevm } from './sevm.ts';
+import { type State, Sevm } from './sevm.ts';
 import { Shanghai } from './forks.ts';
 // import { buildAST } from './ast.ts';
 // import { yul } from './yul.ts';
-import { Selectors } from './selectors.ts';
+// import { Selectors } from './selectors.ts';
 
 // export function x(bytecode: Uint8Array) {
 //     return sevm(bytecode, 0, undefined as unknown as State, new Frontier());
@@ -22,22 +22,28 @@ export class Contract {
      */
     readonly metadata: Metadata | undefined;
 
-    readonly states: Map<number, Block[]>;
+    readonly step;
+
+    readonly states: Map<number, State[]>;
 
     /**
      *
      * @param bytecode the Contract's bytecode to analyze.
      */
-    constructor(bytecode: Parameters<typeof arrayify>[0]) {
+    constructor(bytecode: Parameters<typeof arrayify>[0], Step = /*Selectors*/(Shanghai)) {
         this.bytecode = arrayify(bytecode);
         this.metadata = parseMetadata(this.bytecode).metadata;
-        this.states = new Sevm(new (Selectors(Shanghai))(), this.bytecode).run();
-
-        // const K = Selectors(Shanghai);
-        // const s = new K();
-        // s.decode()
-        // s.publicBranches
+        this.step = new Step();
+        // this.states = new Sevm(this.step, this.bytecode).run();
+        this.states = new Sevm(this.step, this.bytecode).go();
     }
+
+    /**
+     * 
+     */
+    // get selectors(): string[] {
+    //     return [...this.step.publicBranches.keys()];
+    // }
 
     /**
      * https://docs.soliditylang.org/en/latest/yul.html

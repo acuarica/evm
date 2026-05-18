@@ -44,3 +44,16 @@ export function arrayify(data: Uint8Array | ArrayLike<number> | string): Uint8Ar
 export function hexlify(data: Uint8Array): string {
     return data.reduce((str, elem) => str + elem.toString(16).padStart(2, '0'), '');
 }
+
+/**
+ * 
+ * @param data 
+ * @returns 
+ */
+export function bigintify(data: Uint8Array): bigint {
+    let result = 0n;
+    for (let i = data.length - 1, s = 0n; i >= 0; i--, s += 8n) 
+        result += BigInt(data[i]) << s;
+
+    return result;
+}

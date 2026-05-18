@@ -8,6 +8,11 @@ export default defineConfig({
         // https://vitest.dev/config/globalsetup
         globalSetup: 'test/scripts/setup-solc.ts',
 
+        // Extend `expect` with `matchSnapshotmd` matcher.
+        //
+        // https://vitest.dev/guide/learn/setup-teardown.html#setup-files
+        setupFiles: 'test/scripts/setup-snapshot.ts',
+
         // > This is the only terminal reporter that reports
         // > annotations when the test doesn't fail.
         //

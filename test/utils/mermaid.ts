@@ -1,11 +1,11 @@
-import { Block } from '../../src/sevm.ts';
+import type { State } from '../../src/sevm.ts';
 
-export function mermaid(bbs: Map<number, Block[]>, title: string): string {
+export function mermaid(bbs: Map<number, State[]>, title: string): string {
     const m = new Mermaid(title);
     // const p = new Printer();
 
     for (const [pc, bs] of bbs.entries()) {
-        const sg = m.subgraph(`block_${pc}`, `pc ${pc}`);
+        const sg = m.subgraph(`block_${pc}`, `pc :${pc}`);
         for (const b of bs) {
             const entry = pc === 0;
             const [open, close] = entry ? ['[[', ']]'] : ['(', ')'];
@@ -14,14 +14,14 @@ export function mermaid(bbs: Map<number, Block[]>, title: string): string {
             // const un = '|= unused ' + `${b.unused.map(e => p.strExpr(e)).join(' | ')}`;
             // const outs = `${b.outs.map(e => p.strExpr(e)).join(' | ')}`;
             // const label = `${sid}(${params})\n${outs} || ${un}`;
-            const label = sid;
+            const label = `sid ${b.id}`;
 
             sg.line(`    ${sid}${open}"${label}"${close}`);
             // sg.line(`    class ${sid} state`);
 
-            for (const t of b.targets) {
-                const d = t.dynamic ? '==' : '--';
-                m.link(sid, `${d}${t.pushpc}${d}>`, 's_' + t.args!.id);
+            for (const t of b.branches) {
+                const [lb, la] = t.dynamic ? ['-.', '.-'] : ['--', '--'];
+                m.link(sid, `${lb}${t.pushpc}${la}>`, 's_' + t.state!.id);
             }
         }
     }

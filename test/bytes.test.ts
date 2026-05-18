@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { arrayify, hexlify } from '../src/bytes.ts';
+import { arrayify, hexlify, bigintify } from '../src/bytes.ts';
 
 describe('::bytes', () => {
     describe('arrayify', () => {
@@ -58,4 +58,14 @@ describe('::bytes', () => {
             expect(hexlify(Uint8Array.from(array))).toStrictEqual(data.toLowerCase());
         });
     });
+
+        it.each([
+            '0xff',
+            '0x1234',
+            '0x001234',
+            '0x00123400',
+        ])('tobig $0', v => {
+            const a = arrayify(v) 
+            expect(bigintify(a)).toStrictEqual(BigInt('0x' + hexlify(a)));
+        });
 });

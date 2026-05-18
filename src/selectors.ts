@@ -1,8 +1,8 @@
 import type { Opcode } from './decode.ts';
-import { Lit, type Local, type SExpr } from './sexpr.ts';
+import { type Inst, Lit, type Local, type SExpr } from './sexpr.ts';
 import type { State, Step } from './sevm.ts';
 
-interface IPublicBranches {
+export interface IPublicBranches {
 
     /**
      * 
@@ -25,19 +25,21 @@ function JMP<T extends Cons<Step<'JUMPI'>>>(Klass: T): T & Cons<IPublicBranches>
         readonly selectors: IPublicBranches['selectors'] = new WeakMap();
         readonly publicBranches: IPublicBranches['publicBranches'] = new Map();
 
-        JUMPI = (state: State, opcode: Opcode) => {
-            super.JUMPI(state, opcode);
-            const [offset, cond] = state.insts.at(-1)!.args;
+        JUMPI = (state: State, opcode: Opcode): Inst => {
+            const inst = super.JUMPI(state, opcode)!;
+            const [offset, cond] = inst.args;
 
-            // const selector = cond.props['selector'];
             const selector = this.selectors.get(cond);
             if (typeof selector === 'string') {
+                console.log('selector')
                 // const [pc, contBranch] = cond.positive ? [destpc, fallBranch] : [opcode.pc + 1, destBranch];
                 if (offset.expr instanceof Lit) {
                     const pc = Number(offset.expr.value);
                     this.publicBranches.set(selector, { pc, state });
                 }
             }
+
+            return inst;
         }
     };
 }
@@ -49,9 +51,8 @@ function JMP<T extends Cons<Step<'JUMPI'>>>(Klass: T): T & Cons<IPublicBranches>
  */
 function DivExpEQ<T extends Cons<Step<'EQ'>>>(Klass: T): T {
     return class extends Klass {
-        EQ = (state: State, opcode: Opcode) => {
-            super.EQ(state, opcode);
-
+        EQ = (state: State, opcode: Opcode): Inst => {
+            const inst = super.EQ(state, opcode)!;
             const [left, right] = state.stack.top!;
 
             const rr = right.args[1];
@@ -71,6 +72,8 @@ function DivExpEQ<T extends Cons<Step<'EQ'>>>(Klass: T): T {
                     console.log(s);
                 }
             }
+
+            return inst;
         }
     };
 }
@@ -91,8 +94,8 @@ function isSelectorCallData(expr: SExpr) {
 
 function ShrEQ<T extends Cons<IPublicBranches & Step<'EQ'>>>(Klass: T): T {
     return class extends Klass {
-        override EQ = (state: State, opcode: Opcode) => {
-            super.EQ(state, opcode);
+        override EQ = (state: State, opcode: Opcode): Inst => {
+            const inst = super.EQ(state, opcode)!;
 
             const SHRsig = (left: SExpr, right: SExpr): string | undefined => {
                 return left instanceof Lit && isSelectorCallData(right)
@@ -105,6 +108,8 @@ function ShrEQ<T extends Cons<IPublicBranches & Step<'EQ'>>>(Klass: T): T {
                 this.selectors.set(state.stack.top!, sig);
                 // state.stack.top!.props['selector'] = sig;
             }
+
+            return inst;
         }
     };
 }

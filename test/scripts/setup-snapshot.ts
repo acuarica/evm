@@ -8,8 +8,9 @@ const maskPath = (path: string) => path
 
 expect.extend({
     matchSnapshotmd(actual, ext: string, path?: string) {
-        if (typeof actual !== 'string')
-            throw new TypeError('Actual value should be a string');
+        if (typeof actual !== 'string') {
+            actual = JSON.stringify(actual);
+        }
 
         const write = (line: string) => (output += line + '\n');
         const writeSnapshot = () => {
