@@ -1,10 +1,8 @@
-#!/usr/bin/env node
-
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 import c from 'ansi-colors';
 
-const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'];
+import { VERSIONS } from '../utils/solc.ts';
 
 type Releases = { [key: string]: string; };
 
@@ -33,7 +31,7 @@ export async function setup() {
 
     for (const version of VERSIONS) {
         process.stdout.write(`${c.cyan('v' + version)}`);
-        // Use `cjs` extension because compilers are CommonJS files.
+        // Use `cjs` extension because Solidity compilers are CommonJS modules.
         const path = `./.solc/soljson-v${version}.cjs`;
 
         if (existsSync(path)) {

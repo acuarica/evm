@@ -9,7 +9,7 @@ const maskPath = (path: string) => path
 expect.extend({
     matchSnapshotmd(actual, ext: string, path?: string) {
         if (typeof actual !== 'string') {
-            actual = JSON.stringify(actual);
+            actual = JSON.stringify(actual, undefined, 2);
         }
 
         const write = (line: string) => (output += line + '\n');
@@ -22,8 +22,8 @@ expect.extend({
 
         const snapshotPath = this.snapshotState.snapshotPath.replace('.test.ts', '');
         const [snapshotFile, h1] = path === undefined
-            ? [snapshotPath + '.md', this.task?.file.name]
-            : [snapshotPath + '/' + maskPath(path) + '.md', path];
+            ? [`${snapshotPath}.md`, this.task?.file.name]
+            : [`${snapshotPath}/${maskPath(path)}.md`, path];
         const snapshotDir = dirname(snapshotFile);
         mkdirSync(snapshotDir, { recursive: true });
 

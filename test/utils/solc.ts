@@ -8,12 +8,11 @@ import wrapper from 'solc/wrapper';
 
 export const VERSIONS = ['0.5.5', '0.5.17', '0.6.12', '0.7.6', '0.8.16', '0.8.21'] as const;
 
-export type Version = (typeof VERSIONS)[number];
+type Version = (typeof VERSIONS)[number];
 
 const versionsLoaded = new Set<Version>();
 
 const maskTitle = (title: string) => title
-    .replace(/^\.\./, '')
     .replace(/`/g, '')
     .replace(/^::/, '')
     .replace(/ /g, '-')

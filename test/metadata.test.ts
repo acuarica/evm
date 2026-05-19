@@ -1,38 +1,38 @@
 import { describe, it, expect } from 'vitest';
 
-import { compile } from './utils/solc.ts';
+import { compile, VERSIONS } from './utils/solc.ts';
 
 import { arrayify } from '../src/bytes.ts';
 import { parseMetadata } from '../src/metadata.ts';
 
 describe('::metadata', () => {
     describe('parseMetadata', () => {
-        it('should return original bytecode when metadata is not present', function () {
+        it('should return original bytecode when metadata is not present', () => {
             const { bytecode, metadata } = parseMetadata(arrayify('01020304'));
             expect(bytecode).to.be.deep.equal(new Uint8Array([1, 2, 3, 4]));
             expect(metadata).toBeUndefined();
         });
 
-        it('should return original bytecode when bytecode is not long enough', function () {
+        it('should return original bytecode when bytecode is not long enough', () => {
             const { bytecode, metadata } = parseMetadata(arrayify('0102'));
             expect(bytecode).to.be.deep.equal(new Uint8Array([1, 2]));
             expect(metadata).toBeUndefined();
         });
 
-        it('should return original bytecode when metadata is not an object', function () {
+        it('should return original bytecode when metadata is not an object', () => {
             const { bytecode, metadata } = parseMetadata(arrayify('0x001904D20003'));
             expect(bytecode).to.be.deep.equal(new Uint8Array([0, 0x19, 0x04, 0xD2, 0x00, 0x03]));
             expect(metadata).toBeUndefined();
         });
 
-        it('should split metadata when it is an array', function () {
+        it('should split metadata when it is an array', () => {
             const { bytecode, metadata } = parseMetadata(arrayify('0x0084010203040005'));
             expect(bytecode).to.be.deep.equal(new Uint8Array([0]));
             expect(metadata).to.be.deep.equal({ '0': 1, '1': 2, '2': 3, '3': 4 });
             expect(metadata!.url).toBeUndefined();
         });
 
-        it('should decode when `solc` property is found', (ctx) => {
+        it('should decode when `solc` property is found', ctx => {
             const { bytecode } = compile('contract Test {}', '0.8.21', ctx, {
                 metadata: {
                     bytecodeHash: 'none'
@@ -62,42 +62,17 @@ describe('::metadata', () => {
             expect(metadata!.url).toBeUndefined();
         });
 
-        describe(`should get bytecode's metadata compiled with`, function () {
-            /**
-             * IPFS hashes need to be computed manually in order to avoid adding
-             * [`ipfs-core`](https://github.com/ipfs/js-ipfs#install-as-an-application-developer)
-             * as a dependency.
-             * This is a bloated and deprecated package.
-             *
-             * To get the IPFS hash of each contract define `$ARTIFACT` to the output of `solc` compiler and run
-             *
-             * ```sh
-             * cat $ARTIFACT | jq -r .metadata | tr -d '\n' | ipfs add --quiet --only-hash
-             * ```
-             */
-            const hashes = [
-                ['0.5.5', undefined, 'bzzr0', '886590b34f4504f97d0869b9d2210fb027f1057978e99c5a955fd1ea6ab603e9'],
-                ['0.5.17', 5, 'bzzr1', '99edd4d2083be1b43f60e5f50ceb4ef57a6b968f18f236047a97a0eb54036a99'],
-                ['0.6.12', 6, 'ipfs', 'QmR2wMAiGogVWTxtXh1AVNboWSHNggtn9jYzG2zLXi836A'],
-                ['0.7.6', 7, 'ipfs', 'QmaRBmmGGny5mjFjSJcbvcQLsJMRsbcSB4QoEcxFu9mxhB'],
-                ['0.8.16', 8, 'ipfs', 'QmcshgdTcz3T2rD8BgPAw2njvp2WsCCcsi6qh9VQhJhwLZ'],
-                ['0.8.21', 8, 'ipfs', 'QmQaEuFFsAwGbKd51LPcsLkKD5NwsB8aAzg7KkRsjuhjf2'],
-            ] as const;
+        describe(`should get metadata from contract compiled with`, () => {
+            it.for(VERSIONS)('solc-%s', (version, ctx) => {
+                const { bytecode } = compile('contract Test {}', version, ctx);
+                const { metadata } = parseMetadata(arrayify(bytecode));
 
-            hashes.forEach(([version, minor, protocol, hash]) => {
-                it(`solc-${version}`, (ctx) => {
-                    const { bytecode } = compile('contract Test {}', version, ctx);
-                    const { metadata } = parseMetadata(arrayify(bytecode));
-
-                    expect(metadata).to.be.deep.equal(
-                        { protocol, hash, ...minor === undefined ? {} : { solc: version, minor } }
-                    );
-                    expect(metadata!.url).to.be.equal(`${protocol}://${hash}`);
-                });
+                expect(metadata).to.matchSnapshotmd('json');
+                expect(metadata!.url).to.matchSnapshotmd('txt');
             });
         });
 
-        describe('should decode metadata from bytecode (tests from https://github.com/ethereum/sourcify)', function () {
+        describe('should decode metadata from bytecode (tests from https://github.com/ethereum/sourcify)', () => {
             [
                 ['`bzzr1`', '6e677468a2646970667358221220dceca8706b29e917dacf25fceef95acac8d90d765ac926663ce4096195952b6164736f6c634300060b0033', {
                     hash: 'QmdD3hpMj6mEFVy9DP4QqjHaoeYbhKsYvApX1YZNfjTVWp',
@@ -126,7 +101,7 @@ describe('::metadata', () => {
             });
         });
 
-        describe('cbor', function () {
+        describe('cbor', () => {
 
             /**
              * Imported from https://github.com/cbor/test-vectors
@@ -250,19 +225,18 @@ describe('::metadata', () => {
                 { hex: '826161bf61626163ff', roundtrip: false, decoded: ['a', { b: 'c' }] },
                 { hex: 'bf6346756ef563416d7421ff', roundtrip: false, decoded: { Fun: true, Amt: -2 } }
             ];
-            appendix_a.forEach(({ hex, decoded }) => {
-                it(`should cbor decode \`${hex}\` into \`${JSON.stringify(decoded)}\``, function () {
-                    hex = '0x0102' + hex + (hex.length / 2).toString(16).padStart(4, '0');
-                    const { bytecode, metadata } = parseMetadata(arrayify(hex));
 
-                    if (decoded !== null && typeof decoded === 'object') {
-                        expect(bytecode).to.be.deep.equal(new Uint8Array([1, 2]));
-                        expect(metadata).to.be.deep.equal({ ...decoded });
-                    } else {
-                        expect(metadata).toBeUndefined();
-                        expect(bytecode).to.be.deep.equal(Buffer.from(hex.slice(2), 'hex'));
-                    }
-                });
+            it.each(appendix_a)('should cbor decode $hex into `$decoded`', ({ hex, decoded }) => {
+                hex = '0x0102' + hex + (hex.length / 2).toString(16).padStart(4, '0');
+                const { bytecode, metadata } = parseMetadata(arrayify(hex));
+
+                if (decoded !== null && typeof decoded === 'object') {
+                    expect(bytecode).to.be.deep.equal(new Uint8Array([1, 2]));
+                    expect(metadata).to.be.deep.equal({ ...decoded });
+                } else {
+                    expect(metadata).toBeUndefined();
+                    expect(bytecode).to.be.deep.equal(Buffer.from(hex.slice(2), 'hex'));
+                }
             });
         });
     });

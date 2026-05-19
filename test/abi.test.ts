@@ -256,7 +256,7 @@ describe('::abi', function () {
         sigs.forEach(({ sig, fmt, sol }) => {
             if (sol === null) return;
 
-            it(`should find selector \`${sol ?? sig}`, (ctx) => {
+            it(`should find selector \`${sol ?? sig}\``, (ctx) => {
                 const selector = keccak256(fmt).slice(0, 8);
                 // this.test!.title += `#${selector}\``;
                 // ctx.annotate(`#${selector}\``);
