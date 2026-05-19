@@ -36,27 +36,23 @@ expect.extend({
 
         let marker: 'NOT_SEEN' | 'OPEN' | 'CLOSED' = 'NOT_SEEN';
         let output = '';
-        let snapshot: string | undefined = undefined;
+        let expected: string | undefined = undefined;
         for (const line of content.split('\n')) {
             if (line === tag && marker === 'NOT_SEEN') {
                 marker = 'OPEN';
-                snapshot = '';
+                expected = '';
             } else if (marker === 'OPEN' && line === '```') {
                 if (updateSnapshot) {
                     writeSnapshot();
                     marker = 'CLOSED';
                 } else {
                     this.task?.context.annotate(`🎞️ Snapshot \`${ext}\` found`)
-                    const pass = actual + '\n' === snapshot;
-                    return {
-                        pass,
-                        message: pass ? () => '' : () => 'Snapshot as',
-                        actual: actual + '\n',
-                        expected: snapshot,
-                    };
+                    const pass = actual + '\n' === expected;
+                    const message = pass ? () => '' : () => 'Snapshot as';
+                    return { pass, message, actual: actual + '\n', expected };
                 }
             } else if (marker === 'OPEN') {
-                snapshot += line + '\n';
+                expected += line + '\n';
             } else {
                 write(line);
             }
@@ -68,28 +64,34 @@ expect.extend({
         }
 
         writeFileSync(snapshotFile, output.trimEnd() + '\n');
-
-        return {
-            message: () => '',
-            pass: true,
-        }
+        return { message: () => '', pass: true };
     }
 });
 
-// Assertion.addMethod('matchFile', function (path: string, ctx: Mocha.Context) {
-//     const actual = this._obj as unknown;
-//     if (typeof actual !== 'string') throw new TypeError('Actual value should be a string');
-//     if (ctx.test === undefined) throw new TypeError('Mocha context is not defined');
+expect.extend({
+    matchFile(actual, filename: string) {
+        if (typeof actual !== 'string')
+            throw new TypeError('Actual value should be a string');
 
-//     const snapshotPath = `./test/__snapshots__/${path}`;
-//     const dir = dirname(snapshotPath);
-//     mkdirSync(dir, { recursive: true });
-//     if (!existsSync(snapshotPath) || !!UPDATE_SNAPSHOTS) {
-//         writeFileSync(snapshotPath, actual);
-//         ctx.test.title += ` 📸 `;
-//     } else {
-//         ctx.test.title += ` 🎞️ `;
-//         const expected = readFileSync(snapshotPath, 'utf8');
-//         expect(actual, `Snapshot file: ${path}`).to.be.equal(expected);
-//     }
-// });
+        // @ts-expect-error Property '_updateSnapshot' is private and only accessible within class 'SnapshotState'
+        const updateSnapshot = this.snapshotState._updateSnapshot === 'all';
+
+        const snapshotPath = this.snapshotState.snapshotPath.replace('.test.ts', '');
+        const snapshotFile = `${snapshotPath}/${filename}`;
+        const snapshotDir = dirname(snapshotFile);
+        mkdirSync(snapshotDir, { recursive: true });
+
+        if (!existsSync(snapshotFile) || updateSnapshot) {
+            writeFileSync(snapshotFile, actual);
+            this.task?.context.annotate(`📸 File snapshot '${filename}' taken`)
+            return { message: () => '', pass: true };
+        } else {
+            this.task?.context.annotate(`🎞️ Snapshot \`${filename}\` found`)
+            const expected = readFileSync(snapshotFile, 'utf8');
+            expect(actual, `Snapshot file: ${filename}`).to.be.equal(expected);
+            const pass = actual === expected;
+            const message = pass ? () => '' : () => `Snapshot file ${filename}`;
+            return { pass, message, actual, expected };
+        }
+    }
+});

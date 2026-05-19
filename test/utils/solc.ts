@@ -54,10 +54,10 @@ export function compile(
     let writeCacheFn: (output: ReturnType<typeof compile>) => void;
     if (ctx !== null) {
         const fileName = maskTitle(ctx.task.fullTestName
+            .replace(` > solc-${version}`, '')
             .replace(' > should ', ' > ')
             .replace(/ > /g, '.')
-            .replace(`solc-v${version}.`, '')
-            .replace(/\."before-all"-hook-for-"[\w-#]+"/, '')
+            // .replace(/\."before-all"-hook-for-"[\w-#]+"/, '')
         );
 
         const basePath = `.artifacts/v${version}`;

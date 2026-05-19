@@ -37,6 +37,46 @@ export class Contract {
         this.states = new Sevm(this.step, this.bytecode).run();
     }
 
+
+    /**
+     * 
+     */
+    chunks(): {
+        /**
+         * Where this `chunk` begins, inclusive.
+         */
+        pcbegin: number;
+        /**
+         * Where this `chunk` ends, exclusive.
+         */
+        pcend: number;
+        /**
+         * The content found for this `chunk`.
+         * If `pcbegin` is reacheable, then `content` is the `Opcode` for this block. 
+         * Otherwise the uninterpreted slice of the bytecode for this chunk.
+         */
+        content: State[] | Uint8Array,
+    }[] {
+        let lastpc = 0;
+
+        const result: ReturnType<Contract['chunks']> = [];
+        for (const pc of [...this.states.keys()].sort((l, r) => l - r)) {
+            const states = this.states.get(pc)!;
+            if (lastpc !== pc) {
+                result.push({ pcbegin: lastpc, pcend: pc, content: this.bytecode.subarray(lastpc, pc) });
+            }
+            lastpc = states[0].pcend!;
+            // const opcodes = block.opcodes.map(({ opcode, }) => opcode);
+            result.push({ pcbegin: pc, pcend: states[0].pcend!, content: states });
+        }
+
+        if (lastpc !== this.bytecode.length) {
+            result.push({ pcbegin: lastpc, pcend: this.bytecode.length, content: this.bytecode.subarray(lastpc) });
+        }
+
+        return result;
+    }
+
     /**
      * 
      */
