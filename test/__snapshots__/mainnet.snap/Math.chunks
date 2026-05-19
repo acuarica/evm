@@ -275,4 +275,5 @@
 @3394: ⟪11⟫ 1〒
 @3406: ⟪5⟫ 1〒
 @3411: ⟪7⟫ 1〒
-@3418: unreachable (44 bytes in buffer) 00a165627a7a7230582035b5093eb7bdd097e641f6d8b48fe1f7ef8f6fac66f26010afba4bf94c93f2430029
+@3418: unreachable (1 bytes in buffer) 00
+@3419: {"protocol":"bzzr0","hash":"35b5093eb7bdd097e641f6d8b48fe1f7ef8f6fac66f26010afba4bf94c93f243"}

@@ -185,4 +185,5 @@
 @1945: ⟪6⟫ 3〒
 @1953: ⟪9⟫ 3〒
 @1963: ⟪7⟫ 6〒
-@1970: unreachable (54 bytes in buffer) fea2646970667358221220b0b17d7c3e7364608074ea2176b69d32076404618957d5709b57eb25c22b12f964736f6c634300[..]
+@1970: unreachable (1 bytes in buffer) fe
+@1971: {"protocol":"ipfs","hash":"QmaEPSLC78ZfRPYhjUsoRsmFKwFFjYHHPuV3XFsRSHPJ7i","solc":"0.8.18","minor":8}

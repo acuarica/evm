@@ -101,4 +101,5 @@
 @3022: ⟪8⟫ 1〒
 @3035: ⟪8⟫ 2〒
 @3043: ⟪27⟫ 1〒
-@3080: unreachable (44 bytes in buffer) 00a165627a7a72305820deb4c2ccab3c2fdca32ab3f46728389c2fe2c165d5fafa07661e4e004f6c344a0029
+@3080: unreachable (1 bytes in buffer) 00
+@3081: {"protocol":"bzzr0","hash":"deb4c2ccab3c2fdca32ab3f46728389c2fe2c165d5fafa07661e4e004f6c344a"}

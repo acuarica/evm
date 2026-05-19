@@ -123,4 +123,5 @@
 @1722: ⟪8⟫ 2〒
 @1732: ⟪16⟫ 2〒
 @1751: ⟪16⟫ 4〒
-@1769: unreachable (54 bytes in buffer) fea2646970667358221220ef2b957ee09cc178092e93a182ba0a40918bfe721becaab67b2c895dcaec8c1864736f6c634300[..]
+@1769: unreachable (1 bytes in buffer) fe
+@1770: {"protocol":"ipfs","hash":"QmeSGhGrTLyJy9JGQwXXsPA3QnER9z5X4LLrE3G36gY4Uf","solc":"0.8.19","minor":8}

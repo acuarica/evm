@@ -6,10 +6,6 @@ import { Shanghai } from './forks.ts';
 // import { yul } from './yul.ts';
 import { Selectors } from './selectors.ts';
 
-// export function x(bytecode: Uint8Array) {
-//     return sevm(bytecode, 0, undefined as unknown as State, new Frontier());
-// }
-
 export class Contract {
 
     /**
@@ -32,11 +28,10 @@ export class Contract {
      */
     constructor(bytecode: Parameters<typeof arrayify>[0], Step = Selectors(Shanghai)) {
         this.bytecode = arrayify(bytecode);
-        this.metadata = parseMetadata(this.bytecode).metadata;
+        this.metadata = parseMetadata(this.bytecode);
         this.step = new Step();
         this.states = new Sevm(this.step, this.bytecode).run();
     }
-
 
     /**
      * 
@@ -55,22 +50,30 @@ export class Contract {
          * If `pcbegin` is reacheable, then `content` is the `Opcode` for this block. 
          * Otherwise the uninterpreted slice of the bytecode for this chunk.
          */
-        content: State[] | Uint8Array,
+        content: State[] | Uint8Array | Metadata,
     }[] {
-        let lastpc = 0;
-
         const result: ReturnType<Contract['chunks']> = [];
-        for (const pc of [...this.states.keys()].sort((l, r) => l - r)) {
-            const states = this.states.get(pc)!;
-            if (lastpc !== pc) {
-                result.push({ pcbegin: lastpc, pcend: pc, content: this.bytecode.subarray(lastpc, pc) });
+        const pchs = [...this.states.keys()].sort((l, r) => l - r);
+
+        let lastpc = 0;
+        for (const pch of pchs) {
+            const states = this.states.get(pch)!;
+            if (lastpc !== pch) {
+                result.push({ pcbegin: lastpc, pcend: pch, content: this.bytecode.subarray(lastpc, pch) });
             }
             lastpc = states[0].pcend!;
-            // const opcodes = block.opcodes.map(({ opcode, }) => opcode);
-            result.push({ pcbegin: pc, pcend: states[0].pcend!, content: states });
+            result.push({ pcbegin: pch, pcend: lastpc, content: states });
         }
 
-        if (lastpc !== this.bytecode.length) {
+        if (this.metadata !== undefined) {
+            if (lastpc > this.metadata.offset) {
+                throw 'executing metadata';
+            }
+            if (lastpc !== this.metadata.offset) {
+                result.push({ pcbegin: lastpc, pcend: this.metadata.offset, content: this.bytecode.subarray(lastpc, this.metadata.offset) });
+            }
+            result.push({ pcbegin: this.metadata.offset, pcend: this.bytecode.length, content: this.metadata });
+        } else if (lastpc !== this.bytecode.length) {
             result.push({ pcbegin: lastpc, pcend: this.bytecode.length, content: this.bytecode.subarray(lastpc) });
         }
 

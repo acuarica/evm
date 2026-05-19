@@ -570,4 +570,5 @@
 @10455: ⟪12⟫ 2〒
 @10473: ⟪12⟫ 2〒
 @10491: ⟪5⟫ 2〒
-@10498: unreachable (54 bytes in buffer) fea2646970667358221220523f8447662ae057658e8b8548bd7c033b3744a000c1adb73cbdc911e78d64d464736f6c634300[..]
+@10498: unreachable (1 bytes in buffer) fe
+@10499: {"protocol":"ipfs","hash":"QmTsiKEnNDVVpjHUzir8RbYGjCmfriKa3SLRVtLUHNWfsH","solc":"0.8.17","minor":8}

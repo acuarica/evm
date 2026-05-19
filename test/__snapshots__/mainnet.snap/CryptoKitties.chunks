@@ -700,4 +700,5 @@
 @12361: ⟪7⟫ 3〒
 @12370: ⟪12⟫ 3〒
 @12387: ⟪4⟫ 3〒
-@12391: unreachable (44 bytes in buffer) 00a165627a7a72305820a6465fc1ce7ab1a92906ff7206b23d80a21bbd50b85b4bde6a91f8e6b2e3edde0029
+@12391: unreachable (1 bytes in buffer) 00
+@12392: {"protocol":"bzzr0","hash":"a6465fc1ce7ab1a92906ff7206b23d80a21bbd50b85b4bde6a91f8e6b2e3edde"}

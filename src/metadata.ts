@@ -13,10 +13,26 @@ export class Metadata {
     minor?: number;
     experimental?: boolean;
 
+    readonly #offset: number;
+
+    constructor(offset: number) {
+        this.#offset = offset;
+    }
+
+    /**
+     * The `url` of the `Metadata` combines its `protocol` and `hash` when present.
+     */
     get url(): string | undefined {
         return this.protocol === undefined
             ? undefined
             : `${this.protocol}://${this.hash}`;
+    }
+
+    /**
+     * The bytecode's offset where this `Metadata` was found.
+     */
+    get offset(): number {
+        return this.#offset;
     }
 }
 
@@ -39,41 +55,28 @@ export class Metadata {
  * If metadata contains a Swarm hash, _i.e._ `bzzr0` or `bzzr1`, it is encoded using hexadecimal.
  * 
  * @param bytecode the contract or library bytecode to test for metadata hash.
- * @returns An object where the `bytecode` is the executable code and
- * `metadata` is the metadata hash when the metadata is present.
+ * @returns the metadata if present. Otherwise `undefined`.
  */
-export function parseMetadata(bytecode: Uint8Array): {
-    /**
-     * The executable code without metadata when it is present.
-     * Otherwise, the original `bytecode`.
-     */
-    bytecode: Uint8Array,
-
-    /**
-     * The metadata if present. Otherwise `undefined`.
-     * 
-     * See https://docs.soliditylang.org/en/latest/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode.
-     */
-    metadata: Metadata | undefined
-} {
+export function parseMetadata(bytecode: Uint8Array): Metadata | undefined {
     if (bytecode.length <= 2)
-        return { bytecode, metadata: undefined };
+        return undefined;
 
     const dataLen = (bytecode.at(-2)! << 8) + bytecode.at(-1)!;
-    const data = new Uint8Array(bytecode.subarray(bytecode.length - 2 - dataLen, bytecode.length - 2));
+    const offset = bytecode.length - 2 - dataLen;
+    const data = new Uint8Array(bytecode.subarray(offset, bytecode.length - 2));
     if (data.length !== dataLen)
-        return { bytecode, metadata: undefined };
+        return undefined;
 
     let obj;
     try {
         obj = cbor(data.buffer);
     } catch {
-        return { bytecode, metadata: undefined };
+        return undefined;
     }
     if (obj === null || typeof obj !== 'object')
-        return { bytecode, metadata: undefined };
+        return undefined;
 
-    const metadata = new Metadata();
+    const metadata = new Metadata(offset);
 
     if ('ipfs' in obj && obj['ipfs'] instanceof Uint8Array) {
         metadata.protocol = 'ipfs';
@@ -96,10 +99,7 @@ export function parseMetadata(bytecode: Uint8Array): {
         delete obj['solc'];
     }
 
-    return {
-        bytecode: bytecode.subarray(0, bytecode.length - 2 - dataLen),
-        metadata: Object.assign(metadata, obj)
-    };
+    return Object.assign(metadata, obj);
 }
 
 /**
