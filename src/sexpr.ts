@@ -94,7 +94,7 @@ export class Local {
 
     toString(): string {
         const jd = this.jumpdest === undefined ? '' : `*jd!${this.jumpdest}`
-        return `%${this.pch}.${this.id}${jd}` ;//+ (this.#opts.expandSingleCopyLocal && expr.copies === 1 ? `:${this.strExpr(expr.expr)}` : '');
+        return `%${this.pch}.${this.id}${jd}`;//+ (this.#opts.expandSingleCopyLocal && expr.copies === 1 ? `:${this.strExpr(expr.expr)}` : '');
     }
 }
 
@@ -113,22 +113,22 @@ export class Lit extends SExpr {
 export class Param extends Local {
     readonly trigger: 'pop' | 'dup' | 'swap' | 'propagate';
     readonly index: number;
-    readonly arg: Local | undefined;
-    constructor(pch: number, id: number, trigger: Param['trigger'], index: number, arg: Local | undefined) {
+    readonly arg: Local;
+    constructor(pch: number, id: number, trigger: Param['trigger'], index: number, arg: Local) {
         // super(pch, id, new SExpr(trigger, []));
         super(pch, id, arg === undefined ? new SExpr(trigger, []) : arg.expr);
         this.trigger = trigger;
         this.index = index;
         this.arg = arg;
-        if (arg !== undefined) {
-            // arg.props['global'] = index + trigger + id;
-            arg.global = `${pch}.${id}`;
-        }
+        // if (arg !== undefined) {
+        // arg.props['global'] = index + trigger + id;
+        arg.global = `${pch}.${id}`;
+        // }
     }
 
     override toString(): string {
         // return `$${expr.pch}.${expr.id}_${expr.trigger}${expr.index}` + (expr.props['jumpdest'] ? '*jd' : '') + (this.#opts.expandArgParam && expr.arg !== undefined ? `:${this.strExpr(expr.arg)}` : '')
-        return `$${this.pch}.${this.id}` + (this.jumpdest ? '*jd' : '') ;//+ (this.#opts.expandArgParam && expr.arg !== undefined ? `:${this.strExpr(expr.arg)}` : '')
+        return `$${this.pch}.${this.id}` + (this.jumpdest ? '*jd' : '');//+ (this.#opts.expandArgParam && expr.arg !== undefined ? `:${this.strExpr(expr.arg)}` : '')
     }
 }
 

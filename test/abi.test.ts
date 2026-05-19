@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { keccak256 } from 'js-sha3';
 
-import { isElemType, parseSig, sighash, type SigMember } from '../src/abi.ts';
-
 import { compile } from './utils/solc.ts';
+
+import { isElemType, parseSig, sighash, type SigMember } from '../src/abi.ts';
 
 const sigs = ([
     {

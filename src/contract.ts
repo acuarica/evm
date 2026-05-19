@@ -4,7 +4,7 @@ import { type State, Sevm } from './sevm.ts';
 import { Shanghai } from './forks.ts';
 // import { buildAST } from './ast.ts';
 // import { yul } from './yul.ts';
-// import { Selectors } from './selectors.ts';
+import { Selectors } from './selectors.ts';
 
 // export function x(bytecode: Uint8Array) {
 //     return sevm(bytecode, 0, undefined as unknown as State, new Frontier());
@@ -30,20 +30,19 @@ export class Contract {
      *
      * @param bytecode the Contract's bytecode to analyze.
      */
-    constructor(bytecode: Parameters<typeof arrayify>[0], Step = /*Selectors*/(Shanghai)) {
+    constructor(bytecode: Parameters<typeof arrayify>[0], Step = Selectors(Shanghai)) {
         this.bytecode = arrayify(bytecode);
         this.metadata = parseMetadata(this.bytecode).metadata;
         this.step = new Step();
-        // this.states = new Sevm(this.step, this.bytecode).run();
-        this.states = new Sevm(this.step, this.bytecode).go();
+        this.states = new Sevm(this.step, this.bytecode).run();
     }
 
     /**
      * 
      */
-    // get selectors(): string[] {
-    //     return [...this.step.publicBranches.keys()];
-    // }
+    get selectors(): string[] {
+        return [...this.step.publicBranches.keys()];
+    }
 
     /**
      * https://docs.soliditylang.org/en/latest/yul.html

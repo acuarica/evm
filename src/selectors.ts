@@ -26,12 +26,11 @@ function JMP<T extends Cons<Step<'JUMPI'>>>(Klass: T): T & Cons<IPublicBranches>
         readonly publicBranches: IPublicBranches['publicBranches'] = new Map();
 
         JUMPI = (state: State, opcode: Opcode): Inst => {
-            const inst = super.JUMPI(state, opcode)!;
+            const inst = super.JUMPI(state, opcode);
             const [offset, cond] = inst.args;
 
             const selector = this.selectors.get(cond);
             if (typeof selector === 'string') {
-                console.log('selector')
                 // const [pc, contBranch] = cond.positive ? [destpc, fallBranch] : [opcode.pc + 1, destBranch];
                 if (offset.expr instanceof Lit) {
                     const pc = Number(offset.expr.value);
@@ -52,7 +51,7 @@ function JMP<T extends Cons<Step<'JUMPI'>>>(Klass: T): T & Cons<IPublicBranches>
 function DivExpEQ<T extends Cons<Step<'EQ'>>>(Klass: T): T {
     return class extends Klass {
         EQ = (state: State, opcode: Opcode): Inst => {
-            const inst = super.EQ(state, opcode)!;
+            const inst = super.EQ(state, opcode);
             const [left, right] = state.stack.top!;
 
             const rr = right.args[1];
@@ -95,7 +94,7 @@ function isSelectorCallData(expr: SExpr) {
 function ShrEQ<T extends Cons<IPublicBranches & Step<'EQ'>>>(Klass: T): T {
     return class extends Klass {
         override EQ = (state: State, opcode: Opcode): Inst => {
-            const inst = super.EQ(state, opcode)!;
+            const inst = super.EQ(state, opcode);
 
             const SHRsig = (left: SExpr, right: SExpr): string | undefined => {
                 return left instanceof Lit && isSelectorCallData(right)

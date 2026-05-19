@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest';
 
-import { Contract } from '../src/contract.ts';
-import { print } from '../src/sevm.ts';
-
-// import './utils/snapshot.ts';
 import { compile } from './utils/solc.ts';
 import { mermaid } from './utils/mermaid.ts';
+
+import { Contract } from '../src/contract.ts';
+import { print } from '../src/sevm.ts';
 
 describe('::contracts', () => {
 
@@ -116,7 +115,7 @@ describe('::contracts', () => {
 
             expect(mermaid(contract.states, title)).to.matchSnapshotmd('mermaid', path);
             expect(print(contract.states)).to.matchSnapshotmd('cpp states', path);
-            // expect(contract.selectors).matchSnapshotmd('json selectors', path);
+            expect(contract.selectors).matchSnapshotmd('json selectors', path);
         });
     });
 });

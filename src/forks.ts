@@ -50,18 +50,17 @@ const FlowDef = {
         `PUSH${i + 1 as Size<32>}`,
         {
             op: 0x60 + i, size: i + 1, step: function (this: IAddLocal, state, op) {
-                // return this.addLocal(state, new Lit(BigInt('0x' + hexlify(op.data!))), op.pc);
                 return this.addLocal(state, new Lit(bigintify(op.data!)), op.pc);
             }
         }
     ] as const)),
     ...zip(range(16).map(i => [
         `DUP${i + 1 as Size<16>}`,
-        { op: 0x80 + i, step: ({ stack }) => (stack.dup(i), undefined) }
+        { op: 0x80 + i, step: ({ stack }, op) => (stack.dup(i), new Inst(`dup[${i + 1}]`, [], op.pc)) }
     ] as const)),
     ...zip(range(16).map(i => [
         `SWAP${i + 1 as Size<16>}`,
-        { op: 0x90 + i, step: ({ stack }) => (stack.swap(i + 1), undefined) }
+        { op: 0x90 + i, step: ({ stack }, op) => (stack.swap(i + 1), new Inst(`swap[${i + 1}]`, [], op.pc)) }
     ] as const)),
     INVALID: { op: 0xfe, step: sinst(0) },
 } satisfies Parameters<typeof ForkFactory>[0];
@@ -164,7 +163,7 @@ const ShanghaiDef = {
     ...ParisDef,
     PUSH0: {
         op: 0x5F, step: function (this: IAddLocal, state, op) {
-            this.addLocal(state, new Lit(0n), op.pc)
+            return this.addLocal(state, new Lit(0n), op.pc);
         }
     },
 } satisfies Parameters<typeof ForkFactory>[0];

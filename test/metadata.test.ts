@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
+import { compile } from './utils/solc.ts';
+
 import { arrayify } from '../src/bytes.ts';
 import { parseMetadata } from '../src/metadata.ts';
-
-import { compile } from './utils/solc.ts';
 
 describe('::metadata', () => {
     describe('parseMetadata', () => {

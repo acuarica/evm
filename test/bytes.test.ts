@@ -41,7 +41,7 @@ describe('::bytes', () => {
     ])('`arrayify`/`hexlify` of/return $0 <--> return/of `Uint8Array` $1', (data, array) => {
         it.each([
             '', '0x', '0X'
-        ])('`arrayify` using prefix $0', (prefix) => {
+        ])('`arrayify` using prefix $0', prefix => {
             expect(arrayify(prefix + data)).toStrictEqual(Uint8Array.from(array));
         });
 
@@ -59,13 +59,22 @@ describe('::bytes', () => {
         });
     });
 
+    describe('bigintify ', () => {
+        it('should return `0n` for empty buffer', () => {
+            expect(bigintify(new Uint8Array())).toStrictEqual(0n);
+        });
+
         it.each([
             '0xff',
             '0x1234',
             '0x001234',
             '0x00123400',
-        ])('tobig $0', v => {
-            const a = arrayify(v) 
-            expect(bigintify(a)).toStrictEqual(BigInt('0x' + hexlify(a)));
+            '0xffffffff',
+            '0x0123456789',
+            '0x3FDA67f7583380E67ef93072294a7fAc882FD7E7',
+        ])('should return the same as hexlify $0', value => {
+            const buf = arrayify(value);
+            expect(bigintify(buf)).toStrictEqual(BigInt('0x' + hexlify(buf)));
         });
+    });
 });

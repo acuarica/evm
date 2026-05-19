@@ -8,18 +8,18 @@ import { Inst, Local, Param, Lit, Printer } from './sexpr.ts';
 
 class ParamStack extends Stack<Local> {
     readonly params: Param[] = [];
-    readonly pc0: number;
+    readonly pch: number;
     readonly args: Stack<Local>;
 
     constructor(pch: number, args: Stack<Local>) {
         super();
-        this.pc0 = pch;
+        this.pch = pch;
         this.args = args;
     }
 
     override pop(): Local {
         if (this.values.length === 0) {
-            const param = new Param(this.pc0, this.params.length, 'pop', 0, this.args.pop());
+            const param = new Param(this.pch, this.params.length, 'pop', 0, this.args.pop());
             this.params.push(param);
             super.push(param);
         }
@@ -49,13 +49,9 @@ class ParamStack extends Stack<Local> {
         super.swap(secondPosition);
     }
 
-    newParams(pos: number, trigger: 'dup' | 'swap' | 'propagate'): Param[] {
+    newParams(pos: number, trigger: 'dup' | 'swap'): Param[] {
         return range(pos - this.values.length)
-            .map(i => new Param(this.pc0, this.params.length + i, trigger, i + this.values.length + 1, this.args.pop()));
-    }
-
-    newParams2(n: number): Param[] {
-        return range(n).map(i => new Param(this.pc0, this.params.length + i, 'propagate', i + this.values.length + 1, this.args.pop()));
+            .map(i => new Param(this.pch, this.params.length + i, trigger, i + this.values.length + 1, this.args.pop()));
     }
 }
 
@@ -103,14 +99,14 @@ export class State {
     }
 };
 
-function findHeaderPc(pc: number, blocks: number[]) {
-    blocks.sort((l, r) => l - r);
-    assert(blocks.length > 0);
-    assert(blocks[0] === 0);
-    let i = 0;
-    for (; i < blocks.length && blocks[i] <= pc; i++);
-    return blocks[i - 1];
-}
+// function findHeaderPc(pc: number, blocks: number[]) {
+//     blocks.sort((l, r) => l - r);
+//     assert(blocks.length > 0);
+//     assert(blocks[0] === 0);
+//     let i = 0;
+//     for (; i < blocks.length && blocks[i] <= pc; i++);
+//     return blocks[i - 1];
+// }
 
 /**
  * The step transition function.
@@ -118,7 +114,7 @@ function findHeaderPc(pc: number, blocks: number[]) {
  * The `EVM` executes a `StepFn` transition for each `opcode` found in the `evm.bytecode`.
  * It should change the `state` accordingly to the `opcode` found.
  */
-export type StepFn = (state: State, opcode: Opcode) => Inst | undefined;
+export type StepFn = (state: State, opcode: Opcode) => Inst;
 
 export type Step<M extends string> = {
     readonly [m in M]: StepFn;
@@ -163,14 +159,11 @@ export class Sevm<M extends string> {
         let op;
         for (op of this.#step.decode(this.#bytecode, state.pcbegin)) {
             const inst = this.#step[op.mnemonic](state, op);
-            if (inst !== undefined) {
-                state.insts.push(inst);
-            }
+            state.insts.push(inst);
 
             if (Sevm.#halts(op.mnemonic)) {
                 break;
             } else if (op.op === ops.JUMP || op.op === ops.JUMPI) {
-                // const jmp = state.last;
                 const jmp = inst;
                 assert(jmp !== undefined);
                 assert(jmp.fn === 'jumpi' || jmp.fn === 'jump', `got ${jmp.fn}`);
@@ -199,11 +192,12 @@ export class Sevm<M extends string> {
                         // TODO dest is in range and less than has valid jump type
 
                         // const h = findHeaderPc(dest.arg.pc!, [...this.states.keys()]);
-                        // assert(h === dest.arg.pch, `for ${dest.arg.pc}: ${h} !== ${dest.arg.pch} in ${[...this.states.keys()]}`);
+                        // assert(h === dest.arg.pch, `${dest} ${dest.arg} ${dest.arg.expr} for ${dest.arg.pc}: ${h} !== ${dest.arg.pch} in ${[...this.states.keys()]}`);
                         // const [{ pcend }] = this.states.get(h)!;
-                        // if (pcend === t) {
-                        //     jmp.ret = true;
-                        // }
+                        const [{ pcend }] = this.states.get(dest.arg.pch)!;
+                        if (pcend === t) {
+                            jmp.ret = true;
+                        }
 
                         if (validatejd(t))
                             state.pushBranch(t, dest.arg.pc!, true);
@@ -224,53 +218,6 @@ export class Sevm<M extends string> {
     }
 
     run(): Map<number, State[]> {
-        let id = 0;
-        const s0 = new State(0);
-        const frames = [{ state: s0, path: [s0] }];
-
-        let maxpath = 0;
-        while (frames.length > 0) {
-            const { state, path } = frames.pop()!;
-            if (path.length > maxpath) {
-                maxpath = path.length;
-                console.log('longest path', maxpath, 'states');
-            }
-
-            this.#exec(state);
-            state.id = id++;
-            if (id % 10000 === 0) {
-                console.log('reached', id, 'states', 'across', this.states.size, 'blocks', 'frames in queue', frames.length);
-            }
-
-            {
-                let clones = this.states.get(state.pcbegin);
-                if (clones === undefined) {
-                    clones = [];
-                    this.states.set(state.pcbegin, clones);
-                }
-                clones.push(state);
-                if (clones.length % 5000 === 0) {
-                    console.log('reached', clones.length, 'for block', state.pcbegin);
-                }
-            }
-
-            for (const br of state.branches) {
-                const p = br.dynamic ? [] : path;
-                const e = p.find(e => e.pcbegin === br.pc);
-                if (e === undefined) {
-                    const brState = new State(br.pc, new Stack([...state.outs, ...state.unused]));
-                    br.state = brState;
-                    frames.push({ state: brState, path: [...p, brState] });
-                } else {
-                    br.state = e;
-                }
-            }
-        }
-
-        return this.states;
-    }
-
-    go(): Map<number, State[]> {
         function match(clargs: Local[], args: Local[], matchfn: (x: Local, y: Local) => boolean) {
             for (let i = 0; i < clargs.length; i++) {
                 if (clargs[i].jumpdest !== undefined) {
@@ -290,7 +237,6 @@ export class Sevm<M extends string> {
         const _run = (state: State, path: State[]): State => {
             if (path.length > maxpath) {
                 maxpath = path.length;
-                console.log('longest path', maxpath, 'states');
             }
 
             this.#exec(state);

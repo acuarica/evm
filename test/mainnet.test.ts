@@ -3,16 +3,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-// import './utils/snapshot.ts';
 import { Contract } from '../src/contract.ts';
 
 describe('::mainnet', function () {
     const dir = './test/mainnet';
 
-    it.for(readdirSync(dir))('%s', (filename, ctx) => {
+    it.for(
+        readdirSync(dir).map(f => [f.split('-')[0], f])
+    )('%s', ([name, filename], ctx) => {
         assert(filename.endsWith('.json'));
-        assert(filename.split('-').length === 2);
-        const [name] = filename.split('-');
 
         if (filename.startsWith('SEAWHALE-'))
             ctx.skip('handle case: dest expr is not lit `and(4294967295n, 3583n)`');
@@ -21,6 +20,9 @@ describe('::mainnet', function () {
 
         const { bytecode } = JSON.parse(readFileSync(`${dir}/${filename}`, 'utf-8')) as { bytecode: string };
         const contract = new Contract(bytecode);
+
+        expect(contract.selectors).matchSnapshotmd('json selectors', name);
+
         const ss = [...contract.states.entries()].sort((l, r) => l[0] - r[0]);
         let coverage = '? opcodes in bytecode\n';
         for (const [pc, clones] of ss) {
